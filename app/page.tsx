@@ -129,6 +129,23 @@ export default function Home() {
     })
     const data = await res.json()
     setCorreccion(data.respuesta)
+    // Guardar en historial
+    const notaMatch = data.respuesta.match(/(d+(?:[.,]d+)?)s*/s*(d+(?:[.,]d+)?)/)
+    const nota = notaMatch ? parseFloat(notaMatch[1].replace(',', '.')) : null
+    const notaMax = notaMatch ? parseFloat(notaMatch[2].replace(',', '.')) : null
+    supabase.from('historial_examenes').insert({
+      user_id: usuario.id,
+      asignatura,
+      tipo,
+      año: examen?.año,
+      bloque: asignatura === 'mates' ? (preguntaActiva?.bloque || '') : (TIPOS_HISTORIA[bloqueIdx]?.label || ''),
+      opcion: opcion === 0 ? 'A' : 'B',
+      nota,
+      nota_maxima: notaMax,
+      enunciado: preguntaActiva?.enunciado?.substring(0, 500),
+      respuesta: respuesta?.substring(0, 1000),
+      correccion: data.respuesta?.substring(0, 2000)
+    }).then(() => {})
     setCargando(false)
   }
 

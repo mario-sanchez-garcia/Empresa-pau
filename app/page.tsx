@@ -56,6 +56,7 @@ export default function Home() {
   const [cargandoChat, setCargandoChat] = useState(false)
   const [historial, setHistorial] = useState<any[]>([])
   const [cargandoHistorial, setCargandoHistorial] = useState(false)
+  const [itemSeleccionado, setItemSeleccionado] = useState<any>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const cfg = ASIGNATURAS[asignatura]
@@ -446,7 +447,7 @@ export default function Home() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {historial.map((item, i) => (
-                    <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px' }}>
+                    <div key={i} onClick={() => setItemSeleccionado(item)} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', cursor: 'pointer', transition: 'box-shadow 0.15s' }} onMouseEnter={e => (e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)')} onMouseLeave={e => (e.currentTarget.style.boxShadow='none')}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                         <div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -478,6 +479,47 @@ export default function Home() {
               </div>
             )}
           </main>
+        )}
+
+
+        {itemSeleccionado && (
+          <div onClick={() => setItemSeleccionado(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>{itemSeleccionado.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana'} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {itemSeleccionado.nota !== null && (
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '24px', fontWeight: 800, color: colorNota(itemSeleccionado.nota / itemSeleccionado.nota_maxima * 10) }}>{itemSeleccionado.nota}</span>
+                      <span style={{ fontSize: '13px', color: '#94a3b8' }}>/{itemSeleccionado.nota_maxima}</span>
+                    </div>
+                  )}
+                  <button onClick={() => setItemSeleccionado(null)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>X</button>
+                </div>
+              </div>
+              <div style={{ padding: '24px' }}>
+                {itemSeleccionado.enunciado && (
+                  <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
+                    <div style={{ fontSize: '14px', color: '#374151', lineHeight: '1.7' }}>
+                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{itemSeleccionado.enunciado}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+                {itemSeleccionado.correccion && (
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Correccion de Pausia IA</div>
+                    <div style={{ fontSize: '14px', lineHeight: '1.75' }}>
+                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{itemSeleccionado.correccion}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {seccion === 'planning' && (

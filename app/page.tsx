@@ -320,12 +320,38 @@ function cambiarTipo(t: Tipo) {
   const mediaHist = calcMedia(historiaH)
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9', fontFamily: 'system-ui, sans-serif' }}>
-
-      <aside style={{ width: '260px', minHeight: '100vh', background: '#0f172a', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, flexShrink: 0 }}>
+    <div style={{
+  display: 'flex',
+  minHeight: '100vh',
+  background: 'linear-gradient(135deg, #f8fafc 0%, #eef6ff 45%, #f6fff9 100%)',
+  fontFamily: 'system-ui, sans-serif'
+}}>
+      <aside style={{
+  width: '270px',
+  minHeight: '100vh',
+  background: 'linear-gradient(180deg, #0f172a 0%, #111827 55%, #172554 100%)',
+  display: 'flex',
+  flexDirection: 'column',
+  position: 'sticky',
+  top: 0,
+  flexShrink: 0,
+  boxShadow: '12px 0 35px rgba(15, 23, 42, 0.18)'
+}}>
         <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: '16px' }}>P</div>
+           <div style={{
+  width: '40px',
+  height: '40px',
+  borderRadius: '14px',
+  background: 'linear-gradient(135deg, #3b82f6, #16a34a)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 900,
+  color: '#fff',
+  fontSize: '17px',
+  boxShadow: '0 10px 24px rgba(59, 130, 246, 0.35)'
+}}>P</div>
             <div>
               <div style={{ color: '#fff', fontWeight: 700, fontSize: '17px' }}>Pausia</div>
               <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>Academia IA · EBAU Madrid</div>
@@ -371,7 +397,19 @@ function cambiarTipo(t: Tipo) {
       </aside>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
+       <header style={{
+  background: 'rgba(255, 255, 255, 0.82)',
+  backdropFilter: 'blur(14px)',
+  borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+  padding: '0 32px',
+  height: '72px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  position: 'sticky',
+  top: 0,
+  zIndex: 10
+}}>
           <div>
             <div style={{ fontWeight: 700, fontSize: '18px', color: '#0f172a' }}>
               {seccion === 'examenes' && cfg.emoji + ' ' + cfg.label}
@@ -397,7 +435,15 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'examenes' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
-            <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', marginBottom: '20px' }}>
+           <div style={{
+  background: 'rgba(255, 255, 255, 0.9)',
+  borderRadius: '24px',
+  border: '1px solid rgba(226, 232, 240, 0.9)',
+  padding: '24px',
+  marginBottom: '22px',
+  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)',
+  backdropFilter: 'blur(12px)'
+}}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {(['Ordinaria', 'Extraordinaria', 'Modelo'] as Tipo[]).map(t => (
@@ -447,7 +493,14 @@ function cambiarTipo(t: Tipo) {
             </div>
 
             {preguntaActiva && (
-              <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: '20px' }}>
+             <div style={{
+  background: 'rgba(255, 255, 255, 0.94)',
+  borderRadius: '24px',
+  border: '1px solid rgba(226, 232, 240, 0.9)',
+  overflow: 'hidden',
+  marginBottom: '22px',
+  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)'
+}}>
                 <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examen?.año} · {tipo}</span>
@@ -477,7 +530,14 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-            <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '24px', marginBottom: '20px' }}>
+           <div style={{
+  background: 'rgba(255, 255, 255, 0.94)',
+  borderRadius: '24px',
+  border: '1px solid rgba(226, 232, 240, 0.9)',
+  padding: '26px',
+  marginBottom: '22px',
+  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)'
+}}>
               <div style={{ fontSize: '13px', fontWeight: 600, color: '#64748b', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                 {(['texto', 'imagen'] as const).map(m => (

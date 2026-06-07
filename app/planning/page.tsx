@@ -62,7 +62,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles. Prioriza las
     })
     const data = await res.json()
     try {
-      const texto = data.respuesta.trim()
+      const texto = data.respuesta.trim().replace(/```json/g, '').replace(/```/g, '').trim()
       const parsed = JSON.parse(texto)
       setPlanning(parsed)
     } catch {

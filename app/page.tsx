@@ -59,6 +59,7 @@ export default function Home() {
   const [itemSeleccionado, setItemSeleccionado] = useState<any>(null)
   const [planIA, setPlanIA] = useState('')
   const [cargandoPlan, setCargandoPlan] = useState(false)
+  const [contextoChat, setContextoChat] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const cfg = ASIGNATURAS[asignatura]
@@ -179,6 +180,7 @@ export default function Home() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matematicas e historia.\n' +
+          (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
           hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
           '\nResponde solo como Pausia.'
       })
@@ -186,6 +188,20 @@ export default function Home() {
     const data = await res.json()
     setMensajes(prev => [...prev, { rol: 'pausia', texto: data.respuesta }])
     setCargandoChat(false)
+  }
+
+  function abrirChatConContexto(item: any) {
+    const ctx = 'El estudiante acaba de revisar esta correccion:\n' +
+      'Asignatura: ' + (item.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana') + '\n' +
+      'Ejercicio: ' + item.bloque + ' - ' + item.tipo + ' ' + item.año + '\n' +
+      'Nota obtenida: ' + item.nota + '/' + item.nota_maxima + '\n' +
+      'Enunciado: ' + (item.enunciado || '') + '\n' +
+      'Correccion: ' + (item.correccion || '') + '\n\n' +
+      'El estudiante quiere entender mejor su nota. Ayudale de forma clara y motivadora.'
+    setContextoChat(ctx)
+    setMensajes([{ rol: 'pausia', texto: 'Hola! Veo que tienes dudas sobre tu correccion de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. Que parte no te queda clara? Preguntame lo que quieras.' }])
+    setItemSeleccionado(null)
+    setSeccion('chat')
   }
 
   async function generarPlan() {
@@ -537,6 +553,7 @@ export default function Home() {
                       <span style={{ fontSize: '13px', color: '#94a3b8' }}>/{itemSeleccionado.nota_maxima}</span>
                     </div>
                   )}
+                  <button onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ padding: '8px 16px', borderRadius: '8px', background: '#0f172a', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>💬 Preguntar a Pausia</button>
                   <button onClick={() => setItemSeleccionado(null)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', fontSize: '16px' }}>X</button>
                 </div>
               </div>

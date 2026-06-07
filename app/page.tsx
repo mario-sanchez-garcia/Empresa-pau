@@ -279,6 +279,24 @@ function cambiarTipo(t: Tipo) {
     { id: 'planning' as Seccion, label: 'Plan IA', icon: '🤖', desc: 'Plan semanal IA' },
   ]
 
+  const calcMedia = (items: any[]) => {
+    const notas = items
+      .filter((item) => item.nota !== null && item.nota_maxima)
+      .map((item) => (item.nota / item.nota_maxima) * 10)
+
+    if (notas.length === 0) return null
+
+    return (notas.reduce((a, b) => a + b, 0) / notas.length).toFixed(1)
+  }
+
+  const matesH = historial.filter((item: any) => item.asignatura === 'mates')
+  const fisicaH = historial.filter((item: any) => item.asignatura === 'fisica')
+  const historiaH = historial.filter((item: any) => item.asignatura === 'historia')
+
+  const mediaM = calcMedia(matesH)
+  const mediaFisica = calcMedia(fisicaH)
+  const mediaHist = calcMedia(historiaH)
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9', fontFamily: 'system-ui, sans-serif' }}>
 

@@ -1,0 +1,24 @@
+
+> pau-app@0.1.0 build
+> next build
+
+▲ Next.js 16.2.7 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.2s
+  Running TypeScript ...
+Failed to type check.
+
+./app/page.tsx:438:387
+Type error: Property 'pts' does not exist on type '{ key: string; label: string; puntos: number; } | { readonly tipo: "tema"; readonly label: "Tema"; readonly pts: 4; } | { readonly tipo: "comentario"; readonly label: "Comentario"; readonly pts: 3; } | { ...; } | { ...; }'.
+  Property 'pts' does not exist on type '{ key: string; label: string; puntos: number; }'.
+
+  [90m436 |[0m ...fg.accent : [32m'1px solid #e2e8f0'[0m } [36mas[0m any}>{i + [35m1[0m}. {bloque} · {preguntasA[i]?.puntuaci...
+  [90m437 |[0m ...
+[31m[1m>[0m [90m438 |[0m ...[32mpx solid #e2e8f0'[0m } [36mas[0m any}>{t.label} · {t.pts}pts</button>
+  [90m    |[0m                                              [31m[1m^[0m
+  [90m439 |[0m ...
+  [90m440 |[0m ...
+  [90m441 |[0m ...
+Next.js build worker exited with code: 1 and signal: null

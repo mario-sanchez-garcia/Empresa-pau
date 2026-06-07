@@ -172,8 +172,7 @@ export default function Home() {
     const resumen = (hist || []).map((h: any) => {
       const pct = h.nota !== null && h.nota_maxima ? (h.nota / h.nota_maxima * 10).toFixed(1) : 'sin nota'
       return h.asignatura + ' - ' + h.bloque + ' (' + h.tipo + ' ' + h.año + '): ' + pct + '/10'
-    }).join('
-')
+    }).join('\n')
     const prompt = 'Eres Pausia, tutor experto para la EBAU de Madrid. Analiza el historial de correcciones del estudiante y genera un plan de estudio personalizado para esta semana.
 
 HISTORIAL:

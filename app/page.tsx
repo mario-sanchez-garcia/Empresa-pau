@@ -35,22 +35,6 @@ function colorNota(n: number) {
 
 function calcMedia(items: any[]) {
   if (!items.length) return null
-  // RESET_BLOQUE_POR_ASIGNATURA_FISICA
-  useEffect(() => {
-    if (asignatura === 'fisica') {
-      setBloque('Gravitacion')
-      setOpcion('A')
-    }
-    if (asignatura === 'mates') {
-      setBloque('Algebra')
-      setOpcion('A')
-    }
-    if (asignatura === 'historia') {
-      setBloque('tema')
-      setOpcion('A')
-    }
-  }, [asignatura])
-
   return (items.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / items.length).toFixed(1)
 }
 

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { examenes, examenesHistoria } from './data/examenes'
+import { examenesFisica } from './data/fisica'
 import { supabase } from './lib/supabase'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
@@ -9,6 +10,7 @@ import 'katex/dist/katex.min.css'
 
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', emoji: '📐', color: '#1e3a5f', light: '#dbeafe', accent: '#3b82f6' },
+  fisica: { label: 'Física', emoji: '⚡', color: '#4c1d95', light: '#ede9fe', accent: '#8b5cf6' },
   historia: { label: 'Historia de España', emoji: '📜', color: '#1a4731', light: '#dcfce7', accent: '#16a34a' }
 }
 
@@ -22,7 +24,7 @@ const mdComponents = {
   blockquote: ({children}: any) => <blockquote style={{ borderLeft: '3px solid #9ca3af', paddingLeft: '1rem', margin: '0.8rem 0', color: '#6b7280', fontStyle: 'italic' }}>{children}</blockquote>,
 }
 
-type Asignatura = 'mates' | 'historia'
+type Asignatura = 'mates' | 'fisica' | 'historia'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
@@ -90,9 +92,12 @@ export default function Home() {
   { tipo: 'corta', label: 'Respuesta corta', pts: 1.5 }
 ] as const
 
-const examenesFiltrados = asignatura === 'mates'
-  ? examenes.filter(e => e.tipo === tipo)
-  : examenesHistoria.filter(e => e.tipo === tipo)
+const examenesFiltrados =
+    asignatura === 'mates'
+      ? examenes.filter(e => e.tipo === tipo)
+      : asignatura === 'fisica'
+        ? examenesFisica.filter(e => e.tipo === tipo)
+        : examenesHistoria.filter(e => e.tipo === tipo)
 
 const aniosDisponibles = Array.from(
   new Set(examenesFiltrados.map(e => e.año))
@@ -367,7 +372,7 @@ function cambiarTipo(t: Tipo) {
           {seccion === 'examenes' && (
             <div style={{ display: 'flex', gap: '6px' }}>
               {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => (
-                <button key={key} onClick={() => cambiarAsignatura(key)} style={{ padding: '6px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer', background: asignatura === key ? val.color : '#f1f5f9', color: asignatura === key ? '#fff' : '#64748b', fontSize: '13px', fontWeight: 600 }}>{val.emoji} {key === 'mates' ? 'Mates' : 'Historia'}</button>
+                <button key={key} onClick={() => cambiarAsignatura(key)} style={{ padding: '6px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer', background: asignatura === key ? val.color : '#f1f5f9', color: asignatura === key ? '#fff' : '#64748b', fontSize: '13px', fontWeight: 600 }}>{val.emoji} {key === 'mates' ? 'Mates' : key === 'fisica' ? 'Física' : 'Historia'}</button>
               ))}
             </div>
           )}

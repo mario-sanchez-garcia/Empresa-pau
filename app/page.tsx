@@ -434,10 +434,6 @@ function cambiarTipo(t: Tipo) {
                   <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
                 )) : TIPOS_HISTORIA.map((t, i) => (
                   <button key={i} onClick={() => { setTipoHistoriaIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: tipoHistoriaIdx === i ? cfg.light : '#f8fafc', color: tipoHistoriaIdx === i ? cfg.color : '#64748b', border: tipoHistoriaIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {t.pts}pts</button><button
-  onClick={() => {
-    setTipoHistoriaIdx(i)
-    reset()
-  }}
   style={{
     padding: '6px 14px',
     borderRadius: '8px',

@@ -109,22 +109,22 @@ export default function Home() {
       const p = preguntaActiva as any
       const tipoMap: Record<string, string> = { tema: 'desarrollo de tema', comentario: 'comentario de texto', definicion: 'definición de conceptos', corta: 'respuesta corta' }
       const tipoLabel = tipoMap[p.tipo] || p.tipo
-      promptTexto = \`Eres un corrector oficial de la EBAU de Madrid especializado en Historia de España.
+      promptTexto = `Eres un corrector oficial de la EBAU de Madrid especializado en Historia de España.
 TIPO DE PREGUNTA: \${tipoLabel}
 ENUNCIADO: \${p.enunciado}
-\${p.texto_fuente ? \`TEXTO FUENTE: \${p.texto_fuente}\` : ''}
-\${p.conceptos ? \`CONCEPTOS A DEFINIR: \${p.conceptos.join(', ')}\` : ''}
+\${p.texto_fuente ? `TEXTO FUENTE: \${p.texto_fuente}` : ''}
+\${p.conceptos ? `CONCEPTOS A DEFINIR: \${p.conceptos.join(', ')}` : ''}
 PUNTUACIÓN MÁXIMA: \${p.puntuacion} puntos
 CRITERIOS: \${p.criterios}
-\${modo === 'imagen' ? 'La imagen adjunta contiene la respuesta manuscrita del estudiante.' : \`RESPUESTA DEL ESTUDIANTE: \${respuesta}\`}
-Corrige con ## headers: ## Nota (X/\${p.puntuacion}), ## Qué está bien, ## Qué falta o mejorar, ## Respuesta modelo\`
+\${modo === 'imagen' ? 'La imagen adjunta contiene la respuesta manuscrita del estudiante.' : `RESPUESTA DEL ESTUDIANTE: \${respuesta}`}
+Corrige con ## headers: ## Nota (X/\${p.puntuacion}), ## Qué está bien, ## Qué falta o mejorar, ## Respuesta modelo`
     } else {
-      promptTexto = \`Eres un corrector oficial de la EBAU de Madrid.
+      promptTexto = `Eres un corrector oficial de la EBAU de Madrid.
 PREGUNTA: \${preguntaActiva?.enunciado}
 PUNTUACIÓN MÁXIMA: \${preguntaActiva?.puntuacion} puntos
 CRITERIOS: \${(preguntaActiva as any)?.criterios}
-\${modo === 'imagen' ? 'La imagen adjunta contiene la respuesta manuscrita.' : \`RESPUESTA: \${respuesta}\`}
-Corrige con ## headers: ## Nota, ## Qué está bien, ## Qué falta, ## Respuesta completa\`
+\${modo === 'imagen' ? 'La imagen adjunta contiene la respuesta manuscrita.' : `RESPUESTA: \${respuesta}`}
+Corrige con ## headers: ## Nota, ## Qué está bien, ## Qué falta, ## Respuesta completa`
     }
     const res = await fetch('/api/chat', {
       method: 'POST',
@@ -147,10 +147,10 @@ Corrige con ## headers: ## Nota, ## Qué está bien, ## Qué falta, ## Respuesta
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pregunta: \`Eres Pausia, un tutor experto para la EBAU de Madrid. Ayuda con dudas sobre selectividad, matemáticas II e historia de España.
-Historial: \${historialActualizado.map(m => \`\${m.rol === 'usuario' ? 'Estudiante' : 'Pausia'}: \${m.texto}\`).join('\\n')}
+        pregunta: `Eres Pausia, un tutor experto para la EBAU de Madrid. Ayuda con dudas sobre selectividad, matemáticas II e historia de España.
+Historial: \${historialActualizado.map(m => `\${m.rol === 'usuario' ? 'Estudiante' : 'Pausia'}: \${m.texto}`).join('\\n')}
 Estudiante: \${inputChat}
-Responde solo como Pausia (no repitas el historial).\`
+Responde solo como Pausia (no repitas el historial).`
       })
     })
     const data = await res.json()
@@ -194,7 +194,7 @@ Responde solo como Pausia (no repitas el historial).\`
 
           <div style={{ color: '#475569', fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 8px', margin: '20px 0 8px' }}>Asignaturas</div>
           {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => (
-            <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer', marginBottom: '4px', textAlign: 'left', background: asignatura === key && seccion === 'examenes' ? \`\${val.color}33\` : 'transparent' }}>
+            <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer', marginBottom: '4px', textAlign: 'left', background: asignatura === key && seccion === 'examenes' ? `\${val.color}33` : 'transparent' }}>
               <span style={{ fontSize: '16px' }}>{val.emoji}</span>
               <div style={{ color: asignatura === key && seccion === 'examenes' ? '#e2e8f0' : '#94a3b8', fontSize: '13px', fontWeight: asignatura === key && seccion === 'examenes' ? 600 : 400 }}>{val.label}</div>
             </button>
@@ -217,7 +217,7 @@ Responde solo como Pausia (no repitas el historial).\`
         <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: '18px', color: '#0f172a' }}>
-              {seccion === 'examenes' && \`\${cfg.emoji} \${cfg.label}\`}
+              {seccion === 'examenes' && `\${cfg.emoji} \${cfg.label}`}
               {seccion === 'chat' && '💬 Chat con Pausia'}
               {seccion === 'planning' && '📅 Mi plan de estudio'}
             </div>
@@ -254,9 +254,9 @@ Responde solo como Pausia (no repitas el historial).\`
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
-                  <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? \`1.5px solid \${cfg.accent}\` : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
+                  <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? `1.5px solid \${cfg.accent}` : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
                 )) : TIPOS_HISTORIA.map((t, i) => (
-                  <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? \`1.5px solid \${cfg.accent}\` : '1px solid #e2e8f0' } as any}>{t.label} · {t.pts}pts</button>
+                  <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? `1.5px solid \${cfg.accent}` : '1px solid #e2e8f0' } as any}>{t.label} · {t.pts}pts</button>
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -269,7 +269,7 @@ Responde solo como Pausia (no repitas el historial).\`
 
             {preguntaActiva && (
               <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: '20px' }}>
-                <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: \`2px solid \${cfg.accent}\`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: `2px solid \${cfg.accent}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examen?.año} · {tipo}</span>
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{asignatura === 'mates' ? preguntaActiva.bloque : (TIPOS_HISTORIA[bloqueIdx]?.label ?? '')}</span>
@@ -282,12 +282,12 @@ Responde solo como Pausia (no repitas el historial).\`
                 </div>
                 <div style={{ padding: '24px' }}>
                   {asignatura === 'historia' && (preguntaActiva as any).texto_fuente && (
-                    <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '10px', background: '#f8fafc', borderLeft: \`3px solid \${cfg.accent}\`, color: '#374151', fontSize: '14px', fontStyle: 'italic', lineHeight: '1.7' }}>{(preguntaActiva as any).texto_fuente}</div>
+                    <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '10px', background: '#f8fafc', borderLeft: `3px solid \${cfg.accent}`, color: '#374151', fontSize: '14px', fontStyle: 'italic', lineHeight: '1.7' }}>{(preguntaActiva as any).texto_fuente}</div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).conceptos && (
                     <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {(preguntaActiva as any).conceptos.map((c: string, i: number) => (
-                        <span key={i} style={{ padding: '4px 12px', borderRadius: '20px', background: cfg.light, color: cfg.color, border: \`1px solid \${cfg.accent}\`, fontSize: '12px', fontWeight: 600 }}>{c}</span>
+                        <span key={i} style={{ padding: '4px 12px', borderRadius: '20px', background: cfg.light, color: cfg.color, border: `1px solid \${cfg.accent}`, fontSize: '12px', fontWeight: 600 }}>{c}</span>
                       ))}
                     </div>
                   )}
@@ -316,7 +316,7 @@ Responde solo como Pausia (no repitas el historial).\`
                       <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '28px', height: '28px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}>✕</button>
                     </div>
                   ) : (
-                    <div onClick={() => fileRef.current?.click()} style={{ height: '180px', borderRadius: '10px', border: \`2px dashed \${cfg.accent}\`, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <div onClick={() => fileRef.current?.click()} style={{ height: '180px', borderRadius: '10px', border: `2px dashed \${cfg.accent}`, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                       <span style={{ fontSize: '2rem' }}>📷</span>
                       <p style={{ fontSize: '14px', fontWeight: 600, color: cfg.color, margin: '8px 0 4px' }}>Haz clic para subir una foto</p>
                       <p style={{ fontSize: '12px', color: cfg.accent, margin: '0' }}>Fotografía tu respuesta manuscrita</p>
@@ -330,7 +330,7 @@ Responde solo como Pausia (no repitas el historial).\`
             </div>
 
             {correccion && (
-              <div style={{ background: '#fff', borderRadius: '14px', border: \`2px solid \${cfg.color}\`, overflow: 'hidden' }}>
+              <div style={{ background: '#fff', borderRadius: '14px', border: `2px solid \${cfg.color}`, overflow: 'hidden' }}>
                 <div style={{ padding: '16px 24px', background: cfg.color, display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '13px' }}>P</div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '0.04em' }}>CORRECCIÓN DE PAUSIA IA</span>

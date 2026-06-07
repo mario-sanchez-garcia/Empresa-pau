@@ -146,7 +146,7 @@ const preguntaHistoria =
   preguntasHistoria.find(p => p.tipo === tipoHistoriaActivo) ??
   preguntasHistoria[0]
 
-const preguntaActiva = asignatura === 'mates' ? preguntaMates : preguntaHistoria
+const preguntaActiva = esEjercicios ? preguntaMates : preguntaHistoria
 
 function reset() {
   setCorreccion('')

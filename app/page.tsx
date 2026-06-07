@@ -113,7 +113,7 @@ export default function Home() {
     let promptTexto = ''
     if (asignatura === 'historia' && preguntaActiva) {
       const p = preguntaActiva as any
-      const tipoLabel = { tema: 'desarrollo de tema', comentario: 'comentario de texto', definicion: 'definición de conceptos', corta: 'respuesta corta' }[p.tipo] || p.tipo
+      const tipoLabel: Record<string, string> = { tema: 'desarrollo de tema', comentario: 'comentario de texto', definicion: 'definición de conceptos', corta: 'respuesta corta' }[p.tipo] || p.tipo
       promptTexto = 'Eres un corrector oficial de la EBAU de Madrid especializado en Historia de España.\n' +
         'TIPO DE PREGUNTA: ' + tipoLabel + '\n' +
         'ENUNCIADO: ' + p.enunciado + '\n' +

@@ -119,6 +119,14 @@ const preguntaMates =
   (opcion === 0 ? preguntasA : preguntasB)[bloqueIdx] ??
   (examen as any)?.preguntas?.[0]
 
+const bloquesFisica = [
+  { key: 'Gravitacion', label: 'Gravitación', puntos: 2 },
+  { key: 'Ondas', label: 'Ondas', puntos: 2 },
+  { key: 'Electricidad', label: 'Electricidad', puntos: 2 },
+  { key: 'Optica', label: 'Óptica', puntos: 2 },
+  { key: 'RadioactividadModerna', label: 'Moderna', puntos: 2 }
+]
+
 const bloquesMates = preguntasA.map((p: any) => p.bloque)
 
 const examenHistoria = asignatura === 'historia'

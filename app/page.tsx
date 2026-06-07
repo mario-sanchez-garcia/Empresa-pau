@@ -24,7 +24,7 @@ const mdComponents = {
 
 type Asignatura = 'mates' | 'historia'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
-type Seccion = 'examenes' | 'chat' | 'planning'
+type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
 export default function Home() {
@@ -45,6 +45,8 @@ export default function Home() {
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
   const [inputChat, setInputChat] = useState('')
   const [cargandoChat, setCargandoChat] = useState(false)
+  const [historial, setHistorial] = useState<any[]>([])
+  const [cargandoHistorial, setCargandoHistorial] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const cfg = ASIGNATURAS[asignatura]
@@ -59,6 +61,14 @@ export default function Home() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
+
+  useEffect(() => {
+    if (seccion === 'historial') {
+      setCargandoHistorial(true)
+      supabase.from('historial_examenes').select('*').order('created_at', { ascending: false }).limit(50)
+        .then(({ data }) => { setHistorial(data || []); setCargandoHistorial(false) })
+    }
+  }, [seccion])
 
   const examenesFiltrados = asignatura === 'mates'
     ? examenes.filter(e => e.tipo === tipo)
@@ -175,6 +185,7 @@ export default function Home() {
   const NAV_ITEMS = [
     { id: 'examenes' as Seccion, label: 'Examenes', icon: '📋', desc: 'Practica y corrige' },
     { id: 'chat' as Seccion, label: 'Chat con Pausia', icon: '💬', desc: 'Resuelve dudas' },
+    { id: 'historial' as Seccion, label: 'Historial', icon: '📊', desc: 'Tus correcciones' },
     { id: 'planning' as Seccion, label: 'Mi plan', icon: '📅', desc: 'Organiza tu estudio' },
   ]
 
@@ -231,11 +242,13 @@ export default function Home() {
             <div style={{ fontWeight: 700, fontSize: '18px', color: '#0f172a' }}>
               {seccion === 'examenes' && cfg.emoji + ' ' + cfg.label}
               {seccion === 'chat' && '💬 Chat con Pausia'}
+              {seccion === 'historial' && '📊 Historial de correcciones'}
               {seccion === 'planning' && '📅 Mi plan de estudio'}
             </div>
             <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
               {seccion === 'examenes' && 'Practica con examenes oficiales de la EBAU Madrid'}
               {seccion === 'chat' && 'Resuelve cualquier duda con tu tutor IA'}
+              {seccion === 'historial' && 'Todas tus correcciones guardadas'}
               {seccion === 'planning' && 'Organiza tu preparacion'}
             </div>
           </div>
@@ -396,6 +409,59 @@ export default function Home() {
               <p style={{ textAlign: 'center', fontSize: '11px', color: '#cbd5e1', margin: '8px 0 0' }}>Enter para enviar · Shift+Enter para nueva linea</p>
             </div>
           </div>
+        )}
+
+
+        {seccion === 'historial' && (
+          <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+            {cargandoHistorial ? (
+              <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>Cargando historial...</div>
+            ) : historial.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Sin correcciones aun</div>
+                <div style={{ fontSize: '14px', color: '#64748b' }}>Haz tu primera correccion en la seccion Examenes</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {historial.map((item, i) => (
+                  <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                      <div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : '#1a4731' }}>
+                            {item.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana'}
+                          </span>
+                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.tipo}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.año}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.bloque}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>Opcion {item.opcion}</span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>
+                          {new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        {item.nota !== null && item.nota_maxima !== null ? (
+                          <div>
+                            <span style={{ fontSize: '28px', fontWeight: 800, color: item.nota >= item.nota_maxima * 0.7 ? '#16a34a' : item.nota >= item.nota_maxima * 0.4 ? '#d97706' : '#dc2626' }}>{item.nota}</span>
+                            <span style={{ fontSize: '14px', color: '#94a3b8' }}>/{item.nota_maxima}</span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '12px', color: '#94a3b8' }}>Sin nota</span>
+                        )}
+                      </div>
+                    </div>
+                    {item.enunciado && (
+                      <div style={{ fontSize: '13px', color: '#374151', background: '#f8fafc', borderRadius: '8px', padding: '10px 14px', lineHeight: '1.6' }}>
+                        {item.enunciado.substring(0, 200)}{item.enunciado.length > 200 ? '...' : ''}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </main>
         )}
 
         {seccion === 'planning' && (

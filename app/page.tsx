@@ -85,7 +85,15 @@ export default function Home() {
     }
   }, [seccion])
 
-  const TIPOS_HISTORIA = [
+  const TIPOS_FISICA = [
+  { key: 'tema', label: 'Gravitación', puntos: 2 },
+  { key: 'comentario', label: 'Ondas', puntos: 2 },
+  { key: 'definicion', label: 'Electricidad', puntos: 2 },
+  { key: 'corta', label: 'Óptica', puntos: 2 },
+  { key: 'moderna', label: 'Radioactividad moderna', puntos: 2 }
+]
+
+const TIPOS_HISTORIA = [
   { tipo: 'tema', label: 'Tema', pts: 4 },
   { tipo: 'comentario', label: 'Comentario', pts: 3 },
   { tipo: 'definicion', label: 'Definiciones', pts: 1.5 },
@@ -426,7 +434,7 @@ function cambiarTipo(t: Tipo) {
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
-                )) : TIPOS_HISTORIA.map((t, i) => (
+                )) : (asignatura === 'fisica' ? TIPOS_FISICA : TIPOS_HISTORIA).map((t, i) => (
                   <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {t.pts}pts</button>
                 ))}
               </div>

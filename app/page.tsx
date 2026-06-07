@@ -175,8 +175,6 @@ export default function Home() {
     }).join('\n')
     const prompt = 'Eres Pausia, tutor experto EBAU Madrid. Analiza el historial y genera un plan semanal personalizado.\n\nHISTORIAL:\n' + (resumen || 'Sin correcciones') + '\n\nGenera: 1) Diagnostico de puntos debiles 2) Plan dia a dia lunes-domingo 3) Ejercicios especificos 4) Objetivo de nota. Se concreto y motivador.'
     const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: prompt }) })
-    const data = await res.json()
-    setPlanIA(data.respuesta)
     setCargandoPlan(false)
     const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: prompt }) })
     const data = await res.json()

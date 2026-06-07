@@ -422,6 +422,33 @@ export default function Home() {
                 <div style={{ fontSize: '14px', color: '#64748b' }}>Haz tu primera correccion en la seccion Examenes</div>
               </div>
             ) : (
+
+            {historial.length > 0 && (() => {
+              const mates = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
+              const historia = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
+              const mediaM = mates.length ? (mates.reduce((a, h) => a + (h.nota / h.nota_maxima * 10), 0) / mates.length).toFixed(1) : null
+              const mediaH = historia.length ? (historia.reduce((a, h) => a + (h.nota / h.nota_maxima * 10), 0) / historia.length).toFixed(1) : null
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
+                    <div style={{ fontSize: '36px', fontWeight: 800, color: '#0f172a' }}>{historial.length}</div>
+                  </div>
+                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
+                    {mediaM ? (
+                      <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mediaM) >= 7 ? '#16a34a' : parseFloat(mediaM) >= 5 ? '#d97706' : '#dc2626' }}>{mediaM}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div>
+                    ) : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  </div>
+                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
+                    {mediaH ? (
+                      <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mediaH) >= 7 ? '#16a34a' : parseFloat(mediaH) >= 5 ? '#d97706' : '#dc2626' }}>{mediaH}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div>
+                    ) : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  </div>
+                </div>
+              )
+            })()}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {historial.map((item, i) => (
                   <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px' }}>

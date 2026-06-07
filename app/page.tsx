@@ -435,7 +435,7 @@ function cambiarTipo(t: Tipo) {
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : TIPOS_HISTORIA).map((t, i) => (
-                  <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {t.puntos}pts</button>
+                  <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {((t as any).puntos ?? (t as any).pts)}pts</button>
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

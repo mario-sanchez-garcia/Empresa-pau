@@ -83,35 +83,81 @@ export default function Home() {
     }
   }, [seccion])
 
-  const examenesFiltrados = asignatura === 'mates'
-    ? examenes.filter(e => e.tipo === tipo)
-    : examenesHistoria.filter(e => e.tipo === tipo)
-  const examen = examenesFiltrados[examenIdx] ?? examenesFiltrados[0]
-  const preguntasA = asignatura === 'mates' ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'A') ?? [] : []
-  const preguntasB = asignatura === 'mates' ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'B') ?? [] : []
-  const preguntaMates = (opcion === 0 ? preguntasA : preguntasB)[bloqueIdx] ?? (examen as any)?.preguntas?.[0]
-  const bloquesMates = preguntasA.map((p: any) => p.bloque)
-  const preguntasHistoria = asignatura === 'historia'
-    ? (examenesHistoria.filter(e => e.tipo === tipo && e.año === examen?.año && e.opcion === (opcion === 0 ? 'A' : 'B'))[0]?.preguntas ?? [])
-    : []
-  const preguntaHistoria = preguntasHistoria[bloqueIdx] ?? preguntasHistoria[0]
-  const preguntaActiva = asignatura === 'mates' ? preguntaMates : preguntaHistoria
-
   const TIPOS_HISTORIA = [
-    { tipo: 'tema', label: 'Tema', pts: 4 },
-    { tipo: 'comentario', label: 'Comentario', pts: 3 },
-    { tipo: 'definicion', label: 'Definiciones', pts: 1.5 },
-    { tipo: 'corta', label: 'Respuesta corta', pts: 1.5 }
-  ]
+  { tipo: 'tema', label: 'Tema', pts: 4 },
+  { tipo: 'comentario', label: 'Comentario', pts: 3 },
+  { tipo: 'definicion', label: 'Definiciones', pts: 1.5 },
+  { tipo: 'corta', label: 'Respuesta corta', pts: 1.5 }
+] as const
 
-  const matesH = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
-  const historiaH = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
-  const mediaM = calcMedia(matesH)
-  const mediaHist = calcMedia(historiaH)
+const examenesFiltrados = asignatura === 'mates'
+  ? examenes.filter(e => e.tipo === tipo)
+  : examenesHistoria.filter(e => e.tipo === tipo)
 
-  function reset() { setCorreccion(''); setRespuesta(''); setImagen(null); setImagenPreview(null) }
-  function cambiarAsignatura(a: Asignatura) { setAsignatura(a); setExamenIdx(0); setBloqueIdx(0); setOpcion(0); setTipo('Ordinaria'); reset() }
-  function cambiarTipo(t: Tipo) { setTipo(t); setExamenIdx(0); setBloqueIdx(0); setOpcion(0); reset() }
+const aniosDisponibles = Array.from(
+  new Set(examenesFiltrados.map(e => e.año))
+)
+
+const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
+
+const examen = examenesFiltrados.find(e => e.año === anioSeleccionado) ?? examenesFiltrados[0]
+
+const preguntasA = asignatura === 'mates'
+  ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'A') ?? []
+  : []
+
+const preguntasB = asignatura === 'mates'
+  ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'B') ?? []
+  : []
+
+const preguntaMates =
+  (opcion === 0 ? preguntasA : preguntasB)[bloqueIdx] ??
+  (examen as any)?.preguntas?.[0]
+
+const bloquesMates = preguntasA.map((p: any) => p.bloque)
+
+const examenHistoria = asignatura === 'historia'
+  ? examenesHistoria.find(
+      e =>
+        e.tipo === tipo &&
+        e.año === anioSeleccionado &&
+        e.opcion === (opcion === 0 ? 'A' : 'B')
+    )
+  : null
+
+const preguntasHistoria = examenHistoria?.preguntas ?? []
+
+const tipoHistoriaActivo = TIPOS_HISTORIA[bloqueIdx]?.tipo
+
+const preguntaHistoria =
+  preguntasHistoria.find(p => p.tipo === tipoHistoriaActivo) ??
+  preguntasHistoria[0]
+
+const preguntaActiva = asignatura === 'mates' ? preguntaMates : preguntaHistoria
+
+function reset() {
+  setCorreccion('')
+  setRespuesta('')
+  setImagen(null)
+  setImagenPreview(null)
+}
+
+function cambiarAsignatura(a: Asignatura) {
+  setAsignatura(a)
+  setExamenIdx(0)
+  setBloqueIdx(0)
+  setOpcion(0)
+  setTipo('Ordinaria')
+  reset()
+}
+
+function cambiarTipo(t: Tipo) {
+  setTipo(t)
+  setExamenIdx(0)
+  setBloqueIdx(0)
+  setOpcion(0)
+  reset()
+}
   async function cerrarSesion() { await supabase.auth.signOut(); window.location.href = '/login' }
 
   function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
@@ -321,9 +367,29 @@ export default function Home() {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                {examenesFiltrados.filter((e, i, arr) => arr.findIndex(x => x.año === e.año) === i).map((ex, i) => (
-                  <button key={ex.año} onClick={() => { setExamenIdx(i); setBloqueIdx(0); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 500, background: examenIdx === i ? cfg.color : '#f8fafc', color: examenIdx === i ? '#fff' : '#374151', border: examenIdx === i ? 'none' : '1px solid #e2e8f0' } as any}>{ex.año}</button>
-                ))}
+                {aniosDisponibles.map((anio, i) => (
+  <button
+    key={anio}
+    onClick={() => {
+      setExamenIdx(i)
+      setBloqueIdx(0)
+      setOpcion(0)
+      reset()
+    }}
+    style={{
+      padding: '6px 14px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '13px',
+      fontWeight: 500,
+      background: examenIdx === i ? cfg.color : '#f8fafc',
+      color: examenIdx === i ? '#fff' : '#374151',
+      border: examenIdx === i ? 'none' : '1px solid #e2e8f0'
+    } as any}
+  >
+    {anio}
+  </button>
+))}
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (

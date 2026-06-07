@@ -214,7 +214,7 @@ export default function Home() {
     { id: 'examenes' as Seccion, label: 'Examenes', icon: '📋', desc: 'Practica y corrige' },
     { id: 'chat' as Seccion, label: 'Chat con Pausia', icon: '💬', desc: 'Resuelve dudas' },
     { id: 'historial' as Seccion, label: 'Historial', icon: '📊', desc: 'Tus correcciones' },
-    { id: 'planning' as Seccion, label: 'Mi plan', icon: '📅', desc: 'Plan personalizado' },
+    { id: 'planning' as Seccion, label: 'Plan IA', icon: '🤖', desc: 'Plan semanal IA' },
   ]
 
   return (
@@ -241,6 +241,13 @@ export default function Home() {
               </div>
             </button>
           ))}
+          <a href="/planning" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', textDecoration: 'none', marginBottom: '4px', background: 'transparent' }}>
+            <span style={{ fontSize: '18px' }}>📅</span>
+            <div>
+              <div style={{ color: '#cbd5e1', fontSize: '14px' }}>Planning</div>
+              <div style={{ color: '#475569', fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
+            </div>
+          </a>
           <div style={{ color: '#475569', fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 8px', margin: '20px 0 8px' }}>Asignaturas</div>
           {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => (
             <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer', marginBottom: '4px', textAlign: 'left', background: asignatura === key && seccion === 'examenes' ? val.color + '33' : 'transparent' }}>

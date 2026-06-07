@@ -453,7 +453,7 @@ export default function Home() {
                     </div>
                     {item.enunciado && (
                       <div style={{ fontSize: '13px', color: '#374151', background: '#f8fafc', borderRadius: '8px', padding: '10px 14px', lineHeight: '1.6' }}>
-                        {item.enunciado.substring(0, 200)}{item.enunciado.length > 200 ? '...' : ''}
+                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{item.enunciado.substring(0, 300) + (item.enunciado.length > 300 ? '...' : '')}</ReactMarkdown>
                       </div>
                     )}
                   </div>

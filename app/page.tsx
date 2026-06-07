@@ -447,7 +447,8 @@ export default function Home() {
               </div>
             ) : (
 
-            <StatsBar historial={historial} />
+            <>
+              <StatsBar historial={historial} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {historial.map((item, i) => (
                   <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px' }}>
@@ -485,7 +486,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-            )}
+            </>
           </main>
         )}
 

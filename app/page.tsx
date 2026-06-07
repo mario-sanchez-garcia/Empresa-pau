@@ -112,6 +112,7 @@ Corrige con ## headers: ## Nota, ## Qué está bien, ## Qué falta, ## Respuesta
           <div className="flex items-center gap-2">
             <span className="text-xs px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.08)', color: '#93c5fd' }}>{usuario.email}</span>
             <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Matemáticas II</span>
+            <a href="/planning" className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>📅 Mi plan</a>
             <button onClick={cerrarSesion} className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ background: 'rgba(255,255,255,0.1)', color: '#fca5a5' }}>Cerrar sesión</button>
           </div>
         </div>

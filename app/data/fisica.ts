@@ -1249,7 +1249,7 @@ export const examenesF: PreguntaFisica[] = [
 
 export interface PreguntaFisicaApp {
   id: string
-  bloque: TipoFisica
+  bloque: 'tema' | 'comentario' | 'definicion' | 'corta' | 'moderna'
   opcion: "A" | "B"
   enunciado: string
   puntuacion: number

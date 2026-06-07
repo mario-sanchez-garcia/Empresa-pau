@@ -45,6 +45,7 @@ export default function Home() {
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
   const [bloqueIdx, setBloqueIdx] = useState(0)
+  const [tipoHistoriaIdx, setTipoHistoriaIdx] = useState(0)
   const [opcion, setOpcion] = useState<0|1>(0)
   const [respuesta, setRespuesta] = useState('')
   const [imagen, setImagen] = useState<string | null>(null)
@@ -140,7 +141,11 @@ const examenHistoria = asignatura === 'historia'
 
 const preguntasHistoria = examenHistoria?.preguntas ?? []
 
-const tipoHistoriaActivo = TIPOS_HISTORIA[bloqueIdx]?.tipo
+const tipoHistoriaActivo = TIPOS_HISTORIA[tipoHistoriaIdx]?.tipo
+
+const preguntaHistoria =
+  preguntasHistoria.find(p => p.tipo === tipoHistoriaActivo) ??
+  preguntasHistoria[0]
 
 const preguntaHistoria =
   preguntasHistoria.find(p => p.tipo === tipoHistoriaActivo) ??
@@ -159,6 +164,7 @@ function cambiarAsignatura(a: Asignatura) {
   setAsignatura(a)
   setExamenIdx(0)
   setBloqueIdx(0)
+  setTipoHistoriaIdx(0)
   setOpcion(0)
   setTipo('Ordinaria')
   reset()
@@ -168,6 +174,7 @@ function cambiarTipo(t: Tipo) {
   setTipo(t)
   setExamenIdx(0)
   setBloqueIdx(0)
+  setTipoHistoriaIdx(0)
   setOpcion(0)
   reset()
 }
@@ -219,7 +226,7 @@ function cambiarTipo(t: Tipo) {
     const notaMax = partes ? parseFloat(partes[2].replace(',', '.')) : null
     supabase.from('historial_examenes').insert({
       user_id: usuario.id, asignatura, tipo, año: examen?.año,
-      bloque: asignatura === 'mates' ? (preguntaActiva?.bloque || '') : (TIPOS_HISTORIA[bloqueIdx]?.label || ''),
+      bloque: asignatura === 'mates' ? (preguntaActiva?.bloque || '') : (TIPOS_HISTORIA[tipoHistoriaIdx]?.label || ''),
       opcion: opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
       enunciado: preguntaActiva?.enunciado?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
@@ -426,8 +433,25 @@ function cambiarTipo(t: Tipo) {
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
                 )) : TIPOS_HISTORIA.map((t, i) => (
-                  <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {t.pts}pts</button>
-                ))}
+                  <button key={i} onClick={() => { setTipoHistoriaIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: tipoHistoriaIdx === i ? cfg.light : '#f8fafc', color: tipoHistoriaIdx === i ? cfg.color : '#64748b', border: tipoHistoriaIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {t.pts}pts</button><button
+  key={i}
+  onClick={() => {
+    setTipoHistoriaIdx(i)
+    reset()
+  }}
+  style={{
+    padding: '6px 14px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: 500,
+    background: tipoHistoriaIdx === i ? cfg.light : '#f8fafc',
+    color: tipoHistoriaIdx === i ? cfg.color : '#64748b',
+    border: tipoHistoriaIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0'
+  } as any}
+>
+  {t.label} · {t.pts}pts
+</button>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>Opcion:</span>
@@ -442,7 +466,7 @@ function cambiarTipo(t: Tipo) {
                 <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examen?.año} · {tipo}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{asignatura === 'mates' ? preguntaActiva.bloque : (TIPOS_HISTORIA[bloqueIdx]?.label ?? '')}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}></span>
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#f1f5f9', color: '#374151', fontSize: '11px', border: '1px solid #e2e8f0' }}>Opcion {opcion === 0 ? 'A' : 'B'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>

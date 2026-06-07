@@ -173,18 +173,11 @@ export default function Home() {
       const pct = h.nota !== null && h.nota_maxima ? (h.nota / h.nota_maxima * 10).toFixed(1) : 'sin nota'
       return h.asignatura + ' - ' + h.bloque + ' (' + h.tipo + ' ' + h.año + '): ' + pct + '/10'
     }).join('\n')
-    const prompt = 'Eres Pausia, tutor experto para la EBAU de Madrid. Analiza el historial de correcciones del estudiante y genera un plan de estudio personalizado para esta semana.
-
-HISTORIAL:
-' + (resumen || 'Sin correcciones aun') + '
-
-Genera un plan detallado con:
-1. Diagnostico de puntos debiles
-2. Plan dia a dia para esta semana (lunes a domingo)
-3. Recursos y ejercicios especificos a practicar
-4. Objetivo de nota para el siguiente examen
-
-Se concreto y motivador.'
+    const prompt = 'Eres Pausia, tutor experto EBAU Madrid. Analiza el historial y genera un plan semanal personalizado.\n\nHISTORIAL:\n' + (resumen || 'Sin correcciones') + '\n\nGenera: 1) Diagnostico de puntos debiles 2) Plan dia a dia lunes-domingo 3) Ejercicios especificos 4) Objetivo de nota. Se concreto y motivador.'
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: prompt }) })
+    const data = await res.json()
+    setPlanIA(data.respuesta)
+    setCargandoPlan(false)
     const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: prompt }) })
     const data = await res.json()
     setPlanIA(data.respuesta)

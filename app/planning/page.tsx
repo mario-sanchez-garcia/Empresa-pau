@@ -41,11 +41,11 @@ export default function Planning() {
     const examen = new Date(p.fecha_examen)
     const diasRestantes = Math.ceil((examen.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
 
-    const res = await fetch('/api/chat', {
+    const res = await fetch('/api/planning', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pregunta: `Eres un planificador de estudio para la EBAU de Madrid.
+        prompt: `Eres un planificador de estudio para la EBAU de Madrid.
 El estudiante tiene ${diasRestantes} días hasta el examen.
 Puede estudiar ${p.horas_dia} horas al día.
 Su nota objetivo es ${p.nota_objetivo} sobre 14.

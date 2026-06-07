@@ -57,6 +57,8 @@ export default function Home() {
   const [historial, setHistorial] = useState<any[]>([])
   const [cargandoHistorial, setCargandoHistorial] = useState(false)
   const [itemSeleccionado, setItemSeleccionado] = useState<any>(null)
+  const [planIA, setPlanIA] = useState('')
+  const [cargandoPlan, setCargandoPlan] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const cfg = ASIGNATURAS[asignatura]
@@ -161,6 +163,33 @@ export default function Home() {
       correccion: data.respuesta?.substring(0, 2000)
     }).then(() => {})
     setCargando(false)
+  }
+
+
+  async function generarPlan() {
+    setCargandoPlan(true); setPlanIA('')
+    const { data: hist } = await supabase.from('historial_examenes').select('*').order('created_at', { ascending: false }).limit(20)
+    const resumen = (hist || []).map((h: any) => {
+      const pct = h.nota !== null && h.nota_maxima ? (h.nota / h.nota_maxima * 10).toFixed(1) : 'sin nota'
+      return h.asignatura + ' - ' + h.bloque + ' (' + h.tipo + ' ' + h.año + '): ' + pct + '/10'
+    }).join('
+')
+    const prompt = 'Eres Pausia, tutor experto para la EBAU de Madrid. Analiza el historial de correcciones del estudiante y genera un plan de estudio personalizado para esta semana.
+
+HISTORIAL:
+' + (resumen || 'Sin correcciones aun') + '
+
+Genera un plan detallado con:
+1. Diagnostico de puntos debiles
+2. Plan dia a dia para esta semana (lunes a domingo)
+3. Recursos y ejercicios especificos a practicar
+4. Objetivo de nota para el siguiente examen
+
+Se concreto y motivador.'
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: prompt }) })
+    const data = await res.json()
+    setPlanIA(data.respuesta)
+    setCargandoPlan(false)
   }
 
   async function enviarChat() {
@@ -523,13 +552,26 @@ export default function Home() {
         )}
 
         {seccion === 'planning' && (
-          <main style={{ flex: 1, padding: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
-              <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Mi plan de estudio</div>
-              <div style={{ fontSize: '14px', color: '#64748b' }}>Proximamente</div>
-              <a href="/planning" style={{ display: 'inline-block', marginTop: '20px', padding: '10px 24px', borderRadius: '10px', background: '#0f172a', color: '#fff', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Ver planning completo</a>
+          <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+            <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '28px', marginBottom: '20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '36px', marginBottom: '12px' }}>📅</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Plan de estudio personalizado</div>
+              <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', maxWidth: '500px', margin: '0 auto 20px' }}>Pausia analiza tus correcciones y genera un plan semanal adaptado a tus puntos debiles</div>
+              <button onClick={generarPlan} disabled={cargandoPlan} style={{ padding: '14px 32px', borderRadius: '10px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#94a3b8' : '#0f172a', color: '#fff', fontSize: '15px', fontWeight: 700 }}>
+                {cargandoPlan ? 'Generando tu plan...' : planIA ? 'Regenerar plan' : 'Generar mi plan semanal'}
+              </button>
             </div>
+            {planIA && (
+              <div style={{ background: '#fff', borderRadius: '14px', border: '2px solid #0f172a', overflow: 'hidden' }}>
+                <div style={{ padding: '16px 24px', background: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '13px' }}>P</div>
+                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · PAUSIA IA</span>
+                </div>
+                <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{planIA}</ReactMarkdown>
+                </div>
+              </div>
+            )}
           </main>
         )}
       </div>

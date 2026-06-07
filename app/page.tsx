@@ -27,6 +27,30 @@ type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
+function StatsBar({ historial }: { historial: any[] }) {
+  const ms = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
+  const hs = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
+  const mM = ms.length ? (ms.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / ms.length).toFixed(1) : null
+  const mH = hs.length ? (hs.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / hs.length).toFixed(1) : null
+  if (historial.length === 0) return null
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
+        <div style={{ fontSize: '36px', fontWeight: 800, color: '#0f172a' }}>{historial.length}</div>
+      </div>
+      <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
+        {mM ? <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mM) >= 7 ? '#16a34a' : parseFloat(mM) >= 5 ? '#d97706' : '#dc2626' }}>{mM}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+      </div>
+      <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
+        {mH ? <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mH) >= 7 ? '#16a34a' : parseFloat(mH) >= 5 ? '#d97706' : '#dc2626' }}>{mH}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   const [usuario, setUsuario] = useState<any>(null)
   const [seccion, setSeccion] = useState<Seccion>('examenes')
@@ -177,36 +201,6 @@ export default function Home() {
     const data = await res.json()
     setMensajes(prev => [...prev, { rol: 'pausia', texto: data.respuesta }])
     setCargandoChat(false)
-  }
-
-
-  const matesH = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
-  const historiaH = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
-  const mediaM = matesH.length ? (matesH.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / matesH.length).toFixed(1) : null
-  const mediaHist = historiaH.length ? (historiaH.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / historiaH.length).toFixed(1) : null
-
-  function StatsBar({ historial }: { historial: any[] }) {
-    const ms = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
-    const hs = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
-    const mM = ms.length ? (ms.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / ms.length).toFixed(1) : null
-    const mH = hs.length ? (hs.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / hs.length).toFixed(1) : null
-    if (historial.length === 0) return null
-    return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
-        <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: '#0f172a' }}>{historial.length}</div>
-        </div>
-        <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
-          {mM ? <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mM) >= 7 ? '#16a34a' : parseFloat(mM) >= 5 ? '#d97706' : '#dc2626' }}>{mM}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
-        </div>
-        <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
-          {mH ? <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mH) >= 7 ? '#16a34a' : parseFloat(mH) >= 5 ? '#d97706' : '#dc2626' }}>{mH}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
-        </div>
-      </div>
-    )
   }
 
   if (!usuario) return null

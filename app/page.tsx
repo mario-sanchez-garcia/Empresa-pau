@@ -139,7 +139,7 @@ export default function Home() {
     })
     const data = await res.json()
     setCorreccion(data.respuesta)
-    // Guardar en historial
+    const notaMatch = data.respuesta.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/)
     const notaMatch = data.respuesta.match(/(d+(?:[.,]d+)?)s*/s*(d+(?:[.,]d+)?)/)
     const nota = notaMatch ? parseFloat(notaMatch[1].replace(',', '.')) : null
     const notaMax = notaMatch ? parseFloat(notaMatch[2].replace(',', '.')) : null

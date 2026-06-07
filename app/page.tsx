@@ -27,28 +27,13 @@ type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
-function StatsBar({ historial }: { historial: any[] }) {
-  const ms = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
-  const hs = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
-  const mM = ms.length ? (ms.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / ms.length).toFixed(1) : null
-  const mH = hs.length ? (hs.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / hs.length).toFixed(1) : null
-  if (historial.length === 0) return null
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
-      <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
-        <div style={{ fontSize: '36px', fontWeight: 800, color: '#0f172a' }}>{historial.length}</div>
-      </div>
-      <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
-        {mM ? <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mM) >= 7 ? '#16a34a' : parseFloat(mM) >= 5 ? '#d97706' : '#dc2626' }}>{mM}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
-      </div>
-      <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
-        {mH ? <div style={{ fontSize: '36px', fontWeight: 800, color: parseFloat(mH) >= 7 ? '#16a34a' : parseFloat(mH) >= 5 ? '#d97706' : '#dc2626' }}>{mH}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
-      </div>
-    </div>
-  )
+function calcMedia(items: any[]) {
+  if (!items.length) return null
+  return (items.reduce((a, h) => a + (h.nota / h.nota_maxima * 10), 0) / items.length).toFixed(1)
+}
+
+function colorNota(n: number) {
+  return n >= 7 ? '#16a34a' : n >= 5 ? '#d97706' : '#dc2626'
 }
 
 export default function Home() {
@@ -163,18 +148,13 @@ export default function Home() {
     })
     const data = await res.json()
     setCorreccion(data.respuesta)
-    const notaMatch = data.respuesta.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/)
-    const nota = notaMatch ? parseFloat(notaMatch[1].replace(',', '.')) : null
-    const notaMax = notaMatch ? parseFloat(notaMatch[2].replace(',', '.')) : null
+    const partes = data.respuesta.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/)
+    const nota = partes ? parseFloat(partes[1].replace(',', '.')) : null
+    const notaMax = partes ? parseFloat(partes[2].replace(',', '.')) : null
     supabase.from('historial_examenes').insert({
-      user_id: usuario.id,
-      asignatura,
-      tipo,
-      año: examen?.año,
+      user_id: usuario.id, asignatura, tipo, año: examen?.año,
       bloque: asignatura === 'mates' ? (preguntaActiva?.bloque || '') : (TIPOS_HISTORIA[bloqueIdx]?.label || ''),
-      opcion: opcion === 0 ? 'A' : 'B',
-      nota,
-      nota_maxima: notaMax,
+      opcion: opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
       enunciado: preguntaActiva?.enunciado?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
       correccion: data.respuesta?.substring(0, 2000)
@@ -193,7 +173,7 @@ export default function Home() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pregunta: 'Eres Pausia, tutor experto para la EBAU de Madrid. Ayuda con dudas sobre selectividad, matematicas II e historia de España.\n' +
+        pregunta: 'Eres Pausia, tutor experto para la EBAU de Madrid.\n' +
           'Historial: ' + hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') + '\n' +
           'Estudiante: ' + inputChat + '\nResponde solo como Pausia.'
       })
@@ -211,6 +191,11 @@ export default function Home() {
     { id: 'historial' as Seccion, label: 'Historial', icon: '📊', desc: 'Tus correcciones' },
     { id: 'planning' as Seccion, label: 'Mi plan', icon: '📅', desc: 'Organiza tu estudio' },
   ]
+
+  const matesH = historial.filter(h => h.asignatura === 'mates' && h.nota !== null)
+  const historiaH = historial.filter(h => h.asignatura === 'historia' && h.nota !== null)
+  const mediaM = calcMedia(matesH)
+  const mediaHist = calcMedia(historiaH)
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9', fontFamily: 'system-ui, sans-serif' }}>
@@ -237,7 +222,6 @@ export default function Home() {
               </div>
             </button>
           ))}
-
           <div style={{ color: '#475569', fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 8px', margin: '20px 0 8px' }}>Asignaturas</div>
           {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => (
             <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer', marginBottom: '4px', textAlign: 'left', background: asignatura === key && seccion === 'examenes' ? val.color + '33' : 'transparent' }}>
@@ -398,9 +382,9 @@ export default function Home() {
                 <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>💬</div>
                   <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Hola! Soy Pausia</div>
-                  <div style={{ fontSize: '15px', color: '#64748b', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu tutor IA para la EBAU de Madrid. Preguntame lo que quieras sobre matematicas, historia o cualquier duda de selectividad.</div>
+                  <div style={{ fontSize: '15px', color: '#64748b', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu tutor IA para la EBAU de Madrid.</div>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
-                    {['Como es la estructura del examen de mates?', 'Que temas caen mas en historia?', 'Explicame la Segunda Republica'].map(s => (
+                    {['Como es el examen de mates?', 'Que temas caen en historia?', 'Explicame la Segunda Republica'].map(s => (
                       <button key={s} onClick={() => setInputChat(s)} style={{ padding: '8px 16px', borderRadius: '20px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#475569', fontSize: '13px', cursor: 'pointer', fontWeight: 500 }}>{s}</button>
                     ))}
                   </div>
@@ -434,7 +418,6 @@ export default function Home() {
           </div>
         )}
 
-
         {seccion === 'historial' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             {cargandoHistorial ? (
@@ -443,50 +426,57 @@ export default function Home() {
               <div style={{ textAlign: 'center', padding: '60px' }}>
                 <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Sin correcciones aun</div>
-                <div style={{ fontSize: '14px', color: '#64748b' }}>Haz tu primera correccion en la seccion Examenes</div>
+                <div style={{ fontSize: '14px', color: '#64748b' }}>Haz tu primera correccion en Examenes</div>
               </div>
             ) : (
-
-            <>
-              <StatsBar historial={historial} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {historial.map((item, i) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                      <div>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : '#1a4731' }}>
-                            {item.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana'}
-                          </span>
-                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.tipo}</span>
-                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.año}</span>
-                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.bloque}</span>
-                          <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>Opcion {item.opcion}</span>
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>
-                          {new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        {item.nota !== null && item.nota_maxima !== null ? (
-                          <div>
-                            <span style={{ fontSize: '28px', fontWeight: 800, color: item.nota >= item.nota_maxima * 0.7 ? '#16a34a' : item.nota >= item.nota_maxima * 0.4 ? '#d97706' : '#dc2626' }}>{item.nota}</span>
-                            <span style={{ fontSize: '14px', color: '#94a3b8' }}>/{item.nota_maxima}</span>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: '12px', color: '#94a3b8' }}>Sin nota</span>
-                        )}
-                      </div>
-                    </div>
-                    {item.enunciado && (
-                      <div style={{ fontSize: '13px', color: '#374151', background: '#f8fafc', borderRadius: '8px', padding: '10px 14px', lineHeight: '1.6' }}>
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{item.enunciado.substring(0, 300) + (item.enunciado.length > 300 ? '...' : '')}</ReactMarkdown>
-                      </div>
-                    )}
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
+                    <div style={{ fontSize: '36px', fontWeight: 800, color: '#0f172a' }}>{historial.length}</div>
                   </div>
-                ))}
+                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
+                    {mediaM ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaM)) }}>{mediaM}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  </div>
+                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
+                    {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {historial.map((item, i) => (
+                    <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                        <div>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : '#1a4731' }}>{item.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana'}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.tipo}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.año}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.bloque}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>Opcion {item.opcion}</span>
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                          {item.nota !== null && item.nota_maxima !== null ? (
+                            <div>
+                              <span style={{ fontSize: '28px', fontWeight: 800, color: colorNota(item.nota / item.nota_maxima * 10) }}>{item.nota}</span>
+                              <span style={{ fontSize: '14px', color: '#94a3b8' }}>/{item.nota_maxima}</span>
+                            </div>
+                          ) : <span style={{ fontSize: '12px', color: '#94a3b8' }}>Sin nota</span>}
+                        </div>
+                      </div>
+                      {item.enunciado && (
+                        <div style={{ fontSize: '13px', color: '#374151', background: '#f8fafc', borderRadius: '8px', padding: '10px 14px', lineHeight: '1.6' }}>
+                          {item.enunciado.substring(0, 200)}{item.enunciado.length > 200 ? '...' : ''}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </>
+            )}
           </main>
         )}
 
@@ -495,7 +485,7 @@ export default function Home() {
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
               <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Mi plan de estudio</div>
-              <div style={{ fontSize: '14px', color: '#64748b' }}>Proximamente — organiza tu preparacion semana a semana</div>
+              <div style={{ fontSize: '14px', color: '#64748b' }}>Proximamente</div>
               <a href="/planning" style={{ display: 'inline-block', marginTop: '20px', padding: '10px 24px', borderRadius: '10px', background: '#0f172a', color: '#fff', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Ver planning completo</a>
             </div>
           </main>

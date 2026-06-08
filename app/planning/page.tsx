@@ -2,10 +2,38 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
+import {
+  ArrowLeft,
+  Atom,
+  BarChart3,
+  BrainCircuit,
+  Check,
+  ChevronRight,
+  Clock3,
+  GraduationCap,
+  LoaderCircle,
+  PenLine,
+  RefreshCw,
+  Rocket,
+  Route,
+  Sigma,
+  Sparkles,
+  Target,
+  Trophy,
+  WandSparkles
+} from 'lucide-react'
 
-const config = { bg: '#1e3a5f', light: '#dbeafe', accent: '#3b82f6' }
+const config = { bg: '#1e40af', light: '#eff6ff', accent: '#3b82f6', ink: '#0f172a' }
 
 const ASIGNATURAS = ['Matematicas II', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biologia', 'Geografia', 'Historia del Arte', 'Latin']
+
+const subjectColor = (asignatura: string) => {
+  const key = asignatura.toLowerCase()
+  if (key.includes('fisica') || key.includes('quimica')) return { bg: '#f5f3ff', fg: '#6d28d9', ring: '#ddd6fe', icon: Atom }
+  if (key.includes('historia') || key.includes('geografia') || key.includes('latin')) return { bg: '#f0fdf4', fg: '#166534', ring: '#bbf7d0', icon: Route }
+  if (key.includes('matematica')) return { bg: '#eff6ff', fg: '#1e40af', ring: '#bfdbfe', icon: Sigma }
+  return { bg: '#f8fafc', fg: '#475569', ring: '#e2e8f0', icon: Sparkles }
+}
 
 export default function Planning() {
   const [usuario, setUsuario] = useState<any>(null)
@@ -166,122 +194,186 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   const totalTareas = planning.reduce((acc, dia) => acc + (dia.tareas?.length ?? 0), 0)
   const completadasHoy = planning.reduce((acc, dia) => acc + (dia.tareas?.filter((t: any) => t.completada)?.length ?? 0), 0)
   const porcentaje = totalTareas > 0 ? Math.round((completadasHoy / totalTareas) * 100) : 0
+  const diasParaExamen = perfil?.fecha_examen
+    ? Math.max(0, Math.ceil((new Date(perfil.fecha_examen).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+    : null
 
   if (cargando) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#f0f4f8' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f5f9ff 50%, #f7fdf9 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
       <div className="text-center">
-        <div className="text-4xl mb-4">📅</div>
-        <p style={{ color: '#6b7280' }}>Cargando tu planning...</p>
+        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 66, height: 66, borderRadius: 24, background: 'linear-gradient(145deg, #60a5fa, #7c3aed)', color: '#fff', boxShadow: '0 20px 44px rgba(37,99,235,0.26)' }}>
+          <LoaderCircle size={30} />
+        </div>
+        <p style={{ color: '#64748b', fontWeight: 700 }}>Cargando tu planning...</p>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen" style={{ background: '#f0f4f8', fontFamily: 'system-ui, sans-serif' }}>
-      <header style={{ background: config.bg }} className="px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f5f9ff 50%, #f7fdf9 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
+      <header className="px-6 py-4" style={{ background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(226,232,240,0.9)', position: 'sticky', top: 0, zIndex: 10 }}>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>P</div>
+            <div className="flex items-center justify-center" style={{ width: 44, height: 44, borderRadius: 16, background: 'linear-gradient(145deg, #60a5fa 0%, #2563eb 58%, #1d4ed8 100%)', color: '#fff', boxShadow: '0 14px 30px rgba(37,99,235,0.28), inset 0 1px 0 rgba(255,255,255,0.35)' }}>
+              <GraduationCap size={23} strokeWidth={2.2} />
+            </div>
             <div>
-              <div className="font-bold text-white text-xl leading-none">Pausia</div>
-              <div className="text-xs mt-1" style={{ color: '#93c5fd' }}>Tu academia IA para la EBAU</div>
+              <div className="font-bold text-xl leading-none" style={{ color: config.ink }}>Pausia</div>
+              <div className="text-xs mt-1" style={{ color: '#64748b' }}>EBAU Madrid · planning que se puede cumplir</div>
             </div>
           </div>
-          <button onClick={() => router.push('/')} className="text-xs px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}>← Exámenes</button>
+          <button onClick={() => router.push('/')} className="text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ background: '#fff', color: '#2563eb', border: '1px solid #dbeafe', boxShadow: '0 10px 24px rgba(15,23,42,0.05)' }}>
+            <ArrowLeft size={14} />Exámenes
+          </button>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
-
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {paso === 'onboarding' && (
-          <div className="bg-white rounded-2xl p-8" style={{ border: '1px solid #e5e7eb' }}>
-            <div className="text-center mb-8">
-              <div className="text-5xl mb-4">📅</div>
-              <h1 className="text-2xl font-bold" style={{ color: '#1e3a5f' }}>Tu plan de estudio personalizado</h1>
-              <p className="text-sm mt-2" style={{ color: '#6b7280' }}>Dinos tres cosas y la IA genera tu plan día a día</p>
-            </div>
+          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+            <section className="rounded-3xl p-8 overflow-hidden" style={{ position: 'relative', background: 'linear-gradient(145deg, #ffffff 0%, #eff6ff 62%, #ddd6fe 100%)', border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 24px 60px rgba(15,23,42,0.08)' }}>
+              <div style={{ position: 'absolute', right: '-46px', bottom: '-58px', width: 190, height: 190, borderRadius: '50%', background: 'rgba(59,130,246,0.16)' }} />
+              <div className="flex items-center justify-center mb-7" style={{ width: 72, height: 72, borderRadius: 26, background: 'linear-gradient(145deg, #60a5fa, #7c3aed)', color: '#fff', boxShadow: '0 20px 44px rgba(37,99,235,0.28)' }}>
+                <Rocket size={34} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: '#2563eb' }}>Plan de ataque</p>
+              <h1 className="text-3xl font-bold leading-tight mb-3" style={{ color: config.ink }}>Tu semana de estudio, sin humo.</h1>
+              <p className="text-sm leading-6" style={{ color: '#64748b' }}>Dinos fecha, horas y asignaturas flojas. Pausia lo convierte en tareas cortas, concretas y repartidas con cabeza.</p>
+              <div className="grid gap-3 mt-8" style={{ position: 'relative', gridTemplateColumns: 'repeat(auto-fit, minmax(92px, 1fr))' }}>
+                {[
+                  { label: 'Días', value: diasParaExamen ?? '--', icon: Route },
+                  { label: 'Horas', value: `${horasDia}h`, icon: Clock3 },
+                  { label: 'Meta', value: `${notaObjetivo}/14`, icon: Trophy }
+                ].map(item => {
+                  const Icon = item.icon
+                  return (
+                    <div key={item.label} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(226,232,240,0.95)' }}>
+                      <Icon size={18} color="#2563eb" />
+                      <div className="text-xl font-bold mt-3" style={{ color: config.ink }}>{item.value}</div>
+                      <div className="text-xs mt-1" style={{ color: '#94a3b8' }}>{item.label}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
 
-            <div className="flex flex-col gap-6 max-w-lg mx-auto">
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#374151' }}>¿Cuándo es tu examen?</label>
-                <input type="date" value={fechaExamen} onChange={e => setFechaExamen(e.target.value)}
-                  className="w-full rounded-xl px-4 py-3 text-sm focus:outline-none"
-                  style={{ border: '1.5px solid #e5e7eb', background: '#fafafa' }} />
+            <section className="bg-white rounded-3xl p-8" style={{ border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 24px 60px rgba(15,23,42,0.08)' }}>
+              <div className="mb-7">
+                <h2 className="text-2xl font-bold" style={{ color: config.ink }}>Configura tu planning</h2>
+                <p className="text-sm mt-2" style={{ color: '#64748b' }}>Tres ajustes y lo dejamos listo.</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#374151' }}>
-                  ¿Cuántas horas puedes estudiar al día? <span className="font-bold" style={{ color: config.accent }}>{horasDia}h</span>
-                </label>
-                <input type="range" min={1} max={8} value={horasDia} onChange={e => setHorasDia(Number(e.target.value))} className="w-full" />
-                <div className="flex justify-between text-xs mt-1" style={{ color: '#9ca3af' }}><span>1h</span><span>4h</span><span>8h</span></div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#374151' }}>
-                  ¿Qué nota quieres sacar? <span className="font-bold" style={{ color: config.accent }}>{notaObjetivo}/14</span>
-                </label>
-                <input type="range" min={5} max={14} step={0.5} value={notaObjetivo} onChange={e => setNotaObjetivo(Number(e.target.value))} className="w-full" />
-                <div className="flex justify-between text-xs mt-1" style={{ color: '#9ca3af' }}><span>5</span><span>9.5</span><span>14</span></div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#374151' }}>¿Qué asignaturas llevas peor?</label>
-                <div className="flex flex-wrap gap-2">
-                  {ASIGNATURAS.map(a => (
-                    <button key={a} onClick={() => toggleAsignatura(a)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-medium"
-                      style={asignaturasFlo.includes(a)
-                        ? { background: config.bg, color: '#fff' }
-                        : { background: '#f3f4f6', color: '#6b7280', border: '1px solid #e5e7eb' }}>
-                      {a}
-                    </button>
-                  ))}
+              <div className="flex flex-col gap-6">
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold mb-2" style={{ color: '#334155' }}><Target size={16} color={config.accent} />¿Cuándo es tu examen?</label>
+                  <input type="date" value={fechaExamen} onChange={e => setFechaExamen(e.target.value)}
+                    className="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                    style={{ border: '1.5px solid #e2e8f0', background: '#f8fafc', color: config.ink }} />
                 </div>
-              </div>
 
-              <button onClick={guardarPerfil} disabled={!fechaExamen || asignaturasFlo.length === 0}
-                className="w-full py-4 rounded-2xl font-bold text-white text-lg disabled:opacity-40"
-                style={{ background: config.bg }}>
-                🚀 Generar mi plan con IA
-              </button>
-            </div>
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold mb-2" style={{ color: '#334155' }}><Clock3 size={16} color={config.accent} />Horas al día <span style={{ color: config.accent }}>{horasDia}h</span></label>
+                  <input type="range" min={1} max={8} value={horasDia} onChange={e => setHorasDia(Number(e.target.value))} className="w-full" />
+                  <div className="flex justify-between text-xs mt-1" style={{ color: '#94a3b8' }}><span>1h</span><span>4h</span><span>8h</span></div>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold mb-2" style={{ color: '#334155' }}><Trophy size={16} color={config.accent} />Nota objetivo <span style={{ color: config.accent }}>{notaObjetivo}/14</span></label>
+                  <input type="range" min={5} max={14} step={0.5} value={notaObjetivo} onChange={e => setNotaObjetivo(Number(e.target.value))} className="w-full" />
+                  <div className="flex justify-between text-xs mt-1" style={{ color: '#94a3b8' }}><span>5</span><span>9.5</span><span>14</span></div>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold mb-3" style={{ color: '#334155' }}><BrainCircuit size={16} color={config.accent} />Asignaturas que se atragantan</label>
+                  <div className="flex flex-wrap gap-2">
+                    {ASIGNATURAS.map(a => {
+                      const palette = subjectColor(a)
+                      const active = asignaturasFlo.includes(a)
+                      return (
+                        <button key={a} onClick={() => toggleAsignatura(a)}
+                          className="px-3 py-2 rounded-full text-xs font-bold flex items-center gap-2"
+                          style={active
+                            ? { background: palette.fg, color: '#fff', border: '1px solid transparent', boxShadow: '0 10px 22px rgba(15,23,42,0.08)' }
+                            : { background: palette.bg, color: palette.fg, border: '1px solid ' + palette.ring }}>
+                          {a}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <button onClick={guardarPerfil} disabled={!fechaExamen || asignaturasFlo.length === 0}
+                  className="w-full py-4 rounded-2xl font-bold text-white text-base disabled:opacity-40 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #1e40af, #3b82f6)', boxShadow: '0 18px 38px rgba(37,99,235,0.25)' }}>
+                  <WandSparkles size={18} />Generar mi plan
+                </button>
+              </div>
+            </section>
           </div>
         )}
 
         {paso === 'planning' && (
-          <div className="flex flex-col gap-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold" style={{ color: '#1e3a5f' }}>Tu plan de esta semana</h1>
-                <p className="text-sm mt-1" style={{ color: '#6b7280' }}>
-                  Objetivo: {perfil?.nota_objetivo}/14 · {perfil?.horas_dia}h/día · Examen: {perfil?.fecha_examen ? new Date(perfil.fecha_examen).toLocaleDateString('es-ES') : ''}
-                </p>
+          <div className="flex flex-col gap-6">
+            <section className="rounded-3xl p-6 md:p-7 overflow-hidden" style={{ position: 'relative', background: 'linear-gradient(145deg, #ffffff 0%, #eff6ff 62%, #f5f3ff 100%)', border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 24px 60px rgba(15,23,42,0.08)' }}>
+              <div style={{ position: 'absolute', right: '-42px', top: '-54px', width: 170, height: 170, borderRadius: '50%', background: 'rgba(59,130,246,0.14)' }} />
+              <div className="flex items-start justify-between gap-4" style={{ position: 'relative' }}>
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center justify-center" style={{ width: 64, height: 64, borderRadius: 22, background: 'linear-gradient(145deg, #60a5fa, #7c3aed)', color: '#fff', boxShadow: '0 18px 38px rgba(37,99,235,0.26)' }}>
+                    <Rocket size={30} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: '#2563eb' }}>Ruta semanal</p>
+                    <h1 className="text-3xl font-bold leading-tight" style={{ color: config.ink }}>Tu plan de esta semana</h1>
+                    <p className="text-sm mt-2" style={{ color: '#64748b' }}>
+                      Objetivo {perfil?.nota_objetivo}/14 · {perfil?.horas_dia}h al día · Examen {perfil?.fecha_examen ? new Date(perfil.fecha_examen).toLocaleDateString('es-ES') : ''}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setPaso('onboarding')}
+                  className="text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2"
+                  style={{ background: '#fff', color: '#475569', border: '1px solid #e2e8f0', boxShadow: '0 10px 24px rgba(15,23,42,0.05)' }}>
+                  <PenLine size={14} />Editar perfil
+                </button>
               </div>
-              <button onClick={() => setPaso('onboarding')}
-                className="text-xs px-4 py-2 rounded-xl font-medium"
-                style={{ background: '#f3f4f6', color: '#6b7280', border: '1px solid #e5e7eb' }}>
-                ✏️ Editar perfil
-              </button>
-            </div>
+
+              <div className="grid gap-3 mt-7" style={{ position: 'relative', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))' }}>
+                {[
+                  { label: 'Progreso', value: `${porcentaje}%`, icon: BarChart3, color: '#2563eb' },
+                  { label: 'Tareas', value: totalTareas, icon: Target, color: '#0f766e' },
+                  { label: 'Hechas', value: completadasHoy, icon: Check, color: '#16a34a' },
+                  { label: 'Días examen', value: diasParaExamen ?? '--', icon: Route, color: '#7c3aed' }
+                ].map(item => {
+                  const Icon = item.icon
+                  return (
+                    <div key={item.label} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(226,232,240,0.95)' }}>
+                      <Icon size={18} color={item.color} />
+                      <div className="text-2xl font-bold mt-2" style={{ color: config.ink }}>{item.value}</div>
+                      <div className="text-xs mt-1" style={{ color: '#94a3b8' }}>{item.label}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
 
             {totalTareas > 0 && (
-              <div className="bg-white rounded-2xl p-5" style={{ border: '1px solid #e5e7eb' }}>
+              <div className="bg-white rounded-3xl p-5" style={{ border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 16px 36px rgba(15,23,42,0.05)' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold" style={{ color: '#374151' }}>Progreso semanal</span>
+                  <span className="text-sm font-bold flex items-center gap-2" style={{ color: '#334155' }}><BarChart3 size={16} color={config.accent} />Progreso semanal</span>
                   <span className="text-sm font-bold" style={{ color: config.accent }}>{completadasHoy}/{totalTareas} tareas · {porcentaje}%</span>
                 </div>
-                <div className="w-full rounded-full h-3" style={{ background: '#e5e7eb' }}>
-                  <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: config.accent }}></div>
+                <div className="w-full rounded-full h-3" style={{ background: '#e2e8f0' }}>
+                  <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: 'linear-gradient(135deg, #2563eb, #22c55e)' }}></div>
                 </div>
               </div>
             )}
 
             {generando ? (
-              <div className="bg-white rounded-2xl p-12 text-center" style={{ border: '1px solid #e5e7eb' }}>
-                <div className="text-4xl mb-4">🤖</div>
-                <p className="font-semibold" style={{ color: '#1e3a5f' }}>La IA está generando tu plan...</p>
-                <p className="text-sm mt-2" style={{ color: '#9ca3af' }}>Analizando tu progreso y redistribuyendo tareas pendientes</p>
+              <div className="bg-white rounded-3xl p-12 text-center" style={{ border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 20px 50px rgba(15,23,42,0.07)' }}>
+                <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 66, height: 66, borderRadius: 24, background: 'linear-gradient(145deg, #60a5fa, #7c3aed)', color: '#fff' }}>
+                  <BrainCircuit size={30} />
+                </div>
+                <p className="font-bold" style={{ color: config.ink }}>Pausia está montando tu ruta...</p>
+                <p className="text-sm mt-2" style={{ color: '#94a3b8' }}>Analizando progreso y recolocando tareas pendientes</p>
               </div>
             ) : planning.length > 0 ? (
               <div className="grid gap-4">
@@ -289,54 +381,61 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   const completadasDia = dia.tareas?.filter((t: any) => t.completada)?.length ?? 0
                   const totalDia = dia.tareas?.length ?? 0
                   return (
-                    <div key={i} className="bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid #e5e7eb' }}>
-                      <div className="px-5 py-3 flex items-center justify-between" style={{ background: config.light, borderBottom: `2px solid ${config.accent}` }}>
-                        <span className="font-bold text-sm" style={{ color: '#1e3a5f' }}>📅 {dia.dia}</span>
-                        <span className="text-xs" style={{ color: '#6b7280' }}>{completadasDia}/{totalDia} completadas</span>
+                    <div key={i} className="bg-white rounded-3xl overflow-hidden" style={{ border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 16px 36px rgba(15,23,42,0.05)' }}>
+                      <div className="px-5 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #eff6ff, #f8fafc)', borderBottom: '1px solid #e2e8f0' }}>
+                        <span className="font-bold text-sm flex items-center gap-2" style={{ color: config.ink }}><Route size={16} color={config.accent} />{dia.dia}</span>
+                        <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ color: '#2563eb', background: '#dbeafe' }}>{completadasDia}/{totalDia} completadas</span>
                       </div>
                       <div className="p-4 flex flex-col gap-3">
-                        {dia.tareas?.map((tarea: any, j: number) => (
-                          <div key={j} className="flex items-start gap-3 p-3 rounded-xl"
-                            style={{ background: tarea.completada ? '#f0fdf4' : '#f8fafc', border: `1px solid ${tarea.completada ? '#bbf7d0' : '#e5e7eb'}` }}>
-                            <button onClick={() => !tarea.completada && marcarCompletada(i, j)}
-                              className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs"
-                              style={{ background: tarea.completada ? '#22c55e' : '#fff', border: `2px solid ${tarea.completada ? '#22c55e' : '#d1d5db'}`, color: '#fff' }}>
-                              {tarea.completada ? '✓' : ''}
-                            </button>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: config.light, color: '#1e3a5f' }}>{tarea.asignatura}</span>
-                                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#f3f4f6', color: '#6b7280' }}>{tarea.bloque}</span>
-                                <span className="text-xs" style={{ color: '#9ca3af' }}>⏱ {tarea.duracion} min</span>
-                              </div>
-                              <p className="text-sm" style={{ color: tarea.completada ? '#6b7280' : '#374151', textDecoration: tarea.completada ? 'line-through' : 'none' }}>
-                                {tarea.descripcion}
-                              </p>
-                            </div>
-                            {!tarea.completada && (
-                              <button onClick={() => router.push('/')}
-                                className="text-xs px-3 py-1.5 rounded-lg font-semibold flex-shrink-0"
-                                style={{ background: config.bg, color: '#fff' }}>
-                                Practicar →
+                        {dia.tareas?.map((tarea: any, j: number) => {
+                          const palette = subjectColor(tarea.asignatura)
+                          const SubjectIcon = palette.icon
+                          return (
+                            <div key={j} className="flex items-start gap-3 p-4 rounded-2xl"
+                              style={{ background: tarea.completada ? '#f0fdf4' : '#f8fafc', border: `1px solid ${tarea.completada ? '#bbf7d0' : '#e2e8f0'}` }}>
+                              <button onClick={() => !tarea.completada && marcarCompletada(i, j)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                                style={{ background: tarea.completada ? '#22c55e' : '#fff', border: `2px solid ${tarea.completada ? '#22c55e' : '#cbd5e1'}`, color: '#fff' }}>
+                                {tarea.completada ? <Check size={16} strokeWidth={3} /> : null}
                               </button>
-                            )}
-                          </div>
-                        ))}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                  <span className="text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5" style={{ background: palette.bg, color: palette.fg, border: '1px solid ' + palette.ring }}><SubjectIcon size={13} />{tarea.asignatura}</span>
+                                  <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: '#fff', color: '#64748b', border: '1px solid #e2e8f0' }}>{tarea.bloque}</span>
+                                  <span className="text-xs flex items-center gap-1" style={{ color: '#94a3b8' }}><Clock3 size={13} />{tarea.duracion} min</span>
+                                </div>
+                                <p className="text-sm leading-6" style={{ color: tarea.completada ? '#64748b' : '#334155', textDecoration: tarea.completada ? 'line-through' : 'none' }}>
+                                  {tarea.descripcion}
+                                </p>
+                              </div>
+                              {!tarea.completada && (
+                                <button onClick={() => router.push('/')}
+                                  className="text-xs px-3 py-2 rounded-full font-bold flex-shrink-0 flex items-center gap-1"
+                                  style={{ background: 'linear-gradient(135deg, #1e40af, #3b82f6)', color: '#fff', boxShadow: '0 10px 22px rgba(37,99,235,0.18)' }}>
+                                  Practicar <ChevronRight size={13} />
+                                </button>
+                              )}
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                   )
                 })}
                 <button onClick={() => cargarTareasYPlanning(perfil, usuario?.id)}
-                  className="w-full py-3 rounded-2xl font-semibold text-sm"
-                  style={{ background: '#f3f4f6', color: '#6b7280', border: '1px solid #e5e7eb' }}>
-                  🔄 Recalcular plan
+                  className="w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
+                  style={{ background: '#fff', color: '#475569', border: '1px solid #e2e8f0', boxShadow: '0 12px 28px rgba(15,23,42,0.04)' }}>
+                  <RefreshCw size={16} />Recalcular plan
                 </button>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl p-12 text-center" style={{ border: '1px solid #e5e7eb' }}>
-                <p style={{ color: '#6b7280' }}>No se pudo generar el plan. Intenta de nuevo.</p>
-                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ background: config.bg }}>
-                  Intentar de nuevo
+              <div className="bg-white rounded-3xl p-12 text-center" style={{ border: '1px solid rgba(226,232,240,0.95)', boxShadow: '0 20px 50px rgba(15,23,42,0.07)' }}>
+                <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 20, background: '#eff6ff', color: '#2563eb' }}>
+                  <Route size={28} />
+                </div>
+                <p style={{ color: '#64748b' }}>No se pudo generar el plan. Intenta de nuevo.</p>
+                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="mt-4 px-6 py-2 rounded-full font-bold text-white inline-flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #1e40af, #3b82f6)' }}>
+                  <RefreshCw size={15} />Intentar de nuevo
                 </button>
               </div>
             )}

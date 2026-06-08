@@ -1,7 +1,7 @@
 import getStroke from 'perfect-freehand'
 import type { CanvasElement } from '@/components/zona/types'
 
-export const DRAW_COLORS = ['#111827', '#2563eb', '#7C3AED', '#16a34a', '#f59e0b', '#dc2626']
+export const DRAW_COLORS = ['#111827', '#1d4ed8', '#2563eb', '#0ea5e9', '#64748b', '#94a3b8']
 export const CANVAS_SIZE = 9000
 
 type Point = { x: number; y: number }
@@ -22,12 +22,12 @@ export function DrawTool({ color, width, setColor, setWidth }: DrawToolProps) {
           type="button"
           aria-label={item}
           onClick={() => setColor(item)}
-          className={`h-7 w-7 rounded-full border-2 ${color === item ? 'border-[#7C3AED]' : 'border-white'}`}
+          className={`h-7 w-7 rounded-full border-2 transition hover:-translate-y-0.5 ${color === item ? 'border-[#2563eb]' : 'border-white'}`}
           style={{ background: item }}
         />
       ))}
       <input className="h-8 w-10 rounded-lg" type="color" value={color} onChange={event => setColor(event.target.value)} />
-      <select className="h-9 rounded-xl border border-[#f2e4d4] bg-white px-2 text-sm font-bold text-[#7c6f64]" value={width} onChange={event => setWidth(Number(event.target.value))}>
+      <select className="h-9 rounded-xl border border-[#dbe7fb] bg-white px-2 text-sm font-bold text-slate-600 outline-none focus:border-blue-300" value={width} onChange={event => setWidth(Number(event.target.value))}>
         <option value={3}>Fino</option>
         <option value={6}>Medio</option>
         <option value={12}>Grueso</option>

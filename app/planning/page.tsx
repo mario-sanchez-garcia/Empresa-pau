@@ -5,32 +5,32 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, PenLine, RefreshCw, Rocket } from 'lucide-react'
 
 const config = {
-  bg: '#b4232a',
-  light: '#fff1f2',
-  accent: '#fb7185',
-  violet: '#7c3aed',
-  green: '#2f7d4e',
+  bg: '#2563eb',
+  light: '#eff6ff',
+  accent: '#60a5fa',
+  deep: '#1d4ed8',
+  sky: '#38bdf8',
   ink: '#111827',
   muted: '#64748b',
   softText: '#94a3b8',
   surface: '#ffffff',
   field: '#fafafa',
-  border: '#eadfe6',
-  shadow: '0 24px 70px rgba(55, 39, 47, 0.09)'
+  border: '#dbe7fb',
+  shadow: '0 24px 70px rgba(37, 99, 235, 0.09)'
 }
 
 const SUBJECT_COLORS = {
   mates: { color: '#b4232a', light: '#fff1f2', accent: '#fb7185', border: '#ffe4e6' },
-  fisica: { color: '#7c3aed', light: '#faf5ff', accent: '#c084fc', border: '#f3e8ff' },
-  historia: { color: '#2f7d4e', light: '#f2fbf4', accent: '#74c69d', border: '#dff7e6' },
-  quimica: { color: '#b45309', light: '#fff7ed', accent: '#f59e0b', border: '#fed7aa' },
-  lengua: { color: '#be185d', light: '#fdf2f8', accent: '#f472b6', border: '#fce7f3' },
-  ingles: { color: '#0f766e', light: '#f0fdfa', accent: '#2dd4bf', border: '#ccfbf1' },
-  bio: { color: '#15803d', light: '#f0fdf4', accent: '#86efac', border: '#dcfce7' },
-  geo: { color: '#a16207', light: '#fefce8', accent: '#eab308', border: '#fef3c7' },
-  arte: { color: '#9333ea', light: '#faf5ff', accent: '#d8b4fe', border: '#f3e8ff' },
-  latin: { color: '#9f1239', light: '#fff1f2', accent: '#fb7185', border: '#ffe4e6' },
-  other: { color: '#475569', light: '#f8fafc', accent: '#94a3b8', border: '#e2e8f0' }
+  fisica: { color: '#4338ca', light: '#eef2ff', accent: '#818cf8', border: '#e0e7ff' },
+  historia: { color: '#0f5ea8', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
+  quimica: { color: '#0369a1', light: '#f0f9ff', accent: '#38bdf8', border: '#e0f2fe' },
+  lengua: { color: '#1d4ed8', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
+  ingles: { color: '#0284c7', light: '#f0f9ff', accent: '#38bdf8', border: '#e0f2fe' },
+  bio: { color: '#0f5ea8', light: '#eff6ff', accent: '#93c5fd', border: '#dbeafe' },
+  geo: { color: '#075985', light: '#f0f9ff', accent: '#7dd3fc', border: '#e0f2fe' },
+  arte: { color: '#3730a3', light: '#eef2ff', accent: '#818cf8', border: '#e0e7ff' },
+  latin: { color: '#1e40af', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
+  other: { color: '#2563eb', light: '#eff6ff', accent: '#93c5fd', border: '#dbeafe' }
 }
 
 function hoverVars(color: string, light: string, accent = color) {
@@ -220,16 +220,16 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   const porcentaje = totalTareas > 0 ? Math.round((completadasHoy / totalTareas) * 100) : 0
 
   if (cargando) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(255, 228, 230, 0.82), transparent 30%), radial-gradient(circle at 86% 8%, rgba(243, 232, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(220, 247, 230, 0.62), transparent 30%), linear-gradient(135deg, #fffafb 0%, #f8fafc 48%, #fff7f8 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)' }}>
       <div className="text-center">
-        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: 'linear-gradient(145deg, #b4232a, #7c3aed 55%, #2f7d4e)', color: '#fff', boxShadow: '0 18px 38px rgba(180,35,42,0.22)' }}><Rocket size={28} /></div>
+        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: 'linear-gradient(145deg, #1d4ed8, #2563eb 55%, #38bdf8)', color: '#fff', boxShadow: '0 18px 38px rgba(37,99,235,0.24)' }}><Rocket size={28} /></div>
         <p style={{ color: config.muted, fontWeight: 700 }}>Cargando tu planning...</p>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(255, 228, 230, 0.82), transparent 30%), radial-gradient(circle at 86% 8%, rgba(243, 232, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(220, 247, 230, 0.62), transparent 30%), linear-gradient(135deg, #fffafb 0%, #f8fafc 48%, #fff7f8 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
+    <div className="min-h-screen" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
       <style>{`
         .campus-hover,
         .campus-primary,
@@ -239,43 +239,43 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
 
         .campus-hover:hover {
           transform: translateY(-2px);
-          border-color: var(--hover-border, #fb7185) !important;
-          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #fff1f2)) !important;
-          color: var(--hover-color, #b4232a) !important;
-          box-shadow: 0 16px 34px var(--hover-shadow, rgba(251, 113, 133, 0.18)) !important;
+          border-color: var(--hover-border, #60a5fa) !important;
+          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #eff6ff)) !important;
+          color: var(--hover-color, #2563eb) !important;
+          box-shadow: 0 16px 34px var(--hover-shadow, rgba(96, 165, 250, 0.2)) !important;
         }
 
         .campus-primary:hover:not(:disabled) {
           transform: translateY(-2px);
           filter: saturate(1.08) brightness(1.03);
-          box-shadow: 0 20px 42px var(--hover-shadow, rgba(251, 113, 133, 0.22)) !important;
+          box-shadow: 0 20px 42px var(--hover-shadow, rgba(96, 165, 250, 0.24)) !important;
         }
 
         .campus-task:hover {
           transform: translateY(-2px);
-          border-color: var(--hover-border, #fb7185) !important;
-          box-shadow: 0 18px 38px var(--hover-shadow, rgba(251, 113, 133, 0.14)) !important;
+          border-color: var(--hover-border, #60a5fa) !important;
+          box-shadow: 0 18px 38px var(--hover-shadow, rgba(96, 165, 250, 0.16)) !important;
         }
       `}</style>
-      <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(234, 223, 230, 0.9)' }}>
+      <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(219, 231, 251, 0.9)' }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #b4232a 0%, #7c3aed 58%, #2f7d4e 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(180,35,42,0.22)' }}><GraduationCap size={23} /></div>
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #1d4ed8 0%, #2563eb 58%, #38bdf8 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(37,99,235,0.24)' }}><GraduationCap size={23} /></div>
             <div>
               <div className="font-bold text-xl leading-none" style={{ color: config.ink }}>Pausia</div>
               <div className="text-xs mt-1" style={{ color: config.muted }}>EBAU Madrid · planning que se puede cumplir</div>
             </div>
           </div>
-          <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #eadfe6', boxShadow: '0 10px 24px rgba(55,39,47,0.06)' }}><ArrowLeft size={14} />Exámenes</button>
+          <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}><ArrowLeft size={14} />Exámenes</button>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-8">
 
         {paso === 'onboarding' && (
-          <div className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: config.shadow, backdropFilter: 'blur(18px)' }}>
+          <div className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow, backdropFilter: 'blur(18px)' }}>
             <div className="text-center mb-8">
-              <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #b4232a, #7c3aed 52%, #2f7d4e)', color: '#fff', boxShadow: '0 18px 42px rgba(180, 35, 42, 0.22)' }}><CalendarDays size={30} /></div>
+              <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', boxShadow: '0 18px 42px rgba(37, 99, 235, 0.22)' }}><CalendarDays size={30} /></div>
               <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Tu plan de estudio personalizado</h1>
               <p className="text-sm mt-2" style={{ color: config.muted }}>Dinos tres cosas y Pausia te monta un plan día a día</p>
             </div>
@@ -285,7 +285,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                 <label className="block text-sm font-semibold mb-2" style={{ color: config.ink }}>¿Cuándo es tu examen?</label>
                 <input type="date" value={fechaExamen} onChange={e => setFechaExamen(e.target.value)}
                   className="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                  style={{ border: '1.5px solid #eadfe6', background: config.field, color: config.ink, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75)', accentColor: config.accent }} />
+                  style={{ border: '1.5px solid #dbe7fb', background: config.field, color: config.ink, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75)', accentColor: config.accent }} />
               </div>
 
               <div>
@@ -325,7 +325,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
 
               <button onClick={guardarPerfil} disabled={!fechaExamen || asignaturasFlo.length === 0}
                 className="campus-primary w-full py-4 rounded-2xl font-bold text-white text-lg disabled:opacity-40 flex items-center justify-center gap-2"
-                style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #b4232a, #fb7185)', boxShadow: '0 18px 40px rgba(180, 35, 42, 0.18)' }}>
+                style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', boxShadow: '0 18px 40px rgba(37, 99, 235, 0.2)' }}>
                 <Rocket size={19} /> Generar mi plan
               </button>
             </div>
@@ -343,26 +343,26 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
               </div>
               <button onClick={() => setPaso('onboarding')}
                 className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2"
-                style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #eadfe6', boxShadow: '0 10px 24px rgba(55,39,47,0.06)' }}>
+                style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>
                 <PenLine size={14} /> Editar perfil
               </button>
             </div>
 
             {totalTareas > 0 && (
-              <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: '0 18px 45px rgba(55,39,47,0.07)' }}>
+              <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold" style={{ color: config.ink }}>Progreso semanal</span>
                   <span className="text-sm font-bold" style={{ color: config.accent }}>{completadasHoy}/{totalTareas} tareas · {porcentaje}%</span>
                 </div>
                 <div className="w-full rounded-full h-3" style={{ background: '#f1e8ee' }}>
-                  <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: 'linear-gradient(90deg, #b4232a, #fb7185, #7c3aed, #2f7d4e)' }}></div>
+                  <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: 'linear-gradient(90deg, #1d4ed8, #2563eb, #38bdf8)' }}></div>
                 </div>
               </div>
             )}
 
             {generando ? (
-              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: config.shadow }}>
-                <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: config.light, color: config.bg, border: '1px solid #ffe4e6' }}><Bot size={28} /></div>
+              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
+                <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: config.light, color: config.bg, border: '1px solid #dbeafe' }}><Bot size={28} /></div>
                 <p className="font-semibold" style={{ color: config.ink }}>Pausia está montando tu plan...</p>
                 <p className="text-sm mt-2" style={{ color: config.softText }}>Analizando tu progreso y redistribuyendo tareas pendientes</p>
               </div>
@@ -372,8 +372,8 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   const completadasDia = dia.tareas?.filter((t: any) => t.completada)?.length ?? 0
                   const totalDia = dia.tareas?.length ?? 0
                   return (
-                    <div key={i} className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: '0 18px 45px rgba(55,39,47,0.07)' }}>
-                      <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #fff1f2, #faf5ff)', borderBottom: `2px solid ${config.accent}` }}>
+                    <div key={i} className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
+                      <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #eff6ff, #eef2ff)', borderBottom: `2px solid ${config.accent}` }}>
                         <span className="font-bold text-sm flex items-center gap-2" style={{ color: config.ink }}><CalendarDays size={15} color={config.accent} /> {dia.dia}</span>
                         <span className="text-xs" style={{ color: config.muted }}>{completadasDia}/{totalDia} completadas</span>
                       </div>
@@ -382,10 +382,10 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                           const theme = subjectTheme(tarea.asignatura)
                           return (
                           <div key={j} className="campus-task flex items-start gap-3 p-3 rounded-xl"
-                            style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#f0fdf4' : theme.light, border: `1px solid ${tarea.completada ? '#bbf7d0' : theme.border}` }}>
+                            style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#eff6ff' : theme.light, border: `1px solid ${tarea.completada ? '#bfdbfe' : theme.border}` }}>
                             <button onClick={() => !tarea.completada && marcarCompletada(i, j)}
                               className="campus-hover w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs"
-                              style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#22c55e' : '#fff', border: `2px solid ${tarea.completada ? '#22c55e' : theme.accent}`, color: '#fff' }}>
+                              style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#2563eb' : '#fff', border: `2px solid ${tarea.completada ? '#2563eb' : theme.accent}`, color: '#fff' }}>
                               {tarea.completada ? <Check size={14} /> : ''}
                             </button>
                             <div className="flex-1">
@@ -413,14 +413,14 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                 })}
                 <button onClick={() => cargarTareasYPlanning(perfil, usuario?.id)}
                   className="campus-hover w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
-                  style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #eadfe6', boxShadow: '0 12px 28px rgba(55,39,47,0.06)' }}>
+                  style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
                   <RefreshCw size={15} /> Recalcular plan
                 </button>
               </div>
             ) : (
-              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: config.shadow }}>
+              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
                 <p style={{ color: config.muted }}>No se pudo generar el plan. Intenta de nuevo.</p>
-                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="campus-primary mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #b4232a, #fb7185)' }}>
+                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="campus-primary mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}>
                   Intentar de nuevo
                 </button>
               </div>

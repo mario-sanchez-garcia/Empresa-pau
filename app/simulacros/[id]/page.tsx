@@ -71,7 +71,7 @@ export default function SimulacroActivoPage() {
   const elapsedMinutes = Math.ceil((TOTAL_SECONDS - secondsLeft) / 60)
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
   const percentLeft = secondsLeft / TOTAL_SECONDS * 100
-  const timerColor = secondsLeft > 45 * 60 ? 'bg-emerald-500' : secondsLeft > 15 * 60 ? 'bg-amber-500' : 'bg-red-500'
+  const timerColor = secondsLeft > 45 * 60 ? 'bg-blue-500' : secondsLeft > 15 * 60 ? 'bg-sky-500' : 'bg-indigo-500'
 
   async function autosave() {
     if (!record) return
@@ -113,78 +113,78 @@ export default function SimulacroActivoPage() {
   }
 
   if (!record) {
-    return <SimulacroShell title="Simulacro" subtitle="Cargando examen..."><div className="rounded-xl bg-white p-8 font-black text-slate-500">Preparando simulacro...</div></SimulacroShell>
+    return <SimulacroShell title="Simulacro" subtitle="Cargando examen..."><div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-8 font-black text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">Preparando simulacro...</div></SimulacroShell>
   }
 
   return (
     <SimulacroShell
       title="Examen activo"
       subtitle="90 minutos, cuatro bloques y corrección completa"
-      actions={<button onClick={() => setConfirmOpen(true)} className="flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-black text-white"><Send size={16} />Entregar examen</button>}
+      actions={<button onClick={() => setConfirmOpen(true)} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-4 py-2 text-sm font-black text-white shadow-[0_16px_34px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5"><Send size={16} />Entregar examen</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-5">
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <Badge color={cfg.color}>{cfg.label}</Badge>
               <Badge color="#475569">{record.id.slice(0, 8)}</Badge>
-              <Badge color="#7c3aed">{record.dificultad_real ?? record.dificultad}</Badge>
+              <Badge color="#2563eb">{record.dificultad_real ?? record.dificultad}</Badge>
               <Badge color={cfg.color}>Opción {record.opcion}</Badge>
             </div>
-            <div className="flex items-center gap-2 text-2xl font-black" style={{ color: secondsLeft < 15 * 60 ? '#dc2626' : '#0f172a' }}><Clock size={24} />{formatTime(secondsLeft)}</div>
+            <div className="flex items-center gap-2 text-2xl font-black" style={{ color: secondsLeft < 15 * 60 ? '#1d4ed8' : '#0f172a' }}><Clock size={24} />{formatTime(secondsLeft)}</div>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-slate-100"><div className={`h-full ${timerColor} transition-all`} style={{ width: `${percentLeft}%` }} /></div>
+          <div className="h-3 overflow-hidden rounded-full bg-blue-50"><div className={`h-full ${timerColor} transition-all`} style={{ width: `${percentLeft}%` }} /></div>
           <div className="mt-4 flex flex-wrap gap-2">
             {record.bloques.map((block, index) => {
               const ok = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)
-              return <button key={block.id} onClick={() => setActive(index)} className={`rounded-full px-4 py-2 text-sm font-black ${active === index ? 'bg-violet-600 text-white' : ok ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</button>
+              return <button key={block.id} onClick={() => setActive(index)} className={`rounded-full px-4 py-2 text-sm font-black transition hover:-translate-y-0.5 ${active === index ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.2)]' : ok ? 'bg-sky-50 text-sky-700' : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-700'}`}>{index + 1}</button>
             })}
           </div>
         </section>
 
         {record.bloques.map((block, index) => (
           <section key={block.id} className={active === index ? 'grid gap-4' : 'hidden'}>
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
               <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="mb-2 flex items-center gap-2">
-                    <span className={`h-3 w-3 rounded-full ${answers[block.id]?.text?.trim() || answers[block.id]?.image ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <span className={`h-3 w-3 rounded-full ${answers[block.id]?.text?.trim() || answers[block.id]?.image ? 'bg-blue-500' : 'bg-slate-300'}`} />
                     <h2 className="text-xl font-black">Bloque {index + 1} · {block.tema}</h2>
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs font-black text-slate-500">
-                    <span className="rounded-full bg-slate-100 px-3 py-1">Año {block.year}</span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1">{block.convocatoria}</span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1">{block.puntuacion} pts</span>
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Año {block.year}</span>
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{block.convocatoria}</span>
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{block.puntuacion} pts</span>
                   </div>
                 </div>
               </div>
-              <div className="prose prose-slate max-w-none rounded-xl bg-slate-50 p-5">
+              <div className="prose prose-slate max-w-none rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-5">
                 <MathMarkdown text={block.enunciado} />
-                {block.textoFuente && <MathMarkdown text={block.textoFuente} className="mt-4 rounded-xl border-l-4 border-slate-300 bg-white/70 p-4 text-slate-600" />}
+                {block.textoFuente && <MathMarkdown text={block.textoFuente} className="mt-4 rounded-2xl border-l-4 border-blue-300 bg-white/80 p-4 text-slate-600" />}
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
               <div className="mb-4 flex gap-2">
-                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'text' }))} className={`rounded-xl px-4 py-2 text-sm font-black ${mode[block.id] !== 'image' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600'}`}>Escribir</button>
-                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'image' }))} className={`rounded-xl px-4 py-2 text-sm font-black ${mode[block.id] === 'image' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600'}`}>Subir foto</button>
+                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'text' }))} className={`rounded-2xl px-4 py-2 text-sm font-black transition hover:-translate-y-0.5 ${mode[block.id] !== 'image' ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Escribir</button>
+                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'image' }))} className={`rounded-2xl px-4 py-2 text-sm font-black transition hover:-translate-y-0.5 ${mode[block.id] === 'image' ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Subir foto</button>
               </div>
               {mode[block.id] === 'image' ? (
                 <div className="grid gap-4">
-                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                    <Camera size={32} className="mb-2 text-violet-600" />
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-blue-200 bg-blue-50/70 p-8 text-center transition hover:border-blue-300 hover:bg-blue-50">
+                    <Camera size={32} className="mb-2 text-blue-600" />
                     <span className="font-black">Sube una foto de tu respuesta</span>
                     <input type="file" accept="image/*" className="hidden" onChange={event => void handleImage(block.id, event.target.files?.[0])} />
                   </label>
                   {answers[block.id]?.image && (
-                    <div className="relative overflow-hidden rounded-xl border border-slate-200">
+                    <div className="relative overflow-hidden rounded-3xl border border-[#dbe7fb] bg-white">
                       <img src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`} alt="Respuesta" className="max-h-96 w-full object-contain" />
-                      <button onClick={() => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? { text: '' }), image: null, imageType: null } }))} className="absolute right-3 top-3 rounded-full bg-white p-2 text-red-600 shadow"><Trash2 size={16} /></button>
+                      <button onClick={() => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? { text: '' }), image: null, imageType: null } }))} className="absolute right-3 top-3 rounded-full bg-white p-2 text-blue-700 shadow"><Trash2 size={16} /></button>
                     </div>
                   )}
                 </div>
               ) : (
-                <textarea value={answers[block.id]?.text ?? ''} onChange={event => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text: event.target.value } }))} placeholder="Desarrolla tu respuesta paso a paso..." className="h-56 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 outline-none focus:border-violet-400" />
+                <textarea value={answers[block.id]?.text ?? ''} onChange={event => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text: event.target.value } }))} placeholder="Desarrolla tu respuesta paso a paso..." className="h-56 w-full resize-y rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-4 text-sm leading-7 outline-none transition focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(96,165,250,0.14)]" />
               )}
             </div>
           </section>
@@ -193,13 +193,13 @@ export default function SimulacroActivoPage() {
 
       {(confirmOpen || timeUp) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-red-600" /> : <CheckCircle2 className="text-violet-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
+          <div className="w-full max-w-md rounded-[28px] border border-[#dbe7fb] bg-white p-6 shadow-2xl">
+            <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-blue-700" /> : <CheckCircle2 className="text-blue-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
             <p className="text-sm font-semibold text-slate-600">Has respondido {answeredCount} de {record.bloques.length} bloques. Quedan {record.bloques.length - answeredCount} vacíos.</p>
-            {submitting && <p className="mt-4 rounded-xl bg-violet-50 p-4 text-sm font-black text-violet-700">Pausia está corrigiendo tu simulacro...</p>}
+            {submitting && <p className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm font-black text-blue-700">Pausia está corrigiendo tu simulacro...</p>}
             <div className="mt-6 flex justify-end gap-3">
-              {!timeUp && <button onClick={() => setConfirmOpen(false)} className="rounded-xl border border-slate-200 px-4 py-2 font-black">Volver</button>}
-              <button onClick={submitExam} disabled={submitting} className="rounded-xl bg-violet-600 px-4 py-2 font-black text-white disabled:opacity-60">Ver corrección</button>
+              {!timeUp && <button onClick={() => setConfirmOpen(false)} className="rounded-2xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Volver</button>}
+              <button onClick={submitExam} disabled={submitting} className="rounded-2xl bg-blue-600 px-4 py-2 font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5 disabled:opacity-60">Ver corrección</button>
             </div>
           </div>
         </div>

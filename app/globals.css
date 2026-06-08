@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff8f1;
+  --background: #f8fbff;
   --foreground: #172033;
-  --warm-bg: #fff8f1;
-  --warm-surface: #fffdf9;
-  --warm-border: #f2e4d4;
-  --warm-muted: #7c6f64;
+  --warm-bg: #f8fbff;
+  --warm-surface: #ffffff;
+  --warm-border: #dbe7fb;
+  --warm-muted: #64748b;
   --warm-ink: #172033;
   --warm-blue: #2563eb;
-  --warm-amber: #f59e0b;
-  --warm-coral: #fb7185;
+  --warm-amber: #2563eb;
+  --warm-coral: #60a5fa;
 }
 
 @theme inline {

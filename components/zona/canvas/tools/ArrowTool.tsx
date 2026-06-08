@@ -10,9 +10,9 @@ interface ArrowToolProps {
 
 export function ArrowTool({ curved, arrowHead, connectorFrom, setCurved, setArrowHead }: ArrowToolProps) {
   return (
-    <div className="flex items-center gap-2 text-xs font-black text-[#7c6f64]">
-      <button type="button" onClick={() => setCurved(!curved)} className={`rounded-xl border px-3 py-2 ${curved ? 'border-[#7C3AED] bg-[#f5f3ff] text-[#7C3AED]' : 'border-[#f2e4d4] bg-white'}`}>Curva</button>
-      <select className="h-9 rounded-xl border border-[#f2e4d4] bg-white px-2" value={arrowHead} onChange={event => setArrowHead(event.target.value as 'arrow' | 'dot' | 'none')}>
+    <div className="flex items-center gap-2 text-xs font-black text-slate-500">
+      <button type="button" onClick={() => setCurved(!curved)} className={`rounded-xl border px-3 py-2 transition hover:border-blue-300 hover:bg-blue-50 ${curved ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-[#dbe7fb] bg-white'}`}>Curva</button>
+      <select className="h-9 rounded-xl border border-[#dbe7fb] bg-white px-2 outline-none focus:border-blue-300" value={arrowHead} onChange={event => setArrowHead(event.target.value as 'arrow' | 'dot' | 'none')}>
         <option value="arrow">Flecha</option>
         <option value="dot">Punto</option>
         <option value="none">Sin punta</option>

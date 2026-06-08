@@ -7,20 +7,20 @@ import { supabase } from '@/app/lib/supabase'
 import type { Flashcard, ZonaSubject } from './types'
 
 const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[] = [
-  { id: 'mates', label: 'Mates', color: '#1e40af', soft: '#eff6ff' },
-  { id: 'fisica', label: 'Física', color: '#6d28d9', soft: '#f5f3ff' },
-  { id: 'historia', label: 'Historia', color: '#166534', soft: '#f0fdf4' }
+  { id: 'mates', label: 'Mates', color: '#b4232a', soft: '#fff1f2' },
+  { id: 'fisica', label: 'Física', color: '#4338ca', soft: '#eef2ff' },
+  { id: 'historia', label: 'Historia', color: '#0f5ea8', soft: '#eff6ff' }
 ]
 
 const WARM = {
   ink: '#172033',
-  muted: '#7c6f64',
-  softText: '#a5917d',
-  surface: '#fffdf9',
-  field: '#fffaf5',
-  border: '#f2e4d4',
-  wash: '#fff7ed',
-  purple: '#7C3AED'
+  muted: '#64748b',
+  softText: '#94a3b8',
+  surface: '#ffffff',
+  field: '#f8fbff',
+  border: '#dbe7fb',
+  wash: '#eff6ff',
+  blue: '#2563eb'
 }
 
 interface FlashcardsProps {
@@ -119,7 +119,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   return (
     <div style={{ display: 'grid', gap: 18 }}>
       <section style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(280px, 0.75fr)', gap: 18 }}>
-        <div style={{ background: 'rgba(255,253,249,0.94)', border: '1px solid ' + WARM.border, borderRadius: 28, boxShadow: '0 24px 70px rgba(92,64,35,0.10)', overflow: 'hidden' }}>
+        <div style={{ background: 'rgba(255,255,255,0.94)', border: '1px solid ' + WARM.border, borderRadius: 28, boxShadow: '0 24px 70px rgba(37,99,235,0.10)', overflow: 'hidden' }}>
           <div style={{ padding: 22, borderBottom: '1px solid ' + WARM.border, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
             <div>
               <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Flashcards</div>
@@ -132,7 +132,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
 
           <div style={{ padding: 22 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-              <button onClick={() => { setSubject('all'); setTopic('all'); resetDeck() }} style={chipStyle(subject === 'all', WARM.purple)}>Todas</button>
+              <button onClick={() => { setSubject('all'); setTopic('all'); resetDeck() }} style={chipStyle(subject === 'all', WARM.blue)}>Todas</button>
               {SUBJECTS.map(item => (
                 <button key={item.id} onClick={() => { setSubject(item.id); setTopic('all'); resetDeck() }} style={chipStyle(subject === item.id, item.color)}>{item.label}</button>
               ))}
@@ -145,8 +145,8 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
               ))}
             </div>
 
-            <div style={{ height: 8, borderRadius: 999, background: '#f1e7dc', overflow: 'hidden', marginBottom: 16 }}>
-              <div style={{ width: progress + '%', height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #7C3AED, #22c55e)', transition: 'width .25s ease' }} />
+            <div style={{ height: 8, borderRadius: 999, background: '#eaf1ff', overflow: 'hidden', marginBottom: 16 }}>
+              <div style={{ width: progress + '%', height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #2563eb, #38bdf8)', transition: 'width .25s ease' }} />
             </div>
             <div style={{ color: WARM.muted, fontSize: 13, fontWeight: 750, marginBottom: 18 }}>{reviewed}/{filtered.length} tarjetas repasadas</div>
 
@@ -176,23 +176,23 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                 </div>
               </div>
             ) : (
-              <div style={{ minHeight: 280, borderRadius: 24, border: '1.5px dashed #d8c8b8', background: WARM.field, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
+              <div style={{ minHeight: 280, borderRadius: 24, border: '1.5px dashed #bcd7ff', background: WARM.field, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
                 <div>
-                  <Sparkles size={34} color={WARM.purple} />
-                  <h3 style={{ color: WARM.ink, margin: '12px 0 6px' }}>Tu zona está vacía... por ahora 🚀</h3>
+                  <Sparkles size={34} color={WARM.blue} />
+                  <h3 style={{ color: WARM.ink, margin: '12px 0 6px' }}>Tu zona está vacía... por ahora</h3>
                   <p style={{ color: WARM.muted, margin: 0, lineHeight: 1.6 }}>Crea tu primera tarjeta y empieza a repasarla aquí.</p>
                 </div>
               </div>
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
-              <button onClick={() => answerCard('dont')} disabled={!current} style={answerStyle('#dc2626', '#fef2f2')}>No me la sé</button>
-              <button onClick={() => answerCard('know')} disabled={!current} style={answerStyle('#16a34a', '#f0fdf4')}>Me la sé</button>
+              <button onClick={() => answerCard('dont')} disabled={!current} style={answerStyle('#475569', '#f8fafc')}>No me la sé</button>
+              <button onClick={() => answerCard('know')} disabled={!current} style={answerStyle(WARM.blue, '#eff6ff')}>Me la sé</button>
             </div>
           </div>
         </div>
 
-        <form onSubmit={createCard} style={{ background: 'rgba(255,253,249,0.94)', border: '1px solid ' + WARM.border, borderRadius: 28, boxShadow: '0 24px 70px rgba(92,64,35,0.08)', padding: 22, alignSelf: 'start' }}>
+        <form onSubmit={createCard} style={{ background: 'rgba(255,255,255,0.94)', border: '1px solid ' + WARM.border, borderRadius: 28, boxShadow: '0 24px 70px rgba(37,99,235,0.08)', padding: 22, alignSelf: 'start' }}>
           <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Crear tarjeta</div>
           <h3 style={{ color: WARM.ink, fontSize: 20, margin: '5px 0 16px' }}>Tu propio mazo</h3>
 
@@ -210,7 +210,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
           <label style={labelStyle}>Trasera</label>
           <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 108, resize: 'vertical' }} />
 
-          <button disabled={saving} style={{ width: '100%', marginTop: 12, border: 'none', borderRadius: 16, padding: '13px 16px', background: 'linear-gradient(135deg, #7C3AED, #a855f7)', color: '#fff', fontWeight: 850, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: saving ? 'wait' : 'pointer', boxShadow: '0 16px 34px rgba(124,58,237,.24)' }}>
+          <button disabled={saving} style={{ width: '100%', marginTop: 12, border: 'none', borderRadius: 16, padding: '13px 16px', background: 'linear-gradient(135deg, #1d4ed8, #2563eb, #38bdf8)', color: '#fff', fontWeight: 850, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: saving ? 'wait' : 'pointer', boxShadow: '0 16px 34px rgba(37,99,235,.24)', transition: 'transform .18s ease, box-shadow .18s ease' }}>
             <Plus size={17} />{saving ? 'Guardando...' : 'Crear flashcard'}
           </button>
         </form>
@@ -219,12 +219,12 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
       {filtered.length > 0 && (
         <section style={{ display: 'grid', gap: 10 }}>
           {filtered.map(card => (
-            <div key={card.id} style={{ background: WARM.surface, border: '1px solid ' + WARM.border, borderRadius: 18, padding: 14, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', boxShadow: '0 10px 26px rgba(92,64,35,0.05)' }}>
+            <div key={card.id} style={{ background: WARM.surface, border: '1px solid ' + WARM.border, borderRadius: 18, padding: 14, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', boxShadow: '0 10px 26px rgba(37,99,235,0.06)' }}>
               <div>
                 <div style={{ color: WARM.ink, fontWeight: 800 }}>{card.front}</div>
                 <div style={{ color: WARM.softText, fontSize: 12, marginTop: 4 }}>{subjectLabel(card.subject)} · {card.topic}</div>
               </div>
-              <button onClick={() => deleteCard(card)} aria-label="Eliminar flashcard" style={{ border: '1px solid #fee2e2', color: '#dc2626', background: '#fff7f7', borderRadius: 12, width: 36, height: 36, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 }}>
+              <button onClick={() => deleteCard(card)} aria-label="Eliminar flashcard" style={{ border: '1px solid #dbe7fb', color: '#2563eb', background: '#eff6ff', borderRadius: 12, width: 36, height: 36, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 }}>
                 <Trash2 size={15} />
               </button>
             </div>
@@ -236,7 +236,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
 }
 
 function CardFace({ subject, topic, label, text, back = false }: { subject: ZonaSubject; topic: string; label: string; text: string; back?: boolean }) {
-  const color = SUBJECTS.find(item => item.id === subject)?.color ?? WARM.purple
+  const color = SUBJECTS.find(item => item.id === subject)?.color ?? WARM.blue
 
   return (
     <div style={{
@@ -245,9 +245,9 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
       minHeight: 280,
       borderRadius: 26,
       padding: 26,
-      background: back ? 'linear-gradient(145deg, #fbf8ff, #f5f3ff)' : 'linear-gradient(145deg, #fffdf9, #fff7ed)',
-      border: '1px solid ' + (back ? '#ddd6fe' : WARM.border),
-      boxShadow: '0 24px 60px rgba(92,64,35,0.10)',
+      background: back ? 'linear-gradient(145deg, #f8fbff, #eef6ff)' : 'linear-gradient(145deg, #ffffff, #f8fbff)',
+      border: '1px solid ' + WARM.border,
+      boxShadow: '0 24px 60px rgba(37,99,235,0.10)',
       backfaceVisibility: 'hidden',
       transform: back ? 'rotateY(180deg)' : 'rotateY(0deg)',
       display: 'flex',
@@ -282,9 +282,9 @@ function chipStyle(active: boolean, color: string): CSSProperties {
 
 function topicStyle(active: boolean): CSSProperties {
   return {
-    border: active ? '1px solid #c4b5fd' : '1px solid ' + WARM.border,
-    background: active ? '#f5f3ff' : WARM.surface,
-    color: active ? WARM.purple : WARM.muted,
+    border: active ? '1px solid #bfdbfe' : '1px solid ' + WARM.border,
+    background: active ? '#eff6ff' : WARM.surface,
+    color: active ? WARM.blue : WARM.muted,
     borderRadius: 999,
     padding: '7px 12px',
     fontSize: 12,

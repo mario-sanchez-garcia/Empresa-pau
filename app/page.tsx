@@ -38,9 +38,9 @@ import 'katex/dist/katex.min.css'
 
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#b4232a', light: '#fff1f2', accent: '#fb7185', soft: '#ffe4e6' },
-  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#7c3aed', light: '#faf5ff', accent: '#c084fc', soft: '#f3e8ff' },
-  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#b45309', light: '#fff7ed', accent: '#f59e0b', soft: '#fed7aa' },
-  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#2f7d4e', light: '#f2fbf4', accent: '#74c69d', soft: '#dff7e6' }
+  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#4338ca', light: '#eef2ff', accent: '#818cf8', soft: '#e0e7ff' },
+  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#0369a1', light: '#f0f9ff', accent: '#38bdf8', soft: '#e0f2fe' },
+  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#0f5ea8', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' }
 }
 
 const WARM = {
@@ -49,12 +49,12 @@ const WARM = {
   softText: '#94a3b8',
   surface: '#ffffff',
   field: '#fafafa',
-  wash: '#fff1f2',
-  border: '#eadfe6',
-  amber: '#b4232a',
-  coral: '#fb7185',
-  blue: '#b4232a',
-  shadow: '0 24px 70px rgba(55, 39, 47, 0.09)'
+  wash: '#eff6ff',
+  border: '#dbe7fb',
+  amber: '#2563eb',
+  coral: '#60a5fa',
+  blue: '#2563eb',
+  shadow: '0 24px 70px rgba(37, 99, 235, 0.09)'
 }
 
 const SUBJECT_CARDS = {
@@ -99,7 +99,7 @@ const planMdComponents = {
     <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: WARM.ink, margin: '0 0 18px', lineHeight: 1.2 }}>{children}</h1>
   ),
   h2: ({children}: any) => (
-    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #fff1f2, #faf5ff)', border: '1px solid #eadfe6', color: WARM.blue, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 28px rgba(180,35,42,0.08)' }}>
+    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #eff6ff, #eef2ff)', border: '1px solid #dbe7fb', color: WARM.blue, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 28px rgba(37,99,235,0.08)' }}>
       <Target size={17} />{children}
     </h2>
   ),
@@ -113,12 +113,12 @@ const planMdComponents = {
   ul: ({children}: any) => <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ul>,
   ol: ({children}: any) => <ol style={{ paddingLeft: '1.2rem', margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ol>,
   li: ({children}: any) => (
-    <li style={{ background: WARM.surface, border: '1px solid #eadfe6', borderRadius: '14px', padding: '10px 12px', color: WARM.ink, lineHeight: 1.6, boxShadow: '0 8px 20px rgba(55, 39, 47, 0.045)' }}>
+    <li style={{ background: WARM.surface, border: '1px solid #dbe7fb', borderRadius: '14px', padding: '10px 12px', color: WARM.ink, lineHeight: 1.6, boxShadow: '0 8px 20px rgba(37, 99, 235, 0.045)' }}>
       {children}
     </li>
   ),
   blockquote: ({children}: any) => (
-    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: WARM.wash, border: '1px solid #ffe4e6', color: WARM.blue, fontWeight: 700 }}>
+    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: WARM.wash, border: '1px solid #dbeafe', color: WARM.blue, fontWeight: 700 }}>
       {children}
     </blockquote>
   ),
@@ -226,7 +226,7 @@ function hoverVars(color: string, light: string, accent = color) {
 }
 
 function colorNota(n: number) {
-  return n >= 7 ? '#16a34a' : n >= 5 ? '#d97706' : '#dc2626'
+  return n >= 7 ? '#0f5ea8' : n >= 5 ? '#2563eb' : '#1d4ed8'
 }
 
 function calcMedia(items: any[]) {
@@ -739,7 +739,7 @@ function cambiarTipo(t: Tipo) {
     <div style={{
   display: 'flex',
   minHeight: '100vh',
-  background: 'radial-gradient(circle at 16% 12%, rgba(255, 228, 230, 0.82), transparent 30%), radial-gradient(circle at 86% 8%, rgba(243, 232, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(220, 247, 230, 0.62), transparent 30%), linear-gradient(135deg, #fffafb 0%, #f8fafc 48%, #fff7f8 100%)',
+  background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.78), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.52), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)',
   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
 }}>
       <style>{`
@@ -753,33 +753,33 @@ function cambiarTipo(t: Tipo) {
 
         .campus-hover:hover {
           transform: translateY(-2px);
-          border-color: var(--hover-border, #fb7185) !important;
-          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #fff1f2)) !important;
-          color: var(--hover-color, #b4232a) !important;
-          box-shadow: 0 16px 34px var(--hover-shadow, rgba(251, 113, 133, 0.18)) !important;
+          border-color: var(--hover-border, #60a5fa) !important;
+          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #eff6ff)) !important;
+          color: var(--hover-color, #2563eb) !important;
+          box-shadow: 0 16px 34px var(--hover-shadow, rgba(96, 165, 250, 0.2)) !important;
         }
 
         .campus-primary:hover:not(:disabled) {
           transform: translateY(-2px);
           filter: saturate(1.08) brightness(1.03);
-          box-shadow: 0 20px 42px var(--hover-shadow, rgba(251, 113, 133, 0.22)) !important;
+          box-shadow: 0 20px 42px var(--hover-shadow, rgba(96, 165, 250, 0.24)) !important;
         }
 
         .campus-nav-item:hover {
-          background: var(--hover-bg, rgba(255, 241, 242, 0.78)) !important;
-          border-color: var(--hover-border, rgba(251, 113, 133, 0.5)) !important;
+          background: var(--hover-bg, rgba(239, 246, 255, 0.78)) !important;
+          border-color: var(--hover-border, rgba(96, 165, 250, 0.55)) !important;
           transform: translateX(2px);
         }
 
         .campus-subject-card:hover {
           transform: translateY(-6px);
-          border-color: var(--hover-border, rgba(251, 113, 133, 0.6)) !important;
-          box-shadow: 0 30px 80px var(--hover-shadow, rgba(251, 113, 133, 0.18)) !important;
+          border-color: var(--hover-border, rgba(96, 165, 250, 0.65)) !important;
+          box-shadow: 0 30px 80px var(--hover-shadow, rgba(96, 165, 250, 0.18)) !important;
         }
 
         .campus-subject-card:hover .campus-arrow {
           transform: rotate(8deg) scale(1.05);
-          background: var(--hover-color, #b4232a) !important;
+          background: var(--hover-color, #2563eb) !important;
           color: #ffffff !important;
         }
       `}</style>
@@ -793,21 +793,21 @@ function cambiarTipo(t: Tipo) {
   position: 'sticky',
   top: 0,
   flexShrink: 0,
-  borderRight: '1px solid rgba(234, 223, 230, 0.9)',
-  boxShadow: '18px 0 55px rgba(55, 39, 47, 0.055)'
+  borderRight: '1px solid rgba(219, 231, 251, 0.95)',
+  boxShadow: '18px 0 55px rgba(37, 99, 235, 0.055)'
 }}>
-        <div style={{ padding: '26px 22px 22px', borderBottom: '1px solid rgba(234,223,230,0.9)' }}>
+        <div style={{ padding: '26px 22px 22px', borderBottom: '1px solid rgba(219,231,251,0.95)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
            <div style={{
   width: '44px',
   height: '44px',
   borderRadius: '16px',
-  background: 'linear-gradient(145deg, #b4232a 0%, #7c3aed 58%, #2f7d4e 100%)',
+  background: 'linear-gradient(145deg, #1d4ed8 0%, #2563eb 48%, #38bdf8 100%)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   color: '#fff',
-  boxShadow: '0 16px 34px rgba(180, 35, 42, 0.22), inset 0 1px 0 rgba(255,255,255,0.35)'
+  boxShadow: '0 16px 34px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255,255,255,0.35)'
 }}><GraduationCap size={23} strokeWidth={2.2} /></div>
             <div>
               <div style={{ color: WARM.ink, fontWeight: 760, fontSize: '18px' }}>Pausia</div>
@@ -822,8 +822,8 @@ function cambiarTipo(t: Tipo) {
             const active = seccion === item.id
             return (
             <div key={item.id}>
-              <button className="campus-nav-item" onClick={() => setSeccion(item.id)} style={{ ...hoverVars(WARM.blue, '#fff1f2', '#fb7185'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: active ? '1px solid rgba(251,113,133,0.48)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #ffffff, #fff1f2)' : 'transparent', boxShadow: active ? '0 14px 32px rgba(180, 35, 42, 0.09)' : 'none' }}>
-                <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? WARM.blue : WARM.muted, background: active ? '#ffe4e6' : '#fafafa', border: active ? '1px solid #fecdd3' : '1px solid #eadfe6' }}><Icon size={17} /></span>
+              <button className="campus-nav-item" onClick={() => setSeccion(item.id)} style={{ ...hoverVars(WARM.blue, '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: active ? '1px solid rgba(96,165,250,0.58)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #ffffff, #eff6ff)' : 'transparent', boxShadow: active ? '0 14px 32px rgba(37, 99, 235, 0.09)' : 'none' }}>
+                <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? WARM.blue : WARM.muted, background: active ? '#dbeafe' : '#fafafa', border: active ? '1px solid #bfdbfe' : '1px solid #dbe7fb' }}><Icon size={17} /></span>
                 <div>
                   <div style={{ color: active ? WARM.ink : WARM.muted, fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
                   <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
@@ -831,15 +831,15 @@ function cambiarTipo(t: Tipo) {
               </button>
               {item.id === 'examenes' && (
                 <>
-                  <a className="campus-nav-item" href="/simulacros" style={{ ...hoverVars('#7c3aed', '#faf5ff', '#c084fc'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
-                    <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', background: '#faf5ff', border: '1px solid #f3e8ff' }}><TimerReset size={17} /></span>
+                  <a className="campus-nav-item" href="/simulacros" style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
+                    <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff', border: '1px solid #dbeafe' }}><TimerReset size={17} /></span>
                     <div>
                       <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>Simulacros</div>
                       <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Condiciones reales</div>
                     </div>
                   </a>
-                  <a className="campus-nav-item" href="/zona" style={{ ...hoverVars('#7c3aed', '#faf5ff', '#c084fc'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
-                    <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', background: '#faf5ff', border: '1px solid #f3e8ff' }}><BrainCircuit size={17} /></span>
+                  <a className="campus-nav-item" href="/zona" style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
+                    <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff', border: '1px solid #dbeafe' }}><BrainCircuit size={17} /></span>
                     <div>
                       <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>La Zona</div>
                       <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Estudia a tu manera</div>
@@ -849,8 +849,8 @@ function cambiarTipo(t: Tipo) {
               )}
             </div>
           )})}
-          <a className="campus-nav-item" href="/planning" style={{ ...hoverVars('#7c3aed', '#faf5ff', '#c084fc'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', textDecoration: 'none', marginBottom: '6px', background: 'transparent', border: '1px solid transparent' }}>
-            <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', background: '#faf5ff', border: '1px solid #f3e8ff' }}><Rocket size={17} /></span>
+          <a className="campus-nav-item" href="/planning" style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', textDecoration: 'none', marginBottom: '6px', background: 'transparent', border: '1px solid transparent' }}>
+            <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff', border: '1px solid #dbeafe' }}><Rocket size={17} /></span>
             <div>
               <div style={{ color: WARM.muted, fontSize: '14px', fontWeight: 520 }}>Planning</div>
               <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
@@ -867,15 +867,15 @@ function cambiarTipo(t: Tipo) {
             </button>
           )})}
         </nav>
-        <div style={{ padding: '16px', borderTop: '1px solid rgba(234,223,230,0.9)' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid rgba(219,231,251,0.95)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#fff1f2', border: '1px solid #ffe4e6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.blue, fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#eff6ff', border: '1px solid #dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.blue, fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
             <div style={{ overflow: 'hidden' }}>
               <div style={{ color: WARM.ink, fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{usuario?.email}</div>
               <div style={{ color: WARM.softText, fontSize: '11px' }}>Estudiante</div>
             </div>
           </div>
-          <button className="campus-hover" onClick={cerrarSesion} style={{ ...hoverVars('#b4232a', '#fff1f2', '#fb7185'), width: '100%', padding: '10px 12px', borderRadius: '16px', background: WARM.surface, border: '1px solid #eadfe6', color: '#dc2626', fontSize: '12px', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 22px rgba(55, 39, 47, 0.04)' }}><LogOut size={15} />Cerrar sesion</button>
+          <button className="campus-hover" onClick={cerrarSesion} style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', padding: '10px 12px', borderRadius: '16px', background: WARM.surface, border: '1px solid #dbe7fb', color: '#2563eb', fontSize: '12px', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 22px rgba(37, 99, 235, 0.04)' }}><LogOut size={15} />Cerrar sesion</button>
         </div>
       </aside>
 
@@ -883,7 +883,7 @@ function cambiarTipo(t: Tipo) {
        <header style={{
   background: 'rgba(255, 255, 255, 0.78)',
   backdropFilter: 'blur(22px)',
-  borderBottom: '1px solid rgba(234, 223, 230, 0.9)',
+  borderBottom: '1px solid rgba(219, 231, 251, 0.9)',
   padding: '0 34px',
   height: '78px',
   display: 'flex',
@@ -917,7 +917,7 @@ function cambiarTipo(t: Tipo) {
               {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
                 const Icon = val.icon
                 return (
-                <button className={asignatura === key ? 'campus-primary' : 'campus-hover'} key={key} onClick={() => cambiarAsignatura(key)} style={{ ...hoverVars(val.color, val.light, val.accent), padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #eadfe6', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.92)', color: asignatura === key ? '#fff' : WARM.muted, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(55,39,47,0.04)' }}><Icon size={15} />{val.short}</button>
+                <button className={asignatura === key ? 'campus-primary' : 'campus-hover'} key={key} onClick={() => cambiarAsignatura(key)} style={{ ...hoverVars(val.color, val.light, val.accent), padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #dbe7fb', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.92)', color: asignatura === key ? '#fff' : WARM.muted, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(37,99,235,0.04)' }}><Icon size={15} />{val.short}</button>
               )})}
             </div>
           )}
@@ -952,10 +952,10 @@ function cambiarTipo(t: Tipo) {
                   >
                     <div style={{ position: 'absolute', right: '-28px', bottom: '-34px', width: '116px', height: '116px', borderRadius: '50%', background: val.accent + '1f' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px' }}>
-                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', color: val.color, boxShadow: '0 12px 28px rgba(55,39,47,0.08)' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)' }}>
                         <Icon size={26} strokeWidth={2.1} />
                       </div>
-                      <div className="campus-arrow" style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#ffffff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(55,39,47,0.08)' }}>
+                      <div className="campus-arrow" style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#ffffff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' }}>
                         <ArrowUpRight size={19} />
                       </div>
                     </div>
@@ -971,7 +971,7 @@ function cambiarTipo(t: Tipo) {
            <div style={{
   background: 'rgba(255, 255, 255, 0.92)',
   borderRadius: '24px',
-  border: '1px solid rgba(234, 223, 230, 0.95)',
+  border: '1px solid rgba(219, 231, 251, 0.95)',
   padding: '24px',
   marginBottom: '22px',
   boxShadow: WARM.shadow,
@@ -980,7 +980,7 @@ function cambiarTipo(t: Tipo) {
               <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {(['Ordinaria', 'Extraordinaria', 'Modelo'] as Tipo[]).map(t => (
-                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #eadfe6' } as any}>
+                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                       {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
                       {t}
@@ -1009,7 +1009,7 @@ function cambiarTipo(t: Tipo) {
       fontWeight: 700,
       background: examenIdx === i ? cfg.color : WARM.field,
       color: examenIdx === i ? '#fff' : WARM.ink,
-      border: examenIdx === i ? 'none' : '1px solid #eadfe6'
+      border: examenIdx === i ? 'none' : '1px solid #dbe7fb'
     } as any}
   >
     {anio}
@@ -1038,7 +1038,7 @@ function cambiarTipo(t: Tipo) {
                         fontWeight: 700,
                         background: diaHistoriaIdx === i ? cfg.color : WARM.field,
                         color: diaHistoriaIdx === i ? '#fff' : WARM.muted,
-                        border: diaHistoriaIdx === i ? 'none' : '1px solid #eadfe6'
+                        border: diaHistoriaIdx === i ? 'none' : '1px solid #dbe7fb'
                       } as any}
                     >
                       {dia}
@@ -1048,15 +1048,15 @@ function cambiarTipo(t: Tipo) {
               )}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #eadfe6' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : bloquesHistoria).map((t, i) => (
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #eadfe6' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : (t as any).pts}pts</button>
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '13px', color: WARM.muted, fontWeight: 700 }}>Opcion:</span>
                 {opcionesDisponibles.map(op => (
-                  <button className={opcion === op ? 'campus-primary' : 'campus-hover'} key={op} onClick={() => { setOpcion(op); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #eadfe6' } as any}>{op === 0 ? 'A' : 'B'}</button>
+                  <button className={opcion === op ? 'campus-primary' : 'campus-hover'} key={op} onClick={() => { setOpcion(op); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #dbe7fb' } as any}>{op === 0 ? 'A' : 'B'}</button>
                 ))}
               </div>
             </div>
@@ -1136,13 +1136,13 @@ function cambiarTipo(t: Tipo) {
                 ))}
               </div>
               {modo === 'texto' ? (
-                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder={asignatura === 'historia' ? 'Escribe tu respuesta aqui...' : 'Escribe tu resolucion paso a paso...'} style={{ width: '100%', height: asignatura === 'historia' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #eadfe6', background: WARM.field, color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder={asignatura === 'historia' ? 'Escribe tu respuesta aqui...' : 'Escribe tu resolucion paso a paso...'} style={{ width: '100%', height: asignatura === 'historia' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #dbe7fb', background: WARM.field, color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               ) : (
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
                   {imagenPreview ? (
                     <div style={{ position: 'relative' }}>
-                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '16px', border: '1.5px solid #eadfe6' }} />
+                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '16px', border: '1.5px solid #dbe7fb' }} />
                       <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
                     </div>
                   ) : (
@@ -1178,38 +1178,38 @@ function cambiarTipo(t: Tipo) {
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {mensajes.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                  <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: 'linear-gradient(145deg, #b4232a, #7c3aed 52%, #2f7d4e)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 16px 34px rgba(180,35,42,0.2)' }}><MessageCircle size={28} /></div>
+                  <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 54%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 16px 34px rgba(37,99,235,0.22)' }}><MessageCircle size={28} /></div>
                   <div style={{ fontSize: '20px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Hola! Soy Pausia</div>
                   <div style={{ fontSize: '15px', color: WARM.muted, maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu compa de estudio para la EBAU de Madrid.</div>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
                     {['Como es el examen de mates?', 'Que temas caen en historia?', 'Explicame la Segunda Republica'].map(s => (
-                      <button className="campus-hover" key={s} onClick={() => setInputChat(s)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#fb7185'), padding: '8px 16px', borderRadius: '20px', background: WARM.wash, border: '1px solid #eadfe6', color: WARM.muted, fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}>{s}</button>
+                      <button className="campus-hover" key={s} onClick={() => setInputChat(s)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '8px 16px', borderRadius: '20px', background: WARM.wash, border: '1px solid #dbe7fb', color: WARM.muted, fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}>{s}</button>
                     ))}
                   </div>
                 </div>
               )}
               {mensajes.map((msg, i) => (
                 <div key={i} style={{ display: 'flex', gap: '12px', flexDirection: msg.rol === 'usuario' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0, background: msg.rol === 'usuario' ? '#b4232a' : 'linear-gradient(145deg, #b4232a, #7c3aed 58%, #2f7d4e)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0, background: msg.rol === 'usuario' ? '#2563eb' : 'linear-gradient(145deg, #1d4ed8, #2563eb 58%, #38bdf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
                     {msg.rol === 'usuario' ? usuario?.email?.[0]?.toUpperCase() : 'P'}
                   </div>
-                  <div style={{ maxWidth: '70%', padding: '12px 16px', borderRadius: '18px', background: msg.rol === 'usuario' ? '#b4232a' : WARM.surface, color: msg.rol === 'usuario' ? '#fff' : '#1f2937', border: msg.rol === 'pausia' ? '1px solid #eadfe6' : 'none', fontSize: '14px', lineHeight: '1.7', boxShadow: msg.rol === 'pausia' ? '0 10px 24px rgba(55,39,47,0.06)' : '0 10px 24px rgba(180,35,42,0.12)' }}>
+                  <div style={{ maxWidth: '70%', padding: '12px 16px', borderRadius: '18px', background: msg.rol === 'usuario' ? '#2563eb' : WARM.surface, color: msg.rol === 'usuario' ? '#fff' : '#1f2937', border: msg.rol === 'pausia' ? '1px solid #dbe7fb' : 'none', fontSize: '14px', lineHeight: '1.7', boxShadow: msg.rol === 'pausia' ? '0 10px 24px rgba(37,99,235,0.06)' : '0 10px 24px rgba(37,99,235,0.12)' }}>
                     {msg.rol === 'pausia' ? <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{msg.texto}</ReactMarkdown> : msg.texto}
                   </div>
                 </div>
               ))}
               {cargandoChat && (
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(145deg, #b4232a, #7c3aed 58%, #2f7d4e)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>P</div>
-                  <div style={{ padding: '12px 16px', borderRadius: '18px', background: WARM.surface, border: '1px solid #eadfe6', color: WARM.muted, fontSize: '14px' }}>Pausia esta escribiendo...</div>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 58%, #38bdf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>P</div>
+                  <div style={{ padding: '12px 16px', borderRadius: '18px', background: WARM.surface, border: '1px solid #dbe7fb', color: WARM.muted, fontSize: '14px' }}>Pausia esta escribiendo...</div>
                 </div>
               )}
               <div ref={chatEndRef} />
             </div>
-            <div style={{ padding: '16px 0 24px', borderTop: '1px solid #eadfe6' }}>
-              <div style={{ display: 'flex', gap: '10px', background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '8px 8px 8px 16px', alignItems: 'flex-end', boxShadow: '0 16px 38px rgba(55,39,47,0.08)' }}>
+            <div style={{ padding: '16px 0 24px', borderTop: '1px solid #dbe7fb' }}>
+              <div style={{ display: 'flex', gap: '10px', background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '8px 8px 8px 16px', alignItems: 'flex-end', boxShadow: '0 16px 38px rgba(37,99,235,0.08)' }}>
                 <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '14px', lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#1f2937', fontFamily: 'inherit', maxHeight: '120px' }} />
-                <button className="campus-primary" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat} style={{ ...hoverVars(WARM.blue, WARM.wash, '#fb7185'), padding: '10px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer', background: inputChat.trim() && !cargandoChat ? 'linear-gradient(135deg, #b4232a, #fb7185)' : '#eadfe6', color: inputChat.trim() && !cargandoChat ? '#fff' : WARM.softText, fontSize: '13px', fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7px' }}><SendHorizontal size={15} />Enviar</button>
+                <button className="campus-primary" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '10px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer', background: inputChat.trim() && !cargandoChat ? 'linear-gradient(135deg, #1d4ed8, #60a5fa)' : '#dbe7fb', color: inputChat.trim() && !cargandoChat ? '#fff' : WARM.softText, fontSize: '13px', fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7px' }}><SendHorizontal size={15} />Enviar</button>
               </div>
               <p style={{ textAlign: 'center', fontSize: '11px', color: WARM.softText, margin: '8px 0 0' }}>Enter para enviar · Shift+Enter para nueva linea</p>
             </div>
@@ -1222,37 +1222,37 @@ function cambiarTipo(t: Tipo) {
               <div style={{ textAlign: 'center', padding: '60px', color: WARM.muted }}>Cargando historial...</div>
             ) : historial.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px' }}>
-                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: WARM.wash, color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(180,35,42,0.14)', border: '1px solid #ffe4e6' }}><BarChart3 size={28} /></div>
+                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: WARM.wash, color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.14)', border: '1px solid #dbeafe' }}><BarChart3 size={28} /></div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Sin correcciones aun</div>
                 <div style={{ fontSize: '14px', color: WARM.muted }}>Haz tu primera correccion en Examenes</div>
               </div>
             ) : (
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(55,39,47,0.06)' }}>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
                     <div style={{ fontSize: '36px', fontWeight: 800, color: WARM.ink }}>{historial.length}</div>
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(55,39,47,0.06)' }}>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
                     {mediaM ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaM)) }}>{mediaM}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(55,39,47,0.06)' }}>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Física</div>
                     {mediaFisica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaFisica)) }}>{mediaFisica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(55,39,47,0.06)' }}>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Química</div>
                     {mediaQuimica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaQuimica)) }}>{mediaQuimica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(55,39,47,0.06)' }}>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
                     {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {historial.map((item, i) => (
-                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(item.asignatura === 'mates' ? ASIGNATURAS.mates.color : item.asignatura === 'fisica' ? ASIGNATURAS.fisica.color : item.asignatura === 'quimica' ? ASIGNATURAS.quimica.color : ASIGNATURAS.historia.color, item.asignatura === 'mates' ? ASIGNATURAS.mates.light : item.asignatura === 'fisica' ? ASIGNATURAS.fisica.light : item.asignatura === 'quimica' ? ASIGNATURAS.quimica.light : ASIGNATURAS.historia.light, item.asignatura === 'mates' ? ASIGNATURAS.mates.accent : item.asignatura === 'fisica' ? ASIGNATURAS.fisica.accent : item.asignatura === 'quimica' ? ASIGNATURAS.quimica.accent : ASIGNATURAS.historia.accent), background: WARM.surface, borderRadius: '18px', border: '1px solid #eadfe6', padding: '20px', cursor: 'pointer', boxShadow: '0 12px 30px rgba(55,39,47,0.06)' }}>
+                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(item.asignatura === 'mates' ? ASIGNATURAS.mates.color : item.asignatura === 'fisica' ? ASIGNATURAS.fisica.color : item.asignatura === 'quimica' ? ASIGNATURAS.quimica.color : ASIGNATURAS.historia.color, item.asignatura === 'mates' ? ASIGNATURAS.mates.light : item.asignatura === 'fisica' ? ASIGNATURAS.fisica.light : item.asignatura === 'quimica' ? ASIGNATURAS.quimica.light : ASIGNATURAS.historia.light, item.asignatura === 'mates' ? ASIGNATURAS.mates.accent : item.asignatura === 'fisica' ? ASIGNATURAS.fisica.accent : item.asignatura === 'quimica' ? ASIGNATURAS.quimica.accent : ASIGNATURAS.historia.accent), background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', cursor: 'pointer', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                         <div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -1281,22 +1281,22 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'planning' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
-            <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #eadfe6', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #b4232a, #7c3aed 52%, #2f7d4e)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(180,35,42,0.22), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
+            <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>
               <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos debiles</div>
-              <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#fb7185'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #b4232a, #fb7185)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(180,35,42,0.2)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
+              <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.22)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
                 <BrainCircuit size={17} />
                 {cargandoPlan ? 'Generando tu plan...' : planIA ? 'Regenerar plan' : 'Generar mi plan semanal'}
               </button>
             </div>
             {planIA && (
-              <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #eadfe6', overflow: 'hidden', boxShadow: WARM.shadow }}>
-                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #b4232a, #fb7185)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', overflow: 'hidden', boxShadow: WARM.shadow }}>
+                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><BrainCircuit size={17} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · PAUSIA</span>
                 </div>
-                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #fff1f2)' }}>
+                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #eff6ff)' }}>
                   <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={planMdComponents}>{planIA}</ReactMarkdown>
                 </div>
               </div>
@@ -1306,8 +1306,8 @@ function cambiarTipo(t: Tipo) {
 
         {itemSeleccionado && (
           <div onClick={() => setItemSeleccionado(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: WARM.surface, borderRadius: '22px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto', border: '1px solid #eadfe6', boxShadow: '0 28px 80px rgba(55,39,47,0.22)' }}>
-              <div style={{ padding: '20px 24px', borderBottom: '1px solid #eadfe6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.94)', backdropFilter: 'blur(18px)' }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: WARM.surface, borderRadius: '22px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto', border: '1px solid #dbe7fb', boxShadow: '0 28px 80px rgba(37,99,235,0.18)' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid #dbe7fb', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.94)', backdropFilter: 'blur(18px)' }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '16px', color: WARM.ink }}>{nombreAsignatura(itemSeleccionado.asignatura)} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
                   <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
@@ -1319,13 +1319,13 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ fontSize: '13px', color: WARM.softText }}>/{itemSeleccionado.nota_maxima}</span>
                     </div>
                   )}
-                  <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#fb7185'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #b4232a, #fb7185)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Pausia</button>
-                  <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#fb7185'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #eadfe6', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
+                  <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Pausia</button>
+                  <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #dbe7fb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
                 </div>
               </div>
               <div style={{ padding: '24px' }}>
                 {itemSeleccionado.enunciado && (
-                  <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '16px', background: WARM.field, border: '1px solid #eadfe6' }}>
+                  <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '16px', background: WARM.field, border: '1px solid #dbe7fb' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
                     <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{formatEnunciado(itemSeleccionado.enunciado)}</ReactMarkdown>
                   </div>

@@ -5,10 +5,10 @@ import { examenesQuimica } from '@/app/data/quimica'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 export const SUBJECTS = {
-  mates: { label: 'Matemáticas II', short: 'Mates', color: '#1e3a5f', light: '#eff6ff', icon: Sigma },
-  fisica: { label: 'Física', short: 'Física', color: '#7c3aed', light: '#f5f3ff', icon: Atom },
-  quimica: { label: 'Química', short: 'Química', color: '#065f46', light: '#ecfdf5', icon: FlaskConical },
-  historia: { label: 'Historia de España', short: 'Historia', color: '#1a4731', light: '#f0fdf4', icon: Landmark }
+  mates: { label: 'Matemáticas II', short: 'Mates', color: '#b4232a', light: '#fff1f2', icon: Sigma },
+  fisica: { label: 'Física', short: 'Física', color: '#4338ca', light: '#eef2ff', icon: Atom },
+  quimica: { label: 'Química', short: 'Química', color: '#0369a1', light: '#f0f9ff', icon: FlaskConical },
+  historia: { label: 'Historia de España', short: 'Historia', color: '#0f5ea8', light: '#eff6ff', icon: Landmark }
 } as const
 
 export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [

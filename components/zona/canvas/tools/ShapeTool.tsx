@@ -11,12 +11,12 @@ interface ShapeToolProps {
 
 export function ShapeTool({ fill, border, setFill, setBorder }: ShapeToolProps) {
   return (
-    <div className="flex items-center gap-2 text-xs font-black text-[#7c6f64]">
+    <div className="flex items-center gap-2 text-xs font-black text-slate-500">
       <span>Fill</span>
       <input className="h-8 w-10 rounded-lg" type="color" value={fill === 'transparent' ? '#ffffff' : fill} onChange={event => setFill(event.target.value)} />
       <span>Borde</span>
       <input className="h-8 w-10 rounded-lg" type="color" value={border} onChange={event => setBorder(event.target.value)} />
-      <button type="button" onClick={() => setFill('transparent')} className="rounded-xl border border-[#f2e4d4] bg-white px-3 py-2">Transparente</button>
+      <button type="button" onClick={() => setFill('transparent')} className="rounded-xl border border-[#dbe7fb] bg-white px-3 py-2 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Transparente</button>
     </div>
   )
 }
@@ -38,7 +38,7 @@ export function createShape(point: Point, tool: CanvasTool, fill: string, border
 
 export function renderShape(element: CanvasElement) {
   const fill = element.fill ?? 'transparent'
-  const stroke = element.border ?? '#7C3AED'
+  const stroke = element.border ?? '#2563eb'
   const sw = element.strokeWidth ?? 3
   if (element.shape === 'circle') return <svg className="h-full w-full"><ellipse cx="50%" cy="50%" rx="48%" ry="46%" fill={fill} stroke={stroke} strokeWidth={sw} /></svg>
   if (element.shape === 'triangle') return <svg className="h-full w-full"><polygon points={`${element.width / 2},4 ${element.width - 4},${element.height - 4} 4,${element.height - 4}`} fill={fill} stroke={stroke} strokeWidth={sw} /></svg>

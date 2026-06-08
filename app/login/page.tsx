@@ -4,14 +4,14 @@ import { supabase } from '../lib/supabase'
 import { ArrowRight, GraduationCap, LockKeyhole, Mail, Sparkles } from 'lucide-react'
 
 const config = {
-  bg: '#b4232a',
-  light: '#fff1f2',
-  accent: '#fb7185',
-  violet: '#7c3aed',
-  green: '#2f7d4e',
+  bg: '#2563eb',
+  light: '#eff6ff',
+  accent: '#60a5fa',
+  deep: '#1d4ed8',
+  sky: '#38bdf8',
   ink: '#111827',
   muted: '#64748b',
-  border: '#eadfe6'
+  border: '#dbe7fb'
 }
 
 export default function Login() {
@@ -39,7 +39,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(255, 228, 230, 0.82), transparent 30%), radial-gradient(circle at 86% 8%, rgba(243, 232, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(220, 247, 230, 0.62), transparent 30%), linear-gradient(135deg, #fffafb 0%, #f8fafc 48%, #fff7f8 100%)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)' }}>
       <style>{`
         .campus-hover,
         .campus-primary {
@@ -48,16 +48,16 @@ export default function Login() {
 
         .campus-hover:hover {
           transform: translateY(-2px);
-          border-color: #fb7185 !important;
-          background: linear-gradient(135deg, #ffffff, #fff1f2) !important;
-          color: #b4232a !important;
-          box-shadow: 0 16px 34px rgba(251, 113, 133, 0.18) !important;
+          border-color: #60a5fa !important;
+          background: linear-gradient(135deg, #ffffff, #eff6ff) !important;
+          color: #2563eb !important;
+          box-shadow: 0 16px 34px rgba(96, 165, 250, 0.2) !important;
         }
 
         .campus-primary:hover:not(:disabled) {
           transform: translateY(-2px);
           filter: saturate(1.08) brightness(1.03);
-          box-shadow: 0 20px 42px rgba(180, 35, 42, 0.2) !important;
+          box-shadow: 0 20px 42px rgba(37, 99, 235, 0.22) !important;
         }
 
         .campus-field {
@@ -65,14 +65,14 @@ export default function Login() {
         }
 
         .campus-field:focus-within {
-          border-color: #fb7185 !important;
+          border-color: #60a5fa !important;
           background: #ffffff !important;
-          box-shadow: 0 14px 34px rgba(251, 113, 133, 0.13);
+          box-shadow: 0 14px 34px rgba(96, 165, 250, 0.15);
         }
       `}</style>
-      <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(234, 223, 230, 0.9)' }}>
+      <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(219, 231, 251, 0.95)' }}>
         <div className="max-w-4xl mx-auto flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #b4232a 0%, #7c3aed 58%, #2f7d4e 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(180, 35, 42, 0.22)' }}><GraduationCap size={23} /></div>
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #1d4ed8 0%, #2563eb 54%, #38bdf8 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(37, 99, 235, 0.24)' }}><GraduationCap size={23} /></div>
           <div>
             <div className="font-bold text-xl leading-none" style={{ color: config.ink }}>Pausia</div>
             <div className="text-xs mt-1" style={{ color: config.muted }}>EBAU Madrid · estudio con ritmo</div>
@@ -81,8 +81,8 @@ export default function Login() {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="rounded-3xl p-8 w-full max-w-md" style={{ background: 'rgba(255, 255, 255, 0.9)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: '0 28px 76px rgba(55, 39, 47, 0.1)', backdropFilter: 'blur(18px)' }}>
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style={{ background: '#fff1f2', color: config.bg, border: '1px solid #ffe4e6' }}><Sparkles size={23} /></div>
+        <div className="rounded-3xl p-8 w-full max-w-md" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 28px 76px rgba(37, 99, 235, 0.1)', backdropFilter: 'blur(18px)' }}>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style={{ background: '#eff6ff', color: config.bg, border: '1px solid #dbeafe' }}><Sparkles size={23} /></div>
           <h1 className="text-2xl font-bold mb-1" style={{ color: config.ink }}>
             {modo === 'login' ? 'Bienvenido de vuelta' : 'Crear cuenta'}
           </h1>
@@ -91,8 +91,8 @@ export default function Login() {
           </p>
 
           <div className="flex flex-col gap-3 mb-4">
-            <div className="campus-field flex items-center gap-3 rounded-2xl px-4 py-3" style={{ border: '1.5px solid #eadfe6', background: '#fafafa' }}>
-              <Mail size={17} color="#b4232a" />
+            <div className="campus-field flex items-center gap-3 rounded-2xl px-4 py-3" style={{ border: '1.5px solid #dbe7fb', background: '#fafafa' }}>
+              <Mail size={17} color="#2563eb" />
               <input
                 type="email"
                 placeholder="tu@email.com"
@@ -102,8 +102,8 @@ export default function Login() {
                 style={{ background: 'transparent', color: config.ink }}
               />
             </div>
-            <div className="campus-field flex items-center gap-3 rounded-2xl px-4 py-3" style={{ border: '1.5px solid #eadfe6', background: '#fafafa' }}>
-              <LockKeyhole size={17} color="#7c3aed" />
+            <div className="campus-field flex items-center gap-3 rounded-2xl px-4 py-3" style={{ border: '1.5px solid #dbe7fb', background: '#fafafa' }}>
+              <LockKeyhole size={17} color="#1d4ed8" />
               <input
                 type="password"
                 placeholder="Contraseña"
@@ -116,14 +116,14 @@ export default function Login() {
           </div>
 
           {mensaje && (
-            <p className="text-sm mb-4 px-3 py-2 rounded-xl" style={{ background: config.light, color: config.bg, border: '1px solid #ffe4e6' }}>
+            <p className="text-sm mb-4 px-3 py-2 rounded-xl" style={{ background: config.light, color: config.bg, border: '1px solid #dbeafe' }}>
               {mensaje}
             </p>
           )}
 
           <button onClick={handleSubmit} disabled={cargando}
             className="campus-primary w-full rounded-2xl py-3 font-bold text-white disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #b4232a, #fb7185)', boxShadow: '0 18px 38px rgba(180, 35, 42, 0.18)' }}>
+            style={{ background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', boxShadow: '0 18px 38px rgba(37, 99, 235, 0.2)' }}>
             {cargando ? 'Cargando...' : modo === 'login' ? 'Entrar' : 'Crear cuenta'} <ArrowRight size={17} />
           </button>
 

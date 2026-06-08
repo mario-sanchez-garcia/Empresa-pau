@@ -43,14 +43,14 @@ export function ConnectorElement({ connector, elements, selected, onSelect, upda
 
   return (
     <g onPointerDown={event => { event.stopPropagation(); onSelect() }} className="cursor-pointer">
-      <path d={line.d} fill="none" stroke={selected ? '#7C3AED' : '#2563eb'} strokeWidth={selected ? 4 : 3} strokeDasharray={selected ? '8 6' : undefined} markerEnd={connector.arrowHead === 'arrow' ? 'url(#zona-arrowhead)' : undefined} />
+      <path d={line.d} fill="none" stroke={selected ? '#1d4ed8' : '#2563eb'} strokeWidth={selected ? 4 : 3} strokeDasharray={selected ? '8 6' : undefined} markerEnd={connector.arrowHead === 'arrow' ? 'url(#zona-arrowhead)' : undefined} />
       {connector.arrowHead === 'dot' && <circle cx={line.b.x} cy={line.b.y} r={7} fill="#2563eb" />}
       <foreignObject x={(line.a.x + line.b.x) / 2 - 72} y={(line.a.y + line.b.y) / 2 - 18} width={144} height={42}>
         <div
           contentEditable
           suppressContentEditableWarning
           onBlur={event => updateElement(connector.id, { label: event.currentTarget.innerText }, true)}
-          className="rounded-full border border-[#f2e4d4] bg-white/90 px-3 py-1 text-center text-xs font-black text-[#172033] outline-none"
+          className="rounded-full border border-[#dbe7fb] bg-white/90 px-3 py-1 text-center text-xs font-black text-[#172033] outline-none"
         >
           {connector.label ?? ''}
         </div>
@@ -73,7 +73,7 @@ function renderElementContent(element: CanvasItem, updateElement: CanvasElementV
   if (element.type === 'mind') {
     const radius = element.nodeStyle === 'pill' ? 'rounded-full' : element.nodeStyle === 'square' ? 'rounded' : 'rounded-2xl'
     return (
-      <div contentEditable suppressContentEditableWarning onBlur={event => updateElement(element.id, { text: event.currentTarget.innerText }, true)} className={`flex h-full w-full items-center justify-center border-2 border-[#7C3AED] bg-white px-3 text-center font-black text-[#172033] shadow-lg outline-none ${radius}`}>
+      <div contentEditable suppressContentEditableWarning onBlur={event => updateElement(element.id, { text: event.currentTarget.innerText }, true)} className={`flex h-full w-full items-center justify-center border-2 border-[#2563eb] bg-white px-3 text-center font-black text-[#172033] shadow-lg outline-none ${radius}`}>
         {element.text}
       </div>
     )

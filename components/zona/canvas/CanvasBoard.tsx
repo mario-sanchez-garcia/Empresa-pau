@@ -14,7 +14,7 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
   const canvas = useCanvas(userId, initialCanvases)
 
   return (
-    <div className="relative flex h-[calc(100vh-78px)] min-h-[680px] overflow-hidden rounded-3xl border border-[#f2e4d4] bg-[#fffdf9] shadow-2xl max-md:block">
+    <div className="relative flex h-[calc(100vh-78px)] min-h-[680px] overflow-hidden rounded-3xl border border-[#dbe7fb] bg-white shadow-[0_24px_70px_rgba(37,99,235,0.12)] max-md:block">
       <CanvasToolbar {...canvas} />
 
       <input ref={canvas.fileRef} type="file" accept="image/*" onChange={canvas.handleFileInput} className="hidden" />
@@ -70,11 +70,11 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
           )}
         </div>
 
-        <div className="absolute bottom-4 right-4 z-30 overflow-hidden rounded-2xl border border-[#f2e4d4] bg-white/95 shadow-xl" style={{ width: canvas.minimap.width, height: canvas.minimap.height }}>
+        <div className="absolute bottom-4 right-4 z-30 overflow-hidden rounded-2xl border border-[#dbe7fb] bg-white/95 shadow-[0_18px_45px_rgba(37,99,235,0.12)]" style={{ width: canvas.minimap.width, height: canvas.minimap.height }}>
           {canvas.elements.filter(element => element.type !== 'connector').map(element => (
             <span
               key={element.id}
-              className="absolute rounded bg-[#7C3AED]/30"
+              className="absolute rounded bg-[#2563eb]/25"
               style={{
                 left: (element.x - canvas.minimap.bounds.x) * canvas.minimap.scale,
                 top: (element.y - canvas.minimap.bounds.y) * canvas.minimap.scale,

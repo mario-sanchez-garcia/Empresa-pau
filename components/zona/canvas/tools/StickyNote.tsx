@@ -18,7 +18,7 @@ export function StickyNoteTool({ color, setColor }: StickyNoteProps) {
           type="button"
           aria-label={item}
           onClick={() => setColor(item)}
-          className={`h-8 w-8 rounded-xl border-2 ${color === item ? 'border-[#7C3AED]' : 'border-white'}`}
+          className={`h-8 w-8 rounded-xl border-2 transition hover:-translate-y-0.5 ${color === item ? 'border-[#2563eb]' : 'border-white'}`}
           style={{ background: item }}
         />
       ))}

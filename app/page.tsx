@@ -5,6 +5,7 @@ import { examenesFisica } from './data/fisica'
 import { examenesQuimica } from './data/quimica'
 import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from './lib/correctionPrompt'
+import { formatExamText } from './lib/mathFormatting'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -207,21 +208,7 @@ function normalizeSoftLineBreaks(text: string) {
 }
 
 function formatEnunciado(enunciado?: string | null) {
-  if (!enunciado) return ''
-
-  const texto = formatScientificNotation(normalizeSoftLineBreaks(
-    formatBrokenMathBlocks(normalizePdfGlyphs(enunciado))
-    .replace(/\uf8eb\s*(?:\uf8ec\s*)*\uf8ed\s*([\s\S]*?)\s*\uf8f6\s*(?:\uf8f7\s*)*\uf8f8/g, (_, rows) => formatMatrixRows(rows))
-    .replace(/\uf8f1\s*(?:\uf8f4\s*)*\uf8f2\s*(?:\uf8f4\s*)*\uf8f3/g, '{')
-    .replace(/\uf8fc\s*(?:\uf8f4\s*)*\uf8fd\s*(?:\uf8f4\s*)*\uf8fe/g, '}')
-    .replace(/\u001a/g, '{')
-    .replace(/−\s*→\s*v/g, '$\\vec v$')
-    .replace(/−\s*→\s*0/g, '$\\vec 0$')
-    .replace(/\bdet \(([^)]+)\)/g, '$\\det($1)$')
-  ))
-
-  return texto
-    .replace(/\n(?!\n)/g, '  \n')
+  return formatExamText(enunciado)
 }
 
 type Asignatura = 'mates' | 'fisica' | 'quimica' | 'historia'

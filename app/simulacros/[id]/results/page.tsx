@@ -3,13 +3,11 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { CheckCircle2, Clock, Copy, Lightbulb, MessageCircle, RotateCcw, Target, TriangleAlert } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroRecord } from '@/components/simulacros/types'
+import MathMarkdown from '@/components/shared/MathMarkdown'
 import 'katex/dist/katex.min.css'
 
 type Tab = 'resumen' | 'detalle' | 'plan' | 'bloques'
@@ -160,7 +158,7 @@ function ResultCard({ icon, title, text, tone = 'blue' }: { icon: ReactNode; tit
 }
 
 function Markdown({ text }: { text?: string }) {
-  return <div className="prose prose-slate max-w-none"><ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{text ?? ''}</ReactMarkdown></div>
+  return <MathMarkdown text={text} className="prose prose-slate" />
 }
 
 function gradeColor(n: number) {

@@ -3,13 +3,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AlertTriangle, Camera, CheckCircle2, Clock, Send, Trash2 } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
+import MathMarkdown from '@/components/shared/MathMarkdown'
 import 'katex/dist/katex.min.css'
 
 const TOTAL_SECONDS = 90 * 60
@@ -161,8 +159,8 @@ export default function SimulacroActivoPage() {
                 </div>
               </div>
               <div className="prose prose-slate max-w-none rounded-xl bg-slate-50 p-5">
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{block.enunciado}</ReactMarkdown>
-                {block.textoFuente && <blockquote className="mt-4 border-l-4 border-slate-300 pl-4 text-slate-600">{block.textoFuente}</blockquote>}
+                <MathMarkdown text={block.enunciado} />
+                {block.textoFuente && <MathMarkdown text={block.textoFuente} className="mt-4 rounded-xl border-l-4 border-slate-300 bg-white/70 p-4 text-slate-600" />}
               </div>
             </div>
 

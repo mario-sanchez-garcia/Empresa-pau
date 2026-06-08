@@ -4,6 +4,7 @@ import { examenes, examenesHistoria } from './data/examenes'
 import { examenesFisica } from './data/fisica'
 import { examenesQuimica } from './data/quimica'
 import { supabase } from './lib/supabase'
+import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from './lib/correctionPrompt'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -580,43 +581,53 @@ function cambiarTipo(t: Tipo) {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
     setCargando(true); setCorreccion('')
-    let prompt = ''
-    if (asignatura === 'historia' && preguntaActiva) {
-      const p = preguntaActiva as any
-      const tipoMap: Record<string, string> = { tema: 'desarrollo de tema', comentario: 'comentario de texto', definicion: 'definicion de conceptos', corta: 'respuesta corta' }
-      prompt = 'Eres corrector oficial EBAU Madrid Historia de Espana.\n' +
-        'TIPO: ' + (tipoMap[p.tipo] || p.tipo) + '\n' +
-        'ENUNCIADO: ' + formatEnunciado(p.enunciado) + '\n' +
-        (p.texto_fuente ? 'FUENTE: ' + p.texto_fuente + '\n' : '') +
-        (p.conceptos ? 'CONCEPTOS: ' + p.conceptos.join(', ') + '\n' : '') +
-        'PUNTUACION MAX: ' + p.puntuacion + '\n' +
-        'CRITERIOS: ' + p.criterios + '\n' +
-        (modo === 'imagen' ? 'Imagen adjunta con respuesta manuscrita.' : 'RESPUESTA: ' + respuesta) + '\n' +
-        'Corrige con: ## Nota (X/' + p.puntuacion + '), ## Que esta bien, ## Que falta, ## Respuesta modelo'
-    } else {
-      prompt = 'Eres corrector oficial EBAU Madrid ' + (asignatura === 'fisica' ? 'Fisica' : asignatura === 'quimica' ? 'Quimica' : 'Matematicas') + '.\n' +
-        'PREGUNTA: ' + enunciadoActivo + '\n' +
-        'PUNTUACION MAX: ' + preguntaActiva?.puntuacion + '\n' +
-        'CRITERIOS: ' + (preguntaActiva as any)?.criterios + '\n' +
-        (modo === 'imagen' ? 'Imagen adjunta con respuesta manuscrita.' : 'RESPUESTA: ' + respuesta) + '\n' +
-        'Corrige con: ## Nota, ## Que esta bien, ## Que falta, ## Respuesta completa'
-    }
+    const p = preguntaActiva as any
+    const puntuacionMax = Number(p?.puntuacion ?? p?.puntos ?? 10)
+    const prompt = buildCorrectionPrompt({
+      subject: nombreAsignatura(asignatura),
+      simulacroId: `Práctica ${nombreAsignatura(asignatura)} ${examen?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
+      option: opcionMostrada,
+      elapsedMinutes: 0,
+      difficulty: 'Media',
+      blocks: [{
+        numeroBloque: 'Bloque 1',
+        tema: bloqueActivoLabel || p?.bloque || p?.tipo || 'Pregunta',
+        year: p?.año ?? examen?.año ?? 'No especificado',
+        convocatoria: p?.convocatoria ?? examen?.tipo ?? tipo,
+        option: p?.opcion ?? opcionMostrada,
+        maxScore: puntuacionMax,
+        officialPrompt: enunciadoActivo,
+        criteria: p?.criterios,
+        sourceText: p?.texto_fuente,
+        concepts: p?.conceptos,
+        studentAnswer: modo === 'imagen'
+          ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+          : respuesta
+      }]
+    })
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
     })
     const data = await res.json()
-    setCorreccion(data.respuesta)
-    const partes = data.respuesta.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/)
-    const nota = partes ? parseFloat(partes[1].replace(',', '.')) : null
-    const notaMax = partes ? parseFloat(partes[2].replace(',', '.')) : null
+    const correccionJson = parseCorrectionJson(data.respuesta || '')
+    const correccionVisible = correccionJson ? correctionJsonToMarkdown(correccionJson) : data.respuesta
+    setCorreccion(correccionVisible)
+    const bloqueJson = correccionJson?.desglose_bloques?.[0]
+    const partes = !correccionJson ? data.respuesta.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
+    const nota = bloqueJson?.puntos_conseguidos != null
+      ? Number(bloqueJson.puntos_conseguidos)
+      : partes ? parseFloat(partes[1].replace(',', '.')) : null
+    const notaMax = bloqueJson?.puntos_maximos != null
+      ? Number(bloqueJson.puntos_maximos)
+      : partes ? parseFloat(partes[2].replace(',', '.')) : null
     supabase.from('historial_examenes').insert({
       user_id: usuario.id, asignatura, tipo, año: examen?.año,
       bloque: bloqueActivoLabel || '',
       opcion: opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
       enunciado: enunciadoActivo?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
-      correccion: data.respuesta?.substring(0, 2000)
+      correccion: correccionVisible?.substring(0, 2000)
     }).then(() => {})
     setCargando(false)
   }

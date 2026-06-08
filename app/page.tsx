@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { examenes, examenesHistoria } from './data/examenes'
 import { examenesFisica } from './data/fisica'
+import { examenesQuimica } from './data/quimica'
 import { supabase } from './lib/supabase'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
@@ -15,6 +16,7 @@ import {
   ClipboardList,
   FileText,
   Flame,
+  FlaskConical,
   GraduationCap,
   Landmark,
   LibraryBig,
@@ -34,6 +36,7 @@ import 'katex/dist/katex.min.css'
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#1e40af', light: '#eff6ff', accent: '#3b82f6', soft: '#dbeafe' },
   fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#6d28d9', light: '#f5f3ff', accent: '#06b6d4', soft: '#ddd6fe' },
+  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#0f766e', light: '#f0fdfa', accent: '#14b8a6', soft: '#ccfbf1' },
   historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#166534', light: '#f0fdf4', accent: '#22c55e', soft: '#dcfce7' }
 }
 
@@ -63,6 +66,12 @@ const SUBJECT_CARDS = {
     subtitle: 'Ondas, campo, óptica y moderna',
     icon: Atom,
     kicker: 'Modo laboratorio'
+  },
+  quimica: {
+    title: 'Química',
+    subtitle: 'Problemas oficiales, formulación y equilibrio',
+    icon: FlaskConical,
+    kicker: 'Modo reacción'
   },
   historia: {
     title: 'Historia',
@@ -148,7 +157,7 @@ function formatEnunciado(enunciado?: string | null) {
     .replace(/\n(?!\n)/g, '  \n')
 }
 
-type Asignatura = 'mates' | 'fisica' | 'historia'
+type Asignatura = 'mates' | 'fisica' | 'quimica' | 'historia'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
@@ -242,7 +251,9 @@ const examenesFiltrados =
       ? examenes.filter(e => e.tipo === tipo)
       : asignatura === 'fisica'
         ? examenesFisica.filter(e => e.tipo === tipo)
-        : examenesHistoria.filter(e => e.tipo === tipo)
+        : asignatura === 'quimica'
+          ? examenesQuimica.filter(e => e.tipo === tipo)
+          : examenesHistoria.filter(e => e.tipo === tipo)
 
 const aniosDisponibles = Array.from(
   new Set(examenesFiltrados.map(e => e.año))
@@ -304,6 +315,32 @@ const preguntaFisica = asignatura === 'fisica'
     (examen as any)?.preguntas?.[0]
   : null
 
+const preguntasQuimica = asignatura === 'quimica'
+  ? (examen as any)?.preguntas ?? []
+  : []
+
+const bloquesQuimica = Array.from(
+  new Map(
+    preguntasQuimica.map((p: any) => [
+      p.bloque,
+      { tipo: p.bloque, label: p.label ?? p.numero ?? p.bloque, pts: p.puntuacion }
+    ])
+  ).values()
+) as { tipo: string; label: string; pts: number }[]
+
+const tipoQuimicaActivo = bloquesQuimica[bloqueIdx]?.tipo
+
+const preguntaQuimica = asignatura === 'quimica'
+  ? preguntasQuimica.find(
+      (p: any) =>
+        p.opcion === (opcion === 0 ? 'A' : 'B') &&
+        p.bloque === tipoQuimicaActivo
+    ) ??
+    preguntasQuimica.find((p: any) => p.bloque === tipoQuimicaActivo) ??
+    preguntasQuimica.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
+    preguntasQuimica[0]
+  : null
+
 const OPCIONES = [0, 1] as const
 
 const opcionesMatesDisponibles = asignatura === 'mates'
@@ -322,6 +359,14 @@ const opcionesFisicaDisponibles = asignatura === 'fisica'
     ))
   : []
 
+const opcionesQuimicaDisponibles = asignatura === 'quimica'
+  ? Array.from(new Set(
+      preguntasQuimica
+        .filter((p: any) => p.bloque === tipoQuimicaActivo)
+        .map((p: any) => p.opcion)
+    ))
+  : []
+
 const opcionesHistoriaDisponibles = asignatura === 'historia'
   ? Array.from(new Set(examenesHistoriaDelDia.map(e => e.opcion)))
   : []
@@ -331,6 +376,8 @@ const opcionesDisponibles: (0 | 1)[] =
     ? OPCIONES.filter(op => opcionesMatesDisponibles.includes(op === 0 ? 'A' : 'B'))
     : asignatura === 'fisica' && opcionesFisicaDisponibles.length
     ? OPCIONES.filter(op => opcionesFisicaDisponibles.includes(op === 0 ? 'A' : 'B'))
+    : asignatura === 'quimica' && opcionesQuimicaDisponibles.length
+    ? OPCIONES.filter(op => opcionesQuimicaDisponibles.includes(op === 0 ? 'A' : 'B'))
     : asignatura === 'historia' && opcionesHistoriaDisponibles.length
     ? OPCIONES.filter(op => opcionesHistoriaDisponibles.includes(op === 0 ? 'A' : 'B'))
     : [...OPCIONES]
@@ -359,6 +406,7 @@ const preguntaHistoria =
 const preguntaActiva =
   asignatura === 'mates' ? preguntaMates :
   asignatura === 'fisica' ? preguntaFisica :
+  asignatura === 'quimica' ? preguntaQuimica :
   preguntaHistoria
 
 const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
@@ -366,6 +414,7 @@ const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
 const bloqueActivoLabel =
   asignatura === 'mates' ? (preguntaActiva as any)?.bloque :
   asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
+  asignatura === 'quimica' ? ((preguntaActiva as any)?.label ?? bloquesQuimica[bloqueIdx]?.label ?? '') :
   ((preguntaActiva as any)?.label ?? LABELS_HISTORIA[(preguntaActiva as any)?.tipo] ?? '')
 
 const opcionMostrada = (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
@@ -388,6 +437,15 @@ function puntosBloqueMates(bloque: string) {
   )?.puntuacion ?? 2.5
 }
 
+function puntosBloqueQuimica(tipoBloque: string) {
+  return (
+    preguntasQuimica.find(
+      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+    ) ??
+    preguntasQuimica.find((p: any) => p.bloque === tipoBloque)
+  )?.puntuacion ?? 2
+}
+
 function cambiarBloqueMates(i: number, bloque: string) {
   setBloqueIdx(i)
   const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)?.opcion
@@ -402,9 +460,17 @@ function cambiarBloqueFisica(i: number, tipoBloque: string) {
   reset()
 }
 
+function cambiarBloqueQuimica(i: number, tipoBloque: string) {
+  setBloqueIdx(i)
+  const primeraOpcion = preguntasQuimica.find((p: any) => p.bloque === tipoBloque)?.opcion
+  if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
+  reset()
+}
+
 function nombreAsignatura(a: string) {
   if (a === 'mates') return 'Matematicas II'
   if (a === 'fisica') return 'Física'
+  if (a === 'quimica') return 'Química'
   return 'Historia de Espana'
 }
 
@@ -463,7 +529,7 @@ function cambiarTipo(t: Tipo) {
         (modo === 'imagen' ? 'Imagen adjunta con respuesta manuscrita.' : 'RESPUESTA: ' + respuesta) + '\n' +
         'Corrige con: ## Nota (X/' + p.puntuacion + '), ## Que esta bien, ## Que falta, ## Respuesta modelo'
     } else {
-      prompt = 'Eres corrector oficial EBAU Madrid ' + (asignatura === 'fisica' ? 'Fisica' : 'Matematicas') + '.\n' +
+      prompt = 'Eres corrector oficial EBAU Madrid ' + (asignatura === 'fisica' ? 'Fisica' : asignatura === 'quimica' ? 'Quimica' : 'Matematicas') + '.\n' +
         'PREGUNTA: ' + enunciadoActivo + '\n' +
         'PUNTUACION MAX: ' + preguntaActiva?.puntuacion + '\n' +
         'CRITERIOS: ' + (preguntaActiva as any)?.criterios + '\n' +
@@ -500,7 +566,7 @@ function cambiarTipo(t: Tipo) {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matematicas e historia.\n' +
+        pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matematicas, fisica, quimica e historia.\n' +
           (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
           hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
           '\nResponde solo como Pausia.'
@@ -537,9 +603,9 @@ function cambiarTipo(t: Tipo) {
       : 'Sin correcciones aun'
     const prompt = 'Eres Pausia, entrenador de estudio para EBAU Madrid.\n' +
       'Genera un plan semanal útil, visual y concreto para esta app.\n\n' +
-      'ASIGNATURAS DISPONIBLES EN LA APP: Matemáticas II, Física, Historia de España.\n' +
-      'No inventes Lengua, Inglés, Filosofía, Química ni otras asignaturas si no aparecen en el historial.\n' +
-      'Si no hay historial, crea un plan inicial SOLO con Matemáticas II, Física e Historia de España.\n\n' +
+      'ASIGNATURAS DISPONIBLES EN LA APP: Matemáticas II, Física, Química, Historia de España.\n' +
+      'No inventes Lengua, Inglés, Filosofía ni otras asignaturas si no aparecen en el historial.\n' +
+      'Si no hay historial, crea un plan inicial SOLO con Matemáticas II, Física, Química e Historia de España.\n\n' +
       'HISTORIAL DEL ESTUDIANTE:\n' + resumen + '\n\n' +
       'FORMATO OBLIGATORIO:\n' +
       '- Responde en Markdown.\n' +
@@ -588,10 +654,12 @@ function cambiarTipo(t: Tipo) {
 
   const matesH = historial.filter((item: any) => item.asignatura === 'mates')
   const fisicaH = historial.filter((item: any) => item.asignatura === 'fisica')
+  const quimicaH = historial.filter((item: any) => item.asignatura === 'quimica')
   const historiaH = historial.filter((item: any) => item.asignatura === 'historia')
 
   const mediaM = calcMedia(matesH)
   const mediaFisica = calcMedia(fisicaH)
+  const mediaQuimica = calcMedia(quimicaH)
   const mediaHist = calcMedia(historiaH)
 
   return (
@@ -723,8 +791,8 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'examenes' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '980px', width: '100%', margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px', marginBottom: '22px' }}>
-              {(['mates', 'fisica', 'historia'] as Asignatura[]).map(key => {
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px', marginBottom: '22px' }}>
+              {(['mates', 'fisica', 'quimica', 'historia'] as Asignatura[]).map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
                 const Icon = card.icon
@@ -737,8 +805,8 @@ function cambiarTipo(t: Tipo) {
                       position: 'relative',
                       overflow: 'hidden',
                       textAlign: 'left',
-                      minHeight: '162px',
-                      padding: '22px',
+                      minHeight: '154px',
+                      padding: '20px',
                       borderRadius: '24px',
                       border: active ? '1px solid ' + val.accent : '1px solid rgba(242,228,212,0.95)',
                       background: 'linear-gradient(145deg, #fffdf9 0%, ' + val.light + ' 58%, ' + val.soft + ' 100%)',
@@ -755,7 +823,7 @@ function cambiarTipo(t: Tipo) {
                         <ArrowUpRight size={19} />
                       </div>
                     </div>
-                    <div style={{ marginTop: '22px', fontSize: '20px', fontWeight: 760, color: WARM.ink, position: 'relative' }}>{card.title}</div>
+                    <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 760, color: WARM.ink, position: 'relative' }}>{card.title}</div>
                     <div style={{ marginTop: '5px', color: WARM.muted, fontSize: '13px', lineHeight: '1.45', position: 'relative' }}>{card.subtitle}</div>
                     <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: '#fffdf9cc', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative' }}>
                       <Flame size={13} />{card.kicker}
@@ -841,8 +909,8 @@ function cambiarTipo(t: Tipo) {
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #f2e4d4' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
-                )) : (asignatura === 'fisica' ? TIPOS_FISICA : bloquesHistoria).map((t, i) => (
-                  <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #f2e4d4' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : (t as any).pts}pts</button>
+                )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : bloquesHistoria).map((t, i) => (
+                  <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #f2e4d4' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -896,6 +964,13 @@ function cambiarTipo(t: Tipo) {
                         title="Fuente histórica oficial"
                         style={{ width: '100%', height: '420px', border: '0', display: 'block', background: '#fff' }}
                       />
+                    </div>
+                  )}
+                  {asignatura === 'quimica' && (preguntaActiva as any).pdfFuente && (
+                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                      <a href={(preguntaActiva as any).pdfFuente} target="_blank" rel="noreferrer" style={{ padding: '8px 12px', borderRadius: '999px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.soft, fontSize: '12px', fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                        <FileText size={14} />Ver PDF oficial
+                      </a>
                     </div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).conceptos && (
@@ -1019,7 +1094,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             ) : (
               <div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' }}>
                   <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
                     <div style={{ fontSize: '36px', fontWeight: 800, color: WARM.ink }}>{historial.length}</div>
@@ -1033,6 +1108,10 @@ function cambiarTipo(t: Tipo) {
                     {mediaFisica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaFisica)) }}>{mediaFisica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
                   <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Química</div>
+                    {mediaQuimica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaQuimica)) }}>{mediaQuimica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
+                  </div>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
                     {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
@@ -1043,7 +1122,7 @@ function cambiarTipo(t: Tipo) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                         <div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : item.asignatura === 'fisica' ? '#4c1d95' : '#1a4731' }}>{nombreAsignatura(item.asignatura)}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : item.asignatura === 'fisica' ? '#4c1d95' : item.asignatura === 'quimica' ? '#0f766e' : '#1a4731' }}>{nombreAsignatura(item.asignatura)}</span>
                             <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.tipo}</span>
                             <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.año}</span>
                             <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.bloque}</span>

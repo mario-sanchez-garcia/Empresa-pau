@@ -501,7 +501,6 @@ export interface PreguntaHistoria {
   puntuacion: number
   texto_fuente?: string
   imagen_url?: string
-  imagenes_url?: string[]
   imagenFuente?: string
   pdfFuente?: string
   paginaFuente?: number
@@ -535,7 +534,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2025-ordinaria-A-fuente1",
-        imagenes_url: ["/historia-imgs/24-25 ordinaria HE fuente 1.PNG", "/historia-imgs/24-25 ordinaria HE fuente 1 coinc.PNG"],
+        imagen_url: "/historia-imgs/24-25 ordinaria HE fuente 1.PNG",
         tipo: "fuente1",
         label: "Fuente 1",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las transformaciones económicas en el franquismo. (Puntuación máxima: 2,5 puntos).\nFuente: Albert Carreras (ed.), Estadísticas históricas de España. Siglos XIX-XX (1989).",
@@ -546,7 +545,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2025-ordinaria-A-fuente2",
-        imagenes_url: ["/historia-imgs/24-25 ordinaria HE fuente 2.PNG", "/historia-imgs/24-25 ordinaria HE fuente 2 coinc.PNG"],
+        imagen_url: "/historia-imgs/24-25 ordinaria HE fuente 2.PNG",
         tipo: "fuente2",
         label: "Fuente 2",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la Guerra Civil: Desarrollo de la guerra y consecuencias. (Puntuación máxima: 2,5 puntos).\nEl número 10 de la madrileña calle de Peironcely, en el distrito de Puente de Vallecas, fotografía de\nRobert Capa, noviembre de 1936",
@@ -588,7 +587,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Lunes-A-fuente",
-        imagenes_url: ["/historia-imgs/23-24 ordinaria HE A lunes.PNG", "/historia-imgs/23-24 ordinaria HE A coinc.PNG"],
+        imagen_url: "/historia-imgs/23-24 ordinaria HE A lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione los datos con las transformaciones económicas y sociales del siglo XIX: La evolución de la población y de las ciudades. (Puntuación máxima: 2 puntos).\nCenso de la población de España según el recuento de 1860. Junta General de Estadística",
@@ -621,7 +620,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Lunes-B-fuente",
-        imagenes_url: ["/historia-imgs/23-24 ordinaria HE B lunes.PNG", "/historia-imgs/23-24 ordinaria HE B coinc.PNG"],
+        imagen_url: "/historia-imgs/23-24 ordinaria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione la fuente con el impacto de los acontecimientos internacionales durante el reinado de\nAlfonso XIII: Marruecos. (Puntuación máxima: 2 puntos).\nCampaña del Rif, posición de Monte Arruit: capellán rezando ante los restos de españoles encontrados en el interior de la posición",
@@ -720,7 +719,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Lunes-A-fuente",
-        imagenes_url: ["/historia-imgs/22-23 ordinaria HE A lunes.PNG", "/historia-imgs/22-23 ordinaria HE coinc.PNG"],
+        imagen_url: "/historia-imgs/22-23 ordinaria HE A lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la alternancia política: gobiernos del Partido Popular (Puntuación máxima: 1 punto).\nCelebración en la sede del Partido Popular de los resultados en las elecciones generales de marzo\n1996",
@@ -753,7 +752,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Lunes-B-fuente",
-        imagenes_url: ["/historia-imgs/22-23 ordinaria HE B lunes.PNG", "/historia-imgs/22-23 ordinaria HE coinc.PNG"],
+        imagen_url: "/historia-imgs/22-23 ordinaria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente cuadro. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico del turno de partidos durante la Restauración (Puntuación máxima:\n1 punto).\nResultados de las elecciones al Congreso en España 1876-1898\nPartido en el\nGobierno que convoca las elecciones\nDiputados del partido en el\nGobierno\nDiputados de las oposiciones\nTotal diputados\nCongreso\n1876 Conservador 333 58 391\n1879 Conservador 293 99 392\n1881 Liberal 297 95 392\n1884 Conservador 318 74 392\n1886 Liberal 278 114 392\n1891 Conservador 253 146 399\n1893 Liberal 281 119 400\n1896 Conservador 269 132 401\n1898 Liberal 266 135 401\nFuente: Martínez Cuadrado, Miguel, Elecciones y partidos políticos en España 1868-1931.",
@@ -852,7 +851,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Lunes-A-fuente",
-        imagenes_url: ["/historia-imgs/21-22 ordinaria HE A Lunes.PNG", "/historia-imgs/21 22 oridnaria HE A coinc.PNG"],
+        imagen_url: "/historia-imgs/21-22 ordinaria HE A Lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente tabla (Puntuación máxima: 0,5 puntos).\n2. \tRelacione estos datos con el restablecimiento de la democracia: las elecciones de junio de 1977\n(Puntuación máxima: 1 punto).\nResultados Elecciones Generales (Congreso de los Diputados) de 15-VI-1977",
@@ -885,7 +884,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Lunes-B-fuente",
-        imagenes_url: ["/historia-imgs/21-22 ordinaria HE B lunes.PNG", "/historia-imgs/21-22 ordinaria HE B coinc.PNG"],
+        imagen_url: "/historia-imgs/21-22 ordinaria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. \tRelacione esta imagen con la Guerra de la Independencia: antecedentes y causas (Puntuación máxima: 1 punto).\nLevantamiento del 2 de mayo de 1808 en Madrid, pintura de Goya",
@@ -984,7 +983,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Lunes-A-fuente",
-        imagenes_url: ["/historia-imgs/20-21 ordianria HE A lunes.PNG", "/historia-imgs/20-21 ordinaria HE A coinc.PNG"],
+        imagen_url: "/historia-imgs/20-21 ordianria HE A lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la creación del Estado franquista. (Puntuación máxima: 1 punto).\nFranco llega a las Cortes, para presidir la sesión de apertura, 1943.",
@@ -1017,7 +1016,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Lunes-B-fuente",
-        imagenes_url: ["/historia-imgs/20-21 ordianria HE B lunes.PNG", "/historia-imgs/20-21 ordinaria HE B coinc.PNG"],
+        imagen_url: "/historia-imgs/20-21 ordianria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la guerra entre España y Estados Unidos. (Puntuación máxima: 1 punto).\nSoldados españoles en Cuba (Fondo: Biblioteca Nacional)",
@@ -1116,7 +1115,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Lunes-A-fuente",
-        imagenes_url: ["/historia-imgs/19-20 ordinaria HE A Lunes.PNG", "/historia-imgs/19-20 ordinaria HE A coinc.PNG"],
+        imagen_url: "/historia-imgs/19-20 ordinaria HE A Lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la revolución industrial en la España del siglo XIX. El sistema de comunicaciones: el ferrocarril. (Puntuación máxima: 1 punto).\nLos directores de la línea Barcelona-Mataró (1861). Fuente: Ayuntamiento de Mataró.",
@@ -1149,7 +1148,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Lunes-B-fuente",
-        imagenes_url: ["/historia-imgs/19-20 ordinaria HE B Lunes.PNG", "/historia-imgs/19-20 ordinaria HE A coinc.PNG"],
+        imagen_url: "/historia-imgs/19-20 ordinaria HE B Lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico del golpe de Estado de 23 de febrero de 1981. (Puntuación máxima: 1 punto).\nTeniente Coronel Antonio Tejero en el Congreso de los Diputados. Fuente: Agencia EFE.",

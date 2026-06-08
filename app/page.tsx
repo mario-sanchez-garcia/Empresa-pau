@@ -1039,30 +1039,9 @@ function cambiarTipo(t: Tipo) {
                       className="mt-4 max-w-full rounded-lg border border-gray-200 shadow-sm"
                     />
                   )}
-                  {asignatura === 'historia' && (preguntaActiva as any).imagenes_url?.map((url: string, i: number) => (
-                    <img
-                      key={i}
-                      src={url}
-                      alt={`Fuente histórica ${i + 1}`}
-                      className="mt-4 max-w-full rounded-lg border border-gray-200 shadow-sm"
-                    />
-                  ))}
                   {asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
                     <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                       <img src={(preguntaActiva as any).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
-                    </div>
-                  )}
-                  {asignatura === 'historia' && (preguntaActiva as any).pdfFuente && (
-                    <div style={{ marginBottom: '16px', borderRadius: '14px', overflow: 'hidden', border: '1px solid #dbe4ef', background: '#f8fafc' }}>
-                      <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid #e2e8f0' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Fuente oficial PDF · página {(preguntaActiva as any).paginaFuente ?? 1}</span>
-                        <a href={`${(preguntaActiva as any).pdfFuente}#page=${(preguntaActiva as any).paginaFuente ?? 1}`} target="_blank" rel="noreferrer" style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textDecoration: 'none' }}>Abrir</a>
-                      </div>
-                      <iframe
-                        src={`${(preguntaActiva as any).pdfFuente}#page=${(preguntaActiva as any).paginaFuente ?? 1}&view=FitH`}
-                        title="Fuente histórica oficial"
-                        style={{ width: '100%', height: '420px', border: '0', display: 'block', background: '#fff' }}
-                      />
                     </div>
                   )}
                   {asignatura === 'quimica' && (preguntaActiva as any).pdfFuente && (

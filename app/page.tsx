@@ -11,7 +11,6 @@ import {
   Atom,
   BarChart3,
   BrainCircuit,
-  CalendarDays,
   Camera,
   ClipboardList,
   FileText,
@@ -22,6 +21,7 @@ import {
   LogOut,
   MessageCircle,
   PenLine,
+  Rocket,
   SendHorizontal,
   Sigma,
   Target,
@@ -400,7 +400,7 @@ function cambiarTipo(t: Tipo) {
     seccion === 'examenes' ? cfg.icon :
     seccion === 'chat' ? MessageCircle :
     seccion === 'historial' ? BarChart3 :
-    CalendarDays
+    Rocket
 
   const calcMedia = (items: any[]) => {
     const notas = items
@@ -474,7 +474,7 @@ function cambiarTipo(t: Tipo) {
             </button>
           )})}
           <a href="/planning" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', textDecoration: 'none', marginBottom: '6px', background: 'transparent' }}>
-            <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', background: '#f8fafc' }}><CalendarDays size={17} /></span>
+            <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff' }}><Rocket size={17} /></span>
             <div>
               <div style={{ color: '#475569', fontSize: '14px', fontWeight: 520 }}>Planning</div>
               <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
@@ -845,7 +845,7 @@ function cambiarTipo(t: Tipo) {
         {seccion === 'planning' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '28px', marginBottom: '20px', textAlign: 'center' }}>
-              <div style={{ width: '54px', height: '54px', borderRadius: '18px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}><CalendarDays size={26} /></div>
+              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #60a5fa, #7c3aed)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.26), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Plan de estudio personalizado</div>
               <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos debiles</div>
               <button onClick={generarPlan} disabled={cargandoPlan} style={{ padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#94a3b8' : 'linear-gradient(135deg, #0f172a, #2563eb)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.24)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>

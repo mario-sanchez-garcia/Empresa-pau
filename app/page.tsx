@@ -139,14 +139,76 @@ function formatMatrixRows(raw: string) {
 
   if (!rows.length) return ''
 
-  const rowSeparator = ' ' + String.raw`\\` + '\n'
-  return '\n\n$$\n\\begin{pmatrix}\n' + rows.join(rowSeparator) + '\n\\end{pmatrix}\n$$\n\n'
+  const rowSeparator = ' ' + String.raw`\\` + ' '
+  return '\n\n$$\\begin{pmatrix} ' + rows.join(rowSeparator) + ' \\end{pmatrix}$$\n\n'
+}
+
+function toLatexMathExpr(expr: string) {
+  return expr
+    .trim()
+    .replace(/[−–]/g, '-')
+    .replace(/\s+/g, ' ')
+    .replace(/\btg\b/g, '\\tan')
+    .replace(/\bsen\b/g, '\\sin')
+    .replace(/\bln\b/g, '\\ln')
+    .replace(/\bcos\b/g, '\\cos')
+    .replace(/π/g, '\\pi')
+    .replace(/[·∙⋅ꞏ]/g, '\\cdot ')
+}
+
+function formatBrokenMathBlocks(text: string) {
+  return text
+    .replace(/∫\s*([^\n]+)\n\s*([^\n]+)\n\s*([^\n.]+?)d([a-z])\./g, (_, upper, lower, expr, variable) =>
+      '\n\n$$\\int_{' + toLatexMathExpr(lower) + '}^{' + toLatexMathExpr(upper) + '} ' + toLatexMathExpr(expr) + '\\,d' + variable + '$$\n\n'
+    )
+    .replace(/lim\s*\n\s*x\s*→\s*π\s*\n\s*2\s*\n\s*\(\s*\n\s*tg x\s*\n\s*2\s*\n\s*\)\s*\(\s*1\s*\n\s*cos x\s*\)\s*\./g,
+      '\n\n$$\\lim_{x\\to\\pi/2}(\\tan x)^2\\left(\\frac{1}{\\cos x}\\right)$$\n\n'
+    )
+}
+
+function normalizePdfGlyphs(text: string) {
+  return text
+    .replace(/\u00ad/g, '')
+    .replace(/\t/g, ' ')
+    .replace(/\uf0b4|×/g, ' · ')
+    .replace(/\uf0d7|∙|⋅|ꞏ/g, ' · ')
+    .replace(/\uf0ae|\uf022/g, '→')
+    .replace(/\uf044/g, '⇄')
+    .replace(/\uf02d/g, '-')
+    .replace(/\uf06c/g, 'λ')
+    .replace(/\uf020/g, ' ')
+    .replace(/\uf072/g, '')
+    .replace(/\uf6da/g, '')
+    .replace(/\u20d7\s*([ijk])/g, ' $\\vec{$1}$')
+}
+
+function formatScientificNotation(text: string) {
+  const unitPattern = '(m|cm|mm|kg|s|C|N|J|W|L|mol|A|T|Hz|atm|g)'
+  const positiveUnitPattern = '(m|cm|mm|kg|s|J|W|L|mol|Hz|atm|g)'
+
+  return text
+    .replace(/10\s*[−-]\s*(\d+)/g, (_, exp) => '$10^{-' + exp + '}$')
+    .replace(/10\s+([3-9]|[1-3]\d)\b/g, (_, exp) => '$10^{' + exp + '}$')
+    .replace(new RegExp('\\b' + unitPattern + '\\s*[−-]\\s*(\\d+)\\b', 'g'), (_, unit, exp) => unit + '$^{-' + exp + '}$')
+    .replace(new RegExp('(?<=\\s)' + positiveUnitPattern + '\\s*(\\d+)\\b', 'g'), (_, unit, exp) => unit + '$^{' + exp + '}$')
+    .replace(/\b([A-Za-z])\s*([₀₁₂₃₄₅₆₇₈₉])\b/g, (_, base, sub) => base + '$_{' + '₀₁₂₃₄₅₆₇₈₉'.indexOf(sub) + '}$')
+    .replace(/\b([A-Za-z])\s*([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_, base, sup) => {
+      const map: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
+      return base + '$^{' + String(sup).split('').map(ch => map[ch] ?? ch).join('') + '}$'
+    })
+}
+
+function normalizeSoftLineBreaks(text: string) {
+  return text
+    .replace(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])-\s*\n\s*([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])/g, '$1$2')
+    .replace(/([^\n])\n(?!\n|[a-d]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[.)]|[-•])/gi, '$1 ')
 }
 
 function formatEnunciado(enunciado?: string | null) {
   if (!enunciado) return ''
 
-  return enunciado
+  const texto = formatScientificNotation(normalizeSoftLineBreaks(
+    formatBrokenMathBlocks(normalizePdfGlyphs(enunciado))
     .replace(/\uf8eb\s*(?:\uf8ec\s*)*\uf8ed\s*([\s\S]*?)\s*\uf8f6\s*(?:\uf8f7\s*)*\uf8f8/g, (_, rows) => formatMatrixRows(rows))
     .replace(/\uf8f1\s*(?:\uf8f4\s*)*\uf8f2\s*(?:\uf8f4\s*)*\uf8f3/g, '{')
     .replace(/\uf8fc\s*(?:\uf8f4\s*)*\uf8fd\s*(?:\uf8f4\s*)*\uf8fe/g, '}')
@@ -154,6 +216,9 @@ function formatEnunciado(enunciado?: string | null) {
     .replace(/−\s*→\s*v/g, '$\\vec v$')
     .replace(/−\s*→\s*0/g, '$\\vec 0$')
     .replace(/\bdet \(([^)]+)\)/g, '$\\det($1)$')
+  ))
+
+  return texto
     .replace(/\n(?!\n)/g, '  \n')
 }
 

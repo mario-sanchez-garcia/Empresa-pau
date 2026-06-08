@@ -6,12 +6,32 @@ import { supabase } from './lib/supabase'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import {
+  ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  Bot,
+  CalendarDays,
+  Camera,
+  Calculator,
+  ClipboardList,
+  FileText,
+  GraduationCap,
+  Landmark,
+  LogOut,
+  MessageCircle,
+  PenLine,
+  Sparkles,
+  Target,
+  UploadCloud,
+  X
+} from 'lucide-react'
 import 'katex/dist/katex.min.css'
 
 const ASIGNATURAS = {
-  mates: { label: 'Matemáticas II', emoji: '📐', color: '#1e3a5f', light: '#dbeafe', accent: '#3b82f6' },
-  fisica: { label: 'Física', emoji: '⚡', color: '#4c1d95', light: '#ede9fe', accent: '#8b5cf6' },
-  historia: { label: 'Historia de España', emoji: '📜', color: '#1a4731', light: '#dcfce7', accent: '#16a34a' }
+  mates: { label: 'Matemáticas II', short: 'Mates', icon: Calculator, color: '#1e40af', light: '#eff6ff', accent: '#3b82f6', soft: '#dbeafe' },
+  fisica: { label: 'Física', short: 'Física', icon: Sparkles, color: '#5b21b6', light: '#f5f3ff', accent: '#8b5cf6', soft: '#ede9fe' },
+  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#166534', light: '#f0fdf4', accent: '#22c55e', soft: '#dcfce7' }
 }
 
 const mdComponents = {
@@ -312,11 +332,17 @@ function cambiarTipo(t: Tipo) {
   if (!usuario) return null
 
   const NAV_ITEMS = [
-    { id: 'examenes' as Seccion, label: 'Examenes', icon: '📋', desc: 'Practica y corrige' },
-    { id: 'chat' as Seccion, label: 'Chat con Pausia', icon: '💬', desc: 'Resuelve dudas' },
-    { id: 'historial' as Seccion, label: 'Historial', icon: '📊', desc: 'Tus correcciones' },
-    { id: 'planning' as Seccion, label: 'Plan IA', icon: '🤖', desc: 'Plan semanal IA' },
+    { id: 'examenes' as Seccion, label: 'Examenes', icon: ClipboardList, desc: 'Practica y corrige' },
+    { id: 'chat' as Seccion, label: 'Chat con Pausia', icon: MessageCircle, desc: 'Resuelve dudas' },
+    { id: 'historial' as Seccion, label: 'Historial', icon: BarChart3, desc: 'Tus correcciones' },
+    { id: 'planning' as Seccion, label: 'Plan IA', icon: Bot, desc: 'Plan semanal IA' },
   ]
+
+  const HeaderIcon =
+    seccion === 'examenes' ? cfg.icon :
+    seccion === 'chat' ? MessageCircle :
+    seccion === 'historial' ? BarChart3 :
+    CalendarDays
 
   const calcMedia = (items: any[]) => {
     const notas = items
@@ -340,86 +366,92 @@ function cambiarTipo(t: Tipo) {
     <div style={{
   display: 'flex',
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #f8fafc 0%, #eef6ff 45%, #f6fff9 100%)',
-  fontFamily: 'system-ui, sans-serif'
+  background: 'linear-gradient(135deg, #f8fafc 0%, #f5f9ff 45%, #f7fdf9 100%)',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
 }}>
       <aside style={{
-  width: '270px',
+  width: '282px',
   minHeight: '100vh',
-  background: 'linear-gradient(180deg, #0f172a 0%, #111827 55%, #172554 100%)',
+  background: 'rgba(255, 255, 255, 0.78)',
+  backdropFilter: 'blur(24px)',
   display: 'flex',
   flexDirection: 'column',
   position: 'sticky',
   top: 0,
   flexShrink: 0,
-  boxShadow: '12px 0 35px rgba(15, 23, 42, 0.18)'
+  borderRight: '1px solid rgba(226, 232, 240, 0.9)',
+  boxShadow: '18px 0 50px rgba(15, 23, 42, 0.06)'
 }}>
-        <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ padding: '26px 22px 22px', borderBottom: '1px solid rgba(226,232,240,0.85)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
            <div style={{
-  width: '40px',
-  height: '40px',
-  borderRadius: '14px',
-  background: 'linear-gradient(135deg, #3b82f6, #16a34a)',
+  width: '44px',
+  height: '44px',
+  borderRadius: '16px',
+  background: 'linear-gradient(145deg, #60a5fa 0%, #2563eb 58%, #1d4ed8 100%)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontWeight: 900,
   color: '#fff',
-  fontSize: '17px',
-  boxShadow: '0 10px 24px rgba(59, 130, 246, 0.35)'
-}}>P</div>
+  boxShadow: '0 14px 30px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255,255,255,0.35)'
+}}><GraduationCap size={23} strokeWidth={2.2} /></div>
             <div>
-              <div style={{ color: '#fff', fontWeight: 700, fontSize: '17px' }}>Pausia</div>
+              <div style={{ color: '#0f172a', fontWeight: 760, fontSize: '18px' }}>Pausia</div>
               <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>Academia IA · EBAU Madrid</div>
             </div>
           </div>
         </div>
-        <nav style={{ padding: '16px 12px', flex: 1 }}>
-          <div style={{ color: '#475569', fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 8px', marginBottom: '8px' }}>Navegacion</div>
-          {NAV_ITEMS.map(item => (
-            <button key={item.id} onClick={() => setSeccion(item.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer', marginBottom: '4px', textAlign: 'left', background: seccion === item.id ? 'rgba(59,130,246,0.15)' : 'transparent' }}>
-              <span style={{ fontSize: '18px' }}>{item.icon}</span>
+        <nav style={{ padding: '18px 14px', flex: 1 }}>
+          <div style={{ color: '#94a3b8', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', marginBottom: '10px' }}>Navegacion</div>
+          {NAV_ITEMS.map(item => {
+            const Icon = item.icon
+            const active = seccion === item.id
+            return (
+            <button key={item.id} onClick={() => setSeccion(item.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: active ? '1px solid rgba(59,130,246,0.18)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #ffffff, #eff6ff)' : 'transparent', boxShadow: active ? '0 12px 28px rgba(37, 99, 235, 0.08)' : 'none' }}>
+              <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#2563eb' : '#64748b', background: active ? '#dbeafe' : '#f8fafc' }}><Icon size={17} /></span>
               <div>
-                <div style={{ color: seccion === item.id ? '#93c5fd' : '#cbd5e1', fontWeight: seccion === item.id ? 600 : 400, fontSize: '14px' }}>{item.label}</div>
-                <div style={{ color: '#475569', fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
+                <div style={{ color: active ? '#0f172a' : '#475569', fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
+                <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
               </div>
             </button>
-          ))}
-          <a href="/planning" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', textDecoration: 'none', marginBottom: '4px', background: 'transparent' }}>
-            <span style={{ fontSize: '18px' }}>📅</span>
+          )})}
+          <a href="/planning" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', textDecoration: 'none', marginBottom: '6px', background: 'transparent' }}>
+            <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', background: '#f8fafc' }}><CalendarDays size={17} /></span>
             <div>
-              <div style={{ color: '#cbd5e1', fontSize: '14px' }}>Planning</div>
-              <div style={{ color: '#475569', fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
+              <div style={{ color: '#475569', fontSize: '14px', fontWeight: 520 }}>Planning</div>
+              <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
             </div>
           </a>
-          <div style={{ color: '#475569', fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 8px', margin: '20px 0 8px' }}>Asignaturas</div>
-          {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => (
-            <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer', marginBottom: '4px', textAlign: 'left', background: asignatura === key && seccion === 'examenes' ? val.color + '33' : 'transparent' }}>
-              <span style={{ fontSize: '16px' }}>{val.emoji}</span>
-              <div style={{ color: asignatura === key && seccion === 'examenes' ? '#e2e8f0' : '#94a3b8', fontSize: '13px', fontWeight: asignatura === key && seccion === 'examenes' ? 600 : 400 }}>{val.label}</div>
+          <div style={{ color: '#94a3b8', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', margin: '22px 0 10px' }}>Asignaturas</div>
+          {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
+            const Icon = val.icon
+            const active = asignatura === key && seccion === 'examenes'
+            return (
+            <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 13px', borderRadius: '16px', border: active ? '1px solid ' + val.soft : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? val.light : 'transparent' }}>
+              <span style={{ width: '32px', height: '32px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: val.color, background: active ? '#fff' : val.light }}><Icon size={16} /></span>
+              <div style={{ color: active ? val.color : '#64748b', fontSize: '13px', fontWeight: active ? 700 : 520 }}>{val.label}</div>
             </button>
-          ))}
+          )})}
         </nav>
-        <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid rgba(226,232,240,0.85)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e3a5f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#93c5fd', fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
             <div style={{ overflow: 'hidden' }}>
-              <div style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{usuario?.email}</div>
-              <div style={{ color: '#475569', fontSize: '11px' }}>Estudiante</div>
+              <div style={{ color: '#0f172a', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{usuario?.email}</div>
+              <div style={{ color: '#94a3b8', fontSize: '11px' }}>Estudiante</div>
             </div>
           </div>
-          <button onClick={cerrarSesion} style={{ width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}>Cerrar sesion</button>
+          <button onClick={cerrarSesion} style={{ width: '100%', padding: '10px 12px', borderRadius: '14px', background: '#fff', border: '1px solid #fee2e2', color: '#dc2626', fontSize: '12px', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.04)' }}><LogOut size={15} />Cerrar sesion</button>
         </div>
       </aside>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
        <header style={{
-  background: 'rgba(255, 255, 255, 0.82)',
-  backdropFilter: 'blur(14px)',
+  background: 'rgba(255, 255, 255, 0.76)',
+  backdropFilter: 'blur(22px)',
   borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
-  padding: '0 32px',
-  height: '72px',
+  padding: '0 34px',
+  height: '78px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -427,12 +459,16 @@ function cambiarTipo(t: Tipo) {
   top: 0,
   zIndex: 10
 }}>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '15px', background: cfg.light, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + cfg.soft }}>
+              <HeaderIcon size={20} />
+            </div>
+            <div>
             <div style={{ fontWeight: 700, fontSize: '18px', color: '#0f172a' }}>
-              {seccion === 'examenes' && cfg.emoji + ' ' + cfg.label}
-              {seccion === 'chat' && '💬 Chat con Pausia'}
-              {seccion === 'historial' && '📊 Historial de correcciones'}
-              {seccion === 'planning' && '📅 Mi plan de estudio'}
+              {seccion === 'examenes' && cfg.label}
+              {seccion === 'chat' && 'Chat con Pausia'}
+              {seccion === 'historial' && 'Historial de correcciones'}
+              {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
             <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
               {seccion === 'examenes' && 'Practica con examenes oficiales EBAU Madrid'}
@@ -440,18 +476,57 @@ function cambiarTipo(t: Tipo) {
               {seccion === 'historial' && 'Todas tus correcciones guardadas'}
               {seccion === 'planning' && 'Plan semanal personalizado por IA'}
             </div>
+            </div>
           </div>
           {seccion === 'examenes' && (
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => (
-                <button key={key} onClick={() => cambiarAsignatura(key)} style={{ padding: '6px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer', background: asignatura === key ? val.color : '#f1f5f9', color: asignatura === key ? '#fff' : '#64748b', fontSize: '13px', fontWeight: 600 }}>{val.emoji} {key === 'mates' ? 'Mates' : key === 'fisica' ? 'Física' : 'Historia'}</button>
-              ))}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
+                const Icon = val.icon
+                return (
+                <button key={key} onClick={() => cambiarAsignatura(key)} style={{ padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #e2e8f0', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.9)', color: asignatura === key ? '#fff' : '#64748b', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(15,23,42,0.04)' }}><Icon size={15} />{val.short}</button>
+              )})}
             </div>
           )}
         </header>
 
         {seccion === 'examenes' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px', marginBottom: '22px' }}>
+              {(['mates', 'historia'] as Asignatura[]).map(key => {
+                const val = ASIGNATURAS[key]
+                const Icon = key === 'mates' ? Calculator : BookOpen
+                const active = asignatura === key
+                return (
+                  <button
+                    key={key}
+                    onClick={() => cambiarAsignatura(key)}
+                    style={{
+                      position: 'relative',
+                      overflow: 'hidden',
+                      textAlign: 'left',
+                      minHeight: '148px',
+                      padding: '22px',
+                      borderRadius: '24px',
+                      border: active ? '1px solid ' + val.accent : '1px solid rgba(226,232,240,0.95)',
+                      background: 'linear-gradient(135deg, #ffffff 0%, ' + val.light + ' 100%)',
+                      cursor: 'pointer',
+                      boxShadow: active ? '0 24px 55px ' + val.accent + '26' : '0 18px 45px rgba(15, 23, 42, 0.07)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px' }}>
+                      <div style={{ width: '54px', height: '54px', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', color: val.color, boxShadow: '0 12px 28px rgba(15,23,42,0.08)' }}>
+                        <Icon size={26} strokeWidth={2.1} />
+                      </div>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? val.color : '#fff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(15,23,42,0.08)' }}>
+                        <ArrowUpRight size={19} />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: '22px', fontSize: '20px', fontWeight: 760, color: '#0f172a' }}>{key === 'mates' ? 'Matemáticas' : 'Historia'}</div>
+                    <div style={{ marginTop: '5px', color: '#64748b', fontSize: '13px', lineHeight: '1.45' }}>{key === 'mates' ? 'Problemas, bloques y corrección paso a paso' : 'Temas, comentarios y conceptos EBAU'}</div>
+                  </button>
+                )
+              })}
+            </div>
            <div style={{
   background: 'rgba(255, 255, 255, 0.9)',
   borderRadius: '24px',
@@ -465,7 +540,10 @@ function cambiarTipo(t: Tipo) {
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {(['Ordinaria', 'Extraordinaria', 'Modelo'] as Tipo[]).map(t => (
                   <button key={t} onClick={() => cambiarTipo(t)} style={{ padding: '7px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 500, background: tipo === t ? cfg.color : '#f8fafc', color: tipo === t ? '#fff' : '#64748b', border: tipo === t ? 'none' : '1px solid #e2e8f0' } as any}>
-                    {t === 'Ordinaria' ? '📋' : t === 'Extraordinaria' ? '📝' : '🎯'} {t}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                      {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
+                      {t}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -558,7 +636,7 @@ function cambiarTipo(t: Tipo) {
               <div style={{ fontSize: '13px', fontWeight: 600, color: '#64748b', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                 {(['texto', 'imagen'] as const).map(m => (
-                  <button key={m} onClick={() => setModo(m)} style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, background: modo === m ? cfg.color : '#f1f5f9', color: modo === m ? '#fff' : '#64748b' }}>{m === 'texto' ? '✏️ Escribir' : '📷 Subir foto'}</button>
+                  <button key={m} onClick={() => setModo(m)} style={{ padding: '9px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: modo === m ? 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')' : '#f1f5f9', color: modo === m ? '#fff' : '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>{m === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}{m === 'texto' ? 'Escribir' : 'Subir foto'}</button>
                 ))}
               </div>
               {modo === 'texto' ? (
@@ -569,18 +647,18 @@ function cambiarTipo(t: Tipo) {
                   {imagenPreview ? (
                     <div style={{ position: 'relative' }}>
                       <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '10px', border: '1.5px solid #e2e8f0' }} />
-                      <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '28px', height: '28px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}>X</button>
+                      <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
                     </div>
                   ) : (
                     <div onClick={() => fileRef.current?.click()} style={{ height: '180px', borderRadius: '10px', border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                      <span style={{ fontSize: '2rem' }}>📷</span>
+                      <UploadCloud size={34} color={cfg.color} />
                       <p style={{ fontSize: '14px', fontWeight: 600, color: cfg.color, margin: '8px 0 4px' }}>Haz clic para subir una foto</p>
                       <p style={{ fontSize: '12px', color: cfg.accent, margin: '0' }}>Fotografia tu respuesta manuscrita</p>
                     </div>
                   )}
                 </div>
               )}
-              <button onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ marginTop: '16px', width: '100%', padding: '14px', borderRadius: '10px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : cfg.color, color: '#fff', fontSize: '15px', fontWeight: 700, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1 }}>
+              <button onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ marginTop: '16px', width: '100%', padding: '15px', borderRadius: '16px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33' }}>
                 {cargando ? 'Pausia esta corrigiendo...' : 'Corregir con Pausia IA'}
               </button>
             </div>
@@ -604,7 +682,7 @@ function cambiarTipo(t: Tipo) {
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {mensajes.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>💬</div>
+                  <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.12)' }}><MessageCircle size={28} /></div>
                   <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Hola! Soy Pausia</div>
                   <div style={{ fontSize: '15px', color: '#64748b', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu tutor IA para la EBAU de Madrid.</div>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
@@ -648,7 +726,7 @@ function cambiarTipo(t: Tipo) {
               <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>Cargando historial...</div>
             ) : historial.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.12)' }}><BarChart3 size={28} /></div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Sin correcciones aun</div>
                 <div style={{ fontSize: '14px', color: '#64748b' }}>Haz tu primera correccion en Examenes</div>
               </div>
@@ -688,7 +766,7 @@ function cambiarTipo(t: Tipo) {
                           </div>
                         )}
                       </div>
-                      <div style={{ fontSize: '13px', color: '#64748b' }}>Haz clic para ver la correccion completa →</div>
+                      <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>Haz clic para ver la correccion completa <ArrowUpRight size={14} /></div>
                     </div>
                   ))}
                 </div>
@@ -700,10 +778,10 @@ function cambiarTipo(t: Tipo) {
         {seccion === 'planning' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '28px', marginBottom: '20px', textAlign: 'center' }}>
-              <div style={{ fontSize: '36px', marginBottom: '12px' }}>📅</div>
+              <div style={{ width: '54px', height: '54px', borderRadius: '18px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}><CalendarDays size={26} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Plan de estudio personalizado</div>
               <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>Pausia analiza tus correcciones y genera un plan semanal adaptado a tus puntos debiles</div>
-              <button onClick={generarPlan} disabled={cargandoPlan} style={{ padding: '14px 32px', borderRadius: '10px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#94a3b8' : '#0f172a', color: '#fff', fontSize: '15px', fontWeight: 700 }}>
+              <button onClick={generarPlan} disabled={cargandoPlan} style={{ padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#94a3b8' : 'linear-gradient(135deg, #0f172a, #2563eb)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.24)' }}>
                 {cargandoPlan ? 'Generando tu plan...' : planIA ? 'Regenerar plan' : 'Generar mi plan semanal'}
               </button>
             </div>
@@ -736,8 +814,8 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ fontSize: '13px', color: '#94a3b8' }}>/{itemSeleccionado.nota_maxima}</span>
                     </div>
                   )}
-                  <button onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ padding: '8px 16px', borderRadius: '8px', background: '#0f172a', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>💬 Preguntar a Pausia</button>
-                  <button onClick={() => setItemSeleccionado(null)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', fontSize: '16px' }}>X</button>
+                  <button onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #0f172a, #2563eb)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Pausia</button>
+                  <button onClick={() => setItemSeleccionado(null)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}><X size={17} /></button>
                 </div>
               </div>
               <div style={{ padding: '24px' }}>

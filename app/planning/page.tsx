@@ -4,7 +4,58 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, PenLine, RefreshCw, Rocket } from 'lucide-react'
 
-const config = { bg: '#1e40af', light: '#fff7ed', accent: '#f59e0b', coral: '#fb7185', ink: '#172033' }
+const config = {
+  bg: '#b4232a',
+  light: '#fff1f2',
+  accent: '#fb7185',
+  violet: '#7c3aed',
+  green: '#2f7d4e',
+  ink: '#111827',
+  muted: '#64748b',
+  softText: '#94a3b8',
+  surface: '#ffffff',
+  field: '#fafafa',
+  border: '#eadfe6',
+  shadow: '0 24px 70px rgba(55, 39, 47, 0.09)'
+}
+
+const SUBJECT_COLORS = {
+  mates: { color: '#b4232a', light: '#fff1f2', accent: '#fb7185', border: '#ffe4e6' },
+  fisica: { color: '#7c3aed', light: '#faf5ff', accent: '#c084fc', border: '#f3e8ff' },
+  historia: { color: '#2f7d4e', light: '#f2fbf4', accent: '#74c69d', border: '#dff7e6' },
+  quimica: { color: '#b45309', light: '#fff7ed', accent: '#f59e0b', border: '#fed7aa' },
+  lengua: { color: '#be185d', light: '#fdf2f8', accent: '#f472b6', border: '#fce7f3' },
+  ingles: { color: '#0f766e', light: '#f0fdfa', accent: '#2dd4bf', border: '#ccfbf1' },
+  bio: { color: '#15803d', light: '#f0fdf4', accent: '#86efac', border: '#dcfce7' },
+  geo: { color: '#a16207', light: '#fefce8', accent: '#eab308', border: '#fef3c7' },
+  arte: { color: '#9333ea', light: '#faf5ff', accent: '#d8b4fe', border: '#f3e8ff' },
+  latin: { color: '#9f1239', light: '#fff1f2', accent: '#fb7185', border: '#ffe4e6' },
+  other: { color: '#475569', light: '#f8fafc', accent: '#94a3b8', border: '#e2e8f0' }
+}
+
+function hoverVars(color: string, light: string, accent = color) {
+  return {
+    '--hover-color': color,
+    '--hover-bg': light,
+    '--hover-border': accent,
+    '--hover-shadow': `${accent}33`
+  } as any
+}
+
+function subjectTheme(name = '') {
+  const value = name.toLowerCase()
+  if (value.includes('mat')) return SUBJECT_COLORS.mates
+  if (value.includes('fis')) return SUBJECT_COLORS.fisica
+  if (value.includes('historia de espana') || value.includes('historia de españa')) return SUBJECT_COLORS.historia
+  if (value.includes('quim')) return SUBJECT_COLORS.quimica
+  if (value.includes('lengua')) return SUBJECT_COLORS.lengua
+  if (value.includes('ingles') || value.includes('inglés')) return SUBJECT_COLORS.ingles
+  if (value.includes('bio')) return SUBJECT_COLORS.bio
+  if (value.includes('geo')) return SUBJECT_COLORS.geo
+  if (value.includes('arte')) return SUBJECT_COLORS.arte
+  if (value.includes('latin') || value.includes('latín')) return SUBJECT_COLORS.latin
+  return SUBJECT_COLORS.other
+}
 
 const ASIGNATURAS = ['Matematicas II', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biologia', 'Geografia', 'Historia del Arte', 'Latin']
 
@@ -169,37 +220,64 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   const porcentaje = totalTareas > 0 ? Math.round((completadasHoy / totalTareas) * 100) : 0
 
   if (cargando) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fff8f1 0%, #fff7ed 45%, #eff6ff 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(255, 228, 230, 0.82), transparent 30%), radial-gradient(circle at 86% 8%, rgba(243, 232, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(220, 247, 230, 0.62), transparent 30%), linear-gradient(135deg, #fffafb 0%, #f8fafc 48%, #fff7f8 100%)' }}>
       <div className="text-center">
-        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: 'linear-gradient(145deg, #f59e0b, #fb7185 55%, #2563eb)', color: '#fff', boxShadow: '0 18px 38px rgba(245,158,11,0.25)' }}><Rocket size={28} /></div>
-        <p style={{ color: '#7c6f64', fontWeight: 700 }}>Cargando tu planning...</p>
+        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: 'linear-gradient(145deg, #b4232a, #7c3aed 55%, #2f7d4e)', color: '#fff', boxShadow: '0 18px 38px rgba(180,35,42,0.22)' }}><Rocket size={28} /></div>
+        <p style={{ color: config.muted, fontWeight: 700 }}>Cargando tu planning...</p>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #fff8f1 0%, #fff7ed 45%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
-      <header className="px-6 py-4" style={{ background: 'rgba(255, 253, 249, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(242, 228, 212, 0.9)' }}>
+    <div className="min-h-screen" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(255, 228, 230, 0.82), transparent 30%), radial-gradient(circle at 86% 8%, rgba(243, 232, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(220, 247, 230, 0.62), transparent 30%), linear-gradient(135deg, #fffafb 0%, #f8fafc 48%, #fff7f8 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
+      <style>{`
+        .campus-hover,
+        .campus-primary,
+        .campus-task {
+          transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease, filter 180ms ease;
+        }
+
+        .campus-hover:hover {
+          transform: translateY(-2px);
+          border-color: var(--hover-border, #fb7185) !important;
+          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #fff1f2)) !important;
+          color: var(--hover-color, #b4232a) !important;
+          box-shadow: 0 16px 34px var(--hover-shadow, rgba(251, 113, 133, 0.18)) !important;
+        }
+
+        .campus-primary:hover:not(:disabled) {
+          transform: translateY(-2px);
+          filter: saturate(1.08) brightness(1.03);
+          box-shadow: 0 20px 42px var(--hover-shadow, rgba(251, 113, 133, 0.22)) !important;
+        }
+
+        .campus-task:hover {
+          transform: translateY(-2px);
+          border-color: var(--hover-border, #fb7185) !important;
+          box-shadow: 0 18px 38px var(--hover-shadow, rgba(251, 113, 133, 0.14)) !important;
+        }
+      `}</style>
+      <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(234, 223, 230, 0.9)' }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #f59e0b, #fb7185 48%, #2563eb)', color: '#fff', boxShadow: '0 16px 34px rgba(245,158,11,0.25)' }}><GraduationCap size={23} /></div>
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #b4232a 0%, #7c3aed 58%, #2f7d4e 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(180,35,42,0.22)' }}><GraduationCap size={23} /></div>
             <div>
               <div className="font-bold text-xl leading-none" style={{ color: config.ink }}>Pausia</div>
-              <div className="text-xs mt-1" style={{ color: '#8a7663' }}>EBAU Madrid · planning que se puede cumplir</div>
+              <div className="text-xs mt-1" style={{ color: config.muted }}>EBAU Madrid · planning que se puede cumplir</div>
             </div>
           </div>
-          <button onClick={() => router.push('/')} className="text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ background: '#fffdf9', color: '#1e40af', border: '1px solid #f2e4d4', boxShadow: '0 10px 24px rgba(92,64,35,0.06)' }}><ArrowLeft size={14} />Exámenes</button>
+          <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #eadfe6', boxShadow: '0 10px 24px rgba(55,39,47,0.06)' }}><ArrowLeft size={14} />Exámenes</button>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-8">
 
         {paso === 'onboarding' && (
-          <div className="rounded-3xl p-8" style={{ background: 'rgba(255, 253, 249, 0.94)', border: '1px solid #f2e4d4', boxShadow: '0 24px 70px rgba(92, 64, 35, 0.12)', backdropFilter: 'blur(18px)' }}>
+          <div className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: config.shadow, backdropFilter: 'blur(18px)' }}>
             <div className="text-center mb-8">
-              <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #f59e0b, #fb7185 52%, #2563eb)', color: '#fff', boxShadow: '0 18px 42px rgba(245, 158, 11, 0.28)' }}><CalendarDays size={30} /></div>
+              <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #b4232a, #7c3aed 52%, #2f7d4e)', color: '#fff', boxShadow: '0 18px 42px rgba(180, 35, 42, 0.22)' }}><CalendarDays size={30} /></div>
               <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Tu plan de estudio personalizado</h1>
-              <p className="text-sm mt-2" style={{ color: '#7c6f64' }}>Dinos tres cosas y Pausia te monta un plan día a día</p>
+              <p className="text-sm mt-2" style={{ color: config.muted }}>Dinos tres cosas y Pausia te monta un plan día a día</p>
             </div>
 
             <div className="flex flex-col gap-6 max-w-lg mx-auto">
@@ -207,7 +285,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                 <label className="block text-sm font-semibold mb-2" style={{ color: config.ink }}>¿Cuándo es tu examen?</label>
                 <input type="date" value={fechaExamen} onChange={e => setFechaExamen(e.target.value)}
                   className="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                  style={{ border: '1.5px solid #f2e4d4', background: '#fffaf5', color: config.ink, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75)' }} />
+                  style={{ border: '1.5px solid #eadfe6', background: config.field, color: config.ink, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75)', accentColor: config.accent }} />
               </div>
 
               <div>
@@ -215,7 +293,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   ¿Cuántas horas puedes estudiar al día? <span className="font-bold" style={{ color: config.accent }}>{horasDia}h</span>
                 </label>
                 <input type="range" min={1} max={8} value={horasDia} onChange={e => setHorasDia(Number(e.target.value))} className="w-full" style={{ accentColor: config.accent }} />
-                <div className="flex justify-between text-xs mt-1" style={{ color: '#a5917d' }}><span>1h</span><span>4h</span><span>8h</span></div>
+                <div className="flex justify-between text-xs mt-1" style={{ color: config.softText }}><span>1h</span><span>4h</span><span>8h</span></div>
               </div>
 
               <div>
@@ -223,27 +301,31 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   ¿Qué nota quieres sacar? <span className="font-bold" style={{ color: config.accent }}>{notaObjetivo}/14</span>
                 </label>
                 <input type="range" min={5} max={14} step={0.5} value={notaObjetivo} onChange={e => setNotaObjetivo(Number(e.target.value))} className="w-full" style={{ accentColor: config.accent }} />
-                <div className="flex justify-between text-xs mt-1" style={{ color: '#a5917d' }}><span>5</span><span>9.5</span><span>14</span></div>
+                <div className="flex justify-between text-xs mt-1" style={{ color: config.softText }}><span>5</span><span>9.5</span><span>14</span></div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: config.ink }}>¿Qué asignaturas llevas peor?</label>
                 <div className="flex flex-wrap gap-2">
-                  {ASIGNATURAS.map(a => (
-                    <button key={a} onClick={() => toggleAsignatura(a)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold"
-                      style={asignaturasFlo.includes(a)
-                        ? { background: 'linear-gradient(135deg, #2563eb, #f59e0b)', color: '#fff', boxShadow: '0 10px 22px rgba(37,99,235,0.16)' }
-                        : { background: '#fffaf5', color: '#7c6f64', border: '1px solid #f2e4d4' }}>
-                      {a}
-                    </button>
-                  ))}
+                  {ASIGNATURAS.map(a => {
+                    const theme = subjectTheme(a)
+                    const active = asignaturasFlo.includes(a)
+                    return (
+                      <button key={a} onClick={() => toggleAsignatura(a)}
+                        className={active ? 'campus-primary px-3 py-1.5 rounded-xl text-xs font-bold' : 'campus-hover px-3 py-1.5 rounded-xl text-xs font-bold'}
+                        style={active
+                          ? { ...hoverVars(theme.color, theme.light, theme.accent), background: 'linear-gradient(135deg, ' + theme.color + ', ' + theme.accent + ')', color: '#fff', boxShadow: '0 10px 22px ' + theme.accent + '33' }
+                          : { ...hoverVars(theme.color, theme.light, theme.accent), background: theme.light, color: theme.color, border: '1px solid ' + theme.border }}>
+                        {a}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
               <button onClick={guardarPerfil} disabled={!fechaExamen || asignaturasFlo.length === 0}
-                className="w-full py-4 rounded-2xl font-bold text-white text-lg disabled:opacity-40 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #f59e0b)', boxShadow: '0 18px 40px rgba(245, 158, 11, 0.22)' }}>
+                className="campus-primary w-full py-4 rounded-2xl font-bold text-white text-lg disabled:opacity-40 flex items-center justify-center gap-2"
+                style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #b4232a, #fb7185)', boxShadow: '0 18px 40px rgba(180, 35, 42, 0.18)' }}>
                 <Rocket size={19} /> Generar mi plan
               </button>
             </div>
@@ -255,34 +337,34 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Tu plan de esta semana</h1>
-                <p className="text-sm mt-1" style={{ color: '#7c6f64' }}>
+                <p className="text-sm mt-1" style={{ color: config.muted }}>
                   Objetivo: {perfil?.nota_objetivo}/14 · {perfil?.horas_dia}h/día · Examen: {perfil?.fecha_examen ? new Date(perfil.fecha_examen).toLocaleDateString('es-ES') : ''}
                 </p>
               </div>
               <button onClick={() => setPaso('onboarding')}
-                className="text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2"
-                style={{ background: '#fffdf9', color: '#1e40af', border: '1px solid #f2e4d4', boxShadow: '0 10px 24px rgba(92,64,35,0.06)' }}>
+                className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2"
+                style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #eadfe6', boxShadow: '0 10px 24px rgba(55,39,47,0.06)' }}>
                 <PenLine size={14} /> Editar perfil
               </button>
             </div>
 
             {totalTareas > 0 && (
-              <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 253, 249, 0.94)', border: '1px solid #f2e4d4', boxShadow: '0 18px 45px rgba(92,64,35,0.08)' }}>
+              <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: '0 18px 45px rgba(55,39,47,0.07)' }}>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold" style={{ color: config.ink }}>Progreso semanal</span>
                   <span className="text-sm font-bold" style={{ color: config.accent }}>{completadasHoy}/{totalTareas} tareas · {porcentaje}%</span>
                 </div>
-                <div className="w-full rounded-full h-3" style={{ background: '#f4e5d6' }}>
-                  <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: 'linear-gradient(90deg, #f59e0b, #fb7185, #2563eb)' }}></div>
+                <div className="w-full rounded-full h-3" style={{ background: '#f1e8ee' }}>
+                  <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: 'linear-gradient(90deg, #b4232a, #fb7185, #7c3aed, #2f7d4e)' }}></div>
                 </div>
               </div>
             )}
 
             {generando ? (
-              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 253, 249, 0.94)', border: '1px solid #f2e4d4', boxShadow: '0 22px 55px rgba(92,64,35,0.1)' }}>
-                <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: '#fff7ed', color: config.accent, border: '1px solid #fed7aa' }}><Bot size={28} /></div>
+              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: config.shadow }}>
+                <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: config.light, color: config.bg, border: '1px solid #ffe4e6' }}><Bot size={28} /></div>
                 <p className="font-semibold" style={{ color: config.ink }}>Pausia está montando tu plan...</p>
-                <p className="text-sm mt-2" style={{ color: '#a5917d' }}>Analizando tu progreso y redistribuyendo tareas pendientes</p>
+                <p className="text-sm mt-2" style={{ color: config.softText }}>Analizando tu progreso y redistribuyendo tareas pendientes</p>
               </div>
             ) : planning.length > 0 ? (
               <div className="grid gap-4">
@@ -290,53 +372,55 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   const completadasDia = dia.tareas?.filter((t: any) => t.completada)?.length ?? 0
                   const totalDia = dia.tareas?.length ?? 0
                   return (
-                    <div key={i} className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255, 253, 249, 0.95)', border: '1px solid #f2e4d4', boxShadow: '0 18px 45px rgba(92,64,35,0.08)' }}>
-                      <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #fff7ed, #eff6ff)', borderBottom: `2px solid ${config.accent}` }}>
+                    <div key={i} className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: '0 18px 45px rgba(55,39,47,0.07)' }}>
+                      <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #fff1f2, #faf5ff)', borderBottom: `2px solid ${config.accent}` }}>
                         <span className="font-bold text-sm flex items-center gap-2" style={{ color: config.ink }}><CalendarDays size={15} color={config.accent} /> {dia.dia}</span>
-                        <span className="text-xs" style={{ color: '#7c6f64' }}>{completadasDia}/{totalDia} completadas</span>
+                        <span className="text-xs" style={{ color: config.muted }}>{completadasDia}/{totalDia} completadas</span>
                       </div>
                       <div className="p-4 flex flex-col gap-3">
-                        {dia.tareas?.map((tarea: any, j: number) => (
-                          <div key={j} className="flex items-start gap-3 p-3 rounded-xl"
-                            style={{ background: tarea.completada ? '#f0fdf4' : '#fffaf5', border: `1px solid ${tarea.completada ? '#bbf7d0' : '#f2e4d4'}` }}>
+                        {dia.tareas?.map((tarea: any, j: number) => {
+                          const theme = subjectTheme(tarea.asignatura)
+                          return (
+                          <div key={j} className="campus-task flex items-start gap-3 p-3 rounded-xl"
+                            style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#f0fdf4' : theme.light, border: `1px solid ${tarea.completada ? '#bbf7d0' : theme.border}` }}>
                             <button onClick={() => !tarea.completada && marcarCompletada(i, j)}
-                              className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs"
-                              style={{ background: tarea.completada ? '#22c55e' : '#fffdf9', border: `2px solid ${tarea.completada ? '#22c55e' : '#e7c9ad'}`, color: '#fff' }}>
+                              className="campus-hover w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs"
+                              style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#22c55e' : '#fff', border: `2px solid ${tarea.completada ? '#22c55e' : theme.accent}`, color: '#fff' }}>
                               {tarea.completada ? <Check size={14} /> : ''}
                             </button>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: '#eff6ff', color: '#1e40af' }}>{tarea.asignatura}</span>
-                                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#fff7ed', color: '#9a5b00', border: '1px solid #fed7aa' }}>{tarea.bloque}</span>
-                                <span className="text-xs flex items-center gap-1" style={{ color: '#a5917d' }}><Clock3 size={13} /> {tarea.duracion} min</span>
+                                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: '#fff', color: theme.color, border: '1px solid ' + theme.border }}>{tarea.asignatura}</span>
+                                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#fff', color: config.muted, border: '1px solid ' + theme.border }}>{tarea.bloque}</span>
+                                <span className="text-xs flex items-center gap-1" style={{ color: config.softText }}><Clock3 size={13} /> {tarea.duracion} min</span>
                               </div>
-                              <p className="text-sm" style={{ color: tarea.completada ? '#7c6f64' : config.ink, textDecoration: tarea.completada ? 'line-through' : 'none' }}>
+                              <p className="text-sm" style={{ color: tarea.completada ? config.muted : config.ink, textDecoration: tarea.completada ? 'line-through' : 'none' }}>
                                 {tarea.descripcion}
                               </p>
                             </div>
                             {!tarea.completada && (
                               <button onClick={() => router.push('/')}
-                                className="text-xs px-3 py-1.5 rounded-full font-bold flex-shrink-0 flex items-center gap-1.5"
-                                style={{ background: 'linear-gradient(135deg, #2563eb, #f59e0b)', color: '#fff', boxShadow: '0 10px 22px rgba(37,99,235,0.16)' }}>
+                                className="campus-primary text-xs px-3 py-1.5 rounded-full font-bold flex-shrink-0 flex items-center gap-1.5"
+                                style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: 'linear-gradient(135deg, ' + theme.color + ', ' + theme.accent + ')', color: '#fff', boxShadow: '0 10px 22px ' + theme.accent + '33' }}>
                                 Practicar <ArrowUpRight size={13} />
                               </button>
                             )}
                           </div>
-                        ))}
+                        )})}
                       </div>
                     </div>
                   )
                 })}
                 <button onClick={() => cargarTareasYPlanning(perfil, usuario?.id)}
-                  className="w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
-                  style={{ background: '#fffdf9', color: '#1e40af', border: '1px solid #f2e4d4', boxShadow: '0 12px 28px rgba(92,64,35,0.06)' }}>
+                  className="campus-hover w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
+                  style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #eadfe6', boxShadow: '0 12px 28px rgba(55,39,47,0.06)' }}>
                   <RefreshCw size={15} /> Recalcular plan
                 </button>
               </div>
             ) : (
-              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 253, 249, 0.94)', border: '1px solid #f2e4d4', boxShadow: '0 22px 55px rgba(92,64,35,0.1)' }}>
-                <p style={{ color: '#7c6f64' }}>No se pudo generar el plan. Intenta de nuevo.</p>
-                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ background: 'linear-gradient(135deg, #2563eb, #f59e0b)' }}>
+              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 223, 230, 0.95)', boxShadow: config.shadow }}>
+                <p style={{ color: config.muted }}>No se pudo generar el plan. Intenta de nuevo.</p>
+                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="campus-primary mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #b4232a, #fb7185)' }}>
                   Intentar de nuevo
                 </button>
               </div>

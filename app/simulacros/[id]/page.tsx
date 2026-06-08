@@ -8,7 +8,6 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
 import MathMarkdown from '@/components/shared/MathMarkdown'
-import 'katex/dist/katex.min.css'
 
 const TOTAL_SECONDS = 90 * 60
 

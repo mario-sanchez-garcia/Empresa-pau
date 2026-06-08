@@ -8,9 +8,7 @@ import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from './lib/correctionPrompt'
 import { formatExamText } from './lib/mathFormatting'
 import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
-import ReactMarkdown from 'react-markdown'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
+import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
   ArrowUpRight,
   Atom,
@@ -37,8 +35,6 @@ import {
   WandSparkles,
   X
 } from 'lucide-react'
-import 'katex/dist/katex.min.css'
-
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#b4232a', light: '#fff1f2', accent: '#fb7185', soft: '#ffe4e6' },
   fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#1e3a8a', light: '#eff6ff', accent: '#3b82f6', soft: '#dbeafe' },
@@ -1181,7 +1177,7 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   <div style={{ fontSize: '1.05rem', lineHeight: '1.8', color: '#1f2937' }}>
-                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{enunciadoActivo}</ReactMarkdown>
+                    <MathMarkdown text={enunciadoActivo} components={mdComponents} />
                   </div>
                 </div>
               </div>
@@ -1232,7 +1228,7 @@ function cambiarTipo(t: Tipo) {
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>CORRECCION DE PAUSIA</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #fafafa)' }}>
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{correccion}</ReactMarkdown>
+                  <MathMarkdown text={correccion} format={false} components={mdComponents} />
                 </div>
               </div>
             )}
@@ -1260,7 +1256,7 @@ function cambiarTipo(t: Tipo) {
                     {msg.rol === 'usuario' ? usuario?.email?.[0]?.toUpperCase() : 'P'}
                   </div>
                   <div style={{ maxWidth: '70%', padding: '12px 16px', borderRadius: '18px', background: msg.rol === 'usuario' ? '#2563eb' : WARM.surface, color: msg.rol === 'usuario' ? '#fff' : '#1f2937', border: msg.rol === 'pausia' ? '1px solid #dbe7fb' : 'none', fontSize: '14px', lineHeight: '1.7', boxShadow: msg.rol === 'pausia' ? '0 10px 24px rgba(37,99,235,0.06)' : '0 10px 24px rgba(37,99,235,0.12)' }}>
-                    {msg.rol === 'pausia' ? <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{msg.texto}</ReactMarkdown> : msg.texto}
+                    {msg.rol === 'pausia' ? <MathMarkdown text={msg.texto} format={false} components={mdComponents} /> : msg.texto}
                   </div>
                 </div>
               ))}
@@ -1367,7 +1363,7 @@ function cambiarTipo(t: Tipo) {
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · PAUSIA</span>
                 </div>
                 <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #eff6ff)' }}>
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={planMdComponents}>{planIA}</ReactMarkdown>
+                  <MathMarkdown text={planIA} format={false} components={planMdComponents} />
                 </div>
               </div>
             )}
@@ -1397,13 +1393,13 @@ function cambiarTipo(t: Tipo) {
                 {itemSeleccionado.enunciado && (
                   <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '16px', background: WARM.field, border: '1px solid #dbe7fb' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
-                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{formatEnunciado(itemSeleccionado.enunciado)}</ReactMarkdown>
+                    <MathMarkdown text={itemSeleccionado.enunciado} components={mdComponents} />
                   </div>
                 )}
                 {itemSeleccionado.correccion && (
                   <div>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Correccion de Pausia</div>
-                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{itemSeleccionado.correccion}</ReactMarkdown>
+                    <MathMarkdown text={itemSeleccionado.correccion} format={false} components={mdComponents} />
                   </div>
                 )}
               </div>

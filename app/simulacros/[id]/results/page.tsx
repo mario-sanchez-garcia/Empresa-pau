@@ -8,7 +8,6 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroRecord } from '@/components/simulacros/types'
 import MathMarkdown from '@/components/shared/MathMarkdown'
-import 'katex/dist/katex.min.css'
 
 type Tab = 'resumen' | 'detalle' | 'plan' | 'bloques'
 

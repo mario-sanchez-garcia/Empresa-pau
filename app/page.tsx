@@ -68,6 +68,35 @@ const mdComponents = {
   blockquote: ({children}: any) => <blockquote style={{ borderLeft: '3px solid #9ca3af', paddingLeft: '1rem', margin: '0.8rem 0', color: '#6b7280', fontStyle: 'italic' }}>{children}</blockquote>,
 }
 
+function formatMatrixRows(raw: string) {
+  const rows = raw
+    .replace(/−/g, '-')
+    .replace(/\t/g, ' ')
+    .split('\n')
+    .map(row => row.trim().replace(/\s+([+\-])\s+/g, '$1').replace(/\s+/g, ' '))
+    .filter(Boolean)
+    .map(row => row.split(' ').join(' & '))
+
+  if (!rows.length) return ''
+
+  const rowSeparator = ' ' + String.raw`\\` + '\n'
+  return '\n\n$$\n\\begin{pmatrix}\n' + rows.join(rowSeparator) + '\n\\end{pmatrix}\n$$\n\n'
+}
+
+function formatEnunciado(enunciado?: string | null) {
+  if (!enunciado) return ''
+
+  return enunciado
+    .replace(/\uf8eb\s*(?:\uf8ec\s*)*\uf8ed\s*([\s\S]*?)\s*\uf8f6\s*(?:\uf8f7\s*)*\uf8f8/g, (_, rows) => formatMatrixRows(rows))
+    .replace(/\uf8f1\s*(?:\uf8f4\s*)*\uf8f2\s*(?:\uf8f4\s*)*\uf8f3/g, '{')
+    .replace(/\uf8fc\s*(?:\uf8f4\s*)*\uf8fd\s*(?:\uf8f4\s*)*\uf8fe/g, '}')
+    .replace(/\u001a/g, '{')
+    .replace(/−\s*→\s*v/g, '$\\vec v$')
+    .replace(/−\s*→\s*0/g, '$\\vec 0$')
+    .replace(/\bdet \(([^)]+)\)/g, '$\\det($1)$')
+    .replace(/\n(?!\n)/g, '  \n')
+}
+
 type Asignatura = 'mates' | 'fisica' | 'historia'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
@@ -244,6 +273,8 @@ const preguntaActiva =
   asignatura === 'fisica' ? preguntaFisica :
   preguntaHistoria
 
+const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
+
 const bloqueActivoLabel =
   asignatura === 'mates' ? (preguntaActiva as any)?.bloque :
   asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
@@ -334,7 +365,7 @@ function cambiarTipo(t: Tipo) {
       const tipoMap: Record<string, string> = { tema: 'desarrollo de tema', comentario: 'comentario de texto', definicion: 'definicion de conceptos', corta: 'respuesta corta' }
       prompt = 'Eres corrector oficial EBAU Madrid Historia de Espana.\n' +
         'TIPO: ' + (tipoMap[p.tipo] || p.tipo) + '\n' +
-        'ENUNCIADO: ' + p.enunciado + '\n' +
+        'ENUNCIADO: ' + formatEnunciado(p.enunciado) + '\n' +
         (p.texto_fuente ? 'FUENTE: ' + p.texto_fuente + '\n' : '') +
         (p.conceptos ? 'CONCEPTOS: ' + p.conceptos.join(', ') + '\n' : '') +
         'PUNTUACION MAX: ' + p.puntuacion + '\n' +
@@ -343,7 +374,7 @@ function cambiarTipo(t: Tipo) {
         'Corrige con: ## Nota (X/' + p.puntuacion + '), ## Que esta bien, ## Que falta, ## Respuesta modelo'
     } else {
       prompt = 'Eres corrector oficial EBAU Madrid ' + (asignatura === 'fisica' ? 'Fisica' : 'Matematicas') + '.\n' +
-        'PREGUNTA: ' + preguntaActiva?.enunciado + '\n' +
+        'PREGUNTA: ' + enunciadoActivo + '\n' +
         'PUNTUACION MAX: ' + preguntaActiva?.puntuacion + '\n' +
         'CRITERIOS: ' + (preguntaActiva as any)?.criterios + '\n' +
         (modo === 'imagen' ? 'Imagen adjunta con respuesta manuscrita.' : 'RESPUESTA: ' + respuesta) + '\n' +
@@ -362,7 +393,7 @@ function cambiarTipo(t: Tipo) {
       user_id: usuario.id, asignatura, tipo, año: examen?.año,
       bloque: bloqueActivoLabel || '',
       opcion: opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
-      enunciado: preguntaActiva?.enunciado?.substring(0, 500),
+      enunciado: enunciadoActivo?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
       correccion: data.respuesta?.substring(0, 2000)
     }).then(() => {})
@@ -719,7 +750,7 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   <div style={{ fontSize: '1.05rem', lineHeight: '1.8', color: '#1f2937' }}>
-                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{preguntaActiva.enunciado}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{enunciadoActivo}</ReactMarkdown>
                   </div>
                 </div>
               </div>
@@ -927,7 +958,7 @@ function cambiarTipo(t: Tipo) {
                 {itemSeleccionado.enunciado && (
                   <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
-                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{itemSeleccionado.enunciado}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{formatEnunciado(itemSeleccionado.enunciado)}</ReactMarkdown>
                   </div>
                 )}
                 {itemSeleccionado.correccion && (

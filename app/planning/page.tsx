@@ -21,10 +21,10 @@ const config = {
 
 const SUBJECT_COLORS = {
   mates: { color: '#b4232a', light: '#fff1f2', accent: '#fb7185', border: '#ffe4e6' },
-  fisica: { color: '#4338ca', light: '#eef2ff', accent: '#818cf8', border: '#e0e7ff' },
-  historia: { color: '#0f5ea8', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
-  quimica: { color: '#0369a1', light: '#f0f9ff', accent: '#38bdf8', border: '#e0f2fe' },
-  lengua: { color: '#1d4ed8', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
+  fisica: { color: '#1e3a8a', light: '#eff6ff', accent: '#3b82f6', border: '#dbeafe' },
+  historia: { color: '#a16207', light: '#fffbeb', accent: '#facc15', border: '#fef3c7' },
+  quimica: { color: '#c2410c', light: '#fff7ed', accent: '#fb923c', border: '#fed7aa' },
+  lengua: { color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
   ingles: { color: '#0284c7', light: '#f0f9ff', accent: '#38bdf8', border: '#e0f2fe' },
   bio: { color: '#0f5ea8', light: '#eff6ff', accent: '#93c5fd', border: '#dbeafe' },
   geo: { color: '#075985', light: '#f0f9ff', accent: '#7dd3fc', border: '#e0f2fe' },

@@ -109,10 +109,11 @@ export default function SimulacrosPage() {
               const cfg = SUBJECTS[key]
               const Icon = cfg.icon
               return (
-                <button key={key} onClick={() => setSubject(key)} className="rounded-3xl border p-5 text-left transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]" style={{ borderColor: subject === key ? cfg.color : '#dbe7fb', background: subject === key ? cfg.light : '#fff', boxShadow: subject === key ? `0 0 0 2px ${cfg.color}22, 0 18px 44px ${cfg.color}1f` : undefined }}>
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm" style={{ background: cfg.light, color: cfg.color }}><Icon size={24} /></div>
-                  <h3 className="font-black">{cfg.label}</h3>
-                  <p className="text-sm font-semibold text-slate-500">Simulacro oficial mezclado</p>
+                <button key={key} onClick={() => setSubject(key)} className="relative overflow-hidden rounded-3xl border p-5 text-left transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]" style={{ borderColor: subject === key ? cfg.color : '#dbe7fb', background: subject === key ? `linear-gradient(145deg,#ffffff,${cfg.light})` : '#fff', boxShadow: subject === key ? `0 0 0 2px ${cfg.color}22, 0 18px 44px ${cfg.color}1f` : undefined }}>
+                  <Icon size={92} className="pointer-events-none absolute -bottom-5 -right-4 opacity-10" style={{ color: cfg.color }} />
+                  <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm" style={{ background: cfg.light, color: cfg.color }}><Icon size={24} /></div>
+                  <h3 className="relative font-black">{cfg.label}</h3>
+                  <p className="relative text-sm font-semibold text-slate-500">Simulacro oficial mezclado</p>
                 </button>
               )
             })}

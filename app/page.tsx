@@ -39,9 +39,9 @@ import 'katex/dist/katex.min.css'
 
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#b4232a', light: '#fff1f2', accent: '#fb7185', soft: '#ffe4e6' },
-  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#4338ca', light: '#eef2ff', accent: '#818cf8', soft: '#e0e7ff' },
-  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#0369a1', light: '#f0f9ff', accent: '#38bdf8', soft: '#e0f2fe' },
-  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#0f5ea8', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' }
+  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#1e3a8a', light: '#eff6ff', accent: '#3b82f6', soft: '#dbeafe' },
+  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#c2410c', light: '#fff7ed', accent: '#fb923c', soft: '#fed7aa' },
+  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#a16207', light: '#fffbeb', accent: '#facc15', soft: '#fef3c7' }
 }
 
 const WARM = {
@@ -228,6 +228,74 @@ function hoverVars(color: string, light: string, accent = color) {
 
 function colorNota(n: number) {
   return n >= 7 ? '#0f5ea8' : n >= 5 ? '#2563eb' : '#1d4ed8'
+}
+
+function SubjectIllustration({ subject, color, accent }: { subject: Asignatura; color: string; accent: string }) {
+  const common = {
+    position: 'absolute' as const,
+    right: '16px',
+    bottom: '10px',
+    width: '138px',
+    height: '96px',
+    opacity: 0.82,
+    pointerEvents: 'none' as const
+  }
+
+  if (subject === 'mates') {
+    return (
+      <svg viewBox="0 0 150 105" style={common} aria-hidden="true">
+        <path d="M18 84H132" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.28" />
+        <path d="M24 80V22" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.28" />
+        {[42, 62, 82, 102, 122].map(x => <path key={x} d={`M${x} 80V72`} stroke={color} strokeWidth="2" strokeLinecap="round" opacity="0.22" />)}
+        <path d="M30 70C45 58 51 66 64 50C76 35 86 42 99 28C108 18 118 17 128 13" fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round" />
+        <path d="M30 70C48 62 55 70 70 56C84 42 94 48 109 33C118 24 124 22 132 18" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" opacity="0.45" />
+        <circle cx="30" cy="70" r="6" fill={accent} />
+        <circle cx="70" cy="56" r="6" fill={accent} />
+        <circle cx="109" cy="33" r="6" fill={accent} />
+      </svg>
+    )
+  }
+
+  if (subject === 'fisica') {
+    return (
+      <svg viewBox="0 0 150 105" style={common} aria-hidden="true">
+        <circle cx="74" cy="53" r="12" fill={accent} opacity="0.78" />
+        <ellipse cx="74" cy="53" rx="52" ry="18" fill="none" stroke={color} strokeWidth="4" opacity="0.32" />
+        <ellipse cx="74" cy="53" rx="52" ry="18" fill="none" stroke={accent} strokeWidth="3" transform="rotate(58 74 53)" opacity="0.6" />
+        <ellipse cx="74" cy="53" rx="52" ry="18" fill="none" stroke={accent} strokeWidth="3" transform="rotate(-58 74 53)" opacity="0.48" />
+        <path d="M105 66C116 75 124 75 135 66" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" opacity="0.22" />
+        <circle cx="119" cy="35" r="5" fill={accent} />
+      </svg>
+    )
+  }
+
+  if (subject === 'quimica') {
+    return (
+      <svg viewBox="0 0 150 105" style={common} aria-hidden="true">
+        <path d="M62 18H98" stroke={color} strokeWidth="4" strokeLinecap="round" />
+        <path d="M72 18V43L45 82C40 89 45 96 54 96H110C119 96 124 89 119 82L92 43V18" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.72" />
+        <path d="M58 74C68 67 78 82 91 73C98 68 106 69 115 75L121 84C124 90 119 96 110 96H54C45 96 40 89 45 82L51 73C53 74 55 75 58 74Z" fill={accent} opacity="0.28" />
+        <circle cx="64" cy="66" r="4" fill={accent} />
+        <circle cx="97" cy="58" r="5" fill={accent} opacity="0.78" />
+        <circle cx="86" cy="84" r="3" fill={color} opacity="0.35" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg viewBox="0 0 150 105" style={common} aria-hidden="true">
+      <path d="M25 41L75 17L125 41" fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" opacity="0.66" />
+      <path d="M36 45H114" stroke={accent} strokeWidth="5" strokeLinecap="round" opacity="0.72" />
+      {[45, 63, 81, 99].map(x => (
+        <g key={x}>
+          <path d={`M${x} 48V82`} stroke={color} strokeWidth="5" strokeLinecap="round" opacity="0.46" />
+          <path d={`M${x - 7} 84H${x + 7}`} stroke={color} strokeWidth="4" strokeLinecap="round" opacity="0.34" />
+        </g>
+      ))}
+      <path d="M30 91H120" stroke={color} strokeWidth="5" strokeLinecap="round" opacity="0.56" />
+      <circle cx="75" cy="39" r="5" fill={accent} opacity="0.92" />
+    </svg>
+  )
 }
 
 function calcMedia(items: any[]) {
@@ -854,27 +922,28 @@ function cambiarTipo(t: Tipo) {
                       position: 'relative',
                       overflow: 'hidden',
                       textAlign: 'left',
-                      minHeight: '154px',
+                      minHeight: '178px',
                       padding: '20px',
                       borderRadius: '24px',
-                      border: active ? '1px solid ' + val.accent : '1px solid rgba(234,223,230,0.95)',
+                      border: active ? '1px solid ' + val.accent : '1px solid rgba(219,231,251,0.95)',
                       background: 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 58%, ' + val.soft + ' 100%)',
                       cursor: 'pointer',
-                      boxShadow: active ? '0 24px 55px ' + val.accent + '26' : '0 18px 45px rgba(55, 39, 47, 0.08)'
+                      boxShadow: active ? '0 24px 55px ' + val.accent + '28' : '0 18px 45px rgba(37, 99, 235, 0.08)'
                     }}
                   >
-                    <div style={{ position: 'absolute', right: '-28px', bottom: '-34px', width: '116px', height: '116px', borderRadius: '50%', background: val.accent + '1f' }} />
+                    <div style={{ position: 'absolute', right: '-34px', bottom: '-42px', width: '128px', height: '128px', borderRadius: '50%', background: val.accent + '22' }} />
+                    <SubjectIllustration subject={key} color={val.color} accent={val.accent} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px' }}>
-                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)', position: 'relative', zIndex: 2 }}>
                         <Icon size={26} strokeWidth={2.1} />
                       </div>
-                      <div className="campus-arrow" style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#ffffff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' }}>
+                      <div className="campus-arrow" style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#ffffff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)', position: 'relative', zIndex: 2 }}>
                         <ArrowUpRight size={19} />
                       </div>
                     </div>
-                    <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 760, color: WARM.ink, position: 'relative' }}>{card.title}</div>
-                    <div style={{ marginTop: '5px', color: WARM.muted, fontSize: '13px', lineHeight: '1.45', position: 'relative' }}>{card.subtitle}</div>
-                    <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.76)', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative' }}>
+                    <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 760, color: WARM.ink, position: 'relative', zIndex: 2 }}>{card.title}</div>
+                    <div style={{ marginTop: '5px', color: WARM.muted, fontSize: '13px', lineHeight: '1.45', position: 'relative', zIndex: 2, maxWidth: '72%' }}>{card.subtitle}</div>
+                    <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.76)', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
                       <Flame size={13} />{card.kicker}
                     </div>
                   </button>

@@ -6,9 +6,9 @@ import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSub
 
 export const SUBJECTS = {
   mates: { label: 'Matemáticas II', short: 'Mates', color: '#b4232a', light: '#fff1f2', icon: Sigma },
-  fisica: { label: 'Física', short: 'Física', color: '#4338ca', light: '#eef2ff', icon: Atom },
-  quimica: { label: 'Química', short: 'Química', color: '#0369a1', light: '#f0f9ff', icon: FlaskConical },
-  historia: { label: 'Historia de España', short: 'Historia', color: '#0f5ea8', light: '#eff6ff', icon: Landmark }
+  fisica: { label: 'Física', short: 'Física', color: '#1e3a8a', light: '#eff6ff', icon: Atom },
+  quimica: { label: 'Química', short: 'Química', color: '#c2410c', light: '#fff7ed', icon: FlaskConical },
+  historia: { label: 'Historia de España', short: 'Historia', color: '#a16207', light: '#fffbeb', icon: Landmark }
 } as const
 
 export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [

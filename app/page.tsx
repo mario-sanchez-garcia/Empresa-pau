@@ -772,13 +772,24 @@ function cambiarTipo(t: Tipo) {
             const Icon = item.icon
             const active = seccion === item.id
             return (
-            <button key={item.id} onClick={() => setSeccion(item.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: active ? '1px solid rgba(245,158,11,0.22)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #fffdf9, #fff7ed)' : 'transparent', boxShadow: active ? '0 12px 28px rgba(92, 64, 35, 0.08)' : 'none' }}>
-              <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? WARM.blue : WARM.muted, background: active ? '#eff6ff' : '#fffaf5', border: active ? '1px solid #dbeafe' : '1px solid #f2e4d4' }}><Icon size={17} /></span>
-              <div>
-                <div style={{ color: active ? WARM.ink : WARM.muted, fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
-                <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
-              </div>
-            </button>
+            <div key={item.id}>
+              <button onClick={() => setSeccion(item.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: active ? '1px solid rgba(245,158,11,0.22)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #fffdf9, #fff7ed)' : 'transparent', boxShadow: active ? '0 12px 28px rgba(92, 64, 35, 0.08)' : 'none' }}>
+                <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? WARM.blue : WARM.muted, background: active ? '#eff6ff' : '#fffaf5', border: active ? '1px solid #dbeafe' : '1px solid #f2e4d4' }}><Icon size={17} /></span>
+                <div>
+                  <div style={{ color: active ? WARM.ink : WARM.muted, fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
+                  <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
+                </div>
+              </button>
+              {item.id === 'examenes' && (
+                <a href="/zona" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
+                  <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', background: '#f5f3ff', border: '1px solid #ddd6fe' }}><BrainCircuit size={17} /></span>
+                  <div>
+                    <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>La Zona</div>
+                    <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Estudia a tu manera</div>
+                  </div>
+                </a>
+              )}
+            </div>
           )})}
           <a href="/planning" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', textDecoration: 'none', marginBottom: '6px', background: 'transparent' }}>
             <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.amber, background: '#fff7ed', border: '1px solid #fed7aa' }}><Rocket size={17} /></span>

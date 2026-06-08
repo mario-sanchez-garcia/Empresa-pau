@@ -37,6 +37,20 @@ const ASIGNATURAS = {
   historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#166534', light: '#f0fdf4', accent: '#22c55e', soft: '#dcfce7' }
 }
 
+const WARM = {
+  ink: '#172033',
+  muted: '#7c6f64',
+  softText: '#a5917d',
+  surface: '#fffdf9',
+  field: '#fffaf5',
+  wash: '#fff7ed',
+  border: '#f2e4d4',
+  amber: '#f59e0b',
+  coral: '#fb7185',
+  blue: '#2563eb',
+  shadow: '0 22px 60px rgba(92, 64, 35, 0.10)'
+}
+
 const SUBJECT_CARDS = {
   mates: {
     title: 'Matemáticas',
@@ -70,29 +84,29 @@ const mdComponents = {
 
 const planMdComponents = {
   h1: ({children}: any) => (
-    <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: '#0f172a', margin: '0 0 18px', lineHeight: 1.2 }}>{children}</h1>
+    <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: WARM.ink, margin: '0 0 18px', lineHeight: 1.2 }}>{children}</h1>
   ),
   h2: ({children}: any) => (
-    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #eff6ff, #f8fafc)', border: '1px solid #dbeafe', color: '#1e40af', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #fff7ed, #eff6ff)', border: '1px solid #f2e4d4', color: '#1e40af', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 28px rgba(92,64,35,0.06)' }}>
       <Target size={17} />{children}
     </h2>
   ),
   h3: ({children}: any) => (
-    <h3 style={{ margin: '16px 0 10px', color: '#0f172a', fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <Flame size={15} color="#2563eb" />{children}
+    <h3 style={{ margin: '16px 0 10px', color: WARM.ink, fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <Flame size={15} color={WARM.amber} />{children}
     </h3>
   ),
-  strong: ({children}: any) => <strong style={{ fontWeight: 800, color: '#0f172a' }}>{children}</strong>,
-  p: ({children}: any) => <p style={{ margin: '0.55rem 0', color: '#475569', lineHeight: 1.75 }}>{children}</p>,
+  strong: ({children}: any) => <strong style={{ fontWeight: 800, color: WARM.ink }}>{children}</strong>,
+  p: ({children}: any) => <p style={{ margin: '0.55rem 0', color: WARM.muted, lineHeight: 1.75 }}>{children}</p>,
   ul: ({children}: any) => <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ul>,
   ol: ({children}: any) => <ol style={{ paddingLeft: '1.2rem', margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ol>,
   li: ({children}: any) => (
-    <li style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '10px 12px', color: '#334155', lineHeight: 1.6, boxShadow: '0 8px 20px rgba(15, 23, 42, 0.035)' }}>
+    <li style={{ background: WARM.surface, border: '1px solid #f2e4d4', borderRadius: '14px', padding: '10px 12px', color: WARM.ink, lineHeight: 1.6, boxShadow: '0 8px 20px rgba(92, 64, 35, 0.045)' }}>
       {children}
     </li>
   ),
   blockquote: ({children}: any) => (
-    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontWeight: 700 }}>
+    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: '#fff7ed', border: '1px solid #fed7aa', color: '#9a5b00', fontWeight: 700 }}>
       {children}
     </blockquote>
   ),
@@ -584,90 +598,90 @@ function cambiarTipo(t: Tipo) {
     <div style={{
   display: 'flex',
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #f8fafc 0%, #f5f9ff 45%, #f7fdf9 100%)',
+  background: 'linear-gradient(135deg, #fff8f1 0%, #fff7ed 34%, #eef6ff 70%, #f7fff8 100%)',
   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
 }}>
       <aside style={{
   width: '282px',
   minHeight: '100vh',
-  background: 'rgba(255, 255, 255, 0.78)',
+  background: 'rgba(255, 253, 249, 0.84)',
   backdropFilter: 'blur(24px)',
   display: 'flex',
   flexDirection: 'column',
   position: 'sticky',
   top: 0,
   flexShrink: 0,
-  borderRight: '1px solid rgba(226, 232, 240, 0.9)',
-  boxShadow: '18px 0 50px rgba(15, 23, 42, 0.06)'
+  borderRight: '1px solid rgba(242, 228, 212, 0.92)',
+  boxShadow: '18px 0 55px rgba(92, 64, 35, 0.08)'
 }}>
-        <div style={{ padding: '26px 22px 22px', borderBottom: '1px solid rgba(226,232,240,0.85)' }}>
+        <div style={{ padding: '26px 22px 22px', borderBottom: '1px solid rgba(242,228,212,0.9)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
            <div style={{
   width: '44px',
   height: '44px',
   borderRadius: '16px',
-  background: 'linear-gradient(145deg, #60a5fa 0%, #2563eb 58%, #1d4ed8 100%)',
+  background: 'linear-gradient(145deg, #f59e0b 0%, #fb7185 45%, #2563eb 100%)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   color: '#fff',
-  boxShadow: '0 14px 30px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255,255,255,0.35)'
+  boxShadow: '0 14px 30px rgba(245, 158, 11, 0.28), inset 0 1px 0 rgba(255,255,255,0.35)'
 }}><GraduationCap size={23} strokeWidth={2.2} /></div>
             <div>
-              <div style={{ color: '#0f172a', fontWeight: 760, fontSize: '18px' }}>Pausia</div>
-              <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>EBAU Madrid · practica mejor</div>
+              <div style={{ color: WARM.ink, fontWeight: 760, fontSize: '18px' }}>Pausia</div>
+              <div style={{ color: WARM.muted, fontSize: '11px', marginTop: '2px' }}>EBAU Madrid · practica mejor</div>
             </div>
           </div>
         </div>
         <nav style={{ padding: '18px 14px', flex: 1 }}>
-          <div style={{ color: '#94a3b8', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', marginBottom: '10px' }}>Navegacion</div>
+          <div style={{ color: WARM.softText, fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', marginBottom: '10px' }}>Navegacion</div>
           {NAV_ITEMS.map(item => {
             const Icon = item.icon
             const active = seccion === item.id
             return (
-            <button key={item.id} onClick={() => setSeccion(item.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: active ? '1px solid rgba(59,130,246,0.18)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #ffffff, #eff6ff)' : 'transparent', boxShadow: active ? '0 12px 28px rgba(37, 99, 235, 0.08)' : 'none' }}>
-              <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#2563eb' : '#64748b', background: active ? '#dbeafe' : '#f8fafc' }}><Icon size={17} /></span>
+            <button key={item.id} onClick={() => setSeccion(item.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: active ? '1px solid rgba(245,158,11,0.22)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #fffdf9, #fff7ed)' : 'transparent', boxShadow: active ? '0 12px 28px rgba(92, 64, 35, 0.08)' : 'none' }}>
+              <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? WARM.blue : WARM.muted, background: active ? '#eff6ff' : '#fffaf5', border: active ? '1px solid #dbeafe' : '1px solid #f2e4d4' }}><Icon size={17} /></span>
               <div>
-                <div style={{ color: active ? '#0f172a' : '#475569', fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
-                <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
+                <div style={{ color: active ? WARM.ink : WARM.muted, fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
+                <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
               </div>
             </button>
           )})}
           <a href="/planning" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', textDecoration: 'none', marginBottom: '6px', background: 'transparent' }}>
-            <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff' }}><Rocket size={17} /></span>
+            <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.amber, background: '#fff7ed', border: '1px solid #fed7aa' }}><Rocket size={17} /></span>
             <div>
-              <div style={{ color: '#475569', fontSize: '14px', fontWeight: 520 }}>Planning</div>
-              <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
+              <div style={{ color: WARM.muted, fontSize: '14px', fontWeight: 520 }}>Planning</div>
+              <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
             </div>
           </a>
-          <div style={{ color: '#94a3b8', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', margin: '22px 0 10px' }}>Asignaturas</div>
+          <div style={{ color: WARM.softText, fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', margin: '22px 0 10px' }}>Asignaturas</div>
           {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
             const Icon = val.icon
             const active = asignatura === key && seccion === 'examenes'
             return (
-            <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 13px', borderRadius: '16px', border: active ? '1px solid ' + val.soft : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? val.light : 'transparent' }}>
+            <button key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 13px', borderRadius: '16px', border: active ? '1px solid ' + val.soft : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #fffdf9, ' + val.light + ')' : 'transparent' }}>
               <span style={{ width: '32px', height: '32px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: val.color, background: active ? '#fff' : val.light }}><Icon size={16} /></span>
-              <div style={{ color: active ? val.color : '#64748b', fontSize: '13px', fontWeight: active ? 700 : 520 }}>{val.label}</div>
+              <div style={{ color: active ? val.color : WARM.muted, fontSize: '13px', fontWeight: active ? 700 : 520 }}>{val.label}</div>
             </button>
           )})}
         </nav>
-        <div style={{ padding: '16px', borderTop: '1px solid rgba(226,232,240,0.85)' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid rgba(242,228,212,0.9)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#fff7ed', border: '1px solid #fed7aa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.amber, fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
             <div style={{ overflow: 'hidden' }}>
-              <div style={{ color: '#0f172a', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{usuario?.email}</div>
-              <div style={{ color: '#94a3b8', fontSize: '11px' }}>Estudiante</div>
+              <div style={{ color: WARM.ink, fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{usuario?.email}</div>
+              <div style={{ color: WARM.softText, fontSize: '11px' }}>Estudiante</div>
             </div>
           </div>
-          <button onClick={cerrarSesion} style={{ width: '100%', padding: '10px 12px', borderRadius: '14px', background: '#fff', border: '1px solid #fee2e2', color: '#dc2626', fontSize: '12px', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.04)' }}><LogOut size={15} />Cerrar sesion</button>
+          <button onClick={cerrarSesion} style={{ width: '100%', padding: '10px 12px', borderRadius: '14px', background: WARM.surface, border: '1px solid #fee2e2', color: '#dc2626', fontSize: '12px', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 22px rgba(92, 64, 35, 0.05)' }}><LogOut size={15} />Cerrar sesion</button>
         </div>
       </aside>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
        <header style={{
-  background: 'rgba(255, 255, 255, 0.76)',
+  background: 'rgba(255, 253, 249, 0.78)',
   backdropFilter: 'blur(22px)',
-  borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+  borderBottom: '1px solid rgba(242, 228, 212, 0.9)',
   padding: '0 34px',
   height: '78px',
   display: 'flex',
@@ -682,13 +696,13 @@ function cambiarTipo(t: Tipo) {
               <HeaderIcon size={20} />
             </div>
             <div>
-            <div style={{ fontWeight: 700, fontSize: '18px', color: '#0f172a' }}>
+            <div style={{ fontWeight: 700, fontSize: '18px', color: WARM.ink }}>
               {seccion === 'examenes' && cfg.label}
               {seccion === 'chat' && 'Chat con Pausia'}
               {seccion === 'historial' && 'Historial de correcciones'}
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
-            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>
               {seccion === 'examenes' && 'Practica con examenes oficiales EBAU Madrid'}
               {seccion === 'chat' && 'Resuelve dudas sin quedarte bloqueado'}
               {seccion === 'historial' && 'Todas tus correcciones guardadas'}
@@ -701,7 +715,7 @@ function cambiarTipo(t: Tipo) {
               {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
                 const Icon = val.icon
                 return (
-                <button key={key} onClick={() => cambiarAsignatura(key)} style={{ padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #e2e8f0', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.9)', color: asignatura === key ? '#fff' : '#64748b', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(15,23,42,0.04)' }}><Icon size={15} />{val.short}</button>
+                <button key={key} onClick={() => cambiarAsignatura(key)} style={{ padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #f2e4d4', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,253,249,0.92)', color: asignatura === key ? '#fff' : WARM.muted, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(92,64,35,0.05)' }}><Icon size={15} />{val.short}</button>
               )})}
             </div>
           )}
@@ -726,24 +740,24 @@ function cambiarTipo(t: Tipo) {
                       minHeight: '162px',
                       padding: '22px',
                       borderRadius: '24px',
-                      border: active ? '1px solid ' + val.accent : '1px solid rgba(226,232,240,0.95)',
-                      background: 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 58%, ' + val.soft + ' 100%)',
+                      border: active ? '1px solid ' + val.accent : '1px solid rgba(242,228,212,0.95)',
+                      background: 'linear-gradient(145deg, #fffdf9 0%, ' + val.light + ' 58%, ' + val.soft + ' 100%)',
                       cursor: 'pointer',
-                      boxShadow: active ? '0 24px 55px ' + val.accent + '26' : '0 18px 45px rgba(15, 23, 42, 0.07)'
+                      boxShadow: active ? '0 24px 55px ' + val.accent + '26' : '0 18px 45px rgba(92, 64, 35, 0.09)'
                     }}
                   >
                     <div style={{ position: 'absolute', right: '-28px', bottom: '-34px', width: '116px', height: '116px', borderRadius: '50%', background: val.accent + '1f' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px' }}>
-                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', color: val.color, boxShadow: '0 12px 28px rgba(15,23,42,0.08)' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fffdf9', color: val.color, boxShadow: '0 12px 28px rgba(92,64,35,0.08)' }}>
                         <Icon size={26} strokeWidth={2.1} />
                       </div>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#fff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(15,23,42,0.08)' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#fffdf9', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(92,64,35,0.08)' }}>
                         <ArrowUpRight size={19} />
                       </div>
                     </div>
-                    <div style={{ marginTop: '22px', fontSize: '20px', fontWeight: 760, color: '#0f172a', position: 'relative' }}>{card.title}</div>
-                    <div style={{ marginTop: '5px', color: '#64748b', fontSize: '13px', lineHeight: '1.45', position: 'relative' }}>{card.subtitle}</div>
-                    <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: '#ffffffcc', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative' }}>
+                    <div style={{ marginTop: '22px', fontSize: '20px', fontWeight: 760, color: WARM.ink, position: 'relative' }}>{card.title}</div>
+                    <div style={{ marginTop: '5px', color: WARM.muted, fontSize: '13px', lineHeight: '1.45', position: 'relative' }}>{card.subtitle}</div>
+                    <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: '#fffdf9cc', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative' }}>
                       <Flame size={13} />{card.kicker}
                     </div>
                   </button>
@@ -751,18 +765,18 @@ function cambiarTipo(t: Tipo) {
               })}
             </div>
            <div style={{
-  background: 'rgba(255, 255, 255, 0.9)',
+  background: 'rgba(255, 253, 249, 0.92)',
   borderRadius: '24px',
-  border: '1px solid rgba(226, 232, 240, 0.9)',
+  border: '1px solid rgba(242, 228, 212, 0.95)',
   padding: '24px',
   marginBottom: '22px',
-  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)',
+  boxShadow: WARM.shadow,
   backdropFilter: 'blur(12px)'
 }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {(['Ordinaria', 'Extraordinaria', 'Modelo'] as Tipo[]).map(t => (
-                  <button key={t} onClick={() => cambiarTipo(t)} style={{ padding: '7px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 500, background: tipo === t ? cfg.color : '#f8fafc', color: tipo === t ? '#fff' : '#64748b', border: tipo === t ? 'none' : '1px solid #e2e8f0' } as any}>
+                  <button key={t} onClick={() => cambiarTipo(t)} style={{ padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #f2e4d4' } as any}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                       {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
                       {t}
@@ -783,13 +797,13 @@ function cambiarTipo(t: Tipo) {
     }}
     style={{
       padding: '6px 14px',
-      borderRadius: '8px',
+      borderRadius: '12px',
       cursor: 'pointer',
       fontSize: '13px',
-      fontWeight: 500,
-      background: examenIdx === i ? cfg.color : '#f8fafc',
-      color: examenIdx === i ? '#fff' : '#374151',
-      border: examenIdx === i ? 'none' : '1px solid #e2e8f0'
+      fontWeight: 700,
+      background: examenIdx === i ? cfg.color : WARM.field,
+      color: examenIdx === i ? '#fff' : WARM.ink,
+      border: examenIdx === i ? 'none' : '1px solid #f2e4d4'
     } as any}
   >
     {anio}
@@ -826,27 +840,27 @@ function cambiarTipo(t: Tipo) {
               )}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
-                  <button key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
+                  <button key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #f2e4d4' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : bloquesHistoria).map((t, i) => (
-                  <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : (t as any).pts}pts</button>
+                  <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #f2e4d4' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>Opcion:</span>
+                <span style={{ fontSize: '13px', color: WARM.muted, fontWeight: 700 }}>Opcion:</span>
                 {opcionesDisponibles.map(op => (
-                  <button key={op} onClick={() => { setOpcion(op); reset() }} style={{ width: '38px', height: '38px', borderRadius: '10px', cursor: 'pointer', fontWeight: 700, fontSize: '14px', background: opcion === op ? cfg.color : '#f8fafc', color: opcion === op ? '#fff' : '#374151', border: opcion === op ? 'none' : '1px solid #e2e8f0' } as any}>{op === 0 ? 'A' : 'B'}</button>
+                  <button key={op} onClick={() => { setOpcion(op); reset() }} style={{ width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #f2e4d4' } as any}>{op === 0 ? 'A' : 'B'}</button>
                 ))}
               </div>
             </div>
 
             {preguntaActiva && (
              <div style={{
-  background: 'rgba(255, 255, 255, 0.94)',
+  background: 'rgba(255, 253, 249, 0.95)',
   borderRadius: '24px',
-  border: '1px solid rgba(226, 232, 240, 0.9)',
+  border: '1px solid rgba(242, 228, 212, 0.95)',
   overflow: 'hidden',
   marginBottom: '22px',
-  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)'
+  boxShadow: WARM.shadow
 }}>
                 <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -855,7 +869,7 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{diaHistoriaSeleccionado}</span>
                     )}
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#f1f5f9', color: '#374151', fontSize: '11px', border: '1px solid #e2e8f0' }}>Opcion {opcionMostrada}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid #fed7aa' }}>Opcion {opcionMostrada}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{preguntaActiva.puntuacion}</span>
@@ -864,7 +878,7 @@ function cambiarTipo(t: Tipo) {
                 </div>
                 <div style={{ padding: '24px' }}>
                   {asignatura === 'historia' && (preguntaActiva as any).texto_fuente && (
-                    <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '10px', background: '#f8fafc', borderLeft: '3px solid ' + cfg.accent, color: '#374151', fontSize: '14px', fontStyle: 'italic', lineHeight: '1.7' }}>{(preguntaActiva as any).texto_fuente}</div>
+                    <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '14px', background: WARM.field, borderLeft: '3px solid ' + cfg.accent, color: WARM.ink, fontSize: '14px', fontStyle: 'italic', lineHeight: '1.7' }}>{(preguntaActiva as any).texto_fuente}</div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
                     <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
@@ -899,27 +913,27 @@ function cambiarTipo(t: Tipo) {
             )}
 
            <div style={{
-  background: 'rgba(255, 255, 255, 0.94)',
+  background: 'rgba(255, 253, 249, 0.95)',
   borderRadius: '24px',
-  border: '1px solid rgba(226, 232, 240, 0.9)',
+  border: '1px solid rgba(242, 228, 212, 0.95)',
   padding: '26px',
   marginBottom: '22px',
-  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)'
+  boxShadow: WARM.shadow
 }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#64748b', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: WARM.muted, marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                 {(['texto', 'imagen'] as const).map(m => (
-                  <button key={m} onClick={() => setModo(m)} style={{ padding: '9px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: modo === m ? 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')' : '#f1f5f9', color: modo === m ? '#fff' : '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>{m === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}{m === 'texto' ? 'Escribir' : 'Subir foto'}</button>
+                  <button key={m} onClick={() => setModo(m)} style={{ padding: '9px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: modo === m ? 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')' : WARM.wash, color: modo === m ? '#fff' : WARM.muted, display: 'flex', alignItems: 'center', gap: '8px' }}>{m === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}{m === 'texto' ? 'Escribir' : 'Subir foto'}</button>
                 ))}
               </div>
               {modo === 'texto' ? (
-                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder={asignatura === 'historia' ? 'Escribe tu respuesta aqui...' : 'Escribe tu resolucion paso a paso...'} style={{ width: '100%', height: asignatura === 'historia' ? '280px' : '180px', borderRadius: '10px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #e2e8f0', background: '#fafafa', color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder={asignatura === 'historia' ? 'Escribe tu respuesta aqui...' : 'Escribe tu resolucion paso a paso...'} style={{ width: '100%', height: asignatura === 'historia' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #f2e4d4', background: WARM.field, color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               ) : (
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
                   {imagenPreview ? (
                     <div style={{ position: 'relative' }}>
-                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '10px', border: '1.5px solid #e2e8f0' }} />
+                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '16px', border: '1.5px solid #f2e4d4' }} />
                       <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
                     </div>
                   ) : (
@@ -937,12 +951,12 @@ function cambiarTipo(t: Tipo) {
             </div>
 
             {correccion && (
-              <div style={{ background: '#fff', borderRadius: '14px', border: '2px solid ' + cfg.color, overflow: 'hidden' }}>
+              <div style={{ background: WARM.surface, borderRadius: '24px', border: '2px solid ' + cfg.color, overflow: 'hidden', boxShadow: WARM.shadow }}>
                 <div style={{ padding: '16px 24px', background: cfg.color, display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>CORRECCION DE PAUSIA</span>
                 </div>
-                <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
+                <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #fffdf9, #fffaf5)' }}>
                   <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{correccion}</ReactMarkdown>
                 </div>
               </div>
@@ -955,40 +969,40 @@ function cambiarTipo(t: Tipo) {
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {mensajes.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                  <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.12)' }}><MessageCircle size={28} /></div>
-                  <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Hola! Soy Pausia</div>
-                  <div style={{ fontSize: '15px', color: '#64748b', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu compa de estudio para la EBAU de Madrid.</div>
+                  <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: 'linear-gradient(145deg, #f59e0b, #fb7185 52%, #2563eb)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 16px 34px rgba(245,158,11,0.22)' }}><MessageCircle size={28} /></div>
+                  <div style={{ fontSize: '20px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Hola! Soy Pausia</div>
+                  <div style={{ fontSize: '15px', color: WARM.muted, maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu compa de estudio para la EBAU de Madrid.</div>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
                     {['Como es el examen de mates?', 'Que temas caen en historia?', 'Explicame la Segunda Republica'].map(s => (
-                      <button key={s} onClick={() => setInputChat(s)} style={{ padding: '8px 16px', borderRadius: '20px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#475569', fontSize: '13px', cursor: 'pointer', fontWeight: 500 }}>{s}</button>
+                      <button key={s} onClick={() => setInputChat(s)} style={{ padding: '8px 16px', borderRadius: '20px', background: WARM.wash, border: '1px solid #f2e4d4', color: WARM.muted, fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}>{s}</button>
                     ))}
                   </div>
                 </div>
               )}
               {mensajes.map((msg, i) => (
                 <div key={i} style={{ display: 'flex', gap: '12px', flexDirection: msg.rol === 'usuario' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0, background: msg.rol === 'usuario' ? '#1e3a5f' : '#1a4731', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0, background: msg.rol === 'usuario' ? '#1e40af' : 'linear-gradient(145deg, #f59e0b, #fb7185)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
                     {msg.rol === 'usuario' ? usuario?.email?.[0]?.toUpperCase() : 'P'}
                   </div>
-                  <div style={{ maxWidth: '70%', padding: '12px 16px', borderRadius: '14px', background: msg.rol === 'usuario' ? '#1e3a5f' : '#fff', color: msg.rol === 'usuario' ? '#fff' : '#1f2937', border: msg.rol === 'pausia' ? '1px solid #e2e8f0' : 'none', fontSize: '14px', lineHeight: '1.7' }}>
+                  <div style={{ maxWidth: '70%', padding: '12px 16px', borderRadius: '18px', background: msg.rol === 'usuario' ? '#1e40af' : WARM.surface, color: msg.rol === 'usuario' ? '#fff' : '#1f2937', border: msg.rol === 'pausia' ? '1px solid #f2e4d4' : 'none', fontSize: '14px', lineHeight: '1.7', boxShadow: msg.rol === 'pausia' ? '0 10px 24px rgba(92,64,35,0.06)' : '0 10px 24px rgba(37,99,235,0.10)' }}>
                     {msg.rol === 'pausia' ? <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{msg.texto}</ReactMarkdown> : msg.texto}
                   </div>
                 </div>
               ))}
               {cargandoChat && (
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1a4731', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>P</div>
-                  <div style={{ padding: '12px 16px', borderRadius: '14px', background: '#fff', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '14px' }}>Pausia esta escribiendo...</div>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(145deg, #f59e0b, #fb7185)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>P</div>
+                  <div style={{ padding: '12px 16px', borderRadius: '18px', background: WARM.surface, border: '1px solid #f2e4d4', color: WARM.muted, fontSize: '14px' }}>Pausia esta escribiendo...</div>
                 </div>
               )}
               <div ref={chatEndRef} />
             </div>
-            <div style={{ padding: '16px 0 24px', borderTop: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', gap: '10px', background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '8px 8px 8px 16px', alignItems: 'flex-end' }}>
+            <div style={{ padding: '16px 0 24px', borderTop: '1px solid #f2e4d4' }}>
+              <div style={{ display: 'flex', gap: '10px', background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '8px 8px 8px 16px', alignItems: 'flex-end', boxShadow: '0 16px 38px rgba(92,64,35,0.08)' }}>
                 <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '14px', lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#1f2937', fontFamily: 'inherit', maxHeight: '120px' }} />
-                <button onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat} style={{ padding: '10px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer', background: inputChat.trim() && !cargandoChat ? 'linear-gradient(135deg, #0f172a, #2563eb)' : '#e2e8f0', color: inputChat.trim() && !cargandoChat ? '#fff' : '#94a3b8', fontSize: '13px', fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7px' }}><SendHorizontal size={15} />Enviar</button>
+                <button onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat} style={{ padding: '10px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer', background: inputChat.trim() && !cargandoChat ? 'linear-gradient(135deg, #2563eb, #f59e0b)' : '#f2e4d4', color: inputChat.trim() && !cargandoChat ? '#fff' : WARM.softText, fontSize: '13px', fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7px' }}><SendHorizontal size={15} />Enviar</button>
               </div>
-              <p style={{ textAlign: 'center', fontSize: '11px', color: '#cbd5e1', margin: '8px 0 0' }}>Enter para enviar · Shift+Enter para nueva linea</p>
+              <p style={{ textAlign: 'center', fontSize: '11px', color: WARM.softText, margin: '8px 0 0' }}>Enter para enviar · Shift+Enter para nueva linea</p>
             </div>
           </div>
         )}
@@ -996,54 +1010,54 @@ function cambiarTipo(t: Tipo) {
         {seccion === 'historial' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             {cargandoHistorial ? (
-              <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>Cargando historial...</div>
+              <div style={{ textAlign: 'center', padding: '60px', color: WARM.muted }}>Cargando historial...</div>
             ) : historial.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px' }}>
-                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.12)' }}><BarChart3 size={28} /></div>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Sin correcciones aun</div>
-                <div style={{ fontSize: '14px', color: '#64748b' }}>Haz tu primera correccion en Examenes</div>
+                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: '#fff7ed', color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(245,158,11,0.14)', border: '1px solid #fed7aa' }}><BarChart3 size={28} /></div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Sin correcciones aun</div>
+                <div style={{ fontSize: '14px', color: WARM.muted }}>Haz tu primera correccion en Examenes</div>
               </div>
             ) : (
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
-                    <div style={{ fontSize: '36px', fontWeight: 800, color: '#0f172a' }}>{historial.length}</div>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
+                    <div style={{ fontSize: '36px', fontWeight: 800, color: WARM.ink }}>{historial.length}</div>
                   </div>
-                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
-                    {mediaM ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaM)) }}>{mediaM}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matematicas</div>
+                    {mediaM ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaM)) }}>{mediaM}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Física</div>
-                    {mediaFisica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaFisica)) }}>{mediaFisica}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Física</div>
+                    {mediaFisica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaFisica)) }}>{mediaFisica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
-                    {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/10</span></div> : <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>Sin datos</div>}
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(92,64,35,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
+                    {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {historial.map((item, i) => (
-                    <div key={i} onClick={() => setItemSeleccionado(item)} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', cursor: 'pointer' }}>
+                    <div key={i} onClick={() => setItemSeleccionado(item)} style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #f2e4d4', padding: '20px', cursor: 'pointer', boxShadow: '0 12px 30px rgba(92,64,35,0.06)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                         <div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : item.asignatura === 'fisica' ? '#4c1d95' : '#1a4731' }}>{nombreAsignatura(item.asignatura)}</span>
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.tipo}</span>
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.año}</span>
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.bloque}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.tipo}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.año}</span>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.bloque}</span>
                           </div>
-                          <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
+                          <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '4px' }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                         {item.nota !== null && item.nota_maxima !== null && (
                           <div>
                             <span style={{ fontSize: '28px', fontWeight: 800, color: colorNota(item.nota / item.nota_maxima * 10) }}>{item.nota}</span>
-                            <span style={{ fontSize: '14px', color: '#94a3b8' }}>/{item.nota_maxima}</span>
+                            <span style={{ fontSize: '14px', color: WARM.softText }}>/{item.nota_maxima}</span>
                           </div>
                         )}
                       </div>
-                      <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>Haz clic para ver la correccion completa <ArrowUpRight size={14} /></div>
+                      <div style={{ fontSize: '13px', color: WARM.muted, display: 'flex', alignItems: 'center', gap: '6px' }}>Haz clic para ver la correccion completa <ArrowUpRight size={14} /></div>
                     </div>
                   ))}
                 </div>
@@ -1054,22 +1068,22 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'planning' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
-            <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '28px', marginBottom: '20px', textAlign: 'center' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #60a5fa, #7c3aed)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.26), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Plan de estudio personalizado</div>
-              <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos debiles</div>
-              <button onClick={generarPlan} disabled={cargandoPlan} style={{ padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#94a3b8' : 'linear-gradient(135deg, #0f172a, #2563eb)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.24)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
+            <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #f2e4d4', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #f59e0b, #fb7185 52%, #2563eb)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(245,158,11,0.24), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>
+              <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos debiles</div>
+              <button onClick={generarPlan} disabled={cargandoPlan} style={{ padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#d8c8b8' : 'linear-gradient(135deg, #2563eb, #f59e0b)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(245,158,11,0.24)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
                 <BrainCircuit size={17} />
                 {cargandoPlan ? 'Generando tu plan...' : planIA ? 'Regenerar plan' : 'Generar mi plan semanal'}
               </button>
             </div>
             {planIA && (
-              <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #dbeafe', overflow: 'hidden', boxShadow: '0 22px 55px rgba(15,23,42,0.08)' }}>
-                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #0f172a, #2563eb)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #f2e4d4', overflow: 'hidden', boxShadow: WARM.shadow }}>
+                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #2563eb, #f59e0b)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><BrainCircuit size={17} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · PAUSIA</span>
                 </div>
-                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #f8fafc)' }}>
+                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #fffdf9, #fff7ed)' }}>
                   <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={planMdComponents}>{planIA}</ReactMarkdown>
                 </div>
               </div>
@@ -1079,33 +1093,33 @@ function cambiarTipo(t: Tipo) {
 
         {itemSeleccionado && (
           <div onClick={() => setItemSeleccionado(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto' }}>
-              <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#fff' }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: WARM.surface, borderRadius: '22px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto', border: '1px solid #f2e4d4', boxShadow: '0 28px 80px rgba(0,0,0,0.22)' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid #f2e4d4', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'rgba(255,253,249,0.94)', backdropFilter: 'blur(18px)' }}>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>{nombreAsignatura(itemSeleccionado.asignatura)} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: WARM.ink }}>{nombreAsignatura(itemSeleccionado.asignatura)} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
+                  <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   {itemSeleccionado.nota !== null && (
                     <div>
                       <span style={{ fontSize: '24px', fontWeight: 800, color: colorNota(itemSeleccionado.nota / itemSeleccionado.nota_maxima * 10) }}>{itemSeleccionado.nota}</span>
-                      <span style={{ fontSize: '13px', color: '#94a3b8' }}>/{itemSeleccionado.nota_maxima}</span>
+                      <span style={{ fontSize: '13px', color: WARM.softText }}>/{itemSeleccionado.nota_maxima}</span>
                     </div>
                   )}
-                  <button onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #0f172a, #2563eb)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Pausia</button>
-                  <button onClick={() => setItemSeleccionado(null)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}><X size={17} /></button>
+                  <button onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #2563eb, #f59e0b)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Pausia</button>
+                  <button onClick={() => setItemSeleccionado(null)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #f2e4d4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
                 </div>
               </div>
               <div style={{ padding: '24px' }}>
                 {itemSeleccionado.enunciado && (
-                  <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
+                  <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '16px', background: WARM.field, border: '1px solid #f2e4d4' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
                     <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{formatEnunciado(itemSeleccionado.enunciado)}</ReactMarkdown>
                   </div>
                 )}
                 {itemSeleccionado.correccion && (
                   <div>
-                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Correccion de Pausia</div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Correccion de Pausia</div>
                     <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{itemSeleccionado.correccion}</ReactMarkdown>
                   </div>
                 )}

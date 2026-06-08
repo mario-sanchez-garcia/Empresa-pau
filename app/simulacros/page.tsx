@@ -40,22 +40,36 @@ export default function SimulacrosPage() {
   }
 
   async function createSimulacro() {
-    if (!userId) return
     setLoading(true)
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    const currentUserId = sessionData.session?.user?.id
+    if (sessionError || !currentUserId) {
+      console.error('SIMULACRO_SESSION_ERROR', sessionError)
+      setLoading(false)
+      router.push('/login')
+      return
+    }
+    setUserId(currentUserId)
+
     const generated = generateSimulacro(subject, difficulty, option)
+    const now = new Date().toISOString()
     const row = {
       id: generated.id,
-      user_id: userId,
+      user_id: currentUserId,
       asignatura: subject,
       opcion: option,
       dificultad: difficulty,
       dificultad_real: generated.dificultadReal,
       bloques: generated.blocks,
       respuestas_parciales: {},
-      estado: 'en_progreso'
+      estado: 'en_progreso',
+      created_at: now,
+      updated_at: now
     }
+    console.log('SIMULACRO_INSERT_ROW', row)
     const { error } = await supabase.from('historial_simulacros').insert(row)
     if (error) {
+      console.error('SIMULACRO_INSERT_ERROR', error)
       alert('No se pudo crear el simulacro. Revisa que la tabla historial_simulacros exista en Supabase.')
       setLoading(false)
       return
@@ -126,8 +140,8 @@ export default function SimulacrosPage() {
           </div>
         </section>
 
-        <button onClick={createSimulacro} disabled={loading} className="flex items-center justify-center gap-3 rounded-xl bg-violet-600 px-6 py-4 text-lg font-black text-white shadow-xl disabled:opacity-60">
-          <PlayCircle size={22} />{loading ? 'Generando...' : 'Generar simulacro'}
+        <button onClick={createSimulacro} disabled={loading || !userId} className="flex items-center justify-center gap-3 rounded-xl bg-violet-600 px-6 py-4 text-lg font-black text-white shadow-xl disabled:opacity-60">
+          <PlayCircle size={22} />{loading ? 'Generando...' : userId ? 'Generar simulacro' : 'Cargando sesión...'}
         </button>
       </div>
     </SimulacroShell>

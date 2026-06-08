@@ -157,9 +157,25 @@ const preguntaFisica = asignatura === 'fisica'
         p.opcion === (opcion === 0 ? 'A' : 'B') &&
         p.bloque === tipoFisicaActivo
     ) ??
+    (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoFisicaActivo) ??
     (examen as any)?.preguntas?.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
     (examen as any)?.preguntas?.[0]
   : null
+
+const OPCIONES = [0, 1] as const
+
+const opcionesFisicaDisponibles = asignatura === 'fisica'
+  ? Array.from(new Set(
+      ((examen as any)?.preguntas ?? [])
+        .filter((p: any) => p.bloque === tipoFisicaActivo)
+        .map((p: any) => p.opcion)
+    ))
+  : []
+
+const opcionesDisponibles: (0 | 1)[] =
+  asignatura === 'fisica' && opcionesFisicaDisponibles.length
+    ? OPCIONES.filter(op => opcionesFisicaDisponibles.includes(op === 0 ? 'A' : 'B'))
+    : [...OPCIONES]
 
 const examenHistoria = asignatura === 'historia'
   ? examenesHistoria.find(
@@ -187,6 +203,24 @@ const bloqueActivoLabel =
   asignatura === 'mates' ? (preguntaActiva as any)?.bloque :
   asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
   (TIPOS_HISTORIA[bloqueIdx]?.label ?? '')
+
+const opcionMostrada = (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
+
+function puntosBloqueFisica(tipoBloque: string) {
+  return (
+    (examen as any)?.preguntas?.find(
+      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+    ) ??
+    (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque)
+  )?.puntuacion ?? 2
+}
+
+function cambiarBloqueFisica(i: number, tipoBloque: string) {
+  setBloqueIdx(i)
+  const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque)?.opcion
+  if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
+  reset()
+}
 
 function nombreAsignatura(a: string) {
   if (a === 'mates') return 'Matematicas II'
@@ -576,12 +610,12 @@ function cambiarTipo(t: Tipo) {
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : TIPOS_HISTORIA).map((t, i) => (
-                  <button key={i} onClick={() => { setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {((t as any).puntos ?? (t as any).pts)}pts</button>
+                  <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>Opcion:</span>
-                {([0, 1] as const).map(op => (
+                {opcionesDisponibles.map(op => (
                   <button key={op} onClick={() => { setOpcion(op); reset() }} style={{ width: '38px', height: '38px', borderRadius: '10px', cursor: 'pointer', fontWeight: 700, fontSize: '14px', background: opcion === op ? cfg.color : '#f8fafc', color: opcion === op ? '#fff' : '#374151', border: opcion === op ? 'none' : '1px solid #e2e8f0' } as any}>{op === 0 ? 'A' : 'B'}</button>
                 ))}
               </div>
@@ -600,7 +634,7 @@ function cambiarTipo(t: Tipo) {
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examen?.año} · {tipo}</span>
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#f1f5f9', color: '#374151', fontSize: '11px', border: '1px solid #e2e8f0' }}>Opcion {opcion === 0 ? 'A' : 'B'}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#f1f5f9', color: '#374151', fontSize: '11px', border: '1px solid #e2e8f0' }}>Opcion {opcionMostrada}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{preguntaActiva.puntuacion}</span>

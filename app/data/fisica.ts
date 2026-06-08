@@ -32,7 +32,23 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-1",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "1",
-    enunciado: "Eris es un planeta enano del sistema solar descubierto en enero de 2005 por un equipo\ndel observatorio del Monte Palomar dirigido por Michael E. Brown. Es el objeto transneptuniano más\nmasivo, el segundo más grande después de Plutón, y el cuerpo más grande del sistema solar que no ha\nsido visitado por una sonda espacial. Tiene un diámetro de 2330 km, ligeramente inferior al de Plutón, y\nsu densidad es de 2,5 g cm−3. La órbita de Eris es muy excéntrica; actualmente el planeta se encuentra\na su máxima distancia del Sol (afelio), a 1,45 · 1013 m, llegando a situarse a 5,24 · 1012 m del Sol durante\nsu perihelio.\n\na) (1 punto) Calcule la masa del planeta y el valor de la aceleración de la gravedad en su superficie.\n\nb) (1,5 puntos) Sabiendo que la energía mecánica de un objeto de masa m1 que orbita alrededor de\nun objeto de masa m2 con una órbita elíptica de semieje mayor a es\nEmec = − Gm1m2\n2a ,\ndonde G es la constante de la gravitación universal, halle la energía mecánica de Eris y calcule la\nvelocidad orbital que tendrá en el perihelio.\n\nDatos: Constante de gravitación universal, G = 6,67 · 10−11 N m2 kg−2; Masa del Sol, MSol = 1,99 · 1030 kg.",
+    enunciado: `Eris es un planeta enano del sistema solar descubierto en enero de 2005 por un equipo
+del observatorio del Monte Palomar dirigido por Michael E. Brown. Es el objeto transneptuniano más
+masivo, el segundo más grande después de Plutón, y el cuerpo más grande del sistema solar que no ha
+sido visitado por una sonda espacial. Tiene un diámetro de 2330 km, ligeramente inferior al de Plutón, y
+su densidad es de $2{,}5\ \text{g cm}^{-3}$. La órbita de Eris es muy excéntrica; actualmente el planeta se encuentra
+a su máxima distancia del Sol (afelio), a $1{,}45 \cdot 10^{13}$ m, llegando a situarse a $5{,}24 \cdot 10^{12}$ m del Sol durante
+su perihelio.
+
+a) (1 punto) Calcule la masa del planeta y el valor de la aceleración de la gravedad en su superficie.
+
+b) (1,5 puntos) Sabiendo que la energía mecánica de un objeto de masa $m_1$ que orbita alrededor de
+un objeto de masa $m_2$ con una órbita elíptica de semieje mayor $a$ es
+$$E_{mec} = -\dfrac{Gm_1m_2}{2a},$$
+donde $G$ es la constante de la gravitación universal, halle la energía mecánica de Eris y calcule la
+velocidad orbital que tendrá en el perihelio.
+
+Datos: Constante de gravitación universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa del Sol, $M_{\text{Sol}} = 1{,}99 \cdot 10^{30}\ \text{kg}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -40,7 +56,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-2A",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "2.A",
-    enunciado: "Un electrón de carga −e y un positrón de carga +e se encuentran inicialmente fijos en\nel plano xy en las posiciones (0, 6) nm y (0, -6) nm, respectivamente.\n\na) (1,25 puntos) Obtenga el campo eléctrico en el punto (8, 0) nm debido a ambas partículas.\n\nb) (1,25 puntos) Si al positrón se le imprime una velocidad de −1,5 · 105 m s−1⃗ j, permaneciendo fijo\nel electrón, determine la máxima distancia de alejamiento entre ambas partículas.\n\nDatos: Constante de la ley de Coulomb, K = 9 · 109 N m2 C−2; Valor absoluto de la carga del electrón y del positrón,\ne = 1,6 · 10−19 C; Masa del electrón y del positrón, me = 9,1 · 10−31 kg.",
+    enunciado: `Un electrón de carga $-e$ y un positrón de carga $+e$ se encuentran inicialmente fijos en
+el plano $xy$ en las posiciones $(0, 6)$ nm y $(0, -6)$ nm, respectivamente.
+
+a) (1,25 puntos) Obtenga el campo eléctrico en el punto $(8, 0)$ nm debido a ambas partículas.
+
+b) (1,25 puntos) Si al positrón se le imprime una velocidad de $-1{,}5 \cdot 10^5\ \text{m s}^{-1}\ \hat{j}$, permaneciendo fijo
+el electrón, determine la máxima distancia de alejamiento entre ambas partículas.
+
+Datos: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$; Valor absoluto de la carga del electrón y del positrón,
+$e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Masa del electrón y del positrón, $m_e = 9{,}1 \cdot 10^{-31}\ \text{kg}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -48,7 +73,18 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-2B",
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "2.B",
-    enunciado: "Una espira conductora circular de radio 20 cm se en-\ncuentra en el seno de un campo magnético homogéneo perpendicular\nal plano de la espira (ver figura). Si la espira tiene una resistencia de\n40 Ω, calcule la máxima intensidad de corriente que circulará por la\nespira en los siguientes casos:\n\na) (1,25 puntos) El módulo del campo magnético es constante de\nvalor B = 150 mT, y la espira gira en torno a uno de sus diáme-\ntros con una velocidad angular de 50 rad s−1.\n\nb) (1,25 puntos) La espira se encuentra fija, y el módulo del campo\nmagnético varía con el tiempo conforme a B = B0 sen(ωt), con B0 = 200 mT y ω = 75 rad s−1.",
+    enunciado: `Una espira conductora circular de radio 20 cm se en-
+cuentra en el seno de un campo magnético homogéneo perpendicular
+al plano de la espira (ver figura). Si la espira tiene una resistencia de
+40 Ω, calcule la máxima intensidad de corriente que circulará por la
+espira en los siguientes casos:
+
+a) (1,25 puntos) El módulo del campo magnético es constante de
+valor $B = 150$ mT, y la espira gira en torno a uno de sus diáme-
+tros con una velocidad angular de 50 rad s$^{-1}$.
+
+b) (1,25 puntos) La espira se encuentra fija, y el módulo del campo
+magnético varía con el tiempo conforme a $B = B_0\sin(\omega t)$, con $B_0 = 200$ mT y $\omega = 75$ rad s$^{-1}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -56,7 +92,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-3A",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "3.A",
-    enunciado: "Una ballena sumergida en el mar a una cierta profundidad emite un potente sonido\ngrave de 60 Hz y 25 m de longitud de onda. Un barco A, situado sobre su vertical, detecta dicho sonido\ncon su sónar 80 ms después de ser emitido, y poco tiempo después es detectado por otro barco B\nsituado a 300 m del barco A.\n\na) (1 punto) Halle la profundidad a la que se encuentra la ballena.\n\nb) (1,5 puntos) Si el barco A recibe el sonido con una intensidad de 3 μW m−2, calcule la potencia\ndel sonido emitido por la ballena y el nivel de intensidad sonora que detectará el barco B.\n\nDato: Intensidad umbral, I0 = 1 · 10−12 W m−2.",
+    enunciado: `Una ballena sumergida en el mar a una cierta profundidad emite un potente sonido
+grave de 60 Hz y 25 m de longitud de onda. Un barco A, situado sobre su vertical, detecta dicho sonido
+con su sónar 80 ms después de ser emitido, y poco tiempo después es detectado por otro barco B
+situado a 300 m del barco A.
+
+a) (1 punto) Halle la profundidad a la que se encuentra la ballena.
+
+b) (1,5 puntos) Si el barco A recibe el sonido con una intensidad de 3 μW m$^{-2}$, calcule la potencia
+del sonido emitido por la ballena y el nivel de intensidad sonora que detectará el barco B.
+
+Dato: Intensidad umbral, $I_0 = 1 \cdot 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -64,7 +110,18 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-3B",
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "3.B",
-    enunciado: "Considere la imagen formada por una lente delgada de distancia focal f ′ de un objeto\nsituado a una distancia s a la izquierda de la lente.\n\na) (1 punto) Demuestre que el aumento lateral M tiene la siguiente expresión en función de la dis-\ntancia focal f ′ y la posición del objeto s:\nM = f ′\nf ′ + s\n\nb) (0,5 puntos) Considerando la expresión obtenida en el apartado anterior, razone si una lente\ndivergente puede formar una imagen invertida.\n\nc) (1 punto) Dibuje el trazado de rayos a través del sistema óptico de la imagen formada por una\nlente divergente si el objeto se sitúa a una distancia dos veces su distancia focal.",
+    enunciado: `Considere la imagen formada por una lente delgada de distancia focal $f'$ de un objeto
+situado a una distancia $s$ a la izquierda de la lente.
+
+a) (1 punto) Demuestre que el aumento lateral $M$ tiene la siguiente expresión en función de la dis-
+tancia focal $f'$ y la posición del objeto $s$:
+$$M = \dfrac{f'}{f'+s}$$
+
+b) (0,5 puntos) Considerando la expresión obtenida en el apartado anterior, razone si una lente
+divergente puede formar una imagen invertida.
+
+c) (1 punto) Dibuje el trazado de rayos a través del sistema óptico de la imagen formada por una
+lente divergente si el objeto se sitúa a una distancia dos veces su distancia focal.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -72,7 +129,18 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-4A",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "4.A",
-    enunciado: "Las moléculas de ozono absorben luz ultravioleta (UV) de alta energía, lo que evita que\nllegue a la superficie de la Tierra demasiada radiación dañina para los seres vivos.\n\na) (1 punto) Halle la diferencia de energía, expresada en electrón-voltios, entre los niveles electróni-\ncos de la molécula de ozono que inducen la absorción de radiación de 260 nm.\n\nb) (1,5 puntos) Si el flujo de fotones de 260 nm que le llega a una persona con su cuerpo expuesto\nal sol es de 2,6 · 1014 fotones s−1, calcule la potencia que le incide debida a esos fotones UV y la\nenergía recibida en 30 minutos.\n\nDatos: Valor absoluto de la carga del electrón, e = 1,6 · 10−19 C; Constante de Planck, h = 6,63 · 10−34 J s; Velocidad de la\nluz en el vacío, c = 3 · 108 m s−1.",
+    enunciado: `Las moléculas de ozono absorben luz ultravioleta (UV) de alta energía, lo que evita que
+llegue a la superficie de la Tierra demasiada radiación dañina para los seres vivos.
+
+a) (1 punto) Halle la diferencia de energía, expresada en electrón-voltios, entre los niveles electróni-
+cos de la molécula de ozono que inducen la absorción de radiación de 260 nm.
+
+b) (1,5 puntos) Si el flujo de fotones de 260 nm que le llega a una persona con su cuerpo expuesto
+al sol es de $2{,}6 \cdot 10^{14}$ fotones s$^{-1}$, calcule la potencia que le incide debida a esos fotones UV y la
+energía recibida en 30 minutos.
+
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$; Velocidad de la
+luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -80,7 +148,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-4B",
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "4.B",
-    enunciado: "El mineral de cuarzo (SiO2) sobre la superficie de la Tierra contiene impurezas de\naluminio, con una cantidad de 0,1 % de átomos de 26Al en relación a los átomos de silicio. Cuando el\nmineral se entierra debido a diversos procesos geológicos (sedimentación, glaciares, etc.) los átomos\nde 26Al se desintegran con un tiempo de semidesintegración de 0,72 millones de años.\n\na) (1,25 puntos) Calcule la actividad de una muestra de mineral de cuarzo, debida a la presencia de\nisótopos de 26Al, situada en superficie si contiene 8,3 · 1022 átomos de silicio.\n\nb) (1,25 puntos) Se recoge una muestra de cuarzo de unos sedimentos, obteniéndose una relación\nde 0,08 % de átomos de 26Al respecto a los átomos de silicio. Obtenga la edad correspondiente a\nla formación de dichos sedimentos.",
+    enunciado: `El mineral de cuarzo (SiO$_2$) sobre la superficie de la Tierra contiene impurezas de
+aluminio, con una cantidad de 0,1 % de átomos de $^{26}$Al en relación a los átomos de silicio. Cuando el
+mineral se entierra debido a diversos procesos geológicos (sedimentación, glaciares, etc.) los átomos
+de $^{26}$Al se desintegran con un tiempo de semidesintegración de 0,72 millones de años.
+
+a) (1,25 puntos) Calcule la actividad de una muestra de mineral de cuarzo, debida a la presencia de
+isótopos de $^{26}$Al, situada en superficie si contiene $8{,}3 \cdot 10^{22}$ átomos de silicio.
+
+b) (1,25 puntos) Se recoge una muestra de cuarzo de unos sedimentos, obteniéndose una relación
+de 0,08 % de átomos de $^{26}$Al respecto a los átomos de silicio. Obtenga la edad correspondiente a
+la formación de dichos sedimentos.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -88,7 +166,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-A1",
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
-    enunciado: "La distancia del satélite Halimede a Neptuno, planeta alrededor del cual orbita, varía\nentre 12 y 21 millones de km.\n\na) Calcule el trabajo realizado por la atracción gravitatoria de Neptuno sobre Halimede en el tránsito\ndel punto más próximo al más distante de la órbita.\n\nb) Sabiendo que la energía mecánica de Halimede vale −2,5 · 1020 J, determine la velocidad máxima\nque alcanza en su órbita.\n\nDatos: Constante de Gravitación Universal, G = 6,67 · 10−11 N m2 kg−2; Masa de Halimede, MH = 1,60 · 1015 kg; Masa de\nNeptuno, MN = 1,02 · 1026 kg.",
+    enunciado: `La distancia del satélite Halimede a Neptuno, planeta alrededor del cual orbita, varía
+entre 12 y 21 millones de km.
+
+a) Calcule el trabajo realizado por la atracción gravitatoria de Neptuno sobre Halimede en el tránsito
+del punto más próximo al más distante de la órbita.
+
+b) Sabiendo que la energía mecánica de Halimede vale $-2{,}5 \cdot 10^{20}$ J, determine la velocidad máxima
+que alcanza en su órbita.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de Halimede, $M_H = 1{,}60 \cdot 10^{15}\ \text{kg}$; Masa de
+Neptuno, $M_N = 1{,}02 \cdot 10^{26}\ \text{kg}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -96,7 +184,14 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-A2",
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
-    enunciado: "Por una cuerda tensa dispuesta a lo largo del eje x se propaga, a una velocidad de\n200 m s−1 en el sentido positivo del eje, una onda armónica de 0,4 m de longitud de onda. En el\ninstante inicial y en el origen de coordenadas, la elongación es positiva y también lo es la velocidad de\noscilación, que equivale a la mitad de su valor máximo. Obtenga:\n\na) El número de onda y la frecuencia de la onda.\n\nb) La fase inicial de la onda.",
+    enunciado: `Por una cuerda tensa dispuesta a lo largo del eje $x$ se propaga, a una velocidad de
+200 m s$^{-1}$ en el sentido positivo del eje, una onda armónica de 0,4 m de longitud de onda. En el
+instante inicial y en el origen de coordenadas, la elongación es positiva y también lo es la velocidad de
+oscilación, que equivale a la mitad de su valor máximo. Obtenga:
+
+a) El número de onda y la frecuencia de la onda.
+
+b) La fase inicial de la onda.`,
     apartados: [],
     puntos: 2,
   },
@@ -104,7 +199,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-A3",
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
-    enunciado: "Un hilo conductor de longitud indefinida se extiende a lo largo del eje z. Otro hilo de\nlongitud indefinida paralelo al primero pasa por el punto (5, 0, 0) cm. Los dos hilos se repelen con una\nfuerza por unidad de longitud de 5 · 10−5 N m−1. El campo magnético total se anula a lo largo de la recta\nx = +10 cm en el plano xz.\n\na) Explique si las corrientes en los hilos son paralelas o antiparalelas y calcule su magnitud.\n\nb) Determine el módulo del campo magnético en el punto (−5, 0, 0) cm.\n\nDato: Permeabilidad magnética del vacío, μ0 = 4π · 10−7 T m A−1.",
+    enunciado: `Un hilo conductor de longitud indefinida se extiende a lo largo del eje $z$. Otro hilo de
+longitud indefinida paralelo al primero pasa por el punto $(5, 0, 0)$ cm. Los dos hilos se repelen con una
+fuerza por unidad de longitud de $5 \cdot 10^{-5}$ N m$^{-1}$. El campo magnético total se anula a lo largo de la recta
+$x = +10$ cm en el plano $xz$.
+
+a) Explique si las corrientes en los hilos son paralelas o antiparalelas y calcule su magnitud.
+
+b) Determine el módulo del campo magnético en el punto $(-5, 0, 0)$ cm.
+
+Dato: Permeabilidad magnética del vacío, $\mu_0 = 4\pi \cdot 10^{-7}\ \text{T m A}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -120,7 +224,18 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-A5",
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
-    enunciado: "Una placa de cobalto se expone a luz de una determinada intensidad y de frecuencia\nigual a 1,2 veces la frecuencia umbral para el efecto fotoeléctrico en ese material. En estas condiciones,\nse registra un cierto potencial de frenado V1.\n\na) Si se duplica la frecuencia de la luz incidente, se registra un nuevo potencial de frenado V2, que\nes 6 V mayor que V1. Obtenga el trabajo de extracción para el cobalto y el valor de la frecuencia\numbral.\n\nb) Si se mantiene la frecuencia inicial y se duplica la intensidad de la luz incidente, ¿cómo se modi-\nficará el potencial de frenado?\n\nDatos: Valor absoluto de la carga del electrón, e = 1,6 · 10−19 C; Constante de Planck, h = 6,63 · 10−34 J s.",
+    enunciado: `Una placa de cobalto se expone a luz de una determinada intensidad y de frecuencia
+igual a 1,2 veces la frecuencia umbral para el efecto fotoeléctrico en ese material. En estas condiciones,
+se registra un cierto potencial de frenado $V_1$.
+
+a) Si se duplica la frecuencia de la luz incidente, se registra un nuevo potencial de frenado $V_2$, que
+es 6 V mayor que $V_1$. Obtenga el trabajo de extracción para el cobalto y el valor de la frecuencia
+umbral.
+
+b) Si se mantiene la frecuencia inicial y se duplica la intensidad de la luz incidente, ¿cómo se modi-
+ficará el potencial de frenado?
+
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -128,7 +243,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-B1",
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: "Un satélite de 200 kg de masa se mueve en una órbita cerrada alrededor de la Tierra.\nEn un determinado instante, es detectado a 630 km de altura, moviéndose a 9,92 km s−1 con velocidad\nperpendicular a la dirección radial.\n\na) Compare la velocidad del satélite con la correspondiente a una órbita circular de la altura dada y\ndel resultado anterior, razone si la órbita es circular o elíptica.\n\nb) Calcule los módulos del momento angular y de la aceleración del satélite en el instante señalado.\n\nDatos: Constante de Gravitación Universal, G = 6,67 · 10−11 N m2 kg−2; Masa de la Tierra, MT = 5,97 · 1024 kg; Radio de la\nTierra, RT = 6,37 · 106 m.",
+    enunciado: `Un satélite de 200 kg de masa se mueve en una órbita cerrada alrededor de la Tierra.
+En un determinado instante, es detectado a 630 km de altura, moviéndose a 9,92 km s$^{-1}$ con velocidad
+perpendicular a la dirección radial.
+
+a) Compare la velocidad del satélite con la correspondiente a una órbita circular de la altura dada y
+del resultado anterior, razone si la órbita es circular o elíptica.
+
+b) Calcule los módulos del momento angular y de la aceleración del satélite en el instante señalado.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \cdot 10^6\ \text{m}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -136,7 +261,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-B2",
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: "El campanario de una iglesia medieval, situado a 35 m de altura, consta de 4 campanas.\nCada una de ellas emite 10 mW de potencia sonora tras ser golpeada. Por otro lado, el límite de\ncontaminación acústica en ese municipio está establecido en 55 dB.\n\na) Determine el nivel de intensidad sonora que percibe una persona parada al pie de la torre del\ncampanario cuando se toca una sola campana.\n\nb) ¿Podrán tocar las cuatro campanas a la vez si no se quiere sobrepasar el límite de contaminación\nacústica y la población está situada a más de 100 metros de la iglesia?\n\nDato: Intensidad umbral, I0 = 1 · 10−12 W m−2.",
+    enunciado: `El campanario de una iglesia medieval, situado a 35 m de altura, consta de 4 campanas.
+Cada una de ellas emite 10 mW de potencia sonora tras ser golpeada. Por otro lado, el límite de
+contaminación acústica en ese municipio está establecido en 55 dB.
+
+a) Determine el nivel de intensidad sonora que percibe una persona parada al pie de la torre del
+campanario cuando se toca una sola campana.
+
+b) ¿Podrán tocar las cuatro campanas a la vez si no se quiere sobrepasar el límite de contaminación
+acústica y la población está situada a más de 100 metros de la iglesia?
+
+Dato: Intensidad umbral, $I_0 = 1 \cdot 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -144,7 +279,14 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-B3",
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: "Dos partículas situadas en los puntos (-6, 0) mm y (6, 0) mm del plano xy poseen\ncargas iguales de +9 nC. Obtenga el potencial eléctrico y el campo eléctrico en:\n\na) El origen de coordenadas.\n\nb) El punto (0, 3) mm.\n\nDato: Constante de la ley de Coulomb, K = 9 · 109 N m2 C−2.",
+    enunciado: `Dos partículas situadas en los puntos $(-6, 0)$ mm y $(6, 0)$ mm del plano $xy$ poseen
+cargas iguales de $+9$ nC. Obtenga el potencial eléctrico y el campo eléctrico en:
+
+a) El origen de coordenadas.
+
+b) El punto $(0, 3)$ mm.
+
+Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -160,7 +302,18 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2024-jun-B5",
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
-    enunciado: "Dos muestras, cada una de un radioisótopo distinto (radioisótopo\n1 y radioisótopo 2) contienen en el momento de su preparación la misma masa\ndel radioisótopo correspondiente. Las medidas de actividad de las muestras 1 y\n2 para el instante inicial (t = 0) y al cabo de un día arrojan los siguientes valores:\nA1 (kBq) A2 (kBq)\nt = 0 10,00 11,70\nt = 1 d 8,90 10,77\n\na) Calcule el período de semidesintegración de cada radioisótopo.\n\nb) Si M1 y M2 denotan las respectivas masas atómicas de los radioisótopos, determine el cociente\nM2/M1.",
+    enunciado: `Dos muestras, cada una de un radioisótopo distinto (radioisótopo
+1 y radioisótopo 2) contienen en el momento de su preparación la misma masa
+del radioisótopo correspondiente. Las medidas de actividad de las muestras 1 y
+2 para el instante inicial ($t = 0$) y al cabo de un día arrojan los siguientes valores:
+$A_1$ (kBq) $\quad A_2$ (kBq)
+$t = 0$: 10,00 $\quad$ 11,70
+$t = 1$ d: 8,90 $\quad$ 10,77
+
+a) Calcule el período de semidesintegración de cada radioisótopo.
+
+b) Si $M_1$ y $M_2$ denotan las respectivas masas atómicas de los radioisótopos, determine el cociente
+$M_2/M_1$.`,
     apartados: [],
     puntos: 2,
   },
@@ -168,7 +321,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-A1",
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
-    enunciado: "Un satélite de la constelación OneWeb, de 150 kg de masa, se encuentra en una\nórbita circular alrededor de la Tierra a una altura de 1200 km sobre el nivel del mar. Determine:\n\na) \tLas energías potencial gravitatoria y cinética que tiene el satélite en su órbita.\n\nb) \tLa energía que fue necesario comunicar al satélite para ponerlo en órbita desde la superficie\nde la Tierra.\n\nDatos: Constante de Gravitación Universal, G = 6,67·10 -11 N m 2 kg -2 ; Masa de la Tierra, MT = 5,97·10 24 kg; Radio de la\nTierra, R T = 6,37·10 6 m.",
+    enunciado: `Un satélite de la constelación OneWeb, de 150 kg de masa, se encuentra en una
+órbita circular alrededor de la Tierra a una altura de 1200 km sobre el nivel del mar. Determine:
+
+a) Las energías potencial gravitatoria y cinética que tiene el satélite en su órbita.
+
+b) La energía que fue necesario comunicar al satélite para ponerlo en órbita desde la superficie
+de la Tierra.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \cdot 10^6\ \text{m}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -176,7 +338,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-A2",
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
-    enunciado: "A lo largo de una cuerda se propaga en el sentido +x una onda transversal. El periodo\nde oscilación y la elongación máxima de un punto cualquiera de la cuerda son, respectivamente,\n4·10-3 s y 3 mm. La distancia mínima entre dos puntos cualesquiera de la cuerda que oscilan en fase\nes de 0,25 metros. En el instante 2·10 -3 s la elongación de un punto situado a + 0,5 m del origen de\ncoordenadas es de -1,5 mm y su velocidad de oscilación en ese instante es positiva.\n\na) \tHalle la frecuencia angular y la velocidad de propagación de la onda.\n\nb) \tObtenga la expresión matemática que describe a la onda.",
+    enunciado: `A lo largo de una cuerda se propaga en el sentido $+x$ una onda transversal. El periodo
+de oscilación y la elongación máxima de un punto cualquiera de la cuerda son, respectivamente,
+$4 \cdot 10^{-3}$ s y 3 mm. La distancia mínima entre dos puntos cualesquiera de la cuerda que oscilan en fase
+es de 0,25 metros. En el instante $2 \cdot 10^{-3}$ s la elongación de un punto situado a $+0{,}5$ m del origen de
+coordenadas es de $-1{,}5$ mm y su velocidad de oscilación en ese instante es positiva.
+
+a) Halle la frecuencia angular y la velocidad de propagación de la onda.
+
+b) Obtenga la expresión matemática que describe a la onda.`,
     apartados: [],
     puntos: 2,
   },
@@ -184,7 +354,20 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-A3",
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
-    enunciado: "Tres cargas -q, -q y +2q se encuentran situadas en los\npuntos del plano (-a, a), (a, a) y (0, 0), respectivamente, tal y como se\ndescribe en la figura. Determine, en función de la constante de\nCoulomb, K, el valor de la carga, q, y la distancia, a:\n\na) \tLa expresión de la fuerza electrostática que se ejerce sobre la\ncarga situada en la posición (a, a) y la expresión del trabajo\nque habrá realizado esa fuerza electrostática para traer la\ncarga -q desde el infinito a la posición (a, a).\n\nb) \tEl flujo del campo eléctrico a través de las superficies cerradas\nS1 y S2.\n\nDato: Permitividad eléctrica del vacío;\nεo = 1/4πK.",
+    enunciado: `Tres cargas $-q$, $-q$ y $+2q$ se encuentran situadas en los
+puntos del plano $(-a, a)$, $(a, a)$ y $(0, 0)$, respectivamente, tal y como se
+describe en la figura. Determine, en función de la constante de
+Coulomb, $K$, el valor de la carga, $q$, y la distancia, $a$:
+
+a) La expresión de la fuerza electrostática que se ejerce sobre la
+carga situada en la posición $(a, a)$ y la expresión del trabajo
+que habrá realizado esa fuerza electrostática para traer la
+carga $-q$ desde el infinito a la posición $(a, a)$.
+
+b) El flujo del campo eléctrico a través de las superficies cerradas
+$S_1$ y $S_2$.
+
+Dato: Permitividad eléctrica del vacío; $\varepsilon_0 = 1/(4\pi K)$.`,
     apartados: [],
     puntos: 2,
   },
@@ -200,7 +383,18 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-A5",
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
-    enunciado: "Se sospecha que un acuífero recibe aportes intermitentes de radón ( 222\nRn). Para\ncomprobarlo, se toman semanalmente medidas de la actividad radiactiva de muestras de agua. Una\nde esas medidas arroja un valor de 14 Bq para una muestra de un litro. Determine el valor de la medida\nde la siguiente semana, para otra muestra de un litro, en cada una de las siguientes condiciones:\n\na) \tSi no hubiese ningún aporte de 222\nRn en el transcurso de esa semana.\n\nb) \tSi el cuarto día de esa semana la concentración de 222\nRn en el acuífero experimentase un\naumento súbito de 2∙10-16 g por cada litro de agua.\n\nDatos: Período de semidesintegración del 222\nRn, T1/2 = 3,8 días; Masa atómica del 222 Rn, M222-Rn = 222 u; Número de\nAvogadro, NA = 6,02\n⋅10 23 mol-1.",
+    enunciado: `Se sospecha que un acuífero recibe aportes intermitentes de radón ($^{222}$Rn). Para
+comprobarlo, se toman semanalmente medidas de la actividad radiactiva de muestras de agua. Una
+de esas medidas arroja un valor de 14 Bq para una muestra de un litro. Determine el valor de la medida
+de la siguiente semana, para otra muestra de un litro, en cada una de las siguientes condiciones:
+
+a) Si no hubiese ningún aporte de $^{222}$Rn en el transcurso de esa semana.
+
+b) Si el cuarto día de esa semana la concentración de $^{222}$Rn en el acuífero experimentase un
+aumento súbito de $2 \cdot 10^{-16}$ g por cada litro de agua.
+
+Datos: Período de semidesintegración del $^{222}$Rn, $T_{1/2} = 3{,}8$ días; Masa atómica del $^{222}$Rn, $M_{222\text{-Rn}} = 222$ u; Número de
+Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -208,7 +402,24 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-B1",
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: "En la película Space Cowboys un\namenazador satélite militar orbita alrededor de la\nTierra a una altura de 1600 km sobre la superficie\nterrestre.\n\na) \tCalcule la velocidad orbital del satélite y\nel tiempo que tarda en dar una vuelta\ncompleta \talrededor \tde \tla \tTierra.\nDesprecie en este apartado la interacción\ngravitatoria de la Luna.\n\nb) \tPara evitar que el satélite caiga a la Tierra se decide impulsarlo hacia la Luna. Determine la\ndistancia x al centro de la Tierra, tal y como se muestra en la figura, a la que tendrá que llegar\nel satélite, para que el efecto del campo gravitatorio lunar sea superior al del campo\ngravitatorio terrestre.\n\nDatos: Constante de Gravitación Universal, G = 6,67·10 -11 N m 2 kg -2 ; Masa de la Tierra, MT = 5,97·10 24 kg; Radio de la\nTierra; R T = 6,37·10 3 km; Masa de la Luna, ML = 7,35·10 22 kg; Distancia de la Tierra a la Luna, d = 3,84·10 5 km.",
+    enunciado: `En la película Space Cowboys un
+amenazador satélite militar orbita alrededor de la
+Tierra a una altura de 1600 km sobre la superficie
+terrestre.
+
+a) Calcule la velocidad orbital del satélite y
+el tiempo que tarda en dar una vuelta
+completa alrededor de la Tierra.
+Desprecie en este apartado la interacción
+gravitatoria de la Luna.
+
+b) Para evitar que el satélite caiga a la Tierra se decide impulsarlo hacia la Luna. Determine la
+distancia $x$ al centro de la Tierra, tal y como se muestra en la figura, a la que tendrá que llegar
+el satélite, para que el efecto del campo gravitatorio lunar sea superior al del campo
+gravitatorio terrestre.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \cdot 10^3$ km; Masa de la Luna, $M_L = 7{,}35 \cdot 10^{22}\ \text{kg}$; Distancia de la Tierra a la Luna, $d = 3{,}84 \cdot 10^5$ km.`,
     apartados: [],
     puntos: 2,
   },
@@ -216,7 +427,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-B2",
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: "Un observador que se encuentra a 3 m de una fuente puntual sonora que emite en\ntodas direcciones mide un nivel de intensidad sonora de 53 dB. Halle:\n\na) \tLa intensidad sonora recibida por el observador y la potencia con la que emite la fuente\npuntual.\n\nb) \tLa distancia a la que debe situarse el observador para que el nivel de intensidad sonora\npercibido se reduzca a una cuarta parte.\n\nDato: Intensidad umbral,\nΙ 0 = 10 -12 W m -2 .",
+    enunciado: `Un observador que se encuentra a 3 m de una fuente puntual sonora que emite en
+todas direcciones mide un nivel de intensidad sonora de 53 dB. Halle:
+
+a) La intensidad sonora recibida por el observador y la potencia con la que emite la fuente
+puntual.
+
+b) La distancia a la que debe situarse el observador para que el nivel de intensidad sonora
+percibido se reduzca a una cuarta parte.
+
+Dato: Intensidad umbral, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -224,7 +444,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-B3",
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: "Un ion de He+ se sitúa inicialmente en reposo dentro de una región del espacio donde\nexiste un campo eléctrico homogéneo de 10 3 V m -1 que está dirigido a lo largo del eje +x.\n\na) \tCalcule la aceleración que experimenta el ion en el instante inicial.\n\nb) \tDetermine la fuerza total sobre el ion si a los 20 μs de ser depositado se aplica un campo\nmagnético homogéneo de 0,6 T a lo largo del eje +y.\n\nDatos: Masa atómica del ion de He+\n, MHe = 4 u; Número de Avogadro, NA = 6,02\n⋅10 23 mol-1; Valor absoluto de la carga\ndel electrón, e = 1,6·10 -19 C.",
+    enunciado: `Un ion de He$^+$ se sitúa inicialmente en reposo dentro de una región del espacio donde
+existe un campo eléctrico homogéneo de $10^3$ V m$^{-1}$ que está dirigido a lo largo del eje $+x$.
+
+a) Calcule la aceleración que experimenta el ion en el instante inicial.
+
+b) Determine la fuerza total sobre el ion si a los 20 μs de ser depositado se aplica un campo
+magnético homogéneo de 0,6 T a lo largo del eje $+y$.
+
+Datos: Masa atómica del ion de He$^+$, $M_{\text{He}} = 4$ u; Número de Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$; Valor absoluto de la carga
+del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -240,7 +469,24 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2023-jun-B5",
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
-    enunciado: "Para estudiar el efecto fotoeléctrico se\nregistra la intensidad de corriente entre un cierto metal\nemisor \tde \tfotoelectrones \ty \tuna \tplaca \ten \tfunción \tdel\npotencial \teléctrico \taplicado \tentre \tambos, \tmientras \tse\nilumina el metal fotoemisor con un cierto haz de luz. La\ngráfica adjunta muestra los datos para luz de 379 nm y\n544 nm, donde se observan potenciales de frenado de 2,5 V\ny de 1,5 V, respectivamente.\n\na) A partir de los potenciales de frenado, obtenga el\nvalor de la constante de Planck.\n\nb) Indique cuáles serían los valores del potencial de\nfrenado y de la intensidad de corriente máxima para\nel haz de luz de 379 nm si se disminuyese a la mitad\nla intensidad del haz.\n\nDatos: Velocidad de la luz en el vacío, c = 3·10 8 m s-1; Valor absoluto de la carga del electrón, e = 1,6·10 -19 C.\nTierra\nLuna\nd\nx\n60o\nα\nβ\n60o\n60o",
+    enunciado: `Para estudiar el efecto fotoeléctrico se
+registra la intensidad de corriente entre un cierto metal
+emisor de fotoelectrones y una placa en función del
+potencial eléctrico aplicado entre ambos, mientras se
+ilumina el metal fotoemisor con un cierto haz de luz. La
+gráfica adjunta muestra los datos para luz de 379 nm y
+544 nm, donde se observan potenciales de frenado de 2,5 V
+y de 1,5 V, respectivamente.
+
+a) A partir de los potenciales de frenado, obtenga el
+valor de la constante de Planck.
+
+b) Indique cuáles serían los valores del potencial de
+frenado y de la intensidad de corriente máxima para
+el haz de luz de 379 nm si se disminuyese a la mitad
+la intensidad del haz.
+
+Datos: Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -248,7 +494,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-A1",
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
-    enunciado: "Una partícula de masa 20 kg permanece fija en el origen de coordenadas.\n\na) \tCalcule el campo gravitatorio generado por la masa en el punto (8, 6) m y la fuerza que\nexperimentará una segunda partícula de masa 3 kg situada en dicho punto.\n\nb) \tCon el objetivo de alejar la segunda partícula, se le transmite una velocidad de 1,2·10 -5 m s -1\nen la dirección de la recta que une ambas partículas. Halle el punto más alejado del origen que\nalcanzará dicha partícula.\n\nDatos: Constante de Gravitación Universal, G = 6,67·10-11 N m2 kg-2.",
+    enunciado: `Una partícula de masa 20 kg permanece fija en el origen de coordenadas.
+
+a) Calcule el campo gravitatorio generado por la masa en el punto $(8, 6)$ m y la fuerza que
+experimentará una segunda partícula de masa 3 kg situada en dicho punto.
+
+b) Con el objetivo de alejar la segunda partícula, se le transmite una velocidad de $1{,}2 \cdot 10^{-5}$ m s$^{-1}$
+en la dirección de la recta que une ambas partículas. Halle el punto más alejado del origen que
+alcanzará dicha partícula.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -256,7 +511,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-A2",
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
-    enunciado: "Por una cuerda dispuesta a lo largo del eje x viaja una onda armónica que desplaza\nlos elementos de la cuerda en la dirección del eje y. Se sabe que los elementos A y B, respectivamente\nubicados en xA = 0 m y xB = 2 m, oscilan en fase y cortan al eje x cada 4 s. Teniendo en cuenta que no\nhay entre A y B ningún otro elemento que oscile en fase con ellos:\n\na) \tCalcule el valor de la velocidad de propagación.\n\nb) \tEscriba la expresión matemática de la onda, si esta viaja en el sentido negativo del eje x y en\nel instante inicial los elementos A y B presentan desplazamiento igual a +10 cm y velocidad\nnula.",
+    enunciado: `Por una cuerda dispuesta a lo largo del eje $x$ viaja una onda armónica que desplaza
+los elementos de la cuerda en la dirección del eje $y$. Se sabe que los elementos A y B, respectivamente
+ubicados en $x_A = 0$ m y $x_B = 2$ m, oscilan en fase y cortan al eje $x$ cada 4 s. Teniendo en cuenta que no
+hay entre A y B ningún otro elemento que oscile en fase con ellos:
+
+a) Calcule el valor de la velocidad de propagación.
+
+b) Escriba la expresión matemática de la onda, si esta viaja en el sentido negativo del eje $x$ y en
+el instante inicial los elementos A y B presentan desplazamiento igual a $+10$ cm y velocidad
+nula.`,
     apartados: [],
     puntos: 2,
   },
@@ -264,7 +528,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-A3",
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
-    enunciado: "La figura representa una varilla metálica de 20 cm de longitud, cuyos extremos deslizan\nsin rozamiento sobre unos raíles horizontales, paralelos al eje x, metálicos y de resistencia\ndespreciable. La varilla tiene resistencia despreciable y su\nvelocidad es 1\n2 \tm s\tv \ti −\n= \t . Los raíles están conectados en x = 0\npor una resistencia de valor R = 0,5 Ω . En la región hay un\ncampo magnético uniforme \t0, 4 \tT\tB \tk\t= − \t . Calcule:\n\na) \tLa intensidad de la corriente en el circuito formado por la\nvarilla, la resistencia y los tramos de raíl entre ellas.\n\nb) \tLa fuerza F\n que el campo magnético ejerce sobre la\nvarilla.",
+    enunciado: `La figura representa una varilla metálica de 20 cm de longitud, cuyos extremos deslizan
+sin rozamiento sobre unos raíles horizontales, paralelos al eje $x$, metálicos y de resistencia
+despreciable. La varilla tiene resistencia despreciable y su velocidad es $\vec{v} = 2\ \hat{i}$ m s$^{-1}$. Los raíles están conectados en $x = 0$
+por una resistencia de valor $R = 0{,}5\ \Omega$. En la región hay un
+campo magnético uniforme $\vec{B} = -0{,}4\ \hat{k}$ T. Calcule:
+
+a) La intensidad de la corriente en el circuito formado por la
+varilla, la resistencia y los tramos de raíl entre ellas.
+
+b) La fuerza $\vec{F}$ que el campo magnético ejerce sobre la
+varilla.`,
     apartados: [],
     puntos: 2,
   },
@@ -280,7 +554,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-A5",
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
-    enunciado: "Una muestra contiene inicialmente una masa de 30 mg de 210\nPo. Sabiendo que su\nperíodo de semidesintegración es de 138,38 días, determine:\n\na) \tLa vida media del isótopo y la actividad inicial de la muestra.\n\nb) \tEl tiempo que debe transcurrir para que el contenido de 210 Po de la muestra se reduzca a\n5 mg.\n\nDatos: Masa atómica del 210Po, MPo = 210 u; Número de Avogadro, NA = 6,02\n⋅1023 mol-1.",
+    enunciado: `Una muestra contiene inicialmente una masa de 30 mg de $^{210}$Po. Sabiendo que su
+período de semidesintegración es de 138,38 días, determine:
+
+a) La vida media del isótopo y la actividad inicial de la muestra.
+
+b) El tiempo que debe transcurrir para que el contenido de $^{210}$Po de la muestra se reduzca a
+5 mg.
+
+Datos: Masa atómica del $^{210}$Po, $M_{\text{Po}} = 210$ u; Número de Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -288,7 +570,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-B1",
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: "Marte posee la décima parte de la masa de la Tierra y la mitad de su diámetro.\n\na) \tEncuentre la relación entre las velocidades de escape de Marte y de la Tierra desde sus\nrespectivas superficies.\n\nb) \tSuponga que un objeto se lanza verticalmente desde la superficie terrestre, con una velocidad\nigual a la velocidad de escape de Marte. Si se desprecia el rozamiento, ¿qué altura máxima\nalcanzaría el objeto?\n\nDato: Radio de la Tierra, RT = 6,37·106 m.",
+    enunciado: `Marte posee la décima parte de la masa de la Tierra y la mitad de su diámetro.
+
+a) Encuentre la relación entre las velocidades de escape de Marte y de la Tierra desde sus
+respectivas superficies.
+
+b) Suponga que un objeto se lanza verticalmente desde la superficie terrestre, con una velocidad
+igual a la velocidad de escape de Marte. Si se desprecia el rozamiento, ¿qué altura máxima
+alcanzaría el objeto?
+
+Dato: Radio de la Tierra, $R_T = 6{,}37 \cdot 10^6$ m.`,
     apartados: [],
     puntos: 2,
   },
@@ -296,7 +587,19 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-B2",
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: "Un foco sonoro de potencia P se coloca a una\naltura h sobre el suelo, como ilustra la figura. El nivel de\nintensidad sonora vale 60 dB en el punto A, a 100 m de\ndistancia del foco, y alcanza 80 dB en el punto B, en el suelo\nen la vertical del foco.\n\na) \tCalcule P y h.\n\nb) \t¿Cuál sería el nivel de intensidad en el punto B si se\nagregase sobre él otro foco de igual potencia a una\naltura de h/2?\n\nDato: Intensidad umbral de audición, I0 = 10-12 W m-2.",
+    enunciado: `Un foco sonoro de potencia $P$ se coloca a una
+altura $h$ sobre el suelo, como ilustra la figura. El nivel de
+intensidad sonora vale 60 dB en el punto A, a 100 m de
+distancia del foco, y alcanza 80 dB en el punto B, en el suelo
+en la vertical del foco.
+
+a) Calcule $P$ y $h$.
+
+b) ¿Cuál sería el nivel de intensidad en el punto B si se
+agregase sobre él otro foco de igual potencia a una
+altura de $h/2$?
+
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -304,7 +607,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-B3",
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: "Una carga puntual positiva está situada en el punto (3, 4) m del plano xy. En otro\npunto del plano se coloca una segunda carga puntual, también positiva y de magnitud el cuádruple\nde la primera, haciendo que el campo se anule en el origen de coordenadas.\n\na) \tDetermine la posición de la segunda carga.\n\nb) \tSi el potencial en el origen de coordenadas vale 1,08∙104 V, encuentre el valor de las cargas.\n\nDato: Constante de la ley de Coulomb, K = 9·109 N m2 C-2.",
+    enunciado: `Una carga puntual positiva está situada en el punto $(3, 4)$ m del plano $xy$. En otro
+punto del plano se coloca una segunda carga puntual, también positiva y de magnitud el cuádruple
+de la primera, haciendo que el campo se anule en el origen de coordenadas.
+
+a) Determine la posición de la segunda carga.
+
+b) Si el potencial en el origen de coordenadas vale $1{,}08 \cdot 10^4$ V, encuentre el valor de las cargas.
+
+Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -320,7 +631,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2022-jun-B5",
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
-    enunciado: "Un electrón relativista ha llegado a adquirir una energía cinética equivalente a la energía\nde un fotón de 5∙10-12 m de longitud de onda en el vacío. Calcule:\n\na) \tLa energía cinética del electrón, en eV.\n\nb) \tLa velocidad del electrón.\n\nDatos: Valor absoluto de la carga del electrón, e = 1,6·10-19 C; Constante de Planck, h = 6,63·10-34 J s;\nVelocidad de la luz en el vacío, c = 3·108 m s-1; Masa del electrón en reposo, me = 9,1·10-31 kg.",
+    enunciado: `Un electrón relativista ha llegado a adquirir una energía cinética equivalente a la energía
+de un fotón de $5 \cdot 10^{-12}$ m de longitud de onda en el vacío. Calcule:
+
+a) La energía cinética del electrón, en eV.
+
+b) La velocidad del electrón.
+
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$;
+Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$; Masa del electrón en reposo, $m_e = 9{,}1 \cdot 10^{-31}\ \text{kg}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -328,7 +647,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-A1",
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
-    enunciado: "Una masa puntual de 50 g se encuentra situada en la posición (8, 0) m del plano xy.\nCalcule:\n\na) \tEl potencial gravitatorio y el campo gravitatorio en el punto (0, 6) m del plano debido a\ndicha masa.\n\nb) \tEl trabajo realizado por el campo al trasladar un objeto puntual de 20 g desde el punto\n(0, 6) m hasta el origen de coordenadas.\n\nDato: Constante de Gravitación Universal, G = 6,67·10 -11 N m 2 kg -2 .",
+    enunciado: `Una masa puntual de 50 g se encuentra situada en la posición $(8, 0)$ m del plano $xy$.
+Calcule:
+
+a) El potencial gravitatorio y el campo gravitatorio en el punto $(0, 6)$ m del plano debido a
+dicha masa.
+
+b) El trabajo realizado por el campo al trasladar un objeto puntual de 20 g desde el punto
+$(0, 6)$ m hasta el origen de coordenadas.
+
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -336,7 +664,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-A2",
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
-    enunciado: "Al explotar, un cohete de fuegos artificiales genera una onda sonora esférica con\nuna potencia sonora de 20 mW. Un espectador oye la explosión 1,5 s después de verlo explotar.\nCalcule:\n\na) \tLa distancia a la que está situado el espectador respecto al cohete en el momento de la\nexplosión, así como la intensidad del sonido en la posición del espectador.\n\nb) \tEl nivel de intensidad sonora percibida si explotan 10 cohetes simultáneamente, y el\nespectador los oye todos al unísono 1,5 s después de explotar.\n\nDatos: Velocidad del sonido en el aire, v s = 340 m s-1; Valor umbral de la intensidad acústica, I 0 = 10 -12 W m -2.",
+    enunciado: `Al explotar, un cohete de fuegos artificiales genera una onda sonora esférica con
+una potencia sonora de 20 mW. Un espectador oye la explosión 1,5 s después de verlo explotar.
+Calcule:
+
+a) La distancia a la que está situado el espectador respecto al cohete en el momento de la
+explosión, así como la intensidad del sonido en la posición del espectador.
+
+b) El nivel de intensidad sonora percibida si explotan 10 cohetes simultáneamente, y el
+espectador los oye todos al unísono 1,5 s después de explotar.
+
+Datos: Velocidad del sonido en el aire, $v_s = 340$ m s$^{-1}$; Valor umbral de la intensidad acústica, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -344,7 +682,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-A3",
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
-    enunciado: "Una carga puntual de 2 μC se encuentra situada en el origen de coordenadas.\n\na) \tAplicando el teorema de Gauss, obtenga el flujo del campo eléctrico a través de una\nsuperficie esférica de 10 mm de diámetro centrada en el origen.\n\nb) \tUtilizando el valor del flujo obtenido en el apartado anterior, calcule el módulo del campo\neléctrico en puntos situados a 5 mm de la carga.\n\nDato: Permitividad eléctrica del vacío,\nε0 = 8,85·10 -12 C2 N -1 m -2 .",
+    enunciado: `Una carga puntual de 2 μC se encuentra situada en el origen de coordenadas.
+
+a) Aplicando el teorema de Gauss, obtenga el flujo del campo eléctrico a través de una
+superficie esférica de 10 mm de diámetro centrada en el origen.
+
+b) Utilizando el valor del flujo obtenido en el apartado anterior, calcule el módulo del campo
+eléctrico en puntos situados a 5 mm de la carga.
+
+Dato: Permitividad eléctrica del vacío, $\varepsilon_0 = 8{,}85 \cdot 10^{-12}\ \text{C}^2\ \text{N}^{-1}\ \text{m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -360,7 +706,19 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-A5",
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
-    enunciado: "Un material posee un sistema de tres niveles energéticos electrónicos (nivel\nfundamental, primer nivel, y segundo nivel). Para que un electrón pase desde el nivel fundamental al\nsegundo nivel, el material absorbe radiación de 450 nm; tras lo cual el material emite radiación de\n600 nm debido al decaimiento del primer nivel hasta el fundamental.\n\na) \tDetermine las diferencias de energía entre el primer nivel y el nivel fundamental, y entre el\nsegundo nivel y el nivel fundamental, expresadas en electrón-voltios.\n\nb) \tCalcule la energía por unidad de tiempo que produce la emisión si el material emite\n4⋅1015 fotones s-1\n.\n\nDatos: Valor absoluto de la carga del electrón, e = 1,6·10 -19 C; Constante de Planck, h = 6,63·10 -34 J s; Velocidad de la\nluz en el vacío, c = 3·10 8 m s-1\n.",
+    enunciado: `Un material posee un sistema de tres niveles energéticos electrónicos (nivel
+fundamental, primer nivel, y segundo nivel). Para que un electrón pase desde el nivel fundamental al
+segundo nivel, el material absorbe radiación de 450 nm; tras lo cual el material emite radiación de
+600 nm debido al decaimiento del primer nivel hasta el fundamental.
+
+a) Determine las diferencias de energía entre el primer nivel y el nivel fundamental, y entre el
+segundo nivel y el nivel fundamental, expresadas en electrón-voltios.
+
+b) Calcule la energía por unidad de tiempo que produce la emisión si el material emite
+$4 \cdot 10^{15}$ fotones s$^{-1}$.
+
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$; Velocidad de la
+luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -368,7 +726,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-B1",
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: "Una sonda espacial de 3500 kg se encuentra en órbita circular alrededor de\nSaturno, realizando una revolución cada 36 horas. Calcule:\n\na) \tLa velocidad orbital y la energía mecánica que posee la sonda espacial.\n\nb) \tLa energía mínima necesaria que habría que suministrarle para que abandone el campo\ngravitatorio del planeta.\n\nDatos: Constante de Gravitación Universal, G = 6,67·10 -11 N m 2 kg -2 ; Masa de Saturno, Ms = 5,68·10 26 kg.",
+    enunciado: `Una sonda espacial de 3500 kg se encuentra en órbita circular alrededor de
+Saturno, realizando una revolución cada 36 horas. Calcule:
+
+a) La velocidad orbital y la energía mecánica que posee la sonda espacial.
+
+b) La energía mínima necesaria que habría que suministrarle para que abandone el campo
+gravitatorio del planeta.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de Saturno, $M_s = 5{,}68 \cdot 10^{26}\ \text{kg}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -376,7 +742,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-B2",
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: "El valor del campo eléctrico asociado a una onda electromagnética que se propaga\nen un medio material en la dirección del eje x viene expresado por:\n15 \t7\n( , ) \t4 cos(3, 43 10 \t1,52 10 \t)\tE x t \tt \tx\t= \t⋅ \t− \t⋅ N C-1\n,\ndonde todas las magnitudes están expresadas en unidades del SI. Calcule:\n\na) \tLa frecuencia y la longitud de onda asociadas a la onda electromagnética.\n\nb) \tLa velocidad de propagación de la onda y el índice de refracción del medio por el cual se\npropaga.\n\nDato: Velocidad de la luz en el vacío, c = 3·10 8 m s-1 .",
+    enunciado: `El valor del campo eléctrico asociado a una onda electromagnética que se propaga
+en un medio material en la dirección del eje $x$ viene expresado por:
+$$E(x,t) = 4\cos(3{,}43 \cdot 10^{15}\, t - 1{,}52 \cdot 10^7\, x)\ \text{N C}^{-1},$$
+donde todas las magnitudes están expresadas en unidades del SI. Calcule:
+
+a) La frecuencia y la longitud de onda asociadas a la onda electromagnética.
+
+b) La velocidad de propagación de la onda y el índice de refracción del medio por el cual se
+propaga.
+
+Dato: Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -384,7 +760,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-B3",
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: "Un hilo conductor rectilíneo indefinido situado a lo largo del eje x transporta una\ncorriente de 25 A en sentido positivo del eje. Obtenga:\n\na) \tEl campo magnético creado por el hilo en el punto (0, 5, 0) cm.\n\nb) \tLa fuerza magnética que experimenta un electrón cuando está en la posición (0, 5, 0) cm y\ntiene una velocidad de 1000 m s -1 en sentido positivo del eje y.\n\nDatos: Valor absoluto de la carga del electrón, e = 1,6·10 -19 C; Permeabilidad magnética del vacío,\nμ0 = 4\nπ·10 -7 T m A-1.",
+    enunciado: `Un hilo conductor rectilíneo indefinido situado a lo largo del eje $x$ transporta una
+corriente de 25 A en sentido positivo del eje. Obtenga:
+
+a) El campo magnético creado por el hilo en el punto $(0, 5, 0)$ cm.
+
+b) La fuerza magnética que experimenta un electrón cuando está en la posición $(0, 5, 0)$ cm y
+tiene una velocidad de 1000 m s$^{-1}$ en sentido positivo del eje $y$.
+
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Permeabilidad magnética del vacío,
+$\mu_0 = 4\pi \cdot 10^{-7}\ \text{T m A}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -400,7 +785,14 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2021-jun-B5",
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
-    enunciado: "Un isótopo de una muestra radiactiva posee un periodo de semidesintegración de\n5730 años.\n\na) \tObtenga la vida media y la constante radiactiva del isótopo.\n\nb) \tSi una muestra tiene 5⋅1020 átomos radiactivos en el momento inicial, calcule la actividad\ninicial y el tiempo que debe trascurrir para que dicha actividad se reduzca a la décima\nparte.",
+    enunciado: `Un isótopo de una muestra radiactiva posee un periodo de semidesintegración de
+5730 años.
+
+a) Obtenga la vida media y la constante radiactiva del isótopo.
+
+b) Si una muestra tiene $5 \cdot 10^{20}$ átomos radiactivos en el momento inicial, calcule la actividad
+inicial y el tiempo que debe trascurrir para que dicha actividad se reduzca a la décima
+parte.`,
     apartados: [],
     puntos: 2,
   },
@@ -408,7 +800,14 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-A1",
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
-    enunciado: "Un satélite sigue una órbita circular sincrónica (es decir, del mismo período que el de\nrotación del planeta) de radio 1,59 ·10 5 km en torno a un planeta de masa 1,90·10 27 kg. Calcule:\n\na) \tLa velocidad del satélite en la órbita.\n\nb) \tEl periodo de rotación del planeta sobre su eje.\n\nDato: Constante de Gravitación Universal, G = 6,67·10 -11 N m2 kg -2 .",
+    enunciado: `Un satélite sigue una órbita circular sincrónica (es decir, del mismo período que el de
+rotación del planeta) de radio $1{,}59 \cdot 10^5$ km en torno a un planeta de masa $1{,}90 \cdot 10^{27}$ kg. Calcule:
+
+a) La velocidad del satélite en la órbita.
+
+b) El periodo de rotación del planeta sobre su eje.
+
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -416,7 +815,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-A2",
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
-    enunciado: "Una onda armónica unidimensional, que se propaga en un medio con una velocidad\nde 400 m s -1, está descrita por la siguiente expresión matemática:\n( \t)\t0\tsen\t( , ) \t200 \tcm\t3\nπ \tφ\t= \t− \t+\tkx \tt\ty x t\ndonde x y t están en m y s, respectivamente. Sabiendo que y(0, 0) = 1,5 cm y que la velocidad de\noscilación en t = 0 y x = 0 es positiva, halle:\n\na) El número de onda k y la fase inicial\nφ0.\n\nb) La aceleración máxima de oscilación de un punto genérico del eje x.",
+    enunciado: `Una onda armónica unidimensional, que se propaga en un medio con una velocidad
+de 400 m s$^{-1}$, está descrita por la siguiente expresión matemática:
+$$y(x,t) = 3\sin\!\left(200\pi t - kx + \varphi_0\right)\ \text{cm},$$
+donde $x$ y $t$ están en m y s, respectivamente. Sabiendo que $y(0, 0) = 1{,}5$ cm y que la velocidad de
+oscilación en $t = 0$ y $x = 0$ es positiva, halle:
+
+a) El número de onda $k$ y la fase inicial $\varphi_0$.
+
+b) La aceleración máxima de oscilación de un punto genérico del eje $x$.`,
     apartados: [],
     puntos: 2,
   },
@@ -424,7 +831,17 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-A3",
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
-    enunciado: "Una barra conductora, de 30 cm de longitud y paralela al eje y, se mueve en el plano\nxy con una velocidad en el sentido positivo del eje x. La barra se mueve sobre unos rieles conductores\nparalelos en forma de U (ver figura). Perpendicular al plano,\nhay un campo magnético uniforme 3\n10 \tT\tk−  . Halle la fuerza\nelectromotriz inducida en la barra en función del tiempo en los\nsiguientes casos:\n\na) La velocidad de la barra es constante e igual a\n2 \t-1\n10 \tm s\ti\n .\n\nb) La barra parte del reposo y su aceleración es\nconstante e igual a -2\n5 \tm s\ti\n .",
+    enunciado: `Una barra conductora, de 30 cm de longitud y paralela al eje $y$, se mueve en el plano
+$xy$ con una velocidad en el sentido positivo del eje $x$. La barra se mueve sobre unos rieles conductores
+paralelos en forma de U (ver figura). Perpendicular al plano,
+hay un campo magnético uniforme $\vec{B} = -10^{-3}\ \hat{k}$ T. Halle la fuerza
+electromotriz inducida en la barra en función del tiempo en los
+siguientes casos:
+
+a) La velocidad de la barra es constante e igual a $\vec{v} = 10^2\ \hat{i}$ m s$^{-1}$.
+
+b) La barra parte del reposo y su aceleración es
+constante e igual a $\vec{a} = 5\ \hat{i}$ m s$^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -440,7 +857,12 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-A5",
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
-    enunciado: "Se tienen dos fuentes radiactivas cuya actividad a día de hoy es la misma. Se sabe\nque dentro de 10 años la actividad de la primera fuente será el doble que la de la segunda. Determine:\n\na) \tLa diferencia,\nλ2 –\nλ1, que existe entre las constantes de desintegración de ambas fuentes.\n\nb) \tLa relación entre las actividades de dichas fuentes dentro de 20 años.",
+    enunciado: `Se tienen dos fuentes radiactivas cuya actividad a día de hoy es la misma. Se sabe
+que dentro de 10 años la actividad de la primera fuente será el doble que la de la segunda. Determine:
+
+a) La diferencia, $\lambda_2 - \lambda_1$, que existe entre las constantes de desintegración de ambas fuentes.
+
+b) La relación entre las actividades de dichas fuentes dentro de 20 años.`,
     apartados: [],
     puntos: 2,
   },
@@ -448,7 +870,13 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-B1",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: "Se tiene un planeta de masa 1,95·10 25 kg y radio 5500 km. Determine:\n\na) \tEl módulo de la aceleración de la gravedad en la superficie de dicho planeta.\n\nb) \tLa velocidad de escape desde la superficie del planeta.\n\nDato: Constante de Gravitación Universal, G = 6,67·10 -11 N m2 kg -2 .",
+    enunciado: `Se tiene un planeta de masa $1{,}95 \cdot 10^{25}$ kg y radio 5500 km. Determine:
+
+a) El módulo de la aceleración de la gravedad en la superficie de dicho planeta.
+
+b) La velocidad de escape desde la superficie del planeta.
+
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -456,7 +884,14 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-B2",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: "A una distancia de 10 m, el nivel de intensidad sonora producida por un foco puntual\nes de 20 dB. Halle:\n\na) \tLa potencia del foco.\n\nb) \tEl nivel de intensidad sonora a 2 m del foco.\n\nDato: Intensidad umbral de audición, I 0 = 10 -12 W m-2 .",
+    enunciado: `A una distancia de 10 m, el nivel de intensidad sonora producida por un foco puntual
+es de 20 dB. Halle:
+
+a) La potencia del foco.
+
+b) El nivel de intensidad sonora a 2 m del foco.
+
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -464,7 +899,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-B3",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: "Se tienen cuatro cargas cuyo valor absoluto es |q| = 1·10 -6 C, situadas en los vértices\nde un cuadrado de lado a = 30 cm, que está en el plano xy. Dos de ellas son positivas y están en los\npuntos (0, 0) y (a, a). Las otras dos son negativas y están situadas en los puntos (0, a) y (a, 0). Calcule:\n\na) \tLa fuerza que se ejerce sobre la carga +q situada en el punto (a, a) debida a las otras tres.\n\nb) \tLa energía potencial de la carga situada en el origen de coordenadas debida a las otras tres.\n\nDato: Constante de la ley de Coulomb, K = 9\n·10 9 N m2 C-2.",
+    enunciado: `Se tienen cuatro cargas cuyo valor absoluto es $|q| = 1 \cdot 10^{-6}$ C, situadas en los vértices
+de un cuadrado de lado $a = 30$ cm, que está en el plano $xy$. Dos de ellas son positivas y están en los
+puntos $(0, 0)$ y $(a, a)$. Las otras dos son negativas y están situadas en los puntos $(0, a)$ y $(a, 0)$. Calcule:
+
+a) La fuerza que se ejerce sobre la carga $+q$ situada en el punto $(a, a)$ debida a las otras tres.
+
+b) La energía potencial de la carga situada en el origen de coordenadas debida a las otras tres.
+
+Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -480,7 +923,25 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2020-jun-B5",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
-    enunciado: "Se hace incidir un haz de\nfotones de frecuencia variable sobre una\nlámina de material metálico, de manera que\nse emiten electrones cuya energía cinética\nmáxima se mide, obteniendo la gráfica que\nse adjunta. Determine:\n\na) \tEl trabajo de extracción del metal\nen eV.\n\nb) \tLa longitud de onda de de Broglie\nasociada a los electrones que se\nemiten, \tcon \tmáxima \tenergía\ncinética, cuando la frecuencia de\nlos \tfotones \tincidentes \tes \tde\n10\n·10 14 Hz.\n\nDatos: Valor absoluto de la carga del electrón, e = 1,6·10 -19 C; Masa del electrón, m e = 9,1·10 -31 kg; Constante de\nPlanck, h = 6,63·10 -34 J s.",
+    enunciado: `Se hace incidir un haz de
+fotones de frecuencia variable sobre una
+lámina de material metálico, de manera que
+se emiten electrones cuya energía cinética
+máxima se mide, obteniendo la gráfica que
+se adjunta. Determine:
+
+a) El trabajo de extracción del metal
+en eV.
+
+b) La longitud de onda de de Broglie
+asociada a los electrones que se
+emiten, con máxima energía
+cinética, cuando la frecuencia de
+los fotones incidentes es de
+$10 \cdot 10^{14}$ Hz.
+
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Masa del electrón, $m_e = 9{,}1 \cdot 10^{-31}\ \text{kg}$; Constante de
+Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -488,7 +949,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-A1",
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
-    enunciado: "Una masa puntual m1 = 5 kg está situada en el punto (4, 3) m.\n\na) \tDetermine la intensidad del campo gravitatorio creado por la masa m1 en el origen de\ncoordenadas y el trabajo realizado al trasladar otra masa m2 = 0,5 kg desde el infinito hasta\nel origen de coordenadas.\n\nb) \tSituadas las masas m1 y m2 en las posiciones anteriores, ¿a qué distancia del origen de\ncoordenadas, el campo gravitatorio resultante es nulo?\n\nDato: Constante de Gravitación Universal, G = 6,67ꞏ10 -11 N m2 kg -2 .",
+    enunciado: `Una masa puntual $m_1 = 5$ kg está situada en el punto $(4, 3)$ m.
+
+a) Determine la intensidad del campo gravitatorio creado por la masa $m_1$ en el origen de
+coordenadas y el trabajo realizado al trasladar otra masa $m_2 = 0{,}5$ kg desde el infinito hasta
+el origen de coordenadas.
+
+b) Situadas las masas $m_1$ y $m_2$ en las posiciones anteriores, ¿a qué distancia del origen de
+coordenadas, el campo gravitatorio resultante es nulo?
+
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -496,7 +966,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-A2",
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
-    enunciado: "Un detector situado a cierta distancia de una fuente sonora puntual mide un nivel de\nintensidad sonora de 80 dB. Si se duplica la distancia entre la fuente y el detector, determine a esta\ndistancia:\n\na) \tLa intensidad de la onda sonora.\n\nb) \tEl nivel de intensidad sonora.\n\nDato: Intensidad umbral de audición, I 0 = 10 -12 W m-2 .",
+    enunciado: `Un detector situado a cierta distancia de una fuente sonora puntual mide un nivel de
+intensidad sonora de 80 dB. Si se duplica la distancia entre la fuente y el detector, determine a esta
+distancia:
+
+a) La intensidad de la onda sonora.
+
+b) El nivel de intensidad sonora.
+
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -504,7 +982,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-A3",
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
-    enunciado: "Se tienen dos hilos conductores rectilíneos, indefinidos y paralelos al eje z que cortan\nal plano xy en los puntos O (0, 0, 0) y A (2, 2, 0) cm. Por cada cable circula una corriente de 5 A en\nel sentido positivo del eje z. Calcule:\n\na) \tEl vector campo magnético en el punto P (0, 2, 0) cm y en el punto Q (1, 1, 0) cm.\n\nb) \tLa fuerza magnética por unidad de longitud que actúa sobre el conductor que pasa por el\npunto A (2, 2, 0) cm debida a la presencia del otro, indicando su dirección y sentido.\n\nDato: Permeabilidad magnética del vacío, μ0 = 4πꞏ10 -7 N A -2.",
+    enunciado: `Se tienen dos hilos conductores rectilíneos, indefinidos y paralelos al eje $z$ que cortan
+al plano $xy$ en los puntos $O(0, 0, 0)$ y $A(2, 2, 0)$ cm. Por cada cable circula una corriente de 5 A en
+el sentido positivo del eje $z$. Calcule:
+
+a) El vector campo magnético en el punto $P(0, 2, 0)$ cm y en el punto $Q(1, 1, 0)$ cm.
+
+b) La fuerza magnética por unidad de longitud que actúa sobre el conductor que pasa por el
+punto $A(2, 2, 0)$ cm debida a la presencia del otro, indicando su dirección y sentido.
+
+Dato: Permeabilidad magnética del vacío, $\mu_0 = 4\pi \cdot 10^{-7}$ N A$^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -520,7 +1007,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-A5",
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
-    enunciado: "a) \tLa longitud de onda umbral de un metal para el efecto fotoeléctrico es 579 nm. Calcule el\ntrabajo de extracción del metal, y la energía cinética máxima de los electrones emitidos\nexpresada en eV si el metal se ilumina con una radiación de 304 nm de longitud de onda.\n\nb) \tSi se hace incidir sobre otro metal la misma radiación del apartado anterior observamos\nque el potencial de frenado es de 4,08 V. Calcule el trabajo de extracción de este nuevo\nmetal.\n\nDatos: Constante de Planck, h = 6,63ꞏ10 -34 J s; Valor absoluto de la carga del electrón, e = 1,6ꞏ10 -19 C; Velocidad de la\nluz en el vacío, c = 3ꞏ10 8 m s-1.\n\nOPCIÓN B",
+    enunciado: `a) La longitud de onda umbral de un metal para el efecto fotoeléctrico es 579 nm. Calcule el
+trabajo de extracción del metal, y la energía cinética máxima de los electrones emitidos
+expresada en eV si el metal se ilumina con una radiación de 304 nm de longitud de onda.
+
+b) Si se hace incidir sobre otro metal la misma radiación del apartado anterior observamos
+que el potencial de frenado es de 4,08 V. Calcule el trabajo de extracción de este nuevo
+metal.
+
+Datos: Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Velocidad de la
+luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -528,7 +1024,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-B1",
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: "El Amazonas 5 es un satélite geoestacionario de comunicaciones de 5900 kg puesto en\nórbita en septiembre de 2017. Determine:\n\na) \tLa altura sobre el ecuador terrestre del satélite y su velocidad orbital.\n\nb) \tLa fuerza centrípeta necesaria para que describa la órbita y la energía total del satélite en\ndicha órbita.\n\nDatos: Constante de Gravitación Universal, G = 6,67ꞏ10 -11 N m2 kg -2 ; Masa de la Tierra, MT = 5,97∙10 24 kg; Radio de la\nTierra, R T = 6,37ꞏ10 6 m.",
+    enunciado: `El Amazonas 5 es un satélite geoestacionario de comunicaciones de 5900 kg puesto en
+órbita en septiembre de 2017. Determine:
+
+a) La altura sobre el ecuador terrestre del satélite y su velocidad orbital.
+
+b) La fuerza centrípeta necesaria para que describa la órbita y la energía total del satélite en
+dicha órbita.
+
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \cdot 10^6$ m.`,
     apartados: [],
     puntos: 2,
   },
@@ -536,7 +1041,16 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-B2",
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: "Una onda armónica tranversal de frecuencia f = 0,25 Hz y longitud de onda\n = 2 m se\npropaga en el sentido positivo del eje x. Sabiendo que el punto situado en x = 0,5 m tiene, en el\ninstante t = 2 s, elongación nula y velocidad de oscilación negativa, y en el instante t = 3 s, elongación\ny = - 0,2 m, determine:\n\na) \tLa expresión matemática que representa dicha onda.\n\nb) \tLa velocidad máxima de oscilación de cualquier punto alcanzado por la onda y la diferencia\nde fase, en un mismo instante, entre dos puntos situados en el eje x que distan entre si\n0,75 m.",
+    enunciado: `Una onda armónica transversal de frecuencia $f = 0{,}25$ Hz y longitud de onda $\lambda = 2$ m se
+propaga en el sentido positivo del eje $x$. Sabiendo que el punto situado en $x = 0{,}5$ m tiene, en el
+instante $t = 2$ s, elongación nula y velocidad de oscilación negativa, y en el instante $t = 3$ s, elongación
+$y = -0{,}2$ m, determine:
+
+a) La expresión matemática que representa dicha onda.
+
+b) La velocidad máxima de oscilación de cualquier punto alcanzado por la onda y la diferencia
+de fase, en un mismo instante, entre dos puntos situados en el eje $x$ que distan entre sí
+0,75 m.`,
     apartados: [],
     puntos: 2,
   },
@@ -544,7 +1058,15 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-B3",
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: "Dos cargas puntuales, con valores q 1 = -4 nC y q 2 = +2 nC respectivamente, están\nsituadas en los puntos P1 (-5, 0), y P2 (3, 0) (coordenadas en centímetros).\nDetermine:\n\na) \tEl campo eléctrico y el potencial eléctrico en el origen de coordenadas.\n\nb) \tEn qué punto situado en el segmento que une las dos cargas el potencial eléctrico se anula\n\nDato: Constante de la Ley de Coulomb, K = 9ꞏ10 9 N m2 C-2 .",
+    enunciado: `Dos cargas puntuales, con valores $q_1 = -4$ nC y $q_2 = +2$ nC respectivamente, están
+situadas en los puntos $P_1(-5, 0)$ y $P_2(3, 0)$ (coordenadas en centímetros).
+Determine:
+
+a) El campo eléctrico y el potencial eléctrico en el origen de coordenadas.
+
+b) En qué punto situado en el segmento que une las dos cargas el potencial eléctrico se anula.
+
+Dato: Constante de la Ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -560,7 +1082,14 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2019-jun-B5",
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
-    enunciado: "Se dispone de una muestra de 10 mg de 238 Pu cuyo período de semidesintegración es\nde 87,7 años y su masa atómica es 238 u. Calcule:\n\na) \tEl tiempo necesario para que la muestra se reduzca a 2 mg.\n\nb) \tLos valores de la actividad inicial y final.\n\nDato: Número de Avogadro, N A = 6,02ꞏ10 23 mol-1 .",
+    enunciado: `Se dispone de una muestra de 10 mg de $^{238}$Pu cuyo período de semidesintegración es
+de 87,7 años y su masa atómica es 238 u. Calcule:
+
+a) El tiempo necesario para que la muestra se reduzca a 2 mg.
+
+b) Los valores de la actividad inicial y final.
+
+Dato: Número de Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },

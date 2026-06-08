@@ -68,6 +68,43 @@ const mdComponents = {
   blockquote: ({children}: any) => <blockquote style={{ borderLeft: '3px solid #9ca3af', paddingLeft: '1rem', margin: '0.8rem 0', color: '#6b7280', fontStyle: 'italic' }}>{children}</blockquote>,
 }
 
+const planMdComponents = {
+  h1: ({children}: any) => (
+    <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: '#0f172a', margin: '0 0 18px', lineHeight: 1.2 }}>{children}</h1>
+  ),
+  h2: ({children}: any) => (
+    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #eff6ff, #f8fafc)', border: '1px solid #dbeafe', color: '#1e40af', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <Target size={17} />{children}
+    </h2>
+  ),
+  h3: ({children}: any) => (
+    <h3 style={{ margin: '16px 0 10px', color: '#0f172a', fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <Flame size={15} color="#2563eb" />{children}
+    </h3>
+  ),
+  strong: ({children}: any) => <strong style={{ fontWeight: 800, color: '#0f172a' }}>{children}</strong>,
+  p: ({children}: any) => <p style={{ margin: '0.55rem 0', color: '#475569', lineHeight: 1.75 }}>{children}</p>,
+  ul: ({children}: any) => <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ul>,
+  ol: ({children}: any) => <ol style={{ paddingLeft: '1.2rem', margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ol>,
+  li: ({children}: any) => (
+    <li style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '10px 12px', color: '#334155', lineHeight: 1.6, boxShadow: '0 8px 20px rgba(15, 23, 42, 0.035)' }}>
+      {children}
+    </li>
+  ),
+  blockquote: ({children}: any) => (
+    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontWeight: 700 }}>
+      {children}
+    </blockquote>
+  ),
+}
+
+function limpiarPlanGenerado(texto: string) {
+  return texto
+    .replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '')
+    .replace(/[ \t]+$/gm, '')
+    .trim()
+}
+
 function formatMatrixRows(raw: string) {
   const rows = raw
     .replace(/−/g, '-')
@@ -481,16 +518,32 @@ function cambiarTipo(t: Tipo) {
     const resumen = items.length
       ? items.map((h: any) => {
           const pct = h.nota !== null && h.nota_maxima ? (h.nota / h.nota_maxima * 10).toFixed(1) : 'sin nota'
-          return h.asignatura + ' - ' + h.bloque + ' - ' + h.tipo + ' ' + h.año + ': ' + pct + '/10'
+          return nombreAsignatura(h.asignatura) + ' - ' + h.bloque + ' - ' + h.tipo + ' ' + h.año + ': ' + pct + '/10'
         }).join('\n')
       : 'Sin correcciones aun'
-    const prompt = 'Eres Pausia, tutor EBAU Madrid. Analiza el historial y genera plan semanal personalizado.\n\nHISTORIAL:\n' + resumen + '\n\nIncluye: 1) Diagnostico puntos debiles 2) Plan lunes-domingo 3) Ejercicios especificos 4) Objetivo de nota. Se concreto y motivador.'
+    const prompt = 'Eres Pausia, entrenador de estudio para EBAU Madrid.\n' +
+      'Genera un plan semanal útil, visual y concreto para esta app.\n\n' +
+      'ASIGNATURAS DISPONIBLES EN LA APP: Matemáticas II, Física, Historia de España.\n' +
+      'No inventes Lengua, Inglés, Filosofía, Química ni otras asignaturas si no aparecen en el historial.\n' +
+      'Si no hay historial, crea un plan inicial SOLO con Matemáticas II, Física e Historia de España.\n\n' +
+      'HISTORIAL DEL ESTUDIANTE:\n' + resumen + '\n\n' +
+      'FORMATO OBLIGATORIO:\n' +
+      '- Responde en Markdown.\n' +
+      '- No uses emojis, pictogramas ni iconos Unicode.\n' +
+      '- No uses tablas.\n' +
+      '- Usa negritas con **texto** para datos importantes.\n' +
+      '- Usa secciones claras: # Plan semanal de Pausia, ## Diagnóstico, ## Semana de estudio, ## Ejercicios prioritarios, ## Objetivo.\n' +
+      '- Para cada día usa ### Lunes, ### Martes, etc.\n' +
+      '- Cada día debe tener 2 o 3 tareas máximo, con duración aproximada y una entrega concreta que el estudiante pueda mandar a Pausia.\n' +
+      '- Evita frases grandilocuentes. Tono cercano, directo y cero relleno.\n' +
+      '- No menciones periódicos, apps externas ni recursos que no estén dentro de la app salvo que sea imprescindible.\n' +
+      '- Si faltan datos, dilo en una frase breve y aun así da un plan inicial accionable.\n'
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pregunta: prompt })
     })
     const data = await res.json()
-    setPlanIA(data.respuesta)
+    setPlanIA(limpiarPlanGenerado(data.respuesta || ''))
     setCargandoPlan(false)
   }
 
@@ -1011,13 +1064,13 @@ function cambiarTipo(t: Tipo) {
               </button>
             </div>
             {planIA && (
-              <div style={{ background: '#fff', borderRadius: '14px', border: '2px solid #0f172a', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 24px', background: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><BrainCircuit size={16} /></div>
+              <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #dbeafe', overflow: 'hidden', boxShadow: '0 22px 55px rgba(15,23,42,0.08)' }}>
+                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #0f172a, #2563eb)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><BrainCircuit size={17} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · PAUSIA</span>
                 </div>
-                <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={mdComponents}>{planIA}</ReactMarkdown>
+                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #f8fafc)' }}>
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={planMdComponents}>{planIA}</ReactMarkdown>
                 </div>
               </div>
             )}

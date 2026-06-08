@@ -167,11 +167,22 @@ const preguntasB = asignatura === 'mates'
   ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'B') ?? []
   : []
 
-const preguntaMates =
-  (opcion === 0 ? preguntasA : preguntasB)[bloqueIdx] ??
-  (examen as any)?.preguntas?.[0]
+const bloquesMates = Array.from(new Set(
+  asignatura === 'mates'
+    ? ((examen as any)?.preguntas ?? []).map((p: any) => p.bloque)
+    : []
+)) as string[]
 
-const bloquesMates = preguntasA.map((p: any) => p.bloque)
+const tipoMatesActivo = bloquesMates[bloqueIdx]
+
+const preguntaMates =
+  (examen as any)?.preguntas?.find(
+    (p: any) =>
+      p.opcion === (opcion === 0 ? 'A' : 'B') &&
+      p.bloque === tipoMatesActivo
+  ) ??
+  (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoMatesActivo) ??
+  (examen as any)?.preguntas?.[0]
 
 const tipoFisicaActivo = TIPOS_FISICA[bloqueIdx]?.tipo
 
@@ -188,6 +199,14 @@ const preguntaFisica = asignatura === 'fisica'
 
 const OPCIONES = [0, 1] as const
 
+const opcionesMatesDisponibles = asignatura === 'mates'
+  ? Array.from(new Set(
+      ((examen as any)?.preguntas ?? [])
+        .filter((p: any) => p.bloque === tipoMatesActivo)
+        .map((p: any) => p.opcion)
+    ))
+  : []
+
 const opcionesFisicaDisponibles = asignatura === 'fisica'
   ? Array.from(new Set(
       ((examen as any)?.preguntas ?? [])
@@ -197,7 +216,9 @@ const opcionesFisicaDisponibles = asignatura === 'fisica'
   : []
 
 const opcionesDisponibles: (0 | 1)[] =
-  asignatura === 'fisica' && opcionesFisicaDisponibles.length
+  asignatura === 'mates' && opcionesMatesDisponibles.length
+    ? OPCIONES.filter(op => opcionesMatesDisponibles.includes(op === 0 ? 'A' : 'B'))
+    : asignatura === 'fisica' && opcionesFisicaDisponibles.length
     ? OPCIONES.filter(op => opcionesFisicaDisponibles.includes(op === 0 ? 'A' : 'B'))
     : [...OPCIONES]
 
@@ -237,6 +258,22 @@ function puntosBloqueFisica(tipoBloque: string) {
     ) ??
     (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque)
   )?.puntuacion ?? 2
+}
+
+function puntosBloqueMates(bloque: string) {
+  return (
+    (examen as any)?.preguntas?.find(
+      (p: any) => p.bloque === bloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+    ) ??
+    (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)
+  )?.puntuacion ?? 2.5
+}
+
+function cambiarBloqueMates(i: number, bloque: string) {
+  setBloqueIdx(i)
+  const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)?.opcion
+  if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
+  reset()
 }
 
 function cambiarBloqueFisica(i: number, tipoBloque: string) {
@@ -637,7 +674,7 @@ function cambiarTipo(t: Tipo) {
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
-                  <button key={i} onClick={() => { setBloqueIdx(i); setOpcion(0); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {preguntasA[i]?.puntuacion}pts</button>
+                  <button key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : TIPOS_HISTORIA).map((t, i) => (
                   <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : (t as any).pts}pts</button>
                 ))}

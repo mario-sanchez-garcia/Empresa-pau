@@ -1032,6 +1032,21 @@ function cambiarTipo(t: Tipo) {
                   {asignatura === 'historia' && (preguntaActiva as any).texto_fuente && (
                     <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '14px', background: WARM.field, borderLeft: '3px solid ' + cfg.accent, color: WARM.ink, fontSize: '14px', fontStyle: 'italic', lineHeight: '1.7' }}>{(preguntaActiva as any).texto_fuente}</div>
                   )}
+                  {asignatura === 'historia' && (preguntaActiva as any).imagen_url && (
+                    <img
+                      src={(preguntaActiva as any).imagen_url}
+                      alt="Fuente histórica"
+                      className="mt-4 max-w-full rounded-lg border border-gray-200 shadow-sm"
+                    />
+                  )}
+                  {asignatura === 'historia' && (preguntaActiva as any).imagenes_url?.map((url: string, i: number) => (
+                    <img
+                      key={i}
+                      src={url}
+                      alt={`Fuente histórica ${i + 1}`}
+                      className="mt-4 max-w-full rounded-lg border border-gray-200 shadow-sm"
+                    />
+                  ))}
                   {asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
                     <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                       <img src={(preguntaActiva as any).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />

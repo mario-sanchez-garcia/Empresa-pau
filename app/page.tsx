@@ -1126,11 +1126,11 @@ function cambiarTipo(t: Tipo) {
   background: 'rgba(255, 253, 249, 0.95)',
   borderRadius: '24px',
   border: '1px solid rgba(242, 228, 212, 0.95)',
-  overflow: 'hidden',
+  overflow: 'clip',
   marginBottom: '22px',
   boxShadow: WARM.shadow
 }}>
-                <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50 }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examenActivo?.año} · {tipo}</span>
                     {asignatura === 'historia' && diaHistoriaSeleccionado && (
@@ -1147,7 +1147,7 @@ function cambiarTipo(t: Tipo) {
                     <span style={{ fontSize: '13px', color: cfg.accent }}>pts</span>
                   </div>
                 </div>
-                <div style={{ padding: '24px' }}>
+                <div style={{ padding: '24px', overflowY: 'auto' }}>
                   {(asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any).texto_fuente && (
                     <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '14px', background: WARM.field, borderLeft: '3px solid ' + cfg.accent, color: WARM.ink, fontSize: '14px', fontStyle: asignatura === 'historia' ? 'italic' : 'normal', lineHeight: '1.7' }}>
                       <div style={{ marginBottom: '8px', fontSize: '11px', fontWeight: 800, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Texto fuente oficial</div>

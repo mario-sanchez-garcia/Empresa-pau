@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   content.push({ type: 'text', text: prompt })
 
   const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 4000,
     system: 'Eres Pausia, corrector experto de EvAU Madrid. Devuelve exclusivamente JSON válido cuando el usuario lo pida. No añadas markdown ni texto fuera del JSON.',
     messages: [{ role: 'user', content }]

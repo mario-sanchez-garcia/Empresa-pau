@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import {
   BarChart3,
@@ -15,12 +16,16 @@ import {
   Zap
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
-import Flashcards from '@/components/zona/Flashcards'
-import type { Flashcard, ZonaUser } from '@/components/zona/types'
+import type { ZonaCanvas, ZonaUser } from '@/components/zona/types'
 
-export default function ZonaPage() {
+const CanvasBoard = dynamic(() => import('@/components/zona/canvas/CanvasBoard'), {
+  ssr: false,
+  loading: () => <div className="flex min-h-[520px] items-center justify-center rounded-3xl border border-[#f2e4d4] bg-white/80 font-black text-[#7C3AED]">Preparando tu espacio...</div>
+})
+
+export default function ZonaCanvasPage() {
   const [user, setUser] = useState<ZonaUser | null>(null)
-  const [cards, setCards] = useState<Flashcard[]>([])
+  const [canvases, setCanvases] = useState<ZonaCanvas[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
@@ -32,12 +37,12 @@ export default function ZonaPage() {
         return
       }
       setUser({ id: data.user.id, email: data.user.email })
-      const { data: flashcards } = await supabase
-        .from('flashcards')
+      const { data: rows } = await supabase
+        .from('canvases')
         .select('*')
         .eq('user_id', data.user.id)
-        .order('created_at', { ascending: false })
-      setCards((flashcards ?? []) as Flashcard[])
+        .order('updated_at', { ascending: false })
+      setCanvases((rows ?? []) as ZonaCanvas[])
       setLoading(false)
     }
 
@@ -54,7 +59,7 @@ export default function ZonaPage() {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fff8f1] via-[#fff7ed] to-[#eef6ff]">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#7C3AED] text-white shadow-xl"><Zap size={28} /></div>
-          <p className="font-black text-[#7c6f64]">Cargando La Zona...</p>
+          <p className="font-black text-[#7c6f64]">Abriendo Mi Espacio...</p>
         </div>
       </div>
     )
@@ -97,17 +102,17 @@ export default function ZonaPage() {
           <div className="flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#ddd6fe] bg-[#f5f3ff] text-[#7C3AED]"><BrainCircuit size={22} /></div>
             <div>
-              <h1 className="m-0 text-xl font-black">La Zona</h1>
-              <p className="m-0 text-sm text-[#a5917d]">Estudia a tu manera</p>
+              <h1 className="m-0 text-xl font-black">Mi Espacio</h1>
+              <p className="m-0 text-sm text-[#a5917d]">Canvas infinito para pensar visualmente</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full bg-[#7C3AED] px-4 py-2 text-sm font-black text-white shadow-lg"><Sparkles size={15} /> Flashcards</div>
-            <a className="flex items-center gap-2 rounded-full border border-[#f2e4d4] bg-white/80 px-4 py-2 text-sm font-black text-[#7c6f64]" href="/zona/canvas"><Zap size={15} /> Mi Espacio</a>
+            <a className="flex items-center gap-2 rounded-full border border-[#f2e4d4] bg-white/80 px-4 py-2 text-sm font-black text-[#7c6f64]" href="/zona"><Sparkles size={15} /> Flashcards</a>
+            <div className="flex items-center gap-2 rounded-full bg-[#7C3AED] px-4 py-2 text-sm font-black text-white shadow-lg"><Zap size={15} /> Mi Espacio</div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl p-8 max-md:p-4">
-          <Flashcards userId={user.id} initialCards={cards} />
+        <main className="h-[calc(100vh-78px)] p-4 max-md:h-auto max-md:min-h-[760px]">
+          <CanvasBoard userId={user.id} initialCanvases={canvases} />
         </main>
       </div>
     </div>

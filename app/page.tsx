@@ -28,6 +28,7 @@ import {
   SendHorizontal,
   Sigma,
   Target,
+  TimerReset,
   UploadCloud,
   WandSparkles,
   X
@@ -792,13 +793,22 @@ function cambiarTipo(t: Tipo) {
                 </div>
               </button>
               {item.id === 'examenes' && (
-                <a href="/zona" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
-                  <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', background: '#f5f3ff', border: '1px solid #ddd6fe' }}><BrainCircuit size={17} /></span>
-                  <div>
-                    <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>La Zona</div>
-                    <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Estudia a tu manera</div>
-                  </div>
-                </a>
+                <>
+                  <a href="/simulacros" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
+                    <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', background: '#f5f3ff', border: '1px solid #ddd6fe' }}><TimerReset size={17} /></span>
+                    <div>
+                      <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>Simulacros</div>
+                      <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Condiciones reales</div>
+                    </div>
+                  </a>
+                  <a href="/zona" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '16px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
+                    <span style={{ width: '34px', height: '34px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', background: '#f5f3ff', border: '1px solid #ddd6fe' }}><BrainCircuit size={17} /></span>
+                    <div>
+                      <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>La Zona</div>
+                      <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Estudia a tu manera</div>
+                    </div>
+                  </a>
+                </>
               )}
             </div>
           )})}

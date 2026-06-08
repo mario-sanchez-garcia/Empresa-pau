@@ -36,18 +36,18 @@ const NAV_ITEMS = [
   { id: 'examenes', label: 'Exámenes', desc: 'Practica y corrige', href: '/', icon: ClipboardList },
   { id: 'simulacros', label: 'Simulacros', desc: 'Condiciones reales', href: '/simulacros', icon: TimerReset },
   { id: 'zona', label: 'La Zona', desc: 'Estudia a tu manera', href: '/zona', icon: BrainCircuit },
-  { id: 'chat', label: 'Chat con Pausia', desc: 'Resuelve dudas', href: '/', icon: MessageCircle },
-  { id: 'historial', label: 'Historial', desc: 'Tus correcciones', href: '/', icon: BarChart3 },
-  { id: 'plan-estudio', label: 'Plan de estudio', desc: 'Semana organizada', href: '/', icon: BrainCircuit },
+  { id: 'chat', label: 'Chat con Pausia', desc: 'Resuelve dudas', href: '/?view=chat', icon: MessageCircle },
+  { id: 'historial', label: 'Historial', desc: 'Tus correcciones', href: '/?view=historial', icon: BarChart3 },
+  { id: 'plan-estudio', label: 'Plan de estudio', desc: 'Semana organizada', href: '/?view=planning', icon: BrainCircuit },
   { id: 'planning', label: 'Planning', desc: 'Tareas completables', href: '/planning', icon: Rocket }
 ] as const
 
 const SUBJECTS = [
   { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#b4232a', light: '#fff1f2', border: '#ffe4e6' },
-  { id: 'fisica', label: 'Física', icon: Atom, color: '#4338ca', light: '#eef2ff', border: '#e0e7ff' },
-  { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#0369a1', light: '#f0f9ff', border: '#e0f2fe' },
-  { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#7c2d12', light: '#fff7ed', border: '#fed7aa' },
-  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#0f5ea8', light: '#eff6ff', border: '#dbeafe' }
+  { id: 'fisica', label: 'Física', icon: Atom, color: '#ca8a04', light: '#fefce8', border: '#fef3c7' },
+  { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
+  { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
+  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#78350f', light: '#fff8f1', border: '#fed7aa' }
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {
@@ -127,7 +127,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
           )
           return onSubjectChange
             ? <button key={subject.id} className={classes} style={style} onClick={() => onSubjectChange(subject.id)}>{content}</button>
-            : <Link key={subject.id} className={classes} style={style} href="/">{content}</Link>
+            : <Link key={subject.id} className={classes} style={style} href={`/?subject=${subject.id}`}>{content}</Link>
         })}
       </nav>
 

@@ -37,10 +37,10 @@ import {
 } from 'lucide-react'
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#b4232a', light: '#fff1f2', accent: '#fb7185', soft: '#ffe4e6' },
-  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#1e3a8a', light: '#eff6ff', accent: '#3b82f6', soft: '#dbeafe' },
-  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#c2410c', light: '#fff7ed', accent: '#fb923c', soft: '#fed7aa' },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#7c2d12', light: '#fff7ed', accent: '#f97316', soft: '#fed7aa' },
-  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#a16207', light: '#fffbeb', accent: '#facc15', soft: '#fef3c7' }
+  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#ca8a04', light: '#fefce8', accent: '#facc15', soft: '#fef3c7' },
+  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
+  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
+  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#78350f', light: '#fff8f1', accent: '#b45309', soft: '#fed7aa' }
 }
 
 const WARM = {
@@ -91,13 +91,13 @@ const SUBJECT_CARDS = {
 }
 
 const mdComponents = {
-  h1: ({children}: any) => <h1 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '1.2rem 0 0.5rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.3rem' }}>{children}</h1>,
-  h2: ({children}: any) => <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '1rem 0 0.4rem' }}>{children}</h2>,
-  h3: ({children}: any) => <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#374151', margin: '0.8rem 0 0.3rem' }}>{children}</h3>,
-  strong: ({children}: any) => <strong style={{ fontWeight: 700, color: '#111' }}>{children}</strong>,
-  p: ({children}: any) => <p style={{ margin: '0.4rem 0', color: '#374151' }}>{children}</p>,
-  li: ({children}: any) => <li style={{ margin: '0.25rem 0', color: '#374151' }}>{children}</li>,
-  blockquote: ({children}: any) => <blockquote style={{ borderLeft: '3px solid #9ca3af', paddingLeft: '1rem', margin: '0.8rem 0', color: '#6b7280', fontStyle: 'italic' }}>{children}</blockquote>,
+  h1: ({children}: any) => <h1 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '1.2rem 0 0.65rem', borderBottom: '2px solid #e5edf9', paddingBottom: '0.35rem', color: '#111827' }}>{children}</h1>,
+  h2: ({children}: any) => <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: '1.05rem 0 0.5rem', color: '#111827' }}>{children}</h2>,
+  h3: ({children}: any) => <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1f2937', margin: '0.95rem 0 0.4rem' }}>{children}</h3>,
+  strong: ({children}: any) => <strong style={{ fontWeight: 850, color: '#111827' }}>{children}</strong>,
+  p: ({children}: any) => <p style={{ margin: '0.72rem 0', color: '#374151', lineHeight: 1.85 }}>{children}</p>,
+  li: ({children}: any) => <li style={{ margin: '0.38rem 0', color: '#374151', lineHeight: 1.8 }}>{children}</li>,
+  blockquote: ({children}: any) => <blockquote style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #93c5fd', borderRadius: '16px', padding: '1rem', margin: '1rem 0', color: '#475569', background: '#ffffff', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
 }
 
 const planMdComponents = {
@@ -222,6 +222,21 @@ type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
+const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
+const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'lengua', 'historia']
+
+function readHomeSectionFromUrl(): Seccion | null {
+  if (typeof window === 'undefined') return null
+  const view = new URLSearchParams(window.location.search).get('view')
+  return HOME_SECTIONS.includes(view as Seccion) ? view as Seccion : null
+}
+
+function readSubjectFromUrl(): Asignatura | null {
+  if (typeof window === 'undefined') return null
+  const subject = new URLSearchParams(window.location.search).get('subject')
+  return HOME_SUBJECTS.includes(subject as Asignatura) ? subject as Asignatura : null
+}
+
 function hoverVars(color: string, light: string, accent = color) {
   return {
     '--hover-color': color,
@@ -345,6 +360,13 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    const urlSection = readHomeSectionFromUrl()
+    const urlSubject = readSubjectFromUrl()
+    if (urlSubject) cambiarAsignatura(urlSubject)
+    if (urlSection) setSeccion(urlSection)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
 
@@ -355,6 +377,28 @@ export default function Home() {
         .then(({ data }) => { setHistorial(data || []); setCargandoHistorial(false) })
     }
   }, [seccion])
+
+  function syncHomeUrl(nextSection: Seccion, nextSubject = asignatura) {
+    if (typeof window === 'undefined' || window.location.pathname !== '/') return
+    const params = new URLSearchParams(window.location.search)
+    if (nextSection === 'examenes') params.delete('view')
+    else params.set('view', nextSection)
+    if (nextSection === 'examenes') params.set('subject', nextSubject)
+    else params.delete('subject')
+    const query = params.toString()
+    window.history.replaceState(null, '', query ? `/?${query}` : '/')
+  }
+
+  function navegarASeccion(nextSection: Seccion) {
+    setSeccion(nextSection)
+    syncHomeUrl(nextSection)
+  }
+
+  function navegarAAsignatura(nextSubject: Asignatura) {
+    cambiarAsignatura(nextSubject)
+    setSeccion('examenes')
+    syncHomeUrl('examenes', nextSubject)
+  }
 
   const TIPOS_FISICA = [
   { tipo: 'Gravitacion', label: 'Gravitación', puntos: 2 },
@@ -790,7 +834,7 @@ function cambiarTipo(t: Tipo) {
     setContextoChat(ctx)
     setMensajes([{ rol: 'pausia', texto: 'Hola! Veo que tienes dudas sobre tu correccion de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. Que parte no te queda clara? Preguntame lo que quieras.' }])
     setItemSeleccionado(null)
-    setSeccion('chat')
+    navegarASeccion('chat')
   }
 
   async function generarPlan() {
@@ -928,8 +972,8 @@ function cambiarTipo(t: Tipo) {
         activeItem={seccion === 'planning' ? 'plan-estudio' : seccion as SidebarItemId}
         activeSubject={asignatura as SidebarSubjectId}
         email={usuario?.email}
-        onNavigate={(item) => setSeccion(item === 'plan-estudio' ? 'planning' : item as Seccion)}
-        onSubjectChange={(subject) => { cambiarAsignatura(subject as Asignatura); setSeccion('examenes') }}
+        onNavigate={(item) => navegarASeccion(item === 'plan-estudio' ? 'planning' : item as Seccion)}
+        onSubjectChange={(subject) => navegarAAsignatura(subject as Asignatura)}
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -970,7 +1014,7 @@ function cambiarTipo(t: Tipo) {
               {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
                 const Icon = val.icon
                 return (
-                <button className={asignatura === key ? 'campus-primary' : 'campus-hover'} key={key} onClick={() => cambiarAsignatura(key)} style={{ ...hoverVars(val.color, val.light, val.accent), padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #dbe7fb', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.92)', color: asignatura === key ? '#fff' : WARM.muted, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(37,99,235,0.04)' }}><Icon size={15} />{val.short}</button>
+                <button className={asignatura === key ? 'campus-primary' : 'campus-hover'} key={key} onClick={() => navegarAAsignatura(key)} style={{ ...hoverVars(val.color, val.light, val.accent), padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #dbe7fb', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.92)', color: asignatura === key ? '#fff' : WARM.muted, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(37,99,235,0.04)' }}><Icon size={15} />{val.short}</button>
               )})}
             </div>
           )}
@@ -988,7 +1032,7 @@ function cambiarTipo(t: Tipo) {
                   <button
                     className="campus-subject-card"
                     key={key}
-                    onClick={() => cambiarAsignatura(key)}
+                    onClick={() => navegarAAsignatura(key)}
                     style={{
                       ...hoverVars(val.color, val.light, val.accent),
                       position: 'relative',
@@ -1119,9 +1163,9 @@ function cambiarTipo(t: Tipo) {
 
             {preguntaActiva && (
              <div style={{
-  background: 'rgba(255, 253, 249, 0.95)',
+  background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
-  border: '1px solid rgba(242, 228, 212, 0.95)',
+  border: '1px solid rgba(219, 231, 251, 0.95)',
   overflow: 'clip',
   marginBottom: '22px',
   boxShadow: WARM.shadow
@@ -1136,7 +1180,7 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
                     )}
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid #fed7aa' }}>{asignatura === 'lengua' ? 'Versión' : 'Opcion'} {opcionMostrada}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : 'Opcion'} {opcionMostrada}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{preguntaActiva.puntuacion}</span>
@@ -1145,20 +1189,26 @@ function cambiarTipo(t: Tipo) {
                 </div>
                 <div style={{ padding: '24px', overflowY: 'auto' }}>
                   {(asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any).texto_fuente && (
-                    <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '14px', background: WARM.field, borderLeft: '3px solid ' + cfg.accent, color: WARM.ink, fontSize: '14px', fontStyle: asignatura === 'historia' ? 'italic' : 'normal', lineHeight: '1.7' }}>
-                      <div style={{ marginBottom: '8px', fontSize: '11px', fontWeight: 800, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Texto fuente oficial</div>
-                      {(preguntaActiva as any).texto_fuente}
+                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
+                      <div style={{ color: WARM.ink, fontSize: '14px', lineHeight: 1.85 }}>
+                        <MathMarkdown text={(preguntaActiva as any).texto_fuente} components={mdComponents} />
+                      </div>
                     </div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).imagen_url && (
-                    <img
-                      src={(preguntaActiva as any).imagen_url}
-                      alt="Fuente histórica"
-                      className="mt-4 max-w-full rounded-lg border border-gray-200 shadow-sm"
-                    />
+                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Documento visual</div>
+                      <img
+                        src={(preguntaActiva as any).imagen_url}
+                        alt="Fuente histórica"
+                        className="max-w-full rounded-2xl border border-slate-200 shadow-sm"
+                      />
+                    </div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
-                    <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Fuente histórica oficial</div>
                       <img src={(preguntaActiva as any).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
                     </div>
                   )}
@@ -1176,17 +1226,20 @@ function cambiarTipo(t: Tipo) {
                       ))}
                     </div>
                   )}
-                  <div style={{ fontSize: '1.05rem', lineHeight: '1.8', color: '#1f2937' }}>
-                    <MathMarkdown text={enunciadoActivo} components={mdComponents} />
+                  <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado oficial</div>
+                    <div style={{ fontSize: '1.02rem', lineHeight: '1.85', color: '#1f2937' }}>
+                      <MathMarkdown text={enunciadoActivo} format={false} components={mdComponents} />
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
            <div style={{
-  background: 'rgba(255, 253, 249, 0.95)',
+  background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
-  border: '1px solid rgba(242, 228, 212, 0.95)',
+  border: '1px solid rgba(219, 231, 251, 0.95)',
   padding: '26px',
   marginBottom: '22px',
   boxShadow: WARM.shadow
@@ -1391,9 +1444,11 @@ function cambiarTipo(t: Tipo) {
               </div>
               <div style={{ padding: '24px' }}>
                 {itemSeleccionado.enunciado && (
-                  <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '16px', background: WARM.field, border: '1px solid #dbe7fb' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Enunciado</div>
-                    <MathMarkdown text={itemSeleccionado.enunciado} components={mdComponents} />
+                  <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.blue, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Enunciado oficial</div>
+                    <div style={{ fontSize: '0.98rem', lineHeight: 1.85 }}>
+                      <MathMarkdown text={itemSeleccionado.enunciado} components={mdComponents} />
+                    </div>
                   </div>
                 )}
                 {itemSeleccionado.correccion && (

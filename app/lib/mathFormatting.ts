@@ -10,11 +10,19 @@ export function formatExamText(input?: string | null) {
   text = mapOutsideMath(text, formatScientificNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
+  text = mapOutsideMath(text, formatExamStructure)
 
   return text
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n(?!\n)/g, '  \n')
     .trim()
+}
+
+function formatExamStructure(text: string) {
+  return text
+    .replace(/(^|\n)\s*([a-d]\))/gi, '$1**$2**')
+    .replace(/(^|\n)\s*((?:Datos?|Dato)[.:])/gi, '$1**$2**')
+    .replace(/(^|\n)\s*([ivx]+\))/gi, '$1**$2**')
 }
 
 function mapOutsideMath(text: string, formatter: (value: string) => string) {

@@ -157,10 +157,23 @@ export default function SimulacroActivoPage() {
                   </div>
                 </div>
               </div>
-              <div className="prose prose-slate max-w-none rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-5">
-                {record.asignatura === 'lengua' && index > 0 && block.textoFuente && <MathMarkdown text={block.textoFuente} className="mb-4 rounded-2xl border-l-4 border-blue-300 bg-white/80 p-4 text-slate-600" />}
-                <MathMarkdown text={block.enunciado} />
-                {record.asignatura !== 'lengua' && block.textoFuente && <MathMarkdown text={block.textoFuente} className="mt-4 rounded-2xl border-l-4 border-blue-300 bg-white/80 p-4 text-slate-600" />}
+              <div className="grid gap-4 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
+                {record.asignatura === 'lengua' && index > 0 && block.textoFuente && (
+                  <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
+                    <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Texto fuente oficial</div>
+                    <MathMarkdown text={block.textoFuente} />
+                  </div>
+                )}
+                <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
+                  <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Enunciado oficial</div>
+                  <MathMarkdown text={block.enunciado} />
+                </div>
+                {record.asignatura !== 'lengua' && block.textoFuente && (
+                  <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
+                    <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Texto fuente oficial</div>
+                    <MathMarkdown text={block.textoFuente} />
+                  </div>
+                )}
               </div>
             </div>
 

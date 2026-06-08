@@ -6,10 +6,10 @@ import rehypeKatex from 'rehype-katex'
 import { formatExamText } from '@/app/lib/mathFormatting'
 
 const defaultComponents = {
-  p: ({ children }: any) => <p className="my-2 leading-8 text-slate-700">{children}</p>,
-  li: ({ children }: any) => <li className="my-1 leading-8 text-slate-700">{children}</li>,
+  p: ({ children }: any) => <p className="my-3 leading-8 text-slate-700">{children}</p>,
+  li: ({ children }: any) => <li className="my-2 leading-8 text-slate-700">{children}</li>,
   strong: ({ children }: any) => <strong className="font-black text-slate-950">{children}</strong>,
-  blockquote: ({ children }: any) => <blockquote className="my-4 rounded-xl border-l-4 border-slate-300 bg-white/70 p-4 text-slate-600">{children}</blockquote>,
+  blockquote: ({ children }: any) => <blockquote className="my-4 rounded-2xl border border-slate-200 border-l-4 border-l-blue-300 bg-white p-4 text-slate-600 shadow-sm">{children}</blockquote>,
 }
 
 export default function MathMarkdown({

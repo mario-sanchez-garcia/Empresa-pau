@@ -86,12 +86,12 @@ export default function Home() {
   }, [seccion])
 
   const TIPOS_FISICA = [
-  { key: 'tema', label: 'Gravitación', puntos: 2 },
-  { key: 'comentario', label: 'Ondas', puntos: 2 },
-  { key: 'definicion', label: 'Electricidad', puntos: 2 },
-  { key: 'corta', label: 'Óptica', puntos: 2 },
-  { key: 'moderna', label: 'Radioactividad moderna', puntos: 2 }
-]
+  { tipo: 'Gravitacion', label: 'Gravitación', puntos: 2 },
+  { tipo: 'Ondas', label: 'Ondas', puntos: 2 },
+  { tipo: 'Electricidad', label: 'Electricidad', puntos: 2 },
+  { tipo: 'Optica', label: 'Óptica', puntos: 2 },
+  { tipo: 'RadioactividadModerna', label: 'Radioactividad moderna', puntos: 2 }
+] as const
 
 const TIPOS_HISTORIA = [
   { tipo: 'tema', label: 'Tema', pts: 4 },
@@ -127,15 +127,19 @@ const preguntaMates =
   (opcion === 0 ? preguntasA : preguntasB)[bloqueIdx] ??
   (examen as any)?.preguntas?.[0]
 
-const bloquesFisica = [
-  { key: 'Gravitacion', label: 'Gravitación', puntos: 2 },
-  { key: 'Ondas', label: 'Ondas', puntos: 2 },
-  { key: 'Electricidad', label: 'Electricidad', puntos: 2 },
-  { key: 'Optica', label: 'Óptica', puntos: 2 },
-  { key: 'RadioactividadModerna', label: 'Moderna', puntos: 2 }
-]
-
 const bloquesMates = preguntasA.map((p: any) => p.bloque)
+
+const tipoFisicaActivo = TIPOS_FISICA[bloqueIdx]?.tipo
+
+const preguntaFisica = asignatura === 'fisica'
+  ? (examen as any)?.preguntas?.find(
+      (p: any) =>
+        p.opcion === (opcion === 0 ? 'A' : 'B') &&
+        p.bloque === tipoFisicaActivo
+    ) ??
+    (examen as any)?.preguntas?.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
+    (examen as any)?.preguntas?.[0]
+  : null
 
 const examenHistoria = asignatura === 'historia'
   ? examenesHistoria.find(
@@ -154,8 +158,21 @@ const preguntaHistoria =
   preguntasHistoria.find(p => p.tipo === tipoHistoriaActivo) ??
   preguntasHistoria[0]
 
-const esEjercicios = asignatura === 'mates' || asignatura === 'fisica'
-  const preguntaActiva = esEjercicios ? preguntaMates : preguntaHistoria
+const preguntaActiva =
+  asignatura === 'mates' ? preguntaMates :
+  asignatura === 'fisica' ? preguntaFisica :
+  preguntaHistoria
+
+const bloqueActivoLabel =
+  asignatura === 'mates' ? (preguntaActiva as any)?.bloque :
+  asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
+  (TIPOS_HISTORIA[bloqueIdx]?.label ?? '')
+
+function nombreAsignatura(a: string) {
+  if (a === 'mates') return 'Matematicas II'
+  if (a === 'fisica') return 'Física'
+  return 'Historia de Espana'
+}
 
 function reset() {
   setCorreccion('')
@@ -210,7 +227,7 @@ function cambiarTipo(t: Tipo) {
         (modo === 'imagen' ? 'Imagen adjunta con respuesta manuscrita.' : 'RESPUESTA: ' + respuesta) + '\n' +
         'Corrige con: ## Nota (X/' + p.puntuacion + '), ## Que esta bien, ## Que falta, ## Respuesta modelo'
     } else {
-      prompt = 'Eres corrector oficial EBAU Madrid Matematicas.\n' +
+      prompt = 'Eres corrector oficial EBAU Madrid ' + (asignatura === 'fisica' ? 'Fisica' : 'Matematicas') + '.\n' +
         'PREGUNTA: ' + preguntaActiva?.enunciado + '\n' +
         'PUNTUACION MAX: ' + preguntaActiva?.puntuacion + '\n' +
         'CRITERIOS: ' + (preguntaActiva as any)?.criterios + '\n' +
@@ -228,7 +245,7 @@ function cambiarTipo(t: Tipo) {
     const notaMax = partes ? parseFloat(partes[2].replace(',', '.')) : null
     supabase.from('historial_examenes').insert({
       user_id: usuario.id, asignatura, tipo, año: examen?.año,
-      bloque: asignatura === 'mates' ? (preguntaActiva?.bloque || '') : (TIPOS_HISTORIA[bloqueIdx]?.label || ''),
+      bloque: bloqueActivoLabel || '',
       opcion: opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
       enunciado: preguntaActiva?.enunciado?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
@@ -260,7 +277,7 @@ function cambiarTipo(t: Tipo) {
 
   function abrirChatConContexto(item: any) {
     const ctx = 'El estudiante acaba de revisar esta correccion:\n' +
-      'Asignatura: ' + (item.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana') + '\n' +
+      'Asignatura: ' + nombreAsignatura(item.asignatura) + '\n' +
       'Ejercicio: ' + item.bloque + ' - ' + item.tipo + ' ' + item.año + '\n' +
       'Nota obtenida: ' + item.nota + '/' + item.nota_maxima + '\n' +
       'Enunciado: ' + (item.enunciado || '') + '\n' +
@@ -504,7 +521,7 @@ function cambiarTipo(t: Tipo) {
                 <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examen?.año} · {tipo}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{asignatura === 'mates' ? preguntaActiva.bloque : (TIPOS_HISTORIA[bloqueIdx]?.label ?? '')}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#f1f5f9', color: '#374151', fontSize: '11px', border: '1px solid #e2e8f0' }}>Opcion {opcion === 0 ? 'A' : 'B'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -657,7 +674,7 @@ function cambiarTipo(t: Tipo) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                         <div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : '#1a4731' }}>{item.asignatura === 'mates' ? 'Matematicas II' : 'Historia de Espana'}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: item.asignatura === 'mates' ? '#1e3a5f' : item.asignatura === 'fisica' ? '#4c1d95' : '#1a4731' }}>{nombreAsignatura(item.asignatura)}</span>
                             <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.tipo}</span>
                             <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.año}</span>
                             <span style={{ padding: '2px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569', fontSize: '11px' }}>{item.bloque}</span>
@@ -709,7 +726,7 @@ function cambiarTipo(t: Tipo) {
             <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto' }}>
               <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#fff' }}>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>{itemSeleccionado.asignatura === 'mates' ? 'Matematicas II' : 'Historia'} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>{nombreAsignatura(itemSeleccionado.asignatura)} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

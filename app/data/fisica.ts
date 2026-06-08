@@ -1249,7 +1249,7 @@ export const examenesF: PreguntaFisica[] = [
 
 export interface PreguntaFisicaApp {
   id: string
-  bloque: 'tema' | 'comentario' | 'definicion' | 'corta' | 'moderna'
+  bloque: TipoFisica
   opcion: "A" | "B"
   enunciado: string
   puntuacion: number
@@ -1282,12 +1282,7 @@ export const examenesFisica: ExamenFisica[] = Object.values(
 
     acc[key].preguntas.push({
       id: p.id,
-      bloque:
-        p.tipo === "Gravitacion" ? "tema" :
-        p.tipo === "Ondas" ? "comentario" :
-        p.tipo === "Electricidad" ? "definicion" :
-        p.tipo === "Optica" ? "corta" :
-        "moderna",
+      bloque: p.tipo,
       opcion: p.opcion,
       enunciado:
         `${p.numero}. ${p.enunciado}\n\n` +

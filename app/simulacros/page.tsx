@@ -51,13 +51,14 @@ export default function SimulacrosPage() {
     }
     setUserId(currentUserId)
 
-    const generated = generateSimulacro(subject, difficulty, option)
+    const effectiveOption: SimulacroOption = subject === 'lengua' ? 'A' : option
+    const generated = generateSimulacro(subject, difficulty, effectiveOption)
     const now = new Date().toISOString()
     const row = {
       id: generated.id,
       user_id: currentUserId,
       asignatura: subject,
-      opcion: option,
+      opcion: effectiveOption,
       dificultad: difficulty,
       dificultad_real: generated.dificultadReal,
       bloques: generated.blocks,
@@ -104,7 +105,7 @@ export default function SimulacrosPage() {
 
         <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
           <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Paso 1 · Asignatura</p>
-          <div className="grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-sm:grid-cols-1">
+          <div className="grid grid-cols-5 gap-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
               const cfg = SUBJECTS[key]
               const Icon = cfg.icon
@@ -113,7 +114,7 @@ export default function SimulacrosPage() {
                   <Icon size={92} className="pointer-events-none absolute -bottom-5 -right-4 opacity-10" style={{ color: cfg.color }} />
                   <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm" style={{ background: cfg.light, color: cfg.color }}><Icon size={24} /></div>
                   <h3 className="relative font-black">{cfg.label}</h3>
-                  <p className="relative text-sm font-semibold text-slate-500">Simulacro oficial mezclado</p>
+                  <p className="relative text-sm font-semibold text-slate-500">{key === 'lengua' ? 'Examen oficial completo' : 'Simulacro oficial mezclado'}</p>
                 </button>
               )
             })}
@@ -132,14 +133,16 @@ export default function SimulacrosPage() {
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
-          <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Paso 3 · Opción</p>
-          <div className="flex gap-3">
-            {(['A', 'B'] as SimulacroOption[]).map(item => (
-              <button key={item} onClick={() => setOption(item)} className={`h-12 w-14 rounded-2xl text-lg font-black transition hover:-translate-y-0.5 ${option === item ? 'bg-blue-600 text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)]' : 'border border-[#dbe7fb] bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700'}`}>{item}</button>
-            ))}
-          </div>
-        </section>
+        {subject !== 'lengua' && (
+          <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+            <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Paso 3 · Opción</p>
+            <div className="flex gap-3">
+              {(['A', 'B'] as SimulacroOption[]).map(item => (
+                <button key={item} onClick={() => setOption(item)} className={`h-12 w-14 rounded-2xl text-lg font-black transition hover:-translate-y-0.5 ${option === item ? 'bg-blue-600 text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)]' : 'border border-[#dbe7fb] bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700'}`}>{item}</button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <button onClick={createSimulacro} disabled={loading || !userId} className="flex items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-6 py-4 text-lg font-black text-white shadow-[0_20px_45px_rgba(37,99,235,0.24)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(37,99,235,0.3)] disabled:opacity-60">
           <PlayCircle size={22} />{loading ? 'Generando...' : userId ? 'Generar simulacro' : 'Cargando sesión...'}

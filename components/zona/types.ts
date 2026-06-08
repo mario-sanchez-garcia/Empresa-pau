@@ -1,4 +1,4 @@
-export type ZonaSubject = 'mates' | 'fisica' | 'historia'
+export type ZonaSubject = 'mates' | 'fisica' | 'quimica' | 'lengua' | 'historia'
 
 export interface ZonaUser {
   id: string

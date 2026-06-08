@@ -119,7 +119,7 @@ export default function SimulacroActivoPage() {
   return (
     <SimulacroShell
       title="Examen activo"
-      subtitle="90 minutos, cuatro bloques y corrección completa"
+      subtitle={`90 minutos, ${record.bloques.length} bloques y corrección completa`}
       actions={<button onClick={() => setConfirmOpen(true)} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-4 py-2 text-sm font-black text-white shadow-[0_16px_34px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5"><Send size={16} />Entregar examen</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-5">
@@ -129,7 +129,7 @@ export default function SimulacroActivoPage() {
               <Badge color={cfg.color}>{cfg.label}</Badge>
               <Badge color="#475569">{record.id.slice(0, 8)}</Badge>
               <Badge color="#2563eb">{record.dificultad_real ?? record.dificultad}</Badge>
-              <Badge color={cfg.color}>Opción {record.opcion}</Badge>
+              {record.asignatura !== 'lengua' && <Badge color={cfg.color}>Opción {record.opcion}</Badge>}
             </div>
             <div className="flex items-center gap-2 text-2xl font-black" style={{ color: secondsLeft < 15 * 60 ? '#1d4ed8' : '#0f172a' }}><Clock size={24} />{formatTime(secondsLeft)}</div>
           </div>
@@ -159,8 +159,9 @@ export default function SimulacroActivoPage() {
                 </div>
               </div>
               <div className="prose prose-slate max-w-none rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-5">
+                {record.asignatura === 'lengua' && index > 0 && block.textoFuente && <MathMarkdown text={block.textoFuente} className="mb-4 rounded-2xl border-l-4 border-blue-300 bg-white/80 p-4 text-slate-600" />}
                 <MathMarkdown text={block.enunciado} />
-                {block.textoFuente && <MathMarkdown text={block.textoFuente} className="mt-4 rounded-2xl border-l-4 border-blue-300 bg-white/80 p-4 text-slate-600" />}
+                {record.asignatura !== 'lengua' && block.textoFuente && <MathMarkdown text={block.textoFuente} className="mt-4 rounded-2xl border-l-4 border-blue-300 bg-white/80 p-4 text-slate-600" />}
               </div>
             </div>
 

@@ -38,7 +38,7 @@ export function buildCorrectionPrompt(input: CorrectionPromptInput) {
 
   return `Eres el corrector oficial certificado de las pruebas de acceso a la universidad EvAU de la Comunidad de Madrid para la asignatura de ${input.subject}. Has corregido miles de exámenes reales y conoces con precisión milimétrica los criterios oficiales de corrección publicados por las universidades coordinadoras de Madrid.
 
-Este simulacro ha sido generado combinando preguntas oficiales reales de distintos años y convocatorias de la EvAU Madrid. Cada pregunta tiene su propio año, convocatoria y criterio de corrección oficial. Tu evaluación debe tratar cada pregunta de forma completamente independiente aplicando el criterio del año exacto del que proviene.
+Este simulacro ha sido generado con preguntas oficiales reales de la EvAU Madrid. En Matemáticas, Física, Química e Historia puede combinar preguntas de distintos años y convocatorias; en Lengua Castellana y Literatura II los bloques deben tratarse como partes de un mismo examen cuando compartan texto fuente. Cada pregunta tiene su propio año, convocatoria y criterio de corrección oficial. Tu evaluación debe tratar cada pregunta de forma independiente aplicando el criterio del año exacto del que proviene, y en Lengua debes conservar la coherencia del texto común.
 
 ### CONTEXTO DEL SIMULACRO
 
@@ -84,6 +84,20 @@ Historia de España:
 - Desarrollo sin estructura (introducción, argumentación con causas/consecuencias, conclusión): máximo 60% de la puntuación del bloque.
 - Mera enumeración de datos sin argumentación histórica: máximo 1.0 pt independientemente de la extensión.
 - Uso correcto de vocabulario histórico específico: valoración positiva de hasta +0.25 pts.
+
+Lengua Castellana y Literatura II:
+- Bloque 1, 1.1a tema: valora si enuncia el tema de forma concisa en 1-2 líneas. Máximo 0.5 pts.
+- Bloque 1, 1.1b características: valora si analiza recursos lingüísticos y estilísticos y explica su función en el texto. Máximo 1.5 pts. Si solo lista rasgos sin explicar función, máximo 0.75 pts.
+- Bloque 1, 1.1c tipo de texto: valora si identifica correctamente tipo textual y género discursivo. Máximo 0.5 pts.
+- Bloque 1, 1.2 resumen: debe tener como máximo 6-7 líneas, ideas principales, palabras propias, coherencia y objetividad. Máximo 1 pt.
+- Bloque 1, 1.3 texto argumentativo: posición clara, argumentos, estructura y expresión personal. Máximo 1.5 pts.
+- Bloque 2, 2.1/2.2 sintaxis: exige análisis funcional interoracional e intraoracional hasta el nivel de palabras. Máximo 1.5 pts.
+- Bloque 2, 2.3/2.4 morfología/semántica: definición, análisis y ejemplos correctos cuando proceda. Máximo 1 pt.
+- Bloque 3, 3.1/3.2 literatura: conocimiento global del movimiento, autores y obras relevantes. Máximo 1.5 pts. Si es mero catálogo sin análisis conjunto, máximo 0.75 pts.
+- Bloque 3, 3.3/3.4 obra leída: relación obra-contexto sociohistórico-tradición literaria. Máximo 1 pt.
+- Penalización ortográfica sobre nota final: la primera falta distinta no penaliza; la misma falta repetida cuenta una sola vez; desde la segunda falta distinta, descuenta -0.25 pts por falta hasta un máximo de -2 pts.
+- Errores de redacción, presentación, coherencia, cohesión, léxico o gramática: hasta -1 pt adicional, respetando una deducción máxima global de 2 pts.
+- En respuestas abiertas, valora precisión conceptual, organización, riqueza léxica y corrección gramatical. No exijas una única solución literal si el criterio oficial admite respuesta abierta.
 
 ### INSTRUCCIONES DE EVALUACIÓN
 

@@ -66,7 +66,7 @@ export default function SimulacroResultsPage() {
             <div className="mt-2 text-lg font-black text-slate-500">/10 · {nota14.toFixed(2)}/14</div>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-sm font-black text-slate-600">
               <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Completado en {record.tiempo_empleado ?? 0} min de 90</span>
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Opción {record.opcion}</span>
+              {record.asignatura !== 'lengua' && <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Opción {record.opcion}</span>}
               <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{record.id.slice(0, 8)}</span>
             </div>
             {(record.tiempo_empleado ?? 0) > 90 && <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-800">En el examen real habrías entregado al llegar a 90 min.</div>}

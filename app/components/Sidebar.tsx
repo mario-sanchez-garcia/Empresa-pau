@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Atom,
   BarChart3,
+  BookOpen,
   BrainCircuit,
   ClipboardList,
   FlaskConical,
@@ -20,7 +21,7 @@ import {
 import { supabase } from '@/app/lib/supabase'
 
 export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'planning'
-export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'historia'
+export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'lengua' | 'historia'
 
 interface SidebarProps {
   activeItem?: SidebarItemId
@@ -45,6 +46,7 @@ const SUBJECTS = [
   { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#b4232a', light: '#fff1f2', border: '#ffe4e6' },
   { id: 'fisica', label: 'Física', icon: Atom, color: '#4338ca', light: '#eef2ff', border: '#e0e7ff' },
   { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#0369a1', light: '#f0f9ff', border: '#e0f2fe' },
+  { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#7c2d12', light: '#fff7ed', border: '#fed7aa' },
   { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#0f5ea8', light: '#eff6ff', border: '#dbeafe' }
 ] as const
 

@@ -6,6 +6,7 @@ import { examenesQuimica } from './data/quimica'
 import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from './lib/correctionPrompt'
 import { formatExamText } from './lib/mathFormatting'
+import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -783,102 +784,14 @@ function cambiarTipo(t: Tipo) {
           color: #ffffff !important;
         }
       `}</style>
-      <aside style={{
-  width: '282px',
-  minHeight: '100vh',
-  background: 'rgba(255, 255, 255, 0.78)',
-  backdropFilter: 'blur(24px)',
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'sticky',
-  top: 0,
-  flexShrink: 0,
-  borderRight: '1px solid rgba(219, 231, 251, 0.95)',
-  boxShadow: '18px 0 55px rgba(37, 99, 235, 0.055)'
-}}>
-        <div style={{ padding: '26px 22px 22px', borderBottom: '1px solid rgba(219,231,251,0.95)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-           <div style={{
-  width: '44px',
-  height: '44px',
-  borderRadius: '16px',
-  background: 'linear-gradient(145deg, #1d4ed8 0%, #2563eb 48%, #38bdf8 100%)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: '#fff',
-  boxShadow: '0 16px 34px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255,255,255,0.35)'
-}}><GraduationCap size={23} strokeWidth={2.2} /></div>
-            <div>
-              <div style={{ color: WARM.ink, fontWeight: 760, fontSize: '18px' }}>Pausia</div>
-              <div style={{ color: WARM.muted, fontSize: '11px', marginTop: '2px' }}>EBAU Madrid · practica mejor</div>
-            </div>
-          </div>
-        </div>
-        <nav style={{ padding: '18px 14px', flex: 1 }}>
-          <div style={{ color: WARM.softText, fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', marginBottom: '10px' }}>Navegacion</div>
-          {NAV_ITEMS.map(item => {
-            const Icon = item.icon
-            const active = seccion === item.id
-            return (
-            <div key={item.id}>
-              <button className="campus-nav-item" onClick={() => setSeccion(item.id)} style={{ ...hoverVars(WARM.blue, '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: active ? '1px solid rgba(96,165,250,0.58)' : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #ffffff, #eff6ff)' : 'transparent', boxShadow: active ? '0 14px 32px rgba(37, 99, 235, 0.09)' : 'none' }}>
-                <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? WARM.blue : WARM.muted, background: active ? '#dbeafe' : '#fafafa', border: active ? '1px solid #bfdbfe' : '1px solid #dbe7fb' }}><Icon size={17} /></span>
-                <div>
-                  <div style={{ color: active ? WARM.ink : WARM.muted, fontWeight: active ? 700 : 520, fontSize: '14px' }}>{item.label}</div>
-                  <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
-                </div>
-              </button>
-              {item.id === 'examenes' && (
-                <>
-                  <a className="campus-nav-item" href="/simulacros" style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
-                    <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff', border: '1px solid #dbeafe' }}><TimerReset size={17} /></span>
-                    <div>
-                      <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>Simulacros</div>
-                      <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Condiciones reales</div>
-                    </div>
-                  </a>
-                  <a className="campus-nav-item" href="/zona" style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', border: '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: 'transparent', textDecoration: 'none', boxSizing: 'border-box' }}>
-                    <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff', border: '1px solid #dbeafe' }}><BrainCircuit size={17} /></span>
-                    <div>
-                      <div style={{ color: WARM.muted, fontWeight: 520, fontSize: '14px' }}>La Zona</div>
-                      <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Estudia a tu manera</div>
-                    </div>
-                  </a>
-                </>
-              )}
-            </div>
-          )})}
-          <a className="campus-nav-item" href="/planning" style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 13px', borderRadius: '18px', textDecoration: 'none', marginBottom: '6px', background: 'transparent', border: '1px solid transparent' }}>
-            <span style={{ width: '34px', height: '34px', borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', background: '#eff6ff', border: '1px solid #dbeafe' }}><Rocket size={17} /></span>
-            <div>
-              <div style={{ color: WARM.muted, fontSize: '14px', fontWeight: 520 }}>Planning</div>
-              <div style={{ color: WARM.softText, fontSize: '11px', marginTop: '2px' }}>Tareas completables</div>
-            </div>
-          </a>
-          <div style={{ color: WARM.softText, fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px', margin: '22px 0 10px' }}>Asignaturas</div>
-          {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
-            const Icon = val.icon
-            const active = asignatura === key && seccion === 'examenes'
-            return (
-            <button className="campus-nav-item" key={key} onClick={() => { cambiarAsignatura(key); setSeccion('examenes') }} style={{ ...hoverVars(val.color, val.light, val.accent), width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 13px', borderRadius: '18px', border: active ? '1px solid ' + val.soft : '1px solid transparent', cursor: 'pointer', marginBottom: '6px', textAlign: 'left', background: active ? 'linear-gradient(135deg, #ffffff, ' + val.light + ')' : 'transparent' }}>
-              <span style={{ width: '32px', height: '32px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: val.color, background: active ? '#fff' : val.light }}><Icon size={16} /></span>
-              <div style={{ color: active ? val.color : WARM.muted, fontSize: '13px', fontWeight: active ? 700 : 520 }}>{val.label}</div>
-            </button>
-          )})}
-        </nav>
-        <div style={{ padding: '16px', borderTop: '1px solid rgba(219,231,251,0.95)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#eff6ff', border: '1px solid #dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.blue, fontSize: '13px', fontWeight: 700 }}>{usuario?.email?.[0]?.toUpperCase()}</div>
-            <div style={{ overflow: 'hidden' }}>
-              <div style={{ color: WARM.ink, fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{usuario?.email}</div>
-              <div style={{ color: WARM.softText, fontSize: '11px' }}>Estudiante</div>
-            </div>
-          </div>
-          <button className="campus-hover" onClick={cerrarSesion} style={{ ...hoverVars('#2563eb', '#eff6ff', '#60a5fa'), width: '100%', padding: '10px 12px', borderRadius: '16px', background: WARM.surface, border: '1px solid #dbe7fb', color: '#2563eb', fontSize: '12px', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 22px rgba(37, 99, 235, 0.04)' }}><LogOut size={15} />Cerrar sesion</button>
-        </div>
-      </aside>
-
+      <Sidebar
+        activeItem={seccion === 'planning' ? 'plan-estudio' : seccion as SidebarItemId}
+        activeSubject={asignatura as SidebarSubjectId}
+        email={usuario?.email}
+        onNavigate={(item) => setSeccion(item === 'plan-estudio' ? 'planning' : item as Seccion)}
+        onSubjectChange={(subject) => { cambiarAsignatura(subject as Asignatura); setSeccion('examenes') }}
+        onLogout={cerrarSesion}
+      />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
        <header style={{
   background: 'rgba(255, 255, 255, 0.78)',

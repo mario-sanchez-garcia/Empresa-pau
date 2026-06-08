@@ -118,6 +118,7 @@ export default function Home() {
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
   const [bloqueIdx, setBloqueIdx] = useState(0)
+  const [diaHistoriaIdx, setDiaHistoriaIdx] = useState(0)
   const [opcion, setOpcion] = useState<0|1>(0)
   const [respuesta, setRespuesta] = useState('')
   const [imagen, setImagen] = useState<string | null>(null)
@@ -173,6 +174,18 @@ const TIPOS_HISTORIA = [
   { tipo: 'corta', label: 'Respuesta corta', pts: 1.5 }
 ] as const
 
+const LABELS_HISTORIA: Record<string, string> = {
+  cuestiones: 'Cuestiones',
+  fuente: 'Fuente',
+  fuente1: 'Fuente 1',
+  fuente2: 'Fuente 2',
+  tema: 'Tema',
+  texto: 'Texto',
+  comentario: 'Comentario',
+  definicion: 'Definiciones',
+  corta: 'Respuesta corta'
+}
+
 const examenesFiltrados =
     asignatura === 'mates'
       ? examenes.filter(e => e.tipo === tipo)
@@ -187,6 +200,20 @@ const aniosDisponibles = Array.from(
 const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
 
 const examen = examenesFiltrados.find(e => e.año === anioSeleccionado) ?? examenesFiltrados[0]
+
+const examenesHistoriaDelAnio = asignatura === 'historia'
+  ? examenesHistoria.filter(e => e.tipo === tipo && e.año === anioSeleccionado)
+  : []
+
+const diasHistoriaDisponibles = Array.from(
+  new Set(examenesHistoriaDelAnio.map(e => e.dia).filter(Boolean))
+) as ('Lunes' | 'Martes')[]
+
+const diaHistoriaSeleccionado = diasHistoriaDisponibles[diaHistoriaIdx] ?? diasHistoriaDisponibles[0]
+
+const examenesHistoriaDelDia = diasHistoriaDisponibles.length
+  ? examenesHistoriaDelAnio.filter(e => e.dia === diaHistoriaSeleccionado)
+  : examenesHistoriaDelAnio
 
 const preguntasA = asignatura === 'mates'
   ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'A') ?? []
@@ -244,25 +271,35 @@ const opcionesFisicaDisponibles = asignatura === 'fisica'
     ))
   : []
 
+const opcionesHistoriaDisponibles = asignatura === 'historia'
+  ? Array.from(new Set(examenesHistoriaDelDia.map(e => e.opcion)))
+  : []
+
 const opcionesDisponibles: (0 | 1)[] =
   asignatura === 'mates' && opcionesMatesDisponibles.length
     ? OPCIONES.filter(op => opcionesMatesDisponibles.includes(op === 0 ? 'A' : 'B'))
     : asignatura === 'fisica' && opcionesFisicaDisponibles.length
     ? OPCIONES.filter(op => opcionesFisicaDisponibles.includes(op === 0 ? 'A' : 'B'))
+    : asignatura === 'historia' && opcionesHistoriaDisponibles.length
+    ? OPCIONES.filter(op => opcionesHistoriaDisponibles.includes(op === 0 ? 'A' : 'B'))
     : [...OPCIONES]
 
 const examenHistoria = asignatura === 'historia'
-  ? examenesHistoria.find(
+  ? examenesHistoriaDelDia.find(
       e =>
-        e.tipo === tipo &&
-        e.año === anioSeleccionado &&
         e.opcion === (opcion === 0 ? 'A' : 'B')
-    )
+    ) ?? examenesHistoriaDelDia[0]
   : null
 
 const preguntasHistoria = examenHistoria?.preguntas ?? []
 
-const tipoHistoriaActivo = TIPOS_HISTORIA[bloqueIdx]?.tipo
+const bloquesHistoria = preguntasHistoria.map(p => ({
+  tipo: p.tipo,
+  label: (p as any).label ?? LABELS_HISTORIA[p.tipo] ?? p.tipo,
+  pts: p.puntuacion
+}))
+
+const tipoHistoriaActivo = bloquesHistoria[bloqueIdx]?.tipo
 
 const preguntaHistoria =
   preguntasHistoria.find(p => p.tipo === tipoHistoriaActivo) ??
@@ -278,7 +315,7 @@ const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
 const bloqueActivoLabel =
   asignatura === 'mates' ? (preguntaActiva as any)?.bloque :
   asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
-  (TIPOS_HISTORIA[bloqueIdx]?.label ?? '')
+  ((preguntaActiva as any)?.label ?? LABELS_HISTORIA[(preguntaActiva as any)?.tipo] ?? '')
 
 const opcionMostrada = (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
 
@@ -331,6 +368,7 @@ function cambiarAsignatura(a: Asignatura) {
   setAsignatura(a)
   setExamenIdx(0)
   setBloqueIdx(0)
+  setDiaHistoriaIdx(0)
   setOpcion(0)
   setTipo('Ordinaria')
   reset()
@@ -340,6 +378,7 @@ function cambiarTipo(t: Tipo) {
   setTipo(t)
   setExamenIdx(0)
   setBloqueIdx(0)
+  setDiaHistoriaIdx(0)
   setOpcion(0)
   reset()
 }
@@ -685,6 +724,7 @@ function cambiarTipo(t: Tipo) {
     onClick={() => {
       setExamenIdx(i)
       setBloqueIdx(0)
+      setDiaHistoriaIdx(0)
       setOpcion(0)
       reset()
     }}
@@ -703,10 +743,38 @@ function cambiarTipo(t: Tipo) {
   </button>
 ))}
               </div>
+              {asignatura === 'historia' && diasHistoriaDisponibles.length > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>Día:</span>
+                  {diasHistoriaDisponibles.map((dia, i) => (
+                    <button
+                      key={dia}
+                      onClick={() => {
+                        setDiaHistoriaIdx(i)
+                        setBloqueIdx(0)
+                        setOpcion(0)
+                        reset()
+                      }}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '999px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        background: diaHistoriaIdx === i ? cfg.color : '#f8fafc',
+                        color: diaHistoriaIdx === i ? '#fff' : '#64748b',
+                        border: diaHistoriaIdx === i ? 'none' : '1px solid #e2e8f0'
+                      } as any}
+                    >
+                      {dia}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
-                )) : (asignatura === 'fisica' ? TIPOS_FISICA : TIPOS_HISTORIA).map((t, i) => (
+                )) : (asignatura === 'fisica' ? TIPOS_FISICA : bloquesHistoria).map((t, i) => (
                   <button key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, background: bloqueIdx === i ? cfg.light : '#f8fafc', color: bloqueIdx === i ? cfg.color : '#64748b', border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e2e8f0' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>
@@ -730,6 +798,9 @@ function cambiarTipo(t: Tipo) {
                 <div style={{ padding: '16px 24px', background: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examen?.año} · {tipo}</span>
+                    {asignatura === 'historia' && diaHistoriaSeleccionado && (
+                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{diaHistoriaSeleccionado}</span>
+                    )}
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#f1f5f9', color: '#374151', fontSize: '11px', border: '1px solid #e2e8f0' }}>Opcion {opcionMostrada}</span>
                   </div>
@@ -741,6 +812,24 @@ function cambiarTipo(t: Tipo) {
                 <div style={{ padding: '24px' }}>
                   {asignatura === 'historia' && (preguntaActiva as any).texto_fuente && (
                     <div style={{ marginBottom: '16px', padding: '16px', borderRadius: '10px', background: '#f8fafc', borderLeft: '3px solid ' + cfg.accent, color: '#374151', fontSize: '14px', fontStyle: 'italic', lineHeight: '1.7' }}>{(preguntaActiva as any).texto_fuente}</div>
+                  )}
+                  {asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
+                    <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                      <img src={(preguntaActiva as any).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
+                    </div>
+                  )}
+                  {asignatura === 'historia' && (preguntaActiva as any).pdfFuente && (
+                    <div style={{ marginBottom: '16px', borderRadius: '14px', overflow: 'hidden', border: '1px solid #dbe4ef', background: '#f8fafc' }}>
+                      <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid #e2e8f0' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Fuente oficial PDF · página {(preguntaActiva as any).paginaFuente ?? 1}</span>
+                        <a href={`${(preguntaActiva as any).pdfFuente}#page=${(preguntaActiva as any).paginaFuente ?? 1}`} target="_blank" rel="noreferrer" style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textDecoration: 'none' }}>Abrir</a>
+                      </div>
+                      <iframe
+                        src={`${(preguntaActiva as any).pdfFuente}#page=${(preguntaActiva as any).paginaFuente ?? 1}&view=FitH`}
+                        title="Fuente histórica oficial"
+                        style={{ width: '100%', height: '420px', border: '0', display: 'block', background: '#fff' }}
+                      />
+                    </div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).conceptos && (
                     <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

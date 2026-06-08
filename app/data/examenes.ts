@@ -482,14 +482,27 @@ export const examenes: Examen[] = [
 
 // ─── HISTORIA DE ESPAÑA ──────────────────────────────────────────────────────
 
-export type TipoPreguntaHistoria = 'tema' | 'comentario' | 'definicion' | 'corta'
+export type TipoPreguntaHistoria =
+  | 'cuestiones'
+  | 'fuente'
+  | 'fuente1'
+  | 'fuente2'
+  | 'tema'
+  | 'texto'
+  | 'comentario'
+  | 'definicion'
+  | 'corta'
 
 export interface PreguntaHistoria {
   id: string
   tipo: TipoPreguntaHistoria
+  label?: string
   enunciado: string
   puntuacion: number
   texto_fuente?: string
+  imagenFuente?: string
+  pdfFuente?: string
+  paginaFuente?: number
   conceptos?: string[]
   criterios: string
 }
@@ -499,6 +512,7 @@ export interface ExamenHistoria {
   año: number
   tipo: "Ordinaria" | "Extraordinaria" | "Modelo"
   opcion: "A" | "B"
+  dia?: "Lunes" | "Martes"
   asignatura: "Historia de España"
   comunidad: string
   preguntas: PreguntaHistoria[]
@@ -509,703 +523,830 @@ export const examenesHistoria: ExamenHistoria[] = [
     id: 1, año: 2025, tipo: "Ordinaria", opcion: "A",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2025-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Segunda República Española (1931-1936): etapas políticas y reformas.",
-        puntuacion: 4,
-        criterios: "Se valorará: contexto histórico y proclamación (0.5 pts), Bienio Reformista y reformas clave (1 pt), Bienio Radical-Cedista y contrarreformas (1 pt), Frente Popular y crisis de 1936 (1 pt), conclusión y valoración histórica (0.5 pts)."
-      },
-      {
-        id: "h-2025-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica: identifique la naturaleza del texto, analice sus ideas principales y explique el contexto histórico.",
-        texto_fuente: "«El Gobierno de la República, al dirigirse por primera vez al país en la plenitud de sus funciones, quiere ante todo afirmar su decidido propósito de respetar escrupulosamente la conciencia individual mediante la libertad de creencias y la práctica de cultos, sin que el Estado en momento alguno pueda pedir al ciudadano revelación de sus convicciones religiosas.» — Constitución de la República Española, 1931.",
+{
+        id: "h-2025-ordinaria-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "Responda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-La Hispania romana.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3.-Responda a una de estas dos preguntas:\n-Los Reyes Católicos: unión dinástica e instituciones de gobierno. La guerra de Granada.\n-Sociedad, economía y cultura del siglo XVIII.",
         puntuacion: 3,
-        criterios: "Naturaleza del texto: tipo, autor, fecha, destinatario (0.5 pts), ideas principales: laicidad, libertad religiosa, separación Iglesia-Estado (1 pt), contexto histórico: proclamación República, debate constitucional, conflicto clerical (1 pt), valoración crítica (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2025-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente (máximo 5 líneas) tres de los siguientes cinco conceptos:",
-        conceptos: ["Caciquismo", "Regeneracionismo", "Lerrouxismo", "Anarcosindicalismo", "Frente Popular"],
-        puntuacion: 1.5,
-        criterios: "0.5 puntos por cada definición correcta. Se valorará precisión histórica, contextualización temporal y claridad expositiva."
+{
+        id: "h-2025-ordinaria-A-fuente1",
+        tipo: "fuente1",
+        label: "Fuente 1",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las transformaciones económicas en el franquismo. (Puntuación máxima: 2,5 puntos).\nFuente: Albert Carreras (ed.), Estadísticas históricas de España. Siglos XIX-XX (1989).",
+        puntuacion: 3,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2025.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2025-J-A-4", tipo: "corta",
-        enunciado: "Explique brevemente las causas y consecuencias de la crisis de 1898 en España.",
-        puntuacion: 1.5,
-        criterios: "Causas: conflictos coloniales, desastre militar, debilidad del sistema restauracionista (0.75 pts). Consecuencias: pérdida de colonias, crisis moral, surgimiento del regeneracionismo y los nacionalismos periféricos (0.75 pts)."
+{
+        id: "h-2025-ordinaria-A-fuente2",
+        tipo: "fuente2",
+        label: "Fuente 2",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la Guerra Civil: Desarrollo de la guerra y consecuencias. (Puntuación máxima: 2,5 puntos).\nEl número 10 de la madrileña calle de Peironcely, en el distrito de Puente de Vallecas, fotografía de\nRobert Capa, noviembre de 1936",
+        puntuacion: 3,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2025.pdf",
+        paginaFuente: 2,
+      },
+{
+        id: "h-2025-ordinaria-A-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El Sexenio Revolucionario: La Constitución de 1869. (Puntuación máxima: 2,5 puntos).",
+        puntuacion: 4,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Constitución democrática de la Nación Española promulgada el día 6 de junio de 1869. La Nación española, y en su nombre las Cortes Constituyentes elegidas por sufragio universal, deseando afianzar la justicia, la libertad y la seguridad, y proveer al bien de cuantos vivan en España, decretan y sancionan la siguiente CONSTITUCIÓN.\nTítulo Primero De los españoles y sus derechos:\nArt. 2º. Ningún español ni extranjero podrá ser detenido ni preso sino por causa de delito.\nArt. 3º. Todo detenido será puesto en libertad o entregado a la Autoridad judicial dentro de las veinticuatro horas siguientes al acto de la detención. Toda detención se dejará sin efecto o elevará a prisión dentro de las setenta y dos horas de haber sido entregado el detenido al juez competente. […]\nArt. 4º. Ningún español podrá ser preso sino en virtud de mandamiento de juez competente. […]\nArt. 5º. Nadie podrá entrar en el domicilio de un español, o extranjero residente en España, sin su consentimiento, excepto en los casos urgentes de incendio, inundación u otro peligro análogo, o de agresión ilegítima procedente de dentro, o para auxiliar a persona que desde allí pida socorro. Fuera de estos casos, la entrada en el domicilio de un español, o extranjero residente en España, y el registro de sus papeles o efectos, sólo podrán decretarse por el Juez competente y ejecutarse de día. El registro de papeles y efectos tendrá siempre lugar a presencia del interesado o de un individuo de su familia, y, en su defecto, de dos testigos vecinos del mismo pueblo. Sin embargo, cuando un delincuente, hallado in fraganti y perseguido por la Autoridad o sus agentes, se refugiare en su domicilio, podrán éstos penetrar en él, sólo para el acto de la aprehensión. Si se refugiare en domicilio ajeno, procederá requerimiento al dueño de éste”.\n(Constitución Española de 1869)",
+      },
+{
+        id: "h-2025-ordinaria-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: Las desamortizaciones. La España rural del siglo XIX. Industrialización, comercio y comunicaciones.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 2, año: 2025, tipo: "Ordinaria", opcion: "B",
+    id: 2, año: 2024, tipo: "Ordinaria", opcion: "A", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2025-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Guerra Civil Española (1936-1939): causas, desarrollo y consecuencias.",
-        puntuacion: 4,
-        criterios: "Causas políticas, sociales y económicas (0.75 pts), sublevación militar y dimensión internacional (0.75 pts), desarrollo bélico y zonas (1 pt), consecuencias políticas, sociales y culturales (1 pt), valoración histórica (0.5 pts)."
-      },
-      {
-        id: "h-2025-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica: naturaleza, ideas principales y contexto histórico.",
-        texto_fuente: "«Españoles: Francisco Franco acaba de ser elegido Jefe del Gobierno del Estado Español... En sus manos ponemos el destino de la Patria con la absoluta confianza de que su mando sabrá conducirla a la victoria definitiva.» — Junta de Defensa Nacional, Burgos, octubre de 1936.",
+{
+        id: "h-2024-Lunes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2. Al-Ándalus: evolución política.\n3. Los Reyes Católicos: unión dinástica e instituciones de gobierno. La guerra de Granada.\n4. Las reformas borbónicas en los virreinatos americanos.",
         puntuacion: 3,
-        criterios: "Naturaleza: proclama militar, bando nacional, 1936 (0.5 pts), ideas: legitimación del mando único, retórica patriótica (1 pt), contexto: inicio de la guerra, unificación del bando sublevado, internacionalización (1 pt), valoración (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2025-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente (máximo 5 líneas) tres de los siguientes cinco conceptos:",
-        conceptos: ["Pronunciamiento", "Carlismo", "Anarquismo", "Brigadas Internacionales", "Franquismo"],
-        puntuacion: 1.5,
-        criterios: "0.5 puntos por cada definición correcta. Se valorará precisión histórica, contextualización y claridad."
+{
+        id: "h-2024-Lunes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione los datos con las transformaciones económicas y sociales del siglo XIX: La evolución de la población y de las ciudades. (Puntuación máxima: 2 puntos).\nCenso de la población de España según el recuento de 1860. Junta General de Estadística",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2024-lunes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2025-J-B-4", tipo: "corta",
-        enunciado: "Explique el proceso de transición política española tras la muerte de Franco (1975-1978).",
-        puntuacion: 1.5,
-        criterios: "Muerte de Franco y proclamación de Juan Carlos I (0.25 pts), Ley para la Reforma Política y primeras elecciones (0.5 pts), Constitución de 1978 y consenso (0.75 pts)."
+{
+        id: "h-2024-Lunes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: El franquismo. Fundamentos ideológicos del régimen franquista en el contexto histórico europeo.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 3, año: 2024, tipo: "Ordinaria", opcion: "A",
+    id: 3, año: 2024, tipo: "Ordinaria", opcion: "B", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2024-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Restauración Borbónica (1874-1902): el sistema canovista y el turnismo.",
-        puntuacion: 4,
-        criterios: "Contexto y restauración de Alfonso XII (0.5 pts), sistema canovista y Constitución de 1876 (1 pt), turnismo y partidos dinásticos (1 pt), caciquismo y fraude electoral (1 pt), valoración y crisis del sistema (0.5 pts)."
-      },
-      {
-        id: "h-2024-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«La soberanía reside esencialmente en la Nación, y por lo mismo pertenece a esta exclusivamente el derecho de establecer sus leyes fundamentales.» — Constitución de Cádiz, 1812.",
+{
+        id: "h-2024-Lunes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. La monarquía visigoda.\n2. La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3. Sociedad, economía y cultura de los siglos XVI y XVII.\n4. La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
         puntuacion: 3,
-        criterios: "Naturaleza: constitución liberal, Cortes de Cádiz, 1812 (0.5 pts), ideas: soberanía nacional, liberalismo, ruptura con el Antiguo Régimen (1 pt), contexto: Guerra de Independencia, crisis del Antiguo Régimen (1 pt), valoración histórica (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2024-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Absolutismo", "Desamortización", "Sufragio censitario", "Turnismo", "Regeneracionismo"],
-        puntuacion: 1.5,
-        criterios: "0.5 puntos por definición. Precisión histórica y contextualización temporal."
+{
+        id: "h-2024-Lunes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione la fuente con el impacto de los acontecimientos internacionales durante el reinado de\nAlfonso XIII: Marruecos. (Puntuación máxima: 2 puntos).\nCampaña del Rif, posición de Monte Arruit: capellán rezando ante los restos de españoles encontrados en el interior de la posición",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2024-lunes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2024-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas del pronunciamiento militar de 1936 que desencadenó la Guerra Civil.",
-        puntuacion: 1.5,
-        criterios: "Polarización política (0.5 pts), conflictividad social y económica (0.5 pts), intervención del ejército (0.5 pts)."
+{
+        id: "h-2024-Lunes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: Las Cortes de Cádiz. (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Atendiendo las Cortes generales y extraordinarias a que la facultad individual de los ciudadanos de publicar sus pensamientos e ideas políticas es, no solo un freno de la arbitrariedad de los que gobiernan, sino también un medio de ilustrar a la Nación en general, y el único camino para llevar al conocimiento de la verdadera opinión pública, han venido en decretar lo siguiente:\nArtículo I. Todos los cuerpos y personas particulares, de cualquiera condición y estado que sean, tienen libertad de escribir, imprimir y publicar sus ideas políticas sin necesidad de licencia, revisión o aprobación alguna anteriores a la publicación, bajo las restricciones y responsabilidades que se expresarán en el presente decreto.\nII. Por tanto quedan abolidos todos los actuales juzgados de Imprentas, y la censura de las obras políticas precedente a su impresión.\nIII. Los autores e impresores serán responsables respectivamente del abuso de esta libertad.\nIV. Los libelos infamatorios, los escritos calumniosos, los subversivos de las leyes fundamentales de la monarquía, los licenciosos y contrarios a la decencia pública y buenas costumbres serán castigados con la pena de la ley, y las que aquí se señalarán”.\n(Decreto IX de 10 de noviembre de 1810. En: Colección de los decretos y órdenes que han expedido las Cortes Generales y Extraordinarias desde su instalación en 24 de septiembre de 1810 hasta igual fecha de 1811, Cervantes Virtual).",
       }
     ]
   },
   {
-    id: 4, año: 2024, tipo: "Ordinaria", opcion: "B",
+    id: 4, año: 2024, tipo: "Ordinaria", opcion: "A", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2024-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La dictadura de Primo de Rivera (1923-1930): causas, etapas y caída.",
-        puntuacion: 4,
-        criterios: "Causas: crisis de la Restauración, problema de Marruecos, conflictividad social (1 pt), directorio militar (1 pt), directorio civil y fracaso (1 pt), caída y consecuencias (1 pt)."
-      },
-      {
-        id: "h-2024-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Al País y al Ejército: Españoles: Ha llegado para nosotros el momento más temido que esperado de recoger las ansias, de atender el clamoroso requerimiento de cuantos amando la Patria no ven para ella otra salvación que liberarla de los profesionales de la política...» — Manifiesto de Primo de Rivera, 13 de septiembre de 1923.",
+{
+        id: "h-2024-Martes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El Paleolítico y el Neolítico.\n2. Los reinos cristianos: evolución de la conquista de la Península y organización política.\n3. Exploración, conquista y colonización de América (desde 1492 y durante el siglo XVI).\n4. La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
         puntuacion: 3,
-        criterios: "Naturaleza: manifiesto militar, golpe de estado, 1923 (0.5 pts), ideas: antiparlamentarismo, regeneracionismo autoritario, llamada al ejército (1 pt), contexto: crisis de la Restauración, desastre de Annual, huelgas (1 pt), valoración (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2024-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Caciquismo", "Pistolerismo", "Directorio", "Anarcosindicalismo", "Catalanismo"],
-        puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+{
+        id: "h-2024-Martes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las relaciones internacionales de la dictadura franquista (1939-1975).\n(Puntuación máxima: 2 puntos).\nFranco recibe en Madrid al presidente de Estados Unidos Dwight D. Eisenhower, en visita a España, diciembre de 1959.",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2024-martes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2024-J-B-4", tipo: "corta",
-        enunciado: "Explique las principales reformas del Bienio Reformista de la Segunda República (1931-1933).",
-        puntuacion: 1.5,
-        criterios: "Reforma agraria (0.5 pts), reforma militar (0.5 pts), reformas educativas y laicización (0.5 pts)."
+{
+        id: "h-2024-Martes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: El proceso de independencia de las colonias americanas. El legado español en\nAmérica.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 5, año: 2023, tipo: "Ordinaria", opcion: "A",
+    id: 5, año: 2024, tipo: "Ordinaria", opcion: "B", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2023-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Transición española a la democracia (1975-1982).",
-        puntuacion: 4,
-        criterios: "Muerte de Franco y contexto (0.5 pts), Ley para la Reforma Política y Suárez (1 pt), Constitución de 1978 y consenso (1 pt), autonomías y primeras elecciones (0.75 pts), consolidación democrática y 23-F (0.75 pts)."
-      },
-      {
-        id: "h-2023-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Queda derogada la Ley de 4 de enero de 1977, de Reforma Política... Se reconoce a los partidos políticos el derecho a organizarse libremente para concurrir a las elecciones...» — Real Decreto-ley de noviembre de 1977 sobre amnistía y partidos políticos.",
+{
+        id: "h-2024-Martes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. La Hispania romana.\n2. Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n3. Los Austrias del siglo XVII. Política interior y exterior.\n4. Sociedad, economía y cultura del siglo XVIII.",
         puntuacion: 3,
-        criterios: "Naturaleza: decreto-ley, Transición democrática, 1977 (0.5 pts), ideas: legalización de partidos, amnistía, ruptura pactada (1 pt), contexto: muerte de Franco, reforma política, presión democrática (1 pt), valoración (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2023-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Franquismo", "Technocracy", "Opus Dei", "PCE", "Ruptura democrática"],
-        puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+{
+        id: "h-2024-Martes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione los datos con las transformaciones económicas del siglo XIX: Industrialización, comercio y comunicaciones. (Puntuación máxima: 2 puntos).\nProducción de algunos minerales, 1860-1894 (medias anuales en toneladas)\nPiritas de cobre\nPlomo Mercurio Hierro\n1860-1864 232 66 880 199\n1870-1874 459 77 1.267 596\n1880-1884 1.876 Sin datos 1.627 4.045\n1890-1894 2.549 164 1.707 5.415\nFuente: Comín, F., Martín Aceña, P., Muñoz Rubio, M. y Vidal Olivares, J. (1998): 150 años de historia de los ferrocarriles españoles.",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2024-martes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2023-J-A-4", tipo: "corta",
-        enunciado: "Explique el papel del ejército durante la Transición española.",
-        puntuacion: 1.5,
-        criterios: "Posición inicial del ejército franquista (0.5 pts), intentonas golpistas y 23-F (0.5 pts), integración en la democracia y OTAN (0.5 pts)."
+{
+        id: "h-2024-Martes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La Segunda República: El Gobierno provisional y la Constitución de\n1931. (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“(…) España, en uso de su soberanía y representada por las Cortes Constituyentes, decreta y sanciona esta Constitución.\nArt.1°. España es una República democrática de trabajadores de toda clase, que se organiza en régimen de Libertad y Justicia.\nLos poderes de todos sus órganos emanan del pueblo.\nLa República constituye un Estado integral, compatible con la autonomía de los Municipios y las\nRegiones. (…)\nArt. 2°. Todos los españoles son iguales ante la ley.\nArt. 3°. El Estado español no tiene religión oficial (…)\nArt. 6°. España renuncia a la guerra como instrumento de política nacional (…)\nArt 21. El derecho del Estado español prevalece sobre el de las regiones autónomas en todo lo que no esté atribuido a la exclusiva competencia de éstas en sus respectivos Estatutos (…)\nArt. 26. Todas las confesiones religiosas serán consideradas como Asociaciones sometidas a una ley especial. El Estado, las regiones, las provincias y los Municipios, no mantendrán, favorecerán ni auxiliarán económicamente a las Iglesias, Asociaciones e Instituciones religiosas.\nArt 27 (…) Los cementerios estarán exclusivamente sometidos a la jurisdicción civil. No podrá haber en ellos separación de recintos por motivos religiosos, (…) Todas las confesiones podrán ejercer sus cultos privadamente (…)\nArt. 44. Toda la riqueza del país, sea quien fuere su dueño, está subordinada a los intereses de la economía nacional (...)\nArt. 52. El Congreso de los Diputados se compone de los representantes elegidos por sufragio universal, igual, directo y secreto”.\n(Constitución de 1931. Fuente: De Esteban, J., Las Constituciones de España, Madrid, 1.983).",
       }
     ]
   },
   {
-    id: 6, año: 2023, tipo: "Ordinaria", opcion: "B",
+    id: 6, año: 2023, tipo: "Ordinaria", opcion: "A", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2023-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: El reinado de Alfonso XIII y la crisis del sistema de la Restauración (1902-1923).",
+{
+        id: "h-2023-Lunes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n3. Al Ándalus: economía, sociedad y cultura.\n4. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
         puntuacion: 4,
-        criterios: "Contexto y subida al trono (0.5 pts), crisis del turnismo y regeneracionismo (1 pt), Semana Trágica y conflictividad social (1 pt), crisis de 1917 y desastre de Annual (1 pt), conclusión (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2023-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«La neutralidad de España en la guerra europea es la única política posible para nuestro país en estos momentos. España carece de la preparación militar y económica necesaria para intervenir en un conflicto de estas proporciones.» — Declaración del gobierno español, agosto de 1914.",
-        puntuacion: 3,
-        criterios: "Naturaleza: declaración gubernamental, neutralidad española, 1914 (0.5 pts), ideas: debilidad militar y económica, pragmatismo político (1 pt), contexto: inicio de la I Guerra Mundial, España dividida entre aliadófilos y germanófilos (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2023-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Regeneracionismo", "Semana Trágica", "Crisis de 1917", "Juntas de Defensa", "Desastre de Annual"],
+{
+        id: "h-2023-Lunes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la alternancia política: gobiernos del Partido Popular (Puntuación máxima: 1 punto).\nCelebración en la sede del Partido Popular de los resultados en las elecciones generales de marzo\n1996",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2023-lunes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2023-J-B-4", tipo: "corta",
-        enunciado: "Explique las consecuencias de la Primera Guerra Mundial para España.",
-        puntuacion: 1.5,
-        criterios: "Beneficios económicos de la neutralidad (0.5 pts), división social y política entre aliadófilos y germanófilos (0.5 pts), inflación y conflictividad social (0.5 pts)."
+{
+        id: "h-2023-Lunes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: Las Cortes de Cádiz. La Constitución de 1812.\nD",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 7, año: 2022, tipo: "Ordinaria", opcion: "A",
+    id: 7, año: 2023, tipo: "Ordinaria", opcion: "B", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2022-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: El franquismo (1939-1975): etapas y evolución política.",
+{
+        id: "h-2023-Lunes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Autarquía y represión (0.75 pts), aperturismo y tecnocracia (0.75 pts), desarrollismo y cambio social (1 pt), crisis final y tardofranquismo (0.75 pts), valoración histórica (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2022-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«España es una unidad de destino en lo universal. El servicio a la unidad nacional y a la continuidad histórica de España es deber supremo y tarea colectiva de todos los españoles. Todos los españoles participarán en el Estado a través de la familia, el municipio y el sindicato.» — Fuero de los Españoles, 1945.",
-        puntuacion: 3,
-        criterios: "Naturaleza: ley fundamental, régimen franquista, 1945 (0.5 pts), ideas: nacionalismo, organicismo, rechazo de la democracia liberal (1 pt), contexto: final de la II Guerra Mundial, apertura internacional del franquismo (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2022-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Autarquía", "Falangismo", "Plan de Estabilización", "Oposición interior", "Aperturismo"],
+{
+        id: "h-2023-Lunes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente cuadro. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico del turno de partidos durante la Restauración (Puntuación máxima:\n1 punto).\nResultados de las elecciones al Congreso en España 1876-1898\nPartido en el\nGobierno que convoca las elecciones\nDiputados del partido en el\nGobierno\nDiputados de las oposiciones\nTotal diputados\nCongreso\n1876 Conservador 333 58 391\n1879 Conservador 293 99 392\n1881 Liberal 297 95 392\n1884 Conservador 318 74 392\n1886 Liberal 278 114 392\n1891 Conservador 253 146 399\n1893 Liberal 281 119 400\n1896 Conservador 269 132 401\n1898 Liberal 266 135 401\nFuente: Martínez Cuadrado, Miguel, Elecciones y partidos políticos en España 1868-1931.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2023-lunes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2022-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas del aislamiento internacional de España tras la Segunda Guerra Mundial.",
-        puntuacion: 1.5,
-        criterios: "Vinculación con el Eje (0.5 pts), condena de la ONU (0.5 pts), fin del aislamiento y Pactos de Madrid (0.5 pts)."
+{
+        id: "h-2023-Lunes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: Fases militares de la Guerra Civil. La evolución política y económica en las dos zonas (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Artículo 1°. Falange Española y Requetés, con sus actuales servicios y elementos, se integran bajo Mi Jefatura, en una sola entidad política de carácter nacional, que de momento se denominará\nFalange Española Tradicionalista y de las JONS. Esta organización, intermedia entre la Sociedad y el\nEstado, tiene la misión principal de comunicar al Estado el aliento del pueblo y de llevar a este el pensamiento de aquél a través de las virtudes político-morales, de servicio, jerarquía y hermandad […]\nQuedan disueltas las demás organizaciones y partidos políticos.\nArtículo 2°. Serán órganos rectores de la nueva entidad política nacional el Jefe del Estado, un\nSecretariado o Junta Política y el Consejo Nacional […]\nArtículo 3°. Quedan fundidas en una sola Milicia Nacional las de Falange Española y de Requetés conservando sus emblemas y signos exteriores […]\nLa Milicia Nacional es auxiliar del Ejército. El Jefe del Estado es Jefe Supremo de la Milicia. […]”\n(Decreto de Unificación, dado en Salamanca a 19 de abril de 1937, Francisco Franco)",
       }
     ]
   },
   {
-    id: 8, año: 2022, tipo: "Ordinaria", opcion: "B",
+    id: 8, año: 2023, tipo: "Ordinaria", opcion: "A", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2022-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La industrialización en España durante el siglo XIX.",
+{
+        id: "h-2023-Martes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Los Austrias del siglo XVII: el gobierno de los validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Contexto europeo y retraso español (0.5 pts), industria textil catalana (1 pt), siderurgia vasca y minería (1 pt), ferrocarril y sus efectos (1 pt), valoración del proceso industrializador (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2022-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«La revolución de septiembre de 1868 ha derrocado para siempre la dinastía de los Borbones... El pueblo español quiere una monarquía democrática con sufragio universal, libertad de cultos, libertad de enseñanza y libertad de imprenta.» — Manifiesto de la Junta Revolucionaria de Madrid, 1868.",
-        puntuacion: 3,
-        criterios: "Naturaleza: manifiesto revolucionario, La Gloriosa, 1868 (0.5 pts), ideas: antiborbonicismo, democracia, libertades (1 pt), contexto: crisis del liberalismo moderado, unionismo (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2022-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Carlismo", "Progresismo", "Sexenio Democrático", "Cantón", "Restauración"],
+{
+        id: "h-2023-Martes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con el desarrollo del movimiento obrero español durante la Restauración\nBorbónica (1874-1902) (Puntuación máxima: 1 punto).\n“La Tejedora”, por Joan Planella y Rodríguez (1882). Barcelona, colección particular.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2023-martes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2022-J-B-4", tipo: "corta",
-        enunciado: "Explique el proceso de desamortización en España durante el siglo XIX.",
-        puntuacion: 1.5,
-        criterios: "Desamortización de Mendizábal (0.5 pts), Desamortización de Madoz (0.5 pts), consecuencias sociales y económicas (0.5 pts)."
+{
+        id: "h-2023-Martes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: La oposición a la dictadura: principales grupos y evolución en el tiempo. La crisis del franquismo desde 1973 a la muerte de Franco.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 9, año: 2021, tipo: "Ordinaria", opcion: "A",
+    id: 9, año: 2023, tipo: "Ordinaria", opcion: "B", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2021-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La crisis del Antiguo Régimen en España (1788-1833).",
+{
+        id: "h-2023-Martes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
         puntuacion: 4,
-        criterios: "Carlos IV y Godoy (0.5 pts), Guerra de Independencia y Cortes de Cádiz (1 pt), Constitución de 1812 (0.75 pts), Fernando VII y absolutismo (1 pt), emancipación americana (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2021-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«La Nación española es la reunión de todos los españoles de ambos hemisferios. La Nación española es libre e independiente, y no es ni puede ser patrimonio de ninguna familia ni persona. La soberanía reside esencialmente en la Nación.» — Constitución de 1812, artículos 1-3.",
-        puntuacion: 3,
-        criterios: "Naturaleza: constitución liberal, Cortes de Cádiz, 1812 (0.5 pts), ideas: soberanía nacional, liberalismo, nación inclusiva (1 pt), contexto: Guerra de Independencia, influencia francesa, crisis del absolutismo (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2021-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Ilustración", "Afrancesado", "Guerrilla", "Absolutismo", "Liberalismo"],
+{
+        id: "h-2023-Martes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente cuadro (Puntuación máxima: 0,5 puntos).\n2. Relacione estos datos con el final del reinado de Alfonso XIII (Puntuación máxima: 1 punto).\nResultados, en las capitales de provincia, de las elecciones municipales celebradas el 12 de abril de 1931\nConcejales Alcaldes\nRepublicanos y socialistas 1.062 39\nMonárquicos 467 10\nComunistas 3 0\nOtros 192 3\nFuente: Instituto Nacional de Estadística",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2023-martes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2021-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas y consecuencias de la Guerra de Independencia española (1808-1814).",
-        puntuacion: 1.5,
-        criterios: "Causas: invasión napoleónica, crisis dinástica (0.75 pts), consecuencias: devastación, Constitución de 1812, inicio del liberalismo (0.75 pts)."
+{
+        id: "h-2023-Martes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Isabel II (1833-1868): la primera guerra carlista (Puntuación máxima 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Convenio celebrado entre el Capitán General de los Ejércitos Nacionales D. Baldomero Espartero y el\nTeniente General D. Rafael Maroto.\nArt. 1º. El Capitán General D. Baldomero Espartero recomendará con interés al gobierno el cumplimiento de su oferta de comprometerse formalmente a proponer a las Cortes la concesión o modificación de los fueros.\nArt. 2º. Serán reconocidos los empleos, grados y condecoraciones de los generales, jefes y oficiales, y demás individuos dependientes del ejército del mando del teniente general D. Rafael Maroto, quien presentará las relaciones con expresión de las armas a que pertenecen, quedando en libertad de continuar sirviendo, defendiendo la Constitución de 1837, el trono de Isabel 2ª y la Regencia de su augusta Madre, o bien de retirarse a sus casas los que no quieran seguir con las armas de fuego […]\nArt. 4º. Los que prefieran retirarse a sus casas siendo generales y brigadieres obtendrán su cuartel para donde lo pidan con el sueldo por reglamento les corresponda: los jefes y oficiales obtendrán licencia limitada o su retiro según qué reglamento […]\nRatificado este documento en el cuartel general de Vergara, a 31 de agosto de 1839.”",
       }
     ]
   },
   {
-    id: 10, año: 2021, tipo: "Ordinaria", opcion: "B",
+    id: 10, año: 2022, tipo: "Ordinaria", opcion: "A", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2021-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: Los nacionalismos periféricos en España (finales del XIX - principios del XX).",
+{
+        id: "h-2022-Lunes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y\nAmérica.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Contexto general del nacionalismo europeo (0.5 pts), catalanismo político: de la Renaixença al regionalismo (1 pt), nacionalismo vasco: Sabino Arana y el PNV (1 pt), galleguismo y otros regionalismos (0.75 pts), impacto político (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2021-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Bizkaya por su independencia. El árbol de Gernika y la ley vieja... Lema del Partido Nacionalista Vasco, fundado por Sabino Arana en 1895.»",
-        puntuacion: 3,
-        criterios: "Naturaleza: lema político, PNV, 1895 (0.5 pts), ideas: independentismo vasco, foralismo, identidad étnica y religiosa (1 pt), contexto: industrialización del País Vasco, inmigración, crisis de 1898 (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2021-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Renaixença", "Foralismo", "Lliga Regionalista", "PNV", "Catalanismo"],
+{
+        id: "h-2022-Lunes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente tabla (Puntuación máxima: 0,5 puntos).\n2. \tRelacione estos datos con el restablecimiento de la democracia: las elecciones de junio de 1977\n(Puntuación máxima: 1 punto).\nResultados Elecciones Generales (Congreso de los Diputados) de 15-VI-1977",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2022-lunes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2021-J-B-4", tipo: "corta",
-        enunciado: "Explique el impacto del Desastre del 98 en la política española.",
-        puntuacion: 1.5,
-        criterios: "Pérdida de las últimas colonias (0.5 pts), crisis moral y política (0.5 pts), surgimiento del regeneracionismo (0.5 pts)."
+{
+        id: "h-2022-Lunes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: El reinado de Fernando VII: liberalismo frente a absolutismo. El proceso de independencia de las colonias americanas.\nPartido \tUnión de\nCentro\nDemocrático\nPartido\nSocialista\nObrero\nEspañol\nPartido\nComunista de España\nAlianza\nPopular\nPartido\nSocialista\nPopular\nPacte\nDemocratic\nPer\nCatalunya\nPartido\nNacionalista\nVasco\nEscaños \t165 \t118 \t20 \t16 \t6 \t11 \t8\n% votos \t34,4 \t29,3 \t9,3 \t8,2 \t4,4 \t2,8 \t1,6\nVotos \t6.310.391 \t5.371.866 \t1.709.890 \t1.504.771 \t816.582 \t514.647 \t296.193",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 11, año: 2020, tipo: "Ordinaria", opcion: "A",
+    id: 11, año: 2022, tipo: "Ordinaria", opcion: "B", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2020-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La España del siglo XVIII: los Borbones y las reformas ilustradas.",
+{
+        id: "h-2022-Lunes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
         puntuacion: 4,
-        criterios: "Cambio dinástico y Guerra de Sucesión (0.5 pts), Decretos de Nueva Planta y centralización (1 pt), reformas económicas y sociales (1 pt), Carlos III y el despotismo ilustrado (1 pt), valoración (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2020-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Todo para el pueblo pero sin el pueblo.» — Frase atribuida al despotismo ilustrado del siglo XVIII.",
-        puntuacion: 3,
-        criterios: "Naturaleza: aforismo político, Ilustración, siglo XVIII (0.5 pts), ideas: paternalismo reformista, exclusión popular, reformismo desde arriba (1 pt), contexto: Ilustración europea, reformas borbónicas, límites del absolutismo ilustrado (1 pt), valoración crítica (0.5 pts)."
-      },
-      {
-        id: "h-2020-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Decreto de Nueva Planta", "Regalismo", "Ilustración", "Sociedades Económicas", "Despotismo ilustrado"],
+{
+        id: "h-2022-Lunes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. \tRelacione esta imagen con la Guerra de la Independencia: antecedentes y causas (Puntuación máxima: 1 punto).\nLevantamiento del 2 de mayo de 1808 en Madrid, pintura de Goya",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2022-lunes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2020-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas y consecuencias de la Guerra de Sucesión española (1701-1713).",
-        puntuacion: 1.5,
-        criterios: "Causas: muerte de Carlos II, rivalidad Francia-Austria (0.75 pts), consecuencias: entronización de los Borbones, Tratado de Utrecht, pérdidas territoriales (0.75 pts)."
+{
+        id: "h-2022-Lunes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La integración de España en Europa. Consecuencias económicas y sociales (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Majestad, \tseñores \tministros, \tseñor \tpresidente \tdel \tConsejo, \tseñores \tpresidentes \tde \tlas instituciones comunitarias, señores ministros, señoras y señores:\nHoy damos un paso de importancia histórica para España y para Europa. Al estampar nuestras firmas en el tratado de adhesión a las comunidades europeas, hemos conseguido un hito fundamental para completar la unidad de nuestro viejo continente, y también para superar el aislamiento secular de\nEspaña (...)\nIniciamos hoy una nueva etapa cargada de retos y promesas, una empresa que completa Europa, refuerza los lazos que unen nuestros dos pueblos que permitirá que, dentro de las instituciones comunitarias, acentuemos la proyección de Europa hacia los países de Iberoamérica y de África.\nEntendemos que la unidad europea no puede hacerse solo hacia dentro, sino también hacia fuera (...).\nCompartimos con otras naciones europeas la dimensión mediterránea. Con la ampliación, la comunidad estará aún más cerca de los países de la ribera sur del Mediterráneo.\nSupone un desafío de modernidad que exige un cambio de mentalidad y de estructuras. Será un esfuerzo de adaptación porque nos sumamos con retraso a un proceso en marcha”.\n(Extracto del discurso del presidente Felipe González en el acto de adhesión de España a la CEE,\n12 de junio de 1985)",
       }
     ]
   },
   {
-    id: 12, año: 2020, tipo: "Ordinaria", opcion: "B",
+    id: 12, año: 2022, tipo: "Ordinaria", opcion: "A", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2020-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: El liberalismo español durante el reinado de Isabel II (1833-1868).",
+{
+        id: "h-2022-Martes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
         puntuacion: 4,
-        criterios: "Regencias y primera guerra carlista (0.5 pts), Moderados y Constitución de 1845 (1 pt), Progresistas y Constitución de 1837 (1 pt), Unión Liberal y alternancia (0.75 pts), crisis final del reinado (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2020-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Doña Isabel Segunda, por la gracia de Dios y la Constitución de la Monarquía española, Reina de las Españas... Los españoles elegirán a sus representantes por sufragio directo...» — Constitución de 1837.",
-        puntuacion: 3,
-        criterios: "Naturaleza: constitución liberal, regencia de Espartero, 1837 (0.5 pts), ideas: soberanía compartida, sufragio directo, monarquía constitucional (1 pt), contexto: guerra carlista, consolidación del liberalismo, revolución liberal (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2020-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Carlismo", "Moderantismo", "Progresismo", "Pronunciamiento", "Desamortización"],
+{
+        id: "h-2022-Martes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente tabla (Puntuación máxima: 0,5 puntos).\n2. \tRelacione este cuadro con el sistema de comunicaciones en el siglo XIX: el ferrocarril\n(Puntuación máxima: 1 punto).\nQuinquenios \tKm. nuevos ampliados \tTotal km. explotados final quinquenio\n1846-1850 \t28 \t28\n1851-1855 \t449 \t477\n1856-1860 \t1.441 \t1.918\n1861-1865 \t2.913 \t4.831\n1866-1870 \t641 \t5.472\n1871-1875 \t646 \t6.118\n1876-1880 \t1.360 \t7.478\n1881-1885 \t1.453 \t8.931\n1886-1890 \t1.069 \t10.000\n1891-1895 \t1.529 \t11.529\nFuente: El problema de los ferrocarriles españoles. Antecedentes, datos, soluciones, Madrid, 1933",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2022-martes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2020-J-B-4", tipo: "corta",
-        enunciado: "Explique las principales características del Carlismo.",
-        puntuacion: 1.5,
-        criterios: "Base social y geográfica (0.5 pts), ideología tradicionalista y foralismo (0.5 pts), tres guerras carlistas (0.5 pts)."
+{
+        id: "h-2022-Martes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: Las etapas políticas de la democracia. Los gobiernos de la UCD. El golpe de\nEstado de 23 de febrero de 1981. La alternancia política: gobiernos socialistas y gobiernos del Partido\nPopular.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 13, año: 2019, tipo: "Ordinaria", opcion: "A",
+    id: 13, año: 2022, tipo: "Ordinaria", opcion: "B", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2019-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Segunda República Española: el Bienio Reformista (1931-1933).",
+{
+        id: "h-2022-Martes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con América. Causas del despegue económico de Cataluña.",
         puntuacion: 4,
-        criterios: "Proclamación de la República y constitución (0.75 pts), reformas laicas y educativas (0.75 pts), reforma agraria (1 pt), reforma militar (0.75 pts), oposición y crisis del bienio (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2019-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«España se constituye en República democrática de trabajadores de toda clase, que se organiza en régimen de Libertad y de Justicia. Los poderes de todos sus órganos emanan del pueblo. La República protege igualmente a todos los ciudadanos ante la ley.» — Constitución española de 1931, artículo 1.",
-        puntuacion: 3,
-        criterios: "Naturaleza: constitución republicana, 1931 (0.5 pts), ideas: república democrática, soberanía popular, igualdad jurídica (1 pt), contexto: proclamación de la República, caída de la monarquía, debate constituyente (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2019-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Sufragio universal", "Estatuto de Autonomía", "Reforma agraria", "Laicismo", "Azañismo"],
+{
+        id: "h-2022-Martes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. \tRelacione esta imagen con la política económica del franquismo: la autarquía (Puntuación máxima: 1 punto).\nCartilla individual de racionamiento, 1944",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2022-martes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2019-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas de la caída de la monarquía de Alfonso XIII.",
-        puntuacion: 1.5,
-        criterios: "Crisis política y desprestigio (0.5 pts), dictadura de Primo de Rivera (0.5 pts), resultados electorales de abril de 1931 (0.5 pts)."
+{
+        id: "h-2022-Martes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII: liberalismo frente a absolutismo\n(Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Españoles: Cuando vuestros heroicos esfuerzos lograron poner término al cautiverio en que me retuvo la más inaudita perfidia, todo cuanto vi y escuché, apenas pisé el suelo patrio, se reunió para persuadirme de que la nación deseaba ver resucitada su anterior forma de gobierno […]. Pero mientras\nYo meditaba maduramente con la solicitud propia de mi paternal corazón las variaciones de nuestro régimen fundamental, que parecían más adaptables al carácter nacional y al estado presente de las diversas porciones de la monarquía española, así como más análogas a la organización de los pueblos ilustrados, me habéis hecho entender vuestro anhelo de que se restableciese aquella Constitución que entre el estruendo de armas hostiles fue promulgada en Cádiz el año 1812, al propio tiempo que con asombro del mundo combatíais por la libertad de la patria. He oído vuestros votos, y cual tierno Padre he condescendido a lo que mis hijos reputan conducente a su felicidad.\nHe jurado esa Constitución por la cual suspirabais, y seré siempre su más firme apoyo. Ya he tomado las medidas oportunas para la propia convocatoria de las Cortes […]\nMarchemos francamente, y Yo el primero, por la senda constitucional […]\n(Palacio de Madrid, 10-3-1820, Gaceta extraordinaria de Madrid, 12 de marzo de 1820)",
       }
     ]
   },
   {
-    id: 14, año: 2019, tipo: "Ordinaria", opcion: "B",
+    id: 14, año: 2021, tipo: "Ordinaria", opcion: "A", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2019-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La España de la posguerra: la autarquía franquista (1939-1959).",
+{
+        id: "h-2021-Lunes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Contexto de la posguerra y represión (0.75 pts), autarquía económica y sus consecuencias (1 pt), aislamiento internacional y supervivencia (0.75 pts), pilares del régimen (1 pt), agotamiento del modelo autárquico (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2019-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«La ONU condena el régimen de Franco en España y recomienda que los Estados miembros retiren sus embajadores de Madrid.» — Resolución de la Asamblea General de la ONU, diciembre de 1946.",
-        puntuacion: 3,
-        criterios: "Naturaleza: resolución internacional, condena del franquismo, 1946 (0.5 pts), ideas: rechazo del fascismo, aislamiento diplomático, democracia internacional (1 pt), contexto: fin de la II Guerra Mundial, victoria aliada, Franco y el Eje (1 pt), valoración: supervivencia del franquismo pese al aislamiento (0.5 pts)."
-      },
-      {
-        id: "h-2019-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Autarquía", "Estraperlo", "Movimiento Nacional", "Sindicato Vertical", "Maquis"],
+{
+        id: "h-2021-Lunes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la creación del Estado franquista. (Puntuación máxima: 1 punto).\nFranco llega a las Cortes, para presidir la sesión de apertura, 1943.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2021-lunes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2019-J-B-4", tipo: "corta",
-        enunciado: "Explique los Pactos de Madrid de 1953 y su significado para el franquismo.",
-        puntuacion: 1.5,
-        criterios: "Acuerdos con EE.UU. y el Vaticano (0.5 pts), fin del aislamiento (0.5 pts), bases militares americanas y legitimación internacional (0.5 pts)."
+{
+        id: "h-2021-Lunes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: La Restauración Borbónica (1874-1902): Cánovas del Castillo y el turno de partidos.\nLa Constitución de 1876.\nFranco llega a las Cortes para presidir la sesió n de apertura (17-",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 15, año: 2018, tipo: "Ordinaria", opcion: "A",
+    id: 15, año: 2021, tipo: "Ordinaria", opcion: "B", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2018-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: El reinado de los Reyes Católicos (1474-1516): política interior y exterior.",
+{
+        id: "h-2021-Lunes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
         puntuacion: 4,
-        criterios: "Unión dinástica y consolidación (0.5 pts), política interior: pacificación y centralización (1 pt), expansión exterior: conquista de Granada y Navarra (0.75 pts), descubrimiento de América (0.75 pts), valoración del legado (1 pt)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2018-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Yo, el Rey. Por cuanto el Almirante don Cristóbal Colón... descubrió e ganó con sus naos y con la gente que llevó ciertas islas e tierra firme en el mar Océano... por ende es mi merced y voluntad que vos el dicho don Cristóbal Colón seáis Almirante del mar Océano.» — Capitulaciones de Santa Fe, 1492.",
-        puntuacion: 3,
-        criterios: "Naturaleza: capitulaciones, Reyes Católicos, 1492 (0.5 pts), ideas: acuerdo previo al descubrimiento, títulos y privilegios de Colón (1 pt), contexto: final de la Reconquista, búsqueda de ruta a Asia, proyecto colombino (1 pt), valoración histórica (0.5 pts)."
-      },
-      {
-        id: "h-2018-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Reconquista", "Santa Hermandad", "Inquisición española", "Conquista de América", "Política matrimonial"],
+{
+        id: "h-2021-Lunes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la guerra entre España y Estados Unidos. (Puntuación máxima: 1 punto).\nSoldados españoles en Cuba (Fondo: Biblioteca Nacional)",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2021-lunes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2018-J-A-4", tipo: "corta",
-        enunciado: "Explique la importancia del descubrimiento de América para España.",
-        puntuacion: 1.5,
-        criterios: "Impacto económico: metales preciosos (0.5 pts), construcción del Imperio colonial (0.5 pts), consecuencias demográficas y culturales (0.5 pts)."
+{
+        id: "h-2021-Lunes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La integración de España en Europa.\nConsecuencias económicas y sociales.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Artículo 1. Con arreglo a la presente Acta:\n-Se entenderá por Tratados originarios, el Tratado constitutivo de la Comunidad Europea del Carbón y del\nAcero, el Tratado constitutivo de la Comunidad Económica Europea y el Tratado constitutivo de la Comunidad\nEuropea de la Energía Atómica, tal como han sido completados (…)\n-Se entenderá por Estados miembros actuales, el Reino de Bélgica, el Reino de Dinamarca, la República\nFederal de Alemania, la República Helénica, la República Francesa, Irlanda, la República Italiana, el Gran\nDucado de Luxemburgo, el Reino de los Países Bajos y el Reino Unido de Gran Bretaña e Irlanda del Norte;\n-Se entenderá por Comunidad en su composición actual, la Comunidad compuesta por los Estados miembros actuales;\n-Se entenderá por Comunidad en su composición ampliada, la Comunidad en su composición posterior tanto a la adhesión de 1972 como a la de 1979;\n-Se entenderá por nuevos Estados miembros, el Reino de España y la República Portuguesa”.\nActa relativa a las condiciones de adhesión de España y Portugal a la Comunidad Económica Europea y a las adaptaciones de los Tratados (1985).",
       }
     ]
   },
   {
-    id: 16, año: 2018, tipo: "Ordinaria", opcion: "B",
+    id: 16, año: 2021, tipo: "Ordinaria", opcion: "A", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2018-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: El desarrollismo franquista y el cambio social en España (1959-1975).",
+{
+        id: "h-2021-Martes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
         puntuacion: 4,
-        criterios: "Plan de Estabilización de 1959 (0.75 pts), planes de desarrollo y crecimiento económico (1 pt), éxodo rural y cambio demográfico (0.75 pts), aperturismo y cambio social (0.75 pts), oposición y crisis final del franquismo (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2018-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«El Plan de Estabilización tiene por objeto restablecer el equilibrio de la economía española... suprimir los obstáculos que se oponen a una mayor productividad... y hacer posible la integración de la economía española en los grandes mercados internacionales.» — Decreto-ley del Plan de Estabilización, julio de 1959.",
-        puntuacion: 3,
-        criterios: "Naturaleza: decreto económico, franquismo, 1959 (0.5 pts), ideas: apertura económica, fin de la autarquía, integración internacional (1 pt), contexto: agotamiento del modelo autárquico, presión del FMI, tecnocracia del Opus Dei (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2018-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Tecnocracia", "Opus Dei", "Emigración interior", "Turismo de masas", "ETA"],
+{
+        id: "h-2021-Martes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de los orígenes de la Dictadura de Primo de Rivera. (Puntuación máxima: 1 punto).\nFotografía de Alfonso XIII con los miembros del Directorio Militar (Fuente ABC)",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2021-martes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2018-J-B-4", tipo: "corta",
-        enunciado: "Explique el origen y la evolución de ETA durante el franquismo.",
-        puntuacion: 1.5,
-        criterios: "Fundación de ETA en 1959 (0.5 pts), ideología nacionalista vasca y antifranquismo (0.5 pts), atentado de Carrero Blanco y represión (0.5 pts)."
+{
+        id: "h-2021-Martes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: La Guerra de la Independencia: antecedentes y causas. Bandos en conflicto y fases de la guerra.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 17, año: 2017, tipo: "Ordinaria", opcion: "A",
+    id: 17, año: 2021, tipo: "Ordinaria", opcion: "B", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2017-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La España del Siglo de Oro: los Austrias mayores (Carlos I y Felipe II).",
+{
+        id: "h-2021-Martes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Carlos I: herencia y política imperial (1 pt), conflictos internos: comuneros y germanías (0.75 pts), Felipe II: monarquía hispánica y hegemonía (1 pt), conflictos religiosos y crisis (0.75 pts), valoración del Imperio (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2017-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«En el nombre de Dios Todopoderoso, Padre, Hijo y Espíritu Santo... Los Reyes Católicos de España han sometido a su obediencia tierras e islas que no eran conocidas... Nos, Alejandro VI... hacemos donación a vos y a vuestros herederos de todas las islas y tierras firmes descubiertas...» — Bula Inter Caetera, Alejandro VI, 1493.",
-        puntuacion: 3,
-        criterios: "Naturaleza: bula papal, reparto colonial, 1493 (0.5 pts), ideas: legitimación papal de la conquista, reparto entre España y Portugal (1 pt), contexto: descubrimiento de América, rivalidad hispano-portuguesa, política de los Reyes Católicos (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2017-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Comuneros", "Moriscos", "Hegemonía", "Inquisición", "Erasmismo"],
+{
+        id: "h-2021-Martes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la evolución demográfica entre 1797 y 1833 (Puntuación máxima: 1 punto).\nFuente: Pérez Moreda, Vicente, en Sánchez Albornoz, N. (comp.), La modernización económica de España\n1830-1930, Madrid, Alianza, 1985, p. 26.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2021-martes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2017-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas y consecuencias de la rebelión de los comuneros (1520-1521).",
-        puntuacion: 1.5,
-        criterios: "Causas: llegada de Carlos I, cargos flamencos, fiscalidad (0.75 pts), consecuencias: derrota comunera, reforzamiento del poder real (0.75 pts)."
+{
+        id: "h-2021-Martes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La Transición: alternativas políticas tras la muerte de Franco. El papel del rey y el gobierno de Adolfo Suárez.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Señor Speaker, señor Presidente en funciones, miembros del Congreso, me honra sobremanera vuestra invitación a dirigir este mensaje al Congreso de los Estados Unidos y, a su través, al pueblo que vosotros representáis. Permitidme comenzar hablando del pasado de nuestros dos países, para luego pasar a examinar el presente y el futuro (…)\nLa Monarquía española se ha comprometido desde el primer día a ser una institución abierta en la que todos los ciudadanos tengan un sitio holgado para su participación política sin discriminación de ninguna clase y sin presiones indebidas de grupos sectarios y extremistas. La Corona ampara a la totalidad del pueblo y a cada uno de los ciudadanos, garantizando a través del derecho, y mediante el ejercicio de las libertades civiles, el imperio de la justicia.\nLa Monarquía hará que, bajo los principios de la democracia, se mantengan en España la paz social y la estabilidad política, a la vez que se asegure el acceso ordenado al poder de las distintas alternativas de gobierno, según los deseos del pueblo libremente expresados”.\nDiscurso del Rey Juan Carlos I, Washington, 2 de junio de 1976.",
       }
     ]
   },
   {
-    id: 18, año: 2017, tipo: "Ordinaria", opcion: "B",
+    id: 18, año: 2020, tipo: "Ordinaria", opcion: "A", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2017-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La España democrática (1982-2000): los gobiernos del PSOE y el PP.",
+{
+        id: "h-2020-Lunes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
         puntuacion: 4,
-        criterios: "Victoria del PSOE en 1982 y modernización (0.75 pts), integración en la CEE y la OTAN (0.75 pts), escándalos y crisis del PSOE (0.75 pts), victoria del PP y alternancia (0.75 pts), consolidación democrática (1 pt)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2017-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«El PSOE ha ganado las elecciones generales del 28 de octubre de 1982 con una mayoría absoluta histórica... Felipe González se convierte en el primer presidente socialista de la democracia española...» — Periódico El País, 29 de octubre de 1982.",
-        puntuacion: 3,
-        criterios: "Naturaleza: noticia periodística, elecciones 1982 (0.5 pts), ideas: mayoría socialista, cambio político, fin de la UCD (1 pt), contexto: consolidación democrática, desencanto con la UCD, 23-F (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2017-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Estado de las Autonomías", "OTAN", "CEE", "Reconversión industrial", "Pactos de la Moncloa"],
+{
+        id: "h-2020-Lunes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la revolución industrial en la España del siglo XIX. El sistema de comunicaciones: el ferrocarril. (Puntuación máxima: 1 punto).\nLos directores de la línea Barcelona-Mataró (1861). Fuente: Ayuntamiento de Mataró.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2020-lunes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2017-J-B-4", tipo: "corta",
-        enunciado: "Explique el proceso de integración de España en la Comunidad Económica Europea.",
-        puntuacion: 1.5,
-        criterios: "Solicitud de adhesión (0.5 pts), negociaciones y condiciones (0.5 pts), entrada en 1986 y consecuencias (0.5 pts)."
+{
+        id: "h-2020-Lunes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: La intervención en Marruecos. Repercusiones de la Primera Guerra Mundial en España. La crisis de 1917 y el Trienio Bolchevique.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 19, año: 2016, tipo: "Ordinaria", opcion: "A",
+    id: 19, año: 2020, tipo: "Ordinaria", opcion: "B", dia: "Lunes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2016-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Primera República española (1873-1874): etapas y fracaso.",
+{
+        id: "h-2020-Lunes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
         puntuacion: 4,
-        criterios: "Proclamación y contexto (0.5 pts), presidentes y inestabilidad (1 pt), cantonalismo y guerra carlista (1 pt), golpe de Pavía y final (0.75 pts), valoración histórica (0.75 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2016-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«La República ha nacido para resolver los grandes problemas sociales. El primer problema es el hambre. El segundo es el problema regional. La República ha de ser federal o no será.» — Pi i Margall, presidente de la Primera República, 1873.",
-        puntuacion: 3,
-        criterios: "Naturaleza: discurso político, Primera República, 1873 (0.5 pts), ideas: federalismo, problema social, cuestión regional (1 pt), contexto: Sexenio Democrático, tensiones sociales y territoriales (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2016-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Federalismo", "Cantonalismo", "Internacionalismo obrero", "Carlismo", "Pronunciamiento"],
+{
+        id: "h-2020-Lunes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico del golpe de Estado de 23 de febrero de 1981. (Puntuación máxima: 1 punto).\nTeniente Coronel Antonio Tejero en el Congreso de los Diputados. Fuente: Agencia EFE.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2020-lunes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2016-J-A-4", tipo: "corta",
-        enunciado: "Explique las causas del fracaso de la Primera República española.",
-        puntuacion: 1.5,
-        criterios: "Inestabilidad política (0.5 pts), conflictos internos: cantonalismo y carlismo (0.5 pts), falta de apoyo social y pronunciamiento de Pavía (0.5 pts)."
+{
+        id: "h-2020-Lunes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El Sexenio Democrático (1868-1874). Evolución política: el gobierno provisional. (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "¡Españoles! La ciudad de Cádiz, puesta en armas con toda su provincia, con la armada anclada en el puerto... declara solemnemente que niega su obediencia al gobierno que reside en Madrid, segura de que es leal intérprete de todos los ciudadanos que no hayan perdido el sentimiento de la dignidad, y resuelta a no deponer las armas hasta que la Nación recobre su soberanía, manifieste su voluntad y se cumpla.\nHollada (pisoteada) la ley fundamental, (…); corrompido el sufragio por la amenaza y el soborno; dependiente la seguridad individual, no del derecho propio sino de la irresponsable voluntad cualquiera de las autoridades, muerto el municipio, pasto la administración y la hacienda de la inmoralidad y del agio (negocio), tiranizada la enseñanza, muda la prensa... ¡Españoles!, ¿quién aborrece tanto que se atreva a exclamar: “así ha de ser siempre”? (…).\n(…) queremos vivir la vida de la honra y la libertad.\nQueremos que un gobierno provisional, que represente todas las fuerzas vivas del país, asegure el orden, en tanto que el sufragio universal echa los cimientos de nuestra regeneración social y política.\nContamos para realizarlo (…) con el concurso de todos los liberales, unánimes y compactos ante el común peligro; con el apoyo de las clases acomodadas (…) con los ardientes partidarios de las libertades individuales (…); con el apoyo de los ministros de altar, (…); con el pueblo (…) Acudid todos a las armas (…) con la solemne y poderosa serenidad con que la justicia empuña su espada. (…) ¡Viva\nEspaña con honra!\nEn Cádiz, 19 de septiembre de 1868. Prim, Topete, Dulce, Serrano, Primo de Rivera.",
       }
     ]
   },
   {
-    id: 20, año: 2016, tipo: "Ordinaria", opcion: "B",
+    id: 20, año: 2020, tipo: "Ordinaria", opcion: "A", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2016-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La España de los Austrias menores: decadencia del Imperio (siglo XVII).",
+{
+        id: "h-2020-Martes-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos.\nGuerras y sublevación en Europa.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La Guerra de la Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Felipe III y el valido Lerma (0.75 pts), Felipe IV y el Conde-Duque de Olivares (1 pt), crisis de 1640: Portugal y Cataluña (1 pt), Carlos II y el problema sucesorio (0.75 pts), valoración de la decadencia (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2016-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Esta Monarquía está tan apretada de necesidades que la menor cosa la puede acabar... Los enemigos son muchos y los medios pocos. No hay dinero, no hay crédito, no hay gente, no hay armas...» — Memorial del Conde-Duque de Olivares, 1643.",
-        puntuacion: 3,
-        criterios: "Naturaleza: memorial político, valido de Felipe IV, 1643 (0.5 pts), ideas: crisis financiera, agotamiento militar, multiplicidad de frentes (1 pt), contexto: Guerra de los Treinta Años, revueltas de 1640, decadencia imperial (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2016-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Valido", "Unión de Armas", "Pax Hispánica", "Moriscos", "Picaresca"],
+{
+        id: "h-2020-Martes-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la Guerra de la Independencia (Puntuación máxima: 1 punto).\nCuadro. La rendición de Bailén. Autor: Casado del Alisal. Fuente: Museo del Prado.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2020-martes.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2016-J-B-4", tipo: "corta",
-        enunciado: "Explique las causas y consecuencias de la expulsión de los moriscos (1609).",
-        puntuacion: 1.5,
-        criterios: "Causas: presión religiosa y política, temor a quinta columna (0.75 pts), consecuencias: despoblación de Valencia y Aragón, pérdidas económicas (0.75 pts)."
+{
+        id: "h-2020-Martes-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: La creación del Estado franquista. Grupos ideológicos y apoyos sociales. Etapas de la dictadura y principales características de cada una de ellas. El contexto internacional: del aislamiento al reconocimiento exterior.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
       }
     ]
   },
   {
-    id: 21, año: 2015, tipo: "Ordinaria", opcion: "A",
+    id: 21, año: 2020, tipo: "Ordinaria", opcion: "B", dia: "Martes",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2015-J-A-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La Guerra de la Independencia española (1808-1814) y las Cortes de Cádiz.",
+{
+        id: "h-2020-Martes-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con América. Causas del despegue económico de Cataluña.",
         puntuacion: 4,
-        criterios: "Causas: invasión napoleónica, abdicaciones de Bayona (0.75 pts), guerra: guerrillas y apoyo inglés (1 pt), Cortes de Cádiz y Constitución de 1812 (1 pt), fin de la guerra y retorno de Fernando VII (0.75 pts), valoración histórica (0.5 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2015-J-A-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«Pueblo de Madrid: cuando llegué a esta ciudad encontré al ejército francés apoderándose de sus plazas. El honor español me llama a la defensa de la patria... ¡Viva Fernando VII! ¡Muera el traidor Godoy!» — Proclama del Dos de Mayo, 1808.",
-        puntuacion: 3,
-        criterios: "Naturaleza: proclama popular, Dos de Mayo, 1808 (0.5 pts), ideas: resistencia antifrancesa, legitimismo fernandino, patriotismo (1 pt), contexto: crisis de la monarquía española, Motín de Aranjuez, abdicaciones de Bayona (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2015-J-A-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Afrancesado", "Guerrilla", "Soberanía nacional", "Absolutismo", "Ilustración"],
+{
+        id: "h-2020-Martes-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la Transición (Puntuación máxima: 1 punto).\nCuadro El Abrazo, Juan Genovés. Fuente: Museo Reina Sofía.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2020-martes.pdf",
+        paginaFuente: 2,
       },
-      {
-        id: "h-2015-J-A-4", tipo: "corta",
-        enunciado: "Explique las principales aportaciones de la Constitución de 1812.",
-        puntuacion: 1.5,
-        criterios: "Soberanía nacional y sufragio (0.5 pts), separación de poderes y monarquía constitucional (0.5 pts), derechos y libertades individuales (0.5 pts)."
+{
+        id: "h-2020-Martes-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado efectivo de Isabel II (1843-1868). Evolución política. La\nConstitución de 1845. (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "Artículo 12: La potestad de hacer las leyes reside en la Cortes con el Rey.\nArtículo 13: Las Cortes se componen de dos Cuerpos colegisladores, iguales en facultades: el Senado y el Congreso de los Diputados.\nArtículo 14: El número de Senadores es ilimitado: su nombramiento pertenece al Rey. (…).\nArtículo 20: El Congreso de los Diputados se compondrá de los que nombre las Juntas electorales en la forma que determine la ley. Se nombrará un Diputado a los menos por cada cincuenta mil almas de población. (…).\nArtículo 22: Para ser Diputado se requiere ser español, de estado seglar, haber cumplido veinte y cinco años, disfrutar la renta procedente de bienes raíces, o pagar por contribuciones directas la cantidad que la ley electoral exija, y tener las demás circunstancias que en la misma ley se prefijen.\nLas Cortes en la Constitución de la Monarquía española de 1845.",
       }
     ]
   },
   {
-    id: 22, año: 2015, tipo: "Ordinaria", opcion: "B",
+    id: 22, año: 2019, tipo: "Ordinaria", opcion: "A",
     asignatura: "Historia de España", comunidad: "Madrid",
     preguntas: [
-      {
-        id: "h-2015-J-B-1", tipo: "tema",
-        enunciado: "Desarrolle el tema: La dictadura franquista: estructura política y bases sociales (1939-1959).",
+{
+        id: "h-2019-ordinaria-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
         puntuacion: 4,
-        criterios: "Bases del régimen: Ejército, Iglesia, Falange y Monarquía (1 pt), pilares ideológicos: nacionalcatolicismo (1 pt), represión y control social (1 pt), bases sociales y apoyos (0.75 pts), valoración (0.25 pts)."
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
       },
-      {
-        id: "h-2015-J-B-2", tipo: "comentario",
-        enunciado: "Realice el comentario de la siguiente fuente histórica.",
-        texto_fuente: "«España es una unidad de destino en lo universal. El servicio a la unidad nacional y a la continuidad histórica de España es deber supremo y tarea colectiva de todos los españoles. Todos los españoles participarán en el Estado a través de la familia, el municipio y el sindicato.» — Principios del Movimiento Nacional, 1958.",
-        puntuacion: 3,
-        criterios: "Naturaleza: ley fundamental, tardofranquismo, 1958 (0.5 pts), ideas: organicismo, rechazo del liberalismo y del marxismo, participación controlada (1 pt), contexto: reformismo tecnocrático, apertura internacional, fin de la autarquía (1 pt), valoración (0.5 pts)."
-      },
-      {
-        id: "h-2015-J-B-3", tipo: "definicion",
-        enunciado: "Defina brevemente tres de los siguientes cinco conceptos:",
-        conceptos: ["Nacionalcatolicismo", "Falangismo", "Represión franquista", "Exilio republicano", "Autarquía"],
+{
+        id: "h-2019-ordinaria-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "Relacione esta fotografía con la integración de España en Europa.\nFelipe González firma el Tratado de Adhesión a la CEE el 12 de junio de 1985.",
         puntuacion: 1.5,
-        criterios: "0.5 puntos por definición correcta."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2019.pdf",
+        paginaFuente: 1,
       },
-      {
-        id: "h-2015-J-B-4", tipo: "corta",
-        enunciado: "Explique las principales características del exilio republicano español.",
+{
+        id: "h-2019-ordinaria-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: El problema de Cuba y la guerra entre España y Estados Unidos. La crisis de 1898 y sus consecuencias económicas, políticas e ideológicas.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 23, año: 2019, tipo: "Ordinaria", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+{
+        id: "h-2019-ordinaria-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+{
+        id: "h-2019-ordinaria-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "Relacione este gráfico con las Cortes de Cádiz (1812).\nLas Cortes de Cádiz: participación por grupos sociales.",
         puntuacion: 1.5,
-        criterios: "Causas y destinos del exilio (0.5 pts), perfil de los exiliados: intelectuales y políticos (0.5 pts), actividad política y cultural en el exilio (0.5 pts)."
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2019.pdf",
+        paginaFuente: 2,
+      },
+{
+        id: "h-2019-ordinaria-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): La creación del estado franquista.\nGrupos ideológicos y apoyo social.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "“Llegada la guerra a un punto muy avanzado y próxima la hora victoriosa, urge ya acometer la gran tarea de la paz, cristalizando en el estado nuevo el pensamiento y el estilo de nuestra Revolución Nacional.\nUnidos por un pensamiento y una disciplina común, los españoles todos han de ocupar su puesto en la gran tarea. Esta unificación (...) precisa tener en cuenta que (...) Falange Española y Requetés han sido los dos exponentes auténticos del espíritu del alzamiento nacional iniciado por nuestro glorioso Ejército el diecisiete de julio. Como en otros países de régimen totalitario, la fuerza tradicional viene ahora en\nEspaña a integrarse en la fuerza nueva. Falange Española aportó con su programa masas juveniles, (...) los Requetés [aportaron], junto a su ímpetu guerrero, el sagrado depósito de la tradición española (...).\nPor todo lo expuesto, DISPONGO:\nArtículo 1º. Falange Española y Requetés, con sus actuales servicios y elementos, se integran, bajo Mi\nJefatura, en una sola entidad política de carácter nacional, que de momento se denominará Falange\nEspañola Tradicionalista y de las J.O.N.S. Esta organización, intermedia entre la sociedad y el Estado, tiene la misión principal de comunicar al Estado el aliento del pueblo y de llevar a éste el pensamiento de aquél a través de las virtudes político-morales, de servicio, jerarquía y hermandad (...). Quedan disueltas las demás organizaciones y partidos políticos”.\nDado en Salamanca a diecinueve de abril de mil novecientos treinta y siete.\nFrancisco Franco, Boletín Oficial del Estado (Burgos), 20 de Abril de 1937.",
+      }
+    ]
+  },
+  {
+    id: 24, año: 2018, tipo: "Ordinaria", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+{
+        id: "h-2018-ordinaria-A-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+{
+        id: "h-2018-ordinaria-A-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "Relacione este gráfico con la crisis de 1917 y el trienio bolchevique.\nNúmero de huelgas en España entre 1905 y 1930.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2018.pdf",
+        paginaFuente: 1,
+      },
+{
+        id: "h-2018-ordinaria-A-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "Desarrolle el tema: El reinado de Isabel II (1833-1868): la primera guerra carlista. Evolución política, partidos y conflictos. El Estatuto Real de 1834 y las Constituciones de 1837 y 1845.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 25, año: 2018, tipo: "Ordinaria", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+{
+        id: "h-2018-ordinaria-B-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con América. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+{
+        id: "h-2018-ordinaria-B-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        enunciado: "Relacione esta imagen con la evolución política en el Sexenio Democrático: el reinado de Amadeo de\nSaboya.\nAmadeo I frente al féretro del General Prim en 1871 (Por Antonio Gisbert)",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        pdfFuente: "/historia-pdfs/historia-2018.pdf",
+        paginaFuente: 2,
+      },
+{
+        id: "h-2018-ordinaria-B-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo (puntuación máxima: 1,5 puntos).\n2. Responda a la siguiente cuestión (puntuación máxima: 3 puntos): El gobierno radical cedista (1933-\n1935). La Revolución de Asturias.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        texto_fuente: "A todos los trabajadores:\nEl día 5 del mes en curso comenzó la insurrección gloriosa del proletariado contra la burguesía y después de probada la capacidad revolucionaria de las masas obreras para los objetivos de Gobierno ofreciendo alternativas de ataque y defensa ponderadas, estimamos necesaria una tregua en la lucha, deponiendo las armas en evitación de males mayores. Por ello, reunidos todos los Comités\nRevolucionarios con el provincial, se acordó la vuelta a la normalidad, encareciéndoos a todos os reintegréis de forma ordenada, consciente y serena, al trabajo.\nEsta retirada nuestra, camaradas, la consideramos honrosa por inevitable. La diferencia de medios de lucha, cuando nosotros hemos rendido tributo de ideales y hombría en el teatro de la guerra, y el enemigo cuenta con medios modernos de combate, nos llevó por ética revolucionaria a adoptar esta actitud extrema. Es un alto en el camino, un paréntesis, un descanso reparador después de tanto sobresfuerzo.\nNosotros, camaradas, os recordamos esta frase heroica: “Al proletariado se le puede derrotar, pero jamás vencer”.\nÚltima proclama del Comité Provincial Revolucionario de Asturias, 18 de octubre de 1934.",
       }
     ]
   }

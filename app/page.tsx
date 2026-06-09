@@ -460,10 +460,7 @@ export default function Home() {
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
   const isCatalunaExam = isCatalunaMates || isCatalunaHistoria
   const pinnedClean = normalizePinnedSubjects(pinnedSubjects)
-  const primarySubjectCards = pinnedClean.length
-    ? (pinnedClean.includes(asignatura) ? pinnedClean : [asignatura, ...pinnedClean]).slice(0, 4)
-    : DEFAULT_PINNED_SUBJECTS
-  const visibleSubjectCards = showAllSubjects ? HOME_SUBJECTS : primarySubjectCards
+  const visibleSubjectCards = showAllSubjects ? HOME_SUBJECTS : pinnedClean
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -1313,6 +1310,11 @@ function cambiarTipo(t: Tipo) {
               {pinnedLimitMsg && !showAllSubjects && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '12px', padding: '8px 14px', marginBottom: '12px', color: '#c2410c', fontSize: '13px', fontWeight: 600 }}>
                   Puedes anclar hasta 4 asignaturas. Desancla una para añadir otra.
+                </div>
+              )}
+              {!showAllSubjects && visibleSubjectCards.length === 0 && (
+                <div style={{ padding: '28px 20px', borderRadius: '20px', border: '1px dashed #dbe7fb', background: '#f8fbff', color: WARM.muted, fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
+                  Ancla tus asignaturas favoritas para tenerlas siempre a mano.
                 </div>
               )}
               <div

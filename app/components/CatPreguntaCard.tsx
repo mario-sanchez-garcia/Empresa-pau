@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { PreguntaCat } from '@/app/data/examenes'
-import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
@@ -82,18 +82,18 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
       })
       const data = await res.json()
-      const correccionJson = parseCorrectionJson(data.respuesta || '')
-      const correccionVisible = correccionJson ? correctionJsonToMarkdown(correccionJson) : data.respuesta
+      const parsedCorrection = parseCorrectionJson(data.respuesta || '')
+      const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [pregunta.puntuacion]) : null
+      const correccionVisible = correccionJson ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: pregunta.puntuacion }) : sanitizeCorrectionScaleText(data.respuesta || '', pregunta.puntuacion)
       setCorreccion(correccionVisible)
 
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
       const partes = !correccionJson ? data.respuesta?.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
-      const nota = bloqueJson?.puntos_conseguidos != null
+      const rawNota = bloqueJson?.puntos_conseguidos != null
         ? Number(bloqueJson.puntos_conseguidos)
         : partes ? parseFloat(partes[1].replace(',', '.')) : null
-      const notaMax = bloqueJson?.puntos_maximos != null
-        ? Number(bloqueJson.puntos_maximos)
-        : partes ? parseFloat(partes[2].replace(',', '.')) : pregunta.puntuacion
+      const nota = rawNota === null ? null : Math.min(pregunta.puntuacion, Math.max(0, rawNota))
+      const notaMax = pregunta.puntuacion
       const { data: userData } = await supabase.auth.getUser()
 
       if (userData.user) {
@@ -225,11 +225,22 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         <section className="border-t-2" style={{ borderColor: CAT_UI.color }}>
           <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: CAT_UI.color }}>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>
-            CORRECCION DE PAUSIA
+            CORRECCIÓN DE PAUSIA
           </div>
           <MathMarkdown text={correccion} format={false} className="p-6 text-[0.925rem] leading-7" />
         </section>
       )}
     </article>
   )
+}
+
+function formatPts(value: number) {
+  return value.toFixed(2).replace(/\.00$/, '')
+}
+
+function sanitizeCorrectionScaleText(text: string, maxScore: number) {
+  return text
+    .replace(/\s*\(\s*[0-9]+[.,]?[0-9]*\s*\/\s*14\s*\)/gi, '')
+    .replace(/([0-9]+[.,]?[0-9]*)\s*\/\s*14\b/g, (_, score) => `${score}/${formatPts(maxScore)} pts`)
+    .replace(/sobre\s+14\b/gi, `sobre ${formatPts(maxScore)} puntos`)
 }

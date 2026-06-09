@@ -43,7 +43,6 @@ export default function SimulacroResultsPage() {
   const correctionFailed = Boolean(result.correction_error || result.estado_correccion === 'error')
   const nota = safeNumber(result.nota_final ?? record.nota_final, 0)
   const hasGrade = !correctionFailed && isFiniteNumber(result.nota_final ?? record.nota_final)
-  const nota14 = safeNumber(result.nota_sobre_14, nota * 1.4)
   const cfg = SUBJECTS[record.asignatura]
   const detail = normalizeDetail(result, record, correctionFailed)
   const plan = normalizePlan(result, detail, correctionFailed)
@@ -67,7 +66,7 @@ export default function SimulacroResultsPage() {
           <div className="p-8 text-center">
             <div className="mx-auto mb-3 inline-flex rounded-full px-4 py-2 text-sm font-black text-white" style={{ background: cfg.color }}>{cfg.label} · {record.dificultad_real ?? record.dificultad}</div>
             <div className="text-7xl font-black tracking-tight" style={{ color: hasGrade ? gradeColor(nota) : '#64748b' }}>{hasGrade ? nota.toFixed(2) : 'Sin nota'}</div>
-            <div className="mt-2 text-lg font-black text-slate-500">{hasGrade ? `/10 · ${nota14.toFixed(2)}/14` : 'Corrección pendiente'}</div>
+            <div className="mt-2 text-lg font-black text-slate-500">{hasGrade ? '/10' : 'Corrección pendiente'}</div>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-sm font-black text-slate-600">
               <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Tiempo: {record.tiempo_empleado ?? 0} min de 90</span>
               <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Años: {years || 'sin datos'}</span>

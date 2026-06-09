@@ -168,7 +168,7 @@ function createCorrectionError({ simulacroId, subject, message, raw }: { simulac
 function normalizeCorrectionResult(result: any, context: { simulacroId: string; subject: string; elapsed: number; blocks: any[] }) {
   const normalizedBlocks = context.blocks.map((source, index) => {
     const block = Array.isArray(result?.desglose_bloques) ? result.desglose_bloques[index] ?? {} : {}
-    const max = safeNumber(block.max_puntos ?? block.puntos_maximos ?? source.puntuacion, 0)
+    const max = safeNumber(source.puntuacion ?? source.puntos ?? source.pts ?? block.max_puntos ?? block.puntos_maximos, 0)
     const score = clamp(safeNumber(block.nota ?? block.puntos_conseguidos, 0), 0, max)
     const percentage = max > 0 ? Math.round(score / max * 100) : 0
     return {
@@ -197,8 +197,7 @@ function normalizeCorrectionResult(result: any, context: { simulacroId: string; 
   const totalMax = normalizedBlocks.reduce((sum, block) => sum + safeNumber(block.puntos_maximos, 0), 0)
   const totalScore = normalizedBlocks.reduce((sum, block) => sum + safeNumber(block.puntos_conseguidos, 0), 0)
   const computedNota = totalMax > 0 ? totalScore / totalMax * 10 : 0
-  const nota = clamp(safeNumber(result?.nota_final, computedNota), 0, 10)
-  const nota14 = clamp(safeNumber(result?.nota_sobre_14, nota * 1.4), 0, 14)
+  const nota = clamp(computedNota, 0, 10)
   const resumen = Array.isArray(result?.resumen_por_bloque_tematico) && result.resumen_por_bloque_tematico.length
     ? result.resumen_por_bloque_tematico
     : normalizedBlocks.map(block => ({
@@ -217,7 +216,7 @@ function normalizeCorrectionResult(result: any, context: { simulacroId: string; 
     estado_correccion: 'ok',
     correction_error: false,
     nota_final: Number(nota.toFixed(2)),
-    nota_sobre_14: Number(nota14.toFixed(2)),
+    nota_sobre_14: null,
     tiempo_empleado_minutos: safeNumber(result?.tiempo_empleado_minutos, context.elapsed),
     feedback_general: textOrFallback(result?.feedback_general, 'Corrección completada. Revisa el desglose por bloques para ver los errores concretos.'),
     fortalezas: normalizeList(result?.fortalezas ?? result?.puntos_fuertes),

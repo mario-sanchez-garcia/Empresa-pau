@@ -1,9 +1,8 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
-import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
@@ -19,10 +18,10 @@ type Fuente = {
 }
 
 const UI = {
-  color: '#9f1239',
-  accent: '#fb7185',
-  light: '#fff1f2',
-  border: '#fecdd3',
+  color: '#2f6f4e',
+  accent: '#86c89a',
+  light: '#f0fdf4',
+  border: '#dcfce7',
 }
 
 export function RenderFuente({ fuente }: { fuente?: Fuente }) {
@@ -30,7 +29,7 @@ export function RenderFuente({ fuente }: { fuente?: Fuente }) {
   const imagenes = fuente.imagenes_url?.length ? fuente.imagenes_url : fuente.imagen_url ? [fuente.imagen_url] : []
 
   return (
-    <section className="rounded-[22px] border bg-white p-5 shadow-[0_14px_34px_rgba(159,18,57,0.07)]" style={{ borderColor: UI.border }}>
+    <section className="rounded-[24px] border bg-white p-5 shadow-[0_14px_34px_rgba(37,99,235,0.07)]" style={{ borderColor: UI.border }}>
       {fuente.titulo && <h4 className="mb-4 text-base font-black text-slate-900">{fuente.titulo}</h4>}
       {(fuente.tipo === 'imagen' || fuente.tipo === 'imagen_doble' || fuente.tipo === 'documento') && imagenes.length > 0 && (
         <div className={`grid gap-3 ${imagenes.length > 1 ? 'md:grid-cols-2' : ''}`}>
@@ -41,8 +40,8 @@ export function RenderFuente({ fuente }: { fuente?: Fuente }) {
       {fuente.tabla && (
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
           <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-rose-50 text-rose-900">
-              <tr>{fuente.tabla.columnas?.map(columna => <th key={columna} className="border-b border-rose-200 px-4 py-3 font-black">{columna}</th>)}</tr>
+            <thead style={{ backgroundColor: UI.light, color: UI.color }}>
+              <tr>{fuente.tabla.columnas?.map(columna => <th key={columna} className="border-b px-4 py-3 font-black" style={{ borderColor: UI.border }}>{columna}</th>)}</tr>
             </thead>
             <tbody>{fuente.tabla.filas?.map((fila, index) => <tr key={index} className="even:bg-slate-50">{fila.map((celda, cellIndex) => <td key={cellIndex} className="border-b border-slate-100 px-4 py-3 text-slate-700">{celda}</td>)}</tr>)}</tbody>
           </table>
@@ -81,7 +80,7 @@ export function RespuestaIA({ contenido }: { contenido: string }) {
       <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: UI.color }}>
         <WandSparkles size={17} /> CORRECCIÓN DE PAUSIA
       </div>
-      <div className="prose prose-slate max-w-none p-6 text-sm leading-7"><ReactMarkdown>{contenido}</ReactMarkdown></div>
+      <MathMarkdown text={contenido} format={false} className="p-6 text-sm leading-7" />
     </section>
   )
 }
@@ -153,12 +152,13 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       })
       const data = await response.json()
       const parsed = parseCorrectionJson(data.respuesta || '')
-      const visible = parsed ? correctionJsonToMarkdown(parsed) : data.respuesta
+      const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [puntuacion]) : null
+      const visible = normalized ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: puntuacion }) : sanitizeCorrectionScaleText(data.respuesta || '', puntuacion)
       setCorreccion(visible)
 
       const { data: userData } = await supabase.auth.getUser()
       if (userData.user) {
-        const bloque = parsed?.desglose_bloques?.[0]
+        const bloque = normalized?.desglose_bloques?.[0]
         await supabase.from('historial_examenes').insert({
           user_id: userData.user.id,
           asignatura: 'historia',
@@ -166,8 +166,8 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
           año: Number(contexto.match(/\b20\d{2}\b/)?.[0]),
           bloque: `Ejercicio ${ejercicio.numero}`,
           opcion: 'Única',
-          nota: bloque?.puntos_conseguidos != null ? Number(bloque.puntos_conseguidos) : null,
-          nota_maxima: bloque?.puntos_maximos != null ? Number(bloque.puntos_maximos) : puntuacion,
+          nota: bloque?.puntos_conseguidos != null ? Math.min(puntuacion, Math.max(0, Number(bloque.puntos_conseguidos))) : null,
+          nota_maxima: puntuacion,
           enunciado: enunciadoOficial.substring(0, 500),
           respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 1000),
           correccion: visible?.substring(0, 2000),
@@ -181,17 +181,21 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
   const sinRespuesta = modo === 'texto' ? !respuesta.trim() : !imagen
 
   return (
-    <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(159,18,57,0.08)]" style={{ borderColor: UI.border }}>
+    <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
       <header className="flex items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderColor: UI.accent }}>
         <div>
           <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>{contexto}</div>
           <h3 className="mt-2 text-lg font-black text-slate-900">Ejercicio {ejercicio.numero}</h3>
         </div>
-        <div className="text-right"><span className="text-2xl font-black" style={{ color: UI.color }}>{puntuacion}</span><span className="ml-1 text-sm font-bold text-rose-400">pts</span></div>
+        <div className="text-right"><span className="text-2xl font-black" style={{ color: UI.color }}>{puntuacion}</span><span className="ml-1 text-sm font-bold" style={{ color: UI.accent }}>pts</span></div>
       </header>
       <div className="grid gap-5 p-6">
         <RenderFuente fuente={ejercicio.fuente} />
-        {ejercicio.instrucciones && <MathMarkdown text={ejercicio.instrucciones} className="rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm" />}
+        {ejercicio.instrucciones && (
+          <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}>
+            <MathMarkdown text={ejercicio.instrucciones} />
+          </div>
+        )}
         <div className="grid gap-3">
           {preguntas.map((pregunta: string, index: number) => <MathMarkdown key={index} text={pregunta} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />)}
         </div>
@@ -232,7 +236,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
                 <button onClick={() => fileRef.current?.click()} type="button" className="campus-hover flex h-[220px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed" style={{ borderColor: UI.accent, backgroundColor: `${UI.light}99`, color: UI.color }}>
                   <UploadCloud size={34} />
                   <span className="mt-2 text-sm font-black">Haz clic para subir una foto</span>
-                  <span className="mt-1 text-xs font-semibold text-rose-400">Fotografía tu respuesta manuscrita</span>
+                  <span className="mt-1 text-xs font-semibold" style={{ color: UI.accent }}>Fotografía tu respuesta manuscrita</span>
                 </button>
               )}
             </div>
@@ -245,4 +249,15 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       </div>
     </article>
   )
+}
+
+function formatPts(value: number) {
+  return value.toFixed(2).replace(/\.00$/, '')
+}
+
+function sanitizeCorrectionScaleText(text: string, maxScore: number) {
+  return text
+    .replace(/\s*\(\s*[0-9]+[.,]?[0-9]*\s*\/\s*14\s*\)/gi, '')
+    .replace(/([0-9]+[.,]?[0-9]*)\s*\/\s*14\b/g, (_, score) => `${score}/${formatPts(maxScore)} pts`)
+    .replace(/sobre\s+14\b/gi, `sobre ${formatPts(maxScore)} puntos`)
 }

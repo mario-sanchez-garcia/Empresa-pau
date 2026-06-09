@@ -7,12 +7,12 @@ import { supabase } from '@/app/lib/supabase'
 import type { Flashcard, ZonaSubject } from './types'
 
 const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[] = [
-  { id: 'mates', label: 'Mates', color: '#b4232a', soft: '#fff1f2' },
-  { id: 'fisica', label: 'Física', color: '#ca8a04', soft: '#fefce8' },
+  { id: 'mates', label: 'Mates', color: '#2563eb', soft: '#eff6ff' },
+  { id: 'fisica', label: 'Física', color: '#6d28d9', soft: '#f5f3ff' },
   { id: 'quimica', label: 'Química', color: '#ea580c', soft: '#fff7ed' },
-  { id: 'biologia', label: 'Biología', color: '#047857', soft: '#D1FAE5' },
-  { id: 'lengua', label: 'Lengua', color: '#2563eb', soft: '#eff6ff' },
-  { id: 'historia', label: 'Historia', color: '#78350f', soft: '#fff8f1' }
+  { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' },
+  { id: 'lengua', label: 'Lengua', color: '#4f46e5', soft: '#eef2ff' },
+  { id: 'historia', label: 'Historia', color: '#2f6f4e', soft: '#f0fdf4' }
 ]
 
 const WARM = {

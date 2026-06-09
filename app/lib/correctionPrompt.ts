@@ -114,13 +114,15 @@ Lengua Castellana y Literatura II:
 4. Para cada bloque identifica qué ha hecho bien, qué está mal, qué falta, dónde falla exactamente y cómo debería mejorar.
 5. Cada punto descontado debe tener un motivo claro y concreto en penalizaciones_aplicadas.
 6. No des 0 automáticamente salvo que esté justificado por respuesta en blanco, ausencia total de planteamiento válido o respuesta no relacionada.
-7. Calcula nota_final sobre 10.00 y nota_sobre_14 con dos decimales. Nunca puede superar 10.00 ni 14.00.
-8. Si el tiempo supera 90 minutos, rellena advertencia_tiempo. Si el tiempo es 0, advertencia_tiempo debe indicar que esta práctica no ha sido cronometrada.
-9. Feedback directo, accionable y específico a la respuesta real del alumno. Evita frases genéricas.
-10. El plan de repaso debe salir solo de los errores detectados.
-11. Incluye solucion_orientativa por bloque con el planteamiento o respuesta esperada.
-12. Resume cada bloque temático con nivel: Domina / En progreso / Necesita refuerzo urgente.
-13. Contextualiza la nota según la dificultad.
+7. Para cada bloque, puntos_maximos debe ser exactamente la puntuación máxima oficial enviada en puntuacion_maxima. No uses 10, 14, 100 ni ninguna escala inventada para un ejercicio individual.
+8. Si calculas nota_final, hazlo únicamente como resumen proporcional sobre 10 a partir de la suma de puntos_conseguidos / puntos_maximos de los bloques. La corrección visible del ejercicio debe basarse siempre en puntos_conseguidos / puntos_maximos.
+9. Si una puntuación máxima enviada es 2.5, 1.5, 4, etc., la respuesta JSON debe conservar exactamente esa escala en puntos_maximos. Nunca inventes /14.
+10. Si el tiempo supera 90 minutos, rellena advertencia_tiempo. Si el tiempo es 0, advertencia_tiempo debe indicar que esta práctica no ha sido cronometrada.
+11. Feedback directo, accionable y específico a la respuesta real del alumno. Evita frases genéricas.
+12. El plan de repaso debe salir solo de los errores detectados.
+13. Incluye solucion_orientativa por bloque con el planteamiento o respuesta esperada.
+14. Resume cada bloque temático con nivel: Domina / En progreso / Necesita refuerzo urgente.
+15. Contextualiza la nota según la dificultad.
 
 ### FORMATO DE SALIDA
 
@@ -130,7 +132,6 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
   "simulacro_id": "${input.simulacroId}",
   "asignatura": "${input.subject}",
   "nota_final": 0.00,
-  "nota_sobre_14": 0.00,
   "tiempo_empleado_minutos": ${input.elapsedMinutes},
   "advertencia_tiempo": null,
   "dificultad_simulacro": "${input.difficulty}",
@@ -200,12 +201,25 @@ export function parseCorrectionJson(text: string) {
 }
 
 export function correctionJsonToMarkdown(data: any) {
+  return correctionJsonToMarkdownWithOptions(data)
+}
+
+export function correctionJsonToMarkdownWithOptions(data: any, options: { officialMaxScore?: number } = {}) {
   const bloques = Array.isArray(data?.desglose_bloques) ? data.desglose_bloques : []
   const plan = Array.isArray(data?.plan_repaso) ? data.plan_repaso : []
   const resumen = Array.isArray(data?.resumen_por_bloque_tematico) ? data.resumen_por_bloque_tematico : []
+  const firstBlock = bloques[0] ?? null
+  const officialMax = normalizeScore(options.officialMaxScore)
+  const firstMax = officialMax ?? normalizeScore(firstBlock?.puntos_maximos ?? firstBlock?.max_puntos)
+  const firstScore = firstMax != null
+    ? clampScore(normalizeScore(firstBlock?.puntos_conseguidos ?? firstBlock?.nota) ?? 0, firstMax)
+    : null
+  const heading = firstMax != null
+    ? `## Nota: ${formatNumber(firstScore)}/${formatNumber(firstMax)} pts`
+    : `## Nota: ${formatNumber(data?.nota_final)}/10`
 
   return [
-    `## Nota: ${formatNumber(data?.nota_final)}/10 (${formatNumber(data?.nota_sobre_14)}/14)`,
+    heading,
     data?.advertencia_tiempo ? `> ${data.advertencia_tiempo}` : '',
     `### Feedback general\n${data?.feedback_general ?? ''}`,
     `### Puntos fuertes\n${data?.puntos_fuertes ?? ''}`,
@@ -223,6 +237,52 @@ export function correctionJsonToMarkdown(data: any) {
   ].filter(Boolean).join('\n\n')
 }
 
+export function normalizeCorrectionForOfficialScores(data: any, officialMaxScores: number[]) {
+  const blocks = Array.isArray(data?.desglose_bloques) ? data.desglose_bloques : []
+  const normalizedBlocks = blocks.map((block: any, index: number) => {
+    const officialMax = normalizeScore(officialMaxScores[index]) ?? normalizeScore(block?.puntos_maximos ?? block?.max_puntos) ?? 0
+    const score = clampScore(normalizeScore(block?.puntos_conseguidos ?? block?.nota) ?? 0, officialMax)
+    const percentage = officialMax > 0 ? Math.round((score / officialMax) * 100) : 0
+    return {
+      ...block,
+      nota: score,
+      max_puntos: officialMax,
+      puntos_conseguidos: score,
+      puntos_maximos: officialMax,
+      porcentaje_logrado: percentage
+    }
+  })
+  const totalMax = normalizedBlocks.reduce((sum: number, block: any) => sum + (normalizeScore(block.puntos_maximos) ?? 0), 0)
+  const totalScore = normalizedBlocks.reduce((sum: number, block: any) => sum + (normalizeScore(block.puntos_conseguidos) ?? 0), 0)
+  const notaFinal = totalMax > 0 ? Number(((totalScore / totalMax) * 10).toFixed(2)) : normalizeScore(data?.nota_final) ?? 0
+
+  return {
+    ...data,
+    nota_final: notaFinal,
+    nota_sobre_14: undefined,
+    desglose_bloques: normalizedBlocks,
+    resumen_por_bloque_tematico: Array.isArray(data?.resumen_por_bloque_tematico) && data.resumen_por_bloque_tematico.length
+      ? data.resumen_por_bloque_tematico.map((item: any, index: number) => {
+        const block = normalizedBlocks[index]
+        if (!block) return item
+        return {
+          ...item,
+          puntos_conseguidos: block.puntos_conseguidos,
+          puntos_maximos: block.puntos_maximos,
+          porcentaje: block.porcentaje_logrado
+        }
+      })
+      : normalizedBlocks.map((block: any) => ({
+        bloque: block.tema ?? block.numero_bloque ?? 'Bloque',
+        puntos_conseguidos: block.puntos_conseguidos,
+        puntos_maximos: block.puntos_maximos,
+        porcentaje: block.porcentaje_logrado,
+        nivel: block.porcentaje_logrado >= 80 ? 'Domina' : block.porcentaje_logrado >= 50 ? 'En progreso' : 'Necesita refuerzo urgente',
+        aparece_en_plan_repaso: block.porcentaje_logrado < 80
+      }))
+  }
+}
+
 function penaltiesToMarkdown(items: any) {
   if (!Array.isArray(items) || !items.length) return ''
   return `**Penalizaciones aplicadas:**\n${items.map((item: any) => `- ${item.motivo}: ${item.puntos_descontados}`).join('\n')}`
@@ -230,4 +290,13 @@ function penaltiesToMarkdown(items: any) {
 
 function formatNumber(value: any) {
   return typeof value === 'number' ? value.toFixed(2).replace(/\.00$/, '') : '0'
+}
+
+function normalizeScore(value: any) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
+function clampScore(value: number, max: number) {
+  return Math.min(max, Math.max(0, value))
 }

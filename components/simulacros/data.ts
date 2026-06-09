@@ -7,12 +7,12 @@ import { BIOLOGIA_TOPICS, examenesBiologia } from '@/app/data/biologia'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 export const SUBJECTS = {
-  mates: { label: 'Matemáticas II', short: 'Mates', color: '#b4232a', light: '#fff1f2', icon: Sigma, available: true },
-  fisica: { label: 'Física', short: 'Física', color: '#ca8a04', light: '#fefce8', icon: Atom, available: true },
+  mates: { label: 'Matemáticas II', short: 'Mates', color: '#2563eb', light: '#eff6ff', icon: Sigma, available: true },
+  fisica: { label: 'Física', short: 'Física', color: '#6d28d9', light: '#f5f3ff', icon: Atom, available: true },
   quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
-  biologia: { label: 'Biología', short: 'Bio', color: '#047857', light: '#D1FAE5', icon: Dna, available: true },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#2563eb', light: '#eff6ff', icon: BookOpen, available: true },
-  historia: { label: 'Historia de España', short: 'Historia', color: '#78350f', light: '#fff8f1', icon: Landmark, available: true }
+  biologia: { label: 'Biología', short: 'Bio', color: '#4d7c0f', light: '#f7fee7', icon: Dna, available: true },
+  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#4f46e5', light: '#eef2ff', icon: BookOpen, available: true },
+  historia: { label: 'Historia de España', short: 'Historia', color: '#2f6f4e', light: '#f0fdf4', icon: Landmark, available: true }
 } as const
 
 export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [

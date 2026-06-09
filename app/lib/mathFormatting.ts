@@ -203,9 +203,14 @@ function formatChemicalNotation(text: string) {
 
 function formatExamStructure(text: string) {
   return text
+    .replace(/(^|\n)\s*((?:[1-9]\d*)\.(?:[1-9]\d*)\.\s*(?:\([^)]+puntos?\))?)/gi, '$1**$2**')
+    .replace(/(^|\n)\s*(([A-Z])\.(?:[1-9]\d*)\.\s*(?:\([^)]+puntos?\))?)/g, '$1**$2**')
     .replace(/(^|\n)\s*([a-d]\))/gi, '$1**$2**')
+    .replace(/(^|\n)\s*([A-D]\.[1-9]\.)/g, '$1**$2**')
     .replace(/(^|\n)\s*((?:Datos?|Dato)[.:])/gi, '$1**$2**')
     .replace(/(^|\n)\s*([ivx]+\))/gi, '$1**$2**')
+    .replace(/(\*\*(?:[1-9]\d*)\.(?:[1-9]\d*)\.\*\*)\s*(\([^)]+puntos?\))/gi, '$1 **$2**')
+    .replace(/(\*\*[A-D]\.(?:[1-9]\d*)\.\*\*)\s*(\([^)]+puntos?\))/g, '$1 **$2**')
 }
 
 function toLatexExpression(expression: string) {

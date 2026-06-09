@@ -45,12 +45,12 @@ const NAV_ITEMS = [
 ] as const
 
 const SUBJECTS = [
-  { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#b4232a', light: '#fff1f2', border: '#ffe4e6' },
-  { id: 'fisica', label: 'Física', icon: Atom, color: '#ca8a04', light: '#fefce8', border: '#fef3c7' },
+  { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
+  { id: 'fisica', label: 'Física', icon: Atom, color: '#6d28d9', light: '#f5f3ff', border: '#ede9fe' },
   { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
-  { id: 'biologia', label: 'Biología', icon: Dna, color: '#047857', light: '#D1FAE5', border: '#A7F3D0' },
-  { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
-  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#78350f', light: '#fff8f1', border: '#fed7aa' }
+  { id: 'biologia', label: 'Biología', icon: Dna, color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
+  { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', border: '#ffe4e6' },
+  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' }
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {

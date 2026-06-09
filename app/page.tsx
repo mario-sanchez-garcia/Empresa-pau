@@ -909,7 +909,7 @@ function cambiarTipo(t: Tipo) {
     { id: 'examenes' as Seccion, label: 'Examenes', icon: ClipboardList, desc: 'Practica y corrige' },
     { id: 'chat' as Seccion, label: 'Chat con Pausia', icon: MessageCircle, desc: 'Resuelve dudas' },
     { id: 'historial' as Seccion, label: 'Historial', icon: BarChart3, desc: 'Tus correcciones' },
-    { id: 'planning' as Seccion, label: 'Plan de estudio', icon: BrainCircuit, desc: 'Semana organizada' },
+    { id: 'planning' as Seccion, label: 'Mi Plan', icon: BrainCircuit, desc: 'Semana organizada' },
   ]
 
   const HeaderIcon =

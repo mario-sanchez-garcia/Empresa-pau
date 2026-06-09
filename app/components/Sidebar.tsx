@@ -39,7 +39,7 @@ const NAV_ITEMS = [
   { id: 'zona', label: 'La Zona', desc: 'Estudia a tu manera', href: '/zona', icon: BrainCircuit },
   { id: 'chat', label: 'Chat con Pausia', desc: 'Resuelve dudas', href: '/?view=chat', icon: MessageCircle },
   { id: 'historial', label: 'Historial', desc: 'Tus correcciones', href: '/?view=historial', icon: BarChart3 },
-  { id: 'plan-estudio', label: 'Plan de estudio', desc: 'Semana organizada', href: '/?view=planning', icon: BrainCircuit },
+  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/?view=planning', icon: BrainCircuit },
   { id: 'planning', label: 'Planning', desc: 'Tareas completables', href: '/planning', icon: Rocket }
 ] as const
 

@@ -240,6 +240,7 @@ const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'lengua', 'historia']
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
 const PINNED_SUBJECTS_STORAGE_KEY = 'pausia:pinned-subjects'
+const MAX_PINNED = 4
 
 function readHomeSectionFromUrl(): Seccion | null {
   if (typeof window === 'undefined') return null
@@ -256,7 +257,7 @@ function readSubjectFromUrl(): Asignatura | null {
 function normalizePinnedSubjects(value: unknown): Asignatura[] {
   if (!Array.isArray(value)) return DEFAULT_PINNED_SUBJECTS
   const clean = value.filter((item): item is Asignatura => HOME_SUBJECTS.includes(item as Asignatura))
-  return Array.from(new Set(clean))
+  return Array.from(new Set(clean)).slice(0, MAX_PINNED)
 }
 
 function hoverVars(color: string, light: string, accent = color) {
@@ -427,6 +428,7 @@ export default function Home() {
   const [asignatura, setAsignatura] = useState<Asignatura>('mates')
   const [showAllSubjects, setShowAllSubjects] = useState(false)
   const [pinnedSubjects, setPinnedSubjects] = useState<Asignatura[]>(DEFAULT_PINNED_SUBJECTS)
+  const [pinnedLimitMsg, setPinnedLimitMsg] = useState(false)
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
   const [catEjercicioIdx, setCatEjercicioIdx] = useState(0)
@@ -485,7 +487,15 @@ export default function Home() {
     if (typeof window === 'undefined') return
     try {
       const stored = window.localStorage.getItem(PINNED_SUBJECTS_STORAGE_KEY)
-      if (stored) setPinnedSubjects(normalizePinnedSubjects(JSON.parse(stored)))
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        const normalized = normalizePinnedSubjects(parsed)
+        setPinnedSubjects(normalized)
+        // Re-save if localStorage had more than MAX_PINNED entries
+        if (Array.isArray(parsed) && parsed.length !== normalized.length) {
+          window.localStorage.setItem(PINNED_SUBJECTS_STORAGE_KEY, JSON.stringify(normalized))
+        }
+      }
     } catch {
       setPinnedSubjects(DEFAULT_PINNED_SUBJECTS)
     }
@@ -532,16 +542,19 @@ export default function Home() {
   }
 
   function togglePinnedSubject(subject: Asignatura) {
-    setPinnedSubjects(current => {
-      const exists = current.includes(subject)
-      const next = exists ? current.filter(item => item !== subject) : [subject, ...current]
-      if (typeof window !== 'undefined') {
-        try {
-          window.localStorage.setItem(PINNED_SUBJECTS_STORAGE_KEY, JSON.stringify(next))
-        } catch {}
-      }
-      return next
-    })
+    const exists = pinnedSubjects.includes(subject)
+    if (!exists && pinnedSubjects.length >= MAX_PINNED) {
+      setPinnedLimitMsg(true)
+      return
+    }
+    setPinnedLimitMsg(false)
+    const next = exists ? pinnedSubjects.filter(item => item !== subject) : [subject, ...pinnedSubjects]
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(PINNED_SUBJECTS_STORAGE_KEY, JSON.stringify(next))
+      } catch {}
+    }
+    setPinnedSubjects(next)
   }
 
   const TIPOS_FISICA = [
@@ -1297,7 +1310,22 @@ function cambiarTipo(t: Tipo) {
                   {showAllSubjects ? 'Ocultar' : 'Ver todas'}
                 </button>
               </div>
-              <div className="subject-card-grid">
+              {pinnedLimitMsg && !showAllSubjects && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '12px', padding: '8px 14px', marginBottom: '12px', color: '#c2410c', fontSize: '13px', fontWeight: 600 }}>
+                  Puedes anclar hasta 4 asignaturas. Desancla una para añadir otra.
+                </div>
+              )}
+              <div
+                className="subject-card-grid"
+                style={!showAllSubjects ? {
+                  gridTemplateColumns:
+                    visibleSubjectCards.length === 1 ? 'minmax(280px, 520px)' :
+                    visibleSubjectCards.length === 2 ? 'repeat(2, 1fr)' :
+                    visibleSubjectCards.length === 3 ? 'repeat(3, 1fr)' :
+                    'repeat(4, 1fr)',
+                  justifyContent: visibleSubjectCards.length === 1 ? 'center' : undefined,
+                } : {}}
+              >
               {visibleSubjectCards.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]

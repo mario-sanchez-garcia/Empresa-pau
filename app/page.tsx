@@ -799,7 +799,9 @@ const bloquesIngles = preguntasIngles.map((p: any) => ({ tipo: p.bloque, label: 
 const tipoInglesActivo = bloquesIngles[bloqueIdx]?.tipo
 
 const preguntaIngles = asignatura === 'ingles'
-  ? preguntasIngles.find((p: any) => p.bloque === tipoInglesActivo) ?? preguntasIngles[0] ?? null
+  ? tipoInglesActivo
+    ? preguntasIngles.find((p: any) => p.bloque === tipoInglesActivo) ?? null
+    : null
   : null
 
 const preguntasA = asignatura === 'mates'
@@ -1025,6 +1027,13 @@ const opcionMostrada = asignatura === 'lengua'
   : asignatura === 'ingles'
     ? ((examenIngles as any)?.opcion ?? (diaInglesSeleccionado ? `${diaInglesSeleccionado} · ${(examenIngles as any)?.opcion ?? ''}` : 'Única'))
     : (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
+
+const preguntaActivaKey = [
+  asignatura,
+  (examenActivo as any)?.id ?? examenActivo?.año ?? 'sin-examen',
+  (preguntaActiva as any)?.id ?? (preguntaActiva as any)?.bloque ?? (preguntaActiva as any)?.tipo ?? bloqueIdx,
+  opcionMostrada
+].join('-')
 
 function puntosBloqueFisica(tipoBloque: string) {
   return (
@@ -1832,7 +1841,7 @@ function cambiarTipo(t: Tipo) {
             )}
 
             {!isCatalunaExam && preguntaActiva && (
-             <div style={{
+             <div key={preguntaActivaKey} style={{
   background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.95)',
@@ -1861,7 +1870,23 @@ function cambiarTipo(t: Tipo) {
                   </div>
                 </div>
                 <div style={{ padding: '24px', overflowY: 'auto' }}>
-                  {(asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0) || asignatura === 'ingles') && (preguntaActiva as any)?.texto_fuente && (
+                  {asignatura === 'ingles' && (
+                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)', marginBottom: '18px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Preguntas del apartado</div>
+                      <div style={{ fontSize: '1.02rem', lineHeight: '1.85', color: '#1f2937' }}>
+                        <MathMarkdown key={`${preguntaActivaKey}-enunciado`} text={enunciadoActivo} format={false} components={mdComponents} />
+                      </div>
+                    </div>
+                  )}
+                  {asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
+                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto oficial del examen</div>
+                      <div style={{ color: WARM.ink, fontSize: '14px', lineHeight: 1.85 }}>
+                        <MathMarkdown key={`${preguntaActivaKey}-texto`} text={(preguntaActiva as any).texto_fuente} components={mdComponents} />
+                      </div>
+                    </div>
+                  )}
+                  {(asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && (
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
                       <div style={{ color: WARM.ink, fontSize: '14px', lineHeight: 1.85 }}>
@@ -1911,12 +1936,14 @@ function cambiarTipo(t: Tipo) {
                       ))}
                     </div>
                   )}
-                  <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado oficial</div>
-                    <div style={{ fontSize: '1.02rem', lineHeight: '1.85', color: '#1f2937' }}>
-                      <MathMarkdown text={enunciadoActivo} format={false} components={mdComponents} />
+                  {asignatura !== 'ingles' && (
+                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado oficial</div>
+                      <div style={{ fontSize: '1.02rem', lineHeight: '1.85', color: '#1f2937' }}>
+                        <MathMarkdown text={enunciadoActivo} format={false} components={mdComponents} />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}

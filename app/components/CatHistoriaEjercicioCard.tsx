@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { WandSparkles } from 'lucide-react'
+import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
@@ -88,14 +88,37 @@ export function RespuestaIA({ contenido }: { contenido: string }) {
 
 export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejercicio: any; contexto: string }) {
   const [respuesta, setRespuesta] = useState('')
+  const [imagen, setImagen] = useState<string | null>(null)
+  const [imagenTipo, setImagenTipo] = useState('image/jpeg')
+  const [imagenPreview, setImagenPreview] = useState<string | null>(null)
   const [correccion, setCorreccion] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
+  const fileRef = useRef<HTMLInputElement>(null)
   const preguntas = obtenerPreguntas(ejercicio)
   const puntuacion = puntuacionEjercicio(ejercicio)
   const enunciadoOficial = [ejercicio.instrucciones, ...preguntas].filter(Boolean).join('\n\n')
 
+  function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setImagenTipo(file.type)
+    setImagenPreview(URL.createObjectURL(file))
+    const reader = new FileReader()
+    reader.onload = () => setImagen((reader.result as string).split(',')[1])
+    reader.readAsDataURL(file)
+  }
+
+  function eliminarImagen() {
+    if (imagenPreview) URL.revokeObjectURL(imagenPreview)
+    setImagen(null)
+    setImagenPreview(null)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
   async function corregir() {
-    if (!respuesta.trim()) return
+    if (modo === 'texto' && !respuesta.trim()) return
+    if (modo === 'imagen' && !imagen) return
     setCargando(true)
     setCorreccion('')
     try {
@@ -114,13 +137,19 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
           maxScore: puntuacion,
           officialPrompt: enunciadoOficial,
           sourceText: [ejercicio.fuente?.texto, ejercicio.fuente?.descripcion, ejercicio.fuente?.fuente_completa].filter(Boolean).join('\n'),
-          studentAnswer: respuesta,
+          studentAnswer: modo === 'imagen'
+            ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+            : respuesta,
         }]
       })
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pregunta: prompt }),
+        body: JSON.stringify({
+          pregunta: prompt,
+          imagen: modo === 'imagen' ? imagen : null,
+          imagenTipo: modo === 'imagen' ? imagenTipo : null,
+        }),
       })
       const data = await response.json()
       const parsed = parseCorrectionJson(data.respuesta || '')
@@ -140,7 +169,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
           nota: bloque?.puntos_conseguidos != null ? Number(bloque.puntos_conseguidos) : null,
           nota_maxima: bloque?.puntos_maximos != null ? Number(bloque.puntos_maximos) : puntuacion,
           enunciado: enunciadoOficial.substring(0, 500),
-          respuesta: respuesta.substring(0, 1000),
+          respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 1000),
           correccion: visible?.substring(0, 2000),
         })
       }
@@ -148,6 +177,8 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       setCargando(false)
     }
   }
+
+  const sinRespuesta = modo === 'texto' ? !respuesta.trim() : !imagen
 
   return (
     <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(159,18,57,0.08)]" style={{ borderColor: UI.border }}>
@@ -166,8 +197,47 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
         </div>
         <div className="border-t pt-5" style={{ borderColor: UI.border }}>
           <label className="mb-3 block text-xs font-black uppercase tracking-[0.08em] text-slate-500">Tu respuesta</label>
-          <textarea value={respuesta} onChange={event => setRespuesta(event.target.value)} className="h-[260px] w-full resize-y rounded-2xl border bg-slate-50 p-4 text-sm leading-7 text-slate-800 outline-none focus:bg-white" style={{ borderColor: UI.border }} placeholder="Escribe tu respuesta..." />
-          <button type="button" onClick={corregir} disabled={cargando || !respuesta.trim()} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>
+          <div className="mb-4 flex gap-2">
+            {(['texto', 'imagen'] as const).map(nextMode => (
+              <button
+                className={modo === nextMode ? 'campus-primary' : 'campus-hover'}
+                key={nextMode}
+                onClick={() => setModo(nextMode)}
+                style={{
+                  background: modo === nextMode ? `linear-gradient(135deg, ${UI.color}, ${UI.accent})` : UI.light,
+                  color: modo === nextMode ? '#fff' : UI.color,
+                }}
+                type="button"
+              >
+                <span className="flex items-center gap-2 rounded-full px-[18px] py-[9px] text-[13px] font-bold">
+                  {nextMode === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}
+                  {nextMode === 'texto' ? 'Escribir' : 'Subir foto'}
+                </span>
+              </button>
+            ))}
+          </div>
+          {modo === 'texto' ? (
+            <textarea value={respuesta} onChange={event => setRespuesta(event.target.value)} className="h-[260px] w-full resize-y rounded-2xl border bg-slate-50 p-4 text-sm leading-7 text-slate-800 outline-none focus:bg-white" style={{ borderColor: UI.border }} placeholder="Escribe tu respuesta..." />
+          ) : (
+            <div>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} className="hidden" />
+              {imagenPreview ? (
+                <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: UI.border }}>
+                  <img src={imagenPreview} alt="Respuesta" className="max-h-[360px] w-full object-contain" />
+                  <button onClick={eliminarImagen} type="button" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg" style={{ backgroundColor: UI.color }}>
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => fileRef.current?.click()} type="button" className="campus-hover flex h-[220px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed" style={{ borderColor: UI.accent, backgroundColor: `${UI.light}99`, color: UI.color }}>
+                  <UploadCloud size={34} />
+                  <span className="mt-2 text-sm font-black">Haz clic para subir una foto</span>
+                  <span className="mt-1 text-xs font-semibold text-rose-400">Fotografía tu respuesta manuscrita</span>
+                </button>
+              )}
+            </div>
+          )}
+          <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>
             <WandSparkles size={17} /> {cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
           </button>
         </div>

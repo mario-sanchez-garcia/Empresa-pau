@@ -102,15 +102,18 @@ Lengua Castellana y Literatura II:
 ### INSTRUCCIONES DE EVALUACIÓN
 
 1. Corrige cada bloque de forma independiente.
-2. Para cada bloque identifica qué ha hecho bien, qué ha fallado, qué penalizaciones aplicas y por qué.
-3. Cada punto descontado debe tener un motivo claro y concreto en penalizaciones_aplicadas.
-4. Calcula nota_final sobre 10.00 y nota_sobre_14 con dos decimales. Nunca puede superar 10.00 ni 14.00.
-5. Si el tiempo supera 90 minutos, rellena advertencia_tiempo. Si el tiempo es 0, advertencia_tiempo debe indicar que esta práctica no ha sido cronometrada.
-6. Feedback directo, accionable y sin suavizar errores.
-7. El plan de repaso debe salir solo de los errores detectados.
-8. Incluye solucion_correcta_corta por bloque.
-9. Resume cada bloque temático con nivel: Domina / En progreso / Necesita refuerzo urgente.
-10. Contextualiza la nota según la dificultad.
+2. Si la respuesta está en blanco, dilo claramente y puntúa solo lo justificable. No inventes trabajo del alumno.
+3. Si la respuesta es absurda, irrelevante o no responde al enunciado, dilo con respeto y explica por qué no puntúa.
+4. Para cada bloque identifica qué ha hecho bien, qué está mal, qué falta, dónde falla exactamente y cómo debería mejorar.
+5. Cada punto descontado debe tener un motivo claro y concreto en penalizaciones_aplicadas.
+6. No des 0 automáticamente salvo que esté justificado por respuesta en blanco, ausencia total de planteamiento válido o respuesta no relacionada.
+7. Calcula nota_final sobre 10.00 y nota_sobre_14 con dos decimales. Nunca puede superar 10.00 ni 14.00.
+8. Si el tiempo supera 90 minutos, rellena advertencia_tiempo. Si el tiempo es 0, advertencia_tiempo debe indicar que esta práctica no ha sido cronometrada.
+9. Feedback directo, accionable y específico a la respuesta real del alumno. Evita frases genéricas.
+10. El plan de repaso debe salir solo de los errores detectados.
+11. Incluye solucion_orientativa por bloque con el planteamiento o respuesta esperada.
+12. Resume cada bloque temático con nivel: Domina / En progreso / Necesita refuerzo urgente.
+13. Contextualiza la nota según la dificultad.
 
 ### FORMATO DE SALIDA
 
@@ -126,6 +129,8 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
   "dificultad_simulacro": "${input.difficulty}",
   "contexto_dificultad": "",
   "feedback_general": "",
+  "fortalezas": [""] ,
+  "errores_principales": [""] ,
   "puntos_fuertes": "",
   "puntos_mejora": "",
   "plan_repaso": [
@@ -139,15 +144,22 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
       "tema": "",
       "año_origen": 0,
       "convocatoria_origen": "",
+      "nota": 0.00,
+      "max_puntos": 0.00,
       "puntos_conseguidos": 0.00,
       "puntos_maximos": 0.00,
       "porcentaje_logrado": 0,
+      "que_hizo_bien": "",
+      "errores_detectados": [""],
+      "que_faltaba": "",
       "penalizaciones_aplicadas": [
         { "motivo": "", "puntos_descontados": -0.25 }
       ],
       "correccion_detalle": "",
       "solucion_correcta_corta": "",
-      "consejo_especifico": ""
+      "solucion_orientativa": "",
+      "consejo_especifico": "",
+      "consejo_para_mejorar": ""
     }
   ],
   "resumen_por_bloque_tematico": [
@@ -165,7 +177,16 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
 
 export function parseCorrectionJson(text: string) {
   try {
-    return JSON.parse(text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, ''))
+    const cleaned = text
+      .trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim()
+    const firstBrace = cleaned.indexOf('{')
+    const lastBrace = cleaned.lastIndexOf('}')
+    const jsonText = firstBrace >= 0 && lastBrace > firstBrace ? cleaned.slice(firstBrace, lastBrace + 1) : cleaned
+    return JSON.parse(jsonText)
   } catch {
     return null
   }

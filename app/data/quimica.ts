@@ -40,7 +40,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "A.1",
-        enunciado: "Un elemento químico posee una configuración electrónica 1s22s22p63s23p64s23d6. Justifique\nsi son verdaderas o falsas las siguientes afirmaciones:\na) Pertenece al grupo 17 del Sistema Periódico.\nb) Se encuentra situado en el tercer periodo.\nc) Conduce la electricidad en estado sólido.\nd) Los números cuánticos (3,1,–2,+½) corresponden a un electrón de este elemento.",
+        enunciado: `Un elemento químico posee una configuración electrónica $1s^22s^22p^63s^23p^64s^23d^6$. Justifique
+si son verdaderas o falsas las siguientes afirmaciones:
+a) Pertenece al grupo 17 del Sistema Periódico.
+b) Se encuentra situado en el tercer periodo.
+c) Conduce la electricidad en estado sólido.
+d) Los números cuánticos $(n=3, l=1, m_l=-2, m_s=+\frac{1}{2})$ corresponden a un electrón de este elemento.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -53,7 +58,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "Responda a las siguientes cuestiones:\na) Escriba los equilibrios de disociación en agua de HNO2, NH3 y HSO4− e indique si actúan como ácido o\ncomo base.\nb) Se dispone de una disolución de ácido acético 0,2 M y otra de igual concentración de ácido salicílico.\nJustifique cuál de las dos tiene menor pH.\nc) Calcule el pH de una disolución de amoniaco 0,45 M.\nDatos. Ka (HNO2) = 5,610−4; Ka (HSO4−) = 1,010−2; Ka (ácido acético) = 1,810−5; Ka (ácido salicílico) =\n1,110−3; Kb (amoniaco) = 1,810−5.",
+        enunciado: `Responda a las siguientes cuestiones:
+a) Escriba los equilibrios de disociación en agua de $\text{HNO}_2$, $\text{NH}_3$ y $\text{HSO}_4^-$ e indique si actúan como ácido o
+como base.
+b) Se dispone de una disolución de ácido acético 0,2 M y otra de igual concentración de ácido salicílico.
+Justifique cuál de las dos tiene menor pH.
+c) Calcule el pH de una disolución de amoniaco 0,45 M.
+Datos. $K_a(\text{HNO}_2) = 5{,}6 \cdot 10^{-4}$; $K_a(\text{HSO}_4^-) = 1{,}0 \cdot 10^{-2}$; $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_a(\text{ácido salicílico}) = 1{,}1 \cdot 10^{-3}$; $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -92,7 +103,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "A.5",
-        enunciado: "A partir de los potenciales de reducción que se adjuntan, conteste razonadamente:\na) ¿Qué metales de la lista se disolverán en una disolución de HCl 1 M?\nb) Se dispone de tres recipientes con disoluciones de nitrato de plata, nitrato de cinc y nitrato de\nmanganeso (II). En cada uno se introduce una barra de hierro ¿en qué caso se formará una capa del\notro metal sobre la barra de hierro?\nDatos. E0(V): Fe2+/Fe = −0,44; Zn2+/Zn = −0,76; Ag+/Ag = 0,80; Cu2+/Cu = 0,34; Na+/Na = −2,71;\nMn2+/Mn = −1,18.",
+        enunciado: `A partir de los potenciales de reducción que se adjuntan, conteste razonadamente:
+a) ¿Qué metales de la lista se disolverán en una disolución de HCl 1 M?
+b) Se dispone de tres recipientes con disoluciones de nitrato de plata, nitrato de cinc y nitrato de
+manganeso (II). En cada uno se introduce una barra de hierro ¿en qué caso se formará una capa del
+otro metal sobre la barra de hierro?
+Datos. $E^0$(V): $\text{Fe}^{2+}$/Fe $= -0{,}44$; $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Ag}^+$/Ag $= 0{,}80$; $\text{Cu}^{2+}$/Cu $= 0{,}34$; $\text{Na}^+$/Na $= -2{,}71$; $\text{Mn}^{2+}$/Mn $= -1{,}18$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -105,7 +121,11 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "B.1",
-        enunciado: "Considere los elementos Mg y Cl:\na) Escriba la configuración electrónica de Mg2+ y Cl–.\nb) Indique los números cuánticos del electrón más externo del Mg.\nc) Ordene los elementos por orden creciente de tamaño y justifique la respuesta.\nd) Ordene los elementos por orden creciente de primera energía de ionización y justifique la respuesta.",
+        enunciado: `Considere los elementos Mg y Cl:
+a) Escriba la configuración electrónica de $\text{Mg}^{2+}$ y $\text{Cl}^-$.
+b) Indique los números cuánticos del electrón más externo del Mg.
+c) Ordene los elementos por orden creciente de tamaño y justifique la respuesta.
+d) Ordene los elementos por orden creciente de primera energía de ionización y justifique la respuesta.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -131,7 +151,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "En una celda electrolítica se introduce cloruro de sodio fundido, obteniéndose cloro molecular\ny sodio metálico.\na) Escriba las reacciones que se producen en el ánodo y en el cátodo de la celda electrolítica.\nb) Calcule el potencial necesario para que se produzca la electrolisis.\nc) Calcule el tiempo requerido para que se desprenda 1 mol de Cl2 si se emplea una intensidad de 10 A.\nDatos. E0 (V): Cl2/Cl− = 1,36; Na+/Na = – 2,71; F = 96485 C.",
+        enunciado: `En una celda electrolítica se introduce cloruro de sodio fundido, obteniéndose cloro molecular
+y sodio metálico.
+a) Escriba las reacciones que se producen en el ánodo y en el cátodo de la celda electrolítica.
+b) Calcule el potencial necesario para que se produzca la electrolisis.
+c) Calcule el tiempo requerido para que se desprenda 1 mol de $\text{Cl}_2$ si se emplea una intensidad de 10 A.
+Datos. $E^0$(V): $\text{Cl}_2/\text{Cl}^- = 1{,}36$; $\text{Na}^+$/Na $= -2{,}71$; $F = 96485$ C.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -192,7 +217,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "Justifique si el pH de las siguientes disoluciones es ácido, básico o neutro:\na) Cloruro de amonio 0,1 M.\nb) Acetato de sodio 0,1 M.\nc) 50 mL de ácido clorhídrico 0,2 M + 200 mL de hidróxido de sodio 0,05 M.\nd) Hidróxido de bario 0,1 M.\nDatos: Ka (ácido acético) = 1,8105; Kb (amoniaco) = 1,8105.",
+        enunciado: `Justifique si el pH de las siguientes disoluciones es ácido, básico o neutro:
+a) Cloruro de amonio 0,1 M.
+b) Acetato de sodio 0,1 M.
+c) 50 mL de ácido clorhídrico 0,2 M + 200 mL de hidróxido de sodio 0,05 M.
+d) Hidróxido de bario 0,1 M.
+Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -270,7 +300,11 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "La constante de solubilidad del dicloruro de plomo es 1,6x10 −5.\na) Formule el equilibrio de solubilidad del dicloruro de plomo en agua.\nb) Determine la solubilidad del dicloruro de plomo en agua en molaridad y gꞏL −1.\nc) Justifique cómo afecta a la solubilidad del dicloruro de plomo la adición de cloruro de potasio.\nDatos. Masas atómicas: Cl = 35,5; Pb = 207,2.",
+        enunciado: `La constante de solubilidad del dicloruro de plomo es $1{,}6 \cdot 10^{-5}$.
+a) Formule el equilibrio de solubilidad del dicloruro de plomo en agua.
+b) Determine la solubilidad del dicloruro de plomo en agua en molaridad y g·L$^{-1}$.
+c) Justifique cómo afecta a la solubilidad del dicloruro de plomo la adición de cloruro de potasio.
+Datos. Masas atómicas: Cl = 35,5; Pb = 207,2.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -283,7 +317,14 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "Se forma una pila galvánica con un electrodo de hierro y otro de plata. Teniendo en cuenta los\npotenciales de reducción estándar que se adjuntan:\na) Escriba las semirreacciones que tienen lugar en el ánodo y en el cátodo de la pila galvánica e indique el\nsentido del movimiento de los iones metálicos de las disoluciones con respecto a los electrodos metálicos.\nb) Calcule el potencial de la pila formada.\nc) Dibuje un esquema de la pila indicando sus componentes.\nd) Razone qué ocurriría si introdujéramos una cuchara de plata en una disolución de Fe 2+.\nDatos. E0 (V): Ag +/Ag = 0,80; Fe 2+/Fe = − 0,44.",
+        enunciado: `Se forma una pila galvánica con un electrodo de hierro y otro de plata. Teniendo en cuenta los
+potenciales de reducción estándar que se adjuntan:
+a) Escriba las semirreacciones que tienen lugar en el ánodo y en el cátodo de la pila galvánica e indique el
+sentido del movimiento de los iones metálicos de las disoluciones con respecto a los electrodos metálicos.
+b) Calcule el potencial de la pila formada.
+c) Dibuje un esquema de la pila indicando sus componentes.
+d) Razone qué ocurriría si introdujéramos una cuchara de plata en una disolución de $\text{Fe}^{2+}$.
+Datos. $E^0$(V): $\text{Ag}^+$/Ag $= 0{,}80$; $\text{Fe}^{2+}$/Fe $= -0{,}44$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -296,7 +337,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "Se quiere preparar 500 mL de disolución acuosa de amoniaco 0,1 M a partir de 1 L de amoniaco\ncomercial de 25% de riqueza en masa con una densidad del 0,9 gꞏcm-3.\na) Determine el volumen de amoniaco comercial necesario para preparar dicha disolución.\nb) Calcule el pH de la disolución de 500 mL de amoniaco 0,1 M inicial.\nc) Justifique con las reacciones adecuadas el pH resultante (ácido, básico o neutro) al añadir 250 mL de\nácido clorhídrico 0,2 M a la disolución de 500 mL de amoniaco 0,1 M. Considere volúmenes aditivos.\nDatos: Kb (amoniaco) = 1,8ꞏ10 -5. Masas atómicas: H = 1; N = 14.",
+        enunciado: `Se quiere preparar 500 mL de disolución acuosa de amoniaco 0,1 M a partir de 1 L de amoniaco
+comercial de 25% de riqueza en masa con una densidad del 0,9 g·cm$^{-3}$.
+a) Determine el volumen de amoniaco comercial necesario para preparar dicha disolución.
+b) Calcule el pH de la disolución de 500 mL de amoniaco 0,1 M inicial.
+c) Justifique con las reacciones adecuadas el pH resultante (ácido, básico o neutro) al añadir 250 mL de
+ácido clorhídrico 0,2 M a la disolución de 500 mL de amoniaco 0,1 M. Considere volúmenes aditivos.
+Datos: $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$. Masas atómicas: H = 1; N = 14.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -331,7 +378,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "(2 puntos) Justifique si el pH de las siguientes disoluciones acuosas es ácido, básico o neutro. Escriba\nlas reacciones correspondientes y realice cálculos sólo cuando lo considere necesario.\na) 100 mL de ácido acético 0,2 M + 200 mL de hidróxido de sodio 0,1 M.\nb) Amoniaco.\nc) 100 mL de ácido clorhídrico 0,2 M + 150 mL de hidróxido de sodio 0,2 M.\nd) Hipobromito de sodio.\nDatos. Ka (ácido acético) = 1,810–5; Ka (ácido hipobromoso) = 2,310–9; Kb (amoniaco) = 1,810–5.",
+        enunciado: `(2 puntos) Justifique si el pH de las siguientes disoluciones acuosas es ácido, básico o neutro. Escriba
+las reacciones correspondientes y realice cálculos sólo cuando lo considere necesario.
+a) 100 mL de ácido acético 0,2 M + 200 mL de hidróxido de sodio 0,1 M.
+b) Amoniaco.
+c) 100 mL de ácido clorhídrico 0,2 M + 150 mL de hidróxido de sodio 0,2 M.
+d) Hipobromito de sodio.
+Datos. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_a(\text{ácido hipobromoso}) = 2{,}3 \cdot 10^{-9}$; $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -357,7 +410,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "A.4",
-        enunciado: "(2 puntos) A 2600 K se introduce 1 mol de agua en un recipiente vacío de 100 L, alcanzándose el siguiente\nequilibrio: 2 H2O (g)  2 H2 (g) + O2 (g), con Kp = 4,210–5.\na) Calcule Kc.\nb) Calcule el número de moles de O2 en el equilibrio.\nc) Justifique cómo se modifica el equilibrio al aumentar la presión total por disminución de volumen.\nDato. R = 0,082 atm·L·mol–1·K–1.",
+        enunciado: `(2 puntos) A 2600 K se introduce 1 mol de agua en un recipiente vacío de 100 L, alcanzándose el siguiente
+equilibrio: 2 $\text{H}_2$O (g) $\rightleftharpoons$ 2 $\text{H}_2$ (g) + $\text{O}_2$ (g), con $K_p = 4{,}2 \cdot 10^{-5}$.
+a) Calcule $K_c$.
+b) Calcule el número de moles de $\text{O}_2$ en el equilibrio.
+c) Justifique cómo se modifica el equilibrio al aumentar la presión total por disminución de volumen.
+Dato. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -370,7 +428,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "A.5",
-        enunciado: "(2 puntos) Responda las siguientes cuestiones:\na) Se construye una pila galvánica con los electrodos Zn2+/Zn y Fe2+/Fe. Escriba las semirreacciones que\ntienen lugar en el ánodo y en el cátodo y calcule el potencial.\nb) Se tratan 317,5 g de zinc, de 90% de riqueza en masa, con una disolución de ácido nítrico diluido. Ajuste\nla reacción y calcule los litros de hidrógeno que se obtienen a 25 ºC y 1 atm, si el rendimiento es del\n80%.\nDatos. E0(V): Zn2+/Zn = – 0,76, Fe2+/Fe = – 0,44. R = 0,082 atm·L·mol–1·K–1. Masa atómica: Zn = 65,4.",
+        enunciado: `(2 puntos) Responda las siguientes cuestiones:
+a) Se construye una pila galvánica con los electrodos $\text{Zn}^{2+}$/Zn y $\text{Fe}^{2+}$/Fe. Escriba las semirreacciones que
+tienen lugar en el ánodo y en el cátodo y calcule el potencial.
+b) Se tratan 317,5 g de zinc, de 90% de riqueza en masa, con una disolución de ácido nítrico diluido. Ajuste
+la reacción y calcule los litros de hidrógeno que se obtienen a 25 ºC y 1 atm, si el rendimiento es del
+80%.
+Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Fe}^{2+}$/Fe $= -0{,}44$. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masa atómica: Zn = 65,4.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -435,7 +499,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "(2 puntos) Se tiene una disolución de ácido peryódico 0,10 M.\na) Calcule el pH de la disolución.\nb) Determine el volumen de la disolución del enunciado necesario para preparar 250 mL de disolución de\nácido peryódico 0,02 M.\nc) A 200 mL de la disolución del enunciado se le añaden 125 mL de hidróxido de sodio 0,16 M. Justifique si\nel pH resultante es ácido, básico o neutro.\nDato. Ka (ácido peryódico) = 2,310–2.",
+        enunciado: `(2 puntos) Se tiene una disolución de ácido peryódico 0,10 M.
+a) Calcule el pH de la disolución.
+b) Determine el volumen de la disolución del enunciado necesario para preparar 250 mL de disolución de
+ácido peryódico 0,02 M.
+c) A 200 mL de la disolución del enunciado se le añaden 125 mL de hidróxido de sodio 0,16 M. Justifique si
+el pH resultante es ácido, básico o neutro.
+Dato. $K_a(\text{ácido peryódico}) = 2{,}3 \cdot 10^{-2}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -470,7 +540,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "(2 puntos) Conteste razonadamente las siguientes preguntas para los ácidos: HNO 2, HF y HCN.\na) Suponiendo disoluciones acuosas de igual concentración de cada uno de ellos, explique cuál presenta\nmenor pH.\nb) Justifique y ordene de mayor a menor basicidad las bases conjugadas.\nc) Obtenga el pH de una disolución acuosa 0,2 M de HCN.\nDatos. Ka (HNO2) = 4,510−4; Ka (HF) = 7,110−4; Ka (HCN) = 4,910−10.",
+        enunciado: `(2 puntos) Conteste razonadamente las siguientes preguntas para los ácidos: $\text{HNO}_2$, HF y HCN.
+a) Suponiendo disoluciones acuosas de igual concentración de cada uno de ellos, explique cuál presenta
+menor pH.
+b) Justifique y ordene de mayor a menor basicidad las bases conjugadas.
+c) Obtenga el pH de una disolución acuosa 0,2 M de HCN.
+Datos. $K_a(\text{HNO}_2) = 4{,}5 \cdot 10^{-4}$; $K_a(\text{HF}) = 7{,}1 \cdot 10^{-4}$; $K_a(\text{HCN}) = 4{,}9 \cdot 10^{-10}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -483,7 +558,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "(2 puntos) Se mezclan 0,200 L de disolución de nitrato de bario 0,100 M con 0,100 L de disolución de\nfluoruro de potasio 0,400 M. Considere los volúmenes aditivos.\na) Escriba el equilibrio de solubilidad que tiene lugar, detallando el estado de todas las especies.\nb) Justifique numéricamente la precipitación del fluoruro de bario.\nc) Explique si aumenta, disminuye o no varía la solubilidad del fluoruro de bario cuando se le añade una\ndisolución de ácido fluorhídrico.\nDato. Ks (fluoruro de bario) = 1,010−6.",
+        enunciado: `(2 puntos) Se mezclan 0,200 L de disolución de nitrato de bario 0,100 M con 0,100 L de disolución de
+fluoruro de potasio 0,400 M. Considere los volúmenes aditivos.
+a) Escriba el equilibrio de solubilidad que tiene lugar, detallando el estado de todas las especies.
+b) Justifique numéricamente la precipitación del fluoruro de bario.
+c) Explique si aumenta, disminuye o no varía la solubilidad del fluoruro de bario cuando se le añade una
+disolución de ácido fluorhídrico.
+Dato. $K_s(\text{fluoruro de bario}) = 1{,}0 \cdot 10^{-6}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -496,7 +577,14 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "A.4",
-        enunciado: "(2 puntos) Se construye una pila formada por un electrodo de zinc, sumergido en una disolución 1 M de\nZn(NO3) 2 y conectado por un puente salino con un electrodo de cobre, sumergido en una disolución 1 M de\nCu(NO3) 2.\na) Ajuste las reacciones que tienen lugar en el ánodo y en el cátodo, y la reacción iónica global.\nb) Escriba la notación de la pila y detalle para qué sirve el puente salino.\nc) Indique en qué sentido circula la corriente en el conductor eléctrico.\nd) Indique en qué electrodo se deposita cobre.\nDatos. E0(V): Zn 2+/Zn = −0,76; Cu 2+/Cu = 0,34.",
+        enunciado: `(2 puntos) Se construye una pila formada por un electrodo de zinc, sumergido en una disolución 1 M de
+$\text{Zn(NO}_3)_2$ y conectado por un puente salino con un electrodo de cobre, sumergido en una disolución 1 M de
+$\text{Cu(NO}_3)_2$.
+a) Ajuste las reacciones que tienen lugar en el ánodo y en el cátodo, y la reacción iónica global.
+b) Escriba la notación de la pila y detalle para qué sirve el puente salino.
+c) Indique en qué sentido circula la corriente en el conductor eléctrico.
+d) Indique en qué electrodo se deposita cobre.
+Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Cu}^{2+}$/Cu $= 0{,}34$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -535,7 +623,13 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "(2 puntos) La ecuación de velocidad de la reacción CO(g) + NO2(g) → CO2(g) + NO(g) es v = k [NO 2] 2.\nJustifique si son verdaderas o falsas las siguientes afirmaciones:\na) La velocidad de desaparición de ambos reactivos es la misma.\nb) Las unidades de la constante de velocidad son: molꞏLꞏs−1.\nc) La velocidad de la reacción aumenta al duplicar la concentración inicial de CO(g).\nd) En esta reacción en particular, la constante de velocidad no depende de la temperatura, porque la\nreacción se produce en fase gaseosa.",
+        enunciado: `(2 puntos) La ecuación de velocidad de la reacción CO(g) + $\text{NO}_2$(g) → $\text{CO}_2$(g) + NO(g) es $v = k[\text{NO}_2]^2$.
+Justifique si son verdaderas o falsas las siguientes afirmaciones:
+a) La velocidad de desaparición de ambos reactivos es la misma.
+b) Las unidades de la constante de velocidad son: mol·L·s$^{-1}$.
+c) La velocidad de la reacción aumenta al duplicar la concentración inicial de CO(g).
+d) En esta reacción en particular, la constante de velocidad no depende de la temperatura, porque la
+reacción se produce en fase gaseosa.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -561,7 +655,14 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "(2 puntos) En un reactor de 25,00 L a 440 ºC, se introducen 5,00 mol de hidrógeno y 2,00 mol de\nnitrógeno, obteniendo 50,0 g de NH3 (g) cuando se alcanza el equilibrio 3 H2 (g) + N2 (g) ⇄ 2 NH3 (g).\na) Exprese el número de moles en equilibrio de los reactivos y del producto, en función de x (cambio de\nconcentración en mol), y calcule sus valores.\nb) Obtenga Kc y Kp.\nc) Razone cómo se modifica el equilibrio si la reacción transcurre a la misma temperatura, pero aumenta la\npresión total.\nDatos. R = 0,082 atmꞏLꞏmol –1ꞏK–1. Masas atómicas: H = 1,0; N = 14,0.",
+        enunciado: `(2 puntos) En un reactor de 25,00 L a 440 ºC, se introducen 5,00 mol de hidrógeno y 2,00 mol de
+nitrógeno, obteniendo 50,0 g de $\text{NH}_3$ (g) cuando se alcanza el equilibrio 3 $\text{H}_2$ (g) + $\text{N}_2$ (g) $\rightleftharpoons$ 2 $\text{NH}_3$ (g).
+a) Exprese el número de moles en equilibrio de los reactivos y del producto, en función de x (cambio de
+concentración en mol), y calcule sus valores.
+b) Obtenga $K_c$ y $K_p$.
+c) Razone cómo se modifica el equilibrio si la reacción transcurre a la misma temperatura, pero aumenta la
+presión total.
+Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas: H = 1,0; N = 14,0.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -596,7 +697,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "A.1",
-        enunciado: "Considere los elementos: A (Z = 9) y B (Z = 13).\na) (0,5 puntos) Escriba la configuración electrónica de cada uno.\nb) (0,5 puntos) Identifique el nombre, símbolo, grupo y periodo de cada elemento.\nc) (0,5 puntos) Justifique cuál es el elemento de menor energía de ionización.\nd) (0,5 puntos) Formule el compuesto binario formado por los elementos A y B, nómbrelo e indique el tipo\nde enlace que presenta.",
+        enunciado: `Considere los elementos: A (Z = 9) y B (Z = 13).
+a) (0,5 puntos) Escriba la configuración electrónica de cada uno.
+b) (0,5 puntos) Identifique el nombre, símbolo, grupo y periodo de cada elemento.
+c) (0,5 puntos) Justifique cuál es el elemento de menor energía de ionización.
+d) (0,5 puntos) Formule el compuesto binario formado por los elementos A y B, nómbrelo e indique el tipo
+de enlace que presenta.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -622,7 +728,15 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "Sobre una disolución que contiene iones Hg 2+ 0,010 M y Ag+ 0,020 M se va añadiendo gota a gota otra\ndisolución con iones IO 3–\n. Considere que la adición de las gotas de IO 3– no produce cambio de volumen.\na) (0,5 puntos) Escriba los equilibrios de solubilidad ajustados de las dos sales de IO 3–\n, detallando el estado\nde todas las especies.\nb) (1 punto) Escriba la expresión de Ks en función de la solubilidad y calcule la solubilidad molar de Hg(IO 3) 2\ny AgIO3.\nc) (0,5 puntos) ¿Cómo varía la solubilidad de los yodatos de mercurio y plata al añadir un exceso de yodato\na la disolución?\nDatos. Ks (Hg(IO 3) 2) = 2,0×10−19; Ks (AgIO3) = 3,0×10−8.",
+        enunciado: `Sobre una disolución que contiene iones $\text{Hg}^{2+}$ 0,010 M y $\text{Ag}^+$ 0,020 M se va añadiendo gota a gota otra
+disolución con iones $\text{IO}_3^-$. Considere que la adición de las gotas de $\text{IO}_3^-$ no produce cambio de volumen.
+a) (0,5 puntos) Escriba los equilibrios de solubilidad ajustados de las dos sales de $\text{IO}_3^-$, detallando el estado
+de todas las especies.
+b) (1 punto) Escriba la expresión de $K_s$ en función de la solubilidad y calcule la solubilidad molar de $\text{Hg(IO}_3)_2$
+y $\text{AgIO}_3$.
+c) (0,5 puntos) ¿Cómo varía la solubilidad de los yodatos de mercurio y plata al añadir un exceso de yodato
+a la disolución?
+Datos. $K_s(\text{Hg(IO}_3)_2) = 2{,}0 \cdot 10^{-19}$; $K_s(\text{AgIO}_3) = 3{,}0 \cdot 10^{-8}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -687,7 +801,15 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "El compuesto NOBr (g) descompone según la reacción:\n2 NOBr (g) ⇆ 2 NO (g) + Br 2 (g) (∆H = +16,3 kJ/mol)\nEn un matraz de 1,0 L se introducen 2,0 mol de NOBr. Cuando se alcanza el equilibrio a 25 ºC, se observa\nque se han formado 0,050 mol de Br 2. Calcule:\na) (0,5 puntos) Las concentraciones de cada especie en el equilibrio.\nb) (0,5 puntos) Kc y Kp.\nc) (0,5 puntos) La presión total.\nd) (0,5 puntos) Justifique dos formas de favorecer la descomposición del NOBr.\nDato. R = 0,082 atm·L·mol–1\n·K–1\n.",
+        enunciado: `El compuesto NOBr (g) descompone según la reacción:
+2 NOBr (g) $\rightleftharpoons$ 2 NO (g) + $\text{Br}_2$ (g) ($\Delta H = +16{,}3$ kJ/mol)
+En un matraz de 1,0 L se introducen 2,0 mol de NOBr. Cuando se alcanza el equilibrio a 25 ºC, se observa
+que se han formado 0,050 mol de $\text{Br}_2$. Calcule:
+a) (0,5 puntos) Las concentraciones de cada especie en el equilibrio.
+b) (0,5 puntos) $K_c$ y $K_p$.
+c) (0,5 puntos) La presión total.
+d) (0,5 puntos) Justifique dos formas de favorecer la descomposición del NOBr.
+Dato. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -700,7 +822,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "El agua de una piscina a la que se ha añadido ácido hipocloroso tiene un pH = 7,5.\na) (1 punto) Escriba la reacción y calcule la concentración inicial del ácido hipocloroso en la piscina.\nb) (1 punto) Si observamos que el pH de la piscina ha aumentado hasta 7,8, justifique con las reacciones\nadecuadas y sin hacer cálculos, cuál de los siguientes reactivos debemos añadir para restablecer el pH\na 7,5: NaOH; HCl; NaCl.\nDato. Ka (ácido hipocloroso) = 3,2×10 –8\n.",
+        enunciado: `El agua de una piscina a la que se ha añadido ácido hipocloroso tiene un pH = 7,5.
+a) (1 punto) Escriba la reacción y calcule la concentración inicial del ácido hipocloroso en la piscina.
+b) (1 punto) Si observamos que el pH de la piscina ha aumentado hasta 7,8, justifique con las reacciones
+adecuadas y sin hacer cálculos, cuál de los siguientes reactivos debemos añadir para restablecer el pH
+a 7,5: NaOH; HCl; NaCl.
+Dato. $K_a(\text{ácido hipocloroso}) = 3{,}2 \cdot 10^{-8}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -713,7 +840,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "Responda las siguientes cuestiones:\na) (1 punto) Dibuje el esquema de una pila utilizando como electrodos una barra de cadmio y otra de plata.\nIdentifique todos los elementos que la forman, e indique el sentido del movimiento de los electrones.\nb) (1 punto) Escriba las reacciones que tienen lugar en el cátodo y en el ánodo, y calcule el potencial de la\npila.\nDatos. E0\n(V): Cd2+ /Cd = – 0,40; Ag +\n/Ag = 0,80.",
+        enunciado: `Responda las siguientes cuestiones:
+a) (1 punto) Dibuje el esquema de una pila utilizando como electrodos una barra de cadmio y otra de plata.
+Identifique todos los elementos que la forman, e indique el sentido del movimiento de los electrones.
+b) (1 punto) Escriba las reacciones que tienen lugar en el cátodo y en el ánodo, y calcule el potencial de la
+pila.
+Datos. $E^0$(V): $\text{Cd}^{2+}$/Cd $= -0{,}40$; $\text{Ag}^+$/Ag $= 0{,}80$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -735,7 +867,15 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "A.1",
-        enunciado: "Los iones X2+ e Y– presentan las siguientes configuraciones electrónicas: X2+ (1s22s22p63s23p6) e Y–\n(1s22s22p63s23p6). Responda a las siguientes cuestiones.\na) (0,5 puntos) Justifique el número atómico de los elementos X e Y, e indique su posición (periodo y grupo) en\nel sistema periódico.\nb) (0,5 puntos) Razone qué elemento, X o Y, tiene mayor radio atómico.\nc) (0,5 puntos) Indique qué tipo de enlace presenta a temperatura ambiente cada una de las sustancias X e Y\npor separado.\nd) (0,5 puntos) Justifique la estequiometría y el tipo de enlace del compuesto que forma el elemento X con\nel elemento Y.",
+        enunciado: `Los iones $\text{X}^{2+}$ e $\text{Y}^-$ presentan las siguientes configuraciones electrónicas: $\text{X}^{2+}$ ($1s^22s^22p^63s^23p^6$) e $\text{Y}^-$
+($1s^22s^22p^63s^23p^6$). Responda a las siguientes cuestiones.
+a) (0,5 puntos) Justifique el número atómico de los elementos X e Y, e indique su posición (periodo y grupo) en
+el sistema periódico.
+b) (0,5 puntos) Razone qué elemento, X o Y, tiene mayor radio atómico.
+c) (0,5 puntos) Indique qué tipo de enlace presenta a temperatura ambiente cada una de las sustancias X e Y
+por separado.
+d) (0,5 puntos) Justifique la estequiometría y el tipo de enlace del compuesto que forma el elemento X con
+el elemento Y.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -761,7 +901,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "En un laboratorio se tiene un matraz A, que contiene 15 mL de una disolución acuosa de ácido clorhídrico\n0,050 M, y otro matraz B, que contiene 15 mL de una disolución acuosa de ácido acético 0,050 M.\na) (1 punto) Determine el pH de cada disolución por separado.\nb) (1 punto) Calcule la cantidad de agua que se debe añadir a la disolución más ácida para que el pH de las\ndos disoluciones sea el mismo. Suponga volúmenes aditivos.\nDato. Ka (ácido acético) = 1,810−5.",
+        enunciado: `En un laboratorio se tiene un matraz A, que contiene 15 mL de una disolución acuosa de ácido clorhídrico
+0,050 M, y otro matraz B, que contiene 15 mL de una disolución acuosa de ácido acético 0,050 M.
+a) (1 punto) Determine el pH de cada disolución por separado.
+b) (1 punto) Calcule la cantidad de agua que se debe añadir a la disolución más ácida para que el pH de las
+dos disoluciones sea el mismo. Suponga volúmenes aditivos.
+Dato. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -826,7 +971,14 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "Se preparan disoluciones acuosas de igual concentración de las especies: ácido nítrico, cloruro de potasio,\ncloruro de amonio e hidróxido de potasio. Responda razonadamente a las siguientes cuestiones:\na) (0,5 puntos) ¿Qué disolución tiene mayor pH?\nb) (0,5 puntos) ¿Qué disolución no cambia su pH al diluirla con agua?\nc) (0,5 puntos) ¿Qué reacción se producirá al mezclar volúmenes iguales de las disoluciones de cloruro de\namonio y de hidróxido de potasio?\nd) (0,5 puntos) El pH de la disolución formada en el apartado c), ¿será ácido, básico o neutro?\nDato. Ka (NH4+) = 6,710–10.",
+        enunciado: `Se preparan disoluciones acuosas de igual concentración de las especies: ácido nítrico, cloruro de potasio,
+cloruro de amonio e hidróxido de potasio. Responda razonadamente a las siguientes cuestiones:
+a) (0,5 puntos) ¿Qué disolución tiene mayor pH?
+b) (0,5 puntos) ¿Qué disolución no cambia su pH al diluirla con agua?
+c) (0,5 puntos) ¿Qué reacción se producirá al mezclar volúmenes iguales de las disoluciones de cloruro de
+amonio y de hidróxido de potasio?
+d) (0,5 puntos) El pH de la disolución formada en el apartado c), ¿será ácido, básico o neutro?
+Dato. $K_a(\text{NH}_4^+) = 6{,}7 \cdot 10^{-10}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -839,7 +991,12 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "En un matraz de 3,00 L se introducen 4,38 g de C2H6. Se calienta a 627 ºC y se da el proceso:\nC2H6 (g)  C2H4 (g) + H2 (g), cuya Kp vale 0,050. Calcule:\na) (0,5 puntos) La presión inicial de C2H6.\nb) (0,5 puntos) El valor de Kc.\nc) (1 punto) Las concentraciones de todos los gases en el equilibrio.\nDatos. R = 0,082 atm∙L∙mol−1∙K−1. Masas atómicas (u): H = 1,0; C = 12,0.",
+        enunciado: `En un matraz de 3,00 L se introducen 4,38 g de $\text{C}_2\text{H}_6$. Se calienta a 627 ºC y se da el proceso:
+$\text{C}_2\text{H}_6$ (g) $\rightleftharpoons$ $\text{C}_2\text{H}_4$ (g) + $\text{H}_2$ (g), cuya $K_p$ vale 0,050. Calcule:
+a) (0,5 puntos) La presión inicial de $\text{C}_2\text{H}_6$.
+b) (0,5 puntos) El valor de $K_c$.
+c) (1 punto) Las concentraciones de todos los gases en el equilibrio.
+Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas (u): H = 1,0; C = 12,0.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -900,7 +1057,15 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "La siguiente reacción es de orden 2 respecto al monóxido de carbono y de orden 1 respecto al cloro:\n2 NO (g) + Cl2 (g) → 2 NOCl (g)\na) (0,5 puntos) Escriba la ecuación de velocidad para dicha reacción, y deduzca las unidades de la constante\nde velocidad si las concentraciones se miden en mol·L–1 y el tiempo en s.\nb) (0,5 puntos) A partir de la ecuación de Arrhenius, explique cómo afecta a la velocidad de la reacción un\naumento de temperatura.\nc) (0,5 puntos) Determine la variación de energía de Gibbs estándar de la reacción a 25 ºC.\nd) (0,5 puntos) Justifique si la reacción es espontánea o no a dicha temperatura.\nDatos. A 25 ºC, Hºf (kJ·mol1): NOCl = 51,7; NO = 90,3; Sº (J·mol1·K1): NO = 210,6; Cl2 = 223,0; NOCl =\n261,7.",
+        enunciado: `La siguiente reacción es de orden 2 respecto al monóxido de carbono y de orden 1 respecto al cloro:
+2 NO (g) + $\text{Cl}_2$ (g) → 2 NOCl (g)
+a) (0,5 puntos) Escriba la ecuación de velocidad para dicha reacción, y deduzca las unidades de la constante
+de velocidad si las concentraciones se miden en mol·L$^{-1}$ y el tiempo en s.
+b) (0,5 puntos) A partir de la ecuación de Arrhenius, explique cómo afecta a la velocidad de la reacción un
+aumento de temperatura.
+c) (0,5 puntos) Determine la variación de energía de Gibbs estándar de la reacción a 25 ºC.
+d) (0,5 puntos) Justifique si la reacción es espontánea o no a dicha temperatura.
+Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ (J·mol$^{-1}$·K$^{-1}$): NO = 210,6; $\text{Cl}_2$ = 223,0; NOCl = 261,7.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -978,7 +1143,14 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "Una muestra que está contaminada con 8,310–4 mgL1 de Cd2+, se hace reaccionar con un hidróxido\npara eliminar parte del Cd2+, precipitándolo en forma de hidróxido de cadmio.\na) (0,75 puntos) Formule el equilibrio de solubilidad del hidróxido de cadmio en agua, detallando el estado\nde agregación de cada especie. Escriba la expresión de la Ks.\nb) (0,75 puntos) Calcule el pH mínimo necesario para que se inicie la precipitación del hidróxido.\nc) (0,5 puntos) Tras la precipitación de cierta cantidad de hidróxido de cadmio, se añade cloruro de cadmio\na la disolución. Razone qué efecto tiene lugar y cómo afecta a la solubilidad del hidróxido.\nDatos. Ks (hidróxido de cadmio) = 1,210−14; Masa atómica (u): Cd = 112,4.",
+        enunciado: `Una muestra que está contaminada con $8{,}3 \cdot 10^{-4}$ mg·L$^{-1}$ de $\text{Cd}^{2+}$, se hace reaccionar con un hidróxido
+para eliminar parte del $\text{Cd}^{2+}$, precipitándolo en forma de hidróxido de cadmio.
+a) (0,75 puntos) Formule el equilibrio de solubilidad del hidróxido de cadmio en agua, detallando el estado
+de agregación de cada especie. Escriba la expresión de la $K_s$.
+b) (0,75 puntos) Calcule el pH mínimo necesario para que se inicie la precipitación del hidróxido.
+c) (0,5 puntos) Tras la precipitación de cierta cantidad de hidróxido de cadmio, se añade cloruro de cadmio
+a la disolución. Razone qué efecto tiene lugar y cómo afecta a la solubilidad del hidróxido.
+Datos. $K_s(\text{hidróxido de cadmio}) = 1{,}2 \cdot 10^{-14}$; Masa atómica (u): Cd = 112,4.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -991,7 +1163,14 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "Considere los potenciales de reducción que se indican y conteste razonadamente:\na) (1 punto) Combinando dos electrodos de los especificados, justifique cuales forman la pila con el potencial\nmás positivo. Escriba las reacciones que tienen lugar en el ánodo y en el cátodo, y calcule el potencial de\ndicha pila.\nb) (1 punto) Se dispone de dos recipientes con disoluciones de nitrato de plata y nitrato de manganeso(II) y\nen cada uno se introduce una barra de hierro. ¿En cuál de ellos se formará una capa del otro metal sobre\nla barra de hierro? Razone la respuesta.\nDatos. Eº(V): Mn2+/Mn = −1,18; Fe2+/Fe = −0,44; Pb2+/Pb = −0,125; Ag+/Ag = 0,80; Au3+/Au = 1,52.",
+        enunciado: `Considere los potenciales de reducción que se indican y conteste razonadamente:
+a) (1 punto) Combinando dos electrodos de los especificados, justifique cuales forman la pila con el potencial
+más positivo. Escriba las reacciones que tienen lugar en el ánodo y en el cátodo, y calcule el potencial de
+dicha pila.
+b) (1 punto) Se dispone de dos recipientes con disoluciones de nitrato de plata y nitrato de manganeso(II) y
+en cada uno se introduce una barra de hierro. ¿En cuál de ellos se formará una capa del otro metal sobre
+la barra de hierro? Razone la respuesta.
+Datos. $E°$(V): $\text{Mn}^{2+}$/Mn $= -1{,}18$; $\text{Fe}^{2+}$/Fe $= -0{,}44$; $\text{Pb}^{2+}$/Pb $= -0{,}125$; $\text{Ag}^+$/Ag $= 0{,}80$; $\text{Au}^{3+}$/Au $= 1{,}52$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1026,7 +1205,15 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta2",
         label: "Estructura y enlace",
         numero: "2A",
-        enunciado: "Dadas las configuraciones electrónicas de tres elementos en estado fundamental X: [Ar]4s2,\nY: [Ne]3s2 3p2 y Z: [He]2s22p5:\na) (0,5 puntos) Determine su posición en la tabla periódica (periodo y grupo).\nb) (0,5 puntos) Indique nombre y símbolo de los elementos Y y Z.\nc) (0,75 puntos) Justifique si es posible o no cada una de las siguientes combinaciones de números\ncuánticos. En los casos afirmativos, razone si puede corresponder al electrón más externo de alguno de\nlos elementos del enunciado, indicando a cuál: (2, 1, 0, +1/2); (3, 0, 1, −1/2); (3, 2, 0, +1/2); (4, 4, 0, +1/2).\nd) (0,75 puntos) Defina electronegatividad y justifique cuál de los elementos X, Y o Z es el más\nelectronegativo.",
+        enunciado: `Dadas las configuraciones electrónicas de tres elementos en estado fundamental X: $[\text{Ar}]4s^2$,
+Y: $[\text{Ne}]3s^23p^2$ y Z: $[\text{He}]2s^22p^5$:
+a) (0,5 puntos) Determine su posición en la tabla periódica (periodo y grupo).
+b) (0,5 puntos) Indique nombre y símbolo de los elementos Y y Z.
+c) (0,75 puntos) Justifique si es posible o no cada una de las siguientes combinaciones de números
+cuánticos. En los casos afirmativos, razone si puede corresponder al electrón más externo de alguno de
+los elementos del enunciado, indicando a cuál: $(n=2, l=1, m_l=0, m_s=+\frac{1}{2})$; $(n=3, l=0, m_l=1, m_s=-\frac{1}{2})$; $(n=3, l=2, m_l=0, m_s=+\frac{1}{2})$; $(n=4, l=4, m_l=0, m_s=+\frac{1}{2})$.
+d) (0,75 puntos) Defina electronegatividad y justifique cuál de los elementos X, Y o Z es el más
+electronegativo.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1104,7 +1291,15 @@ export const examenesQuimica: ExamenQuimica[] =
         bloque: "Pregunta4",
         label: "Equilibrio químico",
         numero: "4B",
-        enunciado: "En un recipiente de 2,50 L se introducen 0,0200 mol de N2 y 0,0300 mol de H2. Se eleva la temperatura\nhasta 400 ºC, y la reacción N2 (g) + 3 H2 (g) ⇄ 2 NH3 (g) alcanza el equilibrio, obteniéndose ∆Hr < 0 y una\nconcentración de NH3 (g) de 0,00375 mol·L–1.\na) (1 punto) Calcule las presiones parciales de cada sustancia en el equilibrio y la presión total.\nb) (0,5 puntos) Obtenga Kp y Kc.\nc) (0,5 puntos) Justifique si el rendimiento del proceso aumenta realizándolo a menor temperatura.\nd) (0,5 puntos) Razone cómo varía la concentración de N2 cuando se añade al equilibrio un gas inerte como\nel Ar a volumen y temperatura constantes.\nDato. R = 0,0820 atm⋅L⋅mol−1⋅K−1\n.",
+        enunciado: `En un recipiente de 2,50 L se introducen 0,0200 mol de $\text{N}_2$ y 0,0300 mol de $\text{H}_2$. Se eleva la temperatura
+hasta 400 ºC, y la reacción $\text{N}_2$ (g) + 3 $\text{H}_2$ (g) $\rightleftharpoons$ 2 $\text{NH}_3$ (g) alcanza el equilibrio, obteniéndose $\Delta H_r < 0$ y una
+concentración de $\text{NH}_3$ (g) de 0,00375 mol·L$^{-1}$.
+a) (1 punto) Calcule las presiones parciales de cada sustancia en el equilibrio y la presión total.
+b) (0,5 puntos) Obtenga $K_p$ y $K_c$.
+c) (0,5 puntos) Justifique si el rendimiento del proceso aumenta realizándolo a menor temperatura.
+d) (0,5 puntos) Razone cómo varía la concentración de $\text{N}_2$ cuando se añade al equilibrio un gas inerte como
+el Ar a volumen y temperatura constantes.
+Dato. R = 0,0820 atm·L·mol$^{-1}$·K$^{-1}$.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"

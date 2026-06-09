@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, PlayCircle } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -16,7 +16,9 @@ export default function SimulacrosPage() {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [history, setHistory] = useState<SimulacroRecord[]>([])
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
+  const stats = useMemo(() => buildStats(history), [history])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -35,47 +37,56 @@ export default function SimulacrosPage() {
       .select('*')
       .eq('user_id', uid)
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(100)
     setHistory((data ?? []) as SimulacroRecord[])
   }
 
   async function createSimulacro() {
+    if (loading) return
     setLoading(true)
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-    const currentUserId = sessionData.session?.user?.id
-    if (sessionError || !currentUserId) {
-      console.error('SIMULACRO_SESSION_ERROR', sessionError)
-      setLoading(false)
-      router.push('/login')
-      return
-    }
-    setUserId(currentUserId)
+    setErrorMessage('')
 
-    const effectiveOption: SimulacroOption = subject === 'lengua' ? 'A' : option
-    const generated = generateSimulacro(subject, difficulty, effectiveOption)
-    const now = new Date().toISOString()
-    const row = {
-      id: generated.id,
-      user_id: currentUserId,
-      asignatura: subject,
-      opcion: effectiveOption,
-      dificultad: difficulty,
-      dificultad_real: generated.dificultadReal,
-      bloques: generated.blocks,
-      respuestas_parciales: {},
-      estado: 'en_progreso',
-      created_at: now,
-      updated_at: now
-    }
-    console.log('SIMULACRO_INSERT_ROW', row)
-    const { error } = await supabase.from('historial_simulacros').insert(row)
-    if (error) {
-      console.error('SIMULACRO_INSERT_ERROR', error)
-      alert('No se pudo crear el simulacro. Revisa que la tabla historial_simulacros exista en Supabase.')
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      const currentUserId = sessionData.session?.user?.id
+      if (sessionError || !currentUserId) {
+        console.error('SIMULACRO_SESSION_ERROR', sessionError)
+        setLoading(false)
+        router.push('/login')
+        return
+      }
+      setUserId(currentUserId)
+
+      const effectiveOption: SimulacroOption = subject === 'lengua' ? 'A' : option
+      const generated = generateSimulacro(subject, difficulty, effectiveOption)
+      const now = new Date().toISOString()
+      const row = {
+        id: generated.id,
+        user_id: currentUserId,
+        asignatura: subject,
+        opcion: effectiveOption,
+        dificultad: difficulty,
+        dificultad_real: generated.dificultadReal,
+        bloques: generated.blocks,
+        respuestas_parciales: {},
+        estado: 'en_progreso',
+        created_at: now,
+        updated_at: now
+      }
+      console.log('SIMULACRO_INSERT_ROW', row)
+      const { error } = await supabase.from('historial_simulacros').insert(row)
+      if (error) {
+        console.error('SIMULACRO_INSERT_ERROR', error)
+        setErrorMessage('No se pudo crear el simulacro. Revisa la conexión o la tabla historial_simulacros en Supabase.')
+        setLoading(false)
+        return
+      }
+      router.push(`/simulacros/${generated.id}`)
+    } catch (error) {
+      console.error('SIMULACRO_CREATE_ERROR', error)
+      setErrorMessage('No se pudo crear el simulacro ahora mismo. Inténtalo de nuevo en unos segundos.')
       setLoading(false)
-      return
     }
-    router.push(`/simulacros/${generated.id}`)
   }
 
   return (
@@ -85,6 +96,31 @@ export default function SimulacrosPage() {
       actions={<button onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }} className="flex items-center gap-2 rounded-2xl border border-[#dbe7fb] bg-white/90 px-4 py-2 text-sm font-black text-slate-700 shadow-[0_12px_28px_rgba(37,99,235,0.08)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"><Eye size={16} />Ver mis simulacros</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-6">
+        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-black">Tus estadísticas</h2>
+              <p className="text-sm font-semibold text-slate-500">Solo cuentan simulacros completados.</p>
+            </div>
+            {stats.lastCompleted && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Último: {SUBJECTS[stats.lastCompleted.asignatura]?.label ?? stats.lastCompleted.asignatura} · {formatScore(stats.lastCompleted.nota_final)}/10</span>}
+          </div>
+          {stats.completedCount === 0 ? (
+            <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/60 p-5 text-sm font-bold text-blue-900">
+              Todavía no hay estadísticas porque no has completado ningún simulacro. Cuando entregues el primero, Pausia calculará tu media, mejor nota y tiempo medio.
+            </div>
+          ) : (
+            <div className="grid grid-cols-5 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-1">
+              <StatCard label="Completados" value={String(stats.completedCount)} />
+              <StatCard label="Media" value={`${formatScore(stats.averageScore)}/10`} />
+              <StatCard label="Mejor nota" value={`${formatScore(stats.bestScore)}/10`} />
+              <StatCard label="Tiempo medio" value={`${stats.averageTime} min`} />
+              <StatCard label="Último" value={stats.lastCompleted ? formatDate(stats.lastCompleted.updated_at ?? stats.lastCompleted.created_at) : '-'} />
+            </div>
+          )}
+        </section>
+
+        {errorMessage && <div className="rounded-[24px] border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-900 shadow-[0_12px_30px_rgba(37,99,235,0.08)]">{errorMessage}</div>}
+
         {historyOpen && (
           <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
             <h2 className="mb-4 text-lg font-black">Mis simulacros anteriores</h2>
@@ -150,4 +186,41 @@ export default function SimulacrosPage() {
       </div>
     </SimulacroShell>
   )
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4 shadow-[0_10px_24px_rgba(37,99,235,0.06)]">
+      <p className="text-xs font-black uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
+    </div>
+  )
+}
+
+function buildStats(history: SimulacroRecord[]) {
+  const completed = history.filter(item => item.estado === 'completado' && Number.isFinite(Number(item.nota_final)))
+  const scores = completed.map(item => Number(item.nota_final))
+  const times = completed.map(item => Number(item.tiempo_empleado)).filter(Number.isFinite)
+  return {
+    completedCount: completed.length,
+    averageScore: average(scores),
+    bestScore: scores.length ? Math.max(...scores) : 0,
+    averageTime: Math.round(average(times)),
+    lastCompleted: completed[0] ?? null
+  }
+}
+
+function average(values: number[]) {
+  if (!values.length) return 0
+  return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
+function formatScore(value: any) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number.toFixed(2).replace(/\.00$/, '') : '-'
+}
+
+function formatDate(value?: string) {
+  if (!value) return '-'
+  return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(new Date(value))
 }

@@ -22,6 +22,7 @@ export default function SimulacroActivoPage() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [timeUp, setTimeUp] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -72,9 +73,9 @@ export default function SimulacroActivoPage() {
   const percentLeft = secondsLeft / TOTAL_SECONDS * 100
   const timerColor = secondsLeft > 45 * 60 ? 'bg-blue-500' : secondsLeft > 15 * 60 ? 'bg-sky-500' : 'bg-indigo-500'
 
-  async function autosave() {
+  async function autosave(nextAnswers = answers) {
     if (!record) return
-    await supabase.from('historial_simulacros').update({ respuestas_parciales: answers, updated_at: new Date().toISOString() }).eq('id', record.id)
+    await supabase.from('historial_simulacros').update({ respuestas_parciales: nextAnswers, updated_at: new Date().toISOString() }).eq('id', record.id)
   }
 
   async function handleImage(blockId: string, file?: File) {
@@ -84,31 +85,61 @@ export default function SimulacroActivoPage() {
   }
 
   async function submitExam() {
-    if (!record) return
+    if (!record || submitting) return
     setSubmitting(true)
-    await autosave()
-    const res = await fetch('/api/simulacro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        bloques: record.bloques,
-        respuestas: answers,
-        asignatura: SUBJECTS[record.asignatura].label,
-        opcion: record.opcion,
-        tiempo_empleado: elapsedMinutes,
-        simulacro_id: record.id
+    setSubmitError('')
+    const answersSnapshot = answers
+
+    try {
+      await autosave(answersSnapshot)
+      const res = await fetch('/api/simulacro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bloques: record.bloques,
+          respuestas: answersSnapshot,
+          asignatura: SUBJECTS[record.asignatura].label,
+          opcion: record.opcion,
+          tiempo_empleado: elapsedMinutes,
+          simulacro_id: record.id
+        })
       })
-    })
-    const result = await res.json()
-    await supabase.from('historial_simulacros').update({
-      resultado_json: result,
-      nota_final: result?.nota_final ?? null,
-      estado: 'completado',
-      tiempo_empleado: elapsedMinutes,
-      respuestas_parciales: answers,
-      updated_at: new Date().toISOString()
-    }).eq('id', record.id)
-    router.push(`/simulacros/${record.id}/results`)
+      const result = await safeJson(res)
+
+      if (!res.ok || result?.correction_error) {
+        await supabase.from('historial_simulacros').update({
+          resultado_json: result ?? {
+            correction_error: true,
+            estado_correccion: 'error',
+            feedback_general: 'No hemos podido corregir este simulacro ahora mismo.'
+          },
+          tiempo_empleado: elapsedMinutes,
+          respuestas_parciales: answersSnapshot,
+          updated_at: new Date().toISOString()
+        }).eq('id', record.id)
+        setSubmitError(result?.mensaje_usuario ?? result?.feedback_general ?? 'No hemos podido corregir este simulacro. Inténtalo de nuevo; tus respuestas están guardadas.')
+        setSubmitting(false)
+        return
+      }
+
+      await supabase.from('historial_simulacros').update({
+        resultado_json: result,
+        nota_final: result?.nota_final ?? null,
+        estado: 'completado',
+        tiempo_empleado: elapsedMinutes,
+        respuestas_parciales: answersSnapshot,
+        updated_at: new Date().toISOString()
+      }).eq('id', record.id)
+      router.push(`/simulacros/${record.id}/results`)
+    } catch (error) {
+      console.error('SIMULACRO_SUBMIT_ERROR', error)
+      await supabase.from('historial_simulacros').update({
+        respuestas_parciales: answersSnapshot,
+        updated_at: new Date().toISOString()
+      }).eq('id', record.id)
+      setSubmitError('No hemos podido entregar la corrección. Tus respuestas están guardadas y puedes volver a intentarlo.')
+      setSubmitting(false)
+    }
   }
 
   if (!record) {
@@ -119,7 +150,7 @@ export default function SimulacroActivoPage() {
     <SimulacroShell
       title="Examen activo"
       subtitle={`90 minutos, ${record.bloques.length} bloques y corrección completa`}
-      actions={<button onClick={() => setConfirmOpen(true)} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-4 py-2 text-sm font-black text-white shadow-[0_16px_34px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5"><Send size={16} />Entregar examen</button>}
+      actions={<button onClick={() => { setSubmitError(''); setConfirmOpen(true) }} disabled={submitting} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-4 py-2 text-sm font-black text-white shadow-[0_16px_34px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5 disabled:opacity-60"><Send size={16} />Entregar examen</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-5">
         <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
@@ -210,8 +241,9 @@ export default function SimulacroActivoPage() {
             <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-blue-700" /> : <CheckCircle2 className="text-blue-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
             <p className="text-sm font-semibold text-slate-600">Has respondido {answeredCount} de {record.bloques.length} bloques. Quedan {record.bloques.length - answeredCount} vacíos.</p>
             {submitting && <p className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm font-black text-blue-700">Pausia está corrigiendo tu simulacro...</p>}
+            {submitError && <p className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-900">{submitError}</p>}
             <div className="mt-6 flex justify-end gap-3">
-              {!timeUp && <button onClick={() => setConfirmOpen(false)} className="rounded-2xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Volver</button>}
+              {!timeUp && <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="rounded-2xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-60">Volver</button>}
               <button onClick={submitExam} disabled={submitting} className="rounded-2xl bg-blue-600 px-4 py-2 font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5 disabled:opacity-60">Ver corrección</button>
             </div>
           </div>
@@ -237,4 +269,12 @@ function fileToBase64(file: File) {
     reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
     reader.readAsDataURL(file)
   })
+}
+
+async function safeJson(response: Response) {
+  try {
+    return await response.json()
+  } catch {
+    return null
+  }
 }

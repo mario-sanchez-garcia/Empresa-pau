@@ -5,6 +5,10 @@ import { examenesQuimica } from '@/app/data/quimica'
 import { examenesLengua } from '@/app/data/lengua'
 import { examenesIngles } from '@/app/data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from '@/app/data/biologia'
+import { examenesFisicaCataluna } from '@/app/data/fisica_cataluna'
+import { examenesQuimicaCataluna } from '@/app/data/quimica_cataluna'
+import { examenesLenguaCataluna } from '@/app/data/lengua_cataluna'
+import { examenesCataluna } from '@/app/data/examenes_cataluna'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 export const SUBJECTS = {
@@ -35,8 +39,20 @@ const THEME_ORDER: Record<SimulacroSubject, string[]> = {
 
 export function generateSimulacro(subject: SimulacroSubject, difficulty: SimulacroDifficulty, option: SimulacroOption, comunidad: string) {
   const years = yearsForSubject(subject, difficulty)
+
   if (subject === 'lengua') {
     const lenguaYears = difficulty === 'Fácil' ? [2019, 2020] : difficulty === 'Media' ? [2021, 2022] : [2023, 2024]
+
+    if (comunidad === 'Cataluña') {
+      const candidates = examenesLenguaCataluna.filter(exam => lenguaYears.includes(exam.anio))
+      if (!candidates.length) return null
+      const selected = shuffle(candidates)[0]
+      const blocks = normalizeLenguaCatalunaExam(selected, option)
+      if (!blocks.length) return null
+      const dificultadReal = selected.anio >= 2023 ? 'Difícil' : selected.anio >= 2019 ? 'Media' : 'Fácil'
+      return { id: crypto.randomUUID(), blocks, dificultadReal }
+    }
+
     const candidates = examenesLengua.filter(exam => lenguaYears.includes(exam.año) && (exam.comunidad ?? 'Madrid') === comunidad)
     if (!candidates.length) return null
     const selected = shuffle(candidates)[0]
@@ -51,6 +67,7 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
   }
 
   const questions = normalizeQuestions(subject, comunidad).filter(item => years.includes(item.year) && item.option === option)
+  const distinctYears = new Set(questions.map(q => q.year)).size
   const usedYears = new Set<number>()
   const blocks: SimulacroBlock[] = []
 
@@ -66,7 +83,7 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
   if (blocks.length < 4) {
     for (const candidate of shuffle(questions)) {
       if (blocks.some(block => block.id === candidate.block.id)) continue
-      if (usedYears.has(candidate.year) && questions.length >= 4) continue
+      if (usedYears.has(candidate.year) && distinctYears >= 4) continue
       usedYears.add(candidate.year)
       blocks.push({ ...candidate.block, numero: blocks.length + 1 })
       if (blocks.length === 4) break
@@ -90,6 +107,12 @@ function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficu
 }
 
 function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {
+  if (comunidad === 'Cataluña') {
+    if (subject === 'fisica') return normalizeFisicaCatalunaItems()
+    if (subject === 'quimica') return normalizeQuimicaCatalunaItems()
+    if (subject === 'historia') return normalizeHistoriaCatalunaItems()
+    return []
+  }
   const byComunidad = (exam: any) => (exam.comunidad ?? 'Madrid') === comunidad
   if (subject === 'mates') return examenes.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'fisica') return examenesFisica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
@@ -99,6 +122,213 @@ function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {
   if (subject === 'lengua') return examenesLengua.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   return (examenesHistoria as any[]).filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
 }
+
+// ─── Cataluña: Física ────────────────────────────────────────────────────────
+
+function buildCatalunaEjercicioEnunciado(ej: any, opcion?: any): string {
+  const parts: string[] = []
+  if (opcion) {
+    if (opcion.titulo) parts.push(`**${opcion.titulo}**`)
+    if (opcion.enunciado) parts.push(opcion.enunciado)
+    for (const ap of (opcion.apartados ?? [])) {
+      parts.push(`**${ap.letra})** ${ap.enunciado}`)
+    }
+    if (opcion.datos?.length) parts.push(`*Datos:* ${(opcion.datos as string[]).join(' — ')}`)
+  } else {
+    if (ej.enunciado) parts.push(ej.enunciado)
+    if (ej.instrucciones) parts.push(`*${ej.instrucciones}*`)
+    for (const ap of (ej.apartados ?? [])) {
+      parts.push(`**${ap.letra})** ${ap.enunciado}`)
+    }
+    if (ej.datos?.length) parts.push(`*Datos:* ${(ej.datos as string[]).join(' — ')}`)
+  }
+  return parts.filter(Boolean).join('\n\n')
+}
+
+function normalizeFisicaCatalunaItems() {
+  type Item = { rawTheme: string; year: number; option: SimulacroOption; block: SimulacroBlock }
+  const items: Item[] = []
+  for (const exam of examenesFisicaCataluna) {
+    for (const ej of exam.ejercicios) {
+      if (ej.opciones && ej.opciones.length > 0) {
+        for (const op of ej.opciones) {
+          items.push({
+            rawTheme: `ej${ej.numero}`,
+            year: exam.anio,
+            option: op.opcion as SimulacroOption,
+            block: {
+              id: `${exam.id}-ej${ej.numero}-op${op.opcion}`,
+              numero: 0,
+              tema: `${ej.titulo} — Opció ${op.opcion}`,
+              year: exam.anio,
+              convocatoria: exam.convocatoria,
+              option: op.opcion as SimulacroOption,
+              puntuacion: 2.5,
+              enunciado: buildCatalunaEjercicioEnunciado(ej, op),
+              imagenes: (op.imagenes ?? ej.imagenes) as string[] | undefined,
+              requiereImagen: op.requiereRevision ?? ej.requiereRevision
+            }
+          })
+        }
+      } else {
+        // Exercise without A/B choice — available for both options
+        const enunciado = buildCatalunaEjercicioEnunciado(ej)
+        for (const opt of ['A', 'B'] as SimulacroOption[]) {
+          items.push({
+            rawTheme: `ej${ej.numero}`,
+            year: exam.anio,
+            option: opt,
+            block: {
+              id: `${exam.id}-ej${ej.numero}-${opt}`,
+              numero: 0,
+              tema: ej.titulo,
+              year: exam.anio,
+              convocatoria: exam.convocatoria,
+              option: opt,
+              puntuacion: 2.5,
+              enunciado,
+              imagenes: ej.imagenes as string[] | undefined,
+              requiereImagen: ej.requiereRevision
+            }
+          })
+        }
+      }
+    }
+  }
+  return items
+}
+
+// ─── Cataluña: Química ───────────────────────────────────────────────────────
+
+function normalizeQuimicaCatalunaItems() {
+  type Item = { rawTheme: string; year: number; option: SimulacroOption; block: SimulacroBlock }
+  const items: Item[] = []
+  for (const exam of examenesQuimicaCataluna) {
+    for (const ej of exam.ejercicios) {
+      const enunciado = buildCatalunaEjercicioEnunciado(ej)
+      for (const opt of ['A', 'B'] as SimulacroOption[]) {
+        items.push({
+          rawTheme: `ej${ej.numero}`,
+          year: exam.anio,
+          option: opt,
+          block: {
+            id: `${exam.id}-ej${ej.numero}-${opt}`,
+            numero: 0,
+            tema: ej.titulo,
+            year: exam.anio,
+            convocatoria: exam.convocatoria,
+            option: opt,
+            puntuacion: 2.5,
+            enunciado,
+            imagenes: ej.imagenes as string[] | undefined,
+            requiereImagen: ej.requiereRevision
+          }
+        })
+      }
+    }
+  }
+  return items
+}
+
+// ─── Cataluña: Historia ──────────────────────────────────────────────────────
+
+function normalizeHistoriaCatalunaItems() {
+  type Item = { rawTheme: string; year: number; option: SimulacroOption; block: SimulacroBlock }
+  const items: Item[] = []
+  for (const exam of Object.values(examenesCataluna) as any[]) {
+    for (const ej of (exam.ejercicios ?? [])) {
+      const fuente = ej.fuente
+      const textoFuente: string | undefined = fuente?.texto ?? fuente?.descripcion ?? undefined
+      const imagenes: string[] | undefined = fuente?.imagen_url ? [fuente.imagen_url] : undefined
+      const p1Parts: string[] = (ej.pregunta1 ?? []).map(
+        (p: any) => `**${p.letra})** ${p.enunciado}${p.puntos ? ` *(${p.puntos} pts)*` : ''}`
+      )
+      for (const p2 of (ej.pregunta2?.opciones ?? [])) {
+        const opt = (p2.letra as string).toUpperCase() as SimulacroOption
+        const enunciado = [
+          fuente?.titulo ? `**Fuente: ${fuente.titulo}**` : '',
+          p1Parts.join('\n\n'),
+          `**Pregunta de desarrollo — Opción ${opt}:**\n\n${p2.enunciado}`
+        ].filter(Boolean).join('\n\n')
+        items.push({
+          rawTheme: `ej${ej.numero}`,
+          year: exam.anio,
+          option: opt,
+          block: {
+            id: `cat-historia-${exam.id}-ej${ej.numero}-op${opt}`,
+            numero: 0,
+            tema: fuente?.titulo ? `Ejercicio ${ej.numero}: ${fuente.titulo}` : `Ejercicio ${ej.numero}`,
+            year: exam.anio,
+            convocatoria: 'Ordinaria',
+            option: opt,
+            puntuacion: 2.5,
+            enunciado,
+            textoFuente,
+            imagenes,
+            requiereImagen: !!imagenes
+          }
+        })
+      }
+    }
+  }
+  return items
+}
+
+// ─── Cataluña: Lengua ────────────────────────────────────────────────────────
+
+function buildLenguaCatalunaParteEnunciado(parte: any): string {
+  const parts: string[] = [parte.titulo]
+  if (parte.instrucciones) parts.push(parte.instrucciones)
+  for (const ap of (parte.apartados ?? [])) {
+    let text = `**${ap.titulo}**${ap.puntos != null ? ` *(${ap.puntos} pts)*` : ''}\n${ap.enunciado}`
+    if (ap.opciones?.length) {
+      text += '\n' + (ap.opciones as string[]).map((o, i) => `${i + 1}. ${o}`).join('\n')
+    }
+    parts.push(text)
+  }
+  return parts.filter(Boolean).join('\n\n')
+}
+
+function normalizeLenguaCatalunaExam(exam: any, option: SimulacroOption): SimulacroBlock[] {
+  const blocks: SimulacroBlock[] = []
+
+  if (exam.formato === '2025_cuatro_partes_obligatorias') {
+    for (const parte of (exam.partesObligatorias ?? [])) {
+      blocks.push({
+        id: `${exam.id}-${parte.id}`,
+        numero: 0,
+        tema: parte.titulo,
+        year: exam.anio,
+        convocatoria: exam.convocatoria,
+        option: 'A' as SimulacroOption,
+        puntuacion: 2.5,
+        enunciado: buildLenguaCatalunaParteEnunciado(parte),
+        textoFuente: parte.texto
+      })
+    }
+  } else {
+    // opciones_mas_parte_comun
+    const opcionData = (exam.opciones ?? []).find((o: any) => o.opcion === option) ?? (exam.opciones ?? [])[0]
+    const allBloques = [...(opcionData?.bloques ?? []), ...(exam.partesComunes ?? [])]
+    for (const bloque of allBloques) {
+      blocks.push({
+        id: `${exam.id}-${bloque.id}`,
+        numero: 0,
+        tema: bloque.titulo,
+        year: exam.anio,
+        convocatoria: exam.convocatoria,
+        option: (opcionData?.opcion ?? option) as SimulacroOption,
+        puntuacion: 2.5,
+        enunciado: buildLenguaCatalunaParteEnunciado(bloque),
+        textoFuente: (opcionData?.texto ?? bloque.texto) as string | undefined
+      })
+    }
+  }
+
+  return blocks.map((block, idx) => ({ ...block, numero: idx + 1 }))
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
 
 function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) {
   const option = (p.opcion ?? exam.opcion ?? 'A') as SimulacroOption

@@ -189,7 +189,7 @@ export default function SimulacroActivoPage() {
                 </div>
               </div>
               <div className="grid gap-4 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
-                {((record.asignatura === 'lengua' && index > 0) || record.asignatura === 'ingles') && block.textoFuente && (
+                {(record.asignatura === 'lengua' || record.asignatura === 'ingles') && block.textoFuente && (
                   <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
                     <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>{record.asignatura === 'ingles' ? 'Texto oficial' : 'Texto fuente oficial'}</div>
                     <MathMarkdown text={block.textoFuente} />

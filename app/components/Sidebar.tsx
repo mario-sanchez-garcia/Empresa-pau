@@ -19,6 +19,7 @@ import {
   TimerReset
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 
 export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'planning'
 export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'lengua' | 'historia'
@@ -63,6 +64,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
   const [sessionEmail, setSessionEmail] = useState('')
   const currentItem = activeItem ?? routeItem(pathname)
   const displayedEmail = email ?? sessionEmail
+  const { ccaa, setCCAA } = useCCAA()
 
   useEffect(() => {
     if (email === undefined) supabase.auth.getUser().then(({ data }) => setSessionEmail(data.user?.email ?? ''))
@@ -132,6 +134,16 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
       </nav>
 
       <div className="border-t border-[#dbe7fb] p-4">
+        <label className="mb-3 block">
+          <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Comunidad autónoma</span>
+          <select
+            value={ccaa}
+            onChange={(event) => setCCAA(event.target.value as CCAA)}
+            className="w-full rounded-xl border border-[#dbe7fb] bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+          >
+            {CCAA_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </label>
         <div className="mb-3 flex items-center gap-3">
           <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-[13px] font-black text-blue-700">{displayedEmail[0]?.toUpperCase() ?? '?'}</div>
           <div className="min-w-0">

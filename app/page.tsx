@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { examenes, examenesHistoria } from './data/examenes'
+import { examenes, examenesCatMates, examenesHistoria } from './data/examenes'
 import { examenesFisica } from './data/fisica'
 import { examenesQuimica } from './data/quimica'
 import { examenesLengua } from './data/lengua'
@@ -8,6 +8,8 @@ import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } from './lib/correctionPrompt'
 import { formatExamText } from './lib/mathFormatting'
 import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
+import CatPreguntaCard from './components/CatPreguntaCard'
+import { useCCAA } from './hooks/useCCAA'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
   ArrowUpRight,
@@ -351,6 +353,8 @@ export default function Home() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const cfg = ASIGNATURAS[asignatura]
+  const { ccaa } = useCCAA()
+  const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -369,6 +373,14 @@ export default function Home() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
+
+  useEffect(() => {
+    setTipo('Ordinaria')
+    setExamenIdx(0)
+    setBloqueIdx(0)
+    setOpcion(0)
+    reset()
+  }, [ccaa]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (seccion === 'historial') {
@@ -444,11 +456,15 @@ const examenesFiltrados =
             ? examenesLengua.filter(e => e.tipo === tipo)
             : examenesHistoria.filter(e => e.tipo === tipo)
 
-const aniosDisponibles = Array.from(
-  new Set(examenesFiltrados.map(e => e.año))
-)
+const aniosDisponibles = isCatalunaMates
+  ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
+  : Array.from(new Set(examenesFiltrados.map(e => e.año)))
 
 const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
+
+const preguntasCatFiltradas = isCatalunaMates
+  ? examenesCatMates.filter(p => p.tipo === tipo && p.year === anioSeleccionado)
+  : []
 
 const examen = examenesFiltrados.find(e => e.año === anioSeleccionado) ?? examenesFiltrados[0]
 
@@ -1077,7 +1093,7 @@ function cambiarTipo(t: Tipo) {
 }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
-                {(['Ordinaria', 'Extraordinaria', 'Modelo'] as Tipo[]).map(t => (
+                {((isCatalunaMates ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
                   <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                       {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
@@ -1144,14 +1160,14 @@ function cambiarTipo(t: Tipo) {
                   ))}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+              {!isCatalunaMates && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'lengua' ? bloquesLengua : bloquesHistoria).map((t: any, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : (t as any).pts}pts</button>
                 ))}
-              </div>
-              {opcionesDisponibles.length > 0 && (
+              </div>}
+              {!isCatalunaMates && opcionesDisponibles.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '13px', color: WARM.muted, fontWeight: 700 }}>Opcion:</span>
                   {opcionesDisponibles.map(op => (
@@ -1161,7 +1177,18 @@ function cambiarTipo(t: Tipo) {
               )}
             </div>
 
-            {preguntaActiva && (
+            {isCatalunaMates && (
+              <div className="mb-6 grid gap-5">
+                {preguntasCatFiltradas.map(pregunta => <CatPreguntaCard key={pregunta.id} pregunta={pregunta} />)}
+                {preguntasCatFiltradas.length === 0 && (
+                  <div className="rounded-3xl border border-[#dbe7fb] bg-white p-8 text-center text-sm font-bold text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+                    No hay exámenes de Cataluña disponibles para esta convocatoria y año.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isCatalunaMates && preguntaActiva && (
              <div style={{
   background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
@@ -1236,7 +1263,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-           <div style={{
+           {!isCatalunaMates && <div style={{
   background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.95)',
@@ -1272,9 +1299,9 @@ function cambiarTipo(t: Tipo) {
               <button className="campus-primary" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
                 <WandSparkles size={17} />{cargando ? 'Pausia esta corrigiendo...' : 'Corregir con Pausia'}
               </button>
-            </div>
+            </div>}
 
-            {correccion && (
+            {!isCatalunaMates && correccion && (
               <div style={{ background: WARM.surface, borderRadius: '24px', border: '2px solid ' + cfg.color, overflow: 'hidden', boxShadow: WARM.shadow }}>
                 <div style={{ padding: '16px 24px', background: cfg.color, display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>

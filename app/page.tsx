@@ -255,7 +255,7 @@ function readSubjectFromUrl(): Asignatura | null {
 }
 
 function normalizePinnedSubjects(value: unknown): Asignatura[] {
-  if (!Array.isArray(value)) return DEFAULT_PINNED_SUBJECTS
+  if (!Array.isArray(value)) return []
   const clean = value.filter((item): item is Asignatura => HOME_SUBJECTS.includes(item as Asignatura))
   return Array.from(new Set(clean)).slice(0, MAX_PINNED)
 }
@@ -427,7 +427,7 @@ export default function Home() {
   const [seccion, setSeccion] = useState<Seccion>('examenes')
   const [asignatura, setAsignatura] = useState<Asignatura>('mates')
   const [showAllSubjects, setShowAllSubjects] = useState(false)
-  const [pinnedSubjects, setPinnedSubjects] = useState<Asignatura[]>(DEFAULT_PINNED_SUBJECTS)
+  const [pinnedSubjects, setPinnedSubjects] = useState<Asignatura[]>([])
   const [pinnedLimitMsg, setPinnedLimitMsg] = useState(false)
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
@@ -460,7 +460,11 @@ export default function Home() {
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
   const isCatalunaExam = isCatalunaMates || isCatalunaHistoria
   const pinnedClean = normalizePinnedSubjects(pinnedSubjects)
-  const visibleSubjectCards = showAllSubjects ? HOME_SUBJECTS : pinnedClean
+  // Fill up to 4 with recommended subjects not already pinned (never saved to localStorage)
+  const fillerSubjects = HOME_SUBJECTS.filter(s => !pinnedClean.includes(s))
+  const visibleSubjectCards = showAllSubjects
+    ? HOME_SUBJECTS
+    : [...pinnedClean, ...fillerSubjects].slice(0, 4)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -1312,11 +1316,7 @@ function cambiarTipo(t: Tipo) {
                   Puedes anclar hasta 4 asignaturas. Desancla una para añadir otra.
                 </div>
               )}
-              {!showAllSubjects && visibleSubjectCards.length === 0 && (
-                <div style={{ padding: '28px 20px', borderRadius: '20px', border: '1px dashed #dbe7fb', background: '#f8fbff', color: WARM.muted, fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
-                  Ancla tus asignaturas favoritas para tenerlas siempre a mano.
-                </div>
-              )}
+
               <div
                 className="subject-card-grid"
                 style={!showAllSubjects ? {

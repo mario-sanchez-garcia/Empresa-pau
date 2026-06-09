@@ -331,6 +331,7 @@ export default function Home() {
   const [asignatura, setAsignatura] = useState<Asignatura>('mates')
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
+  const [catEjercicioIdx, setCatEjercicioIdx] = useState(0)
   const [bloqueIdx, setBloqueIdx] = useState(0)
   const [diaHistoriaIdx, setDiaHistoriaIdx] = useState(0)
   const [opcion, setOpcion] = useState<0|1>(0)
@@ -377,6 +378,7 @@ export default function Home() {
   useEffect(() => {
     setTipo('Ordinaria')
     setExamenIdx(0)
+    setCatEjercicioIdx(0)
     setBloqueIdx(0)
     setOpcion(0)
     reset()
@@ -465,6 +467,16 @@ const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
 const preguntasCatFiltradas = isCatalunaMates
   ? examenesCatMates.filter(p => p.tipo === tipo && p.year === anioSeleccionado)
   : []
+
+const ejerciciosDisponiblesCat = preguntasCatFiltradas.filter((pregunta, index, preguntas) =>
+  preguntas.findIndex(candidate => candidate.ejercicio === pregunta.ejercicio && candidate.opcion === pregunta.opcion) === index
+)
+
+const preguntaCatSeleccionada = ejerciciosDisponiblesCat[catEjercicioIdx]
+
+const preguntaCatActiva = preguntaCatSeleccionada
+  ? preguntasCatFiltradas.find(p => p.ejercicio === preguntaCatSeleccionada.ejercicio && p.opcion === preguntaCatSeleccionada.opcion)
+  : undefined
 
 const examen = examenesFiltrados.find(e => e.año === anioSeleccionado) ?? examenesFiltrados[0]
 
@@ -736,6 +748,7 @@ function reset() {
 function cambiarAsignatura(a: Asignatura) {
   setAsignatura(a)
   setExamenIdx(0)
+  setCatEjercicioIdx(0)
   setBloqueIdx(0)
   setDiaHistoriaIdx(0)
   setOpcion(0)
@@ -746,6 +759,7 @@ function cambiarAsignatura(a: Asignatura) {
 function cambiarTipo(t: Tipo) {
   setTipo(t)
   setExamenIdx(0)
+  setCatEjercicioIdx(0)
   setBloqueIdx(0)
   setDiaHistoriaIdx(0)
   setOpcion(0)
@@ -1109,6 +1123,7 @@ function cambiarTipo(t: Tipo) {
     key={anio}
     onClick={() => {
       setExamenIdx(i)
+      setCatEjercicioIdx(0)
       setBloqueIdx(0)
       setDiaHistoriaIdx(0)
       setOpcion(0)
@@ -1130,6 +1145,35 @@ function cambiarTipo(t: Tipo) {
   </button>
 ))}
               </div>
+              {isCatalunaMates && (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                  {ejerciciosDisponiblesCat.map((pregunta, i) => {
+                    const label = pregunta.opcion
+                      ? `Ej. ${pregunta.ejercicio} · Opción ${pregunta.opcion}`
+                      : `Ejercicio ${pregunta.ejercicio} · ${pregunta.tema}`
+                    return (
+                      <button
+                        className={catEjercicioIdx === i ? 'campus-primary' : 'campus-hover'}
+                        key={`${pregunta.ejercicio}-${pregunta.opcion ?? 'unica'}`}
+                        onClick={() => setCatEjercicioIdx(i)}
+                        style={{
+                          ...hoverVars(cfg.color, cfg.light, cfg.accent),
+                          padding: '6px 14px',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          background: catEjercicioIdx === i ? cfg.color : WARM.field,
+                          color: catEjercicioIdx === i ? '#fff' : WARM.muted,
+                          border: catEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                        } as any}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
               {(asignatura === 'historia' || asignatura === 'lengua') && versionesExamenDisponibles.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
                   <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>{asignatura === 'historia' ? 'Día:' : 'Versión:'}</span>
@@ -1179,8 +1223,8 @@ function cambiarTipo(t: Tipo) {
 
             {isCatalunaMates && (
               <div className="mb-6 grid gap-5">
-                {preguntasCatFiltradas.map(pregunta => <CatPreguntaCard key={pregunta.id} pregunta={pregunta} />)}
-                {preguntasCatFiltradas.length === 0 && (
+                {preguntaCatActiva && <CatPreguntaCard key={preguntaCatActiva.id} pregunta={preguntaCatActiva} />}
+                {!preguntaCatActiva && (
                   <div className="rounded-3xl border border-[#dbe7fb] bg-white p-8 text-center text-sm font-bold text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
                     No hay exámenes de Cataluña disponibles para esta convocatoria y año.
                   </div>

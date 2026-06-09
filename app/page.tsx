@@ -460,11 +460,12 @@ export default function Home() {
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
   const isCatalunaExam = isCatalunaMates || isCatalunaHistoria
   const pinnedClean = normalizePinnedSubjects(pinnedSubjects)
-  // Fill up to 4 with recommended subjects not already pinned (never saved to localStorage)
+  // Fill up to min 2 with recommended subjects not already pinned (never saved to localStorage)
   const fillerSubjects = HOME_SUBJECTS.filter(s => !pinnedClean.includes(s))
+  const targetCount = Math.max(pinnedClean.length, 2)
   const visibleSubjectCards = showAllSubjects
     ? HOME_SUBJECTS
-    : [...pinnedClean, ...fillerSubjects].slice(0, 4)
+    : [...pinnedClean, ...fillerSubjects].slice(0, targetCount)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {

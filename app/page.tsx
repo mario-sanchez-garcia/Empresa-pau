@@ -15,6 +15,8 @@ import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
 import { useCCAA } from './hooks/useCCAA'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   Atom,
   BarChart3,
@@ -237,6 +239,7 @@ interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'lengua', 'historia']
+const SUBJECT_CARD_VISIBLE_COUNT = 4
 
 function readHomeSectionFromUrl(): Seccion | null {
   if (typeof window === 'undefined') return null
@@ -356,6 +359,7 @@ export default function Home() {
   const [usuario, setUsuario] = useState<any>(null)
   const [seccion, setSeccion] = useState<Seccion>('examenes')
   const [asignatura, setAsignatura] = useState<Asignatura>('mates')
+  const [subjectCardStart, setSubjectCardStart] = useState(0)
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
   const [catEjercicioIdx, setCatEjercicioIdx] = useState(0)
@@ -386,6 +390,10 @@ export default function Home() {
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
   const isCatalunaExam = isCatalunaMates || isCatalunaHistoria
+  const maxSubjectCardStart = Math.max(0, HOME_SUBJECTS.length - SUBJECT_CARD_VISIBLE_COUNT)
+  const visibleSubjectCards = HOME_SUBJECTS.slice(subjectCardStart, subjectCardStart + SUBJECT_CARD_VISIBLE_COUNT)
+  const canMoveSubjectCardsBack = subjectCardStart > 0
+  const canMoveSubjectCardsNext = subjectCardStart < maxSubjectCardStart
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -404,6 +412,17 @@ export default function Home() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
+
+  useEffect(() => {
+    setSubjectCardStart((current) => {
+      const selectedIndex = HOME_SUBJECTS.indexOf(asignatura)
+      if (selectedIndex < current) return selectedIndex
+      if (selectedIndex >= current + SUBJECT_CARD_VISIBLE_COUNT) {
+        return Math.min(maxSubjectCardStart, selectedIndex - SUBJECT_CARD_VISIBLE_COUNT + 1)
+      }
+      return current
+    })
+  }, [asignatura, maxSubjectCardStart])
 
   useEffect(() => {
     setTipo('Ordinaria')
@@ -1108,6 +1127,36 @@ function cambiarTipo(t: Tipo) {
           background: var(--hover-color, #2563eb) !important;
           color: #ffffff !important;
         }
+
+        .subject-card-track {
+          display: flex;
+          gap: 16px;
+          overflow: hidden;
+          width: 100%;
+        }
+
+        .subject-card-item {
+          flex: 0 0 calc((100% - 48px) / 4);
+          min-width: 0;
+        }
+
+        @media (max-width: 920px) {
+          .subject-card-track {
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+          }
+
+          .subject-card-track::-webkit-scrollbar {
+            display: none;
+          }
+
+          .subject-card-item {
+            flex-basis: min(78vw, 260px);
+            scroll-snap-align: start;
+          }
+        }
       `}</style>
       <Sidebar
         activeItem={seccion === 'planning' ? 'plan-estudio' : seccion as SidebarItemId}
@@ -1163,21 +1212,43 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'examenes' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '980px', width: '100%', margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '16px', marginBottom: '22px' }}>
-              {(['mates', 'fisica', 'quimica', 'biologia', 'lengua', 'historia'] as Asignatura[]).map(key => {
+            <div style={{ marginBottom: '22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '10px' }}>
+                <button
+                  className="campus-hover"
+                  aria-label="Ver asignaturas anteriores"
+                  disabled={!canMoveSubjectCardsBack}
+                  onClick={() => setSubjectCardStart((current) => Math.max(0, current - 1))}
+                  style={{ width: '38px', height: '38px', borderRadius: '999px', border: '1px solid #dbe7fb', background: '#ffffff', color: WARM.muted, display: 'grid', placeItems: 'center', cursor: canMoveSubjectCardsBack ? 'pointer' : 'not-allowed', opacity: canMoveSubjectCardsBack ? 1 : 0.42 } as any}
+                >
+                  <ArrowLeft size={17} />
+                </button>
+                <button
+                  className="campus-hover"
+                  aria-label="Ver más asignaturas"
+                  disabled={!canMoveSubjectCardsNext}
+                  onClick={() => setSubjectCardStart((current) => Math.min(maxSubjectCardStart, current + 1))}
+                  style={{ width: '38px', height: '38px', borderRadius: '999px', border: '1px solid #dbe7fb', background: '#ffffff', color: WARM.muted, display: 'grid', placeItems: 'center', cursor: canMoveSubjectCardsNext ? 'pointer' : 'not-allowed', opacity: canMoveSubjectCardsNext ? 1 : 0.42 } as any}
+                >
+                  <ArrowRight size={17} />
+                </button>
+              </div>
+              <div className="subject-card-track">
+              {visibleSubjectCards.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
                 const Icon = card.icon
                 const active = asignatura === key
                 return (
+                  <div className="subject-card-item" key={key}>
                   <button
                     className="campus-subject-card"
-                    key={key}
                     onClick={() => navegarAAsignatura(key)}
                     style={{
                       ...hoverVars(val.color, val.light, val.accent),
                       position: 'relative',
                       overflow: 'hidden',
+                      width: '100%',
                       textAlign: 'left',
                       minHeight: '178px',
                       padding: '20px',
@@ -1204,8 +1275,10 @@ function cambiarTipo(t: Tipo) {
                       <Flame size={13} />{card.kicker}
                     </div>
                   </button>
+                  </div>
                 )
               })}
+              </div>
             </div>
            <div style={{
   background: 'rgba(255, 255, 255, 0.92)',
@@ -1411,10 +1484,10 @@ function cambiarTipo(t: Tipo) {
                     <Dna size={30} />
                   </div>
                   <div style={{ fontSize: '20px', fontWeight: 800, color: WARM.ink, marginBottom: '8px' }}>
-                    Biología en preparación
+                    No hay preguntas de Biología para este filtro
                   </div>
                   <p style={{ maxWidth: '620px', margin: '0 auto', color: WARM.muted, fontSize: '15px', lineHeight: 1.7, fontWeight: 600 }}>
-                    Estamos cargando ejercicios oficiales de Biología. Muy pronto podrás practicar Bioquímica, Genética, Inmunología y más con corrección de Pausia.
+                    Prueba con la convocatoria Ordinaria y los años oficiales cargados para practicar con preguntas reales de EBAU Madrid.
                   </p>
                 </div>
               ) : (

@@ -10,7 +10,7 @@ export const SUBJECTS = {
   mates: { label: 'Matemáticas II', short: 'Mates', color: '#b4232a', light: '#fff1f2', icon: Sigma, available: true },
   fisica: { label: 'Física', short: 'Física', color: '#ca8a04', light: '#fefce8', icon: Atom, available: true },
   quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
-  biologia: { label: 'Biología', short: 'Bio', color: '#047857', light: '#D1FAE5', icon: Dna, available: false },
+  biologia: { label: 'Biología', short: 'Bio', color: '#047857', light: '#D1FAE5', icon: Dna, available: true },
   lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#2563eb', light: '#eff6ff', icon: BookOpen, available: true },
   historia: { label: 'Historia de España', short: 'Historia', color: '#78350f', light: '#fff8f1', icon: Landmark, available: true }
 } as const
@@ -25,13 +25,13 @@ const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   mates: ['Algebra', 'Analisis', 'Geometria', 'Probabilidad'],
   fisica: ['Gravitacion', 'Ondas', 'Electricidad', 'Optica'],
   quimica: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4'],
-  biologia: ['Bioquimica', 'Genetica', 'Microbiologia', 'Inmunologia'],
+  biologia: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5'],
   lengua: ['Comunicacion', 'ReflexionLengua', 'EducacionLiteraria'],
   historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto', 'fuente']
 }
 
 export function generateSimulacro(subject: SimulacroSubject, difficulty: SimulacroDifficulty, option: SimulacroOption) {
-  const years = DIFFICULTIES.find(item => item.id === difficulty)?.years ?? DIFFICULTIES[1].years
+  const years = yearsForSubject(subject, difficulty)
   if (subject === 'lengua') {
     const lenguaYears = difficulty === 'Fácil' ? [2019, 2020] : difficulty === 'Media' ? [2021, 2022] : [2023, 2024]
     const candidates = examenesLengua.filter(exam => lenguaYears.includes(exam.año))
@@ -72,6 +72,15 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
   const averageYear = blocks.reduce((sum, block) => sum + block.year, 0) / Math.max(1, blocks.length)
   const dificultadReal = averageYear >= 2023 ? 'Difícil' : averageYear >= 2019 ? 'Media' : 'Fácil'
   return { id: crypto.randomUUID(), blocks, dificultadReal }
+}
+
+function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficulty) {
+  if (subject === 'biologia') {
+    if (difficulty === 'Fácil') return [2020, 2021]
+    if (difficulty === 'Media') return [2022, 2023]
+    return [2024, 2025]
+  }
+  return DIFFICULTIES.find(item => item.id === difficulty)?.years ?? DIFFICULTIES[1].years
 }
 
 function normalizeQuestions(subject: SimulacroSubject) {

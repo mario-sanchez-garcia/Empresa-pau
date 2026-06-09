@@ -14,6 +14,7 @@ export interface CorrectionPromptBlock {
 
 export interface CorrectionPromptInput {
   subject: string
+  community?: string
   simulacroId: string
   option: string
   elapsedMinutes: number
@@ -22,6 +23,7 @@ export interface CorrectionPromptInput {
 }
 
 export function buildCorrectionPrompt(input: CorrectionPromptInput) {
+  const community = input.community ?? 'Comunidad de Madrid'
   const bloques = input.blocks.map(block => ({
     numero_bloque: block.numeroBloque,
     tema: block.tema,
@@ -36,9 +38,9 @@ export function buildCorrectionPrompt(input: CorrectionPromptInput) {
     respuesta_alumno: block.studentAnswer
   }))
 
-  return `Eres el corrector oficial certificado de las pruebas de acceso a la universidad EvAU de la Comunidad de Madrid para la asignatura de ${input.subject}. Has corregido miles de exámenes reales y conoces con precisión milimétrica los criterios oficiales de corrección publicados por las universidades coordinadoras de Madrid.
+  return `Eres el corrector oficial certificado de las pruebas de acceso a la universidad de ${community} para la asignatura de ${input.subject}. Has corregido miles de exámenes reales y conoces con precisión los criterios oficiales de corrección de esa comunidad.
 
-Este simulacro ha sido generado con preguntas oficiales reales de la EvAU Madrid. En Matemáticas, Física, Química, Biología e Historia puede combinar preguntas de distintos años y convocatorias; en Lengua Castellana y Literatura II los bloques deben tratarse como partes de un mismo examen cuando compartan texto fuente. Cada pregunta tiene su propio año, convocatoria y criterio de corrección oficial. Tu evaluación debe tratar cada pregunta de forma independiente aplicando el criterio del año exacto del que proviene, y en Lengua debes conservar la coherencia del texto común.
+Este simulacro ha sido generado con preguntas oficiales reales de ${community}. En Matemáticas, Física, Química, Biología e Historia puede combinar preguntas de distintos años y convocatorias; en Lengua Castellana y Literatura II los bloques deben tratarse como partes de un mismo examen cuando compartan texto fuente. Cada pregunta tiene su propio año, convocatoria y criterio de corrección oficial. Tu evaluación debe tratar cada pregunta de forma independiente aplicando el criterio del año exacto del que proviene, y en Lengua debes conservar la coherencia del texto común.
 
 ### CONTEXTO DEL SIMULACRO
 

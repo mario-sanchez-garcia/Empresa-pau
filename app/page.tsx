@@ -3,6 +3,9 @@ import { useState, useRef, useEffect } from 'react'
 import { examenes, examenesCatMates, examenesHistoria } from './data/examenes'
 import { examenesCataluna } from './data/examenes_cataluna'
 import { examenesFisica } from './data/fisica'
+import { examenesFisicaCataluna } from './data/fisica_cataluna'
+import { examenesQuimicaCataluna } from './data/quimica_cataluna'
+import { examenesLenguaCataluna } from './data/lengua_cataluna'
 import { examenesQuimica } from './data/quimica'
 import { examenesLengua } from './data/lengua'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
@@ -12,6 +15,8 @@ import { formatExamText } from './lib/mathFormatting'
 import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
+import CatFisicaEjercicioCard from './components/CatFisicaEjercicioCard'
+import CatEjercicioCard, { type CatEjercicioView } from './components/CatEjercicioCard'
 import { useCCAA } from './hooks/useCCAA'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
@@ -433,6 +438,8 @@ export default function Home() {
   const [examenIdx, setExamenIdx] = useState(0)
   const [catEjercicioIdx, setCatEjercicioIdx] = useState(0)
   const [catHistoriaEjercicioIdx, setCatHistoriaEjercicioIdx] = useState(0)
+  const [catFisicaEjercicioIdx, setCatFisicaEjercicioIdx] = useState(0)
+  const [catAsignaturaEjercicioIdx, setCatAsignaturaEjercicioIdx] = useState(0)
   const [bloqueIdx, setBloqueIdx] = useState(0)
   const [diaHistoriaIdx, setDiaHistoriaIdx] = useState(0)
   const [opcion, setOpcion] = useState<0|1>(0)
@@ -458,7 +465,10 @@ export default function Home() {
   const { ccaa } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
-  const isCatalunaExam = isCatalunaMates || isCatalunaHistoria
+  const isCatalunaFisica = asignatura === 'fisica' && ccaa === 'Cataluña'
+  const isCatalunaQuimica = asignatura === 'quimica' && ccaa === 'Cataluña'
+  const isCatalunaLengua = asignatura === 'lengua' && ccaa === 'Cataluña'
+  const isCatalunaExam = isCatalunaMates || isCatalunaHistoria || isCatalunaFisica || isCatalunaQuimica || isCatalunaLengua
   const pinnedClean = normalizePinnedSubjects(pinnedSubjects)
   // Fill up to min 2 with recommended subjects not already pinned (never saved to localStorage)
   const fillerSubjects = HOME_SUBJECTS.filter(s => !pinnedClean.includes(s))
@@ -508,6 +518,8 @@ export default function Home() {
     setExamenIdx(0)
     setCatEjercicioIdx(0)
     setCatHistoriaEjercicioIdx(0)
+    setCatFisicaEjercicioIdx(0)
+    setCatAsignaturaEjercicioIdx(0)
     setBloqueIdx(0)
     setOpcion(0)
     reset()
@@ -610,6 +622,21 @@ const examenesFiltrados =
 
 const aniosDisponibles = isCatalunaMates
   ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
+  : isCatalunaFisica
+    ? Array.from(new Set(examenesFisicaCataluna
+        .filter(examen => examen.convocatoria === tipo.toLowerCase())
+        .map(examen => examen.anio)))
+        .sort((a, b) => b - a)
+  : isCatalunaQuimica
+    ? Array.from(new Set(examenesQuimicaCataluna
+        .filter(examen => examen.convocatoria === tipo.toLowerCase())
+        .map(examen => examen.anio)))
+        .sort((a, b) => b - a)
+  : isCatalunaLengua
+    ? Array.from(new Set(examenesLenguaCataluna
+        .filter(examen => examen.convocatoria === tipo.toLowerCase())
+        .map(examen => examen.anio)))
+        .sort((a, b) => b - a)
   : isCatalunaHistoria
     ? Object.values(examenesCataluna)
         .map((e: any) => e.anio)
@@ -627,6 +654,64 @@ const examenCatalunaActivo = examenesCatalunaDelAnio[0] ?? null
 const ejerciciosCatalunaHistoria = examenCatalunaActivo?.ejercicios ?? []
 const ejercicioCatalunaHistoriaActivo =
   ejerciciosCatalunaHistoria[catHistoriaEjercicioIdx] ?? ejerciciosCatalunaHistoria[0] ?? null
+
+const examenFisicaCatalunaActivo = isCatalunaFisica
+  ? examenesFisicaCataluna.find(examen => examen.anio === anioSeleccionado && examen.convocatoria === tipo.toLowerCase()) ?? null
+  : null
+const ejerciciosFisicaCataluna = examenFisicaCatalunaActivo?.ejercicios ?? []
+const ejercicioFisicaCatalunaActivo =
+  ejerciciosFisicaCataluna[catFisicaEjercicioIdx] ?? ejerciciosFisicaCataluna[0] ?? null
+
+const examenQuimicaCatalunaActivo = isCatalunaQuimica
+  ? examenesQuimicaCataluna.find(examen => examen.anio === anioSeleccionado && examen.convocatoria === tipo.toLowerCase()) ?? null
+  : null
+const ejerciciosQuimicaCataluna: CatEjercicioView[] = examenQuimicaCatalunaActivo?.ejercicios.map(ejercicio => ({
+  id: String(ejercicio.numero),
+  titulo: ejercicio.titulo,
+  instrucciones: ejercicio.instrucciones,
+  enunciado: ejercicio.enunciado,
+  apartados: ejercicio.apartados.map(apartado => ({ id: apartado.letra, enunciado: apartado.enunciado, puntos: apartado.puntos })),
+  datos: ejercicio.datos,
+  imagenes: ejercicio.imagenes,
+  requiereRevision: ejercicio.requiereRevision,
+})) ?? []
+
+const examenLenguaCatalunaActivo = isCatalunaLengua
+  ? examenesLenguaCataluna.find(examen => examen.anio === anioSeleccionado && examen.convocatoria === tipo.toLowerCase()) ?? null
+  : null
+const ejerciciosLenguaCataluna: CatEjercicioView[] = examenLenguaCatalunaActivo
+  ? [
+      ...(examenLenguaCatalunaActivo.opciones ?? []).flatMap(opcion => opcion.bloques.map(bloque => ({
+        id: `${opcion.opcion}-${bloque.id}`,
+        titulo: `${opcion.titulo} · ${bloque.titulo}`,
+        instrucciones: bloque.instrucciones,
+        texto: [opcion.texto, bloque.texto].filter(Boolean).join('\n\n'),
+        fuente: [opcion.fuente, bloque.fuente].filter(Boolean).join('\n\n'),
+        apartados: bloque.apartados,
+        opcion: opcion.opcion,
+      }))),
+      ...(examenLenguaCatalunaActivo.partesComunes ?? []).map(bloque => ({
+        id: `comun-${bloque.id}`,
+        titulo: `Parte común · ${bloque.titulo}`,
+        instrucciones: bloque.instrucciones,
+        texto: bloque.texto,
+        fuente: bloque.fuente,
+        apartados: bloque.apartados,
+        opcion: 'Parte común',
+      })),
+      ...(examenLenguaCatalunaActivo.partesObligatorias ?? []).map(bloque => ({
+        id: bloque.id,
+        titulo: bloque.titulo,
+        instrucciones: bloque.instrucciones,
+        texto: bloque.texto,
+        fuente: bloque.fuente,
+        apartados: bloque.apartados,
+      })),
+    ]
+  : []
+const ejerciciosAsignaturaCataluna = isCatalunaQuimica ? ejerciciosQuimicaCataluna : ejerciciosLenguaCataluna
+const ejercicioAsignaturaCatalunaActivo =
+  ejerciciosAsignaturaCataluna[catAsignaturaEjercicioIdx] ?? ejerciciosAsignaturaCataluna[0] ?? null
 
 const preguntasCatFiltradas = isCatalunaMates
   ? examenesCatMates.filter(p => p.tipo === tipo && p.year === anioSeleccionado)
@@ -975,6 +1060,8 @@ function cambiarAsignatura(a: Asignatura) {
   setExamenIdx(0)
   setCatEjercicioIdx(0)
   setCatHistoriaEjercicioIdx(0)
+  setCatFisicaEjercicioIdx(0)
+  setCatAsignaturaEjercicioIdx(0)
   setBloqueIdx(0)
   setDiaHistoriaIdx(0)
   setOpcion(0)
@@ -987,6 +1074,8 @@ function cambiarTipo(t: Tipo) {
   setExamenIdx(0)
   setCatEjercicioIdx(0)
   setCatHistoriaEjercicioIdx(0)
+  setCatFisicaEjercicioIdx(0)
+  setCatAsignaturaEjercicioIdx(0)
   setBloqueIdx(0)
   setDiaHistoriaIdx(0)
   setOpcion(0)
@@ -1425,6 +1514,8 @@ function cambiarTipo(t: Tipo) {
       setExamenIdx(i)
       setCatEjercicioIdx(0)
       setCatHistoriaEjercicioIdx(0)
+      setCatFisicaEjercicioIdx(0)
+      setCatAsignaturaEjercicioIdx(0)
       setBloqueIdx(0)
       setDiaHistoriaIdx(0)
       setOpcion(0)
@@ -1475,6 +1566,54 @@ function cambiarTipo(t: Tipo) {
                   })}
                 </div>
               )}
+              {isCatalunaFisica && ejerciciosFisicaCataluna.length > 0 && (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                  {ejerciciosFisicaCataluna.map((ejercicio, i) => (
+                    <button
+                      className={catFisicaEjercicioIdx === i ? 'campus-primary' : 'campus-hover'}
+                      key={ejercicio.numero}
+                      onClick={() => setCatFisicaEjercicioIdx(i)}
+                      style={{
+                        ...hoverVars(cfg.color, cfg.light, cfg.accent),
+                        padding: '6px 14px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        background: catFisicaEjercicioIdx === i ? cfg.color : WARM.field,
+                        color: catFisicaEjercicioIdx === i ? '#fff' : WARM.muted,
+                        border: catFisicaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                      } as any}
+                    >
+                      Ejercicio {ejercicio.numero} · {ejercicio.bloque ?? ejercicio.titulo}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {(isCatalunaQuimica || isCatalunaLengua) && ejerciciosAsignaturaCataluna.length > 0 && (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                  {ejerciciosAsignaturaCataluna.map((ejercicio, i) => (
+                    <button
+                      className={catAsignaturaEjercicioIdx === i ? 'campus-primary' : 'campus-hover'}
+                      key={ejercicio.id}
+                      onClick={() => setCatAsignaturaEjercicioIdx(i)}
+                      style={{
+                        ...hoverVars(cfg.color, cfg.light, cfg.accent),
+                        padding: '6px 14px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        background: catAsignaturaEjercicioIdx === i ? cfg.color : WARM.field,
+                        color: catAsignaturaEjercicioIdx === i ? '#fff' : WARM.muted,
+                        border: catAsignaturaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                      } as any}
+                    >
+                      {ejercicio.titulo}
+                    </button>
+                  ))}
+                </div>
+              )}
               {isCatalunaHistoria && ejerciciosCatalunaHistoria.length > 0 && (
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                   {ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => {
@@ -1508,7 +1647,7 @@ function cambiarTipo(t: Tipo) {
                   })}
                 </div>
               )}
-              {!isCatalunaHistoria && (asignatura === 'historia' || asignatura === 'lengua') && versionesExamenDisponibles.length > 1 && (
+              {!isCatalunaExam && (asignatura === 'historia' || asignatura === 'lengua') && versionesExamenDisponibles.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
                   <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>{asignatura === 'historia' ? 'Día:' : 'Versión:'}</span>
                   {versionesExamenDisponibles.map((version, i) => (
@@ -1554,6 +1693,48 @@ function cambiarTipo(t: Tipo) {
                 </div>
               )}
             </div>
+
+            {(isCatalunaQuimica || isCatalunaLengua) && (
+              <div className="mb-6 grid gap-5">
+                {(examenQuimicaCatalunaActivo || examenLenguaCatalunaActivo) && ejercicioAsignaturaCatalunaActivo ? (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '24px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
+                      <ClipboardList size={18} />
+                      {(examenQuimicaCatalunaActivo ?? examenLenguaCatalunaActivo)?.instrucciones}
+                    </div>
+                    <CatEjercicioCard
+                      key={`${(examenQuimicaCatalunaActivo ?? examenLenguaCatalunaActivo)?.id}-${ejercicioAsignaturaCatalunaActivo.id}`}
+                      asignatura={isCatalunaQuimica ? 'quimica' : 'lengua'}
+                      asignaturaLabel={isCatalunaQuimica ? 'Química PAU Cataluña' : 'Lengua Castellana PAU Cataluña'}
+                      examen={(examenQuimicaCatalunaActivo ?? examenLenguaCatalunaActivo)!}
+                      ejercicio={ejercicioAsignaturaCatalunaActivo}
+                    />
+                  </>
+                ) : (
+                  <EmptyQuestionsState subject={asignatura} />
+                )}
+              </div>
+            )}
+
+            {isCatalunaFisica && (
+              <div className="mb-6 grid gap-5">
+                {examenFisicaCatalunaActivo && ejercicioFisicaCatalunaActivo ? (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '24px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
+                      <ClipboardList size={18} />
+                      {examenFisicaCatalunaActivo.instrucciones}
+                    </div>
+                    <CatFisicaEjercicioCard
+                      key={`${examenFisicaCatalunaActivo.id}-${ejercicioFisicaCatalunaActivo.numero}`}
+                      examen={examenFisicaCatalunaActivo}
+                      ejercicio={ejercicioFisicaCatalunaActivo}
+                    />
+                  </>
+                ) : (
+                  <EmptyQuestionsState subject="fisica" />
+                )}
+              </div>
+            )}
 
             {isCatalunaHistoria && (
               <div className="mb-6 grid gap-5">

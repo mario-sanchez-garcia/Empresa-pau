@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { examenes, examenesCatMates, examenesHistoria } from './data/examenes'
+import { examenesCataluna } from './data/examenes_cataluna'
 import { examenesFisica } from './data/fisica'
 import { examenesQuimica } from './data/quimica'
 import { examenesLengua } from './data/lengua'
@@ -9,6 +10,7 @@ import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } 
 import { formatExamText } from './lib/mathFormatting'
 import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
+import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
 import { useCCAA } from './hooks/useCCAA'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
@@ -356,6 +358,8 @@ export default function Home() {
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
+  const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
+  const isCatalunaExam = isCatalunaMates || isCatalunaHistoria
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -460,9 +464,20 @@ const examenesFiltrados =
 
 const aniosDisponibles = isCatalunaMates
   ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
+  : isCatalunaHistoria
+    ? Object.values(examenesCataluna)
+        .map((e: any) => e.anio)
+        .filter((value, index, values) => values.indexOf(value) === index)
+        .sort((a, b) => b - a)
   : Array.from(new Set(examenesFiltrados.map(e => e.año)))
 
 const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
+
+const examenesCatalunaDelAnio = isCatalunaHistoria
+  ? Object.values(examenesCataluna).filter((e: any) => e.anio === anioSeleccionado)
+  : []
+
+const examenCatalunaActivo = examenesCatalunaDelAnio[0] ?? null
 
 const preguntasCatFiltradas = isCatalunaMates
   ? examenesCatMates.filter(p => p.tipo === tipo && p.year === anioSeleccionado)
@@ -1107,7 +1122,7 @@ function cambiarTipo(t: Tipo) {
 }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
-                {((isCatalunaMates ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
+                {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
                   <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                       {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
@@ -1174,7 +1189,7 @@ function cambiarTipo(t: Tipo) {
                   })}
                 </div>
               )}
-              {(asignatura === 'historia' || asignatura === 'lengua') && versionesExamenDisponibles.length > 1 && (
+              {!isCatalunaHistoria && (asignatura === 'historia' || asignatura === 'lengua') && versionesExamenDisponibles.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
                   <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>{asignatura === 'historia' ? 'Día:' : 'Versión:'}</span>
                   {versionesExamenDisponibles.map((version, i) => (
@@ -1204,14 +1219,14 @@ function cambiarTipo(t: Tipo) {
                   ))}
                 </div>
               )}
-              {!isCatalunaMates && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+              {!isCatalunaExam && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'lengua' ? bloquesLengua : bloquesHistoria).map((t: any, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>}
-              {!isCatalunaMates && opcionesDisponibles.length > 0 && (
+              {!isCatalunaExam && opcionesDisponibles.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '13px', color: WARM.muted, fontWeight: 700 }}>Opcion:</span>
                   {opcionesDisponibles.map(op => (
@@ -1220,6 +1235,31 @@ function cambiarTipo(t: Tipo) {
                 </div>
               )}
             </div>
+
+            {isCatalunaHistoria && (
+              <div className="mb-6 grid gap-5">
+                {examenCatalunaActivo ? (
+                  <>
+                    <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 text-sm font-bold text-rose-900">
+                      {examenCatalunaActivo.formato === '2025'
+                        ? '📋 Realiza los 4 ejercicios obligatorios.'
+                        : '📋 Escoge DOS de los cuatro ejercicios y responde a las preguntas correspondientes.'}
+                    </div>
+                    {examenCatalunaActivo.ejercicios.map((ejercicio: any) => (
+                      <CatHistoriaEjercicioCard
+                        key={ejercicio.numero}
+                        ejercicio={ejercicio}
+                        contexto={`PAU Cataluña Historia ${examenCatalunaActivo.anio} - ${examenCatalunaActivo.serie}`}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <div className="rounded-3xl border border-[#dbe7fb] bg-white p-8 text-center text-sm font-bold text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+                    No hay exámenes de Cataluña disponibles para este año.
+                  </div>
+                )}
+              </div>
+            )}
 
             {isCatalunaMates && (
               <div className="mb-6 grid gap-5">
@@ -1232,7 +1272,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-            {!isCatalunaMates && preguntaActiva && (
+            {!isCatalunaExam && preguntaActiva && (
              <div style={{
   background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
@@ -1307,7 +1347,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-           {!isCatalunaMates && <div style={{
+           {!isCatalunaExam && <div style={{
   background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.95)',
@@ -1345,7 +1385,7 @@ function cambiarTipo(t: Tipo) {
               </button>
             </div>}
 
-            {!isCatalunaMates && correccion && (
+            {!isCatalunaExam && correccion && (
               <div style={{ background: WARM.surface, borderRadius: '24px', border: '2px solid ' + cfg.color, overflow: 'hidden', boxShadow: WARM.shadow }}>
                 <div style={{ padding: '16px 24px', background: cfg.color, display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>

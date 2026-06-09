@@ -45,7 +45,7 @@ si son verdaderas o falsas las siguientes afirmaciones:
 a) Pertenece al grupo 17 del Sistema Periódico.
 b) Se encuentra situado en el tercer periodo.
 c) Conduce la electricidad en estado sólido.
-d) Los números cuánticos $(n=3, l=1, m_l=-2, m_s=+\frac{1}{2})$ corresponden a un electrón de este elemento.`,
+d) Los números cuánticos $(n=3, l=1, m_l=-2, m_s=+\\frac{1}{2})$ corresponden a un electrón de este elemento.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -59,12 +59,12 @@ d) Los números cuánticos $(n=3, l=1, m_l=-2, m_s=+\frac{1}{2})$ corresponden a
         label: "Pregunta 2",
         numero: "A.2",
         enunciado: `Responda a las siguientes cuestiones:
-a) Escriba los equilibrios de disociación en agua de $\text{HNO}_2$, $\text{NH}_3$ y $\text{HSO}_4^-$ e indique si actúan como ácido o
+a) Escriba los equilibrios de disociación en agua de $\\text{HNO}_2$, $\\text{NH}_3$ y $\\text{HSO}_4^-$ e indique si actúan como ácido o
 como base.
 b) Se dispone de una disolución de ácido acético 0,2 M y otra de igual concentración de ácido salicílico.
 Justifique cuál de las dos tiene menor pH.
 c) Calcule el pH de una disolución de amoniaco 0,45 M.
-Datos. $K_a(\text{HNO}_2) = 5{,}6 \cdot 10^{-4}$; $K_a(\text{HSO}_4^-) = 1{,}0 \cdot 10^{-2}$; $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_a(\text{ácido salicílico}) = 1{,}1 \cdot 10^{-3}$; $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$.`,
+Datos. $K_a(\\text{HNO}_2) = 5{,}6 \\cdot 10^{-4}$; $K_a(\\text{HSO}_4^-) = 1{,}0 \\cdot 10^{-2}$; $K_a(\\text{ácido acético}) = 1{,}8 \\cdot 10^{-5}$; $K_a(\\text{ácido salicílico}) = 1{,}1 \\cdot 10^{-3}$; $K_b(\\text{amoniaco}) = 1{,}8 \\cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -77,7 +77,11 @@ Datos. $K_a(\text{HNO}_2) = 5{,}6 \cdot 10^{-4}$; $K_a(\text{HSO}_4^-) = 1{,}0 \
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "Responda a las siguientes cuestiones:\na) Escriba dos isómeros de función con la fórmula C3H6O y nómbrelos.\nb) Formule la reacción, indique de qué tipo es, nombre la regla que se sigue para la obtención del producto\nmayoritario y nombre el reactivo y el producto: CH3−CHOH−CH2−CH3 + H2SO4/calor →\nc) Nombre y escriba la fórmula del producto de la reacción de CH3−CH2−CH2−CHO con un reductor.",
+        enunciado: `Responda a las siguientes cuestiones:
+a) Escriba dos isómeros de función con la fórmula $\\text{C}_3\\text{H}_6\\text{O}$ y nómbrelos.
+b) Formule la reacción, indique de qué tipo es, nombre la regla que se sigue para la obtención del producto
+mayoritario y nombre el reactivo y el producto: $\\text{CH}_3-\\text{CHOH}-\\text{CH}_2-\\text{CH}_3 + \\text{H}_2\\text{SO}_4/\\text{calor} \\rightarrow$
+c) Nombre y escriba la fórmula del producto de la reacción de $\\text{CH}_3-\\text{CH}_2-\\text{CH}_2-\\text{CHO}$ con un reductor.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -90,7 +94,11 @@ Datos. $K_a(\text{HNO}_2) = 5{,}6 \cdot 10^{-4}$; $K_a(\text{HSO}_4^-) = 1{,}0 \
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "A.4",
-        enunciado: "A 25ºC se produce la reacción AB3(g)  AB2(g) + 1/2 B2(g), cuando se alcanza el equilibrio\nAB3(g) está disociado al 65% con una presión total de 0,25 atm. Calcule:\na) Las presiones parciales de cada gas en el equilibrio.\nb) Kp y Kc.\nDato. R = 0,082 atm·L·mol−1·K−1.",
+        enunciado: `A 25 ºC se produce la reacción $\\text{AB}_3(g) \\rightleftharpoons \\text{AB}_2(g) + \\frac{1}{2}\\text{B}_2(g)$, cuando se alcanza el equilibrio
+$\\text{AB}_3(g)$ está disociado al 65% con una presión total de 0,25 atm. Calcule:
+a) Las presiones parciales de cada gas en el equilibrio.
+b) $K_p$ y $K_c$.
+Dato. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -108,7 +116,7 @@ a) ¿Qué metales de la lista se disolverán en una disolución de HCl 1 M?
 b) Se dispone de tres recipientes con disoluciones de nitrato de plata, nitrato de cinc y nitrato de
 manganeso (II). En cada uno se introduce una barra de hierro ¿en qué caso se formará una capa del
 otro metal sobre la barra de hierro?
-Datos. $E^0$(V): $\text{Fe}^{2+}$/Fe $= -0{,}44$; $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Ag}^+$/Ag $= 0{,}80$; $\text{Cu}^{2+}$/Cu $= 0{,}34$; $\text{Na}^+$/Na $= -2{,}71$; $\text{Mn}^{2+}$/Mn $= -1{,}18$.`,
+Datos. $E^0$(V): $\\text{Fe}^{2+}$/Fe $= -0{,}44$; $\\text{Zn}^{2+}$/Zn $= -0{,}76$; $\\text{Ag}^+$/Ag $= 0{,}80$; $\\text{Cu}^{2+}$/Cu $= 0{,}34$; $\\text{Na}^+$/Na $= -2{,}71$; $\\text{Mn}^{2+}$/Mn $= -1{,}18$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -122,7 +130,7 @@ Datos. $E^0$(V): $\text{Fe}^{2+}$/Fe $= -0{,}44$; $\text{Zn}^{2+}$/Zn $= -0{,}76
         label: "Pregunta 1",
         numero: "B.1",
         enunciado: `Considere los elementos Mg y Cl:
-a) Escriba la configuración electrónica de $\text{Mg}^{2+}$ y $\text{Cl}^-$.
+a) Escriba la configuración electrónica de $\\text{Mg}^{2+}$ y $\\text{Cl}^-$.
 b) Indique los números cuánticos del electrón más externo del Mg.
 c) Ordene los elementos por orden creciente de tamaño y justifique la respuesta.
 d) Ordene los elementos por orden creciente de primera energía de ionización y justifique la respuesta.`,
@@ -138,7 +146,14 @@ d) Ordene los elementos por orden creciente de primera energía de ionización y
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "La reacción 3 A(g) + B(g)  2 C(g) + D(g) es de orden 1 respecto de A y de orden 2\nrespecto de B.\na) Escriba la velocidad de la reacción en función de cada especie y justifique si la velocidad de\ndesaparición de B es doble de la velocidad de desaparición de A.\nb) Obtenga las unidades de la constante de velocidad.\nc) Razone si la reacción directa es endotérmica sabiendo que la energía de activación es 35 kJ y la de la\nreacción inversa es 62 kJ.\nd) Explique cómo afecta a la velocidad de reacción un aumento de volumen a temperatura constante.",
+        enunciado: `La reacción $3\\ \\text{A}(g) + \\text{B}(g) \\rightarrow 2\\ \\text{C}(g) + \\text{D}(g)$ es de orden 1 respecto de A y de orden 2
+respecto de B.
+a) Escriba la velocidad de la reacción en función de cada especie y justifique si la velocidad de
+desaparición de B es doble de la velocidad de desaparición de A.
+b) Obtenga las unidades de la constante de velocidad.
+c) Razone si la reacción directa es endotérmica sabiendo que la energía de activación es $35\\ \\text{kJ}$ y la de la
+reacción inversa es $62\\ \\text{kJ}$.
+d) Explique cómo afecta a la velocidad de reacción un aumento de volumen a temperatura constante.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -155,8 +170,8 @@ d) Ordene los elementos por orden creciente de primera energía de ionización y
 y sodio metálico.
 a) Escriba las reacciones que se producen en el ánodo y en el cátodo de la celda electrolítica.
 b) Calcule el potencial necesario para que se produzca la electrolisis.
-c) Calcule el tiempo requerido para que se desprenda 1 mol de $\text{Cl}_2$ si se emplea una intensidad de 10 A.
-Datos. $E^0$(V): $\text{Cl}_2/\text{Cl}^- = 1{,}36$; $\text{Na}^+$/Na $= -2{,}71$; $F = 96485$ C.`,
+c) Calcule el tiempo requerido para que se desprenda 1 mol de $\\text{Cl}_2$ si se emplea una intensidad de 10 A.
+Datos. $E^0$(V): $\\text{Cl}_2/\\text{Cl}^- = 1{,}36$; $\\text{Na}^+$/Na $= -2{,}71$; $F = 96485$ C.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -169,7 +184,12 @@ Datos. $E^0$(V): $\text{Cl}_2/\text{Cl}^- = 1{,}36$; $\text{Na}^+$/Na $= -2{,}71
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "Se dispone de H2SO4 comercial de 96,4% de riqueza en masa y densidad 1,84 g·mL–1.\nCalcule:\na) El volumen de ácido comercial que se necesita para preparar 200 mL de disolución 0,5 M.\nb) El pH de la disolución resultante de mezclar 25 mL de disolución 0,1 M de H2SO4 con 50 mL de\ndisolución 0,5 M de NaOH. Suponga los volúmenes aditivos.\nDatos. Masas atómicas: H = 1; O =16; S = 32.",
+        enunciado: `Se dispone de $\\text{H}_2\\text{SO}_4$ comercial de 96,4% de riqueza en masa y densidad $1{,}84\\ \\text{g}\\cdot\\text{mL}^{-1}$.
+Calcule:
+a) El volumen de ácido comercial que se necesita para preparar 200 mL de disolución 0,5 M.
+b) El pH de la disolución resultante de mezclar 25 mL de disolución 0,1 M de $\\text{H}_2\\text{SO}_4$ con 50 mL de
+disolución 0,5 M de $\\text{NaOH}$. Suponga los volúmenes aditivos.
+Datos. Masas atómicas: H = 1; O =16; S = 32.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -182,7 +202,12 @@ Datos. $E^0$(V): $\text{Cl}_2/\text{Cl}^- = 1{,}36$; $\text{Na}^+$/Na $= -2{,}71
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "Responda a las siguientes cuestiones\na) Nombre los siguientes compuestos: CH2OH−CH2−CH=CH−CH3 y CH3−CO−CH2−CO−CH3.\nb) Formule la reacción, indique de qué tipo es, y nombre el reactivo y el producto obtenido:\nCH3−CHOH−CH2−CH2−CH2−CH3 + KMnO4/H+→\nc) Formule y nombre el monómero que ha dado lugar al siguiente polímero: −(CH2−CH2)n−. Nombre el tipo\nde reacción.",
+        enunciado: `Responda a las siguientes cuestiones:
+a) Nombre los siguientes compuestos: $\\text{CH}_2\\text{OH}-\\text{CH}_2-\\text{CH}=\\text{CH}-\\text{CH}_3$ y $\\text{CH}_3-\\text{CO}-\\text{CH}_2-\\text{CO}-\\text{CH}_3$.
+b) Formule la reacción, indique de qué tipo es, y nombre el reactivo y el producto obtenido:
+$\\text{CH}_3-\\text{CHOH}-\\text{CH}_2-\\text{CH}_2-\\text{CH}_2-\\text{CH}_3 + \\text{KMnO}_4/\\text{H}^+ \\rightarrow$
+c) Formule y nombre el monómero que ha dado lugar al siguiente polímero: $-(\\text{CH}_2-\\text{CH}_2)_n-$. Nombre el tipo
+de reacción.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2018.pdf"
@@ -222,7 +247,7 @@ a) Cloruro de amonio 0,1 M.
 b) Acetato de sodio 0,1 M.
 c) 50 mL de ácido clorhídrico 0,2 M + 200 mL de hidróxido de sodio 0,05 M.
 d) Hidróxido de bario 0,1 M.
-Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$.`,
+Datos: $K_a(\\text{ácido acético}) = 1{,}8 \\cdot 10^{-5}$; $K_b(\\text{amoniaco}) = 1{,}8 \\cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -235,7 +260,12 @@ Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "Formule las reacciones propuestas, indicando de qué tipo son y nombrando los productos\nmayoritarios obtenidos:\na) 2-metilbut-2-eno + HBr \nb) Etanol + H2SO4/ Calor \nc) Butan-1-ol + HCl \nd) Ácido etanoico + Propan-1-ol ",
+        enunciado: `Formule las reacciones propuestas, indicando de qué tipo son y nombrando los productos
+mayoritarios obtenidos:
+a) 2-metilbut-2-eno + $\\text{HBr}$ $\\rightarrow$
+b) Etanol + $\\text{H}_2\\text{SO}_4$/calor $\\rightarrow$
+c) Butan-1-ol + $\\text{HCl}$ $\\rightarrow$
+d) Ácido etanoico + propan-1-ol $\\rightarrow$`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -248,7 +278,14 @@ Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "A.4",
-        enunciado: "En un reactor químico a 182 ºC y 1 atm de presión el SbCl 5 está disociado en un 29,2% según\nla reacción: SbCl 5(g)  SbCl 3(g) + Cl 2(g).\na) Calcule las presiones parciales de cada gas en el equilibrio.\nb) Calcule las constantes de equilibrio K p y Kc .\nc) Justifique si se modifica el equilibrio al realizar la reacción a la misma temperatura y a una presión\nmenor de 1 atm.\nd) Indique si se modifica el equilibrio al añadir un catalizador. Justifique la respuesta.\nDatos: R = 0,082 atmꞏLꞏmol −1ꞏK−1.",
+        enunciado: `En un reactor químico a 182 ºC y 1 atm de presión el $\\text{SbCl}_5$ está disociado en un 29,2% según
+la reacción: $\\text{SbCl}_5(g) \\rightleftharpoons \\text{SbCl}_3(g) + \\text{Cl}_2(g)$.
+a) Calcule las presiones parciales de cada gas en el equilibrio.
+b) Calcule las constantes de equilibrio $K_p$ y $K_c$.
+c) Justifique si se modifica el equilibrio al realizar la reacción a la misma temperatura y a una presión
+menor de 1 atm.
+d) Indique si se modifica el equilibrio al añadir un catalizador. Justifique la respuesta.
+Datos: $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -261,7 +298,13 @@ Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "A.5",
-        enunciado: "El estaño metálico es oxidado por el ácido nítrico a óxido de estaño (IV) obteniéndose además\nóxido de nitrógeno (IV) y agua.\na) Escriba y ajuste las semirreacciones de oxidación y reducción que tienen lugar.\nb) Escriba la reacción iónica y la molecular global ajustadas por el método del ion electrón.\nc) Calcule la masa obtenida de óxido de estaño (IV) si se hace reaccionar 100 g de estaño de riqueza 70%\nen masa, sabiendo que el rendimiento de la reacción es del 90%.\nDatos: R = 0,082 atmꞏLꞏmol –1ꞏK–1; Masas atómicas: O = 16,0; Sn = 118,7.",
+        enunciado: `El estaño metálico es oxidado por el ácido nítrico a óxido de estaño (IV) obteniéndose además
+óxido de nitrógeno (IV) y agua.
+a) Escriba y ajuste las semirreacciones de oxidación y reducción que tienen lugar.
+b) Escriba la reacción iónica y la molecular global ajustadas por el método del ion electrón.
+c) Calcule la masa obtenida de óxido de estaño (IV) si se hace reaccionar 100 g de estaño de riqueza 70%
+en masa, sabiendo que el rendimiento de la reacción es del 90%.
+Datos: $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$; Masas atómicas: O = 16,0; Sn = 118,7.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -274,7 +317,11 @@ Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "B.1",
-        enunciado: "Para las moléculas BCl 3 y PCl 3.\na) Justifique el número de pares de electrones enlazantes y de pares libres del átomo central.\nb) Indique su geometría molecular y la hibridación que presenta el átomo central.\nc) Explique su polaridad.\nd) Indique las fuerzas intermoleculares que presentan.",
+        enunciado: `Para las moléculas $\\text{BCl}_3$ y $\\text{PCl}_3$.
+a) Justifique el número de pares de electrones enlazantes y de pares libres del átomo central.
+b) Indique su geometría molecular y la hibridación que presenta el átomo central.
+c) Explique su polaridad.
+d) Indique las fuerzas intermoleculares que presentan.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -287,7 +334,12 @@ Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "Responda las siguientes cuestiones:\na) Formule el 1−cloropropano y nombre los isómeros de posición posibles.\nb) Escriba la reacción de sustitución de cada uno de los isómeros del apartado a) con NaOH. Nombre los\nproductos obtenidos.\nc) Escriba las fórmulas semidesarrolladas de los compuestos orgánicos: 2−metilbutilamina, etanoato de\nmetilo y ácido 2,3−dihidroxibutanoico.",
+        enunciado: `Responda las siguientes cuestiones:
+a) Formule el 1-cloropropano y nombre los isómeros de posición posibles.
+b) Escriba la reacción de sustitución de cada uno de los isómeros del apartado a) con $\\text{NaOH}$. Nombre los
+productos obtenidos.
+c) Escriba las fórmulas semidesarrolladas de los compuestos orgánicos: 2-metilbutilamina, etanoato de
+metilo y ácido 2,3-dihidroxibutanoico.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -300,7 +352,7 @@ Datos: $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_b(\text{amoniaco}
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: `La constante de solubilidad del dicloruro de plomo es $1{,}6 \cdot 10^{-5}$.
+        enunciado: `La constante de solubilidad del dicloruro de plomo es $1{,}6 \\cdot 10^{-5}$.
 a) Formule el equilibrio de solubilidad del dicloruro de plomo en agua.
 b) Determine la solubilidad del dicloruro de plomo en agua en molaridad y g·L$^{-1}$.
 c) Justifique cómo afecta a la solubilidad del dicloruro de plomo la adición de cloruro de potasio.
@@ -323,8 +375,8 @@ a) Escriba las semirreacciones que tienen lugar en el ánodo y en el cátodo de 
 sentido del movimiento de los iones metálicos de las disoluciones con respecto a los electrodos metálicos.
 b) Calcule el potencial de la pila formada.
 c) Dibuje un esquema de la pila indicando sus componentes.
-d) Razone qué ocurriría si introdujéramos una cuchara de plata en una disolución de $\text{Fe}^{2+}$.
-Datos. $E^0$(V): $\text{Ag}^+$/Ag $= 0{,}80$; $\text{Fe}^{2+}$/Fe $= -0{,}44$.`,
+d) Razone qué ocurriría si introdujéramos una cuchara de plata en una disolución de $\\text{Fe}^{2+}$.
+Datos. $E^0$(V): $\\text{Ag}^+$/Ag $= 0{,}80$; $\\text{Fe}^{2+}$/Fe $= -0{,}44$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -343,7 +395,7 @@ a) Determine el volumen de amoniaco comercial necesario para preparar dicha diso
 b) Calcule el pH de la disolución de 500 mL de amoniaco 0,1 M inicial.
 c) Justifique con las reacciones adecuadas el pH resultante (ácido, básico o neutro) al añadir 250 mL de
 ácido clorhídrico 0,2 M a la disolución de 500 mL de amoniaco 0,1 M. Considere volúmenes aditivos.
-Datos: $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$. Masas atómicas: H = 1; N = 14.`,
+Datos: $K_b(\\text{amoniaco}) = 1{,}8 \\cdot 10^{-5}$. Masas atómicas: H = 1; N = 14.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2019.pdf"
@@ -365,7 +417,12 @@ Datos: $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$. Masas atómicas: H = 1; N =
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "A.1",
-        enunciado: "(2 puntos) Considere los elementos aluminio y magnesio.\na) Escriba la configuración electrónica de cada elemento.\nb) Justifique qué elemento presenta mayor radio atómico.\nc) Explique si la segunda energía de ionización del aluminio es mayor, igual o menor que la primera.\nd) Sabiendo que la primera energía de ionización del magnesio es 738,1 kJ·mol–1, razone si es posible\nionizar un mol de átomos de magnesio gaseosos con una energía de 500 kJ.",
+        enunciado: `(2 puntos) Considere los elementos aluminio y magnesio.
+a) Escriba la configuración electrónica de cada elemento.
+b) Justifique qué elemento presenta mayor radio atómico.
+c) Explique si la segunda energía de ionización del aluminio es mayor, igual o menor que la primera.
+d) Sabiendo que la primera energía de ionización del magnesio es $738{,}1\\ \\text{kJ}\\cdot\\text{mol}^{-1}$, razone si es posible
+ionizar un mol de átomos de magnesio gaseosos con una energía de $500\\ \\text{kJ}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -384,7 +441,7 @@ a) 100 mL de ácido acético 0,2 M + 200 mL de hidróxido de sodio 0,1 M.
 b) Amoniaco.
 c) 100 mL de ácido clorhídrico 0,2 M + 150 mL de hidróxido de sodio 0,2 M.
 d) Hipobromito de sodio.
-Datos. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_a(\text{ácido hipobromoso}) = 2{,}3 \cdot 10^{-9}$; $K_b(\text{amoniaco}) = 1{,}8 \cdot 10^{-5}$.`,
+Datos. $K_a(\\text{ácido acético}) = 1{,}8 \\cdot 10^{-5}$; $K_a(\\text{ácido hipobromoso}) = 2{,}3 \\cdot 10^{-9}$; $K_b(\\text{amoniaco}) = 1{,}8 \\cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -397,7 +454,12 @@ Datos. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_a(\text{ácido hi
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: "(2 puntos) Formule las reacciones propuestas, indique de qué tipo son y nombre los productos orgánicos\nobtenidos:\na) But−2−eno + H2/ catalizador \nb) Pentan−1−ol + KMnO4 (oxidante fuerte) \nc) 2−clorobutano + hidróxido de sodio (medio acuoso)\nd) Ácido propanoico + metanol (medio ácido) ",
+        enunciado: `(2 puntos) Formule las reacciones propuestas, indique de qué tipo son y nombre los productos orgánicos
+obtenidos:
+a) But-2-eno + $\\text{H}_2$/catalizador $\\rightarrow$
+b) Pentan-1-ol + $\\text{KMnO}_4$ (oxidante fuerte) $\\rightarrow$
+c) 2-clorobutano + hidróxido de sodio (medio acuoso) $\\rightarrow$
+d) Ácido propanoico + metanol (medio ácido) $\\rightarrow$`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -411,9 +473,9 @@ Datos. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$; $K_a(\text{ácido hi
         label: "Pregunta 4",
         numero: "A.4",
         enunciado: `(2 puntos) A 2600 K se introduce 1 mol de agua en un recipiente vacío de 100 L, alcanzándose el siguiente
-equilibrio: 2 $\text{H}_2$O (g) $\rightleftharpoons$ 2 $\text{H}_2$ (g) + $\text{O}_2$ (g), con $K_p = 4{,}2 \cdot 10^{-5}$.
+equilibrio: 2 $\\text{H}_2$O (g) $\\rightleftharpoons$ 2 $\\text{H}_2$ (g) + $\\text{O}_2$ (g), con $K_p = 4{,}2 \\cdot 10^{-5}$.
 a) Calcule $K_c$.
-b) Calcule el número de moles de $\text{O}_2$ en el equilibrio.
+b) Calcule el número de moles de $\\text{O}_2$ en el equilibrio.
 c) Justifique cómo se modifica el equilibrio al aumentar la presión total por disminución de volumen.
 Dato. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$.`,
         puntuacion: 2,
@@ -429,12 +491,12 @@ Dato. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$.`,
         label: "Pregunta 5",
         numero: "A.5",
         enunciado: `(2 puntos) Responda las siguientes cuestiones:
-a) Se construye una pila galvánica con los electrodos $\text{Zn}^{2+}$/Zn y $\text{Fe}^{2+}$/Fe. Escriba las semirreacciones que
+a) Se construye una pila galvánica con los electrodos $\\text{Zn}^{2+}$/Zn y $\\text{Fe}^{2+}$/Fe. Escriba las semirreacciones que
 tienen lugar en el ánodo y en el cátodo y calcule el potencial.
 b) Se tratan 317,5 g de zinc, de 90% de riqueza en masa, con una disolución de ácido nítrico diluido. Ajuste
 la reacción y calcule los litros de hidrógeno que se obtienen a 25 ºC y 1 atm, si el rendimiento es del
 80%.
-Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Fe}^{2+}$/Fe $= -0{,}44$. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masa atómica: Zn = 65,4.`,
+Datos. $E^0$(V): $\\text{Zn}^{2+}$/Zn $= -0{,}76$; $\\text{Fe}^{2+}$/Fe $= -0{,}44$. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masa atómica: Zn = 65,4.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -460,7 +522,11 @@ Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Fe}^{2+}$/Fe $= -0{,}44
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "(2 puntos) Formule y nombre los reactivos y todos los productos orgánicos de las siguientes reacciones:\na) Deshidratación de pentan−2−ol con ácido sulfúrico y calor.\nb) Reducción de propanona.\nc) CH3−CHOH−CH3 + CH3−COOH \nd) CH3−CH=C(CH3)−CH2−CH3 + HCl →",
+        enunciado: `(2 puntos) Formule y nombre los reactivos y todos los productos orgánicos de las siguientes reacciones:
+a) Deshidratación de pentan-2-ol con ácido sulfúrico y calor.
+b) Reducción de propanona.
+c) $\\text{CH}_3-\\text{CHOH}-\\text{CH}_3 + \\text{CH}_3-\\text{COOH} \\rightarrow$
+d) $\\text{CH}_3-\\text{CH}=\\text{C}(\\text{CH}_3)-\\text{CH}_2-\\text{CH}_3 + \\text{HCl} \\rightarrow$`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -473,7 +539,12 @@ Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Fe}^{2+}$/Fe $= -0{,}44
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "(2 puntos) Una disolución saturada de hidróxido de calcio presenta una solubilidad de 0,96 g·L–1.\na) Formule el equilibrio de solubilidad, indicando el estado de cada especie.\nb) Calcule el producto de solubilidad del hidróxido de calcio.\nc) Calcule el pH de la disolución.\nd) ¿Cómo afecta a la solubilidad del hidróxido de calcio un aumento de pH?\nDatos. Masas atómicas: H = 1,0; O = 16,0; Ca = 40,1.",
+        enunciado: `(2 puntos) Una disolución saturada de hidróxido de calcio presenta una solubilidad de $0{,}96\\ \\text{g}\\cdot\\text{L}^{-1}$.
+a) Formule el equilibrio de solubilidad, indicando el estado de cada especie.
+b) Calcule el producto de solubilidad del hidróxido de calcio.
+c) Calcule el pH de la disolución.
+d) ¿Cómo afecta a la solubilidad del hidróxido de calcio un aumento de pH?
+Datos. Masas atómicas: H = 1,0; O = 16,0; Ca = 40,1.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -486,7 +557,14 @@ Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Fe}^{2+}$/Fe $= -0{,}44
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: "(2 puntos) Se hace reaccionar una disolución de cloruro de sodio con permanganato de potasio en medio\nácido sulfúrico obteniéndose sulfato de manganeso (II), cloro, sulfato de potasio, sulfato de sodio y agua.\na) Ajuste por el método del ion-electrón las semirreacciones de oxidación y reducción que tienen lugar, e\nindique las especies que actúan como oxidante y como reductora.\nb) Ajuste las reacciones iónica y molecular global.\nc) Calcule la masa, en kg, de cloruro de sodio necesaria para obtener 1 m3 de cloro, medido a 750 mm de\nHg y 30 ºC, sabiendo que el rendimiento de la reacción es del 80%.\nDatos. Masas atómicas: Na = 23,0; Cl = 35,5. R = 0,082 atm·L·mol–1·K–1.",
+        enunciado: `(2 puntos) Se hace reaccionar una disolución de cloruro de sodio con permanganato de potasio en medio
+ácido sulfúrico obteniéndose sulfato de manganeso (II), cloro, sulfato de potasio, sulfato de sodio y agua.
+a) Ajuste por el método del ion-electrón las semirreacciones de oxidación y reducción que tienen lugar, e
+indique las especies que actúan como oxidante y como reductora.
+b) Ajuste las reacciones iónica y molecular global.
+c) Calcule la masa, en kg, de cloruro de sodio necesaria para obtener $1\\ \\text{m}^3$ de cloro, medido a 750 mm de
+Hg y 30 ºC, sabiendo que el rendimiento de la reacción es del 80%.
+Datos. Masas atómicas: Na = 23,0; Cl = 35,5. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -505,7 +583,7 @@ b) Determine el volumen de la disolución del enunciado necesario para preparar 
 ácido peryódico 0,02 M.
 c) A 200 mL de la disolución del enunciado se le añaden 125 mL de hidróxido de sodio 0,16 M. Justifique si
 el pH resultante es ácido, básico o neutro.
-Dato. $K_a(\text{ácido peryódico}) = 2{,}3 \cdot 10^{-2}$.`,
+Dato. $K_a(\\text{ácido peryódico}) = 2{,}3 \\cdot 10^{-2}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2020.pdf"
@@ -540,12 +618,12 @@ Dato. $K_a(\text{ácido peryódico}) = 2{,}3 \cdot 10^{-2}$.`,
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: `(2 puntos) Conteste razonadamente las siguientes preguntas para los ácidos: $\text{HNO}_2$, HF y HCN.
+        enunciado: `(2 puntos) Conteste razonadamente las siguientes preguntas para los ácidos: $\\text{HNO}_2$, HF y HCN.
 a) Suponiendo disoluciones acuosas de igual concentración de cada uno de ellos, explique cuál presenta
 menor pH.
 b) Justifique y ordene de mayor a menor basicidad las bases conjugadas.
 c) Obtenga el pH de una disolución acuosa 0,2 M de HCN.
-Datos. $K_a(\text{HNO}_2) = 4{,}5 \cdot 10^{-4}$; $K_a(\text{HF}) = 7{,}1 \cdot 10^{-4}$; $K_a(\text{HCN}) = 4{,}9 \cdot 10^{-10}$.`,
+Datos. $K_a(\\text{HNO}_2) = 4{,}5 \\cdot 10^{-4}$; $K_a(\\text{HF}) = 7{,}1 \\cdot 10^{-4}$; $K_a(\\text{HCN}) = 4{,}9 \\cdot 10^{-10}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -564,7 +642,7 @@ a) Escriba el equilibrio de solubilidad que tiene lugar, detallando el estado de
 b) Justifique numéricamente la precipitación del fluoruro de bario.
 c) Explique si aumenta, disminuye o no varía la solubilidad del fluoruro de bario cuando se le añade una
 disolución de ácido fluorhídrico.
-Dato. $K_s(\text{fluoruro de bario}) = 1{,}0 \cdot 10^{-6}$.`,
+Dato. $K_s(\\text{fluoruro de bario}) = 1{,}0 \\cdot 10^{-6}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -578,13 +656,13 @@ Dato. $K_s(\text{fluoruro de bario}) = 1{,}0 \cdot 10^{-6}$.`,
         label: "Pregunta 4",
         numero: "A.4",
         enunciado: `(2 puntos) Se construye una pila formada por un electrodo de zinc, sumergido en una disolución 1 M de
-$\text{Zn(NO}_3)_2$ y conectado por un puente salino con un electrodo de cobre, sumergido en una disolución 1 M de
-$\text{Cu(NO}_3)_2$.
+$\\text{Zn(NO}_3)_2$ y conectado por un puente salino con un electrodo de cobre, sumergido en una disolución 1 M de
+$\\text{Cu(NO}_3)_2$.
 a) Ajuste las reacciones que tienen lugar en el ánodo y en el cátodo, y la reacción iónica global.
 b) Escriba la notación de la pila y detalle para qué sirve el puente salino.
 c) Indique en qué sentido circula la corriente en el conductor eléctrico.
 d) Indique en qué electrodo se deposita cobre.
-Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Cu}^{2+}$/Cu $= 0{,}34$.`,
+Datos. $E^0$(V): $\\text{Zn}^{2+}$/Zn $= -0{,}76$; $\\text{Cu}^{2+}$/Cu $= 0{,}34$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -597,7 +675,15 @@ Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Cu}^{2+}$/Cu $= 0{,}34$
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "A.5",
-        enunciado: "(2 puntos) Conteste las siguientes cuestiones:\na) Nombre los siguientes compuestos: CH 3−CH(CH3)−C(CH3)=CH−CH2−CH2−CH3;\nCH3−CHOH−CH(C2 H5)−CH 2−OH.\nb) Formule la reacción, indique de qué tipo es, y nombre los compuestos orgánicos implicados:\npropan−2−ol + H2SO4/calor →\nc) Formule la reacción, indique de qué tipo es, y nombre los compuestos orgánicos implicados:\npent−2−eno + H2O/H+ →\nd) Formule la reacción, indique de qué tipo es, y nombre los compuestos orgánicos implicados:\n3−metilpentan−1−ol + HBr →",
+        enunciado: `(2 puntos) Conteste las siguientes cuestiones:
+a) Nombre los siguientes compuestos: $\\text{CH}_3-\\text{CH}(\\text{CH}_3)-\\text{C}(\\text{CH}_3)=\\text{CH}-\\text{CH}_2-\\text{CH}_2-\\text{CH}_3$;
+$\\text{CH}_3-\\text{CHOH}-\\text{CH}(\\text{C}_2\\text{H}_5)-\\text{CH}_2-\\text{OH}$.
+b) Formule la reacción, indique de qué tipo es, y nombre los compuestos orgánicos implicados:
+propan-2-ol + $\\text{H}_2\\text{SO}_4$/calor $\\rightarrow$
+c) Formule la reacción, indique de qué tipo es, y nombre los compuestos orgánicos implicados:
+pent-2-eno + $\\text{H}_2\\text{O}/\\text{H}^+$ $\\rightarrow$
+d) Formule la reacción, indique de qué tipo es, y nombre los compuestos orgánicos implicados:
+3-metilpentan-1-ol + $\\text{HBr}$ $\\rightarrow$`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -610,7 +696,10 @@ Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Cu}^{2+}$/Cu $= 0{,}34$
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "B.1",
-        enunciado: "(2 puntos) Responda las siguientes cuestiones:\na) Justifique si la molécula NH 3 es polar utilizando la teoría de hibridación y su geometría.\nb) Explique si los siguientes compuestos presentan enlace de hidrógeno: H 2O, CH4 y HCl.\nc) Justifique por qué el bromuro de sodio tiene un punto de fusión menor que el cloruro de sodio.",
+        enunciado: `(2 puntos) Responda las siguientes cuestiones:
+a) Justifique si la molécula $\\text{NH}_3$ es polar utilizando la teoría de hibridación y su geometría.
+b) Explique si los siguientes compuestos presentan enlace de hidrógeno: $\\text{H}_2\\text{O}$, $\\text{CH}_4$ y $\\text{HCl}$.
+c) Justifique por qué el bromuro de sodio tiene un punto de fusión menor que el cloruro de sodio.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -623,10 +712,10 @@ Datos. $E^0$(V): $\text{Zn}^{2+}$/Zn $= -0{,}76$; $\text{Cu}^{2+}$/Cu $= 0{,}34$
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: `(2 puntos) La ecuación de velocidad de la reacción CO(g) + $\text{NO}_2$(g) → $\text{CO}_2$(g) + NO(g) es $v = k[\text{NO}_2]^2$.
+        enunciado: `(2 puntos) La ecuación de velocidad de la reacción $\\text{CO}(g) + \\text{NO}_2(g) \\rightarrow \\text{CO}_2(g) + \\text{NO}(g)$ es $v = k[\\text{NO}_2]^2$.
 Justifique si son verdaderas o falsas las siguientes afirmaciones:
 a) La velocidad de desaparición de ambos reactivos es la misma.
-b) Las unidades de la constante de velocidad son: mol·L·s$^{-1}$.
+b) Las unidades de la constante de velocidad son: $\\text{mol}\\cdot\\text{L}\\cdot\\text{s}^{-1}$.
 c) La velocidad de la reacción aumenta al duplicar la concentración inicial de CO(g).
 d) En esta reacción en particular, la constante de velocidad no depende de la temperatura, porque la
 reacción se produce en fase gaseosa.`,
@@ -642,7 +731,13 @@ reacción se produce en fase gaseosa.`,
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "(2 puntos) Se puede obtener cloro gaseoso en la oxidación del ácido clorhídrico con ácido nítrico,\nproduciéndose también dióxido de nitrógeno y agua.\na) Indique cuál es la especie oxidante y cuál la reductora. Ajuste la reacción iónica global y la reacción\nmolecular por el método del ion-electrón.\nb) Sabiendo que el rendimiento de la reacción es del 82%, calcule el volumen de cloro que se obtiene a\n25 °C y 1,0 atm, cuando reaccionan 600 mL de una disolución 2,00 M de HCl con ácido nítrico en exceso.\nDato. R = 0,082 atmꞏLꞏmol –1ꞏK –1.",
+        enunciado: `(2 puntos) Se puede obtener cloro gaseoso en la oxidación del ácido clorhídrico con ácido nítrico,
+produciéndose también dióxido de nitrógeno y agua.
+a) Indique cuál es la especie oxidante y cuál la reductora. Ajuste la reacción iónica global y la reacción
+molecular por el método del ion-electrón.
+b) Sabiendo que el rendimiento de la reacción es del 82%, calcule el volumen de cloro que se obtiene a
+25 °C y 1,0 atm, cuando reaccionan 600 mL de una disolución 2,00 M de $\\text{HCl}$ con ácido nítrico en exceso.
+Dato. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -656,7 +751,7 @@ reacción se produce en fase gaseosa.`,
         label: "Pregunta 4",
         numero: "B.4",
         enunciado: `(2 puntos) En un reactor de 25,00 L a 440 ºC, se introducen 5,00 mol de hidrógeno y 2,00 mol de
-nitrógeno, obteniendo 50,0 g de $\text{NH}_3$ (g) cuando se alcanza el equilibrio 3 $\text{H}_2$ (g) + $\text{N}_2$ (g) $\rightleftharpoons$ 2 $\text{NH}_3$ (g).
+nitrógeno, obteniendo 50,0 g de $\\text{NH}_3$ (g) cuando se alcanza el equilibrio 3 $\\text{H}_2$ (g) + $\\text{N}_2$ (g) $\\rightleftharpoons$ 2 $\\text{NH}_3$ (g).
 a) Exprese el número de moles en equilibrio de los reactivos y del producto, en función de x (cambio de
 concentración en mol), y calcule sus valores.
 b) Obtenga $K_c$ y $K_p$.
@@ -675,7 +770,12 @@ Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas: H = 1,0; N = 14,
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "(2 puntos) La fórmula molecular C 4H8O2, ¿a qué sustancia o sustancias de las propuestas a continuación\ncorresponde? Justifique la respuesta escribiendo en cada caso su fórmula semidesarrollada y molecular.\na) Ácido butanoico.\nb) Butanodial.\nc) Propanoato de metilo.\nd) Ácido metilpropanoico.",
+        enunciado: `(2 puntos) La fórmula molecular $\\text{C}_4\\text{H}_8\\text{O}_2$, ¿a qué sustancia o sustancias de las propuestas a continuación
+corresponde? Justifique la respuesta escribiendo en cada caso su fórmula semidesarrollada y molecular.
+a) Ácido butanoico.
+b) Butanodial.
+c) Propanoato de metilo.
+d) Ácido metilpropanoico.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2021.pdf"
@@ -715,7 +815,13 @@ de enlace que presenta.`,
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "Responda las siguientes cuestiones:\na) (1 punto) Nombre los siguientes compuestos, escriba su fórmula molecular, indique cuáles son isómeros\nentre sí y especifique el tipo de isomería que presentan: a1) CH3−CO−CH2−CH(CH3) 2;\na2) CH3−CHOH−CH(CH3)−CH2−CH3; a3) CH3−C(CH3) 2−CH2−CHO; a4) CH3−(CH2) 2−O−(CH2) 2−CH3.\nb) (1 punto) Se quiere sintetizar 3-bromohexano, como único producto, a partir de un alqueno. Formule la\ncorrespondiente reacción, indique de qué tipo es, nombre la regla que sigue y nombre el alqueno de\npartida.",
+        enunciado: `Responda las siguientes cuestiones:
+a) (1 punto) Nombre los siguientes compuestos, escriba su fórmula molecular, indique cuáles son isómeros
+entre sí y especifique el tipo de isomería que presentan: a1) $\\text{CH}_3-\\text{CO}-\\text{CH}_2-\\text{CH}(\\text{CH}_3)_2$;
+a2) $\\text{CH}_3-\\text{CHOH}-\\text{CH}(\\text{CH}_3)-\\text{CH}_2-\\text{CH}_3$; a3) $\\text{CH}_3-\\text{C}(\\text{CH}_3)_2-\\text{CH}_2-\\text{CHO}$; a4) $\\text{CH}_3-(\\text{CH}_2)_2-\\text{O}-(\\text{CH}_2)_2-\\text{CH}_3$.
+b) (1 punto) Se quiere sintetizar 3-bromohexano, como único producto, a partir de un alqueno. Formule la
+correspondiente reacción, indique de qué tipo es, nombre la regla que sigue y nombre el alqueno de
+partida.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -728,15 +834,15 @@ de enlace que presenta.`,
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "A.3",
-        enunciado: `Sobre una disolución que contiene iones $\text{Hg}^{2+}$ 0,010 M y $\text{Ag}^+$ 0,020 M se va añadiendo gota a gota otra
-disolución con iones $\text{IO}_3^-$. Considere que la adición de las gotas de $\text{IO}_3^-$ no produce cambio de volumen.
-a) (0,5 puntos) Escriba los equilibrios de solubilidad ajustados de las dos sales de $\text{IO}_3^-$, detallando el estado
+        enunciado: `Sobre una disolución que contiene iones $\\text{Hg}^{2+}$ 0,010 M y $\\text{Ag}^+$ 0,020 M se va añadiendo gota a gota otra
+disolución con iones $\\text{IO}_3^-$. Considere que la adición de las gotas de $\\text{IO}_3^-$ no produce cambio de volumen.
+a) (0,5 puntos) Escriba los equilibrios de solubilidad ajustados de las dos sales de $\\text{IO}_3^-$, detallando el estado
 de todas las especies.
-b) (1 punto) Escriba la expresión de $K_s$ en función de la solubilidad y calcule la solubilidad molar de $\text{Hg(IO}_3)_2$
-y $\text{AgIO}_3$.
+b) (1 punto) Escriba la expresión de $K_s$ en función de la solubilidad y calcule la solubilidad molar de $\\text{Hg(IO}_3)_2$
+y $\\text{AgIO}_3$.
 c) (0,5 puntos) ¿Cómo varía la solubilidad de los yodatos de mercurio y plata al añadir un exceso de yodato
 a la disolución?
-Datos. $K_s(\text{Hg(IO}_3)_2) = 2{,}0 \cdot 10^{-19}$; $K_s(\text{AgIO}_3) = 3{,}0 \cdot 10^{-8}$.`,
+Datos. $K_s(\\text{Hg(IO}_3)_2) = 2{,}0 \\cdot 10^{-19}$; $K_s(\\text{AgIO}_3) = 3{,}0 \\cdot 10^{-8}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -749,7 +855,13 @@ Datos. $K_s(\text{Hg(IO}_3)_2) = 2{,}0 \cdot 10^{-19}$; $K_s(\text{AgIO}_3) = 3{
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "A.4",
-        enunciado: "La reacción CHCl3 (g) + Cl2 (g) → CCl4 (g) + HCl (g) es de primer orden con respecto a CHCl3 y de orden\n1/2 con respecto a Cl2.\na) (0,5 puntos) Escriba la ecuación de velocidad y determine el orden total de la reacción.\nb) (0,5 puntos) Deduzca las unidades de la constante de velocidad.\nc) (0,5 puntos) Justifique cómo afecta a la velocidad de reacción un aumento de volumen a temperatura\nconstante.\nd) (0,5 puntos) Justifique cómo afecta a la velocidad de reacción un aumento de temperatura.",
+        enunciado: `La reacción $\\text{CHCl}_3(g) + \\text{Cl}_2(g) \\rightarrow \\text{CCl}_4(g) + \\text{HCl}(g)$ es de primer orden con respecto a $\\text{CHCl}_3$ y de orden
+$1/2$ con respecto a $\\text{Cl}_2$.
+a) (0,5 puntos) Escriba la ecuación de velocidad y determine el orden total de la reacción.
+b) (0,5 puntos) Deduzca las unidades de la constante de velocidad.
+c) (0,5 puntos) Justifique cómo afecta a la velocidad de reacción un aumento de volumen a temperatura
+constante.
+d) (0,5 puntos) Justifique cómo afecta a la velocidad de reacción un aumento de temperatura.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -762,7 +874,13 @@ Datos. $K_s(\text{Hg(IO}_3)_2) = 2{,}0 \cdot 10^{-19}$; $K_s(\text{AgIO}_3) = 3{
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "A.5",
-        enunciado: "El clorato de potasio, en medio ácido, reacciona con aluminio formándose tricloruro de aluminio, cloro\nmolecular, cloruro de potasio y agua.\na) (0,5 puntos) Formule y ajuste las semirreacciones de oxidación y reducción que tienen lugar.\nb) (0,75 puntos) Ajuste las reacciones iónica y molecular por el método del ion-electrón.\nc) (0,75 puntos) Calcule el volumen de una disolución de clorato de potasio de concentración 1,67 g·L –1 que\nse necesita para oxidar 0,54 g de aluminio.\nDatos. Masas atómicas (u): O = 16,0; Al = 27,0; Cl = 35,5; K = 39,1.",
+        enunciado: `El clorato de potasio, en medio ácido, reacciona con aluminio formándose tricloruro de aluminio, cloro
+molecular, cloruro de potasio y agua.
+a) (0,5 puntos) Formule y ajuste las semirreacciones de oxidación y reducción que tienen lugar.
+b) (0,75 puntos) Ajuste las reacciones iónica y molecular por el método del ion-electrón.
+c) (0,75 puntos) Calcule el volumen de una disolución de clorato de potasio de concentración $1{,}67\\ \\text{g}\\cdot\\text{L}^{-1}$ que
+se necesita para oxidar 0,54 g de aluminio.
+Datos. Masas atómicas (u): O = 16,0; Al = 27,0; Cl = 35,5; K = 39,1.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -788,7 +906,12 @@ Datos. $K_s(\text{Hg(IO}_3)_2) = 2{,}0 \cdot 10^{-19}$; $K_s(\text{AgIO}_3) = 3{
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "Complete y ajuste las siguientes reacciones, formule y nombre todos los compuestos orgánicos que\nintervienen e indique el tipo de reacción:\na) (0,5 puntos) Propano + oxígeno →\nb) (0,5 puntos) Ácido butanoico + propan-1-amina →\nc) (0,5 puntos) n CH2=CH2 + catalizador →\nd) (0,5 puntos) CH3−CHOH−CH3 + H2SO 4(concentrado) →",
+        enunciado: `Complete y ajuste las siguientes reacciones, formule y nombre todos los compuestos orgánicos que
+intervienen e indique el tipo de reacción:
+a) (0,5 puntos) Propano + oxígeno $\\rightarrow$
+b) (0,5 puntos) Ácido butanoico + propan-1-amina $\\rightarrow$
+c) (0,5 puntos) $n\\ \\text{CH}_2=\\text{CH}_2$ + catalizador $\\rightarrow$
+d) (0,5 puntos) $\\text{CH}_3-\\text{CHOH}-\\text{CH}_3 + \\text{H}_2\\text{SO}_4$ (concentrado) $\\rightarrow$`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -801,15 +924,15 @@ Datos. $K_s(\text{Hg(IO}_3)_2) = 2{,}0 \cdot 10^{-19}$; $K_s(\text{AgIO}_3) = 3{
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: `El compuesto NOBr (g) descompone según la reacción:
-2 NOBr (g) $\rightleftharpoons$ 2 NO (g) + $\text{Br}_2$ (g) ($\Delta H = +16{,}3$ kJ/mol)
+        enunciado: `El compuesto $\\text{NOBr}(g)$ descompone según la reacción:
+$2\\ \\text{NOBr}(g) \\rightleftharpoons 2\\ \\text{NO}(g) + \\text{Br}_2(g)$ ($\\Delta H = +16{,}3\\ \\text{kJ}\\cdot\\text{mol}^{-1}$)
 En un matraz de 1,0 L se introducen 2,0 mol de NOBr. Cuando se alcanza el equilibrio a 25 ºC, se observa
-que se han formado 0,050 mol de $\text{Br}_2$. Calcule:
+que se han formado 0,050 mol de $\\text{Br}_2$. Calcule:
 a) (0,5 puntos) Las concentraciones de cada especie en el equilibrio.
 b) (0,5 puntos) $K_c$ y $K_p$.
 c) (0,5 puntos) La presión total.
 d) (0,5 puntos) Justifique dos formas de favorecer la descomposición del NOBr.
-Dato. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$.`,
+Dato. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -827,7 +950,7 @@ a) (1 punto) Escriba la reacción y calcule la concentración inicial del ácido
 b) (1 punto) Si observamos que el pH de la piscina ha aumentado hasta 7,8, justifique con las reacciones
 adecuadas y sin hacer cálculos, cuál de los siguientes reactivos debemos añadir para restablecer el pH
 a 7,5: NaOH; HCl; NaCl.
-Dato. $K_a(\text{ácido hipocloroso}) = 3{,}2 \cdot 10^{-8}$.`,
+Dato. $K_a(\\text{ácido hipocloroso}) = 3{,}2 \\cdot 10^{-8}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -845,7 +968,7 @@ a) (1 punto) Dibuje el esquema de una pila utilizando como electrodos una barra 
 Identifique todos los elementos que la forman, e indique el sentido del movimiento de los electrones.
 b) (1 punto) Escriba las reacciones que tienen lugar en el cátodo y en el ánodo, y calcule el potencial de la
 pila.
-Datos. $E^0$(V): $\text{Cd}^{2+}$/Cd $= -0{,}40$; $\text{Ag}^+$/Ag $= 0{,}80$.`,
+Datos. $E^0$(V): $\\text{Cd}^{2+}$/Cd $= -0{,}40$; $\\text{Ag}^+$/Ag $= 0{,}80$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"
@@ -867,7 +990,7 @@ Datos. $E^0$(V): $\text{Cd}^{2+}$/Cd $= -0{,}40$; $\text{Ag}^+$/Ag $= 0{,}80$.`,
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "A.1",
-        enunciado: `Los iones $\text{X}^{2+}$ e $\text{Y}^-$ presentan las siguientes configuraciones electrónicas: $\text{X}^{2+}$ ($1s^22s^22p^63s^23p^6$) e $\text{Y}^-$
+        enunciado: `Los iones $\\text{X}^{2+}$ e $\\text{Y}^-$ presentan las siguientes configuraciones electrónicas: $\\text{X}^{2+}$ ($1s^22s^22p^63s^23p^6$) e $\\text{Y}^-$
 ($1s^22s^22p^63s^23p^6$). Responda a las siguientes cuestiones.
 a) (0,5 puntos) Justifique el número atómico de los elementos X e Y, e indique su posición (periodo y grupo) en
 el sistema periódico.
@@ -888,7 +1011,15 @@ el elemento Y.`,
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "A, B, C, D y E son compuestos orgánicos que reaccionan de acuerdo a los siguientes procesos:\ni) A + HBr → 2−bromopropano; ii) B + C → propanoato de etilo + agua;\niii) D + oxidante → propanona; iv) E + H2SO4 (concentrado) → but−2−eno.\na) (0,5 puntos) Escriba las fórmulas semidesarrolladas de los productos orgánicos de cada una de las cuatro\nreacciones del enunciado.\nb) (0,5 puntos) Identifique, con sus fórmulas semidesarrolladas y su nombre, los compuestos A, B, C, D y E.\nc) (0,5 puntos) Indique de qué tipo es cada reacción del enunciado.\nd) (0,5 puntos) Diga si en alguna de estas reacciones se puede obtener más de un producto. Si es así,\nescriba sus fórmulas semidesarrolladas y nombre dichos compuestos.",
+        enunciado: `A, B, C, D y E son compuestos orgánicos que reaccionan de acuerdo a los siguientes procesos:
+i) $\\text{A} + \\text{HBr} \\rightarrow$ 2-bromopropano; ii) $\\text{B} + \\text{C} \\rightarrow$ propanoato de etilo + agua;
+iii) $\\text{D} + \\text{oxidante} \\rightarrow$ propanona; iv) $\\text{E} + \\text{H}_2\\text{SO}_4$ (concentrado) $\\rightarrow$ but-2-eno.
+a) (0,5 puntos) Escriba las fórmulas semidesarrolladas de los productos orgánicos de cada una de las cuatro
+reacciones del enunciado.
+b) (0,5 puntos) Identifique, con sus fórmulas semidesarrolladas y su nombre, los compuestos A, B, C, D y E.
+c) (0,5 puntos) Indique de qué tipo es cada reacción del enunciado.
+d) (0,5 puntos) Diga si en alguna de estas reacciones se puede obtener más de un producto. Si es así,
+escriba sus fórmulas semidesarrolladas y nombre dichos compuestos.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -906,7 +1037,7 @@ el elemento Y.`,
 a) (1 punto) Determine el pH de cada disolución por separado.
 b) (1 punto) Calcule la cantidad de agua que se debe añadir a la disolución más ácida para que el pH de las
 dos disoluciones sea el mismo. Suponga volúmenes aditivos.
-Dato. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$.`,
+Dato. $K_a(\\text{ácido acético}) = 1{,}8 \\cdot 10^{-5}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -932,7 +1063,15 @@ Dato. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$.`,
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "A.5",
-        enunciado: "Para depositar totalmente el cobre en una célula electrolítica que contiene 800 mL de una disolución\nacuosa de sulfato de cobre(II), se hace pasar una corriente de 1,50 A durante 3 horas.\na) (0,5 puntos) Escriba la reacción que tiene lugar en el cátodo.\nb) (0,75 puntos) Calcule los gramos de cobre depositados.\nc) (0,75 puntos) Una vez depositado todo el cobre, calcule el pH de la disolución, sabiendo que la reacción\nque tiene lugar es: 2 Cu2+ (ac) + 2 H2O (l) → 2 Cu (s) + O2 (g) + 4 H+. Suponga que al finalizar la electrólisis\nel volumen de la disolución se ha mantenido constante y que en el H2SO4 se disocian completamente los\ndos protones.\nDatos. F = 96485 C·mol–1. Masa atómica (u): Cu = 63,5.",
+        enunciado: `Para depositar totalmente el cobre en una célula electrolítica que contiene 800 mL de una disolución
+acuosa de sulfato de cobre(II), se hace pasar una corriente de 1,50 A durante 3 horas.
+a) (0,5 puntos) Escriba la reacción que tiene lugar en el cátodo.
+b) (0,75 puntos) Calcule los gramos de cobre depositados.
+c) (0,75 puntos) Una vez depositado todo el cobre, calcule el pH de la disolución, sabiendo que la reacción
+que tiene lugar es: $2\\ \\text{Cu}^{2+}(ac) + 2\\ \\text{H}_2\\text{O}(l) \\rightarrow 2\\ \\text{Cu}(s) + \\text{O}_2(g) + 4\\ \\text{H}^+$. Suponga que al finalizar la electrólisis
+el volumen de la disolución se ha mantenido constante y que en el $\\text{H}_2\\text{SO}_4$ se disocian completamente los
+dos protones.
+Datos. $F = 96485\\ \\text{C}\\cdot\\text{mol}^{-1}$. Masa atómica (u): Cu = 63,5.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -958,7 +1097,13 @@ Dato. $K_a(\text{ácido acético}) = 1{,}8 \cdot 10^{-5}$.`,
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "Considere los pares de compuestos siguientes: (i) etanoato de etilo y ácido butanoico; (ii) pent−1−eno y\nciclopentano; (iii) but−1−eno y but−2−ino.\na) (1 punto) Escriba las fórmulas semidesarrolladas de los seis compuestos.\nb) (0,5 puntos) Razone si alguno de los pares corresponde a dos compuestos isómeros. En caso afirmativo,\nindique de qué tipo de isómeros se trata.\nc) (0,5 puntos) Indique si cada uno de los compuestos del par (ii) reaccionará con agua en medio ácido. En\ncaso afirmativo, formule y nombre el producto mayoritario de la reacción.",
+        enunciado: `Considere los pares de compuestos siguientes: (i) etanoato de etilo y ácido butanoico; (ii) pent-1-eno y
+ciclopentano; (iii) but-1-eno y but-2-ino.
+a) (1 punto) Escriba las fórmulas semidesarrolladas de los seis compuestos.
+b) (0,5 puntos) Razone si alguno de los pares corresponde a dos compuestos isómeros. En caso afirmativo,
+indique de qué tipo de isómeros se trata.
+c) (0,5 puntos) Indique si cada uno de los compuestos del par (ii) reaccionará con agua en medio ácido. En
+caso afirmativo, formule y nombre el producto mayoritario de la reacción.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -978,7 +1123,7 @@ b) (0,5 puntos) ¿Qué disolución no cambia su pH al diluirla con agua?
 c) (0,5 puntos) ¿Qué reacción se producirá al mezclar volúmenes iguales de las disoluciones de cloruro de
 amonio y de hidróxido de potasio?
 d) (0,5 puntos) El pH de la disolución formada en el apartado c), ¿será ácido, básico o neutro?
-Dato. $K_a(\text{NH}_4^+) = 6{,}7 \cdot 10^{-10}$.`,
+Dato. $K_a(\\text{NH}_4^+) = 6{,}7 \\cdot 10^{-10}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -991,9 +1136,9 @@ Dato. $K_a(\text{NH}_4^+) = 6{,}7 \cdot 10^{-10}$.`,
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: `En un matraz de 3,00 L se introducen 4,38 g de $\text{C}_2\text{H}_6$. Se calienta a 627 ºC y se da el proceso:
-$\text{C}_2\text{H}_6$ (g) $\rightleftharpoons$ $\text{C}_2\text{H}_4$ (g) + $\text{H}_2$ (g), cuya $K_p$ vale 0,050. Calcule:
-a) (0,5 puntos) La presión inicial de $\text{C}_2\text{H}_6$.
+        enunciado: `En un matraz de 3,00 L se introducen 4,38 g de $\\text{C}_2\\text{H}_6$. Se calienta a 627 ºC y se da el proceso:
+$\\text{C}_2\\text{H}_6$ (g) $\\rightleftharpoons$ $\\text{C}_2\\text{H}_4$ (g) + $\\text{H}_2$ (g), cuya $K_p$ vale 0,050. Calcule:
+a) (0,5 puntos) La presión inicial de $\\text{C}_2\\text{H}_6$.
 b) (0,5 puntos) El valor de $K_c$.
 c) (1 punto) Las concentraciones de todos los gases en el equilibrio.
 Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas (u): H = 1,0; C = 12,0.`,
@@ -1009,7 +1154,13 @@ Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas (u): H = 1,0; C =
         bloque: "Pregunta5",
         label: "Pregunta 5",
         numero: "B.5",
-        enunciado: "Una muestra que contiene sulfuro de calcio se trata con ácido nítrico concentrado hasta reacción completa,\nsegún: CaS + HNO3  NO + SO2 + Ca(NO3)2 + H2O\na) (1 punto) Escriba y ajuste por el método del ion electrón las reacciones de oxidación, reducción, iónica y\nmolecular.\nb) (1 punto) Sabiendo que al tratar 35 g de la muestra con exceso de ácido se obtienen 20,3 L de NO,\nmedidos a 30 ºC y 780 mm Hg, calcule la riqueza en CaS de la muestra.\nDatos. Masas atómicas (u): S = 32; Ca = 40. R = 0,082 atm∙L∙mol−1∙K−1.",
+        enunciado: `Una muestra que contiene sulfuro de calcio se trata con ácido nítrico concentrado hasta reacción completa,
+según: $\\text{CaS} + \\text{HNO}_3 \\rightarrow \\text{NO} + \\text{SO}_2 + \\text{Ca(NO}_3)_2 + \\text{H}_2\\text{O}$
+a) (1 punto) Escriba y ajuste por el método del ion electrón las reacciones de oxidación, reducción, iónica y
+molecular.
+b) (1 punto) Sabiendo que al tratar 35 g de la muestra con exceso de ácido se obtienen 20,3 L de NO,
+medidos a 30 ºC y 780 mm Hg, calcule la riqueza en CaS de la muestra.
+Datos. Masas atómicas (u): S = 32; Ca = 40. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2023.pdf"
@@ -1044,7 +1195,15 @@ Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas (u): H = 1,0; C =
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "A.2",
-        enunciado: "Responda a las siguientes cuestiones:\na) (0,75 puntos) Indique cuál o cuáles de los siguientes compuestos presenta isomería geométrica. Escriba\nla fórmula desarrollada y el nombre de cada isómero.\ni) Propeno ii) But−1−eno iii) Pent−2−eno iv) Propen−2−ol\nb) (0,75 puntos) Complete las siguientes reacciones, nombre todos los compuestos orgánicos, e indique el\ntipo de reacción.\ni) Hex−1−eno + HCl → ii) Propan−2−ol + oxidante →\nc) (0,5 puntos) Nombre los siguientes compuestos e indique cuál es el grupo característico principal.\ni) CH3−CH=CH−CHO ii) H−COO−CH(CH3)−CH2−CH3",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (0,75 puntos) Indique cuál o cuáles de los siguientes compuestos presenta isomería geométrica. Escriba
+la fórmula desarrollada y el nombre de cada isómero.
+i) Propeno ii) But-1-eno iii) Pent-2-eno iv) Propen-2-ol
+b) (0,75 puntos) Complete las siguientes reacciones, nombre todos los compuestos orgánicos, e indique el
+tipo de reacción.
+i) Hex-1-eno + $\\text{HCl} \\rightarrow$ ii) Propan-2-ol + oxidante $\\rightarrow$
+c) (0,5 puntos) Nombre los siguientes compuestos e indique cuál es el grupo característico principal.
+i) $\\text{CH}_3-\\text{CH}=\\text{CH}-\\text{CHO}$ ii) $\\text{H}-\\text{COO}-\\text{CH}(\\text{CH}_3)-\\text{CH}_2-\\text{CH}_3$`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1058,14 +1217,14 @@ Datos. R = 0,082 atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas (u): H = 1,0; C =
         label: "Pregunta 3",
         numero: "A.3",
         enunciado: `La siguiente reacción es de orden 2 respecto al monóxido de carbono y de orden 1 respecto al cloro:
-2 NO (g) + $\text{Cl}_2$ (g) → 2 NOCl (g)
+$2\\ \\text{NO}(g) + \\text{Cl}_2(g) \\rightarrow 2\\ \\text{NOCl}(g)$
 a) (0,5 puntos) Escriba la ecuación de velocidad para dicha reacción, y deduzca las unidades de la constante
 de velocidad si las concentraciones se miden en mol·L$^{-1}$ y el tiempo en s.
 b) (0,5 puntos) A partir de la ecuación de Arrhenius, explique cómo afecta a la velocidad de la reacción un
 aumento de temperatura.
 c) (0,5 puntos) Determine la variación de energía de Gibbs estándar de la reacción a 25 ºC.
 d) (0,5 puntos) Justifique si la reacción es espontánea o no a dicha temperatura.
-Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ (J·mol$^{-1}$·K$^{-1}$): NO = 210,6; $\text{Cl}_2$ = 223,0; NOCl = 261,7.`,
+Datos. A 25 ºC, $\\Delta H_f^\\circ$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S^\\circ$ (J·mol$^{-1}$·K$^{-1}$): NO = 210,6; $\\text{Cl}_2$ = 223,0; NOCl = 261,7.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1078,7 +1237,13 @@ Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ 
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "A.4",
-        enunciado: "Se han preparado disoluciones acuosas 0,20 M de los siguientes compuestos a 25 ºC: hidróxido de\nsodio, ácido propanoico, cloruro de amonio, cloruro de potasio y etanoato de sodio.\na) (1 punto) Calcule el pH de las disoluciones de hidróxido de sodio y ácido propanoico.\nb) (1 punto) Ordene las disoluciones de cloruro de amonio, cloruro de potasio y etanoato de sodio de mayor\na menor carácter ácido. Justifique la respuesta formulando las reacciones de ionización de cada especie, y\nlas de hidrólisis del ion que lo requiera.\nDatos. pKa (ácido propanoico) = 4,9; pKa (ácido acético) = 4,75; pKb (amoníaco) = 4,75.",
+        enunciado: `Se han preparado disoluciones acuosas 0,20 M de los siguientes compuestos a 25 ºC: hidróxido de
+sodio, ácido propanoico, cloruro de amonio, cloruro de potasio y etanoato de sodio.
+a) (1 punto) Calcule el pH de las disoluciones de hidróxido de sodio y ácido propanoico.
+b) (1 punto) Ordene las disoluciones de cloruro de amonio, cloruro de potasio y etanoato de sodio de mayor
+a menor carácter ácido. Justifique la respuesta formulando las reacciones de ionización de cada especie, y
+las de hidrólisis del ion que lo requiera.
+Datos. $pK_a$(ácido propanoico) = 4,9; $pK_a$(ácido acético) = 4,75; $pK_b$(amoníaco) = 4,75.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1104,7 +1269,12 @@ Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ 
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "B.1",
-        enunciado: "Considere las moléculas: PF3 y OCS, y responda a las siguientes cuestiones:\na) (0,75 puntos) Represente sus estructuras de Lewis e indique cuántos pares de electrones no enlazantes\ntiene el átomo central.\nb) (0,75 puntos) Indique y represente sus geometrías moleculares de acuerdo con la teoría RPECV, y escriba\nla hibridación del átomo central.\nc) (0,5 puntos) Justifique la polaridad de cada una.",
+        enunciado: `Considere las moléculas: $\\text{PF}_3$ y $\\text{OCS}$, y responda a las siguientes cuestiones:
+a) (0,75 puntos) Represente sus estructuras de Lewis e indique cuántos pares de electrones no enlazantes
+tiene el átomo central.
+b) (0,75 puntos) Indique y represente sus geometrías moleculares de acuerdo con la teoría RPECV, y escriba
+la hibridación del átomo central.
+c) (0,5 puntos) Justifique la polaridad de cada una.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1117,7 +1287,15 @@ Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ 
         bloque: "Pregunta2",
         label: "Pregunta 2",
         numero: "B.2",
-        enunciado: "Responda a las siguientes preguntas:\na) (0,75 puntos) Escriba la fórmula semidesarrollada de los siguientes compuestos:\ni) Ácido etanodioico ii) 2−Metilbutanoato de propilo iii) 2,3,3−Trimetilpentanal\nb) (0,5 puntos) Formule una reacción de esterificación o condensación en la que se obtenga como producto\n2−metilbutanoato de propilo, y nombre los reactivos.\nc) (0,75 puntos) Formule y ajuste la reacción de combustión de etanol. A partir de ella, determine la riqueza\nen etanol de una muestra de 17 g sabiendo que al reaccionar con exceso de oxígeno se obtienen 14,2 L\nde dióxido de carbono medidos a 25 ºC y 785 mmHg.\nDatos. R = 0,082 atm·L·mol–1·K–1. Masas atómicas (u): H = 1,0; C = 12,0; O = 16,0.",
+        enunciado: `Responda a las siguientes preguntas:
+a) (0,75 puntos) Escriba la fórmula semidesarrollada de los siguientes compuestos:
+i) Ácido etanodioico ii) 2-metilbutanoato de propilo iii) 2,3,3-trimetilpentanal
+b) (0,5 puntos) Formule una reacción de esterificación o condensación en la que se obtenga como producto
+2-metilbutanoato de propilo, y nombre los reactivos.
+c) (0,75 puntos) Formule y ajuste la reacción de combustión de etanol. A partir de ella, determine la riqueza
+en etanol de una muestra de 17 g sabiendo que al reaccionar con exceso de oxígeno se obtienen 14,2 L
+de dióxido de carbono medidos a 25 ºC y 785 mmHg.
+Datos. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$. Masas atómicas (u): H = 1,0; C = 12,0; O = 16,0.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1130,7 +1308,13 @@ Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ 
         bloque: "Pregunta3",
         label: "Pregunta 3",
         numero: "B.3",
-        enunciado: "Se introduce cierta cantidad de COCl2 en un recipiente de 1,0 L a 500 K y 0,94 atm, produciéndose su\ndescomposición según la reacción: COCl2 (g) ⇆ CO (g) + Cl2 (g). Sabiendo que a dicha temperatura el valor\nde Kp es 0,19, calcule:\na) (0,5 puntos) La concentración molar inicial de COCl2.\nb) (0,75 puntos) Las concentraciones molares de cada especie en el equilibrio.\nc) (0,75 puntos) La presión parcial de cada uno de los gases en el equilibrio.\nDato. R = 0,082 atm·L·mol–1·K–1.",
+        enunciado: `Se introduce cierta cantidad de $\\text{COCl}_2$ en un recipiente de 1,0 L a 500 K y 0,94 atm, produciéndose su
+descomposición según la reacción: $\\text{COCl}_2(g) \\rightleftharpoons \\text{CO}(g) + \\text{Cl}_2(g)$. Sabiendo que a dicha temperatura el valor
+de $K_p$ es 0,19, calcule:
+a) (0,5 puntos) La concentración molar inicial de $\\text{COCl}_2$.
+b) (0,75 puntos) Las concentraciones molares de cada especie en el equilibrio.
+c) (0,75 puntos) La presión parcial de cada uno de los gases en el equilibrio.
+Dato. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1143,14 +1327,14 @@ Datos. A 25 ºC, $\Delta H°_f$ (kJ·mol$^{-1}$): NOCl = 51,7; NO = 90,3; $S°$ 
         bloque: "Pregunta4",
         label: "Pregunta 4",
         numero: "B.4",
-        enunciado: `Una muestra que está contaminada con $8{,}3 \cdot 10^{-4}$ mg·L$^{-1}$ de $\text{Cd}^{2+}$, se hace reaccionar con un hidróxido
-para eliminar parte del $\text{Cd}^{2+}$, precipitándolo en forma de hidróxido de cadmio.
+        enunciado: `Una muestra que está contaminada con $8{,}3\\cdot 10^{-4}\\ \\text{mg}\\cdot\\text{L}^{-1}$ de $\\text{Cd}^{2+}$, se hace reaccionar con un hidróxido
+para eliminar parte del $\\text{Cd}^{2+}$, precipitándolo en forma de hidróxido de cadmio.
 a) (0,75 puntos) Formule el equilibrio de solubilidad del hidróxido de cadmio en agua, detallando el estado
 de agregación de cada especie. Escriba la expresión de la $K_s$.
 b) (0,75 puntos) Calcule el pH mínimo necesario para que se inicie la precipitación del hidróxido.
 c) (0,5 puntos) Tras la precipitación de cierta cantidad de hidróxido de cadmio, se añade cloruro de cadmio
 a la disolución. Razone qué efecto tiene lugar y cómo afecta a la solubilidad del hidróxido.
-Datos. $K_s(\text{hidróxido de cadmio}) = 1{,}2 \cdot 10^{-14}$; Masa atómica (u): Cd = 112,4.`,
+Datos. $K_s(\\text{hidróxido de cadmio}) = 1{,}2\\cdot 10^{-14}$; Masa atómica (u): Cd = 112,4.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1170,7 +1354,7 @@ dicha pila.
 b) (1 punto) Se dispone de dos recipientes con disoluciones de nitrato de plata y nitrato de manganeso(II) y
 en cada uno se introduce una barra de hierro. ¿En cuál de ellos se formará una capa del otro metal sobre
 la barra de hierro? Razone la respuesta.
-Datos. $E°$(V): $\text{Mn}^{2+}$/Mn $= -1{,}18$; $\text{Fe}^{2+}$/Fe $= -0{,}44$; $\text{Pb}^{2+}$/Pb $= -0{,}125$; $\text{Ag}^+$/Ag $= 0{,}80$; $\text{Au}^{3+}$/Au $= 1{,}52$.`,
+Datos. $E°$(V): $\\text{Mn}^{2+}$/Mn $= -1{,}18$; $\\text{Fe}^{2+}$/Fe $= -0{,}44$; $\\text{Pb}^{2+}$/Pb $= -0{,}125$; $\\text{Ag}^+$/Ag $= 0{,}80$; $\\text{Au}^{3+}$/Au $= 1{,}52$.`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024.pdf"
@@ -1192,7 +1376,19 @@ Datos. $E°$(V): $\text{Mn}^{2+}$/Mn $= -1{,}18$; $\text{Fe}^{2+}$/Fe $= -0{,}44
         bloque: "Pregunta1",
         label: "Termoquímica y cinética",
         numero: "1",
-        enunciado: "Responda a las siguientes preguntas:\na) (0,75 puntos) El nitrato de amonio es un compuesto con muchas aplicaciones, cuya síntesis se realiza\npor reacción directa de ácido nítrico y amoniaco. Escriba la reacción ajustada que se produce y, haciendo\nuso de la Tabla, calcule ∆Grº a 300 K. Justifique la espontaneidad de la reacción.\nb) (0,75 puntos) Una de las aplicaciones del nitrato de amonio es como explosivo, ya que en ciertas\ncondiciones (temperaturas por encima de 175 ºC) se produce de forma explosiva la reacción de\ndescomposición que da lugar a óxido de dinitrógeno y agua. Escriba la reacción ajustada y con los datos\nde la Tabla calcule ∆Hrº y ∆Srº. Determine ∆Grº a 450 K para dicha reacción. Considere que ∆Hrº y ∆Srº\nno cambian con la temperatura. Justifique si la reacción es exotérmica y espontánea.\nc) (0,5 puntos) Escriba la ley de velocidad de la reacción de descomposición del nitrato de amonio\nconsiderando que las unidades de su constante de velocidad son s−1, e indique el orden de la reacción.\nd) (0,5 puntos) Explique cómo afecta a la velocidad de la reacción de descomposición del nitrato de amonio\nuna disminución de la temperatura.",
+        enunciado: `Responda a las siguientes preguntas:
+a) (0,75 puntos) El nitrato de amonio es un compuesto con muchas aplicaciones, cuya síntesis se realiza
+por reacción directa de ácido nítrico y amoniaco. Escriba la reacción ajustada que se produce y, haciendo
+uso de la Tabla, calcule $\\Delta G_r^\\circ$ a 300 K. Justifique la espontaneidad de la reacción.
+b) (0,75 puntos) Una de las aplicaciones del nitrato de amonio es como explosivo, ya que en ciertas
+condiciones (temperaturas por encima de 175 ºC) se produce de forma explosiva la reacción de
+descomposición que da lugar a óxido de dinitrógeno y agua. Escriba la reacción ajustada y con los datos
+de la Tabla calcule $\\Delta H_r^\\circ$ y $\\Delta S_r^\\circ$. Determine $\\Delta G_r^\\circ$ a 450 K para dicha reacción. Considere que $\\Delta H_r^\\circ$ y $\\Delta S_r^\\circ$
+no cambian con la temperatura. Justifique si la reacción es exotérmica y espontánea.
+c) (0,5 puntos) Escriba la ley de velocidad de la reacción de descomposición del nitrato de amonio
+considerando que las unidades de su constante de velocidad son $\\text{s}^{-1}$, e indique el orden de la reacción.
+d) (0,5 puntos) Explique cómo afecta a la velocidad de la reacción de descomposición del nitrato de amonio
+una disminución de la temperatura.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1205,13 +1401,13 @@ Datos. $E°$(V): $\text{Mn}^{2+}$/Mn $= -1{,}18$; $\text{Fe}^{2+}$/Fe $= -0{,}44
         bloque: "Pregunta2",
         label: "Estructura y enlace",
         numero: "2A",
-        enunciado: `Dadas las configuraciones electrónicas de tres elementos en estado fundamental X: $[\text{Ar}]4s^2$,
-Y: $[\text{Ne}]3s^23p^2$ y Z: $[\text{He}]2s^22p^5$:
+        enunciado: `Dadas las configuraciones electrónicas de tres elementos en estado fundamental X: $[\\text{Ar}]4s^2$,
+Y: $[\\text{Ne}]3s^23p^2$ y Z: $[\\text{He}]2s^22p^5$:
 a) (0,5 puntos) Determine su posición en la tabla periódica (periodo y grupo).
 b) (0,5 puntos) Indique nombre y símbolo de los elementos Y y Z.
 c) (0,75 puntos) Justifique si es posible o no cada una de las siguientes combinaciones de números
 cuánticos. En los casos afirmativos, razone si puede corresponder al electrón más externo de alguno de
-los elementos del enunciado, indicando a cuál: $(n=2, l=1, m_l=0, m_s=+\frac{1}{2})$; $(n=3, l=0, m_l=1, m_s=-\frac{1}{2})$; $(n=3, l=2, m_l=0, m_s=+\frac{1}{2})$; $(n=4, l=4, m_l=0, m_s=+\frac{1}{2})$.
+los elementos del enunciado, indicando a cuál: $(n=2, l=1, m_l=0, m_s=+\\frac{1}{2})$; $(n=3, l=0, m_l=1, m_s=-\\frac{1}{2})$; $(n=3, l=2, m_l=0, m_s=+\\frac{1}{2})$; $(n=4, l=4, m_l=0, m_s=+\\frac{1}{2})$.
 d) (0,75 puntos) Defina electronegatividad y justifique cuál de los elementos X, Y o Z es el más
 electronegativo.`,
         puntuacion: 2.5,
@@ -1226,7 +1422,15 @@ electronegativo.`,
         bloque: "Pregunta3",
         label: "Química orgánica",
         numero: "3A",
-        enunciado: "Responda a las siguientes cuestiones:\na) (0,5 puntos) Nombre los siguientes compuestos, e indique a qué tipo de compuesto orgánico pertenecen:\ni) CH3−CH(CH3)−CH2−C(CH2CH3)(CH3)−CH2−CHO\nii) CH2=CH−O−CH2−CH3\nb) (1 punto) Escriba la fórmula semidesarrollada de los siguientes compuestos, nombrando el/los grupo/s\nfuncional/es presente/s:\ni) 3−etil−3,5−dimetilhexan−2−ol ii) ácido 4−etenilhept−2−enoico\niii) 4−etilhexan−3−ona iv) 3−etil−4−metilheptanamida\nc) (1 punto) Formule y nombre dos isómeros de cadena no cíclicos del hexano.",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (0,5 puntos) Nombre los siguientes compuestos, e indique a qué tipo de compuesto orgánico pertenecen:
+i) $\\text{CH}_3-\\text{CH}(\\text{CH}_3)-\\text{CH}_2-\\text{C}(\\text{CH}_2\\text{CH}_3)(\\text{CH}_3)-\\text{CH}_2-\\text{CHO}$
+ii) $\\text{CH}_2=\\text{CH}-\\text{O}-\\text{CH}_2-\\text{CH}_3$
+b) (1 punto) Escriba la fórmula semidesarrollada de los siguientes compuestos, nombrando el/los grupo/s
+funcional/es presente/s:
+i) 3-etil-3,5-dimetilhexan-2-ol ii) ácido 4-etenilhept-2-enoico
+iii) 4-etilhexan-3-ona iv) 3-etil-4-metilheptanamida
+c) (1 punto) Formule y nombre dos isómeros de cadena no cíclicos del hexano.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1239,7 +1443,16 @@ electronegativo.`,
         bloque: "Pregunta4",
         label: "Equilibrio químico",
         numero: "4A",
-        enunciado: "El ácido butanoico (C3H7COOH) es un ácido monoprótico débil que se utiliza en muchas aplicaciones de\nla vida cotidiana, por ejemplo para mantener la frescura del pan, como aromatizante en jarabes o para mejorar\nla jugosidad de la carne, entre otras. A 25 ºC se preparan 250 mL de una disolución 0,250 M de este ácido\ncon pH = 2,72.\na) (1,5 puntos) Escriba ajustada la reacción de disociación en agua y calcule el porcentaje de disociación\ndel ácido y el pKa.\nb) (0,5 puntos) A 25 ºC se prepara una disolución de butanoato de sodio (C3H7COONa). Razone, si su pH\nserá mayor, menor o igual que el de la disolución del enunciado.\nc) (0,5 puntos) Justifique si se formaría una disolución reguladora al mezclar la disolución del enunciado con\nuna disolución de butanoato de sodio.",
+        enunciado: `El ácido butanoico ($\\text{C}_3\\text{H}_7\\text{COOH}$) es un ácido monoprótico débil que se utiliza en muchas aplicaciones de
+la vida cotidiana, por ejemplo para mantener la frescura del pan, como aromatizante en jarabes o para mejorar
+la jugosidad de la carne, entre otras. A 25 ºC se preparan 250 mL de una disolución 0,250 M de este ácido
+con pH = 2,72.
+a) (1,5 puntos) Escriba ajustada la reacción de disociación en agua y calcule el porcentaje de disociación
+del ácido y el $pK_a$.
+b) (0,5 puntos) A 25 ºC se prepara una disolución de butanoato de sodio ($\\text{C}_3\\text{H}_7\\text{COONa}$). Razone, si su pH
+será mayor, menor o igual que el de la disolución del enunciado.
+c) (0,5 puntos) Justifique si se formaría una disolución reguladora al mezclar la disolución del enunciado con
+una disolución de butanoato de sodio.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1252,7 +1465,19 @@ electronegativo.`,
         bloque: "Pregunta1",
         label: "Termoquímica y cinética",
         numero: "1",
-        enunciado: "Responda a las siguientes preguntas:\na) (0,75 puntos) El nitrato de amonio es un compuesto con muchas aplicaciones, cuya síntesis se realiza\npor reacción directa de ácido nítrico y amoniaco. Escriba la reacción ajustada que se produce y, haciendo\nuso de la Tabla, calcule ∆Grº a 300 K. Justifique la espontaneidad de la reacción.\nb) (0,75 puntos) Una de las aplicaciones del nitrato de amonio es como explosivo, ya que en ciertas\ncondiciones (temperaturas por encima de 175 ºC) se produce de forma explosiva la reacción de\ndescomposición que da lugar a óxido de dinitrógeno y agua. Escriba la reacción ajustada y con los datos\nde la Tabla calcule ∆Hrº y ∆Srº. Determine ∆Grº a 450 K para dicha reacción. Considere que ∆Hrº y ∆Srº\nno cambian con la temperatura. Justifique si la reacción es exotérmica y espontánea.\nc) (0,5 puntos) Escriba la ley de velocidad de la reacción de descomposición del nitrato de amonio\nconsiderando que las unidades de su constante de velocidad son s−1, e indique el orden de la reacción.\nd) (0,5 puntos) Explique cómo afecta a la velocidad de la reacción de descomposición del nitrato de amonio\nuna disminución de la temperatura.",
+        enunciado: `Responda a las siguientes preguntas:
+a) (0,75 puntos) El nitrato de amonio es un compuesto con muchas aplicaciones, cuya síntesis se realiza
+por reacción directa de ácido nítrico y amoniaco. Escriba la reacción ajustada que se produce y, haciendo
+uso de la Tabla, calcule $\\Delta G_r^\\circ$ a 300 K. Justifique la espontaneidad de la reacción.
+b) (0,75 puntos) Una de las aplicaciones del nitrato de amonio es como explosivo, ya que en ciertas
+condiciones (temperaturas por encima de 175 ºC) se produce de forma explosiva la reacción de
+descomposición que da lugar a óxido de dinitrógeno y agua. Escriba la reacción ajustada y con los datos
+de la Tabla calcule $\\Delta H_r^\\circ$ y $\\Delta S_r^\\circ$. Determine $\\Delta G_r^\\circ$ a 450 K para dicha reacción. Considere que $\\Delta H_r^\\circ$ y $\\Delta S_r^\\circ$
+no cambian con la temperatura. Justifique si la reacción es exotérmica y espontánea.
+c) (0,5 puntos) Escriba la ley de velocidad de la reacción de descomposición del nitrato de amonio
+considerando que las unidades de su constante de velocidad son $\\text{s}^{-1}$, e indique el orden de la reacción.
+d) (0,5 puntos) Explique cómo afecta a la velocidad de la reacción de descomposición del nitrato de amonio
+una disminución de la temperatura.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1265,7 +1490,13 @@ electronegativo.`,
         bloque: "Pregunta2",
         label: "Estructura y enlace",
         numero: "2B",
-        enunciado: "Considere las siguientes moléculas, cuyas temperaturas de ebullición se indican entre paréntesis: CH3OH\n(338 K), HCHO (254 K) y CH4 (111 K):\na) (0,5 puntos) Dibuje la estructura de Lewis de los tres compuestos.\nb) (0,75 puntos) Indique la hibridación del átomo de carbono y la geometría de cada una de las moléculas\ndel enunciado utilizando el modelo de RPECV.\nc) (0,75 puntos) Justifique los diferentes valores de las temperaturas de ebullición indicadas.\nd) (0,5 puntos) ¿Cuál/es es/son soluble/s en agua? Justifique la respuesta.",
+        enunciado: `Considere las siguientes moléculas, cuyas temperaturas de ebullición se indican entre paréntesis: $\\text{CH}_3\\text{OH}$
+(338 K), $\\text{HCHO}$ (254 K) y $\\text{CH}_4$ (111 K):
+a) (0,5 puntos) Dibuje la estructura de Lewis de los tres compuestos.
+b) (0,75 puntos) Indique la hibridación del átomo de carbono y la geometría de cada una de las moléculas
+del enunciado utilizando el modelo de RPECV.
+c) (0,75 puntos) Justifique los diferentes valores de las temperaturas de ebullición indicadas.
+d) (0,5 puntos) ¿Cuál/es es/son soluble/s en agua? Justifique la respuesta.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1278,7 +1509,20 @@ electronegativo.`,
         bloque: "Pregunta3",
         label: "Química orgánica",
         numero: "3B",
-        enunciado: "Responda a las siguientes cuestiones:\na) (1 punto) Justifique si para el compuesto CH3−CH2−CHOH−CH3 son verdaderas o falsas las siguientes\nafirmaciones. Escriba las reacciones correspondientes si las hubiere, y nombre los productos:\ni) Al reaccionar con H2SO4 concentrado da prioritariamente dos compuestos isómeros geométricos.\nii) Puede adicionar agua para dar butano.\nb) (0,5 puntos) Formule, en cada caso, el compuesto que presente las siguientes condiciones:\ni) Un aldehído de tres carbonos que contenga átomos con hibridación sp.\nii) Una amina secundaria de tres átomos de carbono, con el átomo de nitrógeno unido a un carbono con\nhibridación sp3 y a otro carbono con hibridación sp2.\nc) (1 punto) Dados los compuestos CH3−CHOH−CH3 y CH3−CH2−CH3:\ni) Justifique cuál tiene mayor temperatura de fusión.\nii) Formule la reacción de obtención de CH3−CHOH−CH3 a partir del alqueno correspondiente, indicando\nel medio en el que transcurre (ácido, básico), el tipo de reacción y si se trata del producto minoritario\ny la regla que sigue.",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1 punto) Justifique si para el compuesto $\\text{CH}_3-\\text{CH}_2-\\text{CHOH}-\\text{CH}_3$ son verdaderas o falsas las siguientes
+afirmaciones. Escriba las reacciones correspondientes si las hubiere, y nombre los productos:
+i) Al reaccionar con $\\text{H}_2\\text{SO}_4$ concentrado da prioritariamente dos compuestos isómeros geométricos.
+ii) Puede adicionar agua para dar butano.
+b) (0,5 puntos) Formule, en cada caso, el compuesto que presente las siguientes condiciones:
+i) Un aldehído de tres carbonos que contenga átomos con hibridación sp.
+ii) Una amina secundaria de tres átomos de carbono, con el átomo de nitrógeno unido a un carbono con
+hibridación sp3 y a otro carbono con hibridación sp2.
+c) (1 punto) Dados los compuestos $\\text{CH}_3-\\text{CHOH}-\\text{CH}_3$ y $\\text{CH}_3-\\text{CH}_2-\\text{CH}_3$:
+i) Justifique cuál tiene mayor temperatura de fusión.
+ii) Formule la reacción de obtención de $\\text{CH}_3-\\text{CHOH}-\\text{CH}_3$ a partir del alqueno correspondiente, indicando
+el medio en el que transcurre (ácido, básico), el tipo de reacción y si se trata del producto minoritario
+y la regla que sigue.`,
         puntuacion: 2.5,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2025.pdf"
@@ -1291,13 +1535,13 @@ electronegativo.`,
         bloque: "Pregunta4",
         label: "Equilibrio químico",
         numero: "4B",
-        enunciado: `En un recipiente de 2,50 L se introducen 0,0200 mol de $\text{N}_2$ y 0,0300 mol de $\text{H}_2$. Se eleva la temperatura
-hasta 400 ºC, y la reacción $\text{N}_2$ (g) + 3 $\text{H}_2$ (g) $\rightleftharpoons$ 2 $\text{NH}_3$ (g) alcanza el equilibrio, obteniéndose $\Delta H_r < 0$ y una
-concentración de $\text{NH}_3$ (g) de 0,00375 mol·L$^{-1}$.
+        enunciado: `En un recipiente de 2,50 L se introducen 0,0200 mol de $\\text{N}_2$ y 0,0300 mol de $\\text{H}_2$. Se eleva la temperatura
+hasta 400 ºC, y la reacción $\\text{N}_2$ (g) + 3 $\\text{H}_2$ (g) $\\rightleftharpoons$ 2 $\\text{NH}_3$ (g) alcanza el equilibrio, obteniéndose $\\Delta H_r < 0$ y una
+concentración de $\\text{NH}_3$ (g) de 0,00375 mol·L$^{-1}$.
 a) (1 punto) Calcule las presiones parciales de cada sustancia en el equilibrio y la presión total.
 b) (0,5 puntos) Obtenga $K_p$ y $K_c$.
 c) (0,5 puntos) Justifique si el rendimiento del proceso aumenta realizándolo a menor temperatura.
-d) (0,5 puntos) Razone cómo varía la concentración de $\text{N}_2$ cuando se añade al equilibrio un gas inerte como
+d) (0,5 puntos) Razone cómo varía la concentración de $\\text{N}_2$ cuando se añade al equilibrio un gas inerte como
 el Ar a volumen y temperatura constantes.
 Dato. R = 0,0820 atm·L·mol$^{-1}$·K$^{-1}$.`,
         puntuacion: 2.5,

@@ -36,19 +36,19 @@ export const examenesF: PreguntaFisica[] = [
 del observatorio del Monte Palomar dirigido por Michael E. Brown. Es el objeto transneptuniano más
 masivo, el segundo más grande después de Plutón, y el cuerpo más grande del sistema solar que no ha
 sido visitado por una sonda espacial. Tiene un diámetro de 2330 km, ligeramente inferior al de Plutón, y
-su densidad es de $2{,}5\ \text{g cm}^{-3}$. La órbita de Eris es muy excéntrica; actualmente el planeta se encuentra
-a su máxima distancia del Sol (afelio), a $1{,}45 \cdot 10^{13}$ m, llegando a situarse a $5{,}24 \cdot 10^{12}$ m del Sol durante
+su densidad es de $2{,}5\ \\text{g cm}^{-3}$. La órbita de Eris es muy excéntrica; actualmente el planeta se encuentra
+a su máxima distancia del Sol (afelio), a $1{,}45 \\cdot 10^{13}$ m, llegando a situarse a $5{,}24 \\cdot 10^{12}$ m del Sol durante
 su perihelio.
 
 a) (1 punto) Calcule la masa del planeta y el valor de la aceleración de la gravedad en su superficie.
 
 b) (1,5 puntos) Sabiendo que la energía mecánica de un objeto de masa $m_1$ que orbita alrededor de
 un objeto de masa $m_2$ con una órbita elíptica de semieje mayor $a$ es
-$$E_{mec} = -\dfrac{Gm_1m_2}{2a},$$
+$$E_{mec} = -\\dfrac{Gm_1m_2}{2a},$$
 donde $G$ es la constante de la gravitación universal, halle la energía mecánica de Eris y calcule la
 velocidad orbital que tendrá en el perihelio.
 
-Datos: Constante de gravitación universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa del Sol, $M_{\text{Sol}} = 1{,}99 \cdot 10^{30}\ \text{kg}$.`,
+Datos: Constante de gravitación universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa del Sol, $M_{\\text{Sol}} = 1{,}99 \\cdot 10^{30}\ \\text{kg}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -61,11 +61,11 @@ el plano $xy$ en las posiciones $(0, 6)$ nm y $(0, -6)$ nm, respectivamente.
 
 a) (1,25 puntos) Obtenga el campo eléctrico en el punto $(8, 0)$ nm debido a ambas partículas.
 
-b) (1,25 puntos) Si al positrón se le imprime una velocidad de $-1{,}5 \cdot 10^5\ \text{m s}^{-1}\ \hat{j}$, permaneciendo fijo
+b) (1,25 puntos) Si al positrón se le imprime una velocidad de $-1{,}5 \\cdot 10^5\ \\text{m s}^{-1}\ \\hat{j}$, permaneciendo fijo
 el electrón, determine la máxima distancia de alejamiento entre ambas partículas.
 
-Datos: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$; Valor absoluto de la carga del electrón y del positrón,
-$e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Masa del electrón y del positrón, $m_e = 9{,}1 \cdot 10^{-31}\ \text{kg}$.`,
+Datos: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{C}^{-2}$; Valor absoluto de la carga del electrón y del positrón,
+$e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Masa del electrón y del positrón, $m_e = 9{,}1 \\cdot 10^{-31}\ \\text{kg}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -84,7 +84,7 @@ valor $B = 150$ mT, y la espira gira en torno a uno de sus diáme-
 tros con una velocidad angular de 50 rad s$^{-1}$.
 
 b) (1,25 puntos) La espira se encuentra fija, y el módulo del campo
-magnético varía con el tiempo conforme a $B = B_0\sin(\omega t)$, con $B_0 = 200$ mT y $\omega = 75$ rad s$^{-1}$.`,
+magnético varía con el tiempo conforme a $B = B_0\\sin(\\omega t)$, con $B_0 = 200$ mT y $\\omega = 75$ rad s$^{-1}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -102,7 +102,7 @@ a) (1 punto) Halle la profundidad a la que se encuentra la ballena.
 b) (1,5 puntos) Si el barco A recibe el sonido con una intensidad de 3 μW m$^{-2}$, calcule la potencia
 del sonido emitido por la ballena y el nivel de intensidad sonora que detectará el barco B.
 
-Dato: Intensidad umbral, $I_0 = 1 \cdot 10^{-12}\ \text{W m}^{-2}$.`,
+Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -115,7 +115,7 @@ situado a una distancia $s$ a la izquierda de la lente.
 
 a) (1 punto) Demuestre que el aumento lateral $M$ tiene la siguiente expresión en función de la dis-
 tancia focal $f'$ y la posición del objeto $s$:
-$$M = \dfrac{f'}{f'+s}$$
+$$M = \\dfrac{f'}{f'+s}$$
 
 b) (0,5 puntos) Considerando la expresión obtenida en el apartado anterior, razone si una lente
 divergente puede formar una imagen invertida.
@@ -136,11 +136,11 @@ a) (1 punto) Halle la diferencia de energía, expresada en electrón-voltios, en
 cos de la molécula de ozono que inducen la absorción de radiación de 260 nm.
 
 b) (1,5 puntos) Si el flujo de fotones de 260 nm que le llega a una persona con su cuerpo expuesto
-al sol es de $2{,}6 \cdot 10^{14}$ fotones s$^{-1}$, calcule la potencia que le incide debida a esos fotones UV y la
+al sol es de $2{,}6 \\cdot 10^{14}$ fotones s$^{-1}$, calcule la potencia que le incide debida a esos fotones UV y la
 energía recibida en 30 minutos.
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$; Velocidad de la
-luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Constante de Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$; Velocidad de la
+luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -154,7 +154,7 @@ mineral se entierra debido a diversos procesos geológicos (sedimentación, glac
 de $^{26}$Al se desintegran con un tiempo de semidesintegración de 0,72 millones de años.
 
 a) (1,25 puntos) Calcule la actividad de una muestra de mineral de cuarzo, debida a la presencia de
-isótopos de $^{26}$Al, situada en superficie si contiene $8{,}3 \cdot 10^{22}$ átomos de silicio.
+isótopos de $^{26}$Al, situada en superficie si contiene $8{,}3 \\cdot 10^{22}$ átomos de silicio.
 
 b) (1,25 puntos) Se recoge una muestra de cuarzo de unos sedimentos, obteniéndose una relación
 de 0,08 % de átomos de $^{26}$Al respecto a los átomos de silicio. Obtenga la edad correspondiente a
@@ -172,11 +172,11 @@ entre 12 y 21 millones de km.
 a) Calcule el trabajo realizado por la atracción gravitatoria de Neptuno sobre Halimede en el tránsito
 del punto más próximo al más distante de la órbita.
 
-b) Sabiendo que la energía mecánica de Halimede vale $-2{,}5 \cdot 10^{20}$ J, determine la velocidad máxima
+b) Sabiendo que la energía mecánica de Halimede vale $-2{,}5 \\cdot 10^{20}$ J, determine la velocidad máxima
 que alcanza en su órbita.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de Halimede, $M_H = 1{,}60 \cdot 10^{15}\ \text{kg}$; Masa de
-Neptuno, $M_N = 1{,}02 \cdot 10^{26}\ \text{kg}$.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa de Halimede, $M_H = 1{,}60 \\cdot 10^{15}\ \\text{kg}$; Masa de
+Neptuno, $M_N = 1{,}02 \\cdot 10^{26}\ \\text{kg}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -201,14 +201,14 @@ b) La fase inicial de la onda.`,
     tipo: "Electricidad", numero: "A.3",
     enunciado: `Un hilo conductor de longitud indefinida se extiende a lo largo del eje $z$. Otro hilo de
 longitud indefinida paralelo al primero pasa por el punto $(5, 0, 0)$ cm. Los dos hilos se repelen con una
-fuerza por unidad de longitud de $5 \cdot 10^{-5}$ N m$^{-1}$. El campo magnético total se anula a lo largo de la recta
+fuerza por unidad de longitud de $5 \\cdot 10^{-5}$ N m$^{-1}$. El campo magnético total se anula a lo largo de la recta
 $x = +10$ cm en el plano $xz$.
 
 a) Explique si las corrientes en los hilos son paralelas o antiparalelas y calcule su magnitud.
 
 b) Determine el módulo del campo magnético en el punto $(-5, 0, 0)$ cm.
 
-Dato: Permeabilidad magnética del vacío, $\mu_0 = 4\pi \cdot 10^{-7}\ \text{T m A}^{-1}$.`,
+Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}\ \\text{T m A}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -235,7 +235,7 @@ umbral.
 b) Si se mantiene la frecuencia inicial y se duplica la intensidad de la luz incidente, ¿cómo se modi-
 ficará el potencial de frenado?
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$.`,
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Constante de Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -252,8 +252,8 @@ del resultado anterior, razone si la órbita es circular o elíptica.
 
 b) Calcule los módulos del momento angular y de la aceleración del satélite en el instante señalado.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
-Tierra, $R_T = 6{,}37 \cdot 10^6\ \text{m}$.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \\cdot 10^{24}\ \\text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \\cdot 10^6\ \\text{m}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -271,7 +271,7 @@ campanario cuando se toca una sola campana.
 b) ¿Podrán tocar las cuatro campanas a la vez si no se quiere sobrepasar el límite de contaminación
 acústica y la población está situada a más de 100 metros de la iglesia?
 
-Dato: Intensidad umbral, $I_0 = 1 \cdot 10^{-12}\ \text{W m}^{-2}$.`,
+Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -286,7 +286,7 @@ a) El origen de coordenadas.
 
 b) El punto $(0, 3)$ mm.
 
-Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
+Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -306,9 +306,9 @@ Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^
 1 y radioisótopo 2) contienen en el momento de su preparación la misma masa
 del radioisótopo correspondiente. Las medidas de actividad de las muestras 1 y
 2 para el instante inicial ($t = 0$) y al cabo de un día arrojan los siguientes valores:
-$A_1$ (kBq) $\quad A_2$ (kBq)
-$t = 0$: 10,00 $\quad$ 11,70
-$t = 1$ d: 8,90 $\quad$ 10,77
+$A_1$ (kBq) $\\quad A_2$ (kBq)
+$t = 0$: 10,00 $\\quad$ 11,70
+$t = 1$ d: 8,90 $\\quad$ 10,77
 
 a) Calcule el período de semidesintegración de cada radioisótopo.
 
@@ -329,8 +329,8 @@ a) Las energías potencial gravitatoria y cinética que tiene el satélite en su
 b) La energía que fue necesario comunicar al satélite para ponerlo en órbita desde la superficie
 de la Tierra.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
-Tierra, $R_T = 6{,}37 \cdot 10^6\ \text{m}$.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \\cdot 10^{24}\ \\text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \\cdot 10^6\ \\text{m}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -340,8 +340,8 @@ Tierra, $R_T = 6{,}37 \cdot 10^6\ \text{m}$.`,
     tipo: "Ondas", numero: "A.2",
     enunciado: `A lo largo de una cuerda se propaga en el sentido $+x$ una onda transversal. El periodo
 de oscilación y la elongación máxima de un punto cualquiera de la cuerda son, respectivamente,
-$4 \cdot 10^{-3}$ s y 3 mm. La distancia mínima entre dos puntos cualesquiera de la cuerda que oscilan en fase
-es de 0,25 metros. En el instante $2 \cdot 10^{-3}$ s la elongación de un punto situado a $+0{,}5$ m del origen de
+$4 \\cdot 10^{-3}$ s y 3 mm. La distancia mínima entre dos puntos cualesquiera de la cuerda que oscilan en fase
+es de 0,25 metros. En el instante $2 \\cdot 10^{-3}$ s la elongación de un punto situado a $+0{,}5$ m del origen de
 coordenadas es de $-1{,}5$ mm y su velocidad de oscilación en ese instante es positiva.
 
 a) Halle la frecuencia angular y la velocidad de propagación de la onda.
@@ -367,7 +367,7 @@ carga $-q$ desde el infinito a la posición $(a, a)$.
 b) El flujo del campo eléctrico a través de las superficies cerradas
 $S_1$ y $S_2$.
 
-Dato: Permitividad eléctrica del vacío; $\varepsilon_0 = 1/(4\pi K)$.`,
+Dato: Permitividad eléctrica del vacío; $\\varepsilon_0 = 1/(4\\pi K)$.`,
     apartados: [],
     puntos: 2,
   },
@@ -391,10 +391,10 @@ de la siguiente semana, para otra muestra de un litro, en cada una de las siguie
 a) Si no hubiese ningún aporte de $^{222}$Rn en el transcurso de esa semana.
 
 b) Si el cuarto día de esa semana la concentración de $^{222}$Rn en el acuífero experimentase un
-aumento súbito de $2 \cdot 10^{-16}$ g por cada litro de agua.
+aumento súbito de $2 \\cdot 10^{-16}$ g por cada litro de agua.
 
-Datos: Período de semidesintegración del $^{222}$Rn, $T_{1/2} = 3{,}8$ días; Masa atómica del $^{222}$Rn, $M_{222\text{-Rn}} = 222$ u; Número de
-Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$.`,
+Datos: Período de semidesintegración del $^{222}$Rn, $T_{1/2} = 3{,}8$ días; Masa atómica del $^{222}$Rn, $M_{222\\text{-Rn}} = 222$ u; Número de
+Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -418,8 +418,8 @@ distancia $x$ al centro de la Tierra, tal y como se muestra en la figura, a la q
 el satélite, para que el efecto del campo gravitatorio lunar sea superior al del campo
 gravitatorio terrestre.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
-Tierra, $R_T = 6{,}37 \cdot 10^3$ km; Masa de la Luna, $M_L = 7{,}35 \cdot 10^{22}\ \text{kg}$; Distancia de la Tierra a la Luna, $d = 3{,}84 \cdot 10^5$ km.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \\cdot 10^{24}\ \\text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \\cdot 10^3$ km; Masa de la Luna, $M_L = 7{,}35 \\cdot 10^{22}\ \\text{kg}$; Distancia de la Tierra a la Luna, $d = 3{,}84 \\cdot 10^5$ km.`,
     apartados: [],
     puntos: 2,
   },
@@ -436,7 +436,7 @@ puntual.
 b) La distancia a la que debe situarse el observador para que el nivel de intensidad sonora
 percibido se reduzca a una cuarta parte.
 
-Dato: Intensidad umbral, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
+Dato: Intensidad umbral, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -452,8 +452,8 @@ a) Calcule la aceleración que experimenta el ion en el instante inicial.
 b) Determine la fuerza total sobre el ion si a los 20 μs de ser depositado se aplica un campo
 magnético homogéneo de 0,6 T a lo largo del eje $+y$.
 
-Datos: Masa atómica del ion de He$^+$, $M_{\text{He}} = 4$ u; Número de Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$; Valor absoluto de la carga
-del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$.`,
+Datos: Masa atómica del ion de He$^+$, $M_{\\text{He}} = 4$ u; Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$; Valor absoluto de la carga
+del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -486,7 +486,7 @@ frenado y de la intensidad de corriente máxima para
 el haz de luz de 379 nm si se disminuyese a la mitad
 la intensidad del haz.
 
-Datos: Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$.`,
+Datos: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -499,11 +499,11 @@ Datos: Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$; Va
 a) Calcule el campo gravitatorio generado por la masa en el punto $(8, 6)$ m y la fuerza que
 experimentará una segunda partícula de masa 3 kg situada en dicho punto.
 
-b) Con el objetivo de alejar la segunda partícula, se le transmite una velocidad de $1{,}2 \cdot 10^{-5}$ m s$^{-1}$
+b) Con el objetivo de alejar la segunda partícula, se le transmite una velocidad de $1{,}2 \\cdot 10^{-5}$ m s$^{-1}$
 en la dirección de la recta que une ambas partículas. Halle el punto más alejado del origen que
 alcanzará dicha partícula.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -530,14 +530,14 @@ nula.`,
     tipo: "Electricidad", numero: "A.3",
     enunciado: `La figura representa una varilla metálica de 20 cm de longitud, cuyos extremos deslizan
 sin rozamiento sobre unos raíles horizontales, paralelos al eje $x$, metálicos y de resistencia
-despreciable. La varilla tiene resistencia despreciable y su velocidad es $\vec{v} = 2\ \hat{i}$ m s$^{-1}$. Los raíles están conectados en $x = 0$
-por una resistencia de valor $R = 0{,}5\ \Omega$. En la región hay un
-campo magnético uniforme $\vec{B} = -0{,}4\ \hat{k}$ T. Calcule:
+despreciable. La varilla tiene resistencia despreciable y su velocidad es $\\vec{v} = 2\ \\hat{i}$ m s$^{-1}$. Los raíles están conectados en $x = 0$
+por una resistencia de valor $R = 0{,}5\ \\Omega$. En la región hay un
+campo magnético uniforme $\\vec{B} = -0{,}4\ \\hat{k}$ T. Calcule:
 
 a) La intensidad de la corriente en el circuito formado por la
 varilla, la resistencia y los tramos de raíl entre ellas.
 
-b) La fuerza $\vec{F}$ que el campo magnético ejerce sobre la
+b) La fuerza $\\vec{F}$ que el campo magnético ejerce sobre la
 varilla.`,
     apartados: [],
     puntos: 2,
@@ -562,7 +562,7 @@ a) La vida media del isótopo y la actividad inicial de la muestra.
 b) El tiempo que debe transcurrir para que el contenido de $^{210}$Po de la muestra se reduzca a
 5 mg.
 
-Datos: Masa atómica del $^{210}$Po, $M_{\text{Po}} = 210$ u; Número de Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$.`,
+Datos: Masa atómica del $^{210}$Po, $M_{\\text{Po}} = 210$ u; Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -579,7 +579,7 @@ b) Suponga que un objeto se lanza verticalmente desde la superficie terrestre, c
 igual a la velocidad de escape de Marte. Si se desprecia el rozamiento, ¿qué altura máxima
 alcanzaría el objeto?
 
-Dato: Radio de la Tierra, $R_T = 6{,}37 \cdot 10^6$ m.`,
+Dato: Radio de la Tierra, $R_T = 6{,}37 \\cdot 10^6$ m.`,
     apartados: [],
     puntos: 2,
   },
@@ -599,7 +599,7 @@ b) ¿Cuál sería el nivel de intensidad en el punto B si se
 agregase sobre él otro foco de igual potencia a una
 altura de $h/2$?
 
-Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -613,9 +613,9 @@ de la primera, haciendo que el campo se anule en el origen de coordenadas.
 
 a) Determine la posición de la segunda carga.
 
-b) Si el potencial en el origen de coordenadas vale $1{,}08 \cdot 10^4$ V, encuentre el valor de las cargas.
+b) Si el potencial en el origen de coordenadas vale $1{,}08 \\cdot 10^4$ V, encuentre el valor de las cargas.
 
-Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
+Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -632,14 +632,14 @@ Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Un electrón relativista ha llegado a adquirir una energía cinética equivalente a la energía
-de un fotón de $5 \cdot 10^{-12}$ m de longitud de onda en el vacío. Calcule:
+de un fotón de $5 \\cdot 10^{-12}$ m de longitud de onda en el vacío. Calcule:
 
 a) La energía cinética del electrón, en eV.
 
 b) La velocidad del electrón.
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$;
-Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$; Masa del electrón en reposo, $m_e = 9{,}1 \cdot 10^{-31}\ \text{kg}$.`,
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Constante de Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$;
+Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$; Masa del electrón en reposo, $m_e = 9{,}1 \\cdot 10^{-31}\ \\text{kg}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -656,7 +656,7 @@ dicha masa.
 b) El trabajo realizado por el campo al trasladar un objeto puntual de 20 g desde el punto
 $(0, 6)$ m hasta el origen de coordenadas.
 
-Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -674,7 +674,7 @@ explosión, así como la intensidad del sonido en la posición del espectador.
 b) El nivel de intensidad sonora percibida si explotan 10 cohetes simultáneamente, y el
 espectador los oye todos al unísono 1,5 s después de explotar.
 
-Datos: Velocidad del sonido en el aire, $v_s = 340$ m s$^{-1}$; Valor umbral de la intensidad acústica, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
+Datos: Velocidad del sonido en el aire, $v_s = 340$ m s$^{-1}$; Valor umbral de la intensidad acústica, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -690,7 +690,7 @@ superficie esférica de 10 mm de diámetro centrada en el origen.
 b) Utilizando el valor del flujo obtenido en el apartado anterior, calcule el módulo del campo
 eléctrico en puntos situados a 5 mm de la carga.
 
-Dato: Permitividad eléctrica del vacío, $\varepsilon_0 = 8{,}85 \cdot 10^{-12}\ \text{C}^2\ \text{N}^{-1}\ \text{m}^{-2}$.`,
+Dato: Permitividad eléctrica del vacío, $\\varepsilon_0 = 8{,}85 \\cdot 10^{-12}\ \\text{C}^2\ \\text{N}^{-1}\ \\text{m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -715,10 +715,10 @@ a) Determine las diferencias de energía entre el primer nivel y el nivel fundam
 segundo nivel y el nivel fundamental, expresadas en electrón-voltios.
 
 b) Calcule la energía por unidad de tiempo que produce la emisión si el material emite
-$4 \cdot 10^{15}$ fotones s$^{-1}$.
+$4 \\cdot 10^{15}$ fotones s$^{-1}$.
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$; Velocidad de la
-luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Constante de Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$; Velocidad de la
+luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -734,7 +734,7 @@ a) La velocidad orbital y la energía mecánica que posee la sonda espacial.
 b) La energía mínima necesaria que habría que suministrarle para que abandone el campo
 gravitatorio del planeta.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de Saturno, $M_s = 5{,}68 \cdot 10^{26}\ \text{kg}$.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa de Saturno, $M_s = 5{,}68 \\cdot 10^{26}\ \\text{kg}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -744,7 +744,7 @@ Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N 
     tipo: "Ondas", numero: "B.2",
     enunciado: `El valor del campo eléctrico asociado a una onda electromagnética que se propaga
 en un medio material en la dirección del eje $x$ viene expresado por:
-$$E(x,t) = 4\cos(3{,}43 \cdot 10^{15}\, t - 1{,}52 \cdot 10^7\, x)\ \text{N C}^{-1},$$
+$$E(x,t) = 4\\cos(3{,}43 \\cdot 10^{15}\, t - 1{,}52 \\cdot 10^7\, x)\ \\text{N C}^{-1},$$
 donde todas las magnitudes están expresadas en unidades del SI. Calcule:
 
 a) La frecuencia y la longitud de onda asociadas a la onda electromagnética.
@@ -752,7 +752,7 @@ a) La frecuencia y la longitud de onda asociadas a la onda electromagnética.
 b) La velocidad de propagación de la onda y el índice de refracción del medio por el cual se
 propaga.
 
-Dato: Velocidad de la luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
+Dato: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -768,8 +768,8 @@ a) El campo magnético creado por el hilo en el punto $(0, 5, 0)$ cm.
 b) La fuerza magnética que experimenta un electrón cuando está en la posición $(0, 5, 0)$ cm y
 tiene una velocidad de 1000 m s$^{-1}$ en sentido positivo del eje $y$.
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Permeabilidad magnética del vacío,
-$\mu_0 = 4\pi \cdot 10^{-7}\ \text{T m A}^{-1}$.`,
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Permeabilidad magnética del vacío,
+$\\mu_0 = 4\\pi \\cdot 10^{-7}\ \\text{T m A}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -790,7 +790,7 @@ $\mu_0 = 4\pi \cdot 10^{-7}\ \text{T m A}^{-1}$.`,
 
 a) Obtenga la vida media y la constante radiactiva del isótopo.
 
-b) Si una muestra tiene $5 \cdot 10^{20}$ átomos radiactivos en el momento inicial, calcule la actividad
+b) Si una muestra tiene $5 \\cdot 10^{20}$ átomos radiactivos en el momento inicial, calcule la actividad
 inicial y el tiempo que debe trascurrir para que dicha actividad se reduzca a la décima
 parte.`,
     apartados: [],
@@ -801,13 +801,13 @@ parte.`,
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `Un satélite sigue una órbita circular sincrónica (es decir, del mismo período que el de
-rotación del planeta) de radio $1{,}59 \cdot 10^5$ km en torno a un planeta de masa $1{,}90 \cdot 10^{27}$ kg. Calcule:
+rotación del planeta) de radio $1{,}59 \\cdot 10^5$ km en torno a un planeta de masa $1{,}90 \\cdot 10^{27}$ kg. Calcule:
 
 a) La velocidad del satélite en la órbita.
 
 b) El periodo de rotación del planeta sobre su eje.
 
-Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -817,11 +817,11 @@ Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m
     tipo: "Ondas", numero: "A.2",
     enunciado: `Una onda armónica unidimensional, que se propaga en un medio con una velocidad
 de 400 m s$^{-1}$, está descrita por la siguiente expresión matemática:
-$$y(x,t) = 3\sin\!\left(200\pi t - kx + \varphi_0\right)\ \text{cm},$$
+$$y(x,t) = 3\\sin\!\\left(200\\pi t - kx + \\varphi_0\\right)\ \\text{cm},$$
 donde $x$ y $t$ están en m y s, respectivamente. Sabiendo que $y(0, 0) = 1{,}5$ cm y que la velocidad de
 oscilación en $t = 0$ y $x = 0$ es positiva, halle:
 
-a) El número de onda $k$ y la fase inicial $\varphi_0$.
+a) El número de onda $k$ y la fase inicial $\\varphi_0$.
 
 b) La aceleración máxima de oscilación de un punto genérico del eje $x$.`,
     apartados: [],
@@ -834,14 +834,14 @@ b) La aceleración máxima de oscilación de un punto genérico del eje $x$.`,
     enunciado: `Una barra conductora, de 30 cm de longitud y paralela al eje $y$, se mueve en el plano
 $xy$ con una velocidad en el sentido positivo del eje $x$. La barra se mueve sobre unos rieles conductores
 paralelos en forma de U (ver figura). Perpendicular al plano,
-hay un campo magnético uniforme $\vec{B} = -10^{-3}\ \hat{k}$ T. Halle la fuerza
+hay un campo magnético uniforme $\\vec{B} = -10^{-3}\ \\hat{k}$ T. Halle la fuerza
 electromotriz inducida en la barra en función del tiempo en los
 siguientes casos:
 
-a) La velocidad de la barra es constante e igual a $\vec{v} = 10^2\ \hat{i}$ m s$^{-1}$.
+a) La velocidad de la barra es constante e igual a $\\vec{v} = 10^2\ \\hat{i}$ m s$^{-1}$.
 
 b) La barra parte del reposo y su aceleración es
-constante e igual a $\vec{a} = 5\ \hat{i}$ m s$^{-2}$.`,
+constante e igual a $\\vec{a} = 5\ \\hat{i}$ m s$^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -860,7 +860,7 @@ constante e igual a $\vec{a} = 5\ \hat{i}$ m s$^{-2}$.`,
     enunciado: `Se tienen dos fuentes radiactivas cuya actividad a día de hoy es la misma. Se sabe
 que dentro de 10 años la actividad de la primera fuente será el doble que la de la segunda. Determine:
 
-a) La diferencia, $\lambda_2 - \lambda_1$, que existe entre las constantes de desintegración de ambas fuentes.
+a) La diferencia, $\\lambda_2 - \\lambda_1$, que existe entre las constantes de desintegración de ambas fuentes.
 
 b) La relación entre las actividades de dichas fuentes dentro de 20 años.`,
     apartados: [],
@@ -870,13 +870,13 @@ b) La relación entre las actividades de dichas fuentes dentro de 20 años.`,
     id: "f-2020-jun-B1",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
-    enunciado: `Se tiene un planeta de masa $1{,}95 \cdot 10^{25}$ kg y radio 5500 km. Determine:
+    enunciado: `Se tiene un planeta de masa $1{,}95 \\cdot 10^{25}$ kg y radio 5500 km. Determine:
 
 a) El módulo de la aceleración de la gravedad en la superficie de dicho planeta.
 
 b) La velocidad de escape desde la superficie del planeta.
 
-Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -891,7 +891,7 @@ a) La potencia del foco.
 
 b) El nivel de intensidad sonora a 2 m del foco.
 
-Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -899,7 +899,7 @@ Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
     id: "f-2020-jun-B3",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
-    enunciado: `Se tienen cuatro cargas cuyo valor absoluto es $|q| = 1 \cdot 10^{-6}$ C, situadas en los vértices
+    enunciado: `Se tienen cuatro cargas cuyo valor absoluto es $|q| = 1 \\cdot 10^{-6}$ C, situadas en los vértices
 de un cuadrado de lado $a = 30$ cm, que está en el plano $xy$. Dos de ellas son positivas y están en los
 puntos $(0, 0)$ y $(a, a)$. Las otras dos son negativas y están situadas en los puntos $(0, a)$ y $(a, 0)$. Calcule:
 
@@ -907,7 +907,7 @@ a) La fuerza que se ejerce sobre la carga $+q$ situada en el punto $(a, a)$ debi
 
 b) La energía potencial de la carga situada en el origen de coordenadas debida a las otras tres.
 
-Dato: Constante de la ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
+Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -938,10 +938,10 @@ asociada a los electrones que se
 emiten, con máxima energía
 cinética, cuando la frecuencia de
 los fotones incidentes es de
-$10 \cdot 10^{14}$ Hz.
+$10 \\cdot 10^{14}$ Hz.
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Masa del electrón, $m_e = 9{,}1 \cdot 10^{-31}\ \text{kg}$; Constante de
-Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$.`,
+Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Masa del electrón, $m_e = 9{,}1 \\cdot 10^{-31}\ \\text{kg}$; Constante de
+Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -958,7 +958,7 @@ el origen de coordenadas.
 b) Situadas las masas $m_1$ y $m_2$ en las posiciones anteriores, ¿a qué distancia del origen de
 coordenadas, el campo gravitatorio resultante es nulo?
 
-Dato: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$.`,
+Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -974,7 +974,7 @@ a) La intensidad de la onda sonora.
 
 b) El nivel de intensidad sonora.
 
-Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \text{W m}^{-2}$.`,
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -991,7 +991,7 @@ a) El vector campo magnético en el punto $P(0, 2, 0)$ cm y en el punto $Q(1, 1,
 b) La fuerza magnética por unidad de longitud que actúa sobre el conductor que pasa por el
 punto $A(2, 2, 0)$ cm debida a la presencia del otro, indicando su dirección y sentido.
 
-Dato: Permeabilidad magnética del vacío, $\mu_0 = 4\pi \cdot 10^{-7}$ N A$^{-2}$.`,
+Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}$ N A$^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -1015,8 +1015,8 @@ b) Si se hace incidir sobre otro metal la misma radiación del apartado anterior
 que el potencial de frenado es de 4,08 V. Calcule el trabajo de extracción de este nuevo
 metal.
 
-Datos: Constante de Planck, $h = 6{,}63 \cdot 10^{-34}\ \text{J s}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \cdot 10^{-19}\ \text{C}$; Velocidad de la
-luz en el vacío, $c = 3 \cdot 10^8\ \text{m s}^{-1}$.`,
+Datos: Constante de Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Velocidad de la
+luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -1032,8 +1032,8 @@ a) La altura sobre el ecuador terrestre del satélite y su velocidad orbital.
 b) La fuerza centrípeta necesaria para que describa la órbita y la energía total del satélite en
 dicha órbita.
 
-Datos: Constante de Gravitación Universal, $G = 6{,}67 \cdot 10^{-11}\ \text{N m}^2\ \text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \cdot 10^{24}\ \text{kg}$; Radio de la
-Tierra, $R_T = 6{,}37 \cdot 10^6$ m.`,
+Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \\cdot 10^{24}\ \\text{kg}$; Radio de la
+Tierra, $R_T = 6{,}37 \\cdot 10^6$ m.`,
     apartados: [],
     puntos: 2,
   },
@@ -1041,7 +1041,7 @@ Tierra, $R_T = 6{,}37 \cdot 10^6$ m.`,
     id: "f-2019-jun-B2",
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
-    enunciado: `Una onda armónica transversal de frecuencia $f = 0{,}25$ Hz y longitud de onda $\lambda = 2$ m se
+    enunciado: `Una onda armónica transversal de frecuencia $f = 0{,}25$ Hz y longitud de onda $\\lambda = 2$ m se
 propaga en el sentido positivo del eje $x$. Sabiendo que el punto situado en $x = 0{,}5$ m tiene, en el
 instante $t = 2$ s, elongación nula y velocidad de oscilación negativa, y en el instante $t = 3$ s, elongación
 $y = -0{,}2$ m, determine:
@@ -1066,7 +1066,7 @@ a) El campo eléctrico y el potencial eléctrico en el origen de coordenadas.
 
 b) En qué punto situado en el segmento que une las dos cargas el potencial eléctrico se anula.
 
-Dato: Constante de la Ley de Coulomb, $K = 9 \cdot 10^9\ \text{N m}^2\ \text{C}^{-2}$.`,
+Dato: Constante de la Ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{C}^{-2}$.`,
     apartados: [],
     puntos: 2,
   },
@@ -1089,7 +1089,7 @@ a) El tiempo necesario para que la muestra se reduzca a 2 mg.
 
 b) Los valores de la actividad inicial y final.
 
-Dato: Número de Avogadro, $N_A = 6{,}02 \cdot 10^{23}\ \text{mol}^{-1}$.`,
+Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     apartados: [],
     puntos: 2,
   },

@@ -53,14 +53,14 @@ export const examenes: Examen[] = [
         enunciado: "En el baloncesto existen canastas que valen un punto, otras que valen dos y otras\nque valen tres puntos. Calcule el número de lanzamientos de uno, de dos y de tres puntos que realizó un equipo\nen un partido sabiendo que:\n• El equipo anotó 80 puntos con un acierto del 80% en tiros de uno, del 50% en tiros de dos y del 40% en tiros\nde tres.\n• La tercera parte del número de lanzamientos de dos fue igual a la quinta parte del resto de lanzamientos.\n• El doble del número de lanzamientos de tres es menor en cinco unidades al resto de lanzamientos.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-12", bloque: "Algebra", opcion: "B",
-        enunciado: `Sean la matriz $A = \begin{pmatrix}4&1&0\\2&3&0\\3&2&2\end{pmatrix}$ e $I$ la matriz identidad de orden 3. Se pide:
+        enunciado: `Sean la matriz $A = \\begin{pmatrix}4&1&0\\\\2&3&0\\\\3&2&2\\end{pmatrix}$ e $I$ la matriz identidad de orden 3. Se pide:
 
-a) (1.25 puntos) Calcular el polinomio $P(\lambda) = \det(A - \lambda I)$ y hallar las raíces reales del polinomio.
+a) (1.25 puntos) Calcular el polinomio $P(\\lambda) = \\det(A - \\lambda I)$ y hallar las raíces reales del polinomio.
 
-b) (1.25 puntos) Para $\lambda = 5$, calcular un vector no nulo $\vec{v} = \begin{pmatrix}x\\y\\z\end{pmatrix}$ que satisfaga que $(A - \lambda I)\vec{v} = \vec{0}$.`,
+b) (1.25 puntos) Para $\\lambda = 5$, calcular un vector no nulo $\\vec{v} = \\begin{pmatrix}x\\y\\z\\end{pmatrix}$ que satisfaga que $(A - \\lambda I)\\vec{v} = \\vec{0}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-2", bloque: "Analisis", opcion: "A",
-        enunciado: `Un muro rectangular de la biblioteca pública del barrio se va a pintar con la ayuda de unos grafiteros. La dimensión del muro es de 3 metros de alto y 12 metros de largo. Colocando la esquina inferior izquierda del muro en el origen de coordenadas, se va a utilizar la curva $f(x) = \cos\!\left(\dfrac{\pi x}{9}\right) + 2$ para diferenciar dos regiones del muro que serán pintadas con dos colores distintos. Se sabe que con un bote de spray se pueden pintar 3 metros cuadrados de superficie.
+        enunciado: `Un muro rectangular de la biblioteca pública del barrio se va a pintar con la ayuda de unos grafiteros. La dimensión del muro es de 3 metros de alto y 12 metros de largo. Colocando la esquina inferior izquierda del muro en el origen de coordenadas, se va a utilizar la curva $f(x) = \\cos\!\\left(\\dfrac{\\pi x}{9}\\right) + 2$ para diferenciar dos regiones del muro que serán pintadas con dos colores distintos. Se sabe que con un bote de spray se pueden pintar 3 metros cuadrados de superficie.
 
 a) (0.75 puntos) Halle el valor máximo y el valor mínimo de la función $f(x)$ en el intervalo $[0, 12]$. ¿Está la curva en este intervalo $[0, 12]$ contenida completamente en el muro?
 
@@ -69,25 +69,25 @@ b) (1.25 puntos) Halle el área que tienen que pintar de cada color.
 c) (0.5 puntos) ¿Cuántos botes de spray se tienen que comprar como mínimo para pintar toda el área bajo la curva $f(x)$?`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-31", bloque: "Geometria", opcion: "A",
-        enunciado: `Dados la recta $r \equiv \dfrac{x-1}{2} = \dfrac{y}{0} = \dfrac{z-2}{1}$ y el plano $\pi: x + 2y - 3z = 1$, se pide:
+        enunciado: `Dados la recta $r \\equiv \\dfrac{x-1}{2} = \\dfrac{y}{0} = \\dfrac{z-2}{1}$ y el plano $\\pi: x + 2y - 3z = 1$, se pide:
 
-a) (0.75 puntos) Hallar una ecuación del plano que contiene a $r$ y es perpendicular a $\pi$.
+a) (0.75 puntos) Hallar una ecuación del plano que contiene a $r$ y es perpendicular a $\\pi$.
 
-b) (0.75 puntos) Hallar una ecuación de la recta contenida en $\pi$ que corta perpendicularmente a $r$.
+b) (0.75 puntos) Hallar una ecuación de la recta contenida en $\\pi$ que corta perpendicularmente a $r$.
 
-c) (1 punto) Calcular los puntos de la recta $r$ cuya distancia al plano $\pi$ es $\sqrt{14}$.`,
+c) (1 punto) Calcular los puntos de la recta $r$ cuya distancia al plano $\\pi$ es $\\sqrt{14}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-32", bloque: "Geometria", opcion: "B",
         enunciado: "Sean el punto P (0, 1, 1) y el plano π : x + y = 2. Se pide:\n\na) (0.5 puntos) Hallar la distancia del punto P al plano π.\n\nb) (1 punto) Determinar el punto Q del plano π cuya distancia a P es igual que la distancia de P a π.\n\nc) (1 punto) Hallar el área del triángulo formado por P y los puntos de corte del plano π con los ejes coorde-\nnados.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-41", bloque: "Probabilidad", opcion: "A",
-        enunciado: `Sea $E = \{2, 3, 5, 7, 11, 13, 17, 19\}$ un espacio muestral y $P$ una medida de probabilidad en $E$ definida por: $P(7) = P(3) = \dfrac{1}{4}$ y con el resto de sucesos elementales equiprobables.
+        enunciado: `Sea $E = \{2, 3, 5, 7, 11, 13, 17, 19\}$ un espacio muestral y $P$ una medida de probabilidad en $E$ definida por: $P(7) = P(3) = \\dfrac{1}{4}$ y con el resto de sucesos elementales equiprobables.
 
 Se consideran los sucesos $A = \{7, 11, 13, 19\}$, $B = \{2, 5, 7, 13, 17\}$ y $C = \{3, 5, 7, 11, 13\}$. Se pide calcular:
 
-a) (1.25 puntos) $P\bigl((A - C) \cap B\bigr)$.
+a) (1.25 puntos) $P\\bigl((A - C) \\cap B\\bigr)$.
 
-b) (1.25 puntos) $P\bigl((A \cap B) \mid C\bigr)$.`,
+b) (1.25 puntos) $P\\bigl((A \\cap B) \mid C\\bigr)$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-42", bloque: "Probabilidad", opcion: "B",
         enunciado: "Entre los ciudadanos de 14 años o más de cierto país, el 20% de la población tiene entre 14 y 24\naños, el 50% entre 25 y 64 y el resto más de 64 años. Según datos recogidos por el ministerio de cultura de ese\npaís, el 74% de sus ciudadanos de entre 14 y 24 es lector habitual, mientras que el porcentaje decrece hasta el\n65.8% entre los de 25 a 64 y al 53.7% entre los mayores de 64. Elegido un ciudadano al azar del país en cuestión\nde 14 años o más, se pide:\n\na) (1.25 puntos) Calcular la probabilidad de que sea lector habitual.\n\nb) (1.25 puntos) Si no es lector habitual, calcular la probabilidad de que tenga entre 25 y 64 años.",
@@ -130,39 +130,39 @@ b) (1.25 puntos) $P\bigl((A \cap B) \mid C\bigr)$.`,
         enunciado: "Se tienen listones de madera de tres longitudes diferentes: largos, intermedios y cortos. Puestos uno tras otro,\ntanto con dos listones largos y cuatro intermedios como con tres intermedios y quince cortos se consigue la\nmisma longitud total. Un listón largo supera en 17 cm la medida de uno intermedio más uno corto. Y con nueve\nlistones cortos hemos de añadir 7 cm para igualar la longitud de uno intermedio seguido por uno largo. Se pide\ncalcular la longitud de cada tipo de listón.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-A2", bloque: "Analisis", opcion: "A",
-        enunciado: `Para la función $f(x) = x^4 + \pi x^3 + \pi^2 x^2 + \pi^3 x + \pi^4$, se pide:
+        enunciado: `Para la función $f(x) = x^4 + \\pi x^3 + \\pi^2 x^2 + \\pi^3 x + \\pi^4$, se pide:
 
-a) (0.5 puntos) Calcular la ecuación de la recta tangente a la gráfica de $f(x)$ en $x = \pi$.
+a) (0.5 puntos) Calcular la ecuación de la recta tangente a la gráfica de $f(x)$ en $x = \\pi$.
 
-b) (1 punto) Probar que $f(x)$ tiene, al menos, un punto con derivada nula en el intervalo $(-\pi, 0)$ utilizando justificadamente el teorema de Rolle. Probar de nuevo la misma afirmación utilizando adecuadamente, esta vez, el teorema de Bolzano.
+b) (1 punto) Probar que $f(x)$ tiene, al menos, un punto con derivada nula en el intervalo $(-\\pi, 0)$ utilizando justificadamente el teorema de Rolle. Probar de nuevo la misma afirmación utilizando adecuadamente, esta vez, el teorema de Bolzano.
 
-c) (1 punto) Si $g(x) = f(-x)$, calcular el área entre las gráficas de $f(x)$ y $g(x)$ en el intervalo $[0, \pi]$.`,
+c) (1 punto) Si $g(x) = f(-x)$, calcular el área entre las gráficas de $f(x)$ y $g(x)$ en el intervalo $[0, \\pi]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-A3", bloque: "Geometria", opcion: "A",
         enunciado: "Dados los puntos A(0, 0, 1) y B(1, 1, 0), se pide:\n\na) (1 punto) Hallar una ecuación del plano que pasa por los puntos A y B y es perpendicular al plano z = 0.\n\nb) (1.5 puntos) Hallar ecuaciones de dos rectas paralelas, r1 y r2, que pasen por los puntos A y B respectiva-\nmente, estén en el plano x + z = 1 y tales que la distancia entre ellas sea 1.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-A4", bloque: "Probabilidad", opcion: "A",
-        enunciado: `Sabiendo que $P(\overline{A}) = \dfrac{11}{20}$, $P(A|B) - P(B|A) = \dfrac{1}{24}$ y $P(A \cap B) = \dfrac{3}{10}$, se pide:
+        enunciado: `Sabiendo que $P(\\overline{A}) = \\dfrac{11}{20}$, $P(A|B) - P(B|A) = \\dfrac{1}{24}$ y $P(A \\cap B) = \\dfrac{3}{10}$, se pide:
 
-a) (1.5 puntos) Calcular $P(\overline{A} \cap B)$ y $P(B)$.
+a) (1.5 puntos) Calcular $P(\\overline{A} \\cap B)$ y $P(B)$.
 
-b) (1 punto) Calcular $P(C)$, siendo $C$ otro suceso del espacio muestral, independiente de $A$ y que verifica que $P(A \cup C) = \dfrac{14}{25}$.`,
+b) (1 punto) Calcular $P(C)$, siendo $C$ otro suceso del espacio muestral, independiente de $A$ y que verifica que $P(A \\cup C) = \\dfrac{14}{25}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-B1", bloque: "Algebra", opcion: "B",
-        enunciado: `Consideremos las matrices reales $A = \begin{pmatrix}3&-1&1\\1&1&1\\1&-1&3\end{pmatrix}$, $B = \begin{pmatrix}b&2b&b\\2b&3b&b\\b&b&b\end{pmatrix}$ y $C = \begin{pmatrix}2&0&0\\0&2&0\\0&0&3\end{pmatrix}$, con $b \neq 0$. Se pide:
+        enunciado: `Consideremos las matrices reales $A = \\begin{pmatrix}3&-1&1\\\\1&1&1\\\\1&-1&3\\end{pmatrix}$, $B = \\begin{pmatrix}b&2b&b\\\\2b&3b&b\\b&b&b\\end{pmatrix}$ y $C = \\begin{pmatrix}2&0&0\\\\0&2&0\\\\0&0&3\\end{pmatrix}$, con $b \\neq 0$. Se pide:
 
 a) (1.25 puntos) Encontrar todos los valores de $b$ para los que se verifica $BCB^{-1} = A$.
 
 b) (0.75 puntos) Calcular el determinante de la matriz $AA^t$.
 
-c) (0.5 puntos) Resolver el sistema $B\begin{pmatrix}x\\y\\z\end{pmatrix} = \begin{pmatrix}3\\-1\\1\end{pmatrix}$ para $b = 1$.`,
+c) (0.5 puntos) Resolver el sistema $B\\begin{pmatrix}x\\y\\z\\end{pmatrix} = \\begin{pmatrix}3\\\\-1\\\\1\\end{pmatrix}$ para $b = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-B2", bloque: "Analisis", opcion: "B",
         enunciado: `Calcule:
 
-a) (1.25 puntos) $\displaystyle\int_1^e (x+2)\ln x\,dx$.
+a) (1.25 puntos) $\\displaystyle\\int_1^e (x+2)\\ln x\,dx$.
 
-b) (1.25 puntos) $\displaystyle\lim_{x \to \frac{\pi}{2}} \left(\tan\frac{x}{2}\right)^{\frac{1}{\cos x}}$.`,
+b) (1.25 puntos) $\\displaystyle\\lim_{x \\to \\frac{\\pi}{2}} \\left(\\tan\\frac{x}{2}\\right)^{\\frac{1}{\\cos x}}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-B3", bloque: "Geometria", opcion: "B",
         enunciado: "Al ordenador de una impresora 3D se le suministraron ayer las coordenadas de los cuatro vértices P1, P2, P3 y\nP4 de un tetraedro sólido, el cual construyó al momento. Se sabe que P1(1, 1, 1), P2(2, 1, 0) y P3(1, 3, 2), pero del\ncuarto punto P4(3, a, 3) hoy no estamos seguros del valor de su segunda coordenada.\n\na) (1.5 puntos) A partir de la cantidad de material utilizado por la impresora sabemos que el volumen del\ntetraedro es V = 1. También sabemos que la longitud de ninguna de sus aristas supera la altura de la\nimpresora, que es de 10. Determine los posibles valores de a.\n\nb) (1 punto) Dado el punto Q(3, 3, 3), se quiere imprimir ahora el paralelepípedo que tiene a los segmentos\nP1P2, P1P3 y P1Q como aristas. ¿Cuáles serían los valores de las coordenadas de los ocho vértices del\nparalelepípedo que habría que suministrar al ordenador?",
@@ -208,7 +208,7 @@ b) (1.25 puntos) $\displaystyle\lim_{x \to \frac{\pi}{2}} \left(\tan\frac{x}{2}\
         enunciado: "En una obra, para transportar la tierra extraída para la construcción de los cimientos de un edificio, se usan tres\ntipos de camiones diferentes: A, B y C. Los camiones de tipo A tienen una capacidad de 14 toneladas, los de\ntipo B, de 24 toneladas y los de tipo C, de 28 toneladas. Habría que traer un camión más de tipo A para igualar\nal número de camiones restantes. El 10 % de la capacidad de todos los camiones tipo B supone un séptimo de la\nde los de mayor tonelaje. Hoy, realizando un único viaje cada camión a máxima capacidad, se han extraído de la\nobra 302 toneladas de tierra. ¿Cuánta tierra ha sido transportada hoy por los camiones de cada tipo?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2023-J-A2", bloque: "Analisis", opcion: "A",
-        enunciado: `Dada la función $f(x) = \sqrt[3]{(x^2-1)^2}$, se pide:
+        enunciado: `Dada la función $f(x) = \\sqrt[3]{(x^2-1)^2}$, se pide:
 
 a) (0.25 puntos) Estudiar si es par o impar.
 
@@ -224,7 +224,7 @@ c) (1.5 puntos) Estudiar sus extremos relativos y absolutos.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2023-J-B1", bloque: "Algebra", opcion: "B",
         enunciado: `Dado el sistema
-$$\begin{cases}(a+1)x + 4y = 0 \\ (a-1)y + z = 3 \\ 4x + 2ay + z = 3\end{cases}$$
+$$\\begin{cases}(a+1)x + 4y = 0 \\\\ (a-1)y + z = 3 \\\\ 4x + 2ay + z = 3\\end{cases}$$
 se pide:
 
 a) (1.25 puntos) Discutirlo en función del parámetro $a$.
@@ -235,21 +235,21 @@ c) (0.75 puntos) Resolverlo para $a = 5$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2023-J-B2", bloque: "Analisis", opcion: "B",
         enunciado: `Dada la función real de variable real definida sobre su dominio como
-$$f(x) = \begin{cases} \dfrac{x^2}{2+x^2} & \text{si } x \leq -1 \\ \dfrac{2x^2}{3} - 3x & \text{si } x > -1 \end{cases}$$
+$$f(x) = \\begin{cases} \\dfrac{x^2}{2+x^2} & \\text{si } x \\leq -1 \\\\ \\dfrac{2x^2}{3} - 3x & \\text{si } x > -1 \\end{cases}$$
 se pide:
 
-a) (0.75 puntos) Estudiar la continuidad de la función en $\mathbb{R}$.
+a) (0.75 puntos) Estudiar la continuidad de la función en $\\mathbb{R}$.
 
-b) (1 punto) Calcular el siguiente límite: $\displaystyle\lim_{x \to -\infty} f(x)^{2x^2-1}$.
+b) (1 punto) Calcular el siguiente límite: $\\displaystyle\\lim_{x \\to -\\infty} f(x)^{2x^2-1}$.
 
-c) (0.75 puntos) Calcular la siguiente integral: $\displaystyle\int_{-1}^{0} f(x)\,dx$.`,
+c) (0.75 puntos) Calcular la siguiente integral: $\\displaystyle\\int_{-1}^{0} f(x)\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2023-J-B3", bloque: "Geometria", opcion: "B",
-        enunciado: `Dada la recta $r \equiv \dfrac{x-1}{2} = \dfrac{y}{1} = \dfrac{z+1}{-2}$, el plano $\pi: x - z = 2$ y el punto $A(1, 1, 1)$, se pide:
+        enunciado: `Dada la recta $r \\equiv \\dfrac{x-1}{2} = \\dfrac{y}{1} = \\dfrac{z+1}{-2}$, el plano $\\pi: x - z = 2$ y el punto $A(1, 1, 1)$, se pide:
 
-a) (0.75 puntos) Estudiar la posición relativa de $r$ y $\pi$ y calcular su intersección, si existe.
+a) (0.75 puntos) Estudiar la posición relativa de $r$ y $\\pi$ y calcular su intersección, si existe.
 
-b) (0.75 puntos) Calcular la proyección ortogonal del punto $A$ sobre el plano $\pi$.
+b) (0.75 puntos) Calcular la proyección ortogonal del punto $A$ sobre el plano $\\pi$.
 
 c) (1 punto) Calcular el punto simétrico del punto $A$ con respecto a la recta $r$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
@@ -292,24 +292,24 @@ c) (1 punto) Calcular el punto simétrico del punto $A$ con respecto a la recta 
     preguntas: [
       { id: "2022-J-A1", bloque: "Algebra", opcion: "A",
         enunciado: `Dado el siguiente sistema de ecuaciones lineales dependientes del parámetro real $m$:
-$$\begin{cases} x - 2my + z = 1 \\ mx + 2y - z = -1 \\ x - y + z = 1 \end{cases}$$
+$$\\begin{cases} x - 2my + z = 1 \\\\ mx + 2y - z = -1 \\\\ x - y + z = 1 \\end{cases}$$
 
 a) (2 puntos) Discuta el sistema en función de los valores de $m$.
 
-b) (0.5 puntos) Resuelva el sistema para el valor $m = \dfrac{1}{2}$.`,
+b) (0.5 puntos) Resuelva el sistema para el valor $m = \\dfrac{1}{2}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-A2", bloque: "Analisis", opcion: "A",
         enunciado: `Sea la función
-$$f(x) = \begin{cases} x^3 e^{-1/x^2} & \text{si } x \neq 0 \\ 0 & \text{si } x = 0 \end{cases}$$
+$$f(x) = \\begin{cases} x^3 e^{-1/x^2} & \\text{si } x \\neq 0 \\\\ 0 & \\text{si } x = 0 \\end{cases}$$
 
 a) (1 punto) Estudie la continuidad y derivabilidad de $f(x)$ en $x = 0$.
 
 b) (0.5 puntos) Estudie si $f(x)$ presenta algún tipo de simetría par o impar.
 
-c) (1 punto) Calcule la siguiente integral: $\displaystyle\int_1^2 \dfrac{f(x)}{x^6}\,dx$.`,
+c) (1 punto) Calcule la siguiente integral: $\\displaystyle\\int_1^2 \\dfrac{f(x)}{x^6}\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Con un dispositivo láser situado en el punto $P(1, 1, 1)$ se ha podido seguir la trayectoria de una partícula que se desplaza sobre la recta de ecuaciones $r \equiv \begin{cases} 2x - y = 10 \\ x - z = -90 \end{cases}$.
+        enunciado: `Con un dispositivo láser situado en el punto $P(1, 1, 1)$ se ha podido seguir la trayectoria de una partícula que se desplaza sobre la recta de ecuaciones $r \\equiv \\begin{cases} 2x - y = 10 \\\\ x - z = -90 \\end{cases}$.
 
 a) (0.5 puntos) Calcule un vector director de $r$ y la posición de la partícula cuando su trayectoria incide con el plano $z = 0$.
 
@@ -324,20 +324,20 @@ c) (0.75 puntos) Determine el ángulo entre el plano de ecuación $x + y = 2$ y 
         enunciado: "Tres primos, Pablo, Alejandro y Alicia, se van a repartir un premio de 9450 euros de forma directamente propor-\ncional a sus edades. La suma de las edades de Pablo y Alejandro excede en tres años al doble de la edad de\nAlicia. Además, la edad de los tres primos juntos es de 45 años. Sabiendo que en el reparto del premio Pablo\nrecibe 420 euros más que Alicia, calcule las edades de los tres primos y el dinero que recibe cada uno por el\npremio.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-B2", bloque: "Analisis", opcion: "B",
-        enunciado: `Sea la función $f(x) = \dfrac{x}{x^2+1}$.
+        enunciado: `Sea la función $f(x) = \\dfrac{x}{x^2+1}$.
 
 a) (0.5 puntos) Compruebe si $f(x)$ verifica las hipótesis del Teorema de Bolzano en el intervalo $[-1, 1]$.
 
-b) (1 punto) Calcule y clasifique los extremos relativos de $f(x)$ en $\mathbb{R}$.
+b) (1 punto) Calcule y clasifique los extremos relativos de $f(x)$ en $\\mathbb{R}$.
 
 c) (1 punto) Determine el área comprendida entre la gráfica de la función $f(x)$ y el eje $OX$ en el intervalo $[-1, 1]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-B3", bloque: "Geometria", opcion: "B",
-        enunciado: `Sean el plano $\pi \equiv x + y + z = 1$, la recta $r_1 \equiv \begin{cases} x = 1 + \lambda \\ y = 1 - \lambda \\ z = -1 \end{cases}$, $\lambda \in \mathbb{R}$, y el punto $P(0, 1, 0)$.
+        enunciado: `Sean el plano $\\pi \\equiv x + y + z = 1$, la recta $r_1 \\equiv \\begin{cases} x = 1 + \\lambda \\\\ y = 1 - \\lambda \\\\ z = -1 \\end{cases}$, $\\lambda \\in \\mathbb{R}$, y el punto $P(0, 1, 0)$.
 
-a) (0.5 puntos) Verifique que la recta $r_1$ está contenida en el plano $\pi$ y que el punto $P$ pertenece al mismo plano.
+a) (0.5 puntos) Verifique que la recta $r_1$ está contenida en el plano $\\pi$ y que el punto $P$ pertenece al mismo plano.
 
-b) (0.75 puntos) Halle una ecuación de la recta contenida en el plano $\pi$ que pase por $P$ y sea perpendicular a $r_1$.
+b) (0.75 puntos) Halle una ecuación de la recta contenida en el plano $\\pi$ que pase por $P$ y sea perpendicular a $r_1$.
 
 c) (1.25 puntos) Calcule una ecuación de la recta $r_2$ que pase por $P$ y sea paralela a $r_1$. Halle el área de un cuadrado que tenga dos de sus lados sobre las rectas $r_1$ y $r_2$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
@@ -385,20 +385,20 @@ c) (1.25 puntos) Calcule una ecuación de la recta $r_2$ que pase por $P$ y sea 
         enunciado: "Calcule el área de la región delimitada por las gráficas de las funciones\nf (x) = 2 + x − x2, g(x) = 2x2 − 4x.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Sean la recta $r \equiv \begin{cases} -x - y + z = 0 \\ 2x + 3y - z + 1 = 0 \end{cases}$ y el plano $\pi \equiv 2x + y - z + 3 = 0$. Se pide:
+        enunciado: `Sean la recta $r \\equiv \\begin{cases} -x - y + z = 0 \\\\ 2x + 3y - z + 1 = 0 \\end{cases}$ y el plano $\\pi \\equiv 2x + y - z + 3 = 0$. Se pide:
 
-a) (0.75 puntos) Calcular el ángulo que forman $r$ y $\pi$.
+a) (0.75 puntos) Calcular el ángulo que forman $r$ y $\\pi$.
 
-b) (1 punto) Hallar el simétrico del punto de intersección de la recta $r$ y el plano $\pi$ con respecto al plano $z - y = 0$.
+b) (1 punto) Hallar el simétrico del punto de intersección de la recta $r$ y el plano $\\pi$ con respecto al plano $z - y = 0$.
 
-c) (0.75 puntos) Determinar la proyección ortogonal de la recta $r$ sobre el plano $\pi$.`,
+c) (0.75 puntos) Determinar la proyección ortogonal de la recta $r$ sobre el plano $\\pi$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-A4", bloque: "Probabilidad", opcion: "A",
         enunciado: "El tiempo de vida de los individuos de cierta especie animal tiene una distribución normal con una media de 8.8\nmeses y una desviación típica de 3 meses.\n\na) (1 punto) ¿Qué porcentaje de individuos de esta especie supera los 10 meses? ¿Qué porcentaje de indivi-\nduos ha vivido entre 7 y 10 meses?\n\nb) (1 punto) Si se toman al azar 4 especímenes, ¿cuál es la probabilidad de que al menos uno no supere los\n10 meses de vida?\n\nc) (0.5 puntos) ¿Qué valor de c es tal que el intervalo (8.8 − c, 8.8 + c) incluye el tiempo de vida (medido en\nmeses) del 98 % de los individuos de esta especie?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-B1", bloque: "Algebra", opcion: "B",
         enunciado: `Se considera el siguiente sistema de ecuaciones dependientes del parámetro real $a$:
-$$\begin{cases} ax - 2y + (a-1)z = 4 \\ -2x + 3y - 6z = 2 \\ -ax + y - 6z = 6 \end{cases}$$
+$$\\begin{cases} ax - 2y + (a-1)z = 4 \\\\ -2x + 3y - 6z = 2 \\\\ -ax + y - 6z = 6 \\end{cases}$$
 
 a) (2 puntos) Discuta el sistema según los diferentes valores de $a$.
 
@@ -406,13 +406,13 @@ b) (0.5 puntos) Resuelva el sistema para $a = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-B2", bloque: "Analisis", opcion: "B",
         enunciado: `Se considera la función
-$$f(x) = \begin{cases} \sin x & \text{si } x < 0 \\ x e^x & \text{si } x \geq 0 \end{cases}$$
+$$f(x) = \\begin{cases} \\sin x & \\text{si } x < 0 \\\\ x e^x & \\text{si } x \\geq 0 \\end{cases}$$
 
 a) (0.75 puntos) Estudie la continuidad y la derivabilidad de $f$ en $x = 0$.
 
-b) (1 punto) Estudie los intervalos de crecimiento y decrecimiento de $f$ restringida a $(-\pi, 2)$. Demuestre que existe un punto $x_0 \in [0, 1]$ de manera que $f(x_0) = 2$.
+b) (1 punto) Estudie los intervalos de crecimiento y decrecimiento de $f$ restringida a $(-\\pi, 2)$. Demuestre que existe un punto $x_0 \\in [0, 1]$ de manera que $f(x_0) = 2$.
 
-c) (0.75 puntos) Calcule $\displaystyle\int_{-\pi/2}^{1} f(x)\,dx$.`,
+c) (0.75 puntos) Calcule $\\displaystyle\\int_{-\\pi/2}^{1} f(x)\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-B3", bloque: "Geometria", opcion: "B",
         enunciado: "Sean los planos π1 ≡ x + y = 1 y π2 ≡ x + z = 1.\n\na) (1.5 puntos) Halle los planos paralelos al plano π1 tales que su distancia al origen de coordenadas sea 2.\n\nb) (0.5 puntos) Halle la recta que pasa por el punto (0, 2, 0) y es perpendicular al plano π2.\n\nc) (0.5 puntos) Halle la distancia entre los puntos de intersección del plano π1 con los ejes x e y.",
@@ -427,7 +427,7 @@ c) (0.75 puntos) Calcule $\displaystyle\int_{-\pi/2}^{1} f(x)\,dx$.`,
     preguntas: [
       { id: "2020-J-A1", bloque: "Algebra", opcion: "A",
         enunciado: `Se considera el siguiente sistema de ecuaciones dependientes del parámetro real $a$:
-$$\begin{cases} x + ay + z = a+1 \\ -ax + y - z = 2a \\ -y + z = a \end{cases}$$
+$$\\begin{cases} x + ay + z = a+1 \\\\ -ax + y - z = 2a \\\\ -y + z = a \\end{cases}$$
 
 Se pide:
 
@@ -442,10 +442,10 @@ a) (0.5 puntos) Justificar, usando el teorema adecuado, que existe algún punto 
 
 b) (1 punto) Calcular la ecuación de la recta tangente a la curva $y = f(x)$ con pendiente mínima.
 
-c) (1 punto) Calcular $\displaystyle\int_1^2 \dfrac{f(x)}{g(x)}\,dx$.`,
+c) (1 punto) Calcular $\\displaystyle\\int_1^2 \\dfrac{f(x)}{g(x)}\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2020-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Dadas las rectas $r \equiv \begin{cases} x - y = 2 \\ 3x - z = -1 \end{cases}$ y $s \equiv \begin{cases} x = -1 + 2\lambda \\ y = -4 - \lambda \\ z = \lambda \end{cases}$, se pide:
+        enunciado: `Dadas las rectas $r \\equiv \\begin{cases} x - y = 2 \\\\ 3x - z = -1 \\end{cases}$ y $s \\equiv \\begin{cases} x = -1 + 2\\lambda \\\\ y = -4 - \\lambda \\\\ z = \\lambda \\end{cases}$, se pide:
 
 a) (1 punto) Calcular la posición relativa de las rectas $r$ y $s$.
 
@@ -461,7 +461,7 @@ c) (1 punto) Encontrar la ecuación del plano paralelo a la recta $r$ que contie
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2020-J-B2", bloque: "Analisis", opcion: "B",
         enunciado: `Sea la función
-$$f(x) = \begin{cases} (x-1)^2 & \text{si } x \leq 1 \\ (x-1)^3 & \text{si } x > 1 \end{cases}$$
+$$f(x) = \\begin{cases} (x-1)^2 & \\text{si } x \\leq 1 \\\\ (x-1)^3 & \\text{si } x > 1 \\end{cases}$$
 
 a) (0.5 puntos) Estudie su continuidad en $[-4, 4]$.
 
@@ -481,14 +481,14 @@ c) (1 punto) Determine si la función $g(x) = f'(x)$ está definida, es continua
     id: 12, año: 2019, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
       { id: "2019-J-A1", bloque: "Algebra", opcion: "A",
-        enunciado: `Dadas las matrices $A = \begin{pmatrix}1&3&4&1\\1&a&2&2-a\\-1&2&a&a-2\end{pmatrix}$ y $M = \begin{pmatrix}1&0&0\\0&1&0\\0&0&0\\0&0&1\end{pmatrix}$, se pide:
+        enunciado: `Dadas las matrices $A = \\begin{pmatrix}1&3&4&1\\\\1&a&2&2-a\\\\-1&2&a&a-2\\end{pmatrix}$ y $M = \\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\\\0&0&1\\end{pmatrix}$, se pide:
 
 a) (1.5 puntos) Estudiar el rango de $A$ en función del parámetro real $a$.
 
 b) (1 punto) Calcular, si es posible, la inversa de la matriz $AM$ para el caso $a = 0$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2019-J-A2", bloque: "Analisis", opcion: "A",
-        enunciado: `Dada $f(x) = \dfrac{\ln x}{x}$, donde $\ln$ denota el logaritmo neperiano, definida para $x > 0$, se pide:
+        enunciado: `Dada $f(x) = \\dfrac{\\ln x}{x}$, donde $\\ln$ denota el logaritmo neperiano, definida para $x > 0$, se pide:
 
 a) (0.5 puntos) Calcular, en caso de que exista, una asíntota horizontal de la curva $y = f(x)$.
 
@@ -497,7 +497,7 @@ b) (1 punto) Encontrar un punto de la curva $y = f(x)$ en el que la recta tangen
 c) (1 punto) Calcular el área del recinto acotado limitado por la curva $y = f(x)$ y las rectas $y = 0$ y $x = e$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2019-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Dadas la recta $r \equiv \dfrac{x-1}{2} = \dfrac{y-3}{-2} = \dfrac{z}{1}$ y la recta $s$ que pasa por el punto $(2, -5, 1)$ y tiene dirección $(-1, 0, -1)$, se pide:
+        enunciado: `Dadas la recta $r \\equiv \\dfrac{x-1}{2} = \\dfrac{y-3}{-2} = \\dfrac{z}{1}$ y la recta $s$ que pasa por el punto $(2, -5, 1)$ y tiene dirección $(-1, 0, -1)$, se pide:
 
 a) (1 punto) Estudiar la posición relativa de las dos rectas.
 
@@ -512,22 +512,22 @@ c) (0.5 puntos) Calcular un plano perpendicular a la recta $r$ y que pase por el
         enunciado: "Una estudiante pidió en la cafetería 3 bocadillos, 2 refrescos y 2 bolsas de patatas y pagó un total de 19 euros.\nAl mirar la cuenta comprobó que le habían cobrado un bocadillo y una bolsa de patatas de más. Reclamó y le\ndevolvieron 4 euros.\nPara compensar el error, el vendedor le ofreció llevarse un bocadillo y un refresco por solo 3 euros, lo que suponía\nun descuento del 40 % respecto a sus precios originales. ¿Cuáles eran los respectivos precios sin descuento de\nun bocadillo, de un refresco y de una bolsa de patatas?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2019-J-B2", bloque: "Analisis", opcion: "B",
-        enunciado: `Dada la función $f(x) = \sqrt{4x^2 - x^4}$, se pide:
+        enunciado: `Dada la función $f(x) = \\sqrt{4x^2 - x^4}$, se pide:
 
 a) (0.5 puntos) Determinar su dominio.
 
 b) (1.5 puntos) Determinar sus intervalos de crecimiento y de decrecimiento.
 
-c) (0.5 puntos) Calcular los límites laterales $\displaystyle\lim_{x \to 0^-} \dfrac{f(x)}{x}$ y $\displaystyle\lim_{x \to 0^+} \dfrac{f(x)}{x}$.`,
+c) (0.5 puntos) Calcular los límites laterales $\\displaystyle\\lim_{x \\to 0^-} \\dfrac{f(x)}{x}$ y $\\displaystyle\\lim_{x \\to 0^+} \\dfrac{f(x)}{x}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2019-J-B3", bloque: "Geometria", opcion: "B",
-        enunciado: `Dados el punto $A(2, 1, 0)$ y el plano $\pi \equiv 2x + 3y + 4z = 36$, se pide:
+        enunciado: `Dados el punto $A(2, 1, 0)$ y el plano $\\pi \\equiv 2x + 3y + 4z = 36$, se pide:
 
-a) (0.75 puntos) Determinar la distancia del punto $A$ al plano $\pi$.
+a) (0.75 puntos) Determinar la distancia del punto $A$ al plano $\\pi$.
 
-b) (1 punto) Hallar las coordenadas del punto del plano $\pi$ más próximo al punto $A$.
+b) (1 punto) Hallar las coordenadas del punto del plano $\\pi$ más próximo al punto $A$.
 
-c) (0.75 puntos) Hallar el punto simétrico de $A$ respecto al plano $\pi$.`,
+c) (0.75 puntos) Hallar el punto simétrico de $A$ respecto al plano $\\pi$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2019-J-B4", bloque: "Probabilidad", opcion: "B",
         enunciado: "Una compañía farmacéutica vende un medicamento que alivia la dermatitis atópica en un 80 % de los casos.\nSi un enfermo es tratado con un placebo, la probabilidad de mejoría espontánea es del 10 %. En un estudio\nexperimental, la mitad de los pacientes han sido tratados con el medicamento y la otra mitad con un placebo.\n\na) (1 punto) Determinar cuál es la probabilidad de que un paciente elegido al azar haya mejorado.\n\nb) (1.5 puntos) Si un paciente elegido al azar ha mejorado, hallar la probabilidad de que haya sido tratado con\nel medicamento.",
@@ -539,7 +539,7 @@ c) (0.75 puntos) Hallar el punto simétrico de $A$ respecto al plano $\pi$.`,
     preguntas: [
       { id: "2018-J-A1", bloque: "Algebra", opcion: "A",
         enunciado: `Dado el sistema de ecuaciones
-$$\begin{cases} x + my = 1 \\ -2x - (m+1)y + z = -1 \\ x + (2m-1)y + (m+2)z = 2+2m \end{cases}$$
+$$\\begin{cases} x + my = 1 \\\\ -2x - (m+1)y + z = -1 \\\\ x + (2m-1)y + (m+2)z = 2+2m \\end{cases}$$
 se pide:
 
 a) (2 puntos) Discutir el sistema en función del parámetro $m$.
@@ -547,9 +547,9 @@ a) (2 puntos) Discutir el sistema en función del parámetro $m$.
 b) (0.5 puntos) Resolver el sistema en el caso $m = 0$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2018-J-A2", bloque: "Analisis", opcion: "A",
-        enunciado: `a) (1.5 puntos) En un experimento en un laboratorio se han realizado 5 medidas del mismo objeto, que han dado los resultados siguientes: $m_1 = 0.92$, $m_2 = 0.94$, $m_3 = 0.89$, $m_4 = 0.90$, $m_5 = 0.91$. Se tomará como resultado el valor de $x$ tal que la suma de los cuadrados de los errores sea mínima. Es decir, el valor para el que la función $E(x) = (x-m_1)^2 + (x-m_2)^2 + \cdots + (x-m_5)^2$ alcanza el mínimo. Calcule dicho valor $x$.
+        enunciado: `a) (1.5 puntos) En un experimento en un laboratorio se han realizado 5 medidas del mismo objeto, que han dado los resultados siguientes: $m_1 = 0.92$, $m_2 = 0.94$, $m_3 = 0.89$, $m_4 = 0.90$, $m_5 = 0.91$. Se tomará como resultado el valor de $x$ tal que la suma de los cuadrados de los errores sea mínima. Es decir, el valor para el que la función $E(x) = (x-m_1)^2 + (x-m_2)^2 + \\cdots + (x-m_5)^2$ alcanza el mínimo. Calcule dicho valor $x$.
 
-b) (1 punto) Aplique el método de integración por partes para calcular la integral $\displaystyle\int_1^2 x^2 \ln(x)\,dx$, donde $\ln$ significa logaritmo neperiano.`,
+b) (1 punto) Aplique el método de integración por partes para calcular la integral $\\displaystyle\\int_1^2 x^2 \\ln(x)\,dx$, donde $\\ln$ significa logaritmo neperiano.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2018-J-A3", bloque: "Geometria", opcion: "A",
         enunciado: "Dados los planos π1 ≡ 4x + 6y − 12z + 1 = 0, π2 ≡ −2x − 3y + 6z − 5 = 0, se pide:\n\na) (1 punto) Calcular el volumen de un cubo que tenga dos de sus caras en dichos planos.\n\nb) (1.5 puntos) Para el cuadrado de vértices consecutivos ABCD, con A(2, 1, 3) y B(1, 2, 3), calcular los\nvértices C y D, sabiendo que C pertenece a los planos π2 y π3 ≡ x − y + z = 2.",
@@ -558,16 +558,16 @@ b) (1 punto) Aplique el método de integración por partes para calcular la inte
         enunciado: "El 60% de las ventas en unos grandes almacenes corresponden a artículos con precios rebajados. Los clientes\ndevuelven el 15% de los artículos que compran rebajados, porcentaje que disminuye al 8% si los artículos han\nsido adquiridos sin rebajas.\n\na) (1.25 puntos) Determine el porcentaje global de artículos devueltos.\n\nb) (1.25 puntos) ¿Qué porcentaje de artículos devueltos fueron adquiridos con precios rebajados?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2018-J-B1", bloque: "Algebra", opcion: "B",
-        enunciado: `Dadas las matrices $A = \begin{pmatrix}m&0&2\\-2&4&m\\0&1&-1\end{pmatrix}$ y $B = \begin{pmatrix}-2\\0\\0\end{pmatrix}$, se pide:
+        enunciado: `Dadas las matrices $A = \\begin{pmatrix}m&0&2\\\\-2&4&m\\\\0&1&-1\\end{pmatrix}$ y $B = \\begin{pmatrix}-2\\\\0\\\\0\\end{pmatrix}$, se pide:
 
 a) (1 punto) Obtener los valores del parámetro $m$ para los que la matriz $A$ admite inversa.
 
-b) (1 punto) Para $m = 0$, calcular $A \cdot B$ y $A^{-1} \cdot B$.
+b) (1 punto) Para $m = 0$, calcular $A \\cdot B$ y $A^{-1} \\cdot B$.
 
-c) (0.5 puntos) Calcular $B \cdot B^t$ y $B^t \cdot B$, donde $B^t$ denota la matriz traspuesta de $B$.`,
+c) (0.5 puntos) Calcular $B \\cdot B^t$ y $B^t \\cdot B$, donde $B^t$ denota la matriz traspuesta de $B$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2018-J-B2", bloque: "Analisis", opcion: "B",
-        enunciado: `Dada la función $f(x) = \dfrac{|x|}{\sqrt{x^2+9}}$, se pide:
+        enunciado: `Dada la función $f(x) = \\dfrac{|x|}{\\sqrt{x^2+9}}$, se pide:
 
 a) (0.5 puntos) Determinar, si existen, las asíntotas horizontales de $f(x)$.
 
@@ -576,7 +576,7 @@ b) (0.75 puntos) Calcular $f'(4)$.
 c) (1.25 puntos) Hallar el área del recinto limitado por la curva $y = f(x)$, el eje $OX$ y las rectas $x = -1$ y $x = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2018-J-B3", bloque: "Geometria", opcion: "B",
-        enunciado: `Dados el punto $P(1, 1, 1)$ y las rectas $r \equiv \begin{cases} 2x + y = 2 \\ 5x + z = 6 \end{cases}$ y $s \equiv \dfrac{x-2}{-1} = \dfrac{y+1}{1} = \dfrac{z-1}{1/3}$, se pide:
+        enunciado: `Dados el punto $P(1, 1, 1)$ y las rectas $r \\equiv \\begin{cases} 2x + y = 2 \\\\ 5x + z = 6 \\end{cases}$ y $s \\equiv \\dfrac{x-2}{-1} = \\dfrac{y+1}{1} = \\dfrac{z-1}{1/3}$, se pide:
 
 a) (1 punto) Hallar la distancia del punto $P$ a la recta $r$.
 

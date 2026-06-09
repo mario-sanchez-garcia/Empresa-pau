@@ -50,9 +50,9 @@ const SUBJECTS = [
   { id: 'fisica', label: 'Física', icon: Atom, color: '#6d28d9', light: '#f5f3ff', border: '#ede9fe' },
   { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
   { id: 'biologia', label: 'Biología', icon: Dna, color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
+  { id: 'ingles', label: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', border: '#A5F3FC' },
   { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', border: '#ffe4e6' },
-  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' },
-  { id: 'ingles', label: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', border: '#A5F3FC' }
+  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' }
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {

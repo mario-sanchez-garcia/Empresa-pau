@@ -1,8 +1,9 @@
-import { Atom, BookOpen, Dna, FlaskConical, Landmark, Sigma } from 'lucide-react'
+import { Atom, BookOpen, Dna, FlaskConical, Globe, Landmark, Sigma } from 'lucide-react'
 import { examenes, examenesHistoria } from '@/app/data/examenes'
 import { examenesFisica } from '@/app/data/fisica'
 import { examenesQuimica } from '@/app/data/quimica'
 import { examenesLengua } from '@/app/data/lengua'
+import { examenesIngles } from '@/app/data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from '@/app/data/biologia'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
@@ -11,6 +12,7 @@ export const SUBJECTS = {
   fisica: { label: 'Física', short: 'Física', color: '#6d28d9', light: '#f5f3ff', icon: Atom, available: true },
   quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
   biologia: { label: 'Biología', short: 'Bio', color: '#4d7c0f', light: '#f7fee7', icon: Dna, available: true },
+  ingles: { label: 'Inglés', short: 'Inglés', color: '#0891B2', light: '#CFFAFE', icon: Globe, available: true },
   lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#4f46e5', light: '#eef2ff', icon: BookOpen, available: true },
   historia: { label: 'Historia de España', short: 'Historia', color: '#2f6f4e', light: '#f0fdf4', icon: Landmark, available: true }
 } as const
@@ -26,6 +28,7 @@ const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   fisica: ['Gravitacion', 'Ondas', 'Electricidad', 'Optica'],
   quimica: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4'],
   biologia: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5'],
+  ingles: ['Q1', 'Q2', 'Q4', 'Q5'],
   lengua: ['Comunicacion', 'ReflexionLengua', 'EducacionLiteraria'],
   historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto', 'fuente']
 }
@@ -88,6 +91,7 @@ function normalizeQuestions(subject: SimulacroSubject) {
   if (subject === 'fisica') return examenesFisica.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'quimica') return examenesQuimica.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'biologia') return examenesBiologia.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'ingles') return examenesIngles.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'lengua') return examenesLengua.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   return examenesHistoria.flatMap((exam: any) => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
 }
@@ -132,6 +136,11 @@ function labelFor(subject: SimulacroSubject, theme: string) {
     Pregunta2: 'Pregunta 2',
     Pregunta3: 'Pregunta 3',
     Pregunta4: 'Pregunta 4',
+    Q1: 'Reading: True / False',
+    Q2: 'Reading comprehension',
+    Q3: 'Vocabulary',
+    Q4: 'Use of English',
+    Q5: 'Writing',
     Comunicacion: 'Comunicación',
     ReflexionLengua: 'Reflexión sobre la lengua',
     EducacionLiteraria: 'Educación literaria',

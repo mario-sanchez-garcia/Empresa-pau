@@ -365,7 +365,7 @@ export const examenesIngles: ExamenIngles[] = [
   // ── 2017-2018 ─────────────────────────────────────────────────────────────
   {
     id: 1,
-    año: 2017,
+    año: 2018,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -393,7 +393,7 @@ d) Complete the following sentence to report what was said. "What shall I do nex
   },
   {
     id: 2,
-    año: 2017,
+    año: 2018,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -423,7 +423,7 @@ d) Complete the following sentence to report what was said. "When was the Red Cr
   // ── 2018-2019 ─────────────────────────────────────────────────────────────
   {
     id: 3,
-    año: 2018,
+    año: 2019,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -451,7 +451,7 @@ d) Complete the following sentence to report what was said. "When did you last v
   },
   {
     id: 4,
-    año: 2018,
+    año: 2019,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -481,7 +481,7 @@ d) The young activists, _______ had met at a university event, enjoyed _______ (
   // ── 2019-2020 Lunes ───────────────────────────────────────────────────────
   {
     id: 5,
-    año: 2019,
+    año: 2020,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -510,7 +510,7 @@ d) Complete the following sentence to report what was said. "You won't believe w
   },
   {
     id: 6,
-    año: 2019,
+    año: 2020,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -541,7 +541,7 @@ d) Remember _______ (return) Martin's book to the library before the deadline __
   // ── 2019-2020 Martes ──────────────────────────────────────────────────────
   {
     id: 7,
-    año: 2019,
+    año: 2020,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -570,7 +570,7 @@ d) After _______ (watch) the last thriller on Netflix, I couldn't sleep _______ 
   },
   {
     id: 8,
-    año: 2019,
+    año: 2020,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -601,7 +601,7 @@ d) Rewrite the following sentence so that it means the same: "We are consuming n
   // ── 2020-2021 Lunes ───────────────────────────────────────────────────────
   {
     id: 9,
-    año: 2020,
+    año: 2021,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -630,7 +630,7 @@ d) If I were you, I _______ (show) how brilliant I am by manipulating the langua
   },
   {
     id: 10,
-    año: 2020,
+    año: 2021,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -661,7 +661,7 @@ d) Complete the following sentence to report what was said. "Who is your preferr
   // ── 2020-2021 Martes ──────────────────────────────────────────────────────
   {
     id: 11,
-    año: 2020,
+    año: 2021,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -690,7 +690,7 @@ d) Complete the following sentence to report what was said. "We don't expect man
   },
   {
     id: 12,
-    año: 2020,
+    año: 2021,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -721,7 +721,7 @@ d) Millennials and Generation Z represent a _______ (large) voting bloc _______ 
   // ── 2021-2022 Lunes ───────────────────────────────────────────────────────
   {
     id: 13,
-    año: 2021,
+    año: 2022,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -750,7 +750,7 @@ d) Candidates who are culturally fit _______ (think) to be _______ (bad) for a f
   },
   {
     id: 14,
-    año: 2021,
+    año: 2022,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -781,7 +781,7 @@ d) Complete the following sentence to report what was said. "Were only 2% of use
   // ── 2021-2022 Martes ──────────────────────────────────────────────────────
   {
     id: 15,
-    año: 2021,
+    año: 2022,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -810,7 +810,7 @@ d) Complete the following sentence to report what was said. "Can you check it ou
   },
   {
     id: 16,
-    año: 2021,
+    año: 2022,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -841,7 +841,7 @@ d) Before the 1920s, the radio _______ (use) to contact ships that were out ____
   // ── 2022-2023 Lunes ───────────────────────────────────────────────────────
   {
     id: 17,
-    año: 2022,
+    año: 2023,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -870,7 +870,7 @@ d) Complete the following sentence to report what was said. "What songs did you 
   },
   {
     id: 18,
-    año: 2022,
+    año: 2023,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -901,7 +901,7 @@ d) Complete the following sentence to report what was said. "Are you going to th
   // ── 2022-2023 Martes ──────────────────────────────────────────────────────
   {
     id: 19,
-    año: 2022,
+    año: 2023,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -930,7 +930,7 @@ d) Complete the following sentence to report what was said. "What is your favour
   },
   {
     id: 20,
-    año: 2022,
+    año: 2023,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -961,7 +961,7 @@ d) People _______ diet includes oily fish and vegetables _______ least once a we
   // ── 2023-2024 Lunes ───────────────────────────────────────────────────────
   {
     id: 21,
-    año: 2023,
+    año: 2024,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -990,7 +990,7 @@ d) Complete the following sentence to report what was said. Maggie: "I've never 
   },
   {
     id: 22,
-    año: 2023,
+    año: 2024,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -1021,7 +1021,7 @@ d) Rachel is the one _______ took the decision to create a new AI enterprise ___
   // ── 2023-2024 Martes ──────────────────────────────────────────────────────
   {
     id: 23,
-    año: 2023,
+    año: 2024,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "A",
@@ -1050,7 +1050,7 @@ d) We _______ (be) more in touch with nature if we weren't surrounded by _______
   },
   {
     id: 24,
-    año: 2023,
+    año: 2024,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "B",
@@ -1081,7 +1081,7 @@ d) Complete the following sentence to report what was said. "Did you like chicke
   // ── 2024-2025 9:30h ───────────────────────────────────────────────────────
   {
     id: 25,
-    año: 2024,
+    año: 2025,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "Única",
@@ -1169,7 +1169,7 @@ Remember: DO NOT SIGN OR IDENTIFY YOUR EMAIL.`,
   // ── 2024-2025 12:00h ──────────────────────────────────────────────────────
   {
     id: 26,
-    año: 2024,
+    año: 2025,
     tipo: "Ordinaria",
     convocatoria: "Ordinaria",
     opcion: "Única",

@@ -48,7 +48,7 @@ export default function SimulacrosPage() {
 
     try {
       if (!SUBJECTS[subject].available) {
-        setErrorMessage('Biología estará disponible en simulacros cuando carguemos suficientes ejercicios oficiales.')
+        setErrorMessage(`${SUBJECTS[subject].label} estará disponible en simulacros cuando carguemos suficientes ejercicios oficiales.`)
         setLoading(false)
         return
       }
@@ -191,7 +191,7 @@ export default function SimulacrosPage() {
         )}
 
         <button onClick={createSimulacro} disabled={loading || !userId || !SUBJECTS[subject].available} className="flex items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-6 py-4 text-lg font-black text-white shadow-[0_20px_45px_rgba(37,99,235,0.24)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(37,99,235,0.3)] disabled:opacity-60">
-          <PlayCircle size={22} />{loading ? 'Generando...' : !SUBJECTS[subject].available ? 'Simulacros de Bio próximamente' : userId ? 'Generar simulacro' : 'Cargando sesión...'}
+          <PlayCircle size={22} />{loading ? 'Generando...' : !SUBJECTS[subject].available ? `Simulacros de ${SUBJECTS[subject].short} próximamente` : userId ? 'Generar simulacro' : 'Cargando sesión...'}
         </button>
       </div>
     </SimulacroShell>

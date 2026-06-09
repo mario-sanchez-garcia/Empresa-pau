@@ -112,9 +112,9 @@ const SUBJECT_CARDS = {
   },
   ingles: {
     title: 'Inglés',
-    subtitle: 'Reading, grammar, vocabulary y writing',
+    subtitle: 'Reading, use of English, writing y comprensión',
     icon: Globe,
-    kicker: 'Modo language'
+    kicker: 'Modo fluidez'
   }
 }
 
@@ -251,7 +251,7 @@ type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
-const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'lengua', 'historia', 'ingles']
+const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia']
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
 const PINNED_SUBJECTS_STORAGE_KEY = 'pausia:pinned-subjects'
 const MAX_PINNED = 4
@@ -1194,7 +1194,7 @@ function cambiarTipo(t: Tipo) {
     supabase.from('historial_examenes').insert({
       user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
       bloque: bloqueActivoLabel || '',
-      opcion: asignatura === 'lengua' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
+      opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
       enunciado: enunciadoActivo?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
       correccion: correccionVisible?.substring(0, 2000)
@@ -1212,7 +1212,7 @@ function cambiarTipo(t: Tipo) {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matemáticas, física, química, biología, lengua e historia.\n' +
+        pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua e historia.\n' +
           (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
           hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
           '\nResponde solo como Pausia.'
@@ -1249,9 +1249,9 @@ function cambiarTipo(t: Tipo) {
       : 'Sin correcciones aún'
     const prompt = 'Eres Pausia, entrenador de estudio para EBAU Madrid.\n' +
       'Genera un plan semanal útil, visual y concreto para esta app.\n\n' +
-      'ASIGNATURAS DISPONIBLES EN LA APP: Matemáticas II, Física, Química, Biología, Lengua Castellana y Literatura II, Historia de España.\n' +
-      'No inventes Inglés, Filosofía ni otras asignaturas si no aparecen en el historial.\n' +
-      'Si no hay historial, crea un plan inicial SOLO con Matemáticas II, Física, Química, Biología, Lengua Castellana y Literatura II e Historia de España.\n\n' +
+      'ASIGNATURAS DISPONIBLES EN LA APP: Matemáticas II, Física, Química, Biología, Inglés, Lengua Castellana y Literatura II, Historia de España.\n' +
+      'No inventes Filosofía ni otras asignaturas si no aparecen en el historial.\n' +
+      'Si no hay historial, crea un plan inicial SOLO con Matemáticas II, Física, Química, Biología, Inglés, Lengua Castellana y Literatura II e Historia de España.\n\n' +
       'HISTORIAL DEL ESTUDIANTE:\n' + resumen + '\n\n' +
       'FORMATO OBLIGATORIO:\n' +
       '- Responde en Markdown.\n' +
@@ -1302,6 +1302,7 @@ function cambiarTipo(t: Tipo) {
   const fisicaH = historial.filter((item: any) => item.asignatura === 'fisica')
   const quimicaH = historial.filter((item: any) => item.asignatura === 'quimica')
   const biologiaH = historial.filter((item: any) => item.asignatura === 'biologia')
+  const inglesH = historial.filter((item: any) => item.asignatura === 'ingles')
   const lenguaH = historial.filter((item: any) => item.asignatura === 'lengua')
   const historiaH = historial.filter((item: any) => item.asignatura === 'historia')
 
@@ -1309,6 +1310,7 @@ function cambiarTipo(t: Tipo) {
   const mediaFisica = calcMedia(fisicaH)
   const mediaQuimica = calcMedia(quimicaH)
   const mediaBiologia = calcMedia(biologiaH)
+  const mediaIngles = calcMedia(inglesH)
   const mediaLengua = calcMedia(lenguaH)
   const mediaHist = calcMedia(historiaH)
   const versionesExamenDisponibles = asignatura === 'historia'
@@ -2046,6 +2048,10 @@ function cambiarTipo(t: Tipo) {
                   <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Biología</div>
                     {mediaBiologia ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaBiologia)) }}>{mediaBiologia}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
+                  </div>
+                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Inglés</div>
+                    {mediaIngles ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaIngles)) }}>{mediaIngles}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
                   <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Lengua</div>

@@ -7,6 +7,17 @@ import { buildCorrectionPrompt, correctionJsonToMarkdown, parseCorrectionJson } 
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
+const CAT_UI = {
+  color: '#2563eb',
+  accent: '#60a5fa',
+  light: '#eff6ff',
+  border: '#dbe7fb',
+  field: '#f8fafc',
+  ink: '#1f2937',
+  muted: '#64748b',
+  shadow: '0 18px 45px rgba(37,99,235,0.08)'
+}
+
 export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat }) {
   const [respuesta, setRespuesta] = useState('')
   const [imagen, setImagen] = useState<string | null>(null)
@@ -108,44 +119,64 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   const sinRespuesta = modo === 'texto' ? !respuesta.trim() : !imagen
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-[0_18px_45px_rgba(180,35,42,0.08)]">
-      <header className="flex items-start justify-between gap-4 border-b border-rose-100 bg-rose-50 px-6 py-4">
-        <div>
-          <div className="mb-1 text-[11px] font-black uppercase tracking-widest text-rose-700">
-            {pregunta.serie} · Ejercicio {pregunta.ejercicio}{pregunta.opcion ? ` · Opción ${pregunta.opcion}` : ''}
+    <article className="mb-6 overflow-hidden rounded-[24px] border bg-white" style={{ borderColor: CAT_UI.border, boxShadow: CAT_UI.shadow }}>
+      <header className="flex items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: CAT_UI.light, borderBottom: `2px solid ${CAT_UI.accent}` }}>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[12px] font-black uppercase tracking-[0.06em]" style={{ color: CAT_UI.color }}>
+              PAU Catalunya {pregunta.year} · {pregunta.tipo}
+            </span>
+            <span className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-bold" style={{ borderColor: CAT_UI.accent, color: CAT_UI.color }}>
+              {pregunta.serie}
+            </span>
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ backgroundColor: CAT_UI.color }}>
+              Ejercicio {pregunta.ejercicio}
+            </span>
+            {pregunta.opcion && (
+              <span className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-bold" style={{ borderColor: CAT_UI.border, color: CAT_UI.ink }}>
+                Opción {pregunta.opcion}
+              </span>
+            )}
           </div>
-          <h3 className="text-lg font-black text-slate-900">{pregunta.tema}</h3>
+          <h3 className="mt-2 text-lg font-black text-slate-900">{pregunta.tema}</h3>
         </div>
-        <div className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-black text-rose-700 shadow-sm">
-          {pregunta.puntuacion} pts
+        <div className="flex shrink-0 items-baseline gap-1">
+          <span className="text-[26px] font-black" style={{ color: CAT_UI.color }}>{pregunta.puntuacion}</span>
+          <span className="text-sm font-bold" style={{ color: CAT_UI.accent }}>pts</span>
         </div>
       </header>
 
       <div className="p-6">
-        <MathMarkdown text={pregunta.enunciado} className="text-[1.05rem] leading-8 text-slate-800" />
+        <div className="rounded-[22px] border bg-white px-5 py-4 shadow-[0_14px_34px_rgba(37,99,235,0.07)]" style={{ borderColor: '#e5edf9' }}>
+          <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: CAT_UI.color }}>Enunciado oficial</div>
+          <MathMarkdown text={pregunta.enunciado} className="text-[1.02rem] leading-8 text-slate-800" />
+        </div>
         {pregunta.apartados.length > 0 && (
           <ul className="mt-5 grid gap-2">
             {pregunta.apartados.map((apartado, index) => (
-              <li key={index} className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
-                {apartado}
+              <li key={index} className="rounded-2xl border px-4 py-3 text-sm leading-6 text-slate-700" style={{ borderColor: '#e5edf9', backgroundColor: CAT_UI.field }}>
+                <MathMarkdown text={apartado} className="text-sm leading-6" />
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      <section className="border-t border-rose-100 p-6">
-        <div className="mb-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Tu respuesta</div>
+      <section className="border-t p-6" style={{ borderColor: CAT_UI.border }}>
+        <div className="mb-4 text-[13px] font-bold uppercase tracking-[0.06em]" style={{ color: CAT_UI.muted }}>Tu respuesta</div>
         <div className="mb-4 flex gap-2">
           {(['texto', 'imagen'] as const).map(nextMode => (
             <button
               className={modo === nextMode ? 'campus-primary' : 'campus-hover'}
               key={nextMode}
               onClick={() => setModo(nextMode)}
-              style={{ background: modo === nextMode ? 'linear-gradient(135deg, #b4232a, #fb7185)' : '#fff1f2', color: modo === nextMode ? '#fff' : '#b4232a' }}
+              style={{
+                background: modo === nextMode ? `linear-gradient(135deg, ${CAT_UI.color}, ${CAT_UI.accent})` : CAT_UI.light,
+                color: modo === nextMode ? '#fff' : CAT_UI.color
+              }}
               type="button"
             >
-              <span className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black">
+              <span className="flex items-center gap-2 rounded-full px-[18px] py-[9px] text-[13px] font-bold">
                 {nextMode === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}
                 {nextMode === 'texto' ? 'Escribir' : 'Subir foto'}
               </span>
@@ -158,30 +189,32 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
             value={respuesta}
             onChange={event => setRespuesta(event.target.value)}
             placeholder="Escribe tu resolución paso a paso..."
-            className="h-[180px] w-full resize-y rounded-2xl border border-rose-100 bg-slate-50 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:border-rose-300 focus:bg-white focus:ring-4 focus:ring-rose-100"
+            className="h-[180px] w-full resize-y rounded-2xl border bg-slate-50 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:bg-white"
+            style={{ borderColor: CAT_UI.border }}
           />
         ) : (
           <div>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} className="hidden" />
             {imagenPreview ? (
-              <div className="relative overflow-hidden rounded-2xl border border-rose-100 bg-white">
+              <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: CAT_UI.border }}>
                 <img src={imagenPreview} alt="Respuesta" className="max-h-[300px] w-full object-contain" />
-                <button onClick={eliminarImagen} type="button" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-rose-700 text-white shadow-lg"><X size={16} /></button>
+                <button onClick={eliminarImagen} type="button" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg" style={{ backgroundColor: CAT_UI.color }}><X size={16} /></button>
               </div>
             ) : (
-              <button onClick={() => fileRef.current?.click()} type="button" className="campus-hover flex h-[180px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50 text-rose-700">
+              <button onClick={() => fileRef.current?.click()} type="button" className="campus-hover flex h-[180px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed" style={{ borderColor: CAT_UI.accent, backgroundColor: `${CAT_UI.light}66`, color: CAT_UI.color }}>
                 <UploadCloud size={34} />
                 <span className="mt-2 text-sm font-black">Haz clic para subir una foto</span>
-                <span className="mt-1 text-xs font-semibold text-rose-400">Fotografía tu respuesta manuscrita</span>
+                <span className="mt-1 text-xs font-semibold" style={{ color: CAT_UI.accent }}>Fotografía tu respuesta manuscrita</span>
               </button>
             )}
           </div>
         )}
 
         <button
-          className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-800 to-rose-400 px-5 py-4 text-sm font-black text-white shadow-[0_16px_34px_rgba(180,35,42,0.2)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
           onClick={corregir}
           disabled={cargando || sinRespuesta}
+          style={{ background: `linear-gradient(135deg, ${CAT_UI.color}, ${CAT_UI.accent})`, boxShadow: `0 16px 34px ${CAT_UI.accent}33` }}
           type="button"
         >
           <WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
@@ -189,10 +222,10 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
       </section>
 
       {correccion && (
-        <section className="border-t-2 border-rose-700">
-          <div className="flex items-center gap-2 bg-rose-700 px-6 py-4 text-sm font-black text-white">
+        <section className="border-t-2" style={{ borderColor: CAT_UI.color }}>
+          <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: CAT_UI.color }}>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>
-            CORRECCIÓN DE PAUSIA
+            CORRECCION DE PAUSIA
           </div>
           <MathMarkdown text={correccion} format={false} className="p-6 text-[0.925rem] leading-7" />
         </section>

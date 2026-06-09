@@ -1601,7 +1601,7 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 1,
     tema: "Derivadas y función cúbica",
     enunciado:
-      "Calculeu els coeficients a, b, c i d de la funció f(x) = ax³ + bx² + cx + d si sabem que l'equació de la recta tangent a la gràfica de la funció f en el punt d'inflexió (1, 0) és y = –3x + 3 i que la funció té un extrem relatiu en el punt de la gràfica d'abscissa x = 0.",
+      "Calculeu els coeficients $a$, $b$, $c$ i $d$ de la funció $f(x) = ax^3 + bx^2 + cx + d$ si sabem que l'equació de la recta tangent a la gràfica de la funció $f$ en el punt d'inflexió $(1, 0)$ és $y = -3x + 3$ i que la funció té un extrem relatiu en el punt de la gràfica d'abscissa $x = 0$.",
     apartados: [
       "Calculeu els coeficients a, b, c i d. [2,5 punts]",
     ],
@@ -1617,13 +1617,13 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 2,
     tema: "Matrices",
     enunciado:
-      "Considereu les dues matrius A = [[0,1],[1,0]] i B = [[p²,0,-1],[1,-1,0]] (vegeu enunciat original).\n\na) Calculeu les matrius A·B i B·A.\nb) Siguin C i D dues matrius quadrades del mateix ordre que satisfan C·D = C i D·C = D. Comproveu que les dues matrius, C i D, són idempotents.\n\nNota: Una matriu quadrada s'anomena idempotent si coincideix amb el seu quadrat.",
+      "Considereu les dues matrius $$A = \\begin{pmatrix}0 & 1 \\\\ 1 & 0\\end{pmatrix}$$ i $$B = \\begin{pmatrix}p^2 & 0 & -1 \\\\ 1 & -1 & 0\\end{pmatrix}$$ (vegeu enunciat original).\n\na) Calculeu les matrius $A\\cdot B$ i $B\\cdot A$.\nb) Siguin $C$ i $D$ dues matrius quadrades del mateix ordre que satisfan $C\\cdot D = C$ i $D\\cdot C = D$. Comproveu que les dues matrius, $C$ i $D$, són idempotents.\n\nNota: Una matriu quadrada s'anomena idempotent si coincideix amb el seu quadrat.",
     apartados: [
-      "a) Calculeu les matrius A·B i B·A. [1,5 punts]",
+      "a) Calculeu les matrius $A\\cdot B$ i $B\\cdot A$. [1,5 punts]",
       "b) Demostreu que C i D són idempotents. [1 punt]",
     ],
     criterios:
-      "(a) 0,75 punts por cada producto de matrices correcto. (b) 0,5 punts por C²=C y 0,5 punts por D²=D, razonando a partir de las hipótesis C·D=C y D·C=D.",
+      "(a) 0,75 punts por cada producto de matrices correcto. (b) 0,5 punts por $C^2=C$ y 0,5 punts por $D^2=D$, razonando a partir de las hipótesis $C\\cdot D=C$ y $D\\cdot C=D$.",
     puntuacion: 2.5,
   },
   {
@@ -1634,10 +1634,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 3,
     tema: "Integral y función primitiva",
     enunciado:
-      "Sigui f'(x) = (x² - 4x + 3) / (x - 2) la funció derivada d'una funció derivable f(x) que passa pel punt A = (0, 3).\n\na) Calculeu la funció f(x).\nb) Calculeu l'equació de la recta tangent a la funció f'(x) en el punt d'abscissa x = 3.",
+      "Sigui $f'(x) = \\dfrac{x^2 - 4x + 3}{x - 2}$ la funció derivada d'una funció derivable $f(x)$ que passa pel punt $A = (0, 3)$.\n\na) Calculeu la funció $f(x)$.\nb) Calculeu l'equació de la recta tangent a la funció $f'(x)$ en el punt d'abscissa $x = 3$.",
     apartados: [
-      "a) Calculeu la funció f(x). [1,5 punts]",
-      "b) Recta tangent a f'(x) en x = 3. [1 punt]",
+      "a) Calculeu la funció $f(x)$. [1,5 punts]",
+      "b) Recta tangent a $f'(x)$ en $x = 3$. [1 punt]",
     ],
     criterios:
       "(a) 0,75 punts por el cálculo correcto de la primitiva y 0,75 punts por determinar la constante usando el punto A=(0,3). (b) 0,5 punts por f'(3) y la derivada de f', y 0,5 punts por la ecuación de la recta.",
@@ -1651,13 +1651,13 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 4,
     tema: "Sistemas de ecuaciones lineales",
     enunciado:
-      "Sigui el sistema d'equacions lineals següent, que depèn del paràmetre real λ:\nλx + y + z = 1\nx + λy + z = 1\nx + y + λz = 1\n\na) Discutiu el sistema per als diferents valors del paràmetre λ.\nb) Per al cas λ = –1, resoleu el sistema, interpreteu-lo geomètricament i identifiqueu-ne la solució.",
+      "Sigui el sistema d'equacions lineals següent, que depèn del paràmetre real $\\lambda$:\n$$\\begin{cases}\\lambda x + y + z = 1 \\\\ x + \\lambda y + z = 1 \\\\ x + y + \\lambda z = 1\\end{cases}$$\n\na) Discutiu el sistema per als diferents valors del paràmetre $\\lambda$.\nb) Per al cas $\\lambda = -1$, resoleu el sistema, interpreteu-lo geomètricament i identifiqueu-ne la solució.",
     apartados: [
-      "a) Discusión del sistema según λ. [1,25 punts]",
-      "b) Resolución e interpretación geométrica para λ = –1. [1,25 punts]",
+      "a) Discusión del sistema según $\\lambda$. [1,25 punts]",
+      "b) Resolución e interpretación geométrica para $\\lambda = -1$. [1,25 punts]",
     ],
     criterios:
-      "(a) 0,5 por el determinante, 0,25 por cada caso (λ≠1, λ≠-2, λ=1, λ=-2). (b) 0,5 por la resolución paramétrica y 0,75 por la interpretación geométrica correcta.",
+      "(a) 0,5 por el determinante, 0,25 por cada caso ($\\lambda\\neq1$, $\\lambda\\neq-2$, $\\lambda=1$, $\\lambda=-2$). (b) 0,5 por la resolución paramétrica y 0,75 por la interpretación geométrica correcta.",
     puntuacion: 2.5,
   },
   {
@@ -1668,7 +1668,7 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 5,
     tema: "Optimización — recinto para perro",
     enunciado:
-      "La Núria té un jardí rectangular i vol fer-hi un tancat (rectangular o quadrat) de 8 m² per al seu gos. Ha pensat de posar el tancat tocant al mur del jardí, per estalviar-se un dels quatre costats. El preu de la tanca és de 2,5 €/m.\n\na) Quines dimensions ha de tenir el tancat perquè el cost sigui mínim? Quin és aquest cost mínim?\nb) Si feu que un dels vèrtexs del jardí coincideixi amb un vèrtex del tancat, quants euros us podeu estalviar? Justifiqueu les dimensions de la vostra proposta.",
+      "La Núria té un jardí rectangular i vol fer-hi un tancat (rectangular o quadrat) de $8\\ \\text{m}^2$ per al seu gos. Ha pensat de posar el tancat tocant al mur del jardí, per estalviar-se un dels quatre costats. El preu de la tanca és de $2{,}5\\ € / \\text{m}$.\n\na) Quines dimensions ha de tenir el tancat perquè el cost sigui mínim? Quin és aquest cost mínim?\nb) Si feu que un dels vèrtexs del jardí coincideixi amb un vèrtex del tancat, quants euros us podeu estalviar? Justifiqueu les dimensions de la vostra proposta.",
     apartados: [
       "a) Dimensiones para coste mínimo y valor del coste. [1,75 punts]",
       "b) Ahorro al colocar el tancat en una esquina del jardín. [0,75 punts]",
@@ -1685,10 +1685,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 6,
     tema: "Geometría — planos y rectas",
     enunciado:
-      "Siguin els plans π₁: x + y = 3 i π₂: x – z = –2.\n\na) Trobeu l'equació general del pla π₃, perpendicular a π₁ i π₂, que passa pel punt P = (4, 1, 2).\nb) Sigui r la recta d'intersecció de π₁ i π₂. Calculeu l'equació vectorial de la recta r.\nc) Calculeu el punt Q de la recta r que és més a prop del punt P.",
+      "Siguin els plans $\\pi_1: x + y = 3$ i $\\pi_2: x - z = -2$.\n\na) Trobeu l'equació general del pla $\\pi_3$, perpendicular a $\\pi_1$ i $\\pi_2$, que passa pel punt $P = (4, 1, 2)$.\nb) Sigui $r$ la recta d'intersecció de $\\pi_1$ i $\\pi_2$. Calculeu l'equació vectorial de la recta $r$.\nc) Calculeu el punt $Q$ de la recta $r$ que és més a prop del punt $P$.",
     apartados: [
-      "a) Ecuación de π₃. [0,75 punts]",
-      "b) Ecuación vectorial de r. [0,75 punts]",
+      "a) Ecuación de $\\pi_3$. [0,75 punts]",
+      "b) Ecuación vectorial de $r$. [0,75 punts]",
       "c) Punto Q más próximo a P. [1 punt]",
     ],
     criterios:
@@ -1707,10 +1707,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 1,
     tema: "Integral definida — área entre curvas",
     enunciado:
-      "Considereu les funcions f(x) = –x² + x + 6 i g(x) = –9x + 3x².\n\na) Calculeu l'àrea de la regió delimitada per les dues funcions.\nb) Trobeu l'equació de la recta tangent a la funció f(x) en el punt (–2, 0). Representeu aquesta recta tangent i les funcions f(x) i g(x) en uns mateixos eixos de coordenades.",
+      "Considereu les funcions $f(x) = -x^2 + x + 6$ i $g(x) = -9x + 3x^2$.\n\na) Calculeu l'àrea de la regió delimitada per les dues funcions.\nb) Trobeu l'equació de la recta tangent a la funció $f(x)$ en el punt $(-2, 0)$. Representeu aquesta recta tangent i les funcions $f(x)$ i $g(x)$ en uns mateixos eixos de coordenades.",
     apartados: [
-      "a) Área entre f(x) y g(x). [1,25 punts]",
-      "b) Recta tangente a f(x) en (–2, 0) y representación. [1,25 punts]",
+      "a) Área entre $f(x)$ y $g(x)$. [1,25 punts]",
+      "b) Recta tangente a $f(x)$ en $(-2, 0)$ y representación. [1,25 punts]",
     ],
     criterios:
       "(a) 0,5 por los puntos de corte, 0,5 por el planteamiento de la integral y 0,25 por el cálculo. (b) 0,5 por la derivada y la recta tangente, 0,75 por la representación correcta.",
@@ -1724,10 +1724,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 2,
     tema: "Sistemas de ecuaciones lineales con parámetro",
     enunciado:
-      "Considereu el sistema d'equacions lineals:\nx + y + z = 1\nkx + y – z = k\nx – y + kz = 0\non k és un paràmetre real.\n\na) Discutiu el sistema en funció del valor de k.\nb) Resoleu el sistema per a k = 0 i per a k = 1.",
+      "Considereu el sistema d'equacions lineals:\n$$\\begin{cases}x + y + z = 1 \\\\ kx + y - z = k \\\\ x - y + kz = 0\\end{cases}$$\non $k$ és un paràmetre real.\n\na) Discutiu el sistema en funció del valor de $k$.\nb) Resoleu el sistema per a $k = 0$ i per a $k = 1$.",
     apartados: [
       "a) Discusión según k. [1,5 punts]",
-      "b) Resolución para k = 0 y k = 1. [1 punt]",
+      "b) Resolución para $k = 0$ y $k = 1$. [1 punt]",
     ],
     criterios:
       "(a) 0,5 por el determinante, 0,25 por cada caso. (b) 0,5 por cada sistema resuelto correctamente.",
@@ -1741,10 +1741,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 3,
     tema: "Geometría — rectas en el espacio",
     enunciado:
-      "Considereu les rectes a l'espai r: x = –y = z + m i s: (x-1)/2 = (y+1)/(-1) = (z-2)/1, on m és un paràmetre real.\n\na) Estudieu la posició relativa per als diferents valors del paràmetre m.\nb) Calculeu m perquè la distància entre les rectes r i s sigui de √6/2 unitats.",
+      "Considereu les rectes a l'espai $r: x = -y = z + m$ i $s: \\dfrac{x-1}{2} = \\dfrac{y+1}{-1} = \\dfrac{z-2}{1}$, on $m$ és un paràmetre real.\n\na) Estudieu la posició relativa per als diferents valors del paràmetre $m$.\nb) Calculeu $m$ perquè la distància entre les rectes $r$ i $s$ sigui de $\\sqrt{6}/2$ unitats.",
     apartados: [
       "a) Posición relativa según m. [1,25 punts]",
-      "b) Valor de m para distancia √6/2. [1,25 punts]",
+      "b) Valor de $m$ para distancia $\\sqrt{6}/2$. [1,25 punts]",
     ],
     criterios:
       "(a) 0,5 por los vectores directores, 0,75 por el análisis completo de casos. (b) 0,5 por plantear la fórmula de distancia y 0,75 por el cálculo.",
@@ -1758,7 +1758,7 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 4,
     tema: "Optimización — torre de comunicaciones",
     enunciado:
-      "En una carretera principal hi trobem el poble A. A 12 km del poble A, hi ha un encreuament O amb una carretera secundària que talla perpendicularment la carretera principal. A 9 km de l'encreuament, a la carretera secundària, hi trobem el poble B. Es vol construir una torre de comunicacions T en un punt de la carretera principal entre A i O. Instal·lar el cable entre T i B costa 250 €/km i entre T i A costa 125 €/km. Determineu la distància de O a T que minimitza el cost del cablejat i quin serà el cost mínim.",
+      "En una carretera principal hi trobem el poble $A$. A $12\\ \\text{km}$ del poble $A$, hi ha un encreuament $O$ amb una carretera secundària que talla perpendicularment la carretera principal. A $9\\ \\text{km}$ de l'encreuament, a la carretera secundària, hi trobem el poble $B$. Es vol construir una torre de comunicacions $T$ en un punt de la carretera principal entre $A$ i $O$. Instal·lar el cable entre $T$ i $B$ costa $250\\ €/\\text{km}$ i entre $T$ i $A$ costa $125\\ €/\\text{km}$. Determineu la distància de $O$ a $T$ que minimitza el cost del cablejat i quin serà el cost mínim.",
     apartados: [
       "Distancia OT óptima y coste mínimo. [2,5 punts]",
     ],
@@ -1774,13 +1774,13 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 5,
     tema: "Matrices — familia paramétrica",
     enunciado:
-      "Considereu la família S de matrius de la forma A = [[a, b],[0, 1]], on a, b ∈ ℝ.\n\na) Calculeu A².\nb) Trobeu totes les matrius de la família S que verifiquin A² = I, on I és la matriu identitat d'ordre 2.",
+      "Considereu la família $S$ de matrius de la forma $$A = \\begin{pmatrix}a & b \\\\ 0 & 1\\end{pmatrix},$$ on $a, b \\in \\mathbb{R}$.\n\na) Calculeu $A^2$.\nb) Trobeu totes les matrius de la família $S$ que verifiquin $A^2 = I$, on $I$ és la matriu identitat d'ordre 2.",
     apartados: [
-      "a) Cálculo de A². [1,25 punts]",
-      "b) Matrices A tales que A² = I. [1,25 punts]",
+      "a) Cálculo de $A^2$. [1,25 punts]",
+      "b) Matrices $A$ tales que $A^2 = I$. [1,25 punts]",
     ],
     criterios:
-      "(a) 1,25 por el cálculo correcto de A². (b) 0,5 por plantear el sistema de ecuaciones y 0,75 por encontrar todos los casos.",
+      "(a) 1,25 por el cálculo correcto de $A^2$. (b) 0,5 por plantear el sistema de ecuaciones y 0,75 por encontrar todos los casos.",
     puntuacion: 2.5,
   },
   {
@@ -1791,13 +1791,13 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 6,
     tema: "Derivadas — extremos y parámetros",
     enunciado:
-      "Sigui la funció f(x) = (ax² + b) / x.\n\na) Calculeu els valors dels paràmetres a i b si sabem que la gràfica de la funció f té un extrem relatiu en x = –1 i passa pel punt (2, 5/2).\nb) Per al cas a = b, calculeu i classifiqueu els extrems relatius de la funció.",
+      "Sigui la funció $f(x) = \\dfrac{ax^2 + b}{x}$.\n\na) Calculeu els valors dels paràmetres $a$ i $b$ si sabem que la gràfica de la funció $f$ té un extrem relatiu en $x = -1$ i passa pel punt $(2, 5/2)$.\nb) Per al cas $a = b$, calculeu i classifiqueu els extrems relatius de la funció.",
     apartados: [
       "a) Determinación de a y b. [1,25 punts]",
       "b) Extremos relativos para a = b. [1,25 punts]",
     ],
     criterios:
-      "(a) 0,5 por f'(–1)=0, 0,5 por f(2)=5/2 y 0,25 por la solución. (b) 0,5 por la derivada, 0,5 por los puntos críticos y 0,25 por la clasificación.",
+      "(a) 0,5 por $f'(-1)=0$, 0,5 por $f(2)=5/2$ y 0,25 por la solución. (b) 0,5 por la derivada, 0,5 por los puntos críticos y 0,25 por la clasificación.",
     puntuacion: 2.5,
   },
 
@@ -1812,11 +1812,11 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 1,
     tema: "Análisis — función logarítmica, asíntotas, tangente",
     enunciado:
-      "Considereu la funció f(x) = 2(ln x)/x, definida per a x > 0.\n\na) Estudieu-ne els màxims i els mínims, i les zones de creixement i de decreixement.\nb) Aquesta funció té asímptotes? Feu un esbós de la seva gràfica.\nc) Calculeu l'equació de la recta tangent a la gràfica de y = f(x) en el punt d'abscissa x = 1.",
+      "Considereu la funció $f(x) = \\dfrac{2\\ln x}{x}$, definida per a $x > 0$.\n\na) Estudieu-ne els màxims i els mínims, i les zones de creixement i de decreixement.\nb) Aquesta funció té asímptotes? Feu un esbós de la seva gràfica.\nc) Calculeu l'equació de la recta tangent a la gràfica de $y = f(x)$ en el punt d'abscissa $x = 1$.",
     apartados: [
       "a) Máximos, mínimos y zonas de crecimiento/decrecimiento. [1 punt]",
       "b) Asíntotas y esbozo de la gráfica. [1 punt]",
-      "c) Recta tangente en x = 1. [0,5 punts]",
+      "c) Recta tangente en $x = 1$. [0,5 punts]",
     ],
     criterios:
       "(a) 0,5 por la derivada, 0,25 por el máximo y 0,25 por las zonas. (b) 0,25 por la asíntota vertical, 0,5 por la horizontal y 0,25 por el esbozo. (c) 0,5 por la recta tangente.",
@@ -1830,10 +1830,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 2,
     tema: "Sistemas de ecuaciones lineales con parámetro k",
     enunciado:
-      "Considereu el sistema d'equacions lineals:\n4x + 2y – z = 4\nx – y + kz = 3\n3x + 3y = 1\non k és un paràmetre real.\n\na) Discutiu el sistema per als diferents valors del paràmetre k, i resoleu-lo per a k = 0.\nb) Resoleu el sistema per a k = –1.\nc) Per a k = –1, modifiqueu la tercera equació de manera que el sistema esdevingui incompatible. Justifiqueu la resposta.",
+      "Considereu el sistema d'equacions lineals:\n$$\\begin{cases}4x + 2y - z = 4 \\\\ x - y + kz = 3 \\\\ 3x + 3y = 1\\end{cases}$$\non $k$ és un paràmetre real.\n\na) Discutiu el sistema per als diferents valors del paràmetre $k$, i resoleu-lo per a $k = 0$.\nb) Resoleu el sistema per a $k = -1$.\nc) Per a $k = -1$, modifiqueu la tercera equació de manera que el sistema esdevingui incompatible. Justifiqueu la resposta.",
     apartados: [
       "a) Discusión y resolución para k = 0. [1 punt]",
-      "b) Resolución para k = –1. [0,75 punts]",
+      "b) Resolución para $k = -1$. [0,75 punts]",
       "c) Modificar la tercera ecuación para incompatibilidad. [0,75 punts]",
     ],
     criterios:
@@ -1848,7 +1848,7 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 3,
     tema: "Integral definida — terreno de regadío",
     enunciado:
-      "En Joan troba entre els papers del seu avi un esbós on es descriu un terreny de regadiu. La corba de la gràfica és y = f(x), amb f(x) = –x³ + 7x² – 6x + 5.\n\na) A partir de l'expressió de f(x), calculeu les coordenades dels punts P, Q i R indicats a la figura (P i Q sobre y = 5, R sobre l'eix x). Calculeu també l'equació de la recta PR.\nb) Calculeu la superfície del terreny (región delimitada por la curva y la recta PR).",
+      "En Joan troba entre els papers del seu avi un esbós on es descriu un terreny de regadiu. La corba de la gràfica és $y = f(x)$, amb $f(x) = -x^3 + 7x^2 - 6x + 5$.\n\na) A partir de l'expressió de $f(x)$, calculeu les coordenades dels punts $P$, $Q$ i $R$ indicats a la figura ($P$ i $Q$ sobre $y = 5$, $R$ sobre l'eix $x$). Calculeu també l'equació de la recta $PR$.\nb) Calculeu la superfície del terreny (región delimitada por la curva y la recta $PR$).",
     apartados: [
       "a) Coordenadas de P, Q, R y ecuación de la recta PR. [1,25 punts]",
       "b) Superficie del terreno. [1,25 punts]",
@@ -1882,9 +1882,9 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 5,
     tema: "Optimización — cobert de fusta",
     enunciado:
-      "Volem construir un petit cobert de fusta de 6 m³ de volum, en forma de prisma rectangular, adossat a la paret lateral d'una casa. Només cal construir el sostre i tres parets. El cobert ha de mesurar el triple d'amplària que de fondària. Cada m² de paret costa 30 € i el sostre 50 €/m². Una porta té un cost fix de 35 €.\n\na) Comproveu que el cost de construcció ve donat per C(x) = 300/x + 150x² + 35, on x és la fondària en metres.\nb) Calculeu les dimensions per al cost mínim i justifiqueu-ho. Quin és aquest cost?",
+      "Volem construir un petit cobert de fusta de $6\\ \\text{m}^3$ de volum, en forma de prisma rectangular, adossat a la paret lateral d'una casa. Només cal construir el sostre i tres parets. El cobert ha de mesurar el triple d'amplària que de fondària. Cada $\\text{m}^2$ de paret costa $30\\ €$ i el sostre $50\\ €/\\text{m}^2$. Una porta té un cost fix de $35\\ €$.\n\na) Comproveu que el cost de construcció ve donat per $C(x) = \\dfrac{300}{x} + 150x^2 + 35$, on $x$ és la fondària en metres.\nb) Calculeu les dimensions per al cost mínim i justifiqueu-ho. Quin és aquest cost?",
     apartados: [
-      "a) Deducción de la función de coste C(x). [1,25 punts]",
+      "a) Deducción de la función de coste $C(x)$. [1,25 punts]",
       "b) Dimensiones óptimas y coste mínimo. [1,25 punts]",
     ],
     criterios:
@@ -1899,10 +1899,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 6,
     tema: "Geometría — plano mediatriz, distancias, triángulo",
     enunciado:
-      "Considereu els punts A = (1, 2, 3) i B = (–3, –2, 3).\n\na) Calculeu l'equació del pla π perpendicular a la recta AB que passa pel punt mitjà entre A i B. Justifiqueu que π és el lloc geomètric dels punts equidistants d'A i B.\nb) Calculeu les distàncies de A i B al pla π i comproveu que són iguals. És casualitat?\nc) Sigui C = (–7, 6, 3). El triangle ABC és isòsceles? Calculeu la seva àrea.",
+      "Considereu els punts $A = (1, 2, 3)$ i $B = (-3, -2, 3)$.\n\na) Calculeu l'equació del pla $\\pi$ perpendicular a la recta $AB$ que passa pel punt mitjà entre $A$ i $B$. Justifiqueu que $\\pi$ és el lloc geomètric dels punts equidistants d'$A$ i $B$.\nb) Calculeu les distàncies de $A$ i $B$ al pla $\\pi$ i comproveu que són iguals. És casualitat?\nc) Sigui $C = (-7, 6, 3)$. El triangle $ABC$ és isòsceles? Calculeu la seva àrea.",
     apartados: [
-      "a) Ecuación de π y justificación como lugar geométrico. [1 punt]",
-      "b) Distancias de A y B a π. [0,75 punts]",
+      "a) Ecuación de $\\pi$ y justificación como lugar geométrico. [1 punt]",
+      "b) Distancias de $A$ y $B$ a $\\pi$. [0,75 punts]",
       "c) ¿Es isósceles ABC? Área. [0,75 punts]",
     ],
     criterios:
@@ -1921,10 +1921,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 1,
     tema: "Análisis — función racional, asíntotas, tangentes",
     enunciado:
-      "Considereu la funció f(x) = (x² – 2x) / (x – 1).\n\na) Determineu els talls de la corba y = f(x) amb els eixos de coordenades, i les equacions de les seves possibles asímptotes verticals, horitzontals i obliqües.\nb) Calculeu les equacions de les rectes tangents a la corba y = f(x) en els punts x = 0 i x = 2. Aquestes dues rectes són paral·leles? Justifiqueu la resposta.\nc) Hi ha algun punt on la recta tangent a f(x) tingui pendent 1? En cas afirmatiu, trobeu-lo.",
+      "Considereu la funció $f(x) = \\dfrac{x^2 - 2x}{x - 1}$.\n\na) Determineu els talls de la corba $y = f(x)$ amb els eixos de coordenades, i les equacions de les seves possibles asímptotes verticals, horitzontals i obliqües.\nb) Calculeu les equacions de les rectes tangents a la corba $y = f(x)$ en els punts $x = 0$ i $x = 2$. Aquestes dues rectes són paral·leles? Justifiqueu la resposta.\nc) Hi ha algun punt on la recta tangent a $f(x)$ tingui pendent $1$? En cas afirmatiu, trobeu-lo.",
     apartados: [
       "a) Cortes con ejes y asíntotas. [1 punt]",
-      "b) Rectas tangentes en x = 0 y x = 2 y paralelismo. [1 punt]",
+      "b) Rectas tangentes en $x = 0$ y $x = 2$ y paralelismo. [1 punt]",
       "c) ¿Existe punto con tangente de pendiente 1? [0,5 punts]",
     ],
     criterios:
@@ -1939,11 +1939,11 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 2,
     tema: "Sistemas de ecuaciones lineales con parámetro p",
     enunciado:
-      "Considereu el sistema d'equacions lineals:\ny – z = p + 3\np²x – z = 5\nx – y = 3\non p és un paràmetre real.\n\na) Discutiu el sistema per als diferents valors del paràmetre p.\nb) Resoleu el sistema per al cas p = –1.\nc) Per al cas p = –1, hi ha alguna solució que compleixi, a més, xy = 10? En cas afirmatiu, indiqueu quantes n'hi ha i trobeu-les totes.",
+      "Considereu el sistema d'equacions lineals:\n$$\\begin{cases}y - z = p + 3 \\\\ p^2x - z = 5 \\\\ x - y = 3\\end{cases}$$\non $p$ és un paràmetre real.\n\na) Discutiu el sistema per als diferents valors del paràmetre $p$.\nb) Resoleu el sistema per al cas $p = -1$.\nc) Per al cas $p = -1$, hi ha alguna solució que compleixi, a més, $xy = 10$? En cas afirmatiu, indiqueu quantes n'hi ha i trobeu-les totes.",
     apartados: [
       "a) Discusión según p. [1,25 punts]",
-      "b) Resolución para p = –1. [0,5 punts]",
-      "c) Soluciones con xy = 10 para p = –1. [0,75 punts]",
+      "b) Resolución para $p = -1$. [0,5 punts]",
+      "c) Soluciones con $xy = 10$ para $p = -1$. [0,75 punts]",
     ],
     criterios:
       "(a) 0,25 por el determinante, 0,25 por los valores críticos y 0,25 por cada caso. (b) 0,5 por la solución paramétrica. (c) 0,25 por la ecuación cuadrática, 0,25 por resolverla y 0,25 por los puntos.",
@@ -1957,10 +1957,10 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 3,
     tema: "Probabilidad — piezas defectuosas y binomial",
     enunciado:
-      "Una empresa produeix dos tipus de peces, de ferro i d'acer. El 60% de la producció total correspon a peces de ferro i la resta són d'acer. El 95% de les peces de ferro no tenen cap defecte, mentre que el 3% de les peces d'acer són defectuoses.\n\na) Si agafem una peça a l'atzar, quina és la probabilitat que sigui defectuosa?\nb) L'empresa produirà peces de titani en paquets de 5, amb probabilitat de defecte p (independiente). Comproveu que la probabilitat que en un paquet n'hi hagi exactament 4 de defectuoses és f(p) = 5(p⁴ – p⁵).\nc) Determineu el valor màxim que pren f(p) quan p ≥ 0.",
+      "Una empresa produeix dos tipus de peces, de ferro i d'acer. El $60\\%$ de la producció total correspon a peces de ferro i la resta són d'acer. El $95\\%$ de les peces de ferro no tenen cap defecte, mentre que el $3\\%$ de les peces d'acer són defectuoses.\n\na) Si agafem una peça a l'atzar, quina és la probabilitat que sigui defectuosa?\nb) L'empresa produirà peces de titani en paquets de $5$, amb probabilitat de defecte $p$ (independiente). Comproveu que la probabilitat que en un paquet n'hi hagi exactament $4$ de defectuoses és $f(p) = 5(p^4 - p^5)$.\nc) Determineu el valor màxim que pren $f(p)$ quan $p \\geq 0$.",
     apartados: [
       "a) Probabilidad de pieza defectuosa. [0,75 punts]",
-      "b) Demostración de f(p) = 5(p⁴ – p⁵). [0,75 punts]",
+      "b) Demostración de $f(p) = 5(p^4 - p^5)$. [0,75 punts]",
       "c) Máximo de f(p) para p ≥ 0. [1 punt]",
     ],
     criterios:
@@ -1976,7 +1976,7 @@ export const examenesCatMates: PreguntaCat[] = [
     opcion: "A",
     tema: "Integral definida — vela de barco",
     enunciado:
-      "OPCIÓ A: La vela major d'un veler té forma semiparabòlica i està delimitada per f(x) = –x² + 25, y = 0 i x = 0. La vela té dues parts separades per y = 9. La part superior s'empra amb niló (50 €/u²) i la inferior amb polièster (70 €/u²). Calculeu el cost total del material.",
+      "OPCIÓ A: La vela major d'un veler té forma semiparabòlica i està delimitada per $f(x) = -x^2 + 25$, $y = 0$ i $x = 0$. La vela té dues parts separades per $y = 9$. La part superior s'empra amb niló ($50\\ €/u^2$) i la inferior amb polièster ($70\\ €/u^2$). Calculeu el cost total del material.",
     apartados: [
       "Cálculo del coste total de la vela. [2,5 punts]",
     ],
@@ -1993,10 +1993,10 @@ export const examenesCatMates: PreguntaCat[] = [
     opcion: "B",
     tema: "Geometría — plano perpendicular y recta mediatriz",
     enunciado:
-      "OPCIÓ B: Considereu el pla π d'equació x + y = 0.\n\na) Calculeu l'equació del pla π' perpendicular a π i que conté els punts P = (1, –1, 2) i Q = (3, –3, 6).\nb) Calculeu l'equació paramètrica de la recta continguda en π' i que conté els punts de π' a la mateixa distància de P que de Q.",
+      "OPCIÓ B: Considereu el pla $\\pi$ d'equació $x + y = 0$.\n\na) Calculeu l'equació del pla $\\pi'$ perpendicular a $\\pi$ i que conté els punts $P = (1, -1, 2)$ i $Q = (3, -3, 6)$.\nb) Calculeu l'equació paramètrica de la recta continguda en $\\pi'$ i que conté els punts de $\\pi'$ a la mateixa distància de $P$ que de $Q$.",
     apartados: [
-      "a) Ecuación de π'. [1 punt]",
-      "b) Ecuación paramétrica de la recta mediatriz en π'. [1,5 punts]",
+      "a) Ecuación de $\\pi'$. [1 punt]",
+      "b) Ecuación paramétrica de la recta mediatriz en $\\pi'$. [1,5 punts]",
     ],
     criterios:
       "(a) 0,5 por el planteamiento y 0,5 por la ecuación. (b) 0,75 por el plano perpendicular a PQ por el punto medio y 0,75 por la ecuación paramétrica.",
@@ -2014,13 +2014,13 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 1,
     tema: "Optimización — área mínima de triángulo",
     enunciado:
-      "Una família vol comprar un terreny triangular envoltat de penya-segats que segueixen les rectes y = 0 i y = 3x. El tercer costat del triangle passa pel punt P = (1, 1).\n\na) Plantegeu l'equació de la recta r en funció del pendent m i comproveu que l'àrea ve donada per A(m) = (3/2) · (m² – 2m + 1) / (m² – 3m).\nb) Calculeu el valor de m que fa que l'àrea sigui mínima. Quin és el valor d'aquesta àrea?",
+      "Una família vol comprar un terreny triangular envoltat de penya-segats que segueixen les rectes $y = 0$ i $y = 3x$. El tercer costat del triangle passa pel punt $P = (1, 1)$.\n\na) Plantegeu l'equació de la recta $r$ en funció del pendent $m$ i comproveu que l'àrea ve donada per $A(m) = \\dfrac{3}{2}\\cdot\\dfrac{m^2 - 2m + 1}{m^2 - 3m}$.\nb) Calculeu el valor de $m$ que fa que l'àrea sigui mínima. Quin és el valor d'aquesta àrea?",
     apartados: [
-      "a) Ecuación de la recta r y deducción de A(m). [1 punt]",
+      "a) Ecuación de la recta $r$ y deducción de $A(m)$. [1 punt]",
       "b) Valor de m para área mínima y valor del área. [1,5 punts]",
     ],
     criterios:
-      "(a) 0,25 por la ecuación del haz de rectas, 0,25 por la base, 0,25 por la altura y 0,25 por A(m). (b) 0,5 por la derivada, 0,25 por los puntos críticos, 0,5 por justificar el mínimo y 0,25 por el valor del área.",
+      "(a) 0,25 por la ecuación del haz de rectas, 0,25 por la base, 0,25 por la altura y 0,25 por $A(m)$. (b) 0,5 por la derivada, 0,25 por los puntos críticos, 0,5 por justificar el mínimo y 0,25 por el valor del área.",
     puntuacion: 2.5,
   },
   {
@@ -2031,7 +2031,7 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 2,
     tema: "Sistemas de ecuaciones lineales con parámetro m",
     enunciado:
-      "Considereu el sistema d'equacions lineals:\nx + 3y + z = 5\nmx + 2z = 0\nmy – z = m\non m és un paràmetre real.\n\na) Discutiu el sistema per als diferents valors del paràmetre m.\nb) Resoleu el sistema per a m = 1.\nc) Resoleu el sistema quan aquest tingui infinites solucions.",
+      "Considereu el sistema d'equacions lineals:\n$$\\begin{cases}x + 3y + z = 5 \\\\ mx + 2z = 0 \\\\ my - z = m\\end{cases}$$\non $m$ és un paràmetre real.\n\na) Discutiu el sistema per als diferents valors del paràmetre $m$.\nb) Resoleu el sistema per a $m = 1$.\nc) Resoleu el sistema quan aquest tingui infinites solucions.",
     apartados: [
       "a) Discusión según m. [1,25 punts]",
       "b) Resolución para m = 1. [0,5 punts]",
@@ -2049,7 +2049,7 @@ export const examenesCatMates: PreguntaCat[] = [
     ejercicio: 3,
     tema: "Probabilidad — sesamoïditis y función de beneficios",
     enunciado:
-      "En una població d'esportistes, el 45% practiquen esports d'impacte. Entre aquests, un 10% pateixen sesamoïditis, mentre que entre els altres només un 3% la presenten.\n\na) Quina és la probabilitat que un esportista escollit a l'atzar pateixi sesamoïditis?\nb) Si l'esportista té sesamoïditis, quina és la probabilitat que practiqui esports d'impacte?\nc) Els beneficis d'una empresa de calçat segueixen f(x) = ax³ + bx² + cx, on x són els anys. El primer any es van obtenir el màxim de beneficis (8.000 €) i el segon any hi va haver un punt d'inflexió. Calculeu a, b i c.",
+      "En una població d'esportistes, el $45\\%$ practiquen esports d'impacte. Entre aquests, un $10\\%$ pateixen sesamoïditis, mentre que entre els altres només un $3\\%$ la presenten.\n\na) Quina és la probabilitat que un esportista escollit a l'atzar pateixi sesamoïditis?\nb) Si l'esportista té sesamoïditis, quina és la probabilitat que practiqui esports d'impacte?\nc) Els beneficis d'una empresa de calçat segueixen $f(x) = ax^3 + bx^2 + cx$, on $x$ són els anys. El primer any es van obtenir el màxim de beneficis ($8.000\\ €$) i el segon any hi va haver un punt d'inflexió. Calculeu $a$, $b$ i $c$.",
     apartados: [
       "a) Probabilidad total de sesamoïditis. [0,75 punts]",
       "b) Probabilidad condicionada (Bayes). [0,75 punts]",
@@ -2068,7 +2068,7 @@ export const examenesCatMates: PreguntaCat[] = [
     opcion: "A",
     tema: "Integral definida — vitrall de la Sagrada Família",
     enunciado:
-      "OPCIÓ A: Un vidrier repara un vitrall de la Sagrada Família amb forma delimitada per y = 3sin(x/4) i y = 3cos(x/4), on x i y estan en metres.\n\na) Raoneu a quina funció correspon cada gràfica i calculeu les coordenades dels punts B i C (A és l'origen de coordenades).\nb) Calculeu el preu del vitrall sabent que costa 750 €/m².",
+      "OPCIÓ A: Un vidrier repara un vitrall de la Sagrada Família amb forma delimitada per $y = 3\\sin(x/4)$ i $y = 3\\cos(x/4)$, on $x$ i $y$ estan en metres.\n\na) Raoneu a quina funció correspon cada gràfica i calculeu les coordenades dels punts $B$ i $C$ ($A$ és l'origen de coordenades).\nb) Calculeu el preu del vitrall sabent que costa $750\\ €/\\text{m}^2$.",
     apartados: [
       "a) Identificación de funciones y coordenadas de B y C. [1 punt]",
       "b) Precio del vitrall. [1,5 punts]",
@@ -2086,11 +2086,11 @@ export const examenesCatMates: PreguntaCat[] = [
     opcion: "B",
     tema: "Geometría — planos paralelos y distancias",
     enunciado:
-      "OPCIÓ B: Considereu el pla π: 2x – y + z = 5 i el punt P = (0, 1, 3).\n\na) Comproveu que la distància del punt P al pla π és √6/2.\nb) Trobeu l'equació general d'un pla π₁ paral·lel a π que passi pel punt P. Quina és la distància entre π₁ i π?\nc) Trobeu l'equació general d'un segon pla π₂, diferent de π₁, paral·lel a π i a distància √6/2 de π.",
+      "OPCIÓ B: Considereu el pla $\\pi: 2x - y + z = 5$ i el punt $P = (0, 1, 3)$.\n\na) Comproveu que la distància del punt $P$ al pla $\\pi$ és $\\sqrt{6}/2$.\nb) Trobeu l'equació general d'un pla $\\pi_1$ paral·lel a $\\pi$ que passi pel punt $P$. Quina és la distància entre $\\pi_1$ i $\\pi$?\nc) Trobeu l'equació general d'un segon pla $\\pi_2$, diferent de $\\pi_1$, paral·lel a $\\pi$ i a distància $\\sqrt{6}/2$ de $\\pi$.",
     apartados: [
       "a) Verificación de la distancia. [0,5 punts]",
-      "b) Plano π₁ paralelo a π por P y distancia. [0,75 punts]",
-      "c) Segundo plano π₂ a distancia √6/2 de π. [1,25 punts]",
+      "b) Plano $\\pi_1$ paralelo a $\\pi$ por $P$ y distancia. [0,75 punts]",
+      "c) Segundo plano $\\pi_2$ a distancia $\\sqrt{6}/2$ de $\\pi$. [1,25 punts]",
     ],
     criterios:
       "(a) 0,5 por la verificación. (b) 0,5 por la ecuación y 0,25 por la distancia. (c) 0,5 por la proyección, 0,5 por el punto simétrico y 0,25 por la ecuación final.",

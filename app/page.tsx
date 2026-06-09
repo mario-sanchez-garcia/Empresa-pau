@@ -1032,7 +1032,7 @@ function cambiarTipo(t: Tipo) {
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
             <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>
-              {seccion === 'examenes' && 'Practica con examenes oficiales EBAU Madrid'}
+              {seccion === 'examenes' && (ccaa === 'Cataluña' ? 'Practica con examenes oficiales PAU Catalunya' : 'Practica con examenes oficiales EBAU Madrid')}
               {seccion === 'chat' && 'Resuelve dudas sin quedarte bloqueado'}
               {seccion === 'historial' && 'Todas tus correcciones guardadas'}
               {seccion === 'planning' && 'Tu semana de estudio, aterrizada'}

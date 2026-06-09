@@ -451,16 +451,19 @@ const LABELS_HISTORIA: Record<string, string> = {
   corta: 'Respuesta corta'
 }
 
+const perteneceAComunidadSeleccionada = (examen: any) =>
+  (examen.comunidad ?? examen.ccaa ?? 'Madrid') === ccaa
+
 const examenesFiltrados =
     asignatura === 'mates'
-      ? examenes.filter(e => e.tipo === tipo)
+      ? examenes.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
       : asignatura === 'fisica'
-        ? examenesFisica.filter(e => e.tipo === tipo)
+        ? examenesFisica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
         : asignatura === 'quimica'
-          ? examenesQuimica.filter(e => e.tipo === tipo)
+          ? examenesQuimica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
           : asignatura === 'lengua'
-            ? examenesLengua.filter(e => e.tipo === tipo)
-            : examenesHistoria.filter(e => e.tipo === tipo)
+            ? examenesLengua.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+            : examenesHistoria.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
 
 const aniosDisponibles = isCatalunaMates
   ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
@@ -496,7 +499,7 @@ const preguntaCatActiva = preguntaCatSeleccionada
 const examen = examenesFiltrados.find(e => e.año === anioSeleccionado) ?? examenesFiltrados[0]
 
 const examenesHistoriaDelAnio = asignatura === 'historia'
-  ? examenesHistoria.filter(e => e.tipo === tipo && e.año === anioSeleccionado)
+  ? (examenesFiltrados as typeof examenesHistoria).filter(e => e.año === anioSeleccionado)
   : []
 
 const diasHistoriaDisponibles = Array.from(
@@ -510,7 +513,7 @@ const examenesHistoriaDelDia = diasHistoriaDisponibles.length
   : examenesHistoriaDelAnio
 
 const examenesLenguaDelAnio = asignatura === 'lengua'
-  ? examenesLengua.filter(e => e.tipo === tipo && e.año === anioSeleccionado)
+  ? (examenesFiltrados as typeof examenesLengua).filter(e => e.año === anioSeleccionado)
   : []
 
 const versionesLenguaDisponibles = Array.from(
@@ -1272,6 +1275,12 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
+            {!isCatalunaExam && !preguntaActiva && (
+              <div className="mb-6 rounded-3xl border border-[#dbe7fb] bg-white p-8 text-center text-sm font-bold text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+                No hay exámenes disponibles para esta comunidad, asignatura y año.
+              </div>
+            )}
+
             {!isCatalunaExam && preguntaActiva && (
              <div style={{
   background: 'rgba(255, 255, 255, 0.95)',
@@ -1347,7 +1356,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-           {!isCatalunaExam && <div style={{
+           {!isCatalunaExam && preguntaActiva && <div style={{
   background: 'rgba(255, 255, 255, 0.95)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.95)',

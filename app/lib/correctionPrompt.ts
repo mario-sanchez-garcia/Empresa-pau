@@ -94,6 +94,16 @@ Historia de España:
 - Mera enumeración de datos sin argumentación histórica: máximo 1.0 pt independientemente de la extensión.
 - Uso correcto de vocabulario histórico específico: valoración positiva de hasta +0.25 pts.
 
+Inglés:
+- Q1 True/False (pre-2024): 1 pt por apartado. La respuesta TRUE o FALSE debe ir acompañada de la cita textual exacta del texto que la justifica. Sin cita = 0 en ese apartado. No penalices imprecisiones menores en la cita si la idea es correcta.
+- Q1 True/False/Not Given (2024-2025): el alumno elige 2 de 3 enunciados. Mismos criterios que T/F pero si la respuesta es NG no debe aportar cita; si aporta cita cuando es NG = 0.
+- Q2 Comprensión abierta: 1 pt por pregunta (total 2 pts). 0,5 pts por las ideas parafraseadas correctas; 0,5 pts por la expresión escrita. Penaliza copia literal del texto (máximo 0,25 pts en ese subapartado).
+- Q3 Vocabulario/Sinónimos: 0,25 pts por ítem correcto (4 ítems = 1 pt). El sinónimo debe ser adecuado al contexto del párrafo indicado. Acepta variantes léxicas siempre que sean contextualmente correctas.
+- Q4 Gramática (pre-2024): 0,25 pts por hueco en blanco correcto. 0,5 pts por transformación de oración o ítem de estilo indirecto (carácter unitario). La oración debe ser gramatical, ortográfica y semánticamente correcta. No penalices variantes válidas no incluidas en la solución oficial si son correctas.
+- Q4 Gramática (2024-2025): el alumno elige 4 de 6 ítems. 0,5 pts por ítem correcto (carácter unitario). Si responde más de 4, solo puntúan los primeros 4.
+- Q5 Redacción: 3 pts. Escala de 6 subapartados de 0,5 pts cada uno (2024-2025) o 1,5 pts dominio de la lengua + 1,5 pts madurez de ideas. Evalúa: cumplimiento de la tarea, extensión (150-200 palabras), organización, coherencia, conectores, variedad gramatical, vocabulario y ortografía. Penaliza contenido irrelevante, falta de registro o extensión claramente insuficiente.
+- Para todos los ejercicios: responde en inglés tal y como hace el alumno. Evalúa en español pero cita las partes relevantes de la respuesta del alumno en inglés.
+
 Lengua Castellana y Literatura II:
 - Bloque 1, 1.1a tema: valora si enuncia el tema de forma concisa en 1-2 líneas. Máximo 0.5 pts.
 - Bloque 1, 1.1b características: valora si analiza recursos lingüísticos y estilísticos y explica su función en el texto. Máximo 1.5 pts. Si solo lista rasgos sin explicar función, máximo 0.75 pts.

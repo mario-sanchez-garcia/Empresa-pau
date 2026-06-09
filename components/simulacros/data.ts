@@ -33,12 +33,13 @@ const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto', 'fuente']
 }
 
-export function generateSimulacro(subject: SimulacroSubject, difficulty: SimulacroDifficulty, option: SimulacroOption) {
+export function generateSimulacro(subject: SimulacroSubject, difficulty: SimulacroDifficulty, option: SimulacroOption, comunidad: string) {
   const years = yearsForSubject(subject, difficulty)
   if (subject === 'lengua') {
     const lenguaYears = difficulty === 'Fácil' ? [2019, 2020] : difficulty === 'Media' ? [2021, 2022] : [2023, 2024]
-    const candidates = examenesLengua.filter(exam => lenguaYears.includes(exam.año))
-    const selected = shuffle(candidates)[0] ?? examenesLengua[0]
+    const candidates = examenesLengua.filter(exam => lenguaYears.includes(exam.año) && (exam.comunidad ?? 'Madrid') === comunidad)
+    if (!candidates.length) return null
+    const selected = shuffle(candidates)[0]
     const blocks = (selected?.preguntas ?? []).map((p: any, index: number) => ({
       ...toItem('lengua', selected, p, p.bloque).block,
       numero: index + 1,
@@ -49,7 +50,7 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
     return { id: crypto.randomUUID(), blocks, dificultadReal }
   }
 
-  const questions = normalizeQuestions(subject).filter(item => years.includes(item.year) && item.option === option)
+  const questions = normalizeQuestions(subject, comunidad).filter(item => years.includes(item.year) && item.option === option)
   const usedYears = new Set<number>()
   const blocks: SimulacroBlock[] = []
 
@@ -72,6 +73,8 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
     }
   }
 
+  if (blocks.length === 0) return null
+
   const averageYear = blocks.reduce((sum, block) => sum + block.year, 0) / Math.max(1, blocks.length)
   const dificultadReal = averageYear >= 2023 ? 'Difícil' : averageYear >= 2019 ? 'Media' : 'Fácil'
   return { id: crypto.randomUUID(), blocks, dificultadReal }
@@ -86,14 +89,15 @@ function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficu
   return DIFFICULTIES.find(item => item.id === difficulty)?.years ?? DIFFICULTIES[1].years
 }
 
-function normalizeQuestions(subject: SimulacroSubject) {
-  if (subject === 'mates') return examenes.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
-  if (subject === 'fisica') return examenesFisica.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
-  if (subject === 'quimica') return examenesQuimica.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
-  if (subject === 'biologia') return examenesBiologia.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
-  if (subject === 'ingles') return examenesIngles.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
-  if (subject === 'lengua') return examenesLengua.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
-  return examenesHistoria.flatMap((exam: any) => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
+function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {
+  const byComunidad = (exam: any) => (exam.comunidad ?? 'Madrid') === comunidad
+  if (subject === 'mates') return examenes.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'fisica') return examenesFisica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'quimica') return examenesQuimica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'biologia') return examenesBiologia.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'ingles') return examenesIngles.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'lengua') return examenesLengua.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  return (examenesHistoria as any[]).filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
 }
 
 function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) {

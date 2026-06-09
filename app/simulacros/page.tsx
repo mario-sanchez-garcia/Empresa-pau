@@ -7,6 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { DIFFICULTIES, SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
 import type { SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
+import { useCCAA } from '@/app/hooks/useCCAA'
 
 export default function SimulacrosPage() {
   const [userId, setUserId] = useState('')
@@ -18,6 +19,7 @@ export default function SimulacrosPage() {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
+  const { ccaa } = useCCAA()
   const stats = useMemo(() => buildStats(history), [history])
 
   useEffect(() => {
@@ -64,7 +66,12 @@ export default function SimulacrosPage() {
       setUserId(currentUserId)
 
       const effectiveOption: SimulacroOption = subject === 'lengua' ? 'A' : option
-      const generated = generateSimulacro(subject, difficulty, effectiveOption)
+      const generated = generateSimulacro(subject, difficulty, effectiveOption, ccaa)
+      if (!generated) {
+        setErrorMessage(`Todavía no hay suficientes preguntas oficiales de ${SUBJECTS[subject].label} para crear un simulacro en ${ccaa}. Prueba con otra asignatura o cambia de comunidad.`)
+        setLoading(false)
+        return
+      }
       const now = new Date().toISOString()
       const row = {
         id: generated.id,

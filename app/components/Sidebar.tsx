@@ -9,6 +9,7 @@ import {
   BookOpen,
   BrainCircuit,
   ClipboardList,
+  Dna,
   FlaskConical,
   GraduationCap,
   Landmark,
@@ -22,7 +23,7 @@ import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 
 export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'planning'
-export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'lengua' | 'historia'
+export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia'
 
 interface SidebarProps {
   activeItem?: SidebarItemId
@@ -47,6 +48,7 @@ const SUBJECTS = [
   { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#b4232a', light: '#fff1f2', border: '#ffe4e6' },
   { id: 'fisica', label: 'Física', icon: Atom, color: '#ca8a04', light: '#fefce8', border: '#fef3c7' },
   { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
+  { id: 'biologia', label: 'Biología', icon: Dna, color: '#047857', light: '#D1FAE5', border: '#A7F3D0' },
   { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
   { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#78350f', light: '#fff8f1', border: '#fed7aa' }
 ] as const

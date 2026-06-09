@@ -47,6 +47,12 @@ export default function SimulacrosPage() {
     setErrorMessage('')
 
     try {
+      if (!SUBJECTS[subject].available) {
+        setErrorMessage('Biología estará disponible en simulacros cuando carguemos suficientes ejercicios oficiales.')
+        setLoading(false)
+        return
+      }
+
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const currentUserId = sessionData.session?.user?.id
       if (sessionError || !currentUserId) {
@@ -144,13 +150,17 @@ export default function SimulacrosPage() {
           <div className="grid grid-cols-5 gap-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
               const cfg = SUBJECTS[key]
+              const available = cfg.available
               const Icon = cfg.icon
               return (
-                <button key={key} onClick={() => setSubject(key)} className="relative overflow-hidden rounded-3xl border p-5 text-left transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]" style={{ borderColor: subject === key ? cfg.color : '#dbe7fb', background: subject === key ? `linear-gradient(145deg,#ffffff,${cfg.light})` : '#fff', boxShadow: subject === key ? `0 0 0 2px ${cfg.color}22, 0 18px 44px ${cfg.color}1f` : undefined }}>
+                <button key={key} disabled={!available} onClick={() => available && setSubject(key)} className={`relative overflow-hidden rounded-3xl border p-5 text-left transition ${available ? 'hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]' : 'cursor-not-allowed opacity-70'}`} style={{ borderColor: subject === key ? cfg.color : '#dbe7fb', background: subject === key ? `linear-gradient(145deg,#ffffff,${cfg.light})` : '#fff', boxShadow: subject === key ? `0 0 0 2px ${cfg.color}22, 0 18px 44px ${cfg.color}1f` : undefined }}>
                   <Icon size={92} className="pointer-events-none absolute -bottom-5 -right-4 opacity-10" style={{ color: cfg.color }} />
                   <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm" style={{ background: cfg.light, color: cfg.color }}><Icon size={24} /></div>
-                  <h3 className="relative font-black">{cfg.label}</h3>
-                  <p className="relative text-sm font-semibold text-slate-500">{key === 'lengua' ? 'Examen oficial completo' : 'Simulacro oficial mezclado'}</p>
+                  <div className="relative flex items-center gap-2">
+                    <h3 className="font-black">{cfg.label}</h3>
+                    {!available && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-emerald-700">Próximamente</span>}
+                  </div>
+                  <p className="relative text-sm font-semibold text-slate-500">{available ? (key === 'lengua' ? 'Examen oficial completo' : 'Simulacro oficial mezclado') : 'Estamos cargando ejercicios oficiales'}</p>
                 </button>
               )
             })}
@@ -180,8 +190,8 @@ export default function SimulacrosPage() {
           </section>
         )}
 
-        <button onClick={createSimulacro} disabled={loading || !userId} className="flex items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-6 py-4 text-lg font-black text-white shadow-[0_20px_45px_rgba(37,99,235,0.24)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(37,99,235,0.3)] disabled:opacity-60">
-          <PlayCircle size={22} />{loading ? 'Generando...' : userId ? 'Generar simulacro' : 'Cargando sesión...'}
+        <button onClick={createSimulacro} disabled={loading || !userId || !SUBJECTS[subject].available} className="flex items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-6 py-4 text-lg font-black text-white shadow-[0_20px_45px_rgba(37,99,235,0.24)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(37,99,235,0.3)] disabled:opacity-60">
+          <PlayCircle size={22} />{loading ? 'Generando...' : !SUBJECTS[subject].available ? 'Simulacros de Bio próximamente' : userId ? 'Generar simulacro' : 'Cargando sesión...'}
         </button>
       </div>
     </SimulacroShell>

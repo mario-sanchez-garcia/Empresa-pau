@@ -26,7 +26,7 @@ const SUBJECT_COLORS = {
   quimica: { color: '#ea580c', light: '#fff7ed', accent: '#fb923c', border: '#ffedd5' },
   lengua: { color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
   ingles: { color: '#0284c7', light: '#f0f9ff', accent: '#38bdf8', border: '#e0f2fe' },
-  bio: { color: '#0f5ea8', light: '#eff6ff', accent: '#93c5fd', border: '#dbeafe' },
+  bio: { color: '#047857', light: '#D1FAE5', accent: '#10B981', border: '#A7F3D0' },
   geo: { color: '#075985', light: '#f0f9ff', accent: '#7dd3fc', border: '#e0f2fe' },
   arte: { color: '#3730a3', light: '#eef2ff', accent: '#818cf8', border: '#e0e7ff' },
   latin: { color: '#1e40af', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
@@ -57,7 +57,7 @@ function subjectTheme(name = '') {
   return SUBJECT_COLORS.other
 }
 
-const ASIGNATURAS = ['Matematicas II', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biologia', 'Geografia', 'Historia del Arte', 'Latin']
+const ASIGNATURAS = ['Matematicas II', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biología', 'Geografia', 'Historia del Arte', 'Latin']
 
 export default function Planning() {
   const [usuario, setUsuario] = useState<any>(null)

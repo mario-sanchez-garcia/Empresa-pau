@@ -1,4 +1,4 @@
-export type SimulacroSubject = 'mates' | 'fisica' | 'quimica' | 'lengua' | 'historia'
+export type SimulacroSubject = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia'
 export type SimulacroDifficulty = 'Fácil' | 'Media' | 'Difícil'
 export type SimulacroOption = 'A' | 'B'
 export type SimulacroStatus = 'en_progreso' | 'completado'
@@ -15,6 +15,8 @@ export interface SimulacroBlock {
   criterios?: string
   textoFuente?: string
   conceptos?: string[]
+  imagenes?: string[]
+  requiereImagen?: boolean
 }
 
 export interface SimulacroAnswer {

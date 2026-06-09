@@ -1,16 +1,18 @@
-import { Atom, BookOpen, FlaskConical, Landmark, Sigma } from 'lucide-react'
+import { Atom, BookOpen, Dna, FlaskConical, Landmark, Sigma } from 'lucide-react'
 import { examenes, examenesHistoria } from '@/app/data/examenes'
 import { examenesFisica } from '@/app/data/fisica'
 import { examenesQuimica } from '@/app/data/quimica'
 import { examenesLengua } from '@/app/data/lengua'
+import { BIOLOGIA_TOPICS, examenesBiologia } from '@/app/data/biologia'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 export const SUBJECTS = {
-  mates: { label: 'Matemáticas II', short: 'Mates', color: '#b4232a', light: '#fff1f2', icon: Sigma },
-  fisica: { label: 'Física', short: 'Física', color: '#ca8a04', light: '#fefce8', icon: Atom },
-  quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#2563eb', light: '#eff6ff', icon: BookOpen },
-  historia: { label: 'Historia de España', short: 'Historia', color: '#78350f', light: '#fff8f1', icon: Landmark }
+  mates: { label: 'Matemáticas II', short: 'Mates', color: '#b4232a', light: '#fff1f2', icon: Sigma, available: true },
+  fisica: { label: 'Física', short: 'Física', color: '#ca8a04', light: '#fefce8', icon: Atom, available: true },
+  quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
+  biologia: { label: 'Biología', short: 'Bio', color: '#047857', light: '#D1FAE5', icon: Dna, available: false },
+  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#2563eb', light: '#eff6ff', icon: BookOpen, available: true },
+  historia: { label: 'Historia de España', short: 'Historia', color: '#78350f', light: '#fff8f1', icon: Landmark, available: true }
 } as const
 
 export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [
@@ -23,6 +25,7 @@ const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   mates: ['Algebra', 'Analisis', 'Geometria', 'Probabilidad'],
   fisica: ['Gravitacion', 'Ondas', 'Electricidad', 'Optica'],
   quimica: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4'],
+  biologia: ['Bioquimica', 'Genetica', 'Microbiologia', 'Inmunologia'],
   lengua: ['Comunicacion', 'ReflexionLengua', 'EducacionLiteraria'],
   historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto', 'fuente']
 }
@@ -75,6 +78,7 @@ function normalizeQuestions(subject: SimulacroSubject) {
   if (subject === 'mates') return examenes.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'fisica') return examenesFisica.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'quimica') return examenesQuimica.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'biologia') return examenesBiologia.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'lengua') return examenesLengua.flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   return examenesHistoria.flatMap((exam: any) => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
 }
@@ -93,7 +97,9 @@ function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) 
     enunciado: p.enunciado,
     criterios: p.criterios,
     textoFuente: p.texto_fuente,
-    conceptos: p.conceptos
+    conceptos: p.conceptos,
+    imagenes: p.imagenes,
+    requiereImagen: p.requiereImagen
   }
   return { rawTheme, year: block.year, option, block }
 }
@@ -120,6 +126,7 @@ function labelFor(subject: SimulacroSubject, theme: string) {
     Comunicacion: 'Comunicación',
     ReflexionLengua: 'Reflexión sobre la lengua',
     EducacionLiteraria: 'Educación literaria',
+    ...Object.fromEntries(BIOLOGIA_TOPICS.map(item => [item.tipo, item.label])),
     cuestiones: 'Cuestiones',
     fuente1: 'Fuente 1',
     fuente2: 'Fuente 2',

@@ -7,6 +7,7 @@ import {
   BrainCircuit,
   CheckCircle2,
   ClipboardList,
+  Dna,
   FlaskConical,
   GraduationCap,
   Landmark,
@@ -83,6 +84,7 @@ const SUBJECTS = [
   { icon: Atom, label: 'Física', color: '#ca8a04', light: '#fefce8', ready: true },
   { icon: Landmark, label: 'Historia de España', color: '#78350f', light: '#fff8f1', ready: true },
   { icon: FlaskConical, label: 'Química', color: '#ea580c', light: '#fff7ed', ready: true },
+  { icon: Dna, label: 'Biología', color: '#047857', light: '#D1FAE5', ready: false },
   { icon: BookOpen, label: 'Lengua', color: '#2563eb', light: '#eff6ff', ready: true },
 ]
 
@@ -545,7 +547,7 @@ export default function LandingPage() {
               letterSpacing: '-0.02em',
             }}
           >
-            Las cinco materias de la EBAU Madrid
+            Las seis materias de la EBAU Madrid
           </h2>
         </div>
 
@@ -596,9 +598,9 @@ export default function LandingPage() {
                   style={{
                     fontSize: '11px',
                     fontWeight: 700,
-                    color: '#10b981',
-                    background: '#ecfdf5',
-                    border: '1px solid #a7f3d0',
+                    color: s.ready ? '#10b981' : '#047857',
+                    background: s.ready ? '#ecfdf5' : '#D1FAE5',
+                    border: `1px solid ${s.ready ? '#a7f3d0' : '#A7F3D0'}`,
                     borderRadius: '999px',
                     padding: '3px 10px',
                     display: 'flex',
@@ -607,7 +609,7 @@ export default function LandingPage() {
                   }}
                 >
                   <CheckCircle2 size={10} />
-                  Disponible
+                  {s.ready ? 'Disponible' : 'En preparación'}
                 </div>
               </div>
             )

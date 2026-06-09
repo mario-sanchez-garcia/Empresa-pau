@@ -10,6 +10,7 @@ const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[
   { id: 'mates', label: 'Mates', color: '#b4232a', soft: '#fff1f2' },
   { id: 'fisica', label: 'Física', color: '#ca8a04', soft: '#fefce8' },
   { id: 'quimica', label: 'Química', color: '#ea580c', soft: '#fff7ed' },
+  { id: 'biologia', label: 'Biología', color: '#047857', soft: '#D1FAE5' },
   { id: 'lengua', label: 'Lengua', color: '#2563eb', soft: '#eff6ff' },
   { id: 'historia', label: 'Historia', color: '#78350f', soft: '#fff8f1' }
 ]

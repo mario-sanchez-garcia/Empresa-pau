@@ -3,7 +3,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import { formatExamText } from '@/app/lib/mathFormatting'
+import { normalizeExamStatement } from '@/app/lib/mathFormatting'
 
 const defaultComponents = {
   p: ({ children }: any) => <p className="my-3 leading-8 text-slate-700">{children}</p>,
@@ -30,7 +30,7 @@ export default function MathMarkdown({
         rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
         components={components ?? defaultComponents}
       >
-        {format ? formatExamText(text) : (text ?? '')}
+        {format ? normalizeExamStatement(text) : (text ?? '')}
       </ReactMarkdown>
     </div>
   )

@@ -334,6 +334,7 @@ export default function Home() {
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
   const [catEjercicioIdx, setCatEjercicioIdx] = useState(0)
+  const [catHistoriaEjercicioIdx, setCatHistoriaEjercicioIdx] = useState(0)
   const [bloqueIdx, setBloqueIdx] = useState(0)
   const [diaHistoriaIdx, setDiaHistoriaIdx] = useState(0)
   const [opcion, setOpcion] = useState<0|1>(0)
@@ -383,6 +384,7 @@ export default function Home() {
     setTipo('Ordinaria')
     setExamenIdx(0)
     setCatEjercicioIdx(0)
+    setCatHistoriaEjercicioIdx(0)
     setBloqueIdx(0)
     setOpcion(0)
     reset()
@@ -481,6 +483,9 @@ const examenesCatalunaDelAnio = isCatalunaHistoria
   : []
 
 const examenCatalunaActivo = examenesCatalunaDelAnio[0] ?? null
+const ejerciciosCatalunaHistoria = examenCatalunaActivo?.ejercicios ?? []
+const ejercicioCatalunaHistoriaActivo =
+  ejerciciosCatalunaHistoria[catHistoriaEjercicioIdx] ?? ejerciciosCatalunaHistoria[0] ?? null
 
 const preguntasCatFiltradas = isCatalunaMates
   ? examenesCatMates.filter(p => p.tipo === tipo && p.year === anioSeleccionado)
@@ -767,6 +772,7 @@ function cambiarAsignatura(a: Asignatura) {
   setAsignatura(a)
   setExamenIdx(0)
   setCatEjercicioIdx(0)
+  setCatHistoriaEjercicioIdx(0)
   setBloqueIdx(0)
   setDiaHistoriaIdx(0)
   setOpcion(0)
@@ -778,6 +784,7 @@ function cambiarTipo(t: Tipo) {
   setTipo(t)
   setExamenIdx(0)
   setCatEjercicioIdx(0)
+  setCatHistoriaEjercicioIdx(0)
   setBloqueIdx(0)
   setDiaHistoriaIdx(0)
   setOpcion(0)
@@ -1142,6 +1149,7 @@ function cambiarTipo(t: Tipo) {
     onClick={() => {
       setExamenIdx(i)
       setCatEjercicioIdx(0)
+      setCatHistoriaEjercicioIdx(0)
       setBloqueIdx(0)
       setDiaHistoriaIdx(0)
       setOpcion(0)
@@ -1187,6 +1195,39 @@ function cambiarTipo(t: Tipo) {
                         } as any}
                       >
                         {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              {isCatalunaHistoria && ejerciciosCatalunaHistoria.length > 0 && (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                  {ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => {
+                    const labels: Record<string, string> = {
+                      analisis_fuentes: 'Análisis crítico de fuentes',
+                      redaccion_terminos: 'Redacción con términos históricos',
+                      exposicion_tema: 'Expón un tema',
+                      test: 'Test'
+                    }
+                    const label = labels[ejercicio.tipo]
+                    return (
+                      <button
+                        className={catHistoriaEjercicioIdx === i ? 'campus-primary' : 'campus-hover'}
+                        key={ejercicio.numero}
+                        onClick={() => setCatHistoriaEjercicioIdx(i)}
+                        style={{
+                          ...hoverVars(cfg.color, cfg.light, cfg.accent),
+                          padding: '6px 14px',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          background: catHistoriaEjercicioIdx === i ? cfg.color : WARM.field,
+                          color: catHistoriaEjercicioIdx === i ? '#fff' : WARM.muted,
+                          border: catHistoriaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                        } as any}
+                      >
+                        Ejercicio {ejercicio.numero}{label ? ` · ${label}` : ''}
                       </button>
                     )
                   })}
@@ -1244,17 +1285,19 @@ function cambiarTipo(t: Tipo) {
                 {examenCatalunaActivo ? (
                   <>
                     <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 text-sm font-bold text-rose-900">
-                      {examenCatalunaActivo.formato === '2025'
-                        ? '📋 Realiza los 4 ejercicios obligatorios.'
-                        : '📋 Escoge DOS de los cuatro ejercicios y responde a las preguntas correspondientes.'}
+                      📋 Selecciona un ejercicio para practicarlo individualmente.
                     </div>
-                    {examenCatalunaActivo.ejercicios.map((ejercicio: any) => (
+                    {ejercicioCatalunaHistoriaActivo ? (
                       <CatHistoriaEjercicioCard
-                        key={ejercicio.numero}
-                        ejercicio={ejercicio}
+                        key={ejercicioCatalunaHistoriaActivo.numero}
+                        ejercicio={ejercicioCatalunaHistoriaActivo}
                         contexto={`PAU Cataluña Historia ${examenCatalunaActivo.anio} - ${examenCatalunaActivo.serie}`}
                       />
-                    ))}
+                    ) : (
+                      <div className="rounded-3xl border border-[#dbe7fb] bg-white p-8 text-center text-sm font-bold text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+                        No hay ejercicios disponibles para este examen.
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="rounded-3xl border border-[#dbe7fb] bg-white p-8 text-center text-sm font-bold text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">

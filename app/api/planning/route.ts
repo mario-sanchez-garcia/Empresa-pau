@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
   const { prompt } = await req.json()
 
-  const model = 'claude-opus-4-5'
+  const model = 'claude-sonnet-4-6'
 
   const rateLimit = await checkAiRateLimit({
     userId: authContext.user.id,

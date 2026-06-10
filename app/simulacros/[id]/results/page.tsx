@@ -120,10 +120,15 @@ export default function SimulacroResultsPage() {
                   <TextPanel title="Cómo mejorar" text={block.consejo_para_mejorar} />
                 </div>
 
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <TextPanel title="Enunciado oficial" text={block.enunciado_oficial} />
+                  <TextPanel title="Respuesta del alumno" text={block.respuesta_alumno} />
+                </div>
+
                 {block.penalizaciones_aplicadas.length > 0 && (
                   <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-bold text-blue-900">
                     <strong className="mb-2 block">Penalizaciones aplicadas</strong>
-                    {block.penalizaciones_aplicadas.map((penalty: any, i: number) => <div key={i}>- {penalty.motivo ?? 'Penalización'}: {penalty.puntos_descontados ?? ''}</div>)}
+                    {block.penalizaciones_aplicadas.map((penalty: any, i: number) => <Markdown key={i} text={`- ${penalty.motivo ?? 'Penalización'}: ${penalty.puntos_descontados ?? ''}`} />)}
                   </div>
                 )}
 
@@ -146,9 +151,9 @@ export default function SimulacroResultsPage() {
               <article key={item.prioridad} className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl">
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-black text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">{item.prioridad}</div>
                 <h3 className="mb-2 text-lg font-black">{item.tema}</h3>
-                <p className="text-sm font-semibold text-slate-600">{item.accion}</p>
+                <Markdown text={item.accion} />
                 <p className="mt-3 text-sm font-black text-slate-500"><Clock size={15} className="mr-1 inline" />{item.tiempo_recomendado}</p>
-                <p className="mt-3 rounded-2xl bg-blue-50 p-3 text-sm font-bold text-blue-900">{item.recurso_sugerido}</p>
+                <div className="mt-3 rounded-2xl bg-blue-50 p-3 text-sm font-bold text-blue-900"><Markdown text={item.recurso_sugerido} /></div>
               </article>
             ))}
           </section>
@@ -179,7 +184,7 @@ export default function SimulacroResultsPage() {
 
 function ResultCard({ icon, title, text, tone = 'blue' }: { icon: ReactNode; title: string; text?: string; tone?: 'blue' | 'green' | 'orange' }) {
   const bg = tone === 'green' ? 'bg-sky-50' : tone === 'orange' ? 'bg-blue-50' : 'bg-white/90'
-  return <article className={`rounded-[28px] border border-[#dbe7fb] p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl ${bg}`}><div className="mb-3 flex items-center gap-2 font-black text-blue-800">{icon}{title}</div><p className="text-sm font-semibold leading-7 text-slate-600">{text || 'Sin datos disponibles.'}</p></article>
+  return <article className={`rounded-[28px] border border-[#dbe7fb] p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl ${bg}`}><div className="mb-3 flex items-center gap-2 font-black text-blue-800">{icon}{title}</div><Markdown text={text || 'Sin datos disponibles.'} /></article>
 }
 
 function TextPanel({ title, text }: { title: string; text?: string }) {
@@ -203,6 +208,8 @@ function normalizeDetail(result: any, record: SimulacroRecord, correctionFailed:
       tema: block.tema || source.tema || `Bloque ${index + 1}`,
       año_origen: block.año_origen ?? source.year ?? null,
       convocatoria_origen: block.convocatoria_origen ?? source.convocatoria ?? '',
+      enunciado_oficial: source.enunciado,
+      respuesta_alumno: record.respuestas_parciales?.[source.id]?.text || (record.respuestas_parciales?.[source.id]?.image ? 'Respuesta manuscrita adjunta como imagen.' : 'Sin respuesta guardada.'),
       puntos_conseguidos: score,
       puntos_maximos: max,
       porcentaje_logrado: safeNumber(block.porcentaje_logrado ?? block.porcentaje, percentage),

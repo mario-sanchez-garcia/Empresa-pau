@@ -137,6 +137,10 @@ Lengua Castellana y Literatura II:
 13. Incluye solucion_orientativa por bloque con el planteamiento o respuesta esperada.
 14. Resume cada bloque temático con nivel: Domina / En progreso / Necesita refuerzo urgente.
 15. Contextualiza la nota según la dificultad.
+16. En todos los campos de texto usa Markdown claro: títulos cortos, listas y pasos numerados cuando ayuden a entender la corrección.
+17. Escribe las fórmulas matemáticas, físicas y químicas con LaTeX: inline con $...$ y en bloque con $$...$$.
+18. No uses HTML ni párrafos largos y apelmazados. Separa claramente aciertos, errores, corrección paso a paso, respuesta modelo y consejo final.
+19. Aunque la salida completa sea JSON puro, los valores de texto dentro del JSON pueden y deben contener Markdown y LaTeX válidos.
 
 ### FORMATO DE SALIDA
 
@@ -233,18 +237,22 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
     : `## Nota: ${formatNumber(data?.nota_final)}/10`
 
   return [
-    heading,
+    `# Resultado general\n${heading.replace(/^## /, '')}`,
     data?.advertencia_tiempo ? `> ${data.advertencia_tiempo}` : '',
-    `### Feedback general\n${data?.feedback_general ?? ''}`,
-    `### Puntos fuertes\n${data?.puntos_fuertes ?? ''}`,
-    `### Puntos de mejora\n${data?.puntos_mejora ?? ''}`,
+    data?.feedback_general ?? '',
+    `## Lo que está bien\n${listOrText(data?.fortalezas, data?.puntos_fuertes)}`,
+    `## Errores o mejoras\n${listOrText(data?.errores_principales, data?.puntos_mejora)}`,
     ...bloques.map((block: any) => [
+      `## Corrección paso a paso`,
       `### ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}`,
       `**Puntuación:** ${formatNumber(block.puntos_conseguidos)}/${formatNumber(block.puntos_maximos)} (${block.porcentaje_logrado ?? 0}%)`,
-      `**Corrección:** ${block.correccion_detalle ?? ''}`,
+      block.que_hizo_bien ? `**Aciertos**\n\n${block.que_hizo_bien}` : '',
+      block.errores_detectados?.length ? `**Errores detectados**\n\n${listOrText(block.errores_detectados)}` : '',
+      block.que_faltaba ? `**Qué faltaba**\n\n${block.que_faltaba}` : '',
+      block.correccion_detalle ?? '',
       penaltiesToMarkdown(block.penalizaciones_aplicadas),
-      `**Solución correcta corta:** ${block.solucion_correcta_corta ?? ''}`,
-      `**Consejo específico:** ${block.consejo_especifico ?? ''}`
+      `## Respuesta modelo\n${block.solucion_orientativa ?? block.solucion_correcta_corta ?? ''}`,
+      `## Consejo final\n${block.consejo_especifico ?? block.consejo_para_mejorar ?? ''}`
     ].filter(Boolean).join('\n\n')),
     plan.length ? `### Plan de repaso\n${plan.map((item: any) => `${item.prioridad}. **${item.tema}**: ${item.accion} (${item.tiempo_recomendado}). ${item.recurso_sugerido}`).join('\n')}` : '',
     resumen.length ? `### Resumen por bloque\n${resumen.map((item: any) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : ''
@@ -300,6 +308,13 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
 function penaltiesToMarkdown(items: any) {
   if (!Array.isArray(items) || !items.length) return ''
   return `**Penalizaciones aplicadas:**\n${items.map((item: any) => `- ${item.motivo}: ${item.puntos_descontados}`).join('\n')}`
+}
+
+function listOrText(items: any, fallback = '') {
+  if (Array.isArray(items) && items.filter(Boolean).length) {
+    return items.filter(Boolean).map((item: any) => `- ${String(item)}`).join('\n')
+  }
+  return fallback || 'Sin observaciones adicionales.'
 }
 
 function formatNumber(value: any) {

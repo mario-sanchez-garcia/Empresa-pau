@@ -2175,8 +2175,14 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   </div>
                 )}
+                {itemSeleccionado.respuesta && (
+                  <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '20px', background: '#f8fbff', border: '1px solid #dbe7fb' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.blue, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Respuesta del alumno</div>
+                    <MathMarkdown text={itemSeleccionado.respuesta} components={mdComponents} />
+                  </div>
+                )}
                 {itemSeleccionado.correccion && (
-                  <div>
+                  <div style={{ padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #dbe7fb', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Corrección de Pausia</div>
                     <MathMarkdown text={itemSeleccionado.correccion} format={false} components={mdComponents} />
                   </div>

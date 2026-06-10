@@ -92,9 +92,17 @@ export default function SimulacroActivoPage() {
 
     try {
       await autosave(answersSnapshot)
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      const accessToken = sessionData.session?.access_token
+      if (sessionError || !accessToken) {
+        setSubmitError('Tu sesión ha caducado. Vuelve a iniciar sesión para entregar el simulacro.')
+        setSubmitting(false)
+        return
+      }
+
       const res = await fetch('/api/simulacro', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           bloques: record.bloques,
           respuestas: answersSnapshot,

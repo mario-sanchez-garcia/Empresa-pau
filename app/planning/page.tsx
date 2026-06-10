@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
+import GradePredictionCard from '@/components/grade/GradePredictionCard'
+import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
 
 const config = {
   bg: '#2563eb',
@@ -75,12 +77,16 @@ export default function Planning() {
   const [asignaturasFlo, setAsignaturasFlo] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<PlanTab>('general')
   const [planningError, setPlanningError] = useState('')
+  const [gradePredictions, setGradePredictions] = useState<GradePredictionResult[]>([])
+  const [gradePredictionLoading, setGradePredictionLoading] = useState(false)
+  const [gradePredictionError, setGradePredictionError] = useState('')
   const router = useRouter()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
       setUsuario(data.user)
+      void cargarNotaEstimada(data.user.id)
       const { data: p } = await supabase.from('perfiles').select('*').eq('id', data.user.id).single()
       if (p) {
         setPerfil(p)
@@ -90,6 +96,62 @@ export default function Planning() {
       setCargando(false)
     })
   }, [])
+
+  async function cargarNotaEstimada(userId: string) {
+    setGradePredictionLoading(true)
+    setGradePredictionError('')
+    try {
+      const [simulacrosResult, correctionsResult] = await Promise.all([
+        supabase
+          .from('historial_simulacros')
+          .select('asignatura,estado,nota_final,resultado_json,created_at,updated_at')
+          .eq('user_id', userId)
+          .eq('estado', 'completado')
+          .order('updated_at', { ascending: false })
+          .limit(100),
+        supabase
+          .from('historial_examenes')
+          .select('asignatura,nota,nota_maxima,created_at')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(150)
+      ])
+
+      if (simulacrosResult.error) console.error('GRADE_PREDICTION_SIMULACROS_ERROR', simulacrosResult.error)
+      if (correctionsResult.error) console.error('GRADE_PREDICTION_CORRECTIONS_ERROR', correctionsResult.error)
+
+      const simulacros: GradeEvidenceItem[] = (simulacrosResult.data ?? []).map((item: any) => {
+        const score = firstNumber(item.nota_final, item.resultado_json?.nota_final)
+        const blockScore = score == null ? scoreFromBlocks(item.resultado_json?.desglose_bloques) : null
+        return {
+          source: 'simulacro',
+          subject: item.asignatura,
+          score: score ?? blockScore?.score ?? null,
+          maxScore: score == null ? blockScore?.maxScore ?? null : 10,
+          createdAt: item.updated_at ?? item.created_at
+        }
+      })
+
+      const corrections: GradeEvidenceItem[] = (correctionsResult.data ?? []).map((item: any) => ({
+        source: 'correction',
+        subject: item.asignatura,
+        score: item.nota,
+        maxScore: item.nota_maxima,
+        createdAt: item.created_at
+      }))
+
+      setGradePredictions(calculateGradePredictions([...simulacros, ...corrections]))
+      if (simulacrosResult.error || correctionsResult.error) {
+        setGradePredictionError('No hemos podido leer todos los datos todavía; la estimación se actualizará cuando haya más historial disponible.')
+      }
+    } catch (error) {
+      console.error('GRADE_PREDICTION_ERROR', error)
+      setGradePredictions([])
+      setGradePredictionError('Todavía no hay datos suficientes para estimar tu nota.')
+    } finally {
+      setGradePredictionLoading(false)
+    }
+  }
 
   async function cargarTareasYPlanning(p: any, userId: string) {
     const { data: tareas } = await supabase
@@ -243,6 +305,25 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
     setCargando(false)
   }
 
+  function firstNumber(...values: any[]) {
+    for (const value of values) {
+      const number = Number(value)
+      if (Number.isFinite(number)) return number
+    }
+    return null
+  }
+
+  function scoreFromBlocks(blocks: any) {
+    if (!Array.isArray(blocks)) return null
+    const totals = blocks.reduce((acc, block) => {
+      const score = firstNumber(block?.puntos_conseguidos, block?.nota)
+      const maxScore = firstNumber(block?.puntos_maximos, block?.max_puntos)
+      if (score == null || maxScore == null || maxScore <= 0) return acc
+      return { score: acc.score + score, maxScore: acc.maxScore + maxScore }
+    }, { score: 0, maxScore: 0 })
+    return totals.maxScore > 0 ? totals : null
+  }
+
   function toggleAsignatura(a: string) {
     setAsignaturasFlo(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])
   }
@@ -391,6 +472,12 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                 <PenLine size={14} /> Editar perfil
               </button>
             </div>
+
+            <GradePredictionCard
+              predictions={gradePredictions}
+              loading={gradePredictionLoading}
+              error={gradePredictionError}
+            />
 
             <div className="flex flex-wrap gap-2 rounded-3xl p-2" style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(219,231,251,0.95)', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
               {tabs.map(tab => {

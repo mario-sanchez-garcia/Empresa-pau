@@ -58,19 +58,29 @@ export default function CatEjercicioCard({
   const [correccion, setCorreccion] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
-  const maxScore = ejercicio.apartados.reduce((sum, apartado) => sum + Number(apartado.puntos ?? 0), 0) || 2.5
-  const apartadosTexto = ejercicio.apartados.map(apartado => [
+  const [apartadoIdx, setApartadoIdx] = useState(0)
+  const apartado = ejercicio.apartados[apartadoIdx] ?? ejercicio.apartados[0]
+  const maxScore = Number(apartado?.puntos ?? 2.5)
+  const apartadoTexto = apartado ? [
     `${apartado.id}. ${apartado.enunciado}${apartado.puntos ? ` (${apartado.puntos} puntos)` : ''}`,
     apartado.opciones?.map((opcion, index) => `${String.fromCharCode(97 + index)}) ${opcion}`).join('\n'),
-  ].filter(Boolean).join('\n'))
+  ].filter(Boolean).join('\n') : ''
   const enunciadoCompleto = [
     ejercicio.instrucciones,
     ejercicio.texto,
     ejercicio.fuente,
     ejercicio.enunciado,
-    ...apartadosTexto,
+    apartadoTexto,
     ...(ejercicio.datos ?? []),
   ].filter(Boolean).join('\n\n')
+
+  function cambiarApartado(index: number) {
+    imagenes.forEach(imagen => URL.revokeObjectURL(imagen.preview))
+    setApartadoIdx(index)
+    setImagenes([])
+    setRespuesta('')
+    setCorreccion('')
+  }
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
@@ -104,13 +114,13 @@ export default function CatEjercicioCard({
     const prompt = buildCorrectionPrompt({
       subject: asignaturaLabel,
       community: 'Cataluña',
-      simulacroId: `${examen.id} · ${ejercicio.titulo}`,
+      simulacroId: `${examen.id} · ${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
       option: ejercicio.opcion ?? 'Única',
       elapsedMinutes: 0,
       difficulty: 'Media',
       blocks: [{
-        numeroBloque: ejercicio.titulo,
-        tema: ejercicio.titulo,
+        numeroBloque: `${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
+        tema: apartado?.id ? `${ejercicio.titulo} · ${apartado.id}` : ejercicio.titulo,
         year: examen.anio,
         convocatoria: examen.convocatoria,
         option: ejercicio.opcion ?? 'Única',
@@ -152,7 +162,7 @@ export default function CatEjercicioCard({
           asignatura,
           tipo: `Cataluña · ${examen.convocatoria}`,
           año: examen.anio,
-          bloque: ejercicio.titulo,
+          bloque: `${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
           opcion: ejercicio.opcion ?? 'Única',
           nota: normalized?.desglose_bloques?.[0]?.puntos_conseguidos ?? null,
           nota_maxima: maxScore,
@@ -182,12 +192,20 @@ export default function CatEjercicioCard({
         </div>
       </header>
       <div className="grid gap-4 p-6">
+        {ejercicio.apartados.length > 1 && (
+          <label>
+            <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Pregunta / apartado</span>
+            <select value={apartadoIdx} onChange={event => cambiarApartado(Number(event.target.value))} className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm font-bold text-slate-700 outline-none" style={{ borderColor: UI.border }}>
+              {ejercicio.apartados.map((item, index) => <option key={item.id} value={index}>{item.id} · {item.enunciado}</option>)}
+            </select>
+          </label>
+        )}
         {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este enunciado requiere revisión visual con el documento original.</div>}
         {ejercicio.instrucciones && <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}><MathMarkdown text={ejercicio.instrucciones} /></div>}
         {ejercicio.texto && <MathMarkdown text={ejercicio.texto} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
         {ejercicio.fuente && <MathMarkdown text={ejercicio.fuente} className="text-xs italic text-slate-500" />}
         {ejercicio.enunciado && <MathMarkdown text={ejercicio.enunciado} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
-        {apartadosTexto.map((apartado, index) => <MathMarkdown key={index} text={apartado} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />)}
+        {apartadoTexto && <MathMarkdown text={apartadoTexto} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
         {ejercicio.datos?.map((dato, index) => <MathMarkdown key={index} text={dato} className="text-sm text-slate-600" />)}
         {ejercicio.imagenes?.map((imagen, index) => <div key={index} className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">{imagen}</div>)}
 

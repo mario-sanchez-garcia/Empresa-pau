@@ -262,6 +262,7 @@ const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
 const PINNED_SUBJECTS_STORAGE_KEY = 'pausia:pinned-subjects'
+const PROFILE_PREFERENCES_STORAGE_KEY = 'pausia_profile_preferences'
 const MAX_PINNED = 4
 
 function readHomeSectionFromUrl(): Seccion | null {
@@ -274,6 +275,16 @@ function readSubjectFromUrl(): Asignatura | null {
   if (typeof window === 'undefined') return null
   const subject = new URLSearchParams(window.location.search).get('subject')
   return HOME_SUBJECTS.includes(subject as Asignatura) ? subject as Asignatura : null
+}
+
+function readDefaultSubject(): Asignatura | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(PROFILE_PREFERENCES_STORAGE_KEY) ?? '{}')
+    return HOME_SUBJECTS.includes(stored.defaultSubject as Asignatura) ? stored.defaultSubject as Asignatura : null
+  } catch {
+    return null
+  }
 }
 
 function normalizePinnedSubjects(value: unknown): Asignatura[] {
@@ -504,8 +515,8 @@ export default function Home() {
 
   useEffect(() => {
     const urlSection = readHomeSectionFromUrl()
-    const urlSubject = readSubjectFromUrl()
-    if (urlSubject) cambiarAsignatura(urlSubject)
+    const initialSubject = readSubjectFromUrl() ?? readDefaultSubject()
+    if (initialSubject) cambiarAsignatura(initialSubject)
     if (urlSection) setSeccion(urlSection)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -623,7 +634,7 @@ const LABELS_HISTORIA: Record<string, string> = {
 }
 
 const perteneceAComunidadSeleccionada = (examen: any) =>
-  (examen.comunidad ?? examen.ccaa ?? 'Madrid') === ccaa
+  (examen.comunidad ?? examen.ccaa) === ccaa
 
 const examenesFiltrados =
     asignatura === 'mates'

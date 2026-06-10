@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Bell, Camera, LogOut, Save, ShieldCheck, UserRound, X } from 'lucide-react'
+import { Bell, Camera, LogOut, Save, Settings2, ShieldCheck, UserRound, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/app/components/Sidebar'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
@@ -14,6 +14,10 @@ type Preferences = {
   displayName: string
   photo: string
   dailyGoal: number
+  educationLevel: string
+  defaultSubject: string
+  correctionStyle: 'breve' | 'normal' | 'detallado'
+  longAdvice: boolean
   studyReminders: boolean
   correctionEmails: boolean
 }
@@ -22,6 +26,10 @@ const defaults: Preferences = {
   displayName: '',
   photo: '',
   dailyGoal: 45,
+  educationLevel: '2-bachillerato',
+  defaultSubject: 'mates',
+  correctionStyle: 'normal',
+  longAdvice: true,
   studyReminders: true,
   correctionEmails: false
 }
@@ -32,6 +40,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState('')
   const [preferences, setPreferences] = useState<Preferences>(defaults)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -55,10 +64,16 @@ export default function SettingsPage() {
   }
 
   function save() {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
-    window.dispatchEvent(new Event(CHANGE_EVENT))
-    setSaved(true)
-    window.setTimeout(() => setSaved(false), 2200)
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
+      window.dispatchEvent(new Event(CHANGE_EVENT))
+      setSaveError('')
+      setSaved(true)
+      window.setTimeout(() => setSaved(false), 2200)
+    } catch {
+      setSaved(false)
+      setSaveError('No se han podido guardar los cambios en este dispositivo. Prueba con una foto más pequeña.')
+    }
   }
 
   async function logout() {
@@ -94,16 +109,32 @@ export default function SettingsPage() {
                 <Field label="Nombre visible"><input value={preferences.displayName} onChange={event => setPreferences(current => ({ ...current, displayName: event.target.value }))} placeholder="¿Cómo quieres que te llamemos?" className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white" /></Field>
                 <Field label="Email"><input value={email} readOnly className="w-full cursor-not-allowed rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 outline-none" /></Field>
                 <Field label="Comunidad por defecto"><select value={ccaa} onChange={event => setCCAA(event.target.value as CCAA)} className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white">{CCAA_OPTIONS.map(option => <option key={option}>{option}</option>)}</select></Field>
-                <Field label="Objetivo diario"><select value={preferences.dailyGoal} onChange={event => setPreferences(current => ({ ...current, dailyGoal: Number(event.target.value) }))} className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white"><option value={20}>20 minutos</option><option value={45}>45 minutos</option><option value={60}>60 minutos</option><option value={90}>90 minutos</option></select></Field>
+                <Field label="Curso o nivel"><select value={preferences.educationLevel} onChange={event => setPreferences(current => ({ ...current, educationLevel: event.target.value }))} className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white"><option value="1-bachillerato">1.º Bachillerato</option><option value="2-bachillerato">2.º Bachillerato</option><option value="preparacion-pau">Preparación PAU</option><option value="otro">Otro</option></select></Field>
               </div>
+              <p className="mt-4 text-xs font-semibold text-amber-700">La subida permanente de foto todavía no está configurada. La imagen se guarda solo en este dispositivo.</p>
             </section>
 
             <section className="border-y border-blue-100 bg-white px-5 py-6 sm:px-7">
               <SectionTitle icon={<Bell size={18} />} title="Preferencias" />
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <Field label="Objetivo diario"><select value={preferences.dailyGoal} onChange={event => setPreferences(current => ({ ...current, dailyGoal: Number(event.target.value) }))} className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white"><option value={20}>20 minutos</option><option value={45}>45 minutos</option><option value={60}>60 minutos</option><option value={90}>90 minutos</option></select></Field>
+                <Field label="Asignatura por defecto"><select value={preferences.defaultSubject} onChange={event => setPreferences(current => ({ ...current, defaultSubject: event.target.value }))} className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white"><option value="mates">Matemáticas II</option><option value="fisica">Física</option><option value="quimica">Química</option><option value="lengua">Lengua</option><option value="historia">Historia de España</option><option value="historia_filosofia">Historia de la Filosofía</option><option value="ingles">Inglés</option><option value="biologia">Biología</option></select></Field>
+              </div>
               <div className="mt-5 divide-y divide-blue-50">
                 <Toggle label="Recordatorios de estudio" description="Mantener activa tu rutina de Mi Plan." checked={preferences.studyReminders} onChange={value => setPreferences(current => ({ ...current, studyReminders: value }))} />
                 <Toggle label="Resumen de correcciones por email" description="Preparar un resumen periódico de tu progreso." checked={preferences.correctionEmails} onChange={value => setPreferences(current => ({ ...current, correctionEmails: value }))} />
               </div>
+            </section>
+
+            <section className="border-y border-blue-100 bg-white px-5 py-6 sm:px-7">
+              <SectionTitle icon={<Settings2 size={18} />} title="Personalización" />
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <Field label="Estilo de corrección"><select value={preferences.correctionStyle} onChange={event => setPreferences(current => ({ ...current, correctionStyle: event.target.value as Preferences['correctionStyle'] }))} className="w-full rounded-xl border border-blue-100 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:bg-white"><option value="breve">Breve</option><option value="normal">Normal</option><option value="detallado">Detallado</option></select></Field>
+              </div>
+              <div className="mt-2 divide-y divide-blue-50">
+                <Toggle label="Mostrar consejos largos" description="Conservar explicaciones amplias al final de las correcciones." checked={preferences.longAdvice} onChange={value => setPreferences(current => ({ ...current, longAdvice: value }))} />
+              </div>
+              <p className="mt-3 text-xs font-semibold text-slate-500">Estas preferencias se guardan localmente en este dispositivo. No modifican todavía el formato de la corrección IA.</p>
             </section>
 
             <section className="border-y border-blue-100 bg-white px-5 py-6 sm:px-7">
@@ -116,7 +147,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="sticky bottom-5 mt-7 flex justify-end">
-            <button type="button" onClick={save} className="flex items-center gap-2 rounded-2xl bg-blue-700 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-200"><Save size={17} />{saved ? 'Cambios guardados' : 'Guardar ajustes'}</button>
+            <div className="grid justify-items-end gap-2">
+              {saveError && <div className="max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">{saveError}</div>}
+              <button type="button" onClick={save} className="flex items-center gap-2 rounded-2xl bg-blue-700 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-200"><Save size={17} />{saved ? 'Cambios guardados en este dispositivo' : 'Guardar cambios'}</button>
+            </div>
           </div>
         </div>
       </main>

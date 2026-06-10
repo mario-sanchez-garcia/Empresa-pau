@@ -87,6 +87,16 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
     setQuestionId(questions[0]?.id ?? '')
   }, [textOption, exerciseNumber, exerciseOption, questions.map(question => question.id).join(',')])
 
+  useEffect(() => {
+    setAnswer('')
+    setCorrection('')
+    setError('')
+    setImage(null)
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImagePreview(null)
+    if (fileRef.current) fileRef.current.value = ''
+  }, [ccaa, convocatoria, year, examId, textOption, exerciseNumber, exerciseOption, questionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const sourceText = ccaa === 'Madrid'
     ? isSelectedTextQuestion && selectedText
       ? `**${selectedText.autor}, ${selectedText.obra}**\n\n${selectedText.texto}`

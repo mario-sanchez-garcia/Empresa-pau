@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
-import type { EjercicioFisicaCataluna, ExamenFisicaCataluna, OpcionFisicaCataluna } from '@/app/data/fisica_cataluna'
+import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/fisica_cataluna'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
@@ -15,15 +15,6 @@ const UI = {
   muted: '#64748b',
 }
 
-function renderApartados(apartados: EjercicioFisicaCataluna['apartados'] | OpcionFisicaCataluna['apartados']) {
-  return apartados?.map(apartado => `${apartado.letra}) ${apartado.enunciado}${apartado.puntos ? ` (${apartado.puntos} puntos)` : ''}`) ?? []
-}
-
-function puntuacion(apartados: EjercicioFisicaCataluna['apartados'] | OpcionFisicaCataluna['apartados']) {
-  const total = apartados?.reduce((sum, apartado) => sum + Number(apartado.puntos ?? 0), 0) ?? 0
-  return total || 2.5
-}
-
 type UploadedImage = { name: string; type: string; data: string; preview: string }
 
 export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: ExamenFisicaCataluna; ejercicio: EjercicioFisicaCataluna }) {
@@ -33,11 +24,14 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
   const [correccion, setCorreccion] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
+  const [apartadoIdx, setApartadoIdx] = useState(0)
   const opcion = ejercicio.opciones?.[opcionIdx]
   const apartados = opcion?.apartados ?? ejercicio.apartados
-  const maxScore = puntuacion(apartados)
+  const apartado = apartados?.[apartadoIdx] ?? apartados?.[0]
+  const maxScore = Number(apartado?.puntos ?? 2.5)
   const titulo = opcion?.titulo ?? ejercicio.titulo
-  const enunciado = [ejercicio.instrucciones, opcion?.enunciado ?? ejercicio.enunciado, ...renderApartados(apartados), ...(opcion?.datos ?? ejercicio.datos ?? [])].filter(Boolean).join('\n\n')
+  const apartadoTexto = apartado ? `${apartado.letra}) ${apartado.enunciado}${apartado.puntos ? ` (${apartado.puntos} puntos)` : ''}` : ''
+  const enunciado = [ejercicio.instrucciones, opcion?.enunciado ?? ejercicio.enunciado, apartadoTexto, ...(opcion?.datos ?? ejercicio.datos ?? [])].filter(Boolean).join('\n\n')
   const requiereRevision = ejercicio.requiereRevision || opcion?.requiereRevision
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
@@ -63,6 +57,15 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
     imagenes.forEach(imagen => URL.revokeObjectURL(imagen.preview))
     setImagenes([])
     setOpcionIdx(index)
+    setApartadoIdx(0)
+    setRespuesta('')
+    setCorreccion('')
+  }
+
+  function cambiarApartado(index: number) {
+    imagenes.forEach(imagen => URL.revokeObjectURL(imagen.preview))
+    setImagenes([])
+    setApartadoIdx(index)
     setRespuesta('')
     setCorreccion('')
   }
@@ -76,13 +79,13 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
     const prompt = buildCorrectionPrompt({
       subject: 'Física PAU Cataluña',
       community: 'Cataluña',
-      simulacroId: `${examen.id} · Ejercicio ${ejercicio.numero}`,
+      simulacroId: `${examen.id} · Ejercicio ${ejercicio.numero} · Apartado ${apartado?.letra ?? 'único'}`,
       option,
       elapsedMinutes: 0,
       difficulty: 'Media',
       blocks: [{
-        numeroBloque: `Ejercicio ${ejercicio.numero}`,
-        tema: ejercicio.bloque ?? titulo,
+        numeroBloque: `Ejercicio ${ejercicio.numero} · Apartado ${apartado?.letra ?? 'único'}`,
+        tema: `${ejercicio.bloque ?? titulo} · ${apartado?.letra ?? 'único'}`,
         year: examen.anio,
         convocatoria: examen.convocatoria,
         option,
@@ -123,7 +126,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
           asignatura: 'fisica',
           tipo: `Cataluña · ${examen.convocatoria}`,
           año: examen.anio,
-          bloque: titulo,
+          bloque: `${titulo} · Apartado ${apartado?.letra ?? 'único'}`,
           opcion: option,
           nota: normalized?.desglose_bloques?.[0]?.puntos_conseguidos ?? null,
           nota_maxima: maxScore,
@@ -161,9 +164,17 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
             ))}
           </div>
         )}
+        {(apartados?.length ?? 0) > 1 && (
+          <label>
+            <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Apartado</span>
+            <select value={apartadoIdx} onChange={event => cambiarApartado(Number(event.target.value))} className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm font-bold text-slate-700 outline-none" style={{ borderColor: UI.border }}>
+              {apartados?.map((item, index) => <option key={item.letra} value={index}>{item.letra} · {item.enunciado}</option>)}
+            </select>
+          </label>
+        )}
         {requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este enunciado procede de OCR parcial y requiere consultar el PDF original.</div>}
         {(opcion?.enunciado ?? ejercicio.enunciado) && <MathMarkdown text={opcion?.enunciado ?? ejercicio.enunciado} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
-        {renderApartados(apartados).map((apartado, index) => <MathMarkdown key={index} text={apartado} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />)}
+        {apartadoTexto && <MathMarkdown text={apartadoTexto} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
         {(opcion?.datos ?? ejercicio.datos)?.map((dato, index) => <MathMarkdown key={index} text={dato} className="text-sm text-slate-600" />)}
 
         <section className="border-t pt-5" style={{ borderColor: UI.border }}>

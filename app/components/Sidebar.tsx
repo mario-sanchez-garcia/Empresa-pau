@@ -17,14 +17,15 @@ import {
   LogOut,
   MessageCircle,
   Rocket,
+  Settings,
   Sigma,
   TimerReset
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 
-export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio'
-export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'ingles'
+export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'settings'
+export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 
 interface SidebarProps {
   activeItem?: SidebarItemId
@@ -41,7 +42,8 @@ const NAV_ITEMS = [
   { id: 'zona', label: 'La Zona', desc: 'Estudia a tu manera', href: '/zona', icon: BrainCircuit },
   { id: 'chat', label: 'Chat con Pausia', desc: 'Resuelve dudas', href: '/?view=chat', icon: MessageCircle },
   { id: 'historial', label: 'Historial', desc: 'Tus correcciones', href: '/?view=historial', icon: BarChart3 },
-  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/planning', icon: Rocket }
+  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/planning', icon: Rocket },
+  { id: 'settings', label: 'Ajustes / Perfil', desc: 'Cuenta y preferencias', href: '/settings', icon: Settings }
 ] as const
 
 const SUBJECTS = [
@@ -51,13 +53,15 @@ const SUBJECTS = [
   { id: 'biologia', label: 'Biología', icon: Dna, color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
   { id: 'ingles', label: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', border: '#A5F3FC' },
   { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', border: '#ffe4e6' },
-  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' }
+  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' },
+  { id: 'historia_filosofia', label: 'Historia de la Filosofía', icon: BookOpen, color: '#0f766e', light: '#f0fdfa', border: '#ccfbf1' }
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {
   if (pathname.startsWith('/simulacros')) return 'simulacros'
   if (pathname.startsWith('/zona')) return 'zona'
   if (pathname.startsWith('/planning')) return 'plan-estudio'
+  if (pathname.startsWith('/settings')) return 'settings'
   return 'examenes'
 }
 
@@ -65,6 +69,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
   const pathname = usePathname()
   const router = useRouter()
   const [sessionEmail, setSessionEmail] = useState('')
+  const [profile, setProfile] = useState<{ displayName?: string, photo?: string }>({})
   const currentItem = activeItem ?? routeItem(pathname)
   const displayedEmail = email ?? sessionEmail
   const { ccaa, setCCAA } = useCCAA()
@@ -72,6 +77,23 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
   useEffect(() => {
     if (email === undefined) supabase.auth.getUser().then(({ data }) => setSessionEmail(data.user?.email ?? ''))
   }, [email])
+
+  useEffect(() => {
+    function readProfile() {
+      try {
+        setProfile(JSON.parse(window.localStorage.getItem('pausia_profile_preferences') ?? '{}'))
+      } catch {
+        setProfile({})
+      }
+    }
+    readProfile()
+    window.addEventListener('pausia_profile_preferences_change', readProfile)
+    window.addEventListener('storage', readProfile)
+    return () => {
+      window.removeEventListener('pausia_profile_preferences_change', readProfile)
+      window.removeEventListener('storage', readProfile)
+    }
+  }, [])
 
   async function logout() {
     if (onLogout) {
@@ -148,10 +170,10 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
           </select>
         </label>
         <div className="mb-3 flex items-center gap-3">
-          <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-[13px] font-black text-blue-700">{displayedEmail[0]?.toUpperCase() ?? '?'}</div>
+          <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-blue-100 bg-blue-50 text-[13px] font-black text-blue-700">{profile.photo ? <img src={profile.photo} alt="" className="h-full w-full object-cover" /> : (profile.displayName || displayedEmail)[0]?.toUpperCase() ?? '?'}</div>
           <div className="min-w-0">
-            <div className="truncate text-[13px] font-bold text-slate-900">{displayedEmail || 'Estudiante'}</div>
-            <div className="text-[11px] text-slate-400">Estudiante</div>
+            <div className="truncate text-[13px] font-bold text-slate-900">{profile.displayName || 'Estudiante'}</div>
+            <div className="truncate text-[11px] text-slate-400">{displayedEmail || 'Estudiante'}</div>
           </div>
         </div>
         <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-3 py-2.5 text-xs font-black text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"><LogOut size={15} />Cerrar sesión</button>

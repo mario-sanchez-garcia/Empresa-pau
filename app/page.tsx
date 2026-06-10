@@ -18,6 +18,7 @@ import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
 import CatFisicaEjercicioCard from './components/CatFisicaEjercicioCard'
 import CatEjercicioCard, { type CatEjercicioView } from './components/CatEjercicioCard'
+import PhilosophyExamWorkspace from './components/PhilosophyExamWorkspace'
 import { useCCAA } from './hooks/useCCAA'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
@@ -56,6 +57,7 @@ const ASIGNATURAS = {
   biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
   lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', accent: '#fb7185', soft: '#ffe4e6' },
   historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', soft: '#dcfce7' },
+  historia_filosofia: { label: 'Historia de la Filosofía', short: 'Filosofía', icon: LibraryBig, color: '#0f766e', light: '#f0fdfa', accent: '#2dd4bf', soft: '#ccfbf1' },
   ingles: { label: 'Inglés', short: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', accent: '#06B6D4', soft: '#CFFAFE' }
 }
 
@@ -109,6 +111,12 @@ const SUBJECT_CARDS = {
     subtitle: 'Temas, comentarios y conceptos clave',
     icon: LibraryBig,
     kicker: 'Modo contexto'
+  },
+  historia_filosofia: {
+    title: 'Historia de la Filosofía',
+    subtitle: 'Textos, conceptos y argumentación filosófica',
+    icon: LibraryBig,
+    kicker: 'Modo pensamiento'
   },
   ingles: {
     title: 'Inglés',
@@ -245,13 +253,13 @@ function formatEnunciado(enunciado?: string | null) {
   return formatExamText(enunciado)
 }
 
-type Asignatura = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'ingles'
+type Asignatura = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
-const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia']
+const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
 const PINNED_SUBJECTS_STORAGE_KEY = 'pausia:pinned-subjects'
 const MAX_PINNED = 4
@@ -477,7 +485,8 @@ export default function Home() {
   const isCatalunaFisica = asignatura === 'fisica' && ccaa === 'Cataluña'
   const isCatalunaQuimica = asignatura === 'quimica' && ccaa === 'Cataluña'
   const isCatalunaLengua = asignatura === 'lengua' && ccaa === 'Cataluña'
-  const isCatalunaExam = isCatalunaMates || isCatalunaHistoria || isCatalunaFisica || isCatalunaQuimica || isCatalunaLengua
+  const isPhilosophy = asignatura === 'historia_filosofia'
+  const isCatalunaExam = isCatalunaMates || isCatalunaHistoria || isCatalunaFisica || isCatalunaQuimica || isCatalunaLengua || isPhilosophy
   const pinnedClean = normalizePinnedSubjects(pinnedSubjects)
   // Fill up to min 2 with recommended subjects not already pinned (never saved to localStorage)
   const fillerSubjects = HOME_SUBJECTS.filter(s => !pinnedClean.includes(s))
@@ -1106,6 +1115,7 @@ function nombreAsignatura(a: string) {
   if (a === 'biologia') return 'Biología'
   if (a === 'lengua') return 'Lengua Castellana y Literatura II'
   if (a === 'ingles') return 'Inglés'
+  if (a === 'historia_filosofia') return 'Historia de la Filosofía'
   return 'Historia de España'
 }
 
@@ -1553,7 +1563,7 @@ function cambiarTipo(t: Tipo) {
               })}
               </div>
             </div>
-           <div style={{
+           {!isPhilosophy && <div style={{
   background: 'rgba(255, 255, 255, 0.92)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.95)',
@@ -1760,7 +1770,9 @@ function cambiarTipo(t: Tipo) {
                   ))}
                 </div>
               )}
-            </div>
+            </div>}
+
+            {isPhilosophy && <PhilosophyExamWorkspace ccaa={ccaa} />}
 
             {(isCatalunaQuimica || isCatalunaLengua) && (
               <div className="mb-6 grid gap-5">

@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { isInternalUser } from '@/app/lib/internalUsers'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -12,21 +13,24 @@ export async function POST(req: NextRequest) {
   const { prompt } = await req.json()
 
   const model = 'claude-sonnet-4-6'
+  const internalUser = isInternalUser(authContext.user.email)
 
-  const rateLimit = await checkAiRateLimit({
-    userId: authContext.user.id,
-    route: '/api/planning',
-    action: 'planning_generation',
-    limit: 1,
-    windowSeconds: 7 * 24 * 60 * 60,
-    accessToken: authContext.accessToken
-  })
+  if (!internalUser) {
+    const rateLimit = await checkAiRateLimit({
+      userId: authContext.user.id,
+      route: '/api/planning',
+      action: 'planning_generation',
+      limit: 1,
+      windowSeconds: 7 * 24 * 60 * 60,
+      accessToken: authContext.accessToken
+    })
 
-  if (!rateLimit.allowed) {
-    return rateLimitResponse(
-      'Ya has generado un plan de estudio esta semana. Podrás generar otro más adelante.',
-      rateLimit
-    )
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(
+        'Ya has generado un plan de estudio esta semana. Podrás generar otro más adelante.',
+        rateLimit
+      )
+    }
   }
 
   let message

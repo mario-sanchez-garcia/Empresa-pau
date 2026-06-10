@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { buildCorrectionPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { isInternalUser } from '@/app/lib/internalUsers'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -100,20 +101,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(errorResult, { status: 500 })
     }
 
-    const rateLimit = await checkAiRateLimit({
-      userId: authContext.user.id,
-      route: '/api/simulacro',
-      action: 'simulacro_correction',
-      limit: 1,
-      windowSeconds: 24 * 60 * 60,
-      accessToken: authContext.accessToken
-    })
+    const internalUser = isInternalUser(authContext.user.email)
+    if (!internalUser) {
+      const rateLimit = await checkAiRateLimit({
+        userId: authContext.user.id,
+        route: '/api/simulacro',
+        action: 'simulacro_correction',
+        limit: 1,
+        windowSeconds: 24 * 60 * 60,
+        accessToken: authContext.accessToken
+      })
 
-    if (!rateLimit.allowed) {
-      return rateLimitResponse(
-        'Ya has corregido un simulacro hoy. Podrás corregir otro mañana.',
-        rateLimit
-      )
+      if (!rateLimit.allowed) {
+        return rateLimitResponse(
+          'Ya has corregido un simulacro hoy. Podrás corregir otro mañana.',
+          rateLimit
+        )
+      }
     }
 
     const prompt = buildCorrectionPrompt({

@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { isInternalUser } from '@/app/lib/internalUsers'
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
@@ -58,23 +59,26 @@ export async function POST(request: NextRequest) {
   const action = imageCount > 0 ? 'image_correction' : 'chat'
   const model = 'claude-sonnet-4-6'
   const metadata = { hasImage: imageCount > 0, imageCount }
+  const internalUser = isInternalUser(authContext.user.email)
 
-  const rateLimit = await checkAiRateLimit({
-    userId: authContext.user.id,
-    route: '/api/chat',
-    action,
-    limit: action === 'image_correction' ? 5 : 20,
-    windowSeconds: 24 * 60 * 60,
-    accessToken: authContext.accessToken
-  })
+  if (!internalUser) {
+    const rateLimit = await checkAiRateLimit({
+      userId: authContext.user.id,
+      route: '/api/chat',
+      action,
+      limit: action === 'image_correction' ? 5 : 20,
+      windowSeconds: 24 * 60 * 60,
+      accessToken: authContext.accessToken
+    })
 
-  if (!rateLimit.allowed) {
-    return rateLimitResponse(
-      action === 'image_correction'
-        ? 'Has alcanzado el límite diario de correcciones con imagen. Vuelve a intentarlo mañana.'
-        : 'Has alcanzado el límite diario de mensajes con Pausia. Vuelve a intentarlo mañana.',
-      rateLimit
-    )
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(
+        action === 'image_correction'
+          ? 'Has alcanzado el límite diario de correcciones con imagen. Vuelve a intentarlo mañana.'
+          : 'Has alcanzado el límite diario de mensajes con Pausia. Vuelve a intentarlo mañana.',
+        rateLimit
+      )
+    }
   }
 
   let message

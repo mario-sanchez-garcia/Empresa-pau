@@ -40,6 +40,10 @@ export interface SimulacroRecord {
   nota_final?: number | null
   estado: SimulacroStatus
   tiempo_empleado?: number | null
+  // Future-compatible fields. Until the table exposes them, the active timer uses created_at as its fixed start.
+  started_at?: string | null
+  duration_minutes?: number | null
+  submitted_at?: string | null
   created_at?: string
   updated_at?: string
 }

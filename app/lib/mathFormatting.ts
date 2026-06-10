@@ -1,5 +1,5 @@
 const MATH_TOKEN = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/g
-const ENVIRONMENTS = 'pmatrix|bmatrix|cases'
+const ENVIRONMENTS = 'pmatrix|bmatrix|vmatrix|matrix|cases|aligned'
 const UNITS = 'kg|mol|atm|kJ|Pa|Hz|cm|mm|kg|g|m|s|N|J|W|T|C|V|A|L'
 
 export function normalizeExamStatement(input?: string | null) {
@@ -13,8 +13,8 @@ export function normalizeExamStatement(input?: string | null) {
   text = formatLinearSystems(text)
   text = normalizeSoftLineBreaks(text)
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
-  text = mapOutsideMath(text, wrapExplicitLatex)
   text = mapOutsideMath(text, formatScientificNotation)
+  text = mapOutsideMath(text, wrapExplicitLatex)
   text = mapOutsideMath(text, formatPhysicsNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
@@ -54,7 +54,7 @@ function repairLostLatex(text: string) {
     .replace(new RegExp(`(^|[^\\\\\\w])(egin|end)\\{(${ENVIRONMENTS})\\}`, 'g'),
       (_, prefix, command, environment) => `${prefix}\\${command === 'egin' ? 'begin' : 'end'}{${environment}}`)
     .replace(/(^|[^\\\w])(dfrac|frac|sqrt)\s*(?=\{)/g, '$1\\$2')
-    .replace(/(^|[^\\\w])(cdot|times|leq|geq|neq|approx|rightarrow)\b/g, '$1\\$2')
+    .replace(/(^|[^\\\w])(int|sum|prod|cdot|times|leq|geq|neq|approx|rightarrow|text)\b/g, '$1\\$2')
     .replace(/(^|[^\\\w])(leftrightarrow|rightleftharpoons)\b/g, '$1\\rightleftharpoons')
     .replace(/\bdisplaystylelim\b/g, '\\displaystyle\\lim')
     .replace(/\bmathbbR\b|\bmathbb\{R\}/g, '\\mathbb{R}')
@@ -79,6 +79,7 @@ function wrapLatexEnvironments(text: string) {
         .trim()
         .replace(/\s*;\s*/g, ' \\\\ ')
         .replace(/\s*\|\s*/g, ' & ')
+        .replace(/\\\s+(?=\d|[A-Za-z])/g, ' \\\\ ')
       return `\n\n$$\\begin{${environment}} ${rows} \\end{${environment}}$$\n\n`
     }
   )
@@ -90,8 +91,11 @@ function wrapExplicitLatex(text: string) {
     .replace(/(\\vec\{[^{}\n]+\}\s*=\s*\\hat\{[^{}\n]+\}(?:\s*[+\-]\s*\\hat\{[^{}\n]+\})+)/g, '$$$1$')
 
   output = mapOutsideMath(output, part => part
-    .replace(/(\\(?:d?frac)\{[^{}\n]+\}\{[^{}\n]+\})/g, '$$$1$')
+    .replace(/(\\int(?:_\{?[^}\s]+\}?)?(?:\^\{?[^}\s]+\}?)?\s+[^,.;\n]+?\s+d[a-z]\b)/g, '$$$1$')
+    .replace(/(\\begin\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|aligned)\}[\s\S]*?\\end\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|aligned)\})/g, '$$$1$')
+    .replace(/(\\(?:d?frac)\{[^{}\n]+\}\{[^{}\n]+\}(?:[A-Za-z](?:[_^]\{?[^}\s]+\}?)?)*)/g, '$$$1$')
     .replace(/(\\sqrt(?:\[[^\]\n]+\])?\{[^{}\n]+\})/g, '$$$1$')
+    .replace(/(\d+(?:[,.]\d+)?\s*\\\s*\\text\{[^{}\n]+\}(?:\s*\^\{?[-+]?\d+\}?)?)/g, '$$$1$')
     .replace(/(\\(?:vec|hat|mathbb)\{[^{}\n]+\})/g, '$$$1$')
     .replace(/([A-Za-z0-9_{}^()+\-.,]+\s*\\(?:cdot|times|leq|geq|neq|approx)\s*[A-Za-z0-9_{}^()+\-.,]+)/g, '$$$1$')
     .replace(/(\\(?:Delta|lambda|alpha|beta|gamma|mu|omega|theta|rho|sigma)(?:\s*[_^=+\-]\s*[A-Za-z0-9_{}^+\-]+)?)/g, '$$$1$')
@@ -145,6 +149,8 @@ function formatLimitsAndIntegrals(text: string) {
 
 function formatScientificNotation(text: string) {
   return text
+    .replace(/(\d+(?:[,.]\d+)?)\s*\\times\s*10\s*\^\s*\{?([+\-\u2212]?\d+)\}?\s*(?:\\\s*)?\\text\{([^{}\n]+)\}/g,
+      (_, coefficient, exponent, unit) => `$${coefficient} \\times 10^{${normalizeExponent(exponent)}}\\,\\text{${unit}}$`)
     .replace(new RegExp(`(\\d+(?:[,.]\\d+)?)\\s*(?:\\u00b7|\\\\cdot|cdot|times)\\s*10\\s*\\^?\\s*\\{?([+\\-\\u2212]?\\s*\\d+)\\}?(?:\\s+\\\\text\\{(${UNITS})\\})?`, 'g'),
       (_, coefficient, exponent, unit) => `$${coefficient} \\cdot 10^{${normalizeExponent(exponent)}}${unit ? `\\,\\text{${unit}}` : ''}$`)
     .replace(/\b([A-Za-z])([₀-₉])\b/g, (_, base, subscript) => `$${base}_{${subscriptToNumber(subscript)}}$`)
@@ -188,6 +194,9 @@ function formatChemicalNotation(text: string) {
     .replace(/\b(E\^\{?\\?circ\}?|\\Delta\s*[HGS])\b/g, (_, symbol) => `$${symbol}$`)
     .replace(reaction,
       (_, reactants, arrow, products) => `$${normalizeChemicalSide(reactants)} ${arrow === '\\rightleftharpoons' || arrow === '\u21cc' ? '\\rightleftharpoons' : '\\rightarrow'} ${normalizeChemicalSide(products)}$`)
+    .replace(/\b([A-Z][a-z]?)(?:_(\d+)|(\d+))([+-])(?=\s|$|[.,;:])/g, (_, element, subscriptA, subscriptB, charge) =>
+      `$\\mathrm{${element}${subscriptA || subscriptB ? `_{${subscriptA ?? subscriptB}}` : ''}}^{${charge}}$`)
+    .replace(/\b([A-Z][a-z]?)(?:\^)?([+-])(?=\s|$|[.,;:])/g, (_, element, charge) => `$\\mathrm{${element}}^{${charge}}$`)
 
   output = mapOutsideMath(output, part => part
     .replace(/\b((?:[A-Z][a-z]?_?\d*){2,})(\^\{?[+-]\}?)?/g, (match, formula, charge) =>

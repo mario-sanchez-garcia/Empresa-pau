@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
-import { Plus, RotateCcw, Sparkles, Trash2 } from 'lucide-react'
+import { CopyPlus, Plus, RotateCcw, Sparkles, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import MathMarkdown from '@/components/shared/MathMarkdown'
+import { RECOMMENDED_FLASHCARDS } from './recommendedFlashcards'
 import type { Flashcard, ZonaSubject } from './types'
 
 const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[] = [
@@ -13,7 +15,8 @@ const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[
   { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' },
   { id: 'ingles', label: 'Inglés', color: '#0891B2', soft: '#CFFAFE' },
   { id: 'lengua', label: 'Lengua', color: '#4f46e5', soft: '#eef2ff' },
-  { id: 'historia', label: 'Historia', color: '#2f6f4e', soft: '#f0fdf4' }
+  { id: 'historia', label: 'Historia', color: '#2f6f4e', soft: '#f0fdf4' },
+  { id: 'historia_filosofia', label: 'Filosofía', color: '#0f766e', soft: '#f0fdfa' }
 ]
 
 const WARM = {
@@ -46,6 +49,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const [dragStart, setDragStart] = useState<number | null>(null)
   const [dragX, setDragX] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [copyingSubject, setCopyingSubject] = useState<ZonaSubject | null>(null)
   const [formError, setFormError] = useState('')
   const [form, setForm] = useState({ subject: 'mates' as ZonaSubject, topic: '', front: '', back: '' })
 
@@ -56,14 +60,19 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     )
   }, [cards, subject, topic])
 
+  const recommendedFiltered = useMemo(() => RECOMMENDED_FLASHCARDS.filter(card =>
+    (subject === 'all' || card.subject === subject) &&
+    (topic === 'all' || card.topic === topic)
+  ), [subject, topic])
+  const studyCards = filtered.length ? filtered : recommendedFiltered
   const queue = useMemo(() => {
-    return filtered.flatMap(card => Array.from({ length: cardWeight(card, answers) }, () => card))
-  }, [filtered, answers])
+    return studyCards.flatMap(card => Array.from({ length: cardWeight(card, answers) }, () => card))
+  }, [studyCards, answers])
 
   const current = queue.length ? queue[currentIdx % queue.length] : null
-  const reviewed = Object.keys(answers).filter(id => filtered.some(card => card.id === id)).length
-  const progress = filtered.length ? Math.round((reviewed / filtered.length) * 100) : 0
-  const topics = Array.from(new Set(cards.filter(card => subject === 'all' || card.subject === subject).map(card => card.topic))).filter(Boolean)
+  const reviewed = Object.keys(answers).filter(id => studyCards.some(card => card.id === id)).length
+  const progress = studyCards.length ? Math.round((reviewed / studyCards.length) * 100) : 0
+  const topics = Array.from(new Set([...cards, ...RECOMMENDED_FLASHCARDS].filter(card => subject === 'all' || card.subject === subject).map(card => card.topic))).filter(Boolean)
 
   function resetDeck() {
     setCurrentIdx(0)
@@ -120,6 +129,21 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     setCurrentIdx(0)
   }
 
+  async function copyRecommendedDeck(deckSubject: ZonaSubject) {
+    const deck = RECOMMENDED_FLASHCARDS.filter(card => card.subject === deckSubject)
+    if (!deck.length || copyingSubject) return
+    setCopyingSubject(deckSubject)
+    setFormError('')
+    const payload = deck.map(card => ({ user_id: userId, subject: card.subject, topic: card.topic, front: card.front, back: card.back }))
+    const { data, error } = await supabase.from('flashcards').insert(payload).select('*')
+    if (error) setFormError('No hemos podido copiar el mazo recomendado. Inténtalo otra vez.')
+    else if (data) {
+      setCards(prev => [...data as Flashcard[], ...prev])
+      resetDeck()
+    }
+    setCopyingSubject(null)
+  }
+
   function onPointerUp() {
     if (dragX > 82) answerCard('know')
     else if (dragX < -82) answerCard('dont')
@@ -159,7 +183,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
             <div style={{ height: 8, borderRadius: 999, background: '#eaf1ff', overflow: 'hidden', marginBottom: 16 }}>
               <div style={{ width: progress + '%', height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #2563eb, #38bdf8)', transition: 'width .25s ease' }} />
             </div>
-            <div style={{ color: WARM.muted, fontSize: 13, fontWeight: 750, marginBottom: 18 }}>{reviewed}/{filtered.length} tarjetas repasadas</div>
+            <div style={{ color: WARM.muted, fontSize: 13, fontWeight: 750, marginBottom: 18 }}>{reviewed}/{studyCards.length} tarjetas repasadas · {filtered.length ? 'Tus flashcards' : 'Mazo recomendado para empezar'}</div>
 
             {current ? (
               <div
@@ -191,7 +215,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                 <div>
                   <Sparkles size={34} color={WARM.blue} />
                   <h3 style={{ color: WARM.ink, margin: '12px 0 6px' }}>Tu zona está vacía... por ahora</h3>
-                  <p style={{ color: WARM.muted, margin: 0, lineHeight: 1.6 }}>Crea tu primera tarjeta y empieza a repasarla aquí.</p>
+                  <p style={{ color: WARM.muted, margin: 0, lineHeight: 1.6 }}>Prueba otro filtro o crea tu primera tarjeta.</p>
                 </div>
               </div>
             )}
@@ -244,6 +268,29 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
           ))}
         </section>
       )}
+
+      <section style={{ display: 'grid', gap: 12 }}>
+        <div>
+          <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Para empezar</div>
+          <h2 style={{ margin: '5px 0 0', color: WARM.ink, fontSize: 22 }}>Mazos recomendados</h2>
+          <p style={{ color: WARM.muted, margin: '5px 0 0', fontSize: 13 }}>Puedes repasarlos sin guardarlos. Solo se añaden a tu cuenta cuando pulsas copiar.</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
+          {SUBJECTS.filter(item => subject === 'all' || item.id === subject).map(item => {
+            const deckSize = RECOMMENDED_FLASHCARDS.filter(card => card.subject === item.id).length
+            return (
+              <article key={item.id} style={{ border: '1px solid ' + WARM.border, background: WARM.surface, borderRadius: 18, padding: 16, boxShadow: '0 10px 26px rgba(37,99,235,0.06)' }}>
+                <div style={{ color: item.color, fontSize: 12, fontWeight: 850, textTransform: 'uppercase' }}>Mazo recomendado</div>
+                <h3 style={{ color: WARM.ink, margin: '7px 0 4px' }}>{item.label}</h3>
+                <p style={{ color: WARM.muted, margin: 0, fontSize: 13 }}>{deckSize} tarjetas esenciales</p>
+                <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} style={{ marginTop: 14, width: '100%', border: '1px solid ' + item.color + '33', background: item.soft, color: item.color, borderRadius: 13, padding: '10px 12px', fontWeight: 850, display: 'flex', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
+                  <CopyPlus size={15} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar mazo'}
+                </button>
+              </article>
+            )
+          })}
+        </div>
+      </section>
     </div>
   )
 }
@@ -271,7 +318,7 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
         <span style={{ color, fontWeight: 850, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
         <span style={{ color: WARM.muted, background: WARM.field, border: '1px solid ' + WARM.border, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 750 }}>{subjectLabel(subject)} · {topic}</span>
       </div>
-      <div style={{ color: WARM.ink, fontSize: back ? 22 : 28, fontWeight: back ? 720 : 850, lineHeight: 1.35, margin: '28px 0' }}>{text}</div>
+      <MathMarkdown text={text} className={back ? 'text-lg font-semibold' : 'text-xl font-black'} />
       <div style={{ color: WARM.softText, fontSize: 12, fontWeight: 750 }}>Toca para girar · Arrastra derecha/izquierda</div>
     </div>
   )

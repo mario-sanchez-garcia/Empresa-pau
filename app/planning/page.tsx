@@ -74,6 +74,7 @@ export default function Planning() {
   const [notaObjetivo, setNotaObjetivo] = useState(10)
   const [asignaturasFlo, setAsignaturasFlo] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<PlanTab>('general')
+  const [planningError, setPlanningError] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -156,6 +157,26 @@ Usa exactamente esta estructura:
 Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_dia}h = ${p.horas_dia * 60} min/día). Prioriza las asignaturas flojas.`
       })
     })
+
+    if (!res.ok) {
+      let message = 'No se pudo generar el plan. Intenta de nuevo.'
+      try {
+        const errorBody = await res.json()
+        if (res.status === 429 && errorBody?.error) {
+          message = errorBody.error
+        } else if (res.status === 401) {
+          message = 'Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.'
+        } else if (errorBody?.error) {
+          message = errorBody.error
+        }
+      } catch { /* mantener mensaje genérico */ }
+      setPlanning([])
+      setPlanningError(message)
+      setGenerando(false)
+      return
+    }
+
+    setPlanningError('')
     const data = await res.json()
     try {
       const texto = data.respuesta.trim().replace(/```json/g, '').replace(/```/g, '').trim()
@@ -509,10 +530,12 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
               ) : null
             ) : (
               <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
-                <p style={{ color: config.muted }}>No se pudo generar el plan. Intenta de nuevo.</p>
-                <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="campus-primary mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}>
-                  Intentar de nuevo
-                </button>
+                <p style={{ color: config.muted }}>{planningError || 'No se pudo generar el plan. Intenta de nuevo.'}</p>
+                {!planningError && (
+                  <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="campus-primary mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}>
+                    Intentar de nuevo
+                  </button>
+                )}
               </div>
             )}
           </div>

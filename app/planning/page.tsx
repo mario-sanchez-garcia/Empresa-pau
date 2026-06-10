@@ -129,9 +129,17 @@ export default function Planning() {
       ? `IMPORTANTE: El estudiante no completó estas tareas del día anterior y hay que redistribuirlas: ${tareasAtrasadas.map((t: any) => `${t.asignatura} - ${t.descripcion}`).join(', ')}. Incluye estas tareas pendientes en los próximos días.`
       : ''
 
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    const accessToken = sessionData.session?.access_token
+    if (sessionError || !accessToken) {
+      setPlanning([])
+      setGenerando(false)
+      return
+    }
+
     const res = await fetch('/api/planning', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({
         prompt: `Eres un planificador de estudio para la EBAU de Madrid.
 El estudiante tiene ${diasRestantes} días hasta el examen.

@@ -95,9 +95,16 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
     })
 
     try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      const accessToken = sessionData.session?.access_token
+      if (sessionError || !accessToken) {
+        setCorreccion('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
+        return
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           pregunta: prompt,
           imagenes: modo === 'imagen' ? imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })) : [],

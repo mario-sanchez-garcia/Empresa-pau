@@ -1154,6 +1154,12 @@ function cambiarTipo(t: Tipo) {
 }
   async function cerrarSesion() { await supabase.auth.signOut(); window.location.href = '/login' }
 
+  async function getChatAccessToken() {
+    const { data, error } = await supabase.auth.getSession()
+    if (error || !data.session?.access_token) return null
+    return data.session.access_token
+  }
+
   function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -1168,6 +1174,12 @@ function cambiarTipo(t: Tipo) {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
     setCargando(true); setCorreccion('')
+    const accessToken = await getChatAccessToken()
+    if (!accessToken) {
+      setCorreccion('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
+      setCargando(false)
+      return
+    }
     const p = preguntaActiva as any
     const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
     const prompt = buildCorrectionPrompt({
@@ -1194,7 +1206,7 @@ function cambiarTipo(t: Tipo) {
       }]
     })
     const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
     })
     const data = await res.json()
@@ -1229,8 +1241,14 @@ function cambiarTipo(t: Tipo) {
     setMensajes(hist)
     setInputChat('')
     setCargandoChat(true)
+    const accessToken = await getChatAccessToken()
+    if (!accessToken) {
+      setMensajes(prev => [...prev, { rol: 'pausia', texto: 'Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.' }])
+      setCargandoChat(false)
+      return
+    }
     const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({
         pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua e historia.\n' +
           (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
@@ -1284,8 +1302,14 @@ function cambiarTipo(t: Tipo) {
       '- Evita frases grandilocuentes. Tono cercano, directo y cero relleno.\n' +
       '- No menciones periódicos, apps externas ni recursos que no estén dentro de la app salvo que sea imprescindible.\n' +
       '- Si faltan datos, dilo en una frase breve y aun así da un plan inicial accionable.\n'
+    const accessToken = await getChatAccessToken()
+    if (!accessToken) {
+      setPlanIA('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
+      setCargandoPlan(false)
+      return
+    }
     const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ pregunta: prompt })
     })
     const data = await res.json()

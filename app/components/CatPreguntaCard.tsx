@@ -76,9 +76,16 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
     })
 
     try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      const accessToken = sessionData.session?.access_token
+      if (sessionError || !accessToken) {
+        setCorreccion('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
+        return
+      }
+
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
       })
       const data = await res.json()

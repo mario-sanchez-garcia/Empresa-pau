@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { buildCorrectionPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -144,11 +145,48 @@ export async function POST(request: NextRequest) {
     }
     content.push({ type: 'text', text: prompt })
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 6000,
-      system: 'Eres Pausia, corrector experto de EvAU Madrid. Devuelve exclusivamente JSON válido cuando el usuario lo pida. No añadas markdown ni texto fuera del JSON.',
-      messages: [{ role: 'user', content }]
+    const model = 'claude-sonnet-4-6'
+    const usageMetadata = {
+      asignatura: subject,
+      comunidad: correctionCommunity,
+      opcion: storedOption || opcion || null,
+      bloquesCount: blocks.length,
+      tiempoEmpleado: elapsed
+    }
+    let message
+    try {
+      message = await client.messages.create({
+        model,
+        max_tokens: 6000,
+        system: 'Eres Pausia, corrector experto de EvAU Madrid. Devuelve exclusivamente JSON válido cuando el usuario lo pida. No añadas markdown ni texto fuera del JSON.',
+        messages: [{ role: 'user', content }]
+      })
+    } catch (error) {
+      await logAiUsageEvent({
+        userId: authContext.user.id,
+        route: '/api/simulacro',
+        action: 'simulacro_correction',
+        model,
+        status: 'error',
+        errorCode: getAiErrorCode(error),
+        metadata: usageMetadata,
+        accessToken: authContext.accessToken
+      })
+      throw error
+    }
+
+    const usage = extractAnthropicTokenUsage(message)
+    await logAiUsageEvent({
+      userId: authContext.user.id,
+      route: '/api/simulacro',
+      action: 'simulacro_correction',
+      model,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      totalTokens: usage.totalTokens,
+      status: 'success',
+      metadata: usageMetadata,
+      accessToken: authContext.accessToken
     })
 
     const raw = message.content
@@ -226,7 +264,7 @@ async function getAuthContext(request: NextRequest) {
     global: serviceKey ? undefined : { headers: { Authorization: `Bearer ${accessToken}` } }
   })
 
-  return { user: data.user, supabase }
+  return { user: data.user, supabase, accessToken }
 }
 
 function getBearerToken(request: NextRequest) {

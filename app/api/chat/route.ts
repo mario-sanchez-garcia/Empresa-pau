@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
@@ -53,12 +54,45 @@ export async function POST(request: NextRequest) {
 
   contenido.push({ type: 'text', text: pregunta })
 
+  const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
+  const model = 'claude-sonnet-4-6'
+  const metadata = { hasImage: imageCount > 0, imageCount }
+
   // TODO: enforce per-user chat/correction limits before calling Anthropic.
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4000,
-    system: `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro.`,
-    messages: [{ role: 'user', content: contenido }]
+  let message
+  try {
+    message = await client.messages.create({
+      model,
+      max_tokens: 4000,
+      system: `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro.`,
+      messages: [{ role: 'user', content: contenido }]
+    })
+  } catch (error) {
+    await logAiUsageEvent({
+      userId: authContext.user.id,
+      route: '/api/chat',
+      action: imageCount > 0 ? 'image_correction' : 'chat',
+      model,
+      status: 'error',
+      errorCode: getAiErrorCode(error),
+      metadata,
+      accessToken: authContext.accessToken
+    })
+    throw error
+  }
+
+  const usage = extractAnthropicTokenUsage(message)
+  await logAiUsageEvent({
+    userId: authContext.user.id,
+    route: '/api/chat',
+    action: imageCount > 0 ? 'image_correction' : 'chat',
+    model,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    totalTokens: usage.totalTokens,
+    status: 'success',
+    metadata,
+    accessToken: authContext.accessToken
   })
 
   const respuesta = message.content[0].type === 'text' ? message.content[0].text : ''
@@ -91,7 +125,7 @@ async function getAuthContext(request: NextRequest) {
     }
   }
 
-  return { user: data.user }
+  return { user: data.user, accessToken }
 }
 
 function getBearerToken(request: NextRequest) {

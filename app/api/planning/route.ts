@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -10,13 +11,45 @@ export async function POST(req: NextRequest) {
 
   const { prompt } = await req.json()
 
+  const model = 'claude-opus-4-5'
+
   // TODO: enforce per-user planning generation limits before calling Anthropic.
-  const message = await client.messages.create({
-    model: 'claude-opus-4-5',
-    max_tokens: 2000,
-    system: 'Eres un planificador de estudio para la EBAU. Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin bloques de código markdown, sin explicaciones.',
-    messages: [{ role: 'user', content: prompt }]
+  let message
+  try {
+    message = await client.messages.create({
+      model,
+      max_tokens: 2000,
+      system: 'Eres un planificador de estudio para la EBAU. Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin bloques de código markdown, sin explicaciones.',
+      messages: [{ role: 'user', content: prompt }]
+    })
+  } catch (error) {
+    await logAiUsageEvent({
+      userId: authContext.user.id,
+      route: '/api/planning',
+      action: 'planning_generation',
+      model,
+      status: 'error',
+      errorCode: getAiErrorCode(error),
+      metadata: {},
+      accessToken: authContext.accessToken
+    })
+    throw error
+  }
+
+  const usage = extractAnthropicTokenUsage(message)
+  await logAiUsageEvent({
+    userId: authContext.user.id,
+    route: '/api/planning',
+    action: 'planning_generation',
+    model,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    totalTokens: usage.totalTokens,
+    status: 'success',
+    metadata: {},
+    accessToken: authContext.accessToken
   })
+
   const texto = message.content[0].type === 'text' ? message.content[0].text : ''
   return NextResponse.json({ respuesta: texto })
 }
@@ -47,7 +80,7 @@ async function getAuthContext(request: NextRequest) {
     }
   }
 
-  return { user: data.user }
+  return { user: data.user, accessToken }
 }
 
 function getBearerToken(request: NextRequest) {

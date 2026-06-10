@@ -46,6 +46,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const [dragStart, setDragStart] = useState<number | null>(null)
   const [dragX, setDragX] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState('')
   const [form, setForm] = useState({ subject: 'mates' as ZonaSubject, topic: '', front: '', back: '' })
 
   const filtered = useMemo(() => {
@@ -86,6 +87,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     e.preventDefault()
     if (!form.topic.trim() || !form.front.trim() || !form.back.trim()) return
     setSaving(true)
+    setFormError('')
     const payload = {
       user_id: userId,
       subject: form.subject,
@@ -94,6 +96,11 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
       back: form.back.trim()
     }
     const { data, error } = await supabase.from('flashcards').insert(payload).select('*').single()
+    if (error) {
+      setFormError('No hemos podido guardar la flashcard. Revisa la conexion e intentalo otra vez.')
+      setSaving(false)
+      return
+    }
     if (!error && data) {
       setCards(prev => [data as Flashcard, ...prev])
       setForm({ subject: form.subject, topic: '', front: '', back: '' })
@@ -213,6 +220,8 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
 
           <label style={labelStyle}>Trasera</label>
           <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 108, resize: 'vertical' }} />
+
+          {formError && <div style={{ marginTop: 12, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1e3a8a', borderRadius: 14, padding: '10px 12px', fontSize: 13, fontWeight: 800, lineHeight: 1.5 }}>{formError}</div>}
 
           <button disabled={saving} style={{ width: '100%', marginTop: 12, border: 'none', borderRadius: 16, padding: '13px 16px', background: 'linear-gradient(135deg, #1d4ed8, #2563eb, #38bdf8)', color: '#fff', fontWeight: 850, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: saving ? 'wait' : 'pointer', boxShadow: '0 16px 34px rgba(37,99,235,.24)', transition: 'transform .18s ease, box-shadow .18s ease' }}>
             <Plus size={17} />{saving ? 'Guardando...' : 'Crear flashcard'}

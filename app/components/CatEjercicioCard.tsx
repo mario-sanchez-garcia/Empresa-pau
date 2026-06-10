@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { UploadCloud, WandSparkles, X } from 'lucide-react'
+import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
@@ -35,23 +35,29 @@ type UploadedImage = {
   preview: string
 }
 
-const UI = { color: '#2563eb', accent: '#60a5fa', light: '#eff6ff', border: '#dbeafe' }
+type ColorScheme = { color: string; accent: string; light: string; border: string }
+
+const DEFAULT_UI: ColorScheme = { color: '#2563eb', accent: '#60a5fa', light: '#eff6ff', border: '#dbeafe' }
 
 export default function CatEjercicioCard({
   asignatura,
   asignaturaLabel,
   examen,
   ejercicio,
+  colorScheme,
 }: {
   asignatura: 'quimica' | 'lengua'
   asignaturaLabel: string
   examen: ExamContext
   ejercicio: CatEjercicioView
+  colorScheme?: ColorScheme
 }) {
+  const UI = colorScheme ?? DEFAULT_UI
   const [respuesta, setRespuesta] = useState('')
   const [imagenes, setImagenes] = useState<UploadedImage[]>([])
   const [correccion, setCorreccion] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const maxScore = ejercicio.apartados.reduce((sum, apartado) => sum + Number(apartado.puntos ?? 0), 0) || 2.5
   const apartadosTexto = ejercicio.apartados.map(apartado => [
     `${apartado.id}. ${apartado.enunciado}${apartado.puntos ? ` (${apartado.puntos} puntos)` : ''}`,
@@ -91,7 +97,8 @@ export default function CatEjercicioCard({
   }
 
   async function corregir() {
-    if (!respuesta.trim() && imagenes.length === 0) return
+    if (modo === 'texto' && !respuesta.trim()) return
+    if (modo === 'imagen' && imagenes.length === 0) return
     setCargando(true)
     setCorreccion('')
     const prompt = buildCorrectionPrompt({
@@ -110,10 +117,9 @@ export default function CatEjercicioCard({
         maxScore,
         officialPrompt: enunciadoCompleto,
         sourceText: [ejercicio.texto, ejercicio.fuente].filter(Boolean).join('\n'),
-        studentAnswer: [
-          respuesta.trim(),
-          imagenes.length ? `Se adjuntan ${imagenes.length} imagen(es) de la respuesta manuscrita.` : '',
-        ].filter(Boolean).join('\n\n'),
+        studentAnswer: modo === 'imagen'
+          ? `Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada. Se adjuntan ${imagenes.length} imagen(es).`
+          : respuesta.trim(),
       }],
     })
 
@@ -123,7 +129,7 @@ export default function CatEjercicioCard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pregunta: prompt,
-          imagenes: imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })),
+          imagenes: modo === 'imagen' ? imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })) : [],
         }),
       })
       const data = await response.json()
@@ -144,7 +150,7 @@ export default function CatEjercicioCard({
           nota: normalized?.desglose_bloques?.[0]?.puntos_conseguidos ?? null,
           nota_maxima: maxScore,
           enunciado: enunciadoCompleto.substring(0, 500),
-          respuesta: `${respuesta}${imagenes.length ? `\n${imagenes.length} imagen(es) adjuntas.` : ''}`.substring(0, 1000),
+          respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 1000),
           correccion: visible.substring(0, 2000),
         })
       }
@@ -155,14 +161,22 @@ export default function CatEjercicioCard({
 
   return (
     <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
-      <header className="border-b px-6 py-5" style={{ backgroundColor: UI.light, borderColor: UI.accent }}>
-        <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>PAU Cataluña {examen.anio} · {examen.convocatoria} · {examen.serie}</div>
-        <h3 className="mt-2 text-lg font-black text-slate-900">{ejercicio.titulo}</h3>
-        {ejercicio.opcion && <span className="mt-2 inline-block rounded-full bg-white px-3 py-1 text-xs font-black" style={{ color: UI.color }}>Opción {ejercicio.opcion}</span>}
+      <header className="flex items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}`, position: 'sticky', top: 0, zIndex: 50 }}>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>PAU Cataluña {examen.anio} · {examen.convocatoria} · {examen.serie}</span>
+            {ejercicio.opcion && <span className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-bold" style={{ borderColor: UI.accent, color: UI.color }}>Opción {ejercicio.opcion}</span>}
+          </div>
+          <h3 className="mt-2 text-lg font-black text-slate-900">{ejercicio.titulo}</h3>
+        </div>
+        <div className="flex shrink-0 items-baseline gap-1">
+          <span className="text-[26px] font-black" style={{ color: UI.color }}>{maxScore}</span>
+          <span className="text-sm font-bold" style={{ color: UI.accent }}>pts</span>
+        </div>
       </header>
       <div className="grid gap-4 p-6">
         {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este enunciado requiere revisión visual con el documento original.</div>}
-        {ejercicio.instrucciones && <MathMarkdown text={ejercicio.instrucciones} className="rounded-2xl border px-5 py-4 text-sm" />}
+        {ejercicio.instrucciones && <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}><MathMarkdown text={ejercicio.instrucciones} /></div>}
         {ejercicio.texto && <MathMarkdown text={ejercicio.texto} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
         {ejercicio.fuente && <MathMarkdown text={ejercicio.fuente} className="text-xs italic text-slate-500" />}
         {ejercicio.enunciado && <MathMarkdown text={ejercicio.enunciado} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
@@ -171,15 +185,60 @@ export default function CatEjercicioCard({
         {ejercicio.imagenes?.map((imagen, index) => <div key={index} className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">{imagen}</div>)}
 
         <section className="mt-2 border-t pt-5" style={{ borderColor: UI.border }}>
-          <textarea value={respuesta} onChange={event => setRespuesta(event.target.value)} className="h-[220px] w-full resize-y rounded-2xl border bg-slate-50 p-4 text-sm leading-7 outline-none" style={{ borderColor: UI.border }} placeholder="Escribe tu respuesta..." />
-          <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-5 py-4 text-sm font-black" style={{ borderColor: UI.accent, backgroundColor: UI.light, color: UI.color }}>
-            <UploadCloud size={20} /> Añadir fotos
-            <input type="file" multiple accept="image/png,image/jpeg,image/webp" onChange={handleImagenes} className="hidden" />
-          </label>
-          {imagenes.length > 0 && <div className="mt-4 grid gap-3 sm:grid-cols-2">{imagenes.map((imagen, index) => <div key={`${imagen.name}-${index}`} className="relative rounded-2xl border p-3" style={{ borderColor: UI.border }}><img src={imagen.preview} alt={imagen.name} className="h-40 w-full object-contain" /><div className="mt-2 truncate text-xs font-semibold text-slate-600">{imagen.name}</div><button type="button" onClick={() => eliminarImagen(index)} className="absolute right-2 top-2 rounded-full p-2 text-white" style={{ backgroundColor: UI.color }}><X size={14} /></button></div>)}</div>}
-          <button type="button" onClick={corregir} disabled={cargando || (!respuesta.trim() && imagenes.length === 0)} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}><WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}</button>
+          <div className="mb-3 text-[13px] font-bold uppercase tracking-[0.06em] text-slate-500">Tu respuesta</div>
+          <div className="mb-4 flex gap-2">
+            {(['texto', 'imagen'] as const).map(nextMode => (
+              <button
+                key={nextMode}
+                type="button"
+                onClick={() => setModo(nextMode)}
+                className={modo === nextMode ? 'campus-primary' : 'campus-hover'}
+                style={{
+                  background: modo === nextMode ? `linear-gradient(135deg, ${UI.color}, ${UI.accent})` : UI.light,
+                  color: modo === nextMode ? '#fff' : UI.color,
+                }}
+              >
+                <span className="flex items-center gap-2 rounded-full px-[18px] py-[9px] text-[13px] font-bold">
+                  {nextMode === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}
+                  {nextMode === 'texto' ? 'Escribir' : 'Subir foto'}
+                </span>
+              </button>
+            ))}
+          </div>
+          {modo === 'texto' ? (
+            <textarea value={respuesta} onChange={event => setRespuesta(event.target.value)} className="h-[220px] w-full resize-y rounded-2xl border bg-slate-50 p-4 text-sm leading-7 outline-none transition focus:bg-white" style={{ borderColor: UI.border }} placeholder="Escribe aquí tu respuesta." />
+          ) : (
+            <div>
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-5 py-4 text-sm font-black" style={{ borderColor: UI.accent, backgroundColor: UI.light, color: UI.color }}>
+                <UploadCloud size={20} /> Añadir fotos
+                <input type="file" multiple accept="image/png,image/jpeg,image/webp" onChange={handleImagenes} className="hidden" />
+              </label>
+              {imagenes.length > 0 && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {imagenes.map((imagen, index) => (
+                    <div key={`${imagen.name}-${index}`} className="relative rounded-2xl border p-3" style={{ borderColor: UI.border }}>
+                      <img src={imagen.preview} alt={imagen.name} className="h-40 w-full object-contain" />
+                      <div className="mt-2 truncate text-xs font-semibold text-slate-600">{imagen.name}</div>
+                      <button type="button" onClick={() => eliminarImagen(index)} className="absolute right-2 top-2 rounded-full p-2 text-white" style={{ backgroundColor: UI.color }}><X size={14} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <button type="button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` }}>
+            <WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
+          </button>
         </section>
-        {correccion && <section className="rounded-2xl border-2" style={{ borderColor: UI.color }}><div className="px-5 py-3 text-sm font-black text-white" style={{ backgroundColor: UI.color }}>CORRECCIÓN DE PAUSIA</div><MathMarkdown text={correccion} format={false} className="p-5 text-sm leading-7" /></section>}
+        {correccion && (
+          <section className="overflow-hidden rounded-[22px] border-2" style={{ borderColor: UI.color }}>
+            <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: UI.color }}>
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>
+              CORRECCIÓN DE PAUSIA
+            </div>
+            <MathMarkdown text={correccion} format={false} className="p-6 text-[0.925rem] leading-7" />
+          </section>
+        )}
       </div>
     </article>
   )

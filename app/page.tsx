@@ -1775,6 +1775,7 @@ function cambiarTipo(t: Tipo) {
                       asignaturaLabel={isCatalunaQuimica ? 'Química PAU Cataluña' : 'Lengua Castellana PAU Cataluña'}
                       examen={(examenQuimicaCatalunaActivo ?? examenLenguaCatalunaActivo)!}
                       ejercicio={ejercicioAsignaturaCatalunaActivo}
+                      colorScheme={{ color: cfg.color, accent: cfg.accent, light: cfg.light, border: cfg.soft }}
                     />
                   </>
                 ) : (

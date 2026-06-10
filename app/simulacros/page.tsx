@@ -86,7 +86,6 @@ export default function SimulacrosPage() {
         created_at: now,
         updated_at: now
       }
-      console.log('SIMULACRO_INSERT_ROW', row)
       const { error } = await supabase.from('historial_simulacros').insert(row)
       if (error) {
         console.error('SIMULACRO_INSERT_ERROR', error)

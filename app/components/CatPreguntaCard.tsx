@@ -120,7 +120,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
 
   return (
     <article className="mb-6 overflow-hidden rounded-[24px] border bg-white" style={{ borderColor: CAT_UI.border, boxShadow: CAT_UI.shadow }}>
-      <header className="flex items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: CAT_UI.light, borderBottom: `2px solid ${CAT_UI.accent}` }}>
+      <header className="flex items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: CAT_UI.light, borderBottom: `2px solid ${CAT_UI.accent}`, position: 'sticky', top: 0, zIndex: 50 }}>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[12px] font-black uppercase tracking-[0.06em]" style={{ color: CAT_UI.color }}>

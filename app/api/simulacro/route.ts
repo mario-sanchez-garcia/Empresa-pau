@@ -10,9 +10,12 @@ export const maxDuration = 60
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { bloques, respuestas, asignatura, opcion, tiempo_empleado, simulacro_id } = body
+    const { bloques, respuestas, asignatura, comunidad, opcion, tiempo_empleado, simulacro_id } = body
     const blocks = Array.isArray(bloques) ? bloques : []
     const elapsed = Number(tiempo_empleado ?? 0)
+    const correctionCommunity = typeof comunidad === 'string' && comunidad.trim()
+      ? comunidad.trim()
+      : (typeof blocks[0]?.comunidad === 'string' && blocks[0].comunidad.trim() ? blocks[0].comunidad.trim() : 'Madrid')
 
     if (!simulacro_id || !blocks.length) {
       return NextResponse.json(createCorrectionError({
@@ -34,6 +37,7 @@ export async function POST(request: NextRequest) {
 
     const prompt = buildCorrectionPrompt({
       subject: asignatura,
+      community: correctionCommunity,
       simulacroId: simulacro_id,
       option: opcion,
       elapsedMinutes: elapsed,
@@ -43,6 +47,7 @@ export async function POST(request: NextRequest) {
         return {
           numeroBloque: `Bloque ${index + 1}`,
           tema: block.tema,
+          community: block.comunidad ?? correctionCommunity,
           year: block.year,
           convocatoria: block.convocatoria,
           option: block.option,

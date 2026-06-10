@@ -1162,6 +1162,7 @@ function cambiarTipo(t: Tipo) {
     const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
     const prompt = buildCorrectionPrompt({
       subject: nombreAsignatura(asignatura),
+      community: ccaa,
       simulacroId: `Práctica ${nombreAsignatura(asignatura)} ${examenActivo?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
       option: opcionMostrada,
       elapsedMinutes: 0,

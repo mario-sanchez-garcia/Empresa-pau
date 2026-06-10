@@ -50,7 +50,7 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
       const blocks = normalizeLenguaCatalunaExam(selected, option)
       if (!blocks.length) return null
       const dificultadReal = selected.anio >= 2023 ? 'Difícil' : selected.anio >= 2019 ? 'Media' : 'Fácil'
-      return { id: crypto.randomUUID(), blocks, dificultadReal }
+      return { id: crypto.randomUUID(), blocks: withCommunity(blocks, comunidad), dificultadReal }
     }
 
     const candidates = examenesLengua.filter(exam => lenguaYears.includes(exam.año) && (exam.comunidad ?? 'Madrid') === comunidad)
@@ -63,7 +63,7 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
     }))
     const averageYear = blocks.reduce((sum, block) => sum + block.year, 0) / Math.max(1, blocks.length)
     const dificultadReal = averageYear >= 2023 ? 'Difícil' : averageYear >= 2019 ? 'Media' : 'Fácil'
-    return { id: crypto.randomUUID(), blocks, dificultadReal }
+    return { id: crypto.randomUUID(), blocks: withCommunity(blocks, comunidad), dificultadReal }
   }
 
   const questions = normalizeQuestions(subject, comunidad).filter(item => years.includes(item.year) && item.option === option)
@@ -94,7 +94,11 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
 
   const averageYear = blocks.reduce((sum, block) => sum + block.year, 0) / Math.max(1, blocks.length)
   const dificultadReal = averageYear >= 2023 ? 'Difícil' : averageYear >= 2019 ? 'Media' : 'Fácil'
-  return { id: crypto.randomUUID(), blocks, dificultadReal }
+  return { id: crypto.randomUUID(), blocks: withCommunity(blocks, comunidad), dificultadReal }
+}
+
+function withCommunity(blocks: SimulacroBlock[], comunidad: string) {
+  return blocks.map(block => ({ ...block, comunidad }))
 }
 
 function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficulty) {

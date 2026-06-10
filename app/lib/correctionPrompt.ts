@@ -1,6 +1,7 @@
 export interface CorrectionPromptBlock {
   numeroBloque: string
   tema: string
+  community?: string
   year: number | string
   convocatoria: string
   option: string
@@ -27,6 +28,7 @@ export function buildCorrectionPrompt(input: CorrectionPromptInput) {
   const bloques = input.blocks.map(block => ({
     numero_bloque: block.numeroBloque,
     tema: block.tema,
+    comunidad: block.community ?? input.community ?? 'Comunidad de Madrid',
     año_origen: block.year,
     convocatoria_origen: block.convocatoria,
     opcion_origen: block.option,

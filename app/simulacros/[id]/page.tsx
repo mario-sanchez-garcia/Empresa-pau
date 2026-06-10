@@ -99,6 +99,7 @@ export default function SimulacroActivoPage() {
           bloques: record.bloques,
           respuestas: answersSnapshot,
           asignatura: SUBJECTS[record.asignatura].label,
+          comunidad: record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid',
           opcion: record.opcion,
           tiempo_empleado: elapsedMinutes,
           simulacro_id: record.id

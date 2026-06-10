@@ -23,7 +23,7 @@ import {
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 
-export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'planning'
+export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio'
 export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'ingles'
 
 interface SidebarProps {
@@ -41,8 +41,7 @@ const NAV_ITEMS = [
   { id: 'zona', label: 'La Zona', desc: 'Estudia a tu manera', href: '/zona', icon: BrainCircuit },
   { id: 'chat', label: 'Chat con Pausia', desc: 'Resuelve dudas', href: '/?view=chat', icon: MessageCircle },
   { id: 'historial', label: 'Historial', desc: 'Tus correcciones', href: '/?view=historial', icon: BarChart3 },
-  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/?view=planning', icon: BrainCircuit },
-  { id: 'planning', label: 'Planning', desc: 'Tareas completables', href: '/planning', icon: Rocket }
+  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/planning', icon: Rocket }
 ] as const
 
 const SUBJECTS = [
@@ -58,7 +57,7 @@ const SUBJECTS = [
 function routeItem(pathname: string): SidebarItemId {
   if (pathname.startsWith('/simulacros')) return 'simulacros'
   if (pathname.startsWith('/zona')) return 'zona'
-  if (pathname.startsWith('/planning')) return 'planning'
+  if (pathname.startsWith('/planning')) return 'plan-estudio'
   return 'examenes'
 }
 
@@ -113,7 +112,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
           )
           const classes = `mb-1.5 flex w-full items-center gap-3 rounded-[18px] border px-[13px] py-3 text-left no-underline transition hover:translate-x-0.5 hover:border-blue-300 hover:bg-blue-50 ${active ? 'border-blue-300 bg-gradient-to-br from-white to-blue-50 shadow-[0_14px_32px_rgba(37,99,235,0.09)]' : 'border-transparent bg-transparent'}`
 
-          if (onNavigate && ['examenes', 'chat', 'historial', 'plan-estudio'].includes(item.id)) {
+          if (onNavigate && ['examenes', 'chat', 'historial'].includes(item.id)) {
             return <button key={item.id} className={classes} onClick={() => onNavigate(item.id)}>{content}</button>
           }
           return <Link key={item.id} className={classes} href={item.href}>{content}</Link>

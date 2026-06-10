@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, PenLine, RefreshCw, Rocket } from 'lucide-react'
+import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target } from 'lucide-react'
+import Sidebar from '@/app/components/Sidebar'
 
 const config = {
   bg: '#2563eb',
@@ -58,6 +59,7 @@ function subjectTheme(name = '') {
 }
 
 const ASIGNATURAS = ['Matematicas II', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biología', 'Geografia', 'Historia del Arte', 'Latin']
+type PlanTab = 'general' | 'semana' | 'tareas' | 'ajustes'
 
 export default function Planning() {
   const [usuario, setUsuario] = useState<any>(null)
@@ -71,6 +73,7 @@ export default function Planning() {
   const [horasDia, setHorasDia] = useState(2)
   const [notaObjetivo, setNotaObjetivo] = useState(10)
   const [asignaturasFlo, setAsignaturasFlo] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState<PlanTab>('general')
   const router = useRouter()
 
   useEffect(() => {
@@ -218,6 +221,16 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   const totalTareas = planning.reduce((acc, dia) => acc + (dia.tareas?.length ?? 0), 0)
   const completadasHoy = planning.reduce((acc, dia) => acc + (dia.tareas?.filter((t: any) => t.completada)?.length ?? 0), 0)
   const porcentaje = totalTareas > 0 ? Math.round((completadasHoy / totalTareas) * 100) : 0
+  const tareasPlano = planning.flatMap((dia: any, diaIdx: number) =>
+    (dia.tareas ?? []).map((tarea: any, tareaIdx: number) => ({ ...tarea, dia: dia.dia, diaIdx, tareaIdx }))
+  )
+  const tareasPendientes = tareasPlano.filter((tarea: any) => !tarea.completada)
+  const tabs: Array<{ id: PlanTab; label: string; icon: any }> = [
+    { id: 'general', label: 'Vista general', icon: Target },
+    { id: 'semana', label: 'Plan semanal', icon: CalendarDays },
+    { id: 'tareas', label: 'Tareas', icon: ListChecks },
+    { id: 'ajustes', label: 'Ajustes', icon: Settings }
+  ]
 
   if (cargando) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)' }}>
@@ -229,7 +242,9 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   )
 
   return (
-    <div className="min-h-screen" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
+    <div className="flex min-h-screen max-lg:block" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
+      <Sidebar activeItem="plan-estudio" email={usuario?.email} />
+      <div className="min-w-0 flex-1">
       <style>{`
         .campus-hover,
         .campus-primary,
@@ -263,10 +278,10 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #1d4ed8 0%, #2563eb 58%, #38bdf8 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(37,99,235,0.24)' }}><GraduationCap size={23} /></div>
             <div>
               <div className="font-bold text-xl leading-none" style={{ color: config.ink }}>Pausia</div>
-              <div className="text-xs mt-1" style={{ color: config.muted }}>EBAU Madrid · planning que se puede cumplir</div>
+              <div className="text-xs mt-1" style={{ color: config.muted }}>Mi Plan · semana que se puede cumplir</div>
             </div>
           </div>
-          <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}><ArrowLeft size={14} />Exámenes</button>
+          <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>Exámenes</button>
         </div>
       </header>
 
@@ -276,7 +291,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
           <div className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow, backdropFilter: 'blur(18px)' }}>
             <div className="text-center mb-8">
               <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', boxShadow: '0 18px 42px rgba(37, 99, 235, 0.22)' }}><CalendarDays size={30} /></div>
-              <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Tu plan de estudio personalizado</h1>
+              <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Mi Plan</h1>
               <p className="text-sm mt-2" style={{ color: config.muted }}>Dinos tres cosas y Pausia te monta un plan día a día</p>
             </div>
 
@@ -336,7 +351,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Tu plan de esta semana</h1>
+                <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Mi Plan</h1>
                 <p className="text-sm mt-1" style={{ color: config.muted }}>
                   Objetivo: {perfil?.nota_objetivo}/14 · {perfil?.horas_dia}h/día · Examen: {perfil?.fecha_examen ? new Date(perfil.fecha_examen).toLocaleDateString('es-ES') : ''}
                 </p>
@@ -348,7 +363,41 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
               </button>
             </div>
 
-            {totalTareas > 0 && (
+            <div className="flex flex-wrap gap-2 rounded-3xl p-2" style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(219,231,251,0.95)', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+              {tabs.map(tab => {
+                const Icon = tab.icon
+                const active = activeTab === tab.id
+                return (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                    className="campus-hover flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold"
+                    style={{ ...hoverVars(config.bg, config.light, config.accent), background: active ? 'linear-gradient(135deg, #1d4ed8, #60a5fa)' : '#fff', color: active ? '#fff' : config.muted, border: active ? '1px solid transparent' : '1px solid #dbe7fb', boxShadow: active ? '0 12px 26px rgba(37,99,235,0.18)' : 'none' }}>
+                    <Icon size={15} /> {tab.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {activeTab === 'general' && (
+              <div className="grid gap-4 md:grid-cols-3">
+                <PlanMetric label="Progreso" value={`${porcentaje}%`} detail={`${completadasHoy}/${totalTareas} tareas`} />
+                <PlanMetric label="Pendientes" value={String(tareasPendientes.length)} detail="por completar" />
+                <PlanMetric label="Ritmo" value={`${perfil?.horas_dia ?? 0}h/día`} detail={`objetivo ${perfil?.nota_objetivo ?? '-'} / 14`} />
+                <div className="rounded-3xl p-5 md:col-span-3" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
+                  <h2 className="mb-3 text-sm font-bold" style={{ color: config.ink }}>Próximos objetivos</h2>
+                  <div className="grid gap-2">
+                    {tareasPendientes.slice(0, 4).map((tarea: any, index: number) => (
+                      <div key={`${tarea.dia}-${index}`} className="rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-3 text-sm">
+                        <strong style={{ color: config.ink }}>{tarea.dia}</strong>
+                        <span style={{ color: config.muted }}> · {tarea.asignatura} · {tarea.descripcion}</span>
+                      </div>
+                    ))}
+                    {tareasPendientes.length === 0 && <p className="text-sm" style={{ color: config.muted }}>No tienes tareas pendientes en el plan actual.</p>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {totalTareas > 0 && activeTab !== 'ajustes' && (
               <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold" style={{ color: config.ink }}>Progreso semanal</span>
@@ -367,7 +416,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                 <p className="text-sm mt-2" style={{ color: config.softText }}>Analizando tu progreso y redistribuyendo tareas pendientes</p>
               </div>
             ) : planning.length > 0 ? (
-              <div className="grid gap-4">
+              activeTab === 'semana' ? <div className="grid gap-4">
                 {planning.map((dia: any, i: number) => {
                   const completadasDia = dia.tareas?.filter((t: any) => t.completada)?.length ?? 0
                   const totalDia = dia.tareas?.length ?? 0
@@ -416,7 +465,40 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
                   <RefreshCw size={15} /> Recalcular plan
                 </button>
-              </div>
+              </div> : activeTab === 'tareas' ? (
+                <div className="grid gap-3">
+                  {tareasPlano.map((tarea: any, index: number) => {
+                    const theme = subjectTheme(tarea.asignatura)
+                    return (
+                      <div key={`${tarea.dia}-${index}`} className="campus-task flex items-start gap-3 rounded-2xl p-4"
+                        style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#eff6ff' : '#fff', border: `1px solid ${tarea.completada ? '#bfdbfe' : theme.border}`, boxShadow: '0 12px 28px rgba(37,99,235,0.05)' }}>
+                        <button onClick={() => !tarea.completada && marcarCompletada(tarea.diaIdx, tarea.tareaIdx)}
+                          className="campus-hover mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                          style={{ ...hoverVars(theme.color, theme.light, theme.accent), background: tarea.completada ? '#2563eb' : '#fff', border: `2px solid ${tarea.completada ? '#2563eb' : theme.accent}`, color: '#fff' }}>
+                          {tarea.completada ? <Check size={14} /> : ''}
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1 flex flex-wrap gap-2 text-xs font-bold">
+                            <span style={{ color: theme.color }}>{tarea.asignatura}</span>
+                            <span style={{ color: config.softText }}>{tarea.dia}</span>
+                            <span style={{ color: config.softText }}>{tarea.duracion} min</span>
+                          </div>
+                          <p className="text-sm" style={{ color: tarea.completada ? config.muted : config.ink, textDecoration: tarea.completada ? 'line-through' : 'none' }}>{tarea.descripcion}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : activeTab === 'ajustes' ? (
+                <div className="rounded-3xl p-6" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
+                  <h2 className="mb-2 text-lg font-bold" style={{ color: config.ink }}>Ajustes del plan</h2>
+                  <p className="mb-5 text-sm" style={{ color: config.muted }}>Cambia tu objetivo, disponibilidad o asignaturas flojas y Pausia recalcula la semana.</p>
+                  <div className="flex flex-wrap gap-3">
+                    <button onClick={() => setPaso('onboarding')} className="campus-hover rounded-2xl px-4 py-2 text-sm font-bold" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb' }}><PenLine size={14} /> Editar datos</button>
+                    <button onClick={() => cargarTareasYPlanning(perfil, usuario?.id)} className="campus-primary rounded-2xl px-4 py-2 text-sm font-bold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}><RefreshCw size={14} /> Regenerar plan</button>
+                  </div>
+                </div>
+              ) : null
             ) : (
               <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
                 <p style={{ color: config.muted }}>No se pudo generar el plan. Intenta de nuevo.</p>
@@ -428,6 +510,17 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
           </div>
         )}
       </main>
+      </div>
+    </div>
+  )
+}
+
+function PlanMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
+      <p className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: config.softText }}>{label}</p>
+      <p className="mt-2 text-3xl font-black" style={{ color: config.ink }}>{value}</p>
+      <p className="mt-1 text-sm font-semibold" style={{ color: config.muted }}>{detail}</p>
     </div>
   )
 }

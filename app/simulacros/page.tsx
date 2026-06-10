@@ -23,6 +23,12 @@ export default function SimulacrosPage() {
   const stats = useMemo(() => buildStats(history), [history])
 
   useEffect(() => {
+    setDifficulty('Media')
+    setOption('A')
+    setErrorMessage('')
+  }, [ccaa])
+
+  useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) router.push('/login')
       else {
@@ -68,7 +74,7 @@ export default function SimulacrosPage() {
       const effectiveOption: SimulacroOption = subject === 'lengua' ? 'A' : option
       const generated = generateSimulacro(subject, difficulty, effectiveOption, ccaa)
       if (!generated) {
-        setErrorMessage(`Todavía no hay suficientes preguntas oficiales de ${SUBJECTS[subject].label} para crear un simulacro en ${ccaa}. Prueba con otra asignatura o cambia de comunidad.`)
+        setErrorMessage('No hay suficientes ejercicios disponibles para crear este simulacro.')
         setLoading(false)
         return
       }

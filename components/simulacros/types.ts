@@ -7,6 +7,7 @@ export interface SimulacroBlock {
   id: string
   numero: number
   tema: string
+  comunidad?: string
   year: number
   convocatoria: string
   option: SimulacroOption
@@ -29,6 +30,7 @@ export interface SimulacroRecord {
   id: string
   user_id: string
   asignatura: SimulacroSubject
+  comunidad?: string
   opcion: SimulacroOption
   dificultad: SimulacroDifficulty
   dificultad_real?: string | null

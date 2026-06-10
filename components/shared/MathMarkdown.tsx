@@ -3,7 +3,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import { normalizeExamStatement } from '@/app/lib/mathFormatting'
+import { normalizeExamStatement, normalizeCorrectionText } from '@/app/lib/mathFormatting'
 
 const defaultComponents = {
   h1: ({ children }: any) => <h1 className="mb-4 mt-7 text-2xl font-black text-slate-950">{children}</h1>,
@@ -39,7 +39,7 @@ export default function MathMarkdown({
         rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
         components={{ ...defaultComponents, ...(components ?? {}) }}
       >
-        {normalizeExamStatement(text)}
+        {format ? normalizeExamStatement(text) : normalizeCorrectionText(text)}
       </ReactMarkdown>
     </div>
   )

@@ -29,6 +29,28 @@ export function normalizeExamStatement(input?: string | null) {
 // Kept for compatibility with the existing renderer and imports.
 export const formatExamText = normalizeExamStatement
 
+// Lighter normalization for AI-generated correction/chat text.
+// Unlike normalizeExamStatement it does NOT:
+//   - run normalizePdfGlyphs (no OCR glyph artefacts in AI text)
+//   - run normalizeSoftLineBreaks (preserves the markdown structure the AI wrote)
+//   - run formatBrokenMathBlocks / formatLinearSystems (OCR-specific)
+//   - run formatExamStructure (bolding a)/b)/1.1. etc. — not needed in corrections)
+//   - add trailing soft-break spaces to every line
+export function normalizeCorrectionText(input?: string | null) {
+  if (!input) return ''
+  let text = input
+  text = normalizeExistingMath(text)
+  text = mapOutsideMath(text, repairLostLatex)
+  text = mapOutsideMath(text, wrapLatexEnvironments)
+  text = mapOutsideMath(text, formatLimitsAndIntegrals)
+  text = mapOutsideMath(text, formatScientificNotation)
+  text = mapOutsideMath(text, wrapExplicitLatex)
+  text = mapOutsideMath(text, formatPhysicsNotation)
+  text = mapOutsideMath(text, formatCommonMathExpressions)
+  text = mapOutsideMath(text, formatChemicalNotation)
+  return text.replace(/[ \t]{2,}/g, ' ').trim()
+}
+
 function normalizeExistingMath(text: string) {
   return text.replace(MATH_TOKEN, token => {
     const display = token.startsWith('$$')
@@ -93,8 +115,8 @@ function wrapExplicitLatex(text: string) {
   output = mapOutsideMath(output, part => part
     .replace(/(\\int(?:_\{?[^}\s]+\}?)?(?:\^\{?[^}\s]+\}?)?\s+[^,.;\n]+?\s+d[a-z]\b)/g, '$$$1$')
     .replace(/(\\begin\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|aligned)\}[\s\S]*?\\end\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|aligned)\})/g, '$$$1$')
-    .replace(/(\\(?:d?frac)\{[^{}\n]+\}\{[^{}\n]+\}(?:[A-Za-z](?:[_^]\{?[^}\s]+\}?)?)*)/g, '$$$1$')
-    .replace(/(\\sqrt(?:\[[^\]\n]+\])?\{[^{}\n]+\})/g, '$$$1$')
+    .replace(/(\\(?:d?frac)\{(?:[^{}]|\{[^{}]*\})+\}\{(?:[^{}]|\{[^{}]*\})+\}(?:[A-Za-z](?:[_^]\{?[^}\s]+\}?)?)*)/g, '$$$1$')
+    .replace(/(\\sqrt(?:\[[^\]\n]+\])?\{(?:[^{}]|\{[^{}]*\})+\})/g, '$$$1$')
     .replace(/(\d+(?:[,.]\d+)?\s*\\\s*\\text\{[^{}\n]+\}(?:\s*\^\{?[-+]?\d+\}?)?)/g, '$$$1$')
     .replace(/(\\(?:vec|hat|mathbb)\{[^{}\n]+\})/g, '$$$1$')
     .replace(/([A-Za-z0-9_{}^()+\-.,]+\s*\\(?:cdot|times|leq|geq|neq|approx)\s*[A-Za-z0-9_{}^()+\-.,]+)/g, '$$$1$')

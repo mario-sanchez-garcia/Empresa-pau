@@ -190,25 +190,46 @@ export default function LandingPage() {
             <div style={{ fontSize: '11px', color: C.soft, marginTop: '2px' }}>EBAU Madrid · estudio con ritmo</div>
           </div>
         </div>
-        <Link
-          href="/login"
-          className="lp-btn-primary"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 22px',
-            borderRadius: '999px',
-            background: C.grad,
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: '14px',
-            textDecoration: 'none',
-            boxShadow: '0 14px 32px rgba(37,99,235,0.22)',
-          }}
-        >
-          Entrar <ArrowRight size={15} />
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <Link
+            href="/pricing"
+            className="lp-btn-ghost"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 18px',
+              borderRadius: '999px',
+              background: 'rgba(255,255,255,0.92)',
+              border: '1.5px solid #dbe7fb',
+              color: C.muted,
+              fontWeight: 700,
+              fontSize: '14px',
+              textDecoration: 'none',
+            }}
+          >
+            Ver planes
+          </Link>
+          <Link
+            href="/login"
+            className="lp-btn-primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 22px',
+              borderRadius: '999px',
+              background: C.grad,
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '14px',
+              textDecoration: 'none',
+              boxShadow: '0 14px 32px rgba(37,99,235,0.22)',
+            }}
+          >
+            Entrar <ArrowRight size={15} />
+          </Link>
+        </div>
       </nav>
 
       {/* ── Hero ── */}

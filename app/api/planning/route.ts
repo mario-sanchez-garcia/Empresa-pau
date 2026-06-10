@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -13,7 +13,22 @@ export async function POST(req: NextRequest) {
 
   const model = 'claude-opus-4-5'
 
-  // TODO: enforce per-user planning generation limits before calling Anthropic.
+  const rateLimit = await checkAiRateLimit({
+    userId: authContext.user.id,
+    route: '/api/planning',
+    action: 'planning_generation',
+    limit: 1,
+    windowSeconds: 7 * 24 * 60 * 60,
+    accessToken: authContext.accessToken
+  })
+
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(
+      'Ya has generado un plan de estudio esta semana. Podrás generar otro más adelante.',
+      rateLimit
+    )
+  }
+
   let message
   try {
     message = await client.messages.create({
@@ -87,4 +102,20 @@ function getBearerToken(request: NextRequest) {
   const authorization = request.headers.get('authorization') ?? ''
   const match = authorization.match(/^Bearer\s+(.+)$/i)
   return match?.[1] ?? null
+}
+
+function rateLimitResponse(message: string, result: { limit: number; count: number; retryAfterSeconds?: number }) {
+  return NextResponse.json(
+    {
+      error: message,
+      code: 'RATE_LIMIT_EXCEEDED',
+      limit: result.limit,
+      used: result.count,
+      retryAfterSeconds: result.retryAfterSeconds ?? null
+    },
+    {
+      status: 429,
+      headers: result.retryAfterSeconds ? { 'Retry-After': String(result.retryAfterSeconds) } : undefined
+    }
+  )
 }

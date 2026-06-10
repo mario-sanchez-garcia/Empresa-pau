@@ -18,6 +18,22 @@ type LogAiUsageArgs = {
   accessToken?: string | null
 }
 
+type CheckAiRateLimitArgs = {
+  userId: string
+  route: string
+  action: string
+  limit: number
+  windowSeconds: number
+  accessToken?: string | null
+}
+
+export type AiRateLimitResult = {
+  allowed: boolean
+  count: number
+  limit: number
+  retryAfterSeconds?: number
+}
+
 export function extractAnthropicTokenUsage(message: any) {
   const inputTokens = safeTokenCount(message?.usage?.input_tokens)
   const outputTokens = safeTokenCount(message?.usage?.output_tokens)
@@ -36,6 +52,52 @@ export function getAiErrorCode(error: unknown) {
     if (typeof candidate.status === 'number') return String(candidate.status)
   }
   return 'unknown_error'
+}
+
+export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRateLimitResult> {
+  try {
+    const supabase = createUsageClient(args.accessToken)
+    if (!supabase) {
+      console.error('AI_RATE_LIMIT_ERROR', 'Supabase usage client is not configured')
+      return { allowed: true, count: 0, limit: args.limit }
+    }
+
+    const since = new Date(Date.now() - args.windowSeconds * 1000).toISOString()
+    const { data, count, error } = await supabase
+      .from('ai_usage_events')
+      .select('id, created_at', { count: 'exact' })
+      .eq('user_id', args.userId)
+      .eq('route', args.route)
+      .eq('action', args.action)
+      .eq('status', 'success')
+      .gte('created_at', since)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('AI_RATE_LIMIT_ERROR', error)
+      return { allowed: true, count: 0, limit: args.limit }
+    }
+
+    const currentCount = count ?? data?.length ?? 0
+    if (currentCount < args.limit) {
+      return { allowed: true, count: currentCount, limit: args.limit }
+    }
+
+    const oldestCreatedAt = data?.[0]?.created_at
+    const retryAfterSeconds = oldestCreatedAt
+      ? Math.max(1, Math.ceil((new Date(oldestCreatedAt).getTime() + args.windowSeconds * 1000 - Date.now()) / 1000))
+      : undefined
+
+    return {
+      allowed: false,
+      count: currentCount,
+      limit: args.limit,
+      retryAfterSeconds
+    }
+  } catch (error) {
+    console.error('AI_RATE_LIMIT_ERROR', error)
+    return { allowed: true, count: 0, limit: args.limit }
+  }
 }
 
 export async function logAiUsageEvent(args: LogAiUsageArgs) {

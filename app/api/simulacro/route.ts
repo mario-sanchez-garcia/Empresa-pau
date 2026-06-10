@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { buildCorrectionPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -100,7 +100,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(errorResult, { status: 500 })
     }
 
-    // TODO: enforce per-user simulacro correction limits before calling Anthropic.
+    const rateLimit = await checkAiRateLimit({
+      userId: authContext.user.id,
+      route: '/api/simulacro',
+      action: 'simulacro_correction',
+      limit: 1,
+      windowSeconds: 24 * 60 * 60,
+      accessToken: authContext.accessToken
+    })
+
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(
+        'Ya has corregido un simulacro hoy. Podrás corregir otro mañana.',
+        rateLimit
+      )
+    }
+
     const prompt = buildCorrectionPrompt({
       subject,
       community: correctionCommunity,
@@ -271,6 +286,22 @@ function getBearerToken(request: NextRequest) {
   const authorization = request.headers.get('authorization') ?? ''
   const match = authorization.match(/^Bearer\s+(.+)$/i)
   return match?.[1] ?? null
+}
+
+function rateLimitResponse(message: string, result: { limit: number; count: number; retryAfterSeconds?: number }) {
+  return NextResponse.json(
+    {
+      error: message,
+      code: 'RATE_LIMIT_EXCEEDED',
+      limit: result.limit,
+      used: result.count,
+      retryAfterSeconds: result.retryAfterSeconds ?? null
+    },
+    {
+      status: 429,
+      headers: result.retryAfterSeconds ? { 'Retry-After': String(result.retryAfterSeconds) } : undefined
+    }
+  )
 }
 
 async function updateSimulacro(supabase: any, id: string, userId: string, result: any, tiempo: number) {

@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 export type CatEjercicioView = {
   id: string
@@ -72,6 +73,13 @@ export default function CatEjercicioCard({
     ejercicio.instrucciones,
     ejercicio.texto,
     ejercicio.fuente,
+    ejercicio.enunciado,
+    apartadoTexto,
+    ...(ejercicio.datos ?? []),
+  ].filter(Boolean).join('\n\n')
+  const textoFuente = [ejercicio.texto, ejercicio.fuente].filter(Boolean).join('\n\n')
+  const enunciadoVisible = [
+    ejercicio.instrucciones,
     ejercicio.enunciado,
     apartadoTexto,
     ...(ejercicio.datos ?? []),
@@ -190,10 +198,7 @@ export default function CatEjercicioCard({
     <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}` }}>
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>PAU Cataluña {examen.anio} · {examen.convocatoria} · {examen.serie}</span>
-            {ejercicio.opcion && <span className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-bold" style={{ borderColor: UI.accent, color: UI.color }}>Opción {ejercicio.opcion}</span>}
-          </div>
+          <ExamMetaChips color={UI.color} accent={UI.accent} items={['PAU Catalunya', String(examen.anio), examen.convocatoria, examen.serie, ejercicio.titulo, ejercicio.opcion ? `Opción ${ejercicio.opcion}` : null, apartado?.id ? `Apartado ${apartado.id}` : null]} />
           <h3 className="mt-2 text-lg font-black text-slate-900">{ejercicio.titulo}</h3>
         </div>
         <div className="flex shrink-0 items-baseline gap-1">
@@ -211,17 +216,27 @@ export default function CatEjercicioCard({
           </label>
         )}
         {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
-        {enunciadoCompleto && (
-          <div className="rounded-2xl border bg-white px-5 py-4 shadow-[0_12px_30px_rgba(37,99,235,0.06)]" style={{ borderColor: '#e5edf9' }}>
-            <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+        {textoFuente && (
+          <ExamContentCard title={asignatura === 'lengua' ? 'Texto fuente oficial' : 'Datos / fuente oficial'} color={UI.color} borderColor={UI.border} soft>
             <ExamStatement
-              text={enunciadoCompleto}
+              text={textoFuente}
+              storageKey={`cat-${asignatura}:${examen.id}:${ejercicio.id}:${apartado?.id ?? apartadoIdx}:fuente`}
+              accentColor={UI.color}
+              softColor={UI.light}
+              readingMode={asignatura === 'lengua'}
+            />
+          </ExamContentCard>
+        )}
+        {enunciadoVisible && (
+          <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor="#e5edf9">
+            <ExamStatement
+              text={enunciadoVisible}
               storageKey={`cat-${asignatura}:${examen.id}:${ejercicio.id}:${apartado?.id ?? apartadoIdx}:enunciado`}
               accentColor={UI.color}
               softColor={UI.light}
               readingMode={asignatura === 'lengua'}
             />
-          </div>
+          </ExamContentCard>
         )}
         {ejercicio.imagenes?.map((imagen, index) => <div key={index} className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">{imagen}</div>)}
 

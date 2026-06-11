@@ -9,6 +9,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 const UI = {
   color: '#CA8A04',
@@ -156,7 +157,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
     <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}` }}>
         <div className="min-w-0">
-          <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>PAU Cataluña {examen.anio} · {examen.convocatoria} · {examen.serie}</div>
+          <ExamMetaChips color={UI.color} accent={UI.accent} items={['PAU Catalunya', String(examen.anio), examen.convocatoria, examen.serie, `Ejercicio ${ejercicio.numero}`, opcion?.opcion ? `Opción ${opcion.opcion}` : null, apartado?.letra ? `Apartado ${apartado.letra}` : null]} />
           <h3 className="mt-2 text-lg font-black text-slate-900">{titulo}</h3>
         </div>
         <div className="flex shrink-0 items-baseline gap-1">
@@ -184,15 +185,14 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
         )}
         {requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
         {enunciado && (
-          <div className="rounded-2xl border bg-white px-5 py-4 shadow-[0_12px_30px_rgba(37,99,235,0.06)]" style={{ borderColor: '#e5edf9' }}>
-            <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+          <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor="#e5edf9">
             <ExamStatement
               text={enunciado}
               storageKey={`cat-fisica:${examen.id}:${ejercicio.numero}:${opcion?.opcion ?? 'unica'}:${apartado?.letra ?? apartadoIdx}:enunciado`}
               accentColor={UI.color}
               softColor={UI.light}
             />
-          </div>
+          </ExamContentCard>
         )}
 
         <section className="border-t pt-5" style={{ borderColor: UI.border }}>

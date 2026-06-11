@@ -10,6 +10,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 type Comunidad = 'Madrid' | 'Cataluña'
 type Convocatoria = 'ordinaria' | 'extraordinaria'
@@ -219,7 +220,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
 
   return (
     <div className="mb-8 grid gap-5">
-      <section className="border-y bg-white px-5 py-5" style={{ borderColor: UI.border }}>
+      <section className="rounded-[24px] border bg-white px-5 py-5 shadow-[0_14px_34px_rgba(100,116,139,0.08)]" style={{ borderColor: UI.border }}>
         <div className="mb-4 text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Ruta del examen</div>
         <div className="flex flex-wrap items-end gap-3">
           <Selector label="Convocatoria" value={convocatoria} onChange={value => setConvocatoria(value as Convocatoria)} options={[...new Set((ccaa === 'Madrid' ? examenesHistoriaFilosofiaMadrid : examenesHistoriaFilosofiaCataluna).map(exam => exam.convocatoria))].map(value => ({ value, label: titleCase(value) }))} />
@@ -238,15 +239,27 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
 
       <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(100,116,139,0.10)]" style={{ borderColor: UI.border }}>
         <header className="flex flex-wrap items-start justify-between gap-4 border-b px-6 py-5" style={{ background: UI.light, borderColor: UI.border }}>
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>{ccaa} · {selectedExam.anio} · {titleCase(convocatoria)}{variantLabel ? ` · ${variantLabel}` : ''}</div>
+          <div className="min-w-0">
+            <ExamMetaChips
+              color={UI.color}
+              accent={UI.accent}
+              items={[
+                ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid',
+                String(selectedExam.anio),
+                titleCase(convocatoria),
+                variantLabel,
+                ccaa === 'Cataluña' ? `Exercici ${selectedExercise?.numero ?? ''}` : `Texto ${textOption}`,
+                ccaa === 'Cataluña' && selectedExercise?.opciones ? `Opció ${exerciseOption}` : null,
+                selectedQuestion?.id ? `Pregunta ${selectedQuestion.id}` : null,
+              ]}
+            />
             <h2 className="mt-2 text-xl font-black text-slate-900">{selectedQuestion?.titulo}</h2>
           </div>
           <div className="text-2xl font-black" style={{ color: UI.color }}>{maxScore} <span className="text-sm">pts</span></div>
         </header>
         <div className="grid gap-5 p-6">
           {sourceText && (
-            <div className="rounded-2xl border bg-slate-50 p-5" style={{ borderColor: UI.border }}>
+            <ExamContentCard title={ccaa === 'Cataluña' ? 'Texto filosófico / fuente oficial' : 'Texto filosófico'} color={UI.color} borderColor={UI.border} soft>
               <ExamStatement
                 text={sourceText}
                 storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:fuente`}
@@ -254,10 +267,9 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
                 softColor={UI.light}
                 readingMode
               />
-            </div>
+            </ExamContentCard>
           )}
-          <div>
-            <div className="mb-2 text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+          <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor={UI.border}>
             <ExamStatement
               text={selectedQuestion?.enunciado ?? ''}
               storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:enunciado`}
@@ -266,7 +278,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
               readingMode
             />
             {wordLimit && <div className="mt-3 text-xs font-bold text-slate-500">Límite: {wordLimit}</div>}
-          </div>
+          </ExamContentCard>
         </div>
         <section className="border-t p-6" style={{ borderColor: UI.border }}>
           <div className="mb-4 flex gap-2">

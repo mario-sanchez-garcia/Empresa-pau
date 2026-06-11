@@ -9,6 +9,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 const CAT_UI = {
   color: '#2563eb',
@@ -140,22 +141,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
     <article className="mb-6 overflow-hidden rounded-[24px] border bg-white" style={{ borderColor: CAT_UI.border, boxShadow: CAT_UI.shadow }}>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: CAT_UI.light, borderBottom: `2px solid ${CAT_UI.accent}` }}>
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[12px] font-black uppercase tracking-[0.06em]" style={{ color: CAT_UI.color }}>
-              PAU Catalunya {pregunta.year} · {pregunta.tipo}
-            </span>
-            <span className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-bold" style={{ borderColor: CAT_UI.accent, color: CAT_UI.color }}>
-              {pregunta.serie}
-            </span>
-            <span className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ backgroundColor: CAT_UI.color }}>
-              Ejercicio {pregunta.ejercicio}
-            </span>
-            {pregunta.opcion && (
-              <span className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-bold" style={{ borderColor: CAT_UI.border, color: CAT_UI.ink }}>
-                Opción {pregunta.opcion}
-              </span>
-            )}
-          </div>
+          <ExamMetaChips color={CAT_UI.color} accent={CAT_UI.accent} items={['PAU Catalunya', String(pregunta.year), pregunta.tipo, pregunta.serie, `Ejercicio ${pregunta.ejercicio}`, pregunta.opcion ? `Opción ${pregunta.opcion}` : null]} />
           <h3 className="mt-2 text-lg font-black text-slate-900">{pregunta.tema}</h3>
         </div>
         <div className="flex shrink-0 items-baseline gap-1">
@@ -165,15 +151,14 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
       </header>
 
       <div className="p-6">
-        <div className="rounded-[22px] border bg-white px-5 py-4 shadow-[0_14px_34px_rgba(37,99,235,0.07)]" style={{ borderColor: '#e5edf9' }}>
-          <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: CAT_UI.color }}>Enunciado oficial</div>
+        <ExamContentCard title="Enunciado oficial" color={CAT_UI.color} borderColor="#e5edf9">
           <ExamStatement
             text={enunciadoCompleto}
             storageKey={`cat-mates:${pregunta.id}:enunciado`}
             accentColor={CAT_UI.color}
             softColor={CAT_UI.light}
           />
-        </div>
+        </ExamContentCard>
       </div>
 
       <section className="border-t p-6" style={{ borderColor: CAT_UI.border }}>

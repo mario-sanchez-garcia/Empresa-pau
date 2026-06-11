@@ -9,6 +9,7 @@ import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import MathMarkdown from '@/components/shared/MathMarkdown'
+import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 type Fuente = {
   tipo?: 'texto' | 'imagen' | 'imagen_doble' | 'documento' | 'tabla'
@@ -211,22 +212,21 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
     <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}` }}>
         <div>
-          <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>{contexto}</div>
+          <ExamMetaChips color={UI.color} accent={UI.accent} items={['PAU Catalunya', contexto, `Ejercicio ${ejercicio.numero}`, ejercicio.tipo]} />
           <h3 className="mt-2 text-lg font-black text-slate-900">Ejercicio {ejercicio.numero}</h3>
         </div>
         <div className="text-right"><span className="text-2xl font-black" style={{ color: UI.color }}>{puntuacion}</span><span className="ml-1 text-sm font-bold" style={{ color: UI.accent }}>pts</span></div>
       </header>
       <div className="grid gap-5 p-6">
         <RenderFuente fuente={ejercicio.fuente} storageKeyPrefix={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:fuente`} />
-        <div className="rounded-2xl border bg-white px-5 py-4 shadow-[0_12px_30px_rgba(37,99,235,0.06)]" style={{ borderColor: '#e5edf9' }}>
-          <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+        <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor="#e5edf9">
           <ExamStatement
             text={enunciadoOficial}
             storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:enunciado`}
             accentColor={UI.color}
             softColor={UI.light}
           />
-        </div>
+        </ExamContentCard>
         <div className="border-t pt-5" style={{ borderColor: UI.border }}>
           <label className="mb-3 block text-xs font-black uppercase tracking-[0.08em] text-slate-500">Tu respuesta</label>
           <div className="mb-4 flex gap-2">

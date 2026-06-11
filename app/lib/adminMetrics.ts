@@ -2,11 +2,11 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Approximate internal estimates. Update when provider pricing changes.
-const APPROX_INPUT_EUR_PER_TOKEN = 0.0000028
-const APPROX_OUTPUT_EUR_PER_TOKEN = 0.000014
-const APPROX_AVG_EUR_PER_TOKEN = 0.000007
+const APPROX_INPUT_EUR_PER_TOKEN = 0.0000028   // ~$3/M input tokens
+const APPROX_OUTPUT_EUR_PER_TOKEN = 0.000014    // ~$15/M output tokens
+const APPROX_AVG_EUR_PER_TOKEN = 0.000007       // fallback when only total_tokens known
 
-function estimateCost(
+export function estimateCostEur(
   inputTokens: number | null,
   outputTokens: number | null,
   totalTokens: number | null
@@ -18,6 +18,19 @@ function estimateCost(
     return totalTokens * APPROX_AVG_EUR_PER_TOKEN
   }
   return 0
+}
+
+// Human-readable labels for route+action combinations
+const ROUTE_ACTION_LABELS: Record<string, string> = {
+  '/api/chat|chat': 'Chat con Pausia',
+  '/api/chat|image_correction': 'Corrección imagen',
+  '/api/chat|correction': 'Corrección texto',
+  '/api/planning|planning_generation': 'Mi Plan',
+  '/api/simulacro|simulacro_correction': 'Simulacro'
+}
+
+function routeActionLabel(route: string, action: string): string {
+  return ROUTE_ACTION_LABELS[`${route}|${action}`] ?? `${route.replace('/api/', '')} / ${action}`
 }
 
 function adminClient() {
@@ -43,21 +56,25 @@ function daysAgoUtc(days: number): string {
   return d.toISOString()
 }
 
+export type RangeSummary = {
+  calls: number
+  tokens: number
+  costEur: number
+  errors: number
+  activeUsers: number
+  corrections: number
+  simulacros: number
+  plans: number
+}
+
 export type AdminMetrics = {
-  summary: {
-    callsToday: number
-    tokensToday: number
-    costTodayEur: number
-    cost7dEur: number
-    correctionsToday: number
-    simulacrosToday: number
-    plansThisWeek: number
-    errorsLast24h: number
-    activeUsersToday: number
-    activeUsers7d: number
-  }
-  byRoute: Array<{
+  summaryToday: RangeSummary
+  summary7d: RangeSummary
+  summary30d: RangeSummary
+  byRouteAction: Array<{
     route: string
+    action: string
+    label: string
     calls: number
     tokens: number
     costEur: number
@@ -68,11 +85,20 @@ export type AdminMetrics = {
     calls: number
     tokens: number
     costEur: number
+    lastActive: string | null
   }>
+  simulacrosStats: {
+    total: number
+    completados: number
+    enProgreso: number
+    abandoned: number
+    completionRate: number
+  }
   recentEvents: Array<{
     createdAt: string
     route: string
     action: string
+    label: string
     model: string | null
     totalTokens: number | null
     status: string
@@ -99,35 +125,56 @@ export type AdminMetrics = {
       notaFinal: number | null
     }>
   }
-  betaHealth: {
-    aiActive: boolean
-    trackingActive: boolean
-    errors24h: number
-    costToday: number
-  }
   calculatedAt: string
 }
 
+const EMPTY_RANGE: RangeSummary = {
+  calls: 0, tokens: 0, costEur: 0, errors: 0,
+  activeUsers: 0, corrections: 0, simulacros: 0, plans: 0
+}
+
 const EMPTY: AdminMetrics = {
-  summary: {
-    callsToday: 0,
-    tokensToday: 0,
-    costTodayEur: 0,
-    cost7dEur: 0,
-    correctionsToday: 0,
-    simulacrosToday: 0,
-    plansThisWeek: 0,
-    errorsLast24h: 0,
-    activeUsersToday: 0,
-    activeUsers7d: 0
-  },
-  byRoute: [],
+  summaryToday: { ...EMPTY_RANGE },
+  summary7d: { ...EMPTY_RANGE },
+  summary30d: { ...EMPTY_RANGE },
+  byRouteAction: [],
   topUsers: [],
+  simulacrosStats: { total: 0, completados: 0, enProgreso: 0, abandoned: 0, completionRate: 0 },
   recentEvents: [],
   recentErrors: [],
   productActivity: { recentCorrections: [], recentSimulacros: [] },
-  betaHealth: { aiActive: false, trackingActive: false, errors24h: 0, costToday: 0 },
   calculatedAt: ''
+}
+
+type UsageRow = {
+  user_id: string
+  route: string
+  action: string
+  status: string
+  total_tokens: number | null
+  input_tokens: number | null
+  output_tokens: number | null
+  created_at: string
+}
+
+function buildRangeSummary(
+  rows: UsageRow[],
+  since: string,
+  correctionsSince: number,
+  simulacrosSince: number,
+  plansLabel = 'planning_generation'
+): RangeSummary {
+  const filtered = rows.filter(r => r.created_at >= since)
+  return {
+    calls: filtered.length,
+    tokens: filtered.reduce((s, r) => s + (r.total_tokens ?? 0), 0),
+    costEur: filtered.reduce((s, r) => s + estimateCostEur(r.input_tokens, r.output_tokens, r.total_tokens), 0),
+    errors: filtered.filter(r => r.status === 'error').length,
+    activeUsers: new Set(filtered.map(r => r.user_id)).size,
+    corrections: correctionsSince,
+    simulacros: simulacrosSince,
+    plans: filtered.filter(r => r.action === plansLabel && r.status === 'success').length
+  }
 }
 
 export async function fetchAdminMetrics(): Promise<AdminMetrics> {
@@ -138,17 +185,16 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
   const ago7d = daysAgoUtc(7)
   const ago30d = daysAgoUtc(30)
   const ago1d = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const ago2h = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
 
   try {
-    const [todayRes, weekRes, last50Res, errorRes, allUsageRes] = await Promise.all([
+    const [usageRes, last50Res, errorRes] = await Promise.all([
+      // 30d of all usage events for range computations
       db
         .from('ai_usage_events')
-        .select('route, action, status, total_tokens, input_tokens, output_tokens, user_id')
-        .gte('created_at', todayStart),
-      db
-        .from('ai_usage_events')
-        .select('route, action, status, total_tokens, input_tokens, output_tokens, user_id')
-        .gte('created_at', ago7d),
+        .select('user_id, route, action, status, total_tokens, input_tokens, output_tokens, created_at')
+        .gte('created_at', ago30d)
+        .order('created_at', { ascending: false }),
       db
         .from('ai_usage_events')
         .select('created_at, route, action, model, total_tokens, status, error_code')
@@ -160,60 +206,76 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
         .eq('status', 'error')
         .gte('created_at', ago1d)
         .order('created_at', { ascending: false })
-        .limit(25),
-      db
-        .from('ai_usage_events')
-        .select('user_id, total_tokens, input_tokens, output_tokens')
-        .gte('created_at', ago30d)
+        .limit(25)
     ])
 
-    const todayData = todayRes.data ?? []
-    const weekData = weekRes.data ?? []
-    const allUsage = allUsageRes.data ?? []
+    const allUsage: UsageRow[] = usageRes.data ?? []
 
-    // Summary
-    const callsToday = todayData.length
-    const tokensToday = todayData.reduce((s, r) => s + (r.total_tokens ?? 0), 0)
-    const costTodayEur = todayData.reduce(
-      (s, r) => s + estimateCost(r.input_tokens, r.output_tokens, r.total_tokens),
-      0
-    )
-    const cost7dEur = weekData.reduce(
-      (s, r) => s + estimateCost(r.input_tokens, r.output_tokens, r.total_tokens),
-      0
-    )
-    const errorsLast24h = (errorRes.data ?? []).length
-    const activeUsersToday = new Set(todayData.map(r => r.user_id)).size
-    const activeUsers7d = new Set(weekData.map(r => r.user_id)).size
-    const plansThisWeek = weekData.filter(
-      r => r.action === 'planning_generation' && r.status === 'success'
-    ).length
+    // Corrections and simulacros counts per range (fetched separately for accuracy)
+    let correctionsToday = 0, corrections7d = 0
+    try {
+      const { data } = await db
+        .from('historial_examenes')
+        .select('created_at')
+        .gte('created_at', ago7d)
+      const rows = data ?? []
+      correctionsToday = rows.filter((r: { created_at: string }) => r.created_at >= todayStart).length
+      corrections7d = rows.length
+    } catch { /* historial_examenes may not exist */ }
 
-    // By route (7-day window)
-    const routeMap = new Map<string, { calls: number; tokens: number; cost: number; errors: number }>()
-    for (const row of weekData) {
-      const cur = routeMap.get(row.route) ?? { calls: 0, tokens: 0, cost: 0, errors: 0 }
+    let simulacrosToday = 0, simulacros7d = 0
+    let simulacrosStats: AdminMetrics['simulacrosStats'] = { total: 0, completados: 0, enProgreso: 0, abandoned: 0, completionRate: 0 }
+    try {
+      const { data } = await db
+        .from('historial_simulacros')
+        .select('created_at, estado')
+      const all = data ?? []
+      const completados = all.filter((r: { estado: string }) => r.estado === 'completado')
+      const enProgreso = all.filter((r: { estado: string; created_at: string }) => r.estado === 'en_progreso')
+      const abandoned = enProgreso.filter((r: { created_at: string }) => r.created_at < ago2h)
+      simulacrosToday = completados.filter((r: { created_at: string }) => r.created_at >= todayStart).length
+      simulacros7d = completados.filter((r: { created_at: string }) => r.created_at >= ago7d).length
+      simulacrosStats = {
+        total: all.length,
+        completados: completados.length,
+        enProgreso: enProgreso.length,
+        abandoned: abandoned.length,
+        completionRate: all.length > 0 ? completados.length / all.length : 0
+      }
+    } catch { /* ignore */ }
+
+    // Range summaries
+    const summaryToday = buildRangeSummary(allUsage, todayStart, correctionsToday, simulacrosToday)
+    const summary7d = buildRangeSummary(allUsage, ago7d, corrections7d, simulacros7d)
+    const summary30d = buildRangeSummary(allUsage, ago30d, 0, 0)
+
+    // By route+action (7d window)
+    const raMap = new Map<string, { route: string; action: string; calls: number; tokens: number; cost: number; errors: number }>()
+    for (const row of allUsage.filter(r => r.created_at >= ago7d)) {
+      const key = `${row.route}|${row.action}`
+      const cur = raMap.get(key) ?? { route: row.route, action: row.action, calls: 0, tokens: 0, cost: 0, errors: 0 }
       cur.calls++
       cur.tokens += row.total_tokens ?? 0
-      cur.cost += estimateCost(row.input_tokens, row.output_tokens, row.total_tokens)
+      cur.cost += estimateCostEur(row.input_tokens, row.output_tokens, row.total_tokens)
       if (row.status === 'error') cur.errors++
-      routeMap.set(row.route, cur)
+      raMap.set(key, cur)
     }
-    const byRoute = Array.from(routeMap.entries())
-      .map(([route, v]) => ({ route, calls: v.calls, tokens: v.tokens, costEur: v.cost, errors: v.errors }))
+    const byRouteAction = Array.from(raMap.values())
+      .map(v => ({ ...v, costEur: v.cost, label: routeActionLabel(v.route, v.action) }))
       .sort((a, b) => b.calls - a.calls)
 
-    // Top users (30-day window)
-    const userMap = new Map<string, { calls: number; tokens: number; cost: number }>()
+    // Top users (30d), with lastActive
+    const userMap = new Map<string, { calls: number; tokens: number; cost: number; lastActive: string | null }>()
     for (const row of allUsage) {
-      const cur = userMap.get(row.user_id) ?? { calls: 0, tokens: 0, cost: 0 }
+      const cur = userMap.get(row.user_id) ?? { calls: 0, tokens: 0, cost: 0, lastActive: null }
       cur.calls++
       cur.tokens += row.total_tokens ?? 0
-      cur.cost += estimateCost(row.input_tokens, row.output_tokens, row.total_tokens)
+      cur.cost += estimateCostEur(row.input_tokens, row.output_tokens, row.total_tokens)
+      if (!cur.lastActive || row.created_at > cur.lastActive) cur.lastActive = row.created_at
       userMap.set(row.user_id, cur)
     }
     const topUsers = Array.from(userMap.entries())
-      .map(([userId, v]) => ({ userId, calls: v.calls, tokens: v.tokens, costEur: v.cost }))
+      .map(([userId, v]) => ({ userId, calls: v.calls, tokens: v.tokens, costEur: v.cost, lastActive: v.lastActive }))
       .sort((a, b) => b.tokens - a.tokens)
       .slice(0, 10)
 
@@ -221,6 +283,7 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       createdAt: r.created_at,
       route: r.route,
       action: r.action,
+      label: routeActionLabel(r.route, r.action),
       model: r.model ?? null,
       totalTokens: r.total_tokens ?? null,
       status: r.status,
@@ -235,71 +298,47 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       metadata: r.metadata ?? {}
     }))
 
-    // Product activity — historial_examenes has no migration so wrap defensively
+    // Product activity (most recent for display)
     let recentCorrections: AdminMetrics['productActivity']['recentCorrections'] = []
-    let correctionsToday = 0
     try {
       const { data } = await db
         .from('historial_examenes')
         .select('created_at, asignatura, nota, nota_maxima')
         .order('created_at', { ascending: false })
-        .limit(25)
+        .limit(20)
       recentCorrections = (data ?? []).map((r: Record<string, unknown>) => ({
         createdAt: r.created_at as string,
         asignatura: (r.asignatura as string) ?? '',
         nota: (r.nota as number) ?? null,
         notaMaxima: (r.nota_maxima as number) ?? null
       }))
-      correctionsToday = recentCorrections.filter(r => r.createdAt >= todayStart).length
-    } catch {
-      // historial_examenes may not exist; ignore
-    }
+    } catch { /* historial_examenes may not exist */ }
 
     let recentSimulacros: AdminMetrics['productActivity']['recentSimulacros'] = []
-    let simulacrosToday = 0
     try {
       const { data } = await db
         .from('historial_simulacros')
         .select('created_at, asignatura, estado, nota_final')
         .order('created_at', { ascending: false })
-        .limit(25)
+        .limit(20)
       recentSimulacros = (data ?? []).map(r => ({
         createdAt: r.created_at,
         asignatura: r.asignatura,
         estado: r.estado,
         notaFinal: r.nota_final ?? null
       }))
-      simulacrosToday = recentSimulacros.filter(
-        r => r.createdAt >= todayStart && r.estado === 'completado'
-      ).length
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
 
     return {
-      summary: {
-        callsToday,
-        tokensToday,
-        costTodayEur,
-        cost7dEur,
-        correctionsToday,
-        simulacrosToday,
-        plansThisWeek,
-        errorsLast24h,
-        activeUsersToday,
-        activeUsers7d
-      },
-      byRoute,
+      summaryToday,
+      summary7d,
+      summary30d,
+      byRouteAction,
       topUsers,
+      simulacrosStats,
       recentEvents,
       recentErrors,
       productActivity: { recentCorrections, recentSimulacros },
-      betaHealth: {
-        aiActive: callsToday > 0 || allUsage.length > 0,
-        trackingActive: allUsage.length > 0,
-        errors24h: errorsLast24h,
-        costToday: costTodayEur
-      },
       calculatedAt: new Date().toISOString()
     }
   } catch (err) {

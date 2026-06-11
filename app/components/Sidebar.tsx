@@ -14,6 +14,7 @@ import {
   Globe,
   GraduationCap,
   Landmark,
+  LayoutDashboard,
   LogOut,
   MessageCircle,
   Rocket,
@@ -70,6 +71,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
   const router = useRouter()
   const [sessionEmail, setSessionEmail] = useState('')
   const [profile, setProfile] = useState<{ displayName?: string, photo?: string }>({})
+  const [isAdmin, setIsAdmin] = useState(false)
   const currentItem = activeItem ?? routeItem(pathname)
   const displayedEmail = email ?? sessionEmail
   const { ccaa, setCCAA } = useCCAA()
@@ -77,6 +79,16 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
   useEffect(() => {
     if (email === undefined) supabase.auth.getUser().then(({ data }) => setSessionEmail(data.user?.email ?? ''))
   }, [email])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      fetch('/api/admin/me', { headers: { Authorization: `Bearer ${session.access_token}` } })
+        .then(r => r.ok ? r.json() : { isAdmin: false })
+        .then((d: { isAdmin?: boolean }) => setIsAdmin(d.isAdmin === true))
+        .catch(() => {})
+    })
+  }, [])
 
   useEffect(() => {
     function readProfile() {
@@ -139,6 +151,19 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
           }
           return <Link key={item.id} className={classes} href={item.href}>{content}</Link>
         })}
+
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="mb-1.5 flex w-full items-center gap-3 rounded-[18px] border px-[13px] py-[11px] text-left no-underline transition hover:translate-x-0.5 hover:border-blue-300 hover:bg-blue-50 border-transparent bg-transparent"
+          >
+            <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[13px] border border-[#dbe7fb] bg-[#fafafa] text-slate-500"><LayoutDashboard size={17} /></span>
+            <span>
+              <strong className="block text-sm font-semibold text-slate-500">Panel interno</strong>
+              <small className="mt-0.5 block text-[11px] text-slate-400">Métricas de beta</small>
+            </span>
+          </Link>
+        )}
 
         <div className="mb-2.5 mt-[22px] px-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Asignaturas</div>
         {SUBJECTS.map(subject => {

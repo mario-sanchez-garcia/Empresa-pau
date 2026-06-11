@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { Eraser, Highlighter } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
+import { Eraser, Highlighter, Trash2, X } from 'lucide-react'
 import MathMarkdown from './MathMarkdown'
 
 type ExamStatementProps = {
@@ -26,6 +26,14 @@ type HighlightRange = {
   text: string
 }
 
+type SelectedHighlight = {
+  id: string
+  text: string
+  left: number
+  top: number
+  placement: 'above' | 'below'
+}
+
 export default function ExamStatement({
   text,
   className = '',
@@ -38,9 +46,12 @@ export default function ExamStatement({
   readingMode = false,
   toolbar = true,
 }: ExamStatementProps) {
+  const statementRef = useRef<HTMLDivElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const [highlighterActive, setHighlighterActive] = useState(false)
   const [highlights, setHighlights] = useState<HighlightRange[]>([])
+  const [selectedHighlight, setSelectedHighlight] = useState<SelectedHighlight | null>(null)
+  const [confirmClear, setConfirmClear] = useState(false)
   const safeStorageKey = useMemo(() => storageKey ? `pausia:statement-highlights:${storageKey}` : '', [storageKey])
 
   useEffect(() => {
@@ -61,6 +72,14 @@ export default function ExamStatement({
     if (!root) return
     applyHighlights(root, highlights)
   }, [text, format, highlights])
+
+  useEffect(() => {
+    function closeHighlightMenu(event: PointerEvent) {
+      if (!statementRef.current?.contains(event.target as Node)) setSelectedHighlight(null)
+    }
+    document.addEventListener('pointerdown', closeHighlightMenu)
+    return () => document.removeEventListener('pointerdown', closeHighlightMenu)
+  }, [])
 
   function persist(next: HighlightRange[]) {
     if (!safeStorageKey || typeof window === 'undefined') return
@@ -97,6 +116,40 @@ export default function ExamStatement({
   function clearHighlights() {
     setHighlights([])
     persist([])
+    setSelectedHighlight(null)
+    setConfirmClear(false)
+  }
+
+  function removeHighlight(highlightId: string) {
+    setHighlights(current => {
+      const next = current.filter(highlight => highlight.id !== highlightId)
+      persist(next)
+      return next
+    })
+    setSelectedHighlight(null)
+  }
+
+  function selectHighlight(event: ReactMouseEvent<HTMLDivElement>) {
+    const target = event.target as Element
+    const mark = target.closest<HTMLElement>('mark[data-pausia-highlight="true"]')
+    if (!mark || !bodyRef.current?.contains(mark)) {
+      setSelectedHighlight(null)
+      return
+    }
+
+    const highlight = highlights.find(item => item.id === mark.dataset.pausiaHighlightId)
+    const statement = statementRef.current
+    if (!highlight || !statement) return
+    const statementRect = statement.getBoundingClientRect()
+    const markRect = mark.getBoundingClientRect()
+    const placement = markRect.top - statementRect.top > 110 ? 'above' : 'below'
+    setSelectedHighlight({
+      id: highlight.id,
+      text: highlight.text,
+      left: Math.min(Math.max(markRect.left - statementRect.left, 8), Math.max(statementRect.width - 220, 8)),
+      top: placement === 'above' ? markRect.top - statementRect.top - 8 : markRect.bottom - statementRect.top + 8,
+      placement,
+    })
   }
 
   const style = {
@@ -105,7 +158,7 @@ export default function ExamStatement({
   } as CSSProperties
 
   return (
-    <div className={`exam-statement ${readingMode ? 'exam-statement-reading' : ''} ${className}`} style={style}>
+    <div ref={statementRef} className={`exam-statement ${readingMode ? 'exam-statement-reading' : ''} ${className}`} style={style}>
       {toolbar && (
         <div className="exam-statement-toolbar">
           <button
@@ -117,15 +170,33 @@ export default function ExamStatement({
             <Highlighter size={15} />
             {highlighterActive ? 'Marcador activo' : 'Subrayar'}
           </button>
-          <button className="exam-statement-action exam-statement-action-muted" type="button" onClick={clearHighlights} disabled={!highlights.length}>
+          <button className="exam-statement-action exam-statement-action-muted" type="button" onClick={() => setConfirmClear(true)} disabled={!highlights.length}>
             <Eraser size={15} />
-            Borrar
+            Borrar todos
+          </button>
+          <span className="exam-statement-help">Para quitar uno, haz click sobre el subrayado y pulsa "Quitar subrayado".</span>
+        </div>
+      )}
+      {confirmClear && (
+        <div className="exam-statement-confirm" role="dialog" aria-label="Confirmar borrado de subrayados">
+          <span>¿Seguro que quieres borrar todos los subrayados de este enunciado?</span>
+          <button type="button" onClick={clearHighlights}><Trash2 size={14} />Borrar todos</button>
+          <button type="button" onClick={() => setConfirmClear(false)}><X size={14} />Cancelar</button>
+        </div>
+      )}
+      {selectedHighlight && (
+        <div className={`exam-statement-highlight-menu exam-statement-highlight-menu-${selectedHighlight.placement}`} style={{ left: selectedHighlight.left, top: selectedHighlight.top }}>
+          <span title={selectedHighlight.text}>{selectedHighlight.text}</span>
+          <button type="button" onClick={() => removeHighlight(selectedHighlight.id)}>
+            <Eraser size={14} />
+            Quitar subrayado
           </button>
         </div>
       )}
       <div
         ref={bodyRef}
         className={`exam-statement-body ${highlighterActive ? 'exam-statement-body-marking' : ''} ${bodyClassName}`}
+        onClick={selectHighlight}
         onKeyUp={addHighlightFromSelection}
         onMouseUp={addHighlightFromSelection}
       >
@@ -201,6 +272,7 @@ function highlightRange(root: HTMLElement, highlight: HighlightRange) {
     const mark = document.createElement('mark')
     mark.className = 'pausia-highlight'
     mark.dataset.pausiaHighlight = 'true'
+    mark.dataset.pausiaHighlightId = highlight.id
     selected.parentNode?.replaceChild(mark, selected)
     mark.appendChild(selected)
   }

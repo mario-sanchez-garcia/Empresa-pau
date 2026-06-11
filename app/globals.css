@@ -53,6 +53,7 @@ body {
 .exam-statement {
   --statement-accent: #2563eb;
   --statement-soft: #eff6ff;
+  position: relative;
 }
 
 .exam-statement-toolbar {
@@ -96,6 +97,87 @@ body {
 .exam-statement-action:disabled {
   cursor: not-allowed;
   opacity: 0.48;
+}
+
+.exam-statement-help {
+  align-self: center;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.exam-statement-confirm {
+  align-items: center;
+  background: #fffdf5;
+  border: 1px solid #fde68a;
+  border-radius: 0.9rem;
+  color: #854d0e;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  font-weight: 750;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.exam-statement-confirm button,
+.exam-statement-highlight-menu button {
+  align-items: center;
+  border: 1px solid #dbe7fb;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 850;
+  gap: 0.35rem;
+  padding: 0.38rem 0.65rem;
+}
+
+.exam-statement-confirm button:first-of-type {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+.exam-statement-confirm button:last-of-type {
+  background: #ffffff;
+  color: #64748b;
+}
+
+.exam-statement-highlight-menu {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--statement-accent) 24%, #dbe7fb);
+  border-radius: 0.85rem;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+  display: grid;
+  gap: 0.45rem;
+  max-width: min(260px, calc(100vw - 32px));
+  padding: 0.55rem;
+  position: absolute;
+  width: 212px;
+  z-index: 20;
+}
+
+.exam-statement-highlight-menu-above {
+  transform: translateY(-100%);
+}
+
+.exam-statement-highlight-menu span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exam-statement-highlight-menu button {
+  background: var(--statement-soft);
+  border-color: color-mix(in srgb, var(--statement-accent) 28%, #dbe7fb);
+  color: var(--statement-accent);
+  justify-content: center;
+  width: 100%;
 }
 
 .exam-statement-body .math-markdown {
@@ -142,4 +224,16 @@ body {
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   padding: 0.03rem 0.12rem;
+  cursor: pointer;
+}
+
+.exam-statement-body .math-markdown mark.pausia-highlight:hover {
+  outline: 2px solid color-mix(in srgb, var(--statement-accent) 32%, transparent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 640px) {
+  .exam-statement-help {
+    flex-basis: 100%;
+  }
 }

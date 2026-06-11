@@ -3,11 +3,12 @@
 import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { PreguntaCat } from '@/app/data/examenes'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
-import MathMarkdown from '@/components/shared/MathMarkdown'
+import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 
 const CAT_UI = {
   color: '#2563eb',
@@ -95,9 +96,11 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsedCorrection = parseCorrectionJson(data.respuesta || '')
+      const parsedCorrection = parseCorrectionPayload(data.respuesta)
       const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [pregunta.puntuacion]) : null
-      const correccionVisible = correccionJson ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: pregunta.puntuacion }) : sanitizeCorrectionScaleText(data.respuesta || '', pregunta.puntuacion)
+      const correccionVisible = correccionJson
+        ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: pregunta.puntuacion })
+        : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: pregunta.puntuacion }), pregunta.puntuacion)
       setCorreccion(correccionVisible)
 
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
@@ -238,7 +241,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>
             CORRECCIÓN DE PAUSIA
           </div>
-          <MathMarkdown text={correccion} format={false} className="p-6 text-[0.925rem] leading-7" />
+          <CorrectionResultCard correction={correccion} officialMaxScore={pregunta.puntuacion} className="p-6 text-[0.925rem] leading-7" />
         </section>
       )}
     </article>

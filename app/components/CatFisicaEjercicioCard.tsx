@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/fisica_cataluna'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
-import MathMarkdown from '@/components/shared/MathMarkdown'
+import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 
 const UI = {
   color: '#CA8A04',
@@ -120,9 +121,11 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsed = parseCorrectionJson(data.respuesta || '')
+      const parsed = parseCorrectionPayload(data.respuesta)
       const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
-      const visible = normalized ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore }) : data.respuesta || ''
+      const visible = normalized
+        ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
+        : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
       setCorreccion(visible)
 
       const { data: userData } = await supabase.auth.getUser()
@@ -244,7 +247,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>
               CORRECCIÓN DE PAUSIA
             </div>
-            <MathMarkdown text={correccion} format={false} className="p-6 text-[0.925rem] leading-7" />
+            <CorrectionResultCard correction={correccion} officialMaxScore={maxScore} className="p-6 text-[0.925rem] leading-7" />
           </section>
         )}
       </div>

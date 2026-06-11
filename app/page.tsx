@@ -11,7 +11,8 @@ import { examenesLengua } from './data/lengua'
 import { examenesIngles } from './data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { supabase } from './lib/supabase'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from './lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
+import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
@@ -23,6 +24,7 @@ import PhilosophyExamWorkspace from './components/PhilosophyExamWorkspace'
 import { useCCAA } from './hooks/useCCAA'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
+import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import {
   ArrowUpRight,
   Atom,
@@ -1259,11 +1261,11 @@ function cambiarTipo(t: Tipo) {
       setCargando(false)
       return
     }
-    const parsedCorrection = parseCorrectionJson(data.respuesta || '')
+    const parsedCorrection = parseCorrectionPayload(data.respuesta)
     const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
     const correccionVisible = correccionJson
       ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
-      : sanitizeCorrectionScaleText(data.respuesta || '', puntuacionMax)
+      : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: puntuacionMax }), puntuacionMax)
     setCorreccion(correccionVisible)
     const bloqueJson = correccionJson?.desglose_bloques?.[0]
     const partes = !correccionJson ? (data.respuesta || '').match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
@@ -2081,7 +2083,7 @@ function cambiarTipo(t: Tipo) {
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>CORRECCIÓN DE PAUSIA</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #fafafa)' }}>
-                  <MathMarkdown text={correccion} format={false} components={mdComponents} />
+                  <CorrectionResultCard correction={correccion} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
                 </div>
               </div>
             )}
@@ -2275,7 +2277,7 @@ function cambiarTipo(t: Tipo) {
                 {itemSeleccionado.correccion && (
                   <div style={{ padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #dbe7fb', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Corrección de Pausia</div>
-                    <MathMarkdown text={itemSeleccionado.correccion} format={false} components={mdComponents} />
+                    <CorrectionResultCard correction={itemSeleccionado.correccion} officialMaxScore={itemSeleccionado.nota_maxima} components={mdComponents} />
                   </div>
                 )}
               </div>

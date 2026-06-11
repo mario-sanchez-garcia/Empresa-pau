@@ -4,11 +4,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, ChevronRight, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
-import MathMarkdown from '@/components/shared/MathMarkdown'
+import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 
 type Comunidad = 'Madrid' | 'Cataluña'
 type Convocatoria = 'ordinaria' | 'extraordinaria'
@@ -181,9 +182,11 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(getApiErrorMessage(data, 'No se pudo corregir la respuesta.'))
-      const parsed = parseCorrectionJson(data.respuesta || '')
+      const parsed = parseCorrectionPayload(data.respuesta)
       const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
-      const visible = normalized ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore }) : data.respuesta || ''
+      const visible = normalized
+        ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
+        : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
       setCorrection(visible)
 
       const { data: userData } = await supabase.auth.getUser()
@@ -282,7 +285,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
           {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
           <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}><WandSparkles size={17} />{loading ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}</button>
         </section>
-        {correction && <section className="border-t-2" style={{ borderColor: UI.color }}><div className="px-6 py-4 text-sm font-black text-white" style={{ background: UI.color }}>CORRECCIÓN DE PAUSIA</div><MathMarkdown text={correction} format={false} className="p-6 text-sm leading-7" /></section>}
+        {correction && <section className="border-t-2" style={{ borderColor: UI.color }}><div className="px-6 py-4 text-sm font-black text-white" style={{ background: UI.color }}>CORRECCIÓN DE PAUSIA</div><CorrectionResultCard correction={correction} officialMaxScore={maxScore} className="p-6 text-sm leading-7" /></section>}
       </article>
     </div>
   )

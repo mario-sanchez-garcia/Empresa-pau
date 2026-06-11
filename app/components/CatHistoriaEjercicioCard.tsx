@@ -2,10 +2,12 @@
 
 import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
+import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
 type Fuente = {
@@ -84,14 +86,14 @@ function puntuacionEjercicio(ejercicio: any) {
   return Number(ejercicio.opciones?.[0]?.puntos ?? 2.5)
 }
 
-export function RespuestaIA({ contenido }: { contenido: string }) {
+export function RespuestaIA({ contenido, officialMaxScore }: { contenido: string; officialMaxScore?: number }) {
   if (!contenido) return null
   return (
     <section className="overflow-hidden rounded-[22px] border-2" style={{ borderColor: UI.color }}>
       <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: UI.color }}>
         <WandSparkles size={17} /> CORRECCIÓN DE PAUSIA
       </div>
-      <MathMarkdown text={contenido} format={false} className="p-6 text-sm leading-7" />
+      <CorrectionResultCard correction={contenido} officialMaxScore={officialMaxScore} className="p-6 text-sm leading-7" />
     </section>
   )
 }
@@ -173,9 +175,11 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsed = parseCorrectionJson(data.respuesta || '')
+      const parsed = parseCorrectionPayload(data.respuesta)
       const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [puntuacion]) : null
-      const visible = normalized ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: puntuacion }) : sanitizeCorrectionScaleText(data.respuesta || '', puntuacion)
+      const visible = normalized
+        ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: puntuacion })
+        : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: puntuacion }), puntuacion)
       setCorreccion(visible)
 
       const { data: userData } = await supabase.auth.getUser()
@@ -269,7 +273,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
             <WandSparkles size={17} /> {cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
           </button>
         </div>
-        <RespuestaIA contenido={correccion} />
+        <RespuestaIA contenido={correccion} officialMaxScore={puntuacion} />
       </div>
     </article>
   )

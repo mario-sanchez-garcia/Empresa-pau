@@ -6,6 +6,7 @@ import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, ListChec
 import Sidebar from '@/app/components/Sidebar'
 import GradePredictionCard from '@/components/grade/GradePredictionCard'
 import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
+import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 
 const config = {
   bg: '#2563eb',
@@ -224,12 +225,12 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
       let message = 'No se pudo generar el plan. Intenta de nuevo.'
       try {
         const errorBody = await res.json()
-        if (res.status === 429 && errorBody?.error) {
-          message = errorBody.error
+        if (res.status === 429) {
+          message = getApiErrorMessage(errorBody, message)
         } else if (res.status === 401) {
           message = 'Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.'
-        } else if (errorBody?.error) {
-          message = errorBody.error
+        } else {
+          message = getApiErrorMessage(errorBody, message)
         }
       } catch { /* mantener mensaje genérico */ }
       setPlanning([])

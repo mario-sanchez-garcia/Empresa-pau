@@ -13,6 +13,7 @@ import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from './lib/correctionPrompt'
 import { formatExamText } from './lib/mathFormatting'
+import { getApiErrorMessage } from './lib/rateLimitMessages'
 import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
@@ -1221,6 +1222,11 @@ function cambiarTipo(t: Tipo) {
       body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
     })
     const data = await res.json()
+    if (!res.ok) {
+      setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+      setCargando(false)
+      return
+    }
     const parsedCorrection = parseCorrectionJson(data.respuesta || '')
     const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
     const correccionVisible = correccionJson
@@ -1268,7 +1274,7 @@ function cambiarTipo(t: Tipo) {
       })
     })
     const data = await res.json()
-    setMensajes(prev => [...prev, { rol: 'pausia', texto: data.respuesta }])
+    setMensajes(prev => [...prev, { rol: 'pausia', texto: res.ok ? data.respuesta : getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.') }])
     setCargandoChat(false)
   }
 
@@ -1324,6 +1330,11 @@ function cambiarTipo(t: Tipo) {
       body: JSON.stringify({ pregunta: prompt })
     })
     const data = await res.json()
+    if (!res.ok) {
+      setPlanIA(getApiErrorMessage(data, 'No se pudo generar el plan. Intenta de nuevo.'))
+      setCargandoPlan(false)
+      return
+    }
     setPlanIA(limpiarPlanGenerado(data.respuesta || ''))
     setCargandoPlan(false)
   }

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { isInternalUser } from '@/app/lib/internalUsers'
+import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     if (!rateLimit.allowed) {
       return rateLimitResponse(
-        'Ya has generado un plan de estudio esta semana. Podrás generar otro más adelante.',
+        'planning_generation',
         rateLimit
       )
     }
@@ -108,15 +109,9 @@ function getBearerToken(request: NextRequest) {
   return match?.[1] ?? null
 }
 
-function rateLimitResponse(message: string, result: { limit: number; count: number; retryAfterSeconds?: number }) {
+function rateLimitResponse(action: RateLimitAction, result: { limit: number; count: number; retryAfterSeconds?: number }) {
   return NextResponse.json(
-    {
-      error: message,
-      code: 'RATE_LIMIT_EXCEEDED',
-      limit: result.limit,
-      used: result.count,
-      retryAfterSeconds: result.retryAfterSeconds ?? null
-    },
+    createRateLimitPayload(action, result),
     {
       status: 429,
       headers: result.retryAfterSeconds ? { 'Retry-After': String(result.retryAfterSeconds) } : undefined

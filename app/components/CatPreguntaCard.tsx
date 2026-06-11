@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { PreguntaCat } from '@/app/data/examenes'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
@@ -89,6 +90,10 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
       })
       const data = await res.json()
+      if (!res.ok) {
+        setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+        return
+      }
       const parsedCorrection = parseCorrectionJson(data.respuesta || '')
       const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [pregunta.puntuacion]) : null
       const correccionVisible = correccionJson ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: pregunta.puntuacion }) : sanitizeCorrectionScaleText(data.respuesta || '', pregunta.puntuacion)

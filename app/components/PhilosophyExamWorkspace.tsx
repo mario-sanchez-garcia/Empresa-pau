@@ -5,6 +5,7 @@ import { Camera, ChevronRight, PenLine, UploadCloud, WandSparkles, X } from 'luc
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
@@ -178,7 +179,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
         body: JSON.stringify({ pregunta: prompt, imagen: mode === 'image' ? image : null, imagenTipo: mode === 'image' ? imageType : null })
       })
       const data = await response.json()
-      if (!response.ok) throw new Error(data?.error || 'No se pudo corregir la respuesta.')
+      if (!response.ok) throw new Error(getApiErrorMessage(data, 'No se pudo corregir la respuesta.'))
       const parsed = parseCorrectionJson(data.respuesta || '')
       const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
       const visible = normalized ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore }) : data.respuesta || ''

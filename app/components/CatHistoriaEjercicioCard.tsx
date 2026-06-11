@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
@@ -158,6 +159,10 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
         }),
       })
       const data = await response.json()
+      if (!response.ok) {
+        setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+        return
+      }
       const parsed = parseCorrectionJson(data.respuesta || '')
       const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [puntuacion]) : null
       const visible = normalized ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: puntuacion }) : sanitizeCorrectionScaleText(data.respuesta || '', puntuacion)

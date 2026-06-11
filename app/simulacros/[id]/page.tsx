@@ -8,6 +8,7 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
 import MathMarkdown from '@/components/shared/MathMarkdown'
+import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
 
 const TOTAL_SECONDS = 90 * 60
 
@@ -158,7 +159,13 @@ export default function SimulacroActivoPage() {
       const result = await safeJson(res)
 
       if (!res.ok || result?.correction_error) {
-        await supabase.from('historial_simulacros').update({
+        const updatePayload = result?.code === RATE_LIMIT_CODE
+          ? {
+              tiempo_empleado: elapsedMinutes,
+              respuestas_parciales: answersSnapshot,
+              updated_at: new Date().toISOString()
+            }
+          : {
           resultado_json: result ?? {
             correction_error: true,
             estado_correccion: 'error',
@@ -167,8 +174,9 @@ export default function SimulacroActivoPage() {
           tiempo_empleado: elapsedMinutes,
           respuestas_parciales: answersSnapshot,
           updated_at: new Date().toISOString()
-        }).eq('id', record.id)
-        setSubmitError(result?.mensaje_usuario ?? result?.feedback_general ?? 'No hemos podido corregir este simulacro. Inténtalo de nuevo; tus respuestas están guardadas.')
+        }
+        await supabase.from('historial_simulacros').update(updatePayload).eq('id', record.id)
+        setSubmitError(getApiErrorMessage(result, result?.mensaje_usuario ?? result?.feedback_general ?? 'No hemos podido corregir este simulacro. Inténtalo de nuevo; tus respuestas están guardadas.'))
         setSubmitting(false)
         return
       }

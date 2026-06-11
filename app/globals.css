@@ -25,3 +25,110 @@ body {
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Arial, Helvetica, sans-serif;
 }
+
+.math-markdown {
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.math-markdown .katex {
+  font-size: 1.03em;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.math-markdown .katex-display {
+  margin: 1rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.45rem 0.2rem;
+}
+
+.math-markdown .katex-display > .katex {
+  display: inline-block;
+  max-width: none;
+}
+
+.exam-statement {
+  --statement-accent: #2563eb;
+  --statement-soft: #eff6ff;
+}
+
+.exam-statement-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.exam-statement-action {
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff, var(--statement-soft));
+  border: 1px solid color-mix(in srgb, var(--statement-accent) 22%, #dbe7fb);
+  border-radius: 999px;
+  color: var(--statement-accent);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 850;
+  gap: 0.42rem;
+  padding: 0.45rem 0.8rem;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.exam-statement-action:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--statement-accent), color-mix(in srgb, var(--statement-accent) 66%, #ffffff));
+  border-color: var(--statement-accent);
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--statement-accent) 20%, transparent);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.exam-statement-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.exam-statement-body .math-markdown {
+  color: #253044;
+  font-size: 1.01rem;
+  line-height: 1.92;
+}
+
+.exam-statement-reading .exam-statement-body .math-markdown {
+  font-size: 1.055rem;
+  line-height: 2.02;
+}
+
+.exam-statement-body .math-markdown p {
+  margin: 0.78rem 0;
+}
+
+.exam-statement-body .math-markdown li {
+  margin: 0.48rem 0;
+}
+
+.exam-statement-body .math-markdown p:has(> strong:first-child) {
+  background: linear-gradient(135deg, #ffffff, color-mix(in srgb, var(--statement-soft) 74%, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--statement-accent) 16%, #e5edf9);
+  border-left: 4px solid color-mix(in srgb, var(--statement-accent) 68%, #ffffff);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.045);
+  margin: 1rem 0;
+  padding: 0.78rem 0.95rem;
+}
+
+.exam-statement-body .math-markdown strong {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.exam-statement-body .math-markdown mark.pausia-highlight {
+  background: linear-gradient(180deg, transparent 8%, rgba(254, 240, 138, 0.72) 8%, rgba(254, 240, 138, 0.72) 88%, transparent 88%);
+  border-bottom: 1px solid rgba(202, 138, 4, 0.42);
+  border-radius: 0.28rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.03rem 0.12rem;
+}

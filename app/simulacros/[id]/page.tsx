@@ -7,8 +7,8 @@ import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
-import MathMarkdown from '@/components/shared/MathMarkdown'
 import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
+import ExamStatement from '@/components/shared/ExamStatement'
 
 const TOTAL_SECONDS = 90 * 60
 
@@ -254,17 +254,34 @@ export default function SimulacroActivoPage() {
                 {(record.asignatura === 'lengua' || record.asignatura === 'ingles') && block.textoFuente && (
                   <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
                     <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>{record.asignatura === 'ingles' ? 'Texto oficial' : 'Texto fuente oficial'}</div>
-                    <MathMarkdown text={block.textoFuente} />
+                    <ExamStatement
+                      text={block.textoFuente}
+                      storageKey={`simulacro:${record.id}:bloque:${block.id}:fuente`}
+                      accentColor={cfg.color}
+                      softColor={cfg.light}
+                      readingMode
+                    />
                   </div>
                 )}
                 <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
                   <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Enunciado oficial</div>
-                  <MathMarkdown text={block.enunciado} />
+                  <ExamStatement
+                    text={block.enunciado}
+                    storageKey={`simulacro:${record.id}:bloque:${block.id}:enunciado`}
+                    accentColor={cfg.color}
+                    softColor={cfg.light}
+                    readingMode={record.asignatura === 'lengua' || record.asignatura === 'ingles'}
+                  />
                 </div>
                 {record.asignatura !== 'lengua' && record.asignatura !== 'ingles' && block.textoFuente && (
                   <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
                     <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Texto fuente oficial</div>
-                    <MathMarkdown text={block.textoFuente} />
+                    <ExamStatement
+                      text={block.textoFuente}
+                      storageKey={`simulacro:${record.id}:bloque:${block.id}:fuente`}
+                      accentColor={cfg.color}
+                      softColor={cfg.light}
+                    />
                   </div>
                 )}
               </div>

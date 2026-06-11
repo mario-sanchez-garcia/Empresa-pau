@@ -21,6 +21,7 @@ import CatFisicaEjercicioCard from './components/CatFisicaEjercicioCard'
 import CatEjercicioCard, { type CatEjercicioView } from './components/CatEjercicioCard'
 import PhilosophyExamWorkspace from './components/PhilosophyExamWorkspace'
 import { useCCAA } from './hooks/useCCAA'
+import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import {
   ArrowUpRight,
@@ -53,12 +54,12 @@ import {
 } from 'lucide-react'
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
-  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#6d28d9', light: '#f5f3ff', accent: '#a78bfa', soft: '#ede9fe' },
+  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#7C3AED', light: '#F3E8FF', accent: '#A78BFA', soft: '#ede9fe' },
   quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
   biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
   lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', accent: '#fb7185', soft: '#ffe4e6' },
   historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', soft: '#dcfce7' },
-  historia_filosofia: { label: 'Historia de la Filosofía', short: 'Filosofía', icon: LibraryBig, color: '#0f766e', light: '#f0fdfa', accent: '#2dd4bf', soft: '#ccfbf1' },
+  historia_filosofia: { label: 'Historia de la Filosofía', short: 'Filosofía', icon: BrainCircuit, color: '#64748B', light: '#F8FAFC', accent: '#94A3B8', soft: '#E2E8F0' },
   ingles: { label: 'Inglés', short: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', accent: '#06B6D4', soft: '#CFFAFE' }
 }
 
@@ -116,7 +117,7 @@ const SUBJECT_CARDS = {
   historia_filosofia: {
     title: 'Historia de la Filosofía',
     subtitle: 'Textos, conceptos y argumentación filosófica',
-    icon: LibraryBig,
+    icon: BrainCircuit,
     kicker: 'Modo pensamiento'
   },
   ingles: {
@@ -1062,6 +1063,18 @@ const preguntaActivaKey = [
   opcionMostrada
 ].join('-')
 
+const preguntaActivaStorageId = [
+  ccaa,
+  asignatura,
+  (examenActivo as any)?.año ?? anioSeleccionado ?? 'sin-anio',
+  tipo,
+  (preguntaActiva as any)?.id ?? bloqueActivoLabel ?? 'pregunta',
+  opcionMostrada,
+].filter(Boolean).join(':')
+
+const enunciadoStorageKey = `principal:${preguntaActivaStorageId}:enunciado`
+const fuenteStorageKey = `principal:${preguntaActivaStorageId}:fuente`
+
 function puntosBloqueFisica(tipoBloque: string) {
   return (
     (examen as any)?.preguntas?.find(
@@ -1911,25 +1924,43 @@ function cambiarTipo(t: Tipo) {
                   {asignatura === 'ingles' && (
                     <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)', marginBottom: '18px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Preguntas del apartado</div>
-                      <div style={{ fontSize: '1.02rem', lineHeight: '1.85', color: '#1f2937' }}>
-                        <MathMarkdown key={`${preguntaActivaKey}-enunciado`} text={enunciadoActivo} format={false} components={mdComponents} />
-                      </div>
+                      <ExamStatement
+                        key={`${preguntaActivaKey}-enunciado`}
+                        text={enunciadoActivo}
+                        format={false}
+                        components={mdComponents}
+                        storageKey={enunciadoStorageKey}
+                        accentColor={cfg.color}
+                        softColor={cfg.light}
+                        readingMode
+                      />
                     </div>
                   )}
                   {asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto oficial del examen</div>
-                      <div style={{ color: WARM.ink, fontSize: '14px', lineHeight: 1.85 }}>
-                        <MathMarkdown key={`${preguntaActivaKey}-texto`} text={(preguntaActiva as any).texto_fuente} components={mdComponents} />
-                      </div>
+                      <ExamStatement
+                        key={`${preguntaActivaKey}-texto`}
+                        text={(preguntaActiva as any).texto_fuente}
+                        components={mdComponents}
+                        storageKey={fuenteStorageKey}
+                        accentColor={cfg.color}
+                        softColor={cfg.light}
+                        readingMode
+                      />
                     </div>
                   )}
                   {(asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && (
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
-                      <div style={{ color: WARM.ink, fontSize: '14px', lineHeight: 1.85 }}>
-                        <MathMarkdown text={(preguntaActiva as any).texto_fuente} components={mdComponents} />
-                      </div>
+                      <ExamStatement
+                        text={(preguntaActiva as any).texto_fuente}
+                        components={mdComponents}
+                        storageKey={fuenteStorageKey}
+                        accentColor={cfg.color}
+                        softColor={cfg.light}
+                        readingMode={asignatura === 'lengua'}
+                      />
                     </div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).imagen_url && (
@@ -1977,9 +2008,15 @@ function cambiarTipo(t: Tipo) {
                   {asignatura !== 'ingles' && (
                     <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado oficial</div>
-                      <div style={{ fontSize: '1.02rem', lineHeight: '1.85', color: '#1f2937' }}>
-                        <MathMarkdown text={enunciadoActivo} format={false} components={mdComponents} />
-                      </div>
+                      <ExamStatement
+                        text={enunciadoActivo}
+                        format={false}
+                        components={mdComponents}
+                        storageKey={enunciadoStorageKey}
+                        accentColor={cfg.color}
+                        softColor={cfg.light}
+                        readingMode={asignatura === 'lengua'}
+                      />
                     </div>
                   )}
                 </div>
@@ -2206,9 +2243,14 @@ function cambiarTipo(t: Tipo) {
                 {itemSeleccionado.enunciado && (
                   <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.blue, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Enunciado oficial</div>
-                    <div style={{ fontSize: '0.98rem', lineHeight: 1.85 }}>
-                      <MathMarkdown text={itemSeleccionado.enunciado} components={mdComponents} />
-                    </div>
+                    <ExamStatement
+                      text={itemSeleccionado.enunciado}
+                      components={mdComponents}
+                      storageKey={`historial:${itemSeleccionado.id ?? itemSeleccionado.created_at ?? 'item'}:enunciado`}
+                      accentColor={(ASIGNATURAS[itemSeleccionado.asignatura as Asignatura] ?? ASIGNATURAS.historia).color}
+                      softColor={(ASIGNATURAS[itemSeleccionado.asignatura as Asignatura] ?? ASIGNATURAS.historia).light}
+                      readingMode={itemSeleccionado.asignatura === 'lengua'}
+                    />
                   </div>
                 )}
                 {itemSeleccionado.respuesta && (

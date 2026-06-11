@@ -25,7 +25,7 @@ const config = {
 
 const SUBJECT_COLORS = {
   mates: { color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
-  fisica: { color: '#6d28d9', light: '#f5f3ff', accent: '#a78bfa', border: '#ede9fe' },
+  fisica: { color: '#7C3AED', light: '#F3E8FF', accent: '#A78BFA', border: '#ede9fe' },
   historia: { color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', border: '#dcfce7' },
   quimica: { color: '#ea580c', light: '#fff7ed', accent: '#fb923c', border: '#ffedd5' },
   lengua: { color: '#4f46e5', light: '#eef2ff', accent: '#fb7185', border: '#ffe4e6' },

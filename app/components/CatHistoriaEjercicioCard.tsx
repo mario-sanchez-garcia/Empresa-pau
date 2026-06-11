@@ -5,6 +5,7 @@ import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
 type Fuente = {
@@ -25,7 +26,7 @@ const UI = {
   border: '#dcfce7',
 }
 
-export function RenderFuente({ fuente }: { fuente?: Fuente }) {
+export function RenderFuente({ fuente, storageKeyPrefix = 'cat-historia:fuente' }: { fuente?: Fuente; storageKeyPrefix?: string }) {
   if (!fuente) return null
   const imagenes = fuente.imagenes_url?.length ? fuente.imagenes_url : fuente.imagen_url ? [fuente.imagen_url] : []
 
@@ -37,7 +38,16 @@ export function RenderFuente({ fuente }: { fuente?: Fuente }) {
           {imagenes.map((src, index) => <img key={`${src}-${index}`} src={src} alt={`${fuente.titulo ?? 'Fuente histórica'} ${index + 1}`} className="max-h-[520px] w-full rounded-2xl border border-slate-200 object-contain" />)}
         </div>
       )}
-      {fuente.texto && <MathMarkdown text={fuente.texto} className="mt-4 text-sm leading-7 text-slate-700" />}
+      {fuente.texto && (
+        <ExamStatement
+          className="mt-4"
+          text={fuente.texto}
+          storageKey={`${storageKeyPrefix}:texto`}
+          accentColor={UI.color}
+          softColor={UI.light}
+          readingMode
+        />
+      )}
       {fuente.tabla && (
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
           <table className="w-full border-collapse text-left text-sm">
@@ -203,14 +213,28 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
         <div className="text-right"><span className="text-2xl font-black" style={{ color: UI.color }}>{puntuacion}</span><span className="ml-1 text-sm font-bold" style={{ color: UI.accent }}>pts</span></div>
       </header>
       <div className="grid gap-5 p-6">
-        <RenderFuente fuente={ejercicio.fuente} />
+        <RenderFuente fuente={ejercicio.fuente} storageKeyPrefix={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:fuente`} />
         {ejercicio.instrucciones && (
           <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}>
-            <MathMarkdown text={ejercicio.instrucciones} />
+            <ExamStatement
+              text={ejercicio.instrucciones}
+              storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:instrucciones`}
+              accentColor={UI.color}
+              softColor={UI.light}
+            />
           </div>
         )}
         <div className="grid gap-3">
-          {preguntas.map((pregunta: string, index: number) => <MathMarkdown key={index} text={pregunta} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />)}
+          {preguntas.map((pregunta: string, index: number) => (
+            <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
+              <ExamStatement
+                text={pregunta}
+                storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:pregunta:${index}`}
+                accentColor={UI.color}
+                softColor={UI.light}
+              />
+            </div>
+          ))}
         </div>
         <div className="border-t pt-5" style={{ borderColor: UI.border }}>
           <label className="mb-3 block text-xs font-black uppercase tracking-[0.08em] text-slate-500">Tu respuesta</label>

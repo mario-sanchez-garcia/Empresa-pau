@@ -48,13 +48,13 @@ const NAV_ITEMS = [
 
 const SUBJECTS = [
   { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
-  { id: 'fisica', label: 'Física', icon: Atom, color: '#6d28d9', light: '#f5f3ff', border: '#ede9fe' },
+  { id: 'fisica', label: 'Física', icon: Atom, color: '#7C3AED', light: '#F3E8FF', border: '#ede9fe' },
   { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
   { id: 'biologia', label: 'Biología', icon: Dna, color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
   { id: 'ingles', label: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', border: '#A5F3FC' },
   { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', border: '#ffe4e6' },
   { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' },
-  { id: 'historia_filosofia', label: 'Historia de la Filosofía', icon: BookOpen, color: '#0f766e', light: '#f0fdfa', border: '#ccfbf1' }
+  { id: 'historia_filosofia', label: 'Historia de la Filosofía', icon: BrainCircuit, color: '#64748B', light: '#F8FAFC', border: '#E2E8F0' }
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {

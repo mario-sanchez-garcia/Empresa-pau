@@ -6,6 +6,7 @@ import type { PreguntaCat } from '@/app/data/examenes'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
 const CAT_UI = {
@@ -130,6 +131,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   }
 
   const sinRespuesta = modo === 'texto' ? !respuesta.trim() : !imagen
+  const enunciadoCompleto = [pregunta.enunciado, ...pregunta.apartados].filter(Boolean).join('\n\n')
 
   return (
     <article className="mb-6 overflow-hidden rounded-[24px] border bg-white" style={{ borderColor: CAT_UI.border, boxShadow: CAT_UI.shadow }}>
@@ -162,17 +164,13 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
       <div className="p-6">
         <div className="rounded-[22px] border bg-white px-5 py-4 shadow-[0_14px_34px_rgba(37,99,235,0.07)]" style={{ borderColor: '#e5edf9' }}>
           <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: CAT_UI.color }}>Enunciado oficial</div>
-          <MathMarkdown text={pregunta.enunciado} className="text-[1.02rem] leading-8 text-slate-800" />
+          <ExamStatement
+            text={enunciadoCompleto}
+            storageKey={`cat-mates:${pregunta.id}:enunciado`}
+            accentColor={CAT_UI.color}
+            softColor={CAT_UI.light}
+          />
         </div>
-        {pregunta.apartados.length > 0 && (
-          <ul className="mt-5 grid gap-2">
-            {pregunta.apartados.map((apartado, index) => (
-              <li key={index} className="rounded-2xl border px-4 py-3 text-sm leading-6 text-slate-700" style={{ borderColor: '#e5edf9', backgroundColor: CAT_UI.field }}>
-                <MathMarkdown text={apartado} className="text-sm leading-6" />
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       <section className="border-t p-6" style={{ borderColor: CAT_UI.border }}>

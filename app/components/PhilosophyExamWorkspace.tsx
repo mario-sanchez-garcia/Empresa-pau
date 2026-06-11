@@ -7,16 +7,17 @@ import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
 type Comunidad = 'Madrid' | 'Cataluña'
 type Convocatoria = 'ordinaria' | 'extraordinaria'
 
 const UI = {
-  color: '#0f766e',
-  accent: '#2dd4bf',
-  light: '#f0fdfa',
-  border: '#ccfbf1'
+  color: '#64748B',
+  accent: '#94A3B8',
+  light: '#F8FAFC',
+  border: '#E2E8F0'
 }
 
 function titleCase(value: string) {
@@ -232,7 +233,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
         </div>
       </section>
 
-      <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(15,118,110,0.08)]" style={{ borderColor: UI.border }}>
+      <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(100,116,139,0.10)]" style={{ borderColor: UI.border }}>
         <header className="flex flex-wrap items-start justify-between gap-4 border-b px-6 py-5" style={{ background: UI.light, borderColor: UI.border }}>
           <div>
             <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>{ccaa} · {selectedExam.anio} · {titleCase(convocatoria)}{variantLabel ? ` · ${variantLabel}` : ''}</div>
@@ -241,10 +242,26 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
           <div className="text-2xl font-black" style={{ color: UI.color }}>{maxScore} <span className="text-sm">pts</span></div>
         </header>
         <div className="grid gap-5 p-6">
-          {sourceText && <div className="rounded-2xl border bg-slate-50 p-5" style={{ borderColor: UI.border }}><MathMarkdown text={sourceText} /></div>}
+          {sourceText && (
+            <div className="rounded-2xl border bg-slate-50 p-5" style={{ borderColor: UI.border }}>
+              <ExamStatement
+                text={sourceText}
+                storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:fuente`}
+                accentColor={UI.color}
+                softColor={UI.light}
+                readingMode
+              />
+            </div>
+          )}
           <div>
             <div className="mb-2 text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
-            <MathMarkdown text={selectedQuestion?.enunciado ?? ''} className="text-[1rem] leading-8 text-slate-800" />
+            <ExamStatement
+              text={selectedQuestion?.enunciado ?? ''}
+              storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:enunciado`}
+              accentColor={UI.color}
+              softColor={UI.light}
+              readingMode
+            />
             {wordLimit && <div className="mt-3 text-xs font-bold text-slate-500">Límite: {wordLimit}</div>}
           </div>
         </div>

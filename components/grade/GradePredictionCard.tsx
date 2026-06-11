@@ -15,7 +15,7 @@ const SUBJECT_STYLES: Record<string, { color: string; light: string; border: str
   lengua: { color: '#4f46e5', light: '#eef2ff', border: '#e0e7ff' },
   historia: { color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' },
   ingles: { color: '#0284c7', light: '#f0f9ff', border: '#e0f2fe' },
-  historia_filosofia: { color: '#0f766e', light: '#f0fdfa', border: '#ccfbf1' }
+  historia_filosofia: { color: '#64748B', light: '#F8FAFC', border: '#E2E8F0' }
 }
 
 export default function GradePredictionCard({ predictions, loading, error }: GradePredictionCardProps) {

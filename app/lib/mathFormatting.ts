@@ -142,7 +142,7 @@ function normalizePdfGlyphs(text: string) {
 function normalizeSoftLineBreaks(text: string) {
   return text
     .replace(/([A-Za-z\u00c0-\u017f])-\s*\n\s*([A-Za-z\u00c0-\u017f])/g, '$1$2')
-    .replace(/([^\n])\n(?!\n|[a-d]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[.)]|[-\u2022]|\$\$)/gi, '$1 ')
+    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[.)]|[-\u2022]|\$\$)/gi, '$1 ')
 }
 
 function formatBrokenMathBlocks(text: string) {
@@ -234,14 +234,24 @@ function formatChemicalNotation(text: string) {
 
 function formatExamStructure(text: string) {
   return text
-    .replace(/(^|\n)\s*((?:[1-9]\d*)\.(?:[1-9]\d*)\.\s*(?:\([^)]+puntos?\))?)/gi, '$1**$2**')
-    .replace(/(^|\n)\s*(([A-Z])\.(?:[1-9]\d*)\.\s*(?:\([^)]+puntos?\))?)/g, '$1**$2**')
-    .replace(/(^|\n)\s*([a-d]\))/gi, '$1**$2**')
-    .replace(/(^|\n)\s*([A-D]\.[1-9]\.)/g, '$1**$2**')
+    .replace(/(^|[\n:;.!?])\s*([a-e]\))\s*(\(\s*\d+(?:[,.]\d+)?\s*puntos?\s*\))?/gim,
+      (_, prefix, marker, score) => formatSectionBreak(prefix, marker, score))
+    .replace(/(^|[\n:;])\s*((?:[1-9]\d*)\.(?:[1-9]\d*)\.)\s*(\(\s*\d+(?:[,.]\d+)?\s*puntos?\s*\))?/gim,
+      (_, prefix, marker, score) => formatSectionBreak(prefix, marker, score))
+    .replace(/(^|[\n:;])\s*([A-D]\.(?:[1-9]\d*)\.)\s*(\(\s*\d+(?:[,.]\d+)?\s*puntos?\s*\))?/gm,
+      (_, prefix, marker, score) => formatSectionBreak(prefix, marker, score))
     .replace(/(^|\n)\s*((?:Datos?|Dato)[.:])/gi, '$1**$2**')
     .replace(/(^|\n)\s*([ivx]+\))/gi, '$1**$2**')
-    .replace(/(\*\*(?:[1-9]\d*)\.(?:[1-9]\d*)\.\*\*)\s*(\([^)]+puntos?\))/gi, '$1 **$2**')
-    .replace(/(\*\*[A-D]\.(?:[1-9]\d*)\.\*\*)\s*(\([^)]+puntos?\))/g, '$1 **$2**')
+    .replace(/\b(Desarrolle el tema:|Tema:|Conceptos?:|Defina:|Definiciones?:)/gi, '**$1**')
+    .replace(/(\*\*)?(\(\s*\d+(?:[,.]\d+)?\s*puntos?\s*\))(\*\*)?/gi,
+      (match, before, score, after) => before && after ? match : `**${score}**`)
+    .replace(/\n{3,}/g, '\n\n')
+}
+
+function formatSectionBreak(prefix: string, marker: string, score?: string) {
+  const intro = !prefix ? '' : prefix === '\n' ? '\n\n' : `${prefix}\n\n`
+  const cleanScore = score?.trim()
+  return `${intro}**${marker.trim()}**${cleanScore ? ` **${cleanScore}**` : ''}\n`
 }
 
 function toLatexExpression(expression: string) {

@@ -10,6 +10,10 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export const maxDuration = 60
 
+function examSystemLabel(comunidad: string) {
+  return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
+}
+
 const SUBJECT_LABELS: Record<string, string> = {
   mates: 'Matemáticas II',
   fisica: 'Física',
@@ -178,7 +182,7 @@ export async function POST(request: NextRequest) {
       message = await client.messages.create({
         model,
         max_tokens: 6000,
-        system: 'Eres Pausia, corrector experto de EvAU Madrid. Devuelve exclusivamente JSON válido cuando el usuario lo pida. No añadas markdown ni texto fuera del JSON.',
+        system: `Eres Pausia, corrector experto de ${examSystemLabel(correctionCommunity)}. Devuelve exclusivamente JSON válido cuando el usuario lo pida. No añadas markdown ni texto fuera del JSON.`,
         messages: [{ role: 'user', content }]
       })
     } catch (error) {

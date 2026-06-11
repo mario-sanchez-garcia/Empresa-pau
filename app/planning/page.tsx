@@ -7,6 +7,7 @@ import Sidebar from '@/app/components/Sidebar'
 import GradePredictionCard from '@/components/grade/GradePredictionCard'
 import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { useCCAA } from '@/app/hooks/useCCAA'
 
 const config = {
   bg: '#2563eb',
@@ -82,6 +83,7 @@ export default function Planning() {
   const [gradePredictionLoading, setGradePredictionLoading] = useState(false)
   const [gradePredictionError, setGradePredictionError] = useState('')
   const router = useRouter()
+  const { ccaa } = useCCAA()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -201,11 +203,13 @@ export default function Planning() {
       return
     }
 
+    const examLabel = ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
+
     const res = await fetch('/api/planning', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({
-        prompt: `Eres un planificador de estudio para la EBAU de Madrid.
+        prompt: `Eres un planificador de estudio para ${examLabel}.
 El estudiante tiene ${diasRestantes} días hasta el examen.
 Puede estudiar ${p.horas_dia} horas al día.
 Su nota objetivo es ${p.nota_objetivo} sobre 14.

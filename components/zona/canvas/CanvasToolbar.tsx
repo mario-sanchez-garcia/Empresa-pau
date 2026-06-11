@@ -2,10 +2,10 @@ import {
   Circle,
   Download,
   Eraser,
+  FunctionSquare,
   Image as ImageIcon,
   Minus,
   MousePointer2,
-  Move,
   Network,
   PenLine,
   Plus,
@@ -17,8 +17,6 @@ import {
   Trash2,
   Type,
   Undo2,
-  ZoomIn,
-  ZoomOut
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { CanvasTool, ZonaCanvas } from '@/components/zona/types'
@@ -34,6 +32,7 @@ export const TOOL_ITEMS: Array<{ id: CanvasTool; label: string; icon: typeof Mou
   { id: 'eraser', label: 'Borrar', icon: Eraser },
   { id: 'text', label: 'Texto', icon: Type },
   { id: 'sticky', label: 'Nota', icon: StickyNote },
+  { id: 'formula', label: 'Formula', icon: FunctionSquare },
   { id: 'rect', label: 'Rectangulo', icon: Shapes },
   { id: 'circle', label: 'Circulo', icon: Circle },
   { id: 'triangle', label: 'Triangulo', icon: Shapes },
@@ -116,10 +115,6 @@ export function CanvasToolbar(props: CanvasToolbarProps) {
         <input className="min-w-36 flex-1 rounded-xl border border-[#dbe7fb] bg-white px-3 py-2 text-sm font-black text-[#172033] outline-none transition focus:border-blue-300 focus:shadow-[0_0_0_4px_rgba(96,165,250,0.14)]" value={props.canvasName} onChange={event => props.renameCanvas(event.target.value)} />
         <ToolbarButton onClick={props.undo} disabled={!props.pastCount}><Undo2 size={16} /></ToolbarButton>
         <ToolbarButton onClick={props.redo} disabled={!props.futureCount}><Redo2 size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => props.setZoomValue(props.zoom - 0.1)}><ZoomOut size={16} /></ToolbarButton>
-        <span className="min-w-14 text-center text-sm font-black text-slate-500">{Math.round(props.zoom * 100)}%</span>
-        <ToolbarButton onClick={() => props.setZoomValue(props.zoom + 0.1)}><ZoomIn size={16} /></ToolbarButton>
-        <ToolbarButton onClick={props.fitToScreen}><Move size={16} /></ToolbarButton>
         <button type="button" onClick={props.exportPng} className="flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-sm font-black text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)] transition hover:-translate-y-0.5"><Download size={16} />PNG</button>
         <div className="ml-auto flex items-center gap-1 text-xs font-black text-slate-500"><Save size={14} />{props.saveStatus}</div>
       </div>

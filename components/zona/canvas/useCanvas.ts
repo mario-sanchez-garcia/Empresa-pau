@@ -3,7 +3,6 @@ import type {
   ChangeEvent,
   DragEvent as ReactDragEvent,
   PointerEvent as ReactPointerEvent,
-  WheelEvent as ReactWheelEvent
 } from 'react'
 import { supabase } from '@/app/lib/supabase'
 import type { CanvasElement, CanvasTool, ZonaCanvas, ZonaCanvasData } from '@/components/zona/types'
@@ -51,6 +50,7 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   const [arrowHead, setArrowHead] = useState<'arrow' | 'dot' | 'none'>('arrow')
   const [past, setPast] = useState<CanvasElement[][]>([])
   const [future, setFuture] = useState<CanvasElement[][]>([])
+  const [isPanning, setIsPanning] = useState(false)
 
   const dragRef = useRef<DragState | null>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -143,6 +143,23 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   }, [activeId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault()
+      if (event.ctrlKey || event.metaKey) {
+        const factor = Math.exp(-event.deltaY * 0.002)
+        setZoomValue(zoomRef.current * factor, { x: event.clientX, y: event.clientY })
+        return
+      }
+      setPan(current => ({ x: current.x - event.deltaX, y: current.y - event.deltaY }))
+      markDirty()
+    }
+    viewport.addEventListener('wheel', wheel, { passive: false })
+    return () => viewport.removeEventListener('wheel', wheel)
+  }, [markDirty]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     const down = (event: KeyboardEvent) => handleKey(event)
     const up = (event: KeyboardEvent) => { if (event.code === 'Space') spaceDownRef.current = false }
     window.addEventListener('keydown', down)
@@ -164,15 +181,6 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     applyElements(next, track)
   }
 
-  function onWheel(event: ReactWheelEvent<HTMLDivElement>) {
-    event.preventDefault()
-    if (event.ctrlKey || event.metaKey) setZoomValue(zoomRef.current + (event.deltaY > 0 ? -0.08 : 0.08), { x: event.clientX, y: event.clientY })
-    else {
-      setPan(prev => ({ x: prev.x - event.deltaX, y: prev.y - event.deltaY }))
-      markDirty()
-    }
-  }
-
   function onStagePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     const point = screenToWorld(event.clientX, event.clientY)
     pendingImagePoint.current = point
@@ -181,13 +189,17 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     if (tool === 'eraser') return startEraser(point)
     if (tool === 'text') return addElement(createText(point, { color: textColor, fontSize, bold: textBold, italic: textItalic }))
     if (tool === 'sticky') return addElement(createSticky(point, stickyColor))
+    if (tool === 'formula') return addElement(createFormula(point))
     if (['rect', 'circle', 'triangle', 'arrow'].includes(tool)) return addElement(createShape(point, tool, fillColor, borderColor))
     if (tool === 'mind') return addElement(createMind(point, 'Idea central'))
     if (tool === 'table') return addElement(createTable(point))
     if (tool === 'image') return fileRef.current?.click()
     setSelectedIds([])
-    setSelectionBox({ x: point.x, y: point.y, width: 0, height: 0 })
-    startDrag({ type: 'select', start: point })
+    if (event.shiftKey) {
+      setSelectionBox({ x: point.x, y: point.y, width: 0, height: 0 })
+      return startDrag({ type: 'select', start: point })
+    }
+    startDrag({ type: 'pan', start: { x: event.clientX, y: event.clientY } })
   }
 
   function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -195,6 +207,7 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     if (!drag) return
     const point = screenToWorld(event.clientX, event.clientY)
     if (drag.type === 'pan') {
+      setIsPanning(true)
       setPan(prev => ({ x: prev.x + event.clientX - drag.start.x, y: prev.y + event.clientY - drag.start.y }))
       dragRef.current = { ...drag, start: { x: event.clientX, y: event.clientY } }
       return markDirty()
@@ -224,12 +237,14 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
       setFuture([])
     }
     dragRef.current = null
+    setIsPanning(false)
     setSelectionBox(null)
   }
 
   function onElementPointerDown(event: ReactPointerEvent<HTMLDivElement>, element: CanvasElement) {
     event.stopPropagation()
     const point = screenToWorld(event.clientX, event.clientY)
+    if (spaceDownRef.current || event.button === 1) return startDrag({ type: 'pan', start: { x: event.clientX, y: event.clientY } })
     if (tool === 'connector') return connectElement(element.id)
     if (tool === 'mind' && element.type === 'mind') return addMindChild(element)
     if (tool !== 'select') return
@@ -244,7 +259,7 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   }
 
   function setZoomValue(value: number, anchor?: Point) {
-    const next = Math.min(4, Math.max(0.1, value))
+    const next = Math.min(4, Math.max(0.25, value))
     if (anchor && viewportRef.current) {
       const world = screenToWorld(anchor.x, anchor.y)
       setPan({ x: anchor.x - viewportRef.current.getBoundingClientRect().left - world.x * next, y: anchor.y - viewportRef.current.getBoundingClientRect().top - world.y * next })
@@ -261,7 +276,7 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     }
     const bounds = boundsOf(elementsRef.current)
     const rect = viewportRef.current.getBoundingClientRect()
-    const nextZoom = Math.min(1.25, Math.max(0.1, Math.min((rect.width - 160) / bounds.width, (rect.height - 160) / bounds.height)))
+    const nextZoom = Math.min(1.25, Math.max(0.25, Math.min((rect.width - 160) / bounds.width, (rect.height - 160) / bounds.height)))
     setZoom(nextZoom)
     setPan({ x: rect.width / 2 - (bounds.x + bounds.width / 2) * nextZoom, y: rect.height / 2 - (bounds.y + bounds.height / 2) * nextZoom })
     markDirty()
@@ -292,19 +307,28 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   const minimap = useMemo(() => makeMinimap(elements, pan, zoom, viewportRef.current), [elements, pan, zoom])
 
   return {
-    canvases, activeId, elements, canvasName, tool, pan, zoom, selectedIds, selectionBox, saveStatus, connectorFrom,
+    canvases, activeId, elements, canvasName, tool, pan, zoom, selectedIds, selectionBox, saveStatus, connectorFrom, isPanning,
     drawColor, strokeWidth, textColor, fontSize, textBold, textItalic, stickyColor, fillColor, borderColor, connectorCurved, arrowHead,
     pastCount: past.length, futureCount: future.length, viewportRef, fileRef, minimap,
     selectOnly: (id: string) => setSelectedIds([id]),
     setActiveId, setTool: (next: CanvasTool) => { setTool(next); setConnectorFrom(null) }, createCanvas, deleteCanvas, renameCanvas,
     undo, redo, setZoomValue, fitToScreen, exportPng, selectAll: () => setSelectedIds(elementsRef.current.map(element => element.id)),
     setDrawColor, setStrokeWidth, setTextColor, setFontSize, setTextBold, setTextItalic, setStickyColor, setFillColor, setBorderColor, setConnectorCurved, setArrowHead,
-    onWheel, onStagePointerDown, onPointerMove, onPointerUp, onElementPointerDown, startResize, updateElement, handleFileInput, onDrop
+    addQuickElement, onStagePointerDown, onPointerMove, onPointerUp, onElementPointerDown, startResize, updateElement, handleFileInput, onDrop
   }
 
   function addElement(element: CanvasElement) {
     applyElements([...elementsRef.current, element])
     setSelectedIds([element.id])
+  }
+
+  function addQuickElement(kind: 'sticky' | 'formula' | 'text') {
+    const rect = viewportRef.current?.getBoundingClientRect()
+    const point = rect ? screenToWorld(rect.left + rect.width / 2, rect.top + rect.height / 2) : { x: 300, y: 220 }
+    if (kind === 'sticky') addElement(createSticky(point, stickyColor))
+    else if (kind === 'formula') addElement(createFormula(point))
+    else addElement(createText(point, { color: textColor, fontSize: 30, bold: true, italic: false }))
+    setTool('select')
   }
 
   function startDraw(point: Point) {
@@ -386,7 +410,7 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   }
 
   function keyTool(key: string) {
-    const map: Record<string, CanvasTool> = { v: 'select', p: 'pen', t: 'text', n: 'sticky', m: 'mind' }
+    const map: Record<string, CanvasTool> = { v: 'select', p: 'pen', t: 'text', n: 'sticky', f: 'formula', m: 'mind' }
     const next = map[key.toLowerCase()]
     if (next) setTool(next)
   }
@@ -423,6 +447,10 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   function startDrag(next: DragState) {
     dragRef.current = next
   }
+}
+
+function createFormula(point: Point): CanvasElement {
+  return { id: makeId('formula'), type: 'formula', x: point.x, y: point.y, width: 320, height: 150, text: '$$\\frac{1}{2}mv^2$$' }
 }
 
 type Box = { x: number; y: number; width: number; height: number }

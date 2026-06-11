@@ -1,5 +1,6 @@
-import type { PointerEvent as ReactPointerEvent } from 'react'
+import { useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { CanvasElement as CanvasItem } from '@/components/zona/types'
+import MathMarkdown from '@/components/shared/MathMarkdown'
 import { pathData } from '@/components/zona/canvas/tools/DrawTool'
 import { connectorPath } from '@/components/zona/canvas/tools/ArrowTool'
 import { renderShape } from '@/components/zona/canvas/tools/ShapeTool'
@@ -70,6 +71,7 @@ function renderElementContent(element: CanvasItem, updateElement: CanvasElementV
       </div>
     )
   }
+  if (element.type === 'formula') return <FormulaElement element={element} updateElement={updateElement} />
   if (element.type === 'mind') {
     const radius = element.nodeStyle === 'pill' ? 'rounded-full' : element.nodeStyle === 'square' ? 'rounded' : 'rounded-2xl'
     return (
@@ -88,6 +90,27 @@ function renderElementContent(element: CanvasItem, updateElement: CanvasElementV
       style={{ color: element.color, fontSize: element.fontSize, fontWeight: element.bold ? 800 : 500, fontStyle: element.italic ? 'italic' : 'normal' }}
     >
       {element.text}
+    </div>
+  )
+}
+
+function FormulaElement({ element, updateElement }: { element: CanvasItem; updateElement: CanvasElementViewProps['updateElement'] }) {
+  const [editing, setEditing] = useState(false)
+  if (editing) {
+    return (
+      <textarea
+        autoFocus
+        defaultValue={element.text}
+        onPointerDown={event => event.stopPropagation()}
+        onBlur={event => { updateElement(element.id, { text: event.currentTarget.value }, true); setEditing(false) }}
+        className="h-full w-full resize-none rounded-2xl border border-blue-200 bg-white p-4 font-mono text-sm leading-6 text-slate-800 shadow-xl outline-none focus:border-blue-400"
+        placeholder="Escribe texto, Markdown o LaTeX..."
+      />
+    )
+  }
+  return (
+    <div onDoubleClick={() => setEditing(true)} className="flex h-full w-full cursor-text items-center justify-center overflow-auto rounded-2xl border border-blue-100 bg-white p-5 text-center shadow-[0_18px_45px_rgba(37,99,235,0.12)]">
+      <MathMarkdown text={element.text} format={false} className="text-blue-950" />
     </div>
   )
 }

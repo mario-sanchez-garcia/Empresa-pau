@@ -22,6 +22,7 @@ export type CanvasTool =
   | 'eraser'
   | 'text'
   | 'sticky'
+  | 'formula'
   | 'rect'
   | 'circle'
   | 'triangle'
@@ -31,7 +32,7 @@ export type CanvasTool =
   | 'table'
   | 'image'
 
-export type CanvasElementType = 'path' | 'text' | 'sticky' | 'shape' | 'connector' | 'mind' | 'table' | 'image'
+export type CanvasElementType = 'path' | 'text' | 'sticky' | 'formula' | 'shape' | 'connector' | 'mind' | 'table' | 'image'
 
 export interface CanvasElement {
   id: string

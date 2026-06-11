@@ -212,10 +212,42 @@ export function parseCorrectionJson(text: string) {
     const firstBrace = cleaned.indexOf('{')
     const lastBrace = cleaned.lastIndexOf('}')
     const jsonText = firstBrace >= 0 && lastBrace > firstBrace ? cleaned.slice(firstBrace, lastBrace + 1) : cleaned
-    return JSON.parse(jsonText)
+
+    // First attempt: direct parse
+    try {
+      return restoreLatexEscapes(JSON.parse(jsonText))
+    } catch {
+      // AI commonly writes LaTeX with single backslashes inside JSON strings
+      // (e.g. \sqrt, \sigma, \cdot) which are invalid JSON escape sequences.
+      // Repair: inside each string literal, double any \ not followed by a
+      // recognised JSON escape character (" \ / b f n r t u).
+      const repaired = jsonText.replace(/"(?:[^"\\]|\\.)*"/g, m =>
+        m.replace(/\\(?!["\\\/bfnrtu])/g, '\\\\')
+      )
+      return restoreLatexEscapes(JSON.parse(repaired))
+    }
   } catch {
     return null
   }
+}
+
+// After parsing, restore LaTeX commands that were silently corrupted by valid JSON escapes.
+// \f (form-feed U+000C) and \b (backspace U+0008) are valid JSON escapes, so the AI's
+// \frac / \forall (→ form-feed + rac/orall) and \beta / \begin (→ backspace + eta/egin)
+// survive JSON.parse but arrive as wrong characters. Restore them here.
+function restoreLatexEscapes(obj: any): any {
+  if (typeof obj === 'string') {
+    return obj
+      .replace(/([a-zA-Z])/g, '\\f$1')  // form-feed + letter → \f... (was \frac, \forall…)
+      .replace(/\x08([a-zA-Z])/g, '\\b$1')    // backspace + letter  → \b... (was \beta, \begin…)
+  }
+  if (Array.isArray(obj)) return obj.map(restoreLatexEscapes)
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, any>).map(([k, v]) => [k, restoreLatexEscapes(v)])
+    )
+  }
+  return obj
 }
 
 export function correctionJsonToMarkdown(data: any) {

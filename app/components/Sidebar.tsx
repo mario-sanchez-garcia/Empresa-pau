@@ -105,7 +105,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
   }
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[282px] shrink-0 flex-col border-r border-[#dbe7fb] bg-white/80 shadow-[18px_0_55px_rgba(37,99,235,0.055)] backdrop-blur-2xl max-lg:relative max-lg:h-auto max-lg:w-full">
+    <aside className="sticky top-0 z-50 flex h-screen w-[282px] shrink-0 flex-col border-r border-[#dbe7fb] bg-white/80 shadow-[18px_0_55px_rgba(37,99,235,0.055)] backdrop-blur-2xl max-lg:relative max-lg:h-auto max-lg:w-full">
       <div className="border-b border-[#dbe7fb] px-[22px] py-[24px]">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_16px_34px_rgba(37,99,235,0.24)]">

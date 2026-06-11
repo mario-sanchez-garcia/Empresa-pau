@@ -16,7 +16,7 @@ export default function SimulacroShell({ children, title, subtitle, actions }: S
       <Sidebar />
 
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-30 flex min-h-[82px] items-center justify-between gap-4 border-b border-[#dbe7fb] bg-white/80 px-8 backdrop-blur-xl max-md:flex-wrap max-md:px-4">
+        <header className="sticky top-0 z-40 flex min-h-[82px] items-center justify-between gap-4 border-b border-[#dbe7fb] bg-white/80 px-8 backdrop-blur-xl max-md:flex-wrap max-md:px-4">
           <div>
             <h1 className="text-2xl font-black tracking-tight">{title}</h1>
             <p className="text-sm font-semibold text-slate-500">{subtitle}</p>

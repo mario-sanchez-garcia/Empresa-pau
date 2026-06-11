@@ -195,7 +195,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
 
   return (
     <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
-      <header className="flex items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}`, position: 'sticky', top: 0, zIndex: 50 }}>
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}` }}>
         <div>
           <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>{contexto}</div>
           <h3 className="mt-2 text-lg font-black text-slate-900">Ejercicio {ejercicio.numero}</h3>

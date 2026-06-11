@@ -1359,7 +1359,7 @@ function cambiarTipo(t: Tipo) {
         : null
 
   return (
-    <div style={{
+    <div className="pausia-app-shell" style={{
   display: 'flex',
   minHeight: '100vh',
   background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.78), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.52), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)',
@@ -1418,6 +1418,18 @@ function cambiarTipo(t: Tipo) {
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
           }
         }
+
+        @media (max-width: 1024px) {
+          .pausia-app-shell {
+            display: block !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .pausia-app-header {
+            padding: 14px 16px !important;
+          }
+        }
       `}</style>
       <Sidebar
         activeItem={seccion === 'planning' ? 'plan-estudio' : seccion as SidebarItemId}
@@ -1427,19 +1439,21 @@ function cambiarTipo(t: Tipo) {
         onSubjectChange={(subject) => navegarAAsignatura(subject as Asignatura)}
         onLogout={cerrarSesion}
       />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-       <header style={{
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+       <header className="pausia-app-header" style={{
   background: 'rgba(255, 255, 255, 0.78)',
   backdropFilter: 'blur(22px)',
   borderBottom: '1px solid rgba(219, 231, 251, 0.9)',
-  padding: '0 34px',
-  height: '78px',
+  padding: '12px 34px',
+  minHeight: '78px',
   display: 'flex',
+  flexWrap: 'wrap',
+  gap: '12px',
   alignItems: 'center',
   justifyContent: 'space-between',
   position: 'sticky',
   top: 0,
-  zIndex: 10
+  zIndex: 40
 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ width: '42px', height: '42px', borderRadius: '15px', background: cfg.light, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + cfg.soft }}>
@@ -1461,7 +1475,7 @@ function cambiarTipo(t: Tipo) {
             </div>
           </div>
           {seccion === 'examenes' && (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '8px' }}>
               {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
                 const Icon = val.icon
                 return (
@@ -1873,7 +1887,7 @@ function cambiarTipo(t: Tipo) {
   marginBottom: '22px',
   boxShadow: WARM.shadow
 }}>
-                <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50 }}>
+                <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
                     {asignatura === 'historia' && diaHistoriaSeleccionado && (

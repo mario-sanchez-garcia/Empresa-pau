@@ -113,7 +113,7 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
           </div>
           <div>
             <div className="text-lg font-black text-[#111827]">Pausia</div>
-            <div className="mt-0.5 text-[11px] text-slate-500">EBAU Madrid · practica mejor</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">{ccaa === 'Madrid' ? 'EBAU Madrid' : ccaa === 'Cataluña' ? 'PAU Catalunya' : 'PAU / EBAU'} · practica mejor</div>
           </div>
         </div>
       </div>

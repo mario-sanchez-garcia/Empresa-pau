@@ -174,6 +174,12 @@ function limpiarPlanGenerado(texto: string) {
     .trim()
 }
 
+function examSystemLabel(ccaa: string) {
+  if (ccaa === 'Madrid') return 'EBAU Madrid'
+  if (ccaa === 'Cataluña') return 'PAU Catalunya'
+  return 'PAU / EBAU'
+}
+
 function formatMatrixRows(raw: string) {
   const rows = raw
     .replace(/−/g, '-')
@@ -1244,8 +1250,8 @@ function cambiarTipo(t: Tipo) {
       user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
       bloque: bloqueActivoLabel || '',
       opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
-      enunciado: enunciadoActivo?.substring(0, 500),
-      respuesta: respuesta?.substring(0, 1000),
+      enunciado: enunciadoActivo?.substring(0, 2000),
+      respuesta: respuesta?.substring(0, 4000),
       // Do not truncate full correction: History modal needs complete feedback.
       correccion: correccionVisible
     }).then(() => {})
@@ -1268,7 +1274,7 @@ function cambiarTipo(t: Tipo) {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({
-        pregunta: 'Eres Pausia, tutor EBAU Madrid. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua e historia.\n' +
+        pregunta: `Eres Pausia, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
           (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
           hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
           '\nResponde solo como Pausia.'
@@ -1294,50 +1300,7 @@ function cambiarTipo(t: Tipo) {
   }
 
   async function generarPlan() {
-    setCargandoPlan(true); setPlanIA('')
-    const { data: hist } = await supabase.from('historial_examenes').select('*').order('created_at', { ascending: false }).limit(20)
-    const items = hist || []
-    const resumen = items.length
-      ? items.map((h: any) => {
-          const pct = h.nota !== null && h.nota_maxima ? (h.nota / h.nota_maxima * 10).toFixed(1) : 'sin nota'
-          return nombreAsignatura(h.asignatura) + ' - ' + h.bloque + ' - ' + h.tipo + ' ' + h.año + ': ' + pct + '/10'
-        }).join('\n')
-      : 'Sin correcciones aún'
-    const prompt = 'Eres Pausia, entrenador de estudio para EBAU Madrid.\n' +
-      'Genera un plan semanal útil, visual y concreto para esta app.\n\n' +
-      'ASIGNATURAS DISPONIBLES EN LA APP: Matemáticas II, Física, Química, Biología, Inglés, Lengua Castellana y Literatura II, Historia de España.\n' +
-      'No inventes Filosofía ni otras asignaturas si no aparecen en el historial.\n' +
-      'Si no hay historial, crea un plan inicial SOLO con Matemáticas II, Física, Química, Biología, Inglés, Lengua Castellana y Literatura II e Historia de España.\n\n' +
-      'HISTORIAL DEL ESTUDIANTE:\n' + resumen + '\n\n' +
-      'FORMATO OBLIGATORIO:\n' +
-      '- Responde en Markdown.\n' +
-      '- No uses emojis, pictogramas ni iconos Unicode.\n' +
-      '- No uses tablas.\n' +
-      '- Usa negritas con **texto** para datos importantes.\n' +
-      '- Usa secciones claras: # Plan semanal de Pausia, ## Diagnóstico, ## Semana de estudio, ## Ejercicios prioritarios, ## Objetivo.\n' +
-      '- Para cada día usa ### Lunes, ### Martes, etc.\n' +
-      '- Cada día debe tener 2 o 3 tareas máximo, con duración aproximada y una entrega concreta que el estudiante pueda mandar a Pausia.\n' +
-      '- Evita frases grandilocuentes. Tono cercano, directo y cero relleno.\n' +
-      '- No menciones periódicos, apps externas ni recursos que no estén dentro de la app salvo que sea imprescindible.\n' +
-      '- Si faltan datos, dilo en una frase breve y aun así da un plan inicial accionable.\n'
-    const accessToken = await getChatAccessToken()
-    if (!accessToken) {
-      setPlanIA('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
-      setCargandoPlan(false)
-      return
-    }
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify({ pregunta: prompt })
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setPlanIA(getApiErrorMessage(data, 'No se pudo generar el plan. Intenta de nuevo.'))
-      setCargandoPlan(false)
-      return
-    }
-    setPlanIA(limpiarPlanGenerado(data.respuesta || ''))
-    setCargandoPlan(false)
+    window.location.href = '/planning'
   }
 
   if (!usuario) return null
@@ -1490,7 +1453,7 @@ function cambiarTipo(t: Tipo) {
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
             <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>
-              {seccion === 'examenes' && (ccaa === 'Cataluña' ? 'Practica con exámenes oficiales PAU Catalunya' : 'Practica con exámenes oficiales EBAU Madrid')}
+              {seccion === 'examenes' && `Practica con exámenes oficiales ${examSystemLabel(ccaa)}`}
               {seccion === 'chat' && 'Resuelve dudas sin quedarte bloqueado'}
               {seccion === 'historial' && 'Todas tus correcciones guardadas'}
               {seccion === 'planning' && 'Tu semana de estudio, aterrizada'}
@@ -1912,7 +1875,7 @@ function cambiarTipo(t: Tipo) {
 }}>
                 <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50 }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>EBAU Madrid {examenActivo?.año} · {tipo}</span>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
                     {asignatura === 'historia' && diaHistoriaSeleccionado && (
                       <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{diaHistoriaSeleccionado}</span>
                     )}
@@ -2068,7 +2031,7 @@ function cambiarTipo(t: Tipo) {
                 <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                   <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 54%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 16px 34px rgba(37,99,235,0.22)' }}><MessageCircle size={28} /></div>
                   <div style={{ fontSize: '20px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>¡Hola! Soy Pausia</div>
-                  <div style={{ fontSize: '15px', color: WARM.muted, maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu compa de estudio para la EBAU de Madrid.</div>
+                  <div style={{ fontSize: '15px', color: WARM.muted, maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>Tu compa de estudio para {examSystemLabel(ccaa)}.</div>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
                     {['¿Cómo es el examen de mates?', '¿Qué temas caen en historia?', 'Explícame la Segunda República'].map(s => (
                       <button className="campus-hover" key={s} onClick={() => setInputChat(s)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '8px 16px', borderRadius: '20px', background: WARM.wash, border: '1px solid #dbe7fb', color: WARM.muted, fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}>{s}</button>
@@ -2189,7 +2152,7 @@ function cambiarTipo(t: Tipo) {
               <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos débiles</div>
               <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.22)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
                 <BrainCircuit size={17} />
-                {cargandoPlan ? 'Generando tu plan...' : planIA ? 'Regenerar plan' : 'Generar mi plan semanal'}
+                Abrir Mi Plan
               </button>
             </div>
             {planIA && (

@@ -135,8 +135,8 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
           opcion: option,
           nota: normalized?.desglose_bloques?.[0]?.puntos_conseguidos ?? null,
           nota_maxima: maxScore,
-          enunciado: enunciado.substring(0, 500),
-          respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 1000),
+          enunciado: enunciado.substring(0, 2000),
+          respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: visible,
         })
@@ -178,7 +178,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
             </select>
           </label>
         )}
-        {requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este enunciado procede de OCR parcial y requiere consultar el PDF original.</div>}
+        {requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
         {(opcion?.enunciado ?? ejercicio.enunciado) && <MathMarkdown text={opcion?.enunciado ?? ejercicio.enunciado} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
         {apartadoTexto && <MathMarkdown text={apartadoTexto} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
         {(opcion?.datos ?? ejercicio.datos)?.map((dato, index) => <MathMarkdown key={index} text={dato} className="text-sm text-slate-600" />)}

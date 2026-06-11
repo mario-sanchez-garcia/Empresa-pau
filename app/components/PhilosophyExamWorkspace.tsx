@@ -196,8 +196,8 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
           opcion: ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única',
           nota: scoreFromCorrection(normalized, maxScore),
           nota_maxima: maxScore,
-          enunciado: selectedQuestion.enunciado.substring(0, 500),
-          respuesta: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen.' : answer.substring(0, 1000),
+          enunciado: selectedQuestion.enunciado.substring(0, 2000),
+          respuesta: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen.' : answer.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: visible
         })

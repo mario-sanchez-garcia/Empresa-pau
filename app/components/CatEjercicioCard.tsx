@@ -171,8 +171,8 @@ export default function CatEjercicioCard({
           opcion: ejercicio.opcion ?? 'Única',
           nota: normalized?.desglose_bloques?.[0]?.puntos_conseguidos ?? null,
           nota_maxima: maxScore,
-          enunciado: enunciadoCompleto.substring(0, 500),
-          respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 1000),
+          enunciado: enunciadoCompleto.substring(0, 2000),
+          respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: visible,
         })
@@ -206,7 +206,7 @@ export default function CatEjercicioCard({
             </select>
           </label>
         )}
-        {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este enunciado requiere revisión visual con el documento original.</div>}
+        {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
         {ejercicio.instrucciones && <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}><MathMarkdown text={ejercicio.instrucciones} /></div>}
         {ejercicio.texto && <MathMarkdown text={ejercicio.texto} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
         {ejercicio.fuente && <MathMarkdown text={ejercicio.fuente} className="text-xs italic text-slate-500" />}

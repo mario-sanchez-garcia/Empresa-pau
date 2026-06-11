@@ -1,6 +1,6 @@
 export interface Pregunta {
   id: string
-  bloque: "Algebra" | "Analisis" | "Geometria" | "Probabilidad"
+  bloque: string
   opcion: "A" | "B"
   enunciado: string
   puntuacion: number
@@ -16,36 +16,637 @@ export interface Examen {
   preguntas: Pregunta[]
 }
 
-export const examenes: Examen[] = [
+const criteriosModeloMates = "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final, de acuerdo con los criterios oficiales del modelo."
+
+const preguntaModelo = (
+  id: string,
+  bloque: string,
+  opcion: "A" | "B",
+  enunciado: string,
+  puntuacion = 2.5
+): Pregunta => ({
+  id,
+  bloque,
+  opcion,
+  enunciado,
+  puntuacion,
+  criterios: criteriosModeloMates
+})
+
+const examenesModeloMates: Examen[] = [
   {
-    id: 1, año: 2025, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    id: 101, año: 2026, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"M2025-1A", bloque:"Algebra", opcion:"A",
-        enunciado:`Se considera la matriz $A = \\begin{pmatrix} 2 & 1 & 0 \\\\ 1 & -1 & 1 \\\\ 0 & 1 & 2 \\end{pmatrix}$.\n\na) Calcula $\\det(A)$.\n\nb) Halla $A^{-1}$.\n\nc) Resuelve el sistema $AX = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$.`,
-        puntuacion:2.5, criterios:"Determinante (0.5 pts), inversa (1.25 pts), sistema (0.75 pts)." },
-      { id:"M2025-1B", bloque:"Algebra", opcion:"B",
-        enunciado:`Discute segun $a$ y $b$:\n$$\\begin{cases} x+y+2z=1 \\\\ 2x-y+z=2 \\\\ x+2y+az=b \\end{cases}$$\nResuelve cuando sea SCD.`,
-        puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion (1 pt), resolucion SCD (0.5 pts)." },
-      { id:"M2025-2A", bloque:"Analisis", opcion:"A",
-        enunciado:`$f(x) = \\dfrac{x^2-4}{x-1}$: dominio, asintotas, monotonia, extremos y grafica.`,
-        puntuacion:2.5, criterios:"Dominio y asintotas (0.75 pts), monotonia y extremos (1 pt), grafica (0.75 pts)." },
-      { id:"M2025-2B", bloque:"Analisis", opcion:"B",
-        enunciado:`Calcula el area de la region acotada por $y=x^2-1$ e $y=x+1$.`,
-        puntuacion:2.5, criterios:"Interseccion (0.5 pts), integral (1 pt), resultado (1 pt)." },
-      { id:"M2025-3A", bloque:"Geometria", opcion:"A",
-        enunciado:`$r: \\dfrac{x-1}{2}=\\dfrac{y}{1}=\\dfrac{z+1}{-1}$ y $\\pi: x-y+2z=3$.\n\na) Posicion relativa.\n\nb) Punto de interseccion.\n\nc) Angulo recta-plano.`,
-        puntuacion:2.5, criterios:"Posicion (0.5 pts), interseccion (1 pt), angulo (1 pt)." },
-      { id:"M2025-3B", bloque:"Geometria", opcion:"B",
-        enunciado:`$A(1,0,0)$, $B(0,1,0)$, $C(0,0,1)$.\n\na) Plano por $A$, $B$, $C$.\n\nb) Distancia del origen al plano.\n\nc) Volumen del tetraedro con vertice $O(0,0,0)$.`,
-        puntuacion:2.5, criterios:"Plano (1 pt), distancia (0.75 pts), volumen (0.75 pts)." },
-      { id:"M2025-4A", bloque:"Probabilidad", opcion:"A",
-        enunciado:`$X\\sim N(\\mu=60, \\sigma=12)$.\n\na) $P(48<X<78)$\n\nb) $k$: $P(X>k)=0{,}1587$\n\nc) Con $n=36$, P(media muestral $> 63$)`,
-        puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), media muestral (0.5 pts)." },
-      { id:"M2025-4B", bloque:"Probabilidad", opcion:"B",
-        enunciado:`Tres proveedores: $P_1$ (50%), $P_2$ (30%), $P_3$ (20%). Defectos: 2%, 4%, 6%.\n\na) P(pieza defectuosa)\n\nb) P($P_1$ | defectuosa)`,
-        puntuacion:2.5, criterios:"Probabilidad total (1 pt), Bayes (1.5 pts)." }
+      preguntaModelo("M2026-P1A", "Pregunta 1", "A", `Un equipo de ingenieros está trabajando en un nuevo modelo de dron para tomar fotografías del estado del tráfico. Elegido un sistema de coordenadas, el dron tiene $A(1,0,2)$ como punto de partida y un cierto tramo de autopista está contenido en el plano $\\pi: x+y+2z+1=0$. Las fotografías se deben tomar perpendicularmente al plano $\\pi$. Se toma el punto $C(0,-3,1)$ de $\\pi$ para calibrar el dron.
+
+a) (1 punto) Determine la distancia del dron en el punto de partida $A$ al plano $\\pi$ y halle una ecuación del plano en el que el dron vuela manteniendo en todo momento la misma distancia al plano $\\pi$. Este plano recibe el nombre de plano de vuelo.
+
+b) (1 punto) Responda solo a uno de los dos apartados siguientes:
+
+b1) El dron se mueve en línea recta en el plano de vuelo desde el punto de partida $A$ al punto más cercano a $C$. Halle una ecuación de la recta que contiene la trayectoria lineal que recorre el dron para fotografiar $C$.
+
+b2) La fotografía obtenida de $C$ a esa distancia no tiene buena definición. Se decide acercar el dron desde el punto de partida $A$ descendiendo perpendicularmente al plano $\\pi$ para situarse en $A'$, a la mitad de la distancia original. Calcule el ángulo formado por el plano $\\pi$ y la recta que pasa por $C$ y $A'$.`, 2),
+      preguntaModelo("M2026-P2A", "Pregunta 2", "A", `Dada $f(x)=\\dfrac{x^2+1}{|x|+1}$, se pide:
+
+a) (1 punto) Analizar la paridad y los extremos relativos de $f(x)$.
+
+b) (1 punto) Hallar $\\displaystyle\\int_{-1}^{0} f(x)\\,dx$.`, 2),
+      preguntaModelo("M2026-P3A", "Pregunta 3", "A", `Una envasadora de aceitunas comercializa bolsas con 12 aceitunas. La cosecha de este año ha sido atacada por el hongo *Sphaeropsis dalmatica* y una de cada veinte aceitunas presenta la enfermedad escudete. Se pide:
+
+a) (1 punto) Calcular la probabilidad de que una bolsa no tenga aceitunas con la enfermedad.
+
+b) (1 punto) Los controles sanitarios han fallado y se han distribuido 100 bolsas de aceitunas de esta cosecha. Calcular, aproximando por una distribución normal adecuada, la probabilidad de que al menos el 60% de las bolsas distribuidas tenga alguna aceituna con escudete.`, 2),
+      preguntaModelo("M2026-P4A", "Pregunta 4", "A", `Sean $a\\in\\mathbb{R}$, $A=\\begin{pmatrix}2a&-2\\\\a&1\\end{pmatrix}$ y $B=\\begin{pmatrix}1&2\\\\-1&2\\end{pmatrix}$. Se pide:
+
+a) (1 punto) Calcular, si existen, los valores de $a$ tales que la matriz $AA^t$ sea una matriz diagonal.
+
+b) (1 punto) Calcular, si existen, los valores de $a$ tales que $(A-B)(A+B)=A^2-B^2$.`, 2),
+      preguntaModelo("M2026-P4B", "Pregunta 4", "B", `Sea el sistema de ecuaciones
+
+$$\\begin{cases}
+x+2y-z=2\\\\
+2x+\\lambda y+z=7\\\\
+x+2y+\\lambda z=2
+\\end{cases}$$
+
+a) (1 punto) Discutir el sistema en función del parámetro real $\\lambda$.
+
+b) (1 punto) Resolver el sistema si $\\lambda=-1$.`, 2),
+      preguntaModelo("M2026-P5A", "Pregunta 5", "A", `Sea la función
+
+$$f(x)=\\begin{cases}
+\\dfrac{1}{2}(-8+\\cos x), & 0\\leq x<\\dfrac{\\pi}{2}\\\\
+a\\,\\sin(x)+4, & \\dfrac{\\pi}{2}\\leq x<\\pi\\\\
+2\\sin(2x)+b, & \\pi\\leq x\\leq 2\\pi
+\\end{cases}$$
+
+a) (1 punto) Halle los valores de $a$ y $b$ para que se verifiquen las hipótesis del Teorema de Bolzano en $[0,2\\pi]$.
+
+b) (1 punto) Justifique razonadamente que la función $f(x)$ tiene una única raíz en el intervalo $(0,2\\pi)$ y calcule dicha raíz.`, 2),
+      preguntaModelo("M2026-P5B", "Pregunta 5", "B", `Se considera la función
+
+$$f(x)=\\begin{cases}
+\\dfrac{\\ln(x^2+1)}{x}, & x\\neq 0\\\\
+0, & x=0
+\\end{cases}$$
+
+a) (1 punto) Determinar si $f(x)$ es continua en todo $\\mathbb{R}$.
+
+b) (1 punto) Determinar si $f(x)$ es derivable en el punto $x=0$ y, si existe, calcular la ecuación de la recta tangente a la gráfica de $f(x)$ para $x=0$.`, 2)
     ]
   },
+  {
+    id: 102, año: 2025, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2025-1A", "Algebra", "A", `Sea $\\lambda$ un número real y considérese las matrices
+
+$$A=\\begin{pmatrix}\\lambda&1&\\lambda\\\\0&\\lambda&-1\\end{pmatrix},\\qquad B=\\begin{pmatrix}1&\\lambda\\\\0&-1\\\\1&-\\lambda\\end{pmatrix}.$$
+
+Se pide:
+
+a) (0.5 puntos) Estudiar si existe algún valor de $\\lambda$ para el cual la matriz $AB$ no tenga inversa.
+
+b) (1 punto) Estudiar el rango de la matriz $BA$ en función del parámetro $\\lambda$.
+
+c) (1 punto) Para $\\lambda=1$, discutir el sistema $(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a^2\\\\a^2\\\\2a\\end{pmatrix}$ según los valores de $a$.`),
+      preguntaModelo("M2025-1B", "Algebra", "B", `Se tienen garrafas de tres tamaños diferentes para llenar un aljibe. Con seis garrafas pequeñas y 2 L se llenan exactamente una garrafa mediana y una grande. Con dos garrafas grandes llenamos dos medianas, una pequeña y sobra 1 L. El aljibe se llena al completo bien con catorce garrafas pequeñas más seis medianas, bien con cinco medianas junto con cinco grandes. Se pide calcular la capacidad de cada tipo de garrafa y, una vez conocidas estas, la del aljibe.`),
+      preguntaModelo("M2025-2A", "Analisis", "A", `Sea la función
+
+$$f(x)=\\begin{cases}
+x^2-6x+11, & x<2\\\\
+\\sqrt{5x-1}, & x\\geq 2
+\\end{cases}$$
+
+a) (0.5 puntos) Estudie la continuidad de la función en $\\mathbb{R}$.
+
+b) (1 punto) Estudie los extremos relativos de la función en el intervalo $(1,3)$.
+
+c) (1 punto) Calcule el área encerrada por la función y el eje OX entre $x=1$ y $x=3$.`),
+      preguntaModelo("M2025-2B", "Analisis", "B", `Dada la función $f(x)=\\sin\\left(\\dfrac{\\pi}{2}x\\right)$, se pide:
+
+a) (0.5 puntos) Estudiar la paridad de la función $g(x)=f\\bigl(xf(x)\\bigr)$.
+
+b) (1 punto) Calcular $\\displaystyle\\lim_{x\\to 0}\\dfrac{\\sqrt{4+3f(x)}-2}{x}$.
+
+c) (1 punto) Calcular $\\displaystyle\\int_0^1 x f(x)\\,dx$.`),
+      preguntaModelo("M2025-3A", "Geometria", "A", `Sean los puntos $A(0,0,0)$ y $B(1,1,1)$, y la recta $r\\equiv (x,y,z)=(\\lambda,\\lambda,\\lambda+1)$, $\\lambda\\in\\mathbb{R}$.
+
+a) (1 punto) Halle una ecuación del plano respecto del cual los puntos $A$ y $B$ son simétricos.
+
+b) (1 punto) Halle una ecuación del plano que contiene a la recta $r$ y pasa por el punto $B$.
+
+c) (0.5 puntos) Halle una ecuación de una recta que sea paralela a $r$ y pase por $A$.`),
+      preguntaModelo("M2025-3B", "Geometria", "B", `Dados los tres planos $\\pi_1:-2x-2y+z=0$, $\\pi_2:-2x+y-2z=0$ y $\\pi_3:x-2y-2z=0$, se pide:
+
+a) (1 punto) Determinar el ángulo que forman los planos dos a dos. Determinar la intersección de los tres planos.
+
+b) (1.5 puntos) Determinar el punto $P$ en el espacio del que se sabe que su proyección ortogonal sobre $\\pi_1$ es el punto $Q_1\\left(\\dfrac{1}{3},\\dfrac{4}{3},\\dfrac{10}{3}\\right)$ y que su proyección ortogonal sobre $\\pi_2$ es el punto $Q_2\\left(-\\dfrac{1}{3},\\dfrac{8}{3},\\dfrac{5}{3}\\right)$. Determinar la proyección ortogonal $Q_3$ del punto $P$ sobre el plano $\\pi_3$.`),
+      preguntaModelo("M2025-4A", "Probabilidad", "A", `Según los datos de la Comunidad de Madrid, en la temporada 2021-2022 la cobertura de la vacuna de la gripe entre mayores de 65 años fue de un 73.2%.
+
+a) (1.5 puntos) Ante una situación de brote epidémico, las autoridades deciden restringir aquellas reuniones en las que la probabilidad de que haya más de una persona no vacunada sea mayor de 0.5. Suponiendo que los asistentes a una reunión suponen una muestra aleatoria, ¿se deberían restringir las reuniones de 5 personas mayores de 65 años? ¿Y las reuniones de 7 personas mayores de 65 años?
+
+b) (1 punto) Se toma una muestra aleatoria de 500 personas mayores de 65 años. Calcule, aproximando por la distribución normal adecuada, la probabilidad de que al menos 350 de ellos estén vacunados contra la gripe.`)
+    ]
+  },
+  {
+    id: 103, año: 2024, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2024-1A", "Algebra", "A", `La primera interpretación en EE.UU. de la octava sinfonía de Mahler tuvo lugar en Filadelfia en 1916 con la participación de una orquesta, dos coros con el mismo número de miembros, un tercer coro infantil y, además, ocho cantantes solistas invitados especialmente y que no pertenecían a ninguno de los coros. La décima parte del número total de intérpretes de los tres coros era menor en 15 unidades al de miembros de la orquesta. Los miembros de cada uno de los dos coros no infantiles superaban en 140 unidades a la suma de componentes del coro infantil y los de la orquesta. El número de miembros de la orquesta excedía en 21 unidades a la doceava parte del total de intérpretes. ¿Cuántos intérpretes tenía la orquesta y cada uno de los coros? ¿Cuántos intérpretes había en total?`),
+      preguntaModelo("M2024-2A", "Analisis", "A", `Sea la función $f(x)=x\\sqrt[3]{(x^2-1)^2}$.
+
+a) (0.75 puntos) Halle $\\displaystyle\\lim_{x\\to 1}\\dfrac{f(x)}{(x-1)^{2/3}}$.
+
+b) (1.75 puntos) Halle el área, en el primer cuadrante, comprendida entre la recta $y=x$ y la gráfica de la función $f(x)$.`),
+      preguntaModelo("M2024-3A", "Geometria", "A", `Sea la recta
+
+$$r\\equiv\\begin{cases}
+x=\\lambda\\\\
+y=0\\\\
+z=0
+\\end{cases}$$
+
+y el plano $\\pi:z=0$.
+
+a) (1 punto) Halle una ecuación de la recta paralela al plano $\\pi$ cuya dirección sea perpendicular a $r$ y que pase por el punto $(1,1,1)$.
+
+b) (1.5 puntos) Halle una ecuación de una recta que forme un ángulo de $\\dfrac{\\pi}{4}$ radianes con la recta $r$, que esté contenida en el plano $\\pi$ y pase por el punto $(0,0,0)$.`),
+      preguntaModelo("M2024-4A", "Probabilidad", "A", `La selección española competirá en la Copa Mundial Femenina de Fútbol 2023. En los dos primeros partidos de la fase de grupos, que consta de tres partidos, la probabilidad de ganar cada uno de ellos es del 80%. Sin embargo, debido al aumento en la moral de las jugadoras, si ganan los dos primeros partidos la probabilidad de ganar el tercero asciende al 90%. En caso contrario, la probabilidad de ganar el tercer partido se mantendrá en el 80%. Se pide:
+
+a) (0.5 puntos) Determinar la probabilidad de que la selección española no gane ningún partido durante la fase de grupos.
+
+b) (1 punto) Calcular la probabilidad de que la selección gane el tercer partido de la fase de grupos.
+
+c) (1 punto) Si sabemos que la selección ha ganado el tercer partido, determinar la probabilidad de que no haya ganado alguno de los dos encuentros anteriores.`),
+      preguntaModelo("M2024-1B", "Algebra", "B", `Consideremos las matrices reales
+
+$$A=\\begin{pmatrix}m&1\\\\1&0\\\\m&3\\end{pmatrix},\\qquad B=\\begin{pmatrix}1&m&0\\\\m&0&1\\end{pmatrix}.$$
+
+Se pide:
+
+a) (0.75 puntos) Estudiar si existe algún valor de $m$ para el cual la matriz $BA$ tiene inversa.
+
+b) (0.75 puntos) Estudiar el rango de la matriz $AB$ en función del parámetro $m$.
+
+c) (1 punto) Para $m=1$, discutir el sistema $(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a\\\\a\\\\a^2\\end{pmatrix}$ según los valores de $a$.`),
+      preguntaModelo("M2024-2B", "Analisis", "B", `Dada la función real de variable real $f(x)=x-\\dfrac{4}{(x-1)^2}$, se pide:
+
+a) (0.75 puntos) Hallar el dominio de definición de $f(x)$ y determinar, en el caso de que existan, las ecuaciones de las asíntotas de su gráfica.
+
+b) (1 punto) Determinar los extremos relativos de la función, así como sus intervalos de crecimiento y de decrecimiento.
+
+c) (0.75 puntos) Calcular la ecuación de una recta tangente a la gráfica de $f(x)$ que sea paralela a la recta de ecuación $9x-8y=6$.`),
+      preguntaModelo("M2024-3B", "Geometria", "B", `Dados los puntos $A(0,0,1)$, $B(1,1,0)$, $C(1,0,-1)$, $D(1,1,2)$, se pide:
+
+a) (0.75 puntos) Comprobar que los puntos $A$, $B$, $C$ y $D$ no son coplanarios y hallar el volumen del tetraedro que forman.
+
+b) (0.75 puntos) Hallar el área del triángulo que forman los puntos $B$, $C$ y $D$ y el ángulo $\\widehat{B}$ del mismo.
+
+c) (1 punto) Hallar uno de los puntos $E$ del plano determinado por $A$, $B$ y $C$ tales que el cuadrilátero $ABCE$ sea un paralelogramo. Hallar el área de dicho paralelogramo.`),
+      preguntaModelo("M2024-4B", "Probabilidad", "B", `En un espacio muestral se tienen dos sucesos incompatibles, $A_1$ de probabilidad 0.5 y $A_2$ de probabilidad 0.3 y se considera $A_3=A_1\\cup A_2$. De cierto suceso $B$ de probabilidad 0.4 se sabe que es independiente de $A_1$ y que la probabilidad del suceso $A_3\\cap B$ es 0.1. Con estos datos se pide:
+
+a) (1 punto) Calcular la probabilidad de $A_3$.
+
+b) (1.5 puntos) Decidir si $B$ y $A_2$ son independientes.`)
+    ]
+  },
+  {
+    id: 104, año: 2023, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2023-1A", "Algebra", "A", `En la liga de fútbol profesional de Libertonia compiten veinte equipos. Cada equipo debe tener exactamente veinticinco jugadores de los que tres, y no más, han de ser porteros. Se sabe que la tercera parte del número de defensas coincide con la diferencia entre el número de centrocampistas y el número de delanteros. Por otro lado, la suma de la mitad del número de centrocampistas y el doble del número de delanteros excede en 25 unidades al número de defensas. Calcule el número de defensas, el número de centrocampistas y el número de delanteros que juegan en la liga.`),
+      preguntaModelo("M2023-2A", "Analisis", "A", `Para la función
+
+$$f(x)=\\begin{cases}
+\\dfrac{e(x-1)}{e^x-e}, & x<1\\\\
+\\dfrac{1}{4x-3}, & x\\geq 1
+\\end{cases}$$
+
+se pide:
+
+a) (1 punto) Estudiar su continuidad en $\\mathbb{R}$ y determinar, en el caso de que existan, las ecuaciones de sus asíntotas.
+
+b) (0.5 puntos) Para la función $g(x)=(e^x-e)f(x)$, calcular el valor de $g'(0)$.
+
+c) (1 punto) Calcular $\\displaystyle\\int_1^5 \\sqrt{f(x)}\\,dx$.`),
+      preguntaModelo("M2023-3A", "Geometria", "A", `Un depósito en forma de paralelepípedo, de base cuadrada $ABCD$, apoya completamente su base sobre una rampa en un local, quedando una arista superior pegada al techo. Se considera un sistema de ejes, con los semiejes positivos en un rincón del local. La arista inferior paralela a la que se apoya en el techo y no en su misma cara, tiene vértices de coordenadas $A(1,1,1)$ y $B(1,3,1)$. La ecuación del plano que contiene a la rampa es $4x-3z=1$ y el vértice sobre el punto $A$ es $A'(1,1,6)$. Se pide:
+
+a) (0.5 puntos) Calcular una ecuación del plano que contiene a las aristas $AB$ y $AA'$.
+
+b) (1 punto) Calcular los otros dos vértices, $C$ y $D$, de la base.
+
+c) (1 punto) Calcular el volumen del depósito.`),
+      preguntaModelo("M2023-4A", "Probabilidad", "A", `Una empresa complementa el sueldo de sus empleados según la consecución de ciertos objetivos valorados en función de una puntuación que sigue una distribución normal $N(100,35)$. Se pide:
+
+a) (0.75 puntos) Calcular el porcentaje de empleados con una puntuación comprendida entre 100 y 140.
+
+b) (0.75 puntos) Hallar la probabilidad de que un trabajador obtenga una puntuación inferior a 95 puntos.
+
+c) (1 punto) Determinar la puntuación mínima necesaria para cobrar los objetivos si el 75.17% de la plantilla ha recibido dicho incentivo.`),
+      preguntaModelo("M2023-1B", "Algebra", "B", `Dadas las matrices reales
+
+$$A=\\begin{pmatrix}m&-1&1\\\\-2&0&m\\end{pmatrix},\\quad B=\\begin{pmatrix}2m&-1\\\\1&0\\end{pmatrix},\\quad C=\\begin{pmatrix}0&-1\\\\-2&1\\\\3&-1\\end{pmatrix},$$
+
+se pide:
+
+a) (0.75 puntos) Calcular, si existe, el valor de $m$ para el cual se verifica que $A^tB=C$.
+
+b) (1 punto) Calcular, si existen, los valores de $m$ para los que existe la inversa de $AC$ y calcular para $m=0$ la inversa de $AC$.
+
+c) (0.75 puntos) Calcular, si existe, el valor de $m$ para el cual se cumple que $B^2=B-I$, siendo $I$ la matriz identidad de orden 2.`),
+      preguntaModelo("M2023-2B", "Analisis", "B", `Un ayuntamiento ha dividido en parcelas parte del terreno municipal no urbanizable y lo ha cedido a los vecinos para su cultivo. Uno de los vecinos ha decidido que en su parcela asignada utilizará como huerto una zona rectangular de 72 metros cuadrados, dejando el resto para plantar frutales e instalar una caseta donde guardar las herramientas necesarias. La zona de huerto estará dividida en dos partes: la parte dedicada al cultivo de hortalizas será un rectángulo interior separado de los lados que delimitan el huerto. La separación será de medio metro entre cada uno de los lados de mayor longitud y un metro entre cada uno de los lados de menor longitud. La franja que delimita la zona de hortalizas la dedicará al cultivo de flores y plantas aromáticas.
+
+a) (2 puntos) Calcule las dimensiones del huerto para que el área de la zona para el cultivo de hortalizas sea máxima.
+
+b) (0.5 puntos) Calcule el área de la zona de cultivo de hortalizas.`),
+      preguntaModelo("M2023-3B", "Geometria", "B", `Se consideran las siguientes rectas:
+
+- $r$, la recta que pasa por el punto $P(1,1,2)$ y tiene como vector director $\\vec{u}=(0,1,2)$.
+- $s$, la recta de ecuaciones $s\\equiv\\begin{cases}x+y-4=0\\\\x-2z+2=0\\end{cases}$.
+- $t$, la recta paralela a $s$ que contiene al punto $P$.
+
+a) (0.75 puntos) Estudie la posición relativa de $r$ y $s$.
+
+b) (0.75 puntos) Calcule el ángulo que forman las rectas $r$ y $t$.
+
+c) (1 punto) Calcule la proyección ortogonal del punto $P$ sobre la recta $s$.`),
+      preguntaModelo("M2023-4B", "Probabilidad", "B", `Sabiendo que $P(A\\cup B)=\\dfrac{4}{5}$, $P(\\overline{A})=\\dfrac{9}{20}$ y $P(\\overline{B})=\\dfrac{7}{20}$, se pide:
+
+a) (0.75 puntos) Calcular razonadamente $P(\\overline{A}\\cap\\overline{B})$.
+
+b) (0.75 puntos) Calcular razonadamente $P(\\overline{A}\\cup\\overline{B})$.
+
+c) (0.5 puntos) Calcular razonadamente $P(A-B)$.
+
+d) (0.5 puntos) Determinar si $A$ y $B$ son sucesos independientes.
+
+Nota: $\\overline{A}$ y $A-B$ denotan, respectivamente, el suceso contrario de $A$ y el suceso diferencia de $A$ y $B$.`)
+    ]
+  },
+  {
+    id: 105, año: 2022, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2022-1A", "Algebra", "A", `En una academia de idiomas se imparten clases de inglés, francés y alemán. Cada alumno está matriculado en un único idioma. El número de alumnos matriculados en inglés representa el 60% del total de alumnos de la academia. Si diez alumnos de francés se hubiesen matriculado en alemán, ambos idiomas tendrían el mismo número de alumnos. Además, la cuarta parte de los alumnos de inglés excede en ocho al doble de la diferencia entre los alumnos matriculados en francés y alemán. Calcule el número de alumnos matriculados en cada idioma.`),
+      preguntaModelo("M2022-2A", "Analisis", "A", `Sea la función
+
+$$f(x)=\\begin{cases}
+\\dfrac{1-\\sin x}{x}, & x<0\\\\
+xe^{4-x^2}, & x\\geq 0
+\\end{cases}$$
+
+a) (0.75 puntos) Estudie la continuidad y la derivabilidad de $f$ en $x=0$.
+
+b) (1 punto) Determine los extremos relativos de $f(x)$ en $(0,\\infty)$.
+
+c) (0.75 puntos) Calcule $\\displaystyle\\int_0^2 f(x)\\,dx$.`),
+      preguntaModelo("M2022-3A", "Geometria", "A", `Una sonda planetaria se lanza desde el punto $P(1,0,2)$ y sigue una trayectoria rectilínea que pasa por el punto $Q(3,1,0)$ antes de impactar en una zona plana de la superficie del planeta, que tiene por ecuación $\\pi\\equiv 2x-y+2z+5=0$. Se pide:
+
+a) (1.5 puntos) Calcular las coordenadas del punto de impacto y el coseno del ángulo entre la trayectoria de la sonda y el vector normal al plano $\\pi$.
+
+b) (1 punto) Sabiendo que la alarma de proximidad se dispara antes de llegar a la superficie cuando la distancia al planeta es 1, determinar en qué punto estará la sonda al sonar la alarma.`),
+      preguntaModelo("M2022-4A", "Probabilidad", "A", `Una urna contiene 7 bolas blancas y 12 bolas negras. Se extrae al azar una bola de la urna y se sustituye por dos del otro color. A continuación, se extrae una segunda bola de la urna. Se pide:
+
+a) (1 punto) Calcular la probabilidad de que la segunda bola extraída sea blanca.
+
+b) (0.75 puntos) Calcular la probabilidad de que la segunda bola extraída sea de distinto color que la primera.
+
+c) (0.75 puntos) Calcular la probabilidad de que la primera bola extraída haya sido negra, sabiendo que la segunda bola fue blanca.`),
+      preguntaModelo("M2022-1B", "Algebra", "B", `Sean las matrices
+
+$$A=\\begin{pmatrix}0&1&a\\\\1&0&a\\\\a&1&0\\end{pmatrix},\\qquad B=\\begin{pmatrix}3\\\\-1\\\\-2\\end{pmatrix}.$$
+
+Se pide:
+
+a) (0.5 puntos) Calcular los valores de $a$ para los que la matriz $A$ no tiene inversa.
+
+b) (1 punto) Para $a=1$, calcular la inversa de la matriz $A$.
+
+c) (1 punto) Para $a=2$, resolver el sistema $A\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=B$.`),
+      preguntaModelo("M2022-2B", "Analisis", "B", `Sea $f(x)=x+x^2$. Se pide:
+
+a) (1 punto) Hallar el área de la región acotada que está limitada por la gráfica de $f$ y la recta $y=2x$.
+
+b) (1.5 puntos) Una partícula en movimiento parte del origen y sigue la trayectoria determinada por la gráfica de $f$. En el punto $(1,f(1))$ la partícula sale despedida en la dirección de la recta tangente. Determinar en qué punto choca con la recta vertical $x=2$.`),
+      preguntaModelo("M2022-3B", "Geometria", "B", `Dados los planos $\\pi_1\\equiv x-2y+3z=6$, $\\pi_2\\equiv 3x-z=2$ y el punto $A(1,7,1)$, se pide:
+
+a) (0.5 puntos) Comprobar que $\\pi_1$ y $\\pi_2$ son perpendiculares.
+
+b) (1 punto) Calcular el volumen de un cubo que tenga una cara en el plano $\\pi_1$, otra cara en el plano $\\pi_2$, y un vértice en el punto $A$.
+
+c) (1 punto) Calcular el punto simétrico de $A$ respecto de $\\pi_1$.`),
+      preguntaModelo("M2022-4B", "Probabilidad", "B", `Dos características genéticas $A$ y $B$ aparecen en una especie animal con probabilidades respectivas de 0.2 y 0.3. Sabiendo que la aparición de una de ellas es independiente de la aparición de la otra, se pide calcular:
+
+a) (0.5 puntos) La probabilidad de que un individuo elegido al azar presente ambas características.
+
+b) (0.5 puntos) La probabilidad de que no presente ninguna de ellas.
+
+c) (0.75 puntos) La probabilidad de que presente solamente una de ellas.
+
+d) (0.75 puntos) La probabilidad de que, si elegimos al azar 10 individuos, exactamente 3 de ellos presenten la característica $A$.`)
+    ]
+  },
+  {
+    id: 106, año: 2021, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2021-1A", "Algebra", "A", `Dadas las matrices
+
+$$A=\\begin{pmatrix}0&1&x\\\\1&0&x-1\\\\x+1&0&3\\end{pmatrix},\\qquad B=\\begin{pmatrix}0&\\frac{1}{3}&-\\frac{1}{3}\\\\0&1&0\\\\1&\\frac{2}{3}&-\\frac{2}{3}\\end{pmatrix},$$
+
+se pide:
+
+a) (0.5 puntos) Determinar los valores de $x\\in\\mathbb{R}$ para los cuales $A$ tiene inversa.
+
+b) (0.75 puntos) Para $x=-1$, calcular la inversa de $A$.
+
+c) (1.25 puntos) Para $x=1$, calcular $(AB^t)^{2020}$.`),
+      preguntaModelo("M2021-2A", "Analisis", "A", `Sea la función
+
+$$f(x)=\\begin{cases}
+\\dfrac{2}{x+1}, & x\\leq 1\\\\
+\\dfrac{\\ln x}{x-1}, & x>1
+\\end{cases}$$
+
+a) (0.5 puntos) Estudia la continuidad de $f$.
+
+b) (1 punto) Halla las asíntotas de $f$.
+
+c) (1 punto) Determina el valor de $x_0<1$ que verifica que la recta tangente a la gráfica de $f$ en el punto $(x_0,f(x_0))$ tiene pendiente $-\\dfrac{1}{2}$. Escribe la ecuación de dicha recta tangente.`),
+      preguntaModelo("M2021-3A", "Geometria", "A", `Se consideran los puntos $A(3,1,2)$, $B(0,3,4)$ y $P(-1,1,0)$. Se pide:
+
+a) (0.75 puntos) Determinar las coordenadas de un punto $Q$ sabiendo que los vectores $\\overrightarrow{AB}$ y $\\overrightarrow{PQ}$ son linealmente dependientes, tienen sentidos opuestos y tienen el mismo módulo.
+
+b) (1 punto) Determinar las coordenadas del punto de intersección de la recta $r$ que contiene a $A$ y $P$, y de la recta $s$ que contiene a $B$ y al punto $C(2,-1,-2)$.
+
+c) (0.75 puntos) Calcular el coseno del ángulo formado por $\\overrightarrow{PA}$ y $\\overrightarrow{PB}$.`),
+      preguntaModelo("M2021-4A", "Probabilidad", "A", `En un instituto uno de cada cuatro alumnos practica baloncesto. Se eligen 6 alumnos al azar y se considera la variable aleatoria $X$ que representa el número de estudiantes entre estos 6 que practican baloncesto. Se pide:
+
+a) (1 punto) Identificar la distribución de la variable aleatoria $X$ y calcular $P(X=0)$.
+
+b) (0.75 puntos) Calcular la probabilidad de que al menos 5 de los 6 elegidos practiquen baloncesto.
+
+c) (0.75 puntos) Calcular la probabilidad de que al menos 1 de los 6 practique baloncesto.`),
+      preguntaModelo("M2021-1B", "Algebra", "B", `Dados la matriz
+
+$$A=\\begin{pmatrix}0&1&-1\\\\a&-3&a\\\\a-1&-3&a\\end{pmatrix}$$
+
+y el vector $B=\\begin{pmatrix}0\\\\1\\\\2\\end{pmatrix}$, determinar el valor o valores de $a$ para los que se verifica:
+
+a) (0.5 puntos) $B^t(A+A^t)B=6$.
+
+b) (1 punto) El sistema $AX=B$ no tiene solución.
+
+c) (1 punto) $A=A^{-1}$.`),
+      preguntaModelo("M2021-2B", "Analisis", "B", `Dada la función $f(x)=x^6-4x^4$, se pide:
+
+a) (0.5 puntos) Estudiar sus intervalos de crecimiento y decrecimiento.
+
+b) (1 punto) Encontrar sus máximos y mínimos locales, y determinar si son o no globales.
+
+c) (1 punto) Hallar el área de la región acotada limitada por el eje $y=0$ y la gráfica de $f$.`),
+      preguntaModelo("M2021-3B", "Geometria", "B", `Dadas las rectas
+
+$$r:\\begin{cases}x+2z=1\\\\y+z=2\\end{cases},\\qquad s:\\begin{cases}x=-3+2\\lambda\\\\y=2-\\lambda\\\\z=1+\\lambda\\end{cases}$$
+
+a) (0.75 puntos) Hallar la distancia del origen a la recta $s$.
+
+b) (0.5 puntos) Determinar la posición relativa de $r$ y $s$.
+
+c) (1.25 puntos) Escribir la ecuación de una recta perpendicular común a ambas rectas.`),
+      preguntaModelo("M2021-4B", "Probabilidad", "B", `Una médico experto diagnostica posibles enfermos de una dolencia, fallando en reconocerla en el 5% de los casos que la padecen y diagnosticándola equivocadamente en el 10% de los sanos. Las estadísticas muestran que dicha enfermedad es padecida por 50 de cada diez mil personas. Si una persona al azar se somete a reconocimiento, calcule la probabilidad de:
+
+a) (0.5 puntos) Que sea diagnosticada como enferma.
+
+b) (1 punto) Que esté enferma si la diagnostican como tal.
+
+c) (0.5 puntos) Que no esté enferma si la diagnostican sana.
+
+d) (0.5 puntos) Que sea mal diagnosticada.`)
+    ]
+  },
+  {
+    id: 107, año: 2020, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2020-1A", "Algebra", "A", `Se quiere construir un invernadero para el cultivo de semillas con ambiente controlado de temperatura, humedad y composición del aire. El aire que hay que suministrar debe contener un 78% de nitrógeno, un 21% de oxígeno y un 1% de argón.
+
+a) (0.5 puntos) Si la capacidad del invernadero es 2000 litros, determine cuántos litros de nitrógeno, cuántos de oxígeno y cuántos de argón son necesarios.
+
+b) (2 puntos) Para suministrar el aire se dispone de tres mezclas gaseosas $A$, $B$ y $C$, cuya composición se expresa en la tabla adjunta:
+
+| Mezcla | Nitrógeno | Oxígeno | Argón |
+| --- | ---: | ---: | ---: |
+| A | 80% | 20% | 0% |
+| B | 70% | 20% | 10% |
+| C | 60% | 40% | 0% |
+
+Obtenga la cantidad que hay que utilizar de cada mezcla para llenar el invernadero de aire con la composición requerida.`),
+      preguntaModelo("M2020-2A", "Analisis", "A", `Dada la función $f(x)=e^{3x-2}$, se pide:
+
+a) (1 punto) Determinar el punto en el que la tangente a la curva $y=f(x)$ tiene pendiente igual a $\\dfrac{3}{e}$ y escribir la ecuación de esta recta tangente.
+
+b) (0.5 puntos) Calcular $\\displaystyle\\lim_{x\\to 2/3}\\dfrac{1-f(x)}{6x-4}$.
+
+c) (1 punto) Calcular el área de la superficie acotada por la curva $y=f(x)$ y las rectas $x=0$, $y=1$.`),
+      preguntaModelo("M2020-3A", "Geometria", "A", `Dadas las rectas
+
+$$r_1\\equiv\\begin{cases}x=z-1\\\\y=2-3z\\end{cases},\\qquad r_2\\equiv\\begin{cases}x=4+5z\\\\y=4z-3\\end{cases},$$
+
+se pide:
+
+a) (1.5 puntos) Estudiar su posición relativa y hallar la distancia entre ellas.
+
+b) (1 punto) Hallar el punto de corte entre la recta $r_2$ y el plano que contiene a $r_1$ y pasa por el origen de coordenadas.`),
+      preguntaModelo("M2020-4A", "Probabilidad", "A", `Dados dos sucesos $A$ y $B$, se conocen las siguientes probabilidades: $P(A\\cup B)=0.55$, $P(\\overline{A}\\cup\\overline{B})=0.90$ y $P(B\\mid A)=0.25$. Se pide:
+
+a) (2 puntos) Calcular $P(A\\cap B)$, $P(A)$, $P(B)$ y $P(B\\mid\\overline{A})$.
+
+b) (0.5 puntos) Deducir de manera razonada si los sucesos $A$ y $B$ son independientes.`),
+      preguntaModelo("M2020-1B", "Algebra", "B", `Dadas las matrices
+
+$$A=\\begin{pmatrix}1&2+t\\\\5&10+3t\\\\-1&-2\\end{pmatrix},\\qquad X=\\begin{pmatrix}x\\\\y\\end{pmatrix},\\qquad B=\\begin{pmatrix}3\\\\9\\\\3t+3\\end{pmatrix},$$
+
+se pide:
+
+a) (1 punto) Calcular el rango de la matriz $A$ en función del parámetro $t$.
+
+b) (1.5 puntos) Resolver el sistema $AX=B$, para los valores de $t$ que lo hagan compatible y determinado.`),
+      preguntaModelo("M2020-2B", "Analisis", "B", `Dada la función $f(x)=\\dfrac{3}{x+1}$, se pide:
+
+a) (1 punto) Calcular el área del triángulo formado por los ejes de coordenadas y la recta tangente a la curva $y=f(x)$ en $x=2$.
+
+b) (0.75 puntos) Determinar las posibles asíntotas de la curva $y=f(x)$ y estudiar los intervalos de crecimiento y decrecimiento de $f(x)$.
+
+c) (0.75 puntos) Calcular $\\displaystyle\\int_0^2 x f(x)\\,dx$.`),
+      preguntaModelo("M2020-3B", "Geometria", "B", `Dados los puntos $A(1,1,-2)$, $B(3,-1,4)$ y la recta
+
+$$r\\equiv\\begin{cases}x=1+3\\lambda\\\\y=-2+5\\lambda\\\\z=3\\end{cases}$$
+
+se pide:
+
+a) (1.5 puntos) Calcular el área del triángulo $OPQ$, siendo $O(0,0,0)$, $P$ el punto medio del segmento $AB$ y $Q$ la intersección de la recta que pasa por $A$ y $B$ y el plano $\\pi\\equiv z=7$.
+
+b) (0.5 puntos) Hallar la ecuación del plano que pasa por $A$ y es perpendicular a la recta $r$.
+
+c) (0.5 puntos) Calcular el coseno del ángulo que forman la recta $r$ y la recta que pasa por $A$ y $B$.`),
+      preguntaModelo("M2020-4B", "Probabilidad", "B", `En cierta ciudad se estima que la temperatura máxima de cada día, en el mes de junio, sigue una distribución normal de media $30^{\\circ}\\mathrm{C}$ y varianza 25. Se pide:
+
+a) (0.75 puntos) Calcular la probabilidad de que un día cualquiera del mes la temperatura máxima esté entre $28^{\\circ}\\mathrm{C}$ y $32^{\\circ}\\mathrm{C}$.
+
+b) (1 punto) Calcular el número esperado de días del mes con máxima superior a $36^{\\circ}\\mathrm{C}$.
+
+c) (0.75 puntos) Determinar la temperatura máxima alcanzada el día 10 de junio, sabiendo que dicha temperatura fue superada exactamente el 50% de los días del mes.`)
+    ]
+  },
+  {
+    id: 108, año: 2019, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2019-1A", "Algebra", "A", `Para cada uno de los siguientes apartados, proponga un ejemplo de matriz cuadrada $A$, de dimensión $3\\times 3$, con todos sus números distintos de cero y con sus tres filas y columnas diferentes, que cumpla la condición pedida.
+
+a) (0.5 puntos) El determinante de $A$ vale 0.
+
+b) (0.5 puntos) El determinante de $A$ vale 1.
+
+c) (0.5 puntos) La matriz $A$ coincide con su traspuesta.
+
+d) (1 punto) Para una cierta matriz cuadrada $C$, distinta de la matriz nula y de la identidad, se verifica que $A\\cdot C=C\\cdot A$. Debe proponer ejemplos concretos para las dos matrices $A$ y $C$.`),
+      preguntaModelo("M2019-2A", "Analisis", "A", `La contaminación por dióxido de nitrógeno, $NO_2$, en cierta estación de medición de una ciudad, durante el pasado mes de abril, se puede modelar por la función
+
+$$c(t)=80-6t+\\dfrac{23t^2}{20}-\\dfrac{t^3}{30}\\ \\mathrm{mg/m^3},$$
+
+donde $t\\in[0,30]$ representa el tiempo, expresado en días, transcurrido desde las 0 horas del día 1 de abril.
+
+a) (0.5 puntos) ¿Qué nivel de $NO_2$ había a las 12 horas del día 10 de abril?
+
+b) (1.25 puntos) ¿En qué momento se alcanzó el máximo nivel de $NO_2$?, ¿cuál fue ese nivel máximo?
+
+c) (0.75 puntos) Calcule, mediante $\\displaystyle\\dfrac{1}{30}\\int_0^{30} c(t)\\,dt$, el nivel promedio del mes.`),
+      preguntaModelo("M2019-3A", "Geometria", "A", `Dados los puntos $A(1,2,-3)$, $B(1,5,0)$, $C(5,6,-1)$ y $D(4,-1,3)$, se pide:
+
+a) (1.5 puntos) Calcular el plano $\\pi$ que contiene a los puntos $A$, $B$, $C$ y la distancia del punto $D$ a dicho plano.
+
+b) (0.5 puntos) Calcular el volumen del tetraedro definido por los cuatro puntos dados.
+
+c) (0.5 puntos) Calcular el área del triángulo definido por $A$, $B$ y $C$.`),
+      preguntaModelo("M2019-4A", "Probabilidad", "A", `El examen de oposición a la Administración Local de cierta ciudad consta de 300 preguntas, con respuesta verdadero o falso. Un opositor responde al azar todas las preguntas. Se considera la variable aleatoria $X$ = “número de respuestas acertadas” y se pide:
+
+a) (1.5 puntos) Justificar que la variable $X$ se puede aproximar por una normal y obtener los parámetros correspondientes.
+
+b) (1 punto) Utilizando la aproximación por la normal, hallar la probabilidad de que el opositor acierte a lo sumo 130 preguntas y la probabilidad de que acierte exactamente 160 preguntas.`),
+      preguntaModelo("M2019-1B", "Algebra", "B", `Dado el sistema de ecuaciones
+
+$$\\begin{cases}
+x-my-z=0\\\\
+mx-4y+(6-2m)z=-8m\\\\
+-x+2y+z=6
+\\end{cases}$$
+
+se pide:
+
+a) (2 puntos) Discutir el sistema en función de los valores del parámetro $m$.
+
+b) (0.5 puntos) Resolver el sistema en el caso $m=6$.`),
+      preguntaModelo("M2019-2B", "Analisis", "B", `a) (1 punto) A partir de la gráfica de la función $f$ incluida en el PDF oficial, determine los valores de $f'(-1)$, $\\displaystyle\\lim_{x\\to -2^+}f(x)$, $\\displaystyle\\lim_{x\\to -2^-}f(x)$ y $\\displaystyle\\lim_{x\\to 0}f(x)$.
+
+b) (1.5 puntos) Calcule $\\displaystyle\\int_{-3}^{\\pi} g(x)\\,dx$, donde
+
+$$g(x)=\\begin{cases}
+x^2+2x+1, & -3\\leq x\\leq 0\\\\
+1+\\sin x, & 0<x\\leq 4
+\\end{cases}.$$`),
+      preguntaModelo("M2019-3B", "Geometria", "B", `Dadas las rectas
+
+$$r\\equiv\\begin{cases}x=2+\\lambda\\\\y=3+\\lambda\\\\z=1-\\lambda\\end{cases},\\qquad s\\equiv\\begin{cases}x-y=2\\\\y+z=1\\end{cases},$$
+
+se pide:
+
+a) (1 punto) Determinar la posición relativa de $r$ y $s$.
+
+b) (1 punto) Obtener un plano que contenga a las dos rectas.
+
+c) (0.5 puntos) Dado el punto $A(3,1,0)$, de la recta $s$, obtener un punto $B$, de la recta $r$, de modo que el vector $\\overrightarrow{AB}$ sea perpendicular a la recta $r$.`),
+      preguntaModelo("M2019-4B", "Probabilidad", "B", `El grupo de WhatsApp, formado por los alumnos de una escuela de idiomas, está compuesto por un 60% de mujeres y el resto varones. Se sabe que el 30% del grupo estudia alemán y que la cuarta parte de las mujeres estudia alemán. Se recibe un mensaje en el grupo. Se pide:
+
+a) (1.25 puntos) Calcular la probabilidad de que lo haya enviado una mujer, si se sabe que el o la remitente estudia alemán.
+
+b) (1.25 puntos) Si en el mensaje no hay ninguna información sobre el sexo y estudios del remitente, calcular la probabilidad de que sea varón y estudie alemán.`)
+    ]
+  },
+  {
+    id: 109, año: 2018, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("M2018-1A", "Algebra", "A", `Dadas las matrices
+
+$$A=\\begin{pmatrix}0&1&1\\\\0&3&0\\\\0&-1&3\\end{pmatrix},\\qquad I=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&1\\end{pmatrix},$$
+
+se pide:
+
+a) (1.5 puntos) Obtener los valores de $m$ para los que la matriz $A-mI$ admite inversa.
+
+b) (1 punto) Calcular la matriz inversa de $A-2I$.`),
+      preguntaModelo("M2018-2A", "Analisis", "A", `Dada la función $f(x)=2\\cos(x)+|x-1|$, se pide:
+
+a) (0.5 puntos) Determinar el valor de $f'(0)$.
+
+b) (1 punto) Calcular la ecuación de la recta tangente a la curva $y=f(x)$ en el punto de abscisa $x=\\pi$.
+
+c) (1 punto) Hallar el área del recinto plano limitado por la curva $y=f(x)$, el eje OX y las rectas $x=\\pi$ y $x=2\\pi$.`),
+      preguntaModelo("M2018-3A", "Geometria", "A", `Dados los planos $\\pi_1\\equiv 3x+y+2z-1=0$, $\\pi_2\\equiv 2x-y+3z-1=0$ y la recta
+
+$$r\\equiv\\begin{cases}
+x=1-2t\\\\
+y=-1+t\\\\
+z=1+t
+\\end{cases}$$
+
+se pide:
+
+a) (1.5 puntos) Hallar los puntos de la recta $r$ equidistantes de $\\pi_1$ y $\\pi_2$.
+
+b) (1 punto) Hallar el área del triángulo que forma el punto $P(-2,3,2)$ con los puntos de intersección de $r$ con $\\pi_1$ y $\\pi_2$.`),
+      preguntaModelo("M2018-4A", "Probabilidad", "A", `Sabiendo que el peso de los estudiantes varones de segundo de bachillerato se puede aproximar por una variable aleatoria con distribución normal, de media 74 kg y desviación típica 6 kg, se pide:
+
+a) (1 punto) Determinar el porcentaje de estudiantes varones cuyo peso está comprendido entre los 68 y 80 kg.
+
+b) (0.5 puntos) Estimar cuántos de los 1500 estudiantes varones, que se han presentado a las pruebas de la EvAU en una cierta universidad, pesan más de 80 kg.
+
+c) (1 punto) Si se sabe que uno de estos estudiantes pesa más de 76 kg, ¿cuál es la probabilidad de que pese más de 86 kg?`),
+      preguntaModelo("M2018-1B", "Algebra", "B", `Dada la matriz $A$ y los vectores $X$ y $B$ siguientes:
+
+$$A=\\begin{pmatrix}1&1&1\\\\m&1&m+1\\\\1&m&m\\end{pmatrix},\\qquad X=\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix},\\qquad B=\\begin{pmatrix}1\\\\1\\\\2+m\\end{pmatrix},$$
+
+se pide:
+
+a) (2 puntos) Discutir el sistema lineal $AX=B$ en función de los valores del parámetro $m$.
+
+b) (0.5 puntos) Resolver el sistema lineal $AX=B$ cuando $m=-1$.`),
+      preguntaModelo("M2018-2B", "Analisis", "B", `El dibujo adjunto del PDF oficial muestra la gráfica de la función
+
+$$f(x)=(6-x)e^{\\frac{x-4}{3}}-1.$$
+
+Se pide:
+
+a) (1 punto) Calcular el área de la región sombreada.
+
+b) (1 punto) Determinar la abscisa del punto de la gráfica donde la recta tangente tiene pendiente máxima.
+
+c) (0.5 puntos) Efectuando los cálculos necesarios, obtener la ecuación de la asíntota que se muestra en el dibujo.`),
+      preguntaModelo("M2018-3B", "Geometria", "B", `Dados los planos $\\pi_1\\equiv x+y=0$, $\\pi_2\\equiv x=0$ y el punto $B(-1,1,1)$, se pide:
+
+a) (1 punto) Determinar el punto $B'$, simétrico de $B$ respecto del plano $\\pi_2$.
+
+b) (1 punto) Obtener una ecuación de la recta $r$, contenida en el plano $\\pi_1$, paralela al plano $\\pi_2$ y que pasa por el punto $B$.
+
+c) (0.5 puntos) Hallar el ángulo que forman los planos $\\pi_1$ y $\\pi_2$.`),
+      preguntaModelo("M2018-4B", "Probabilidad", "B", `En una bolsa hay 10 caramelos de fresa, 15 de menta y 5 de limón. Se extraen sucesivamente de la bolsa dos caramelos. Se pide:
+
+a) (1 punto) Determinar la probabilidad de que el segundo de ellos sea de fresa.
+
+b) (0.5 puntos) Determinar la probabilidad de que los dos sean de fresa.
+
+c) (1 punto) Sabiendo que el segundo ha sido de fresa, calcular la probabilidad de que lo haya sido también el primero.`)
+    ]
+  }
+]
+
+export const examenes: Examen[] = [
+  ...examenesModeloMates,
   {
     id: 2, año: 2025, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [

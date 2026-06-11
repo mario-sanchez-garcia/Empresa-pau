@@ -1,10 +1,12 @@
-export type BloqueBiologia = "Pregunta1" | "Pregunta2" | "Pregunta3" | "Pregunta4" | "Pregunta5"
+import { examenesBiologiaCataluna } from "./biologia_cataluna"
+
+export type BloqueBiologia = "Pregunta1" | "Pregunta2" | "Pregunta3" | "Pregunta4" | "Pregunta5" | `Ejercicio${number}${"" | "A" | "B"}`
 
 export interface PreguntaBiologia {
   id: string
   año: number
   convocatoria: "Ordinaria" | "Extraordinaria" | "Modelo"
-  opcion: "A" | "B"
+  opcion: "A" | "B" | "Única"
   bloque: BloqueBiologia
   label: string
   numero: string
@@ -14,6 +16,7 @@ export interface PreguntaBiologia {
   criterios: string
   imagenes?: string[]
   requiereImagen?: boolean
+  requiereRevision?: boolean
   pdfFuente?: string
 }
 
@@ -22,7 +25,9 @@ export interface ExamenBiologia {
   año: number
   tipo: "Ordinaria" | "Extraordinaria" | "Modelo"
   asignatura: "Biología"
-  comunidad: "Madrid"
+  comunidad: "Madrid" | "Cataluña"
+  dia?: `Sèrie ${number}`
+  fuenteDocumento?: string
   preguntas: PreguntaBiologia[]
 }
 
@@ -1071,5 +1076,6 @@ d) Indique cuál es la ploidía y el número de cromátidas por cromosoma en una
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
       }
     ]
-  }
+  },
+  ...examenesBiologiaCataluna,
 ]

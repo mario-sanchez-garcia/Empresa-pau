@@ -914,8 +914,20 @@ const preguntaQuimica = asignatura === 'quimica'
     preguntasQuimica[0]
   : null
 
+const examenesBiologiaDelAnio = asignatura === 'biologia'
+  ? (examenesFiltrados as typeof examenesBiologia).filter(e => e.año === anioSeleccionado)
+  : []
+
+const seriesBiologiaDisponibles = Array.from(new Set(examenesBiologiaDelAnio.map(e => e.dia).filter(Boolean))) as string[]
+const serieBiologiaSeleccionada = seriesBiologiaDisponibles[diaHistoriaIdx] ?? seriesBiologiaDisponibles[0]
+const examenBiologia = asignatura === 'biologia'
+  ? (seriesBiologiaDisponibles.length
+      ? examenesBiologiaDelAnio.find(e => e.dia === serieBiologiaSeleccionada)
+      : examenesBiologiaDelAnio[0]) ?? null
+  : null
+
 const preguntasBiologia = asignatura === 'biologia'
-  ? (examen as any)?.preguntas ?? []
+  ? (examenBiologia as any)?.preguntas ?? []
   : []
 
 const bloquesBiologia = preguntasBiologia.length
@@ -1049,6 +1061,8 @@ const examenActivo = asignatura === 'lengua'
   ? examenLengua
   : asignatura === 'ingles'
     ? examenIngles ?? examen
+    : asignatura === 'biologia'
+      ? examenBiologia ?? examen
     : asignatura === 'historia'
       ? examenHistoria ?? examen
       : examen
@@ -1072,6 +1086,8 @@ const opcionMostrada = asignatura === 'lengua'
   ? (versionLenguaSeleccionada ?? 'Única')
   : asignatura === 'ingles'
     ? (diaInglesSeleccionado ? `${diaInglesSeleccionado} · ${(examenIngles as any)?.opcion ?? 'Única'}` : ((examenIngles as any)?.opcion ?? 'Única'))
+    : asignatura === 'biologia'
+      ? (serieBiologiaSeleccionada ? `${serieBiologiaSeleccionada} · ${(preguntaBiologia as any)?.opcion ?? 'Única'}` : ((preguntaBiologia as any)?.opcion ?? 'Única'))
     : (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
 
 const preguntaActivaKey = [
@@ -1281,7 +1297,7 @@ function cambiarTipo(t: Tipo) {
       user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
       bloque: bloqueActivoLabel || '',
       opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
-      enunciado: enunciadoActivo?.substring(0, 2000),
+      enunciado: enunciadoActivo?.substring(0, 6000),
       respuesta: respuesta?.substring(0, 4000),
       // Do not truncate full correction: History modal needs complete feedback.
       correccion: correccionVisible
@@ -1380,6 +1396,8 @@ function cambiarTipo(t: Tipo) {
       ? versionesLenguaDisponibles
       : asignatura === 'ingles'
         ? diasInglesDisponibles
+        : asignatura === 'biologia'
+          ? seriesBiologiaDisponibles
         : []
   const versionExamenSeleccionada = asignatura === 'historia'
     ? diaHistoriaSeleccionado
@@ -1387,6 +1405,8 @@ function cambiarTipo(t: Tipo) {
       ? versionLenguaSeleccionada
       : asignatura === 'ingles'
         ? diaInglesSeleccionado
+        : asignatura === 'biologia'
+          ? serieBiologiaSeleccionada
         : null
 
   return (
@@ -1780,9 +1800,9 @@ function cambiarTipo(t: Tipo) {
                   })}
                 </div>
               )}
-              {!isCatalunaExam && (asignatura === 'historia' || asignatura === 'lengua' || asignatura === 'ingles') && versionesExamenDisponibles.length > 1 && (
+              {!isCatalunaExam && (asignatura === 'historia' || asignatura === 'lengua' || asignatura === 'ingles' || asignatura === 'biologia') && versionesExamenDisponibles.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>{asignatura === 'historia' || asignatura === 'ingles' ? 'Sesión:' : 'Versión:'}</span>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>{asignatura === 'historia' || asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión:' : 'Versión:'}</span>
                   {versionesExamenDisponibles.map((version, i) => (
                     <button
                       className={diaHistoriaIdx === i ? 'campus-primary' : 'campus-hover'}
@@ -1930,8 +1950,11 @@ function cambiarTipo(t: Tipo) {
                     {asignatura === 'ingles' && versionExamenSeleccionada && (
                       <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
                     )}
+                    {asignatura === 'biologia' && versionExamenSeleccionada && (
+                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
+                    )}
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' ? 'Sesión / opción' : 'Opción'} {opcionMostrada}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión / opción' : 'Opción'} {opcionMostrada}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{formatPts(puntuacionPreguntaActiva)}</span>
@@ -2014,7 +2037,9 @@ function cambiarTipo(t: Tipo) {
                   )}
                   {(preguntaActiva as any).requiereImagen && (!Array.isArray((preguntaActiva as any).imagenes) || (preguntaActiva as any).imagenes.length === 0) && (
                     <div style={{ marginBottom: '18px', padding: '16px 18px', borderRadius: '18px', background: cfg.light, color: cfg.color, border: '1px dashed ' + cfg.accent, fontSize: '13px', fontWeight: 800 }}>
-                      Esta pregunta incluye una imagen que se añadirá próximamente.
+                      {asignatura === 'biologia'
+                        ? 'Este ejercicio requiere una imagen o esquema pendiente de revisión.'
+                        : 'Esta pregunta incluye una imagen que se añadirá próximamente.'}
                     </div>
                   )}
                   {asignatura === 'historia' && (preguntaActiva as any).conceptos && (

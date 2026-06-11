@@ -83,6 +83,8 @@ Química:
 - Resultado correcto sin desarrollo del cálculo: máximo 0.5 pts.
 
 Biología:
+- En Cataluña, respeta la puntuación y todos los apartados del ejercicio oficial concreto. No fuerces el formato ni las opciones de Madrid.
+- Si el ejercicio está marcado como pendiente de imagen y la imagen no se ha enviado, corrige únicamente los apartados que puedan evaluarse con el texto disponible e indica claramente la limitación.
 - Valora precisión conceptual y uso correcto de terminología biológica. Un término clave usado de forma incorrecta debe penalizarse de forma proporcional.
 - En procesos biológicos, exige orden causal: moléculas, estructuras, mecanismos y consecuencias deben estar relacionados, no solo enumerados.
 - En genética, bioquímica y fisiología, distingue entre planteamiento correcto, error puntual de nomenclatura y error conceptual grave.

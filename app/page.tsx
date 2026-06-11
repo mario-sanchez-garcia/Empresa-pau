@@ -59,7 +59,7 @@ const ASIGNATURAS = {
   fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', soft: '#FEF08A' },
   quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
   biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', accent: '#fb7185', soft: '#ffe4e6' },
+  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#0284C7', light: '#E0F2FE', accent: '#38BDF8', soft: '#BAE6FD' },
   historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', soft: '#dcfce7' },
   historia_filosofia: { label: 'Historia de la Filosofía', short: 'Filosofía', icon: BrainCircuit, color: '#64748B', light: '#F8FAFC', accent: '#94A3B8', soft: '#E2E8F0' },
   ingles: { label: 'Inglés', short: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', accent: '#06B6D4', soft: '#CFFAFE' }
@@ -525,8 +525,9 @@ export default function Home() {
   // Fill up to min 2 with recommended subjects not already pinned (never saved to localStorage)
   const fillerSubjects = HOME_SUBJECTS.filter(s => !pinnedClean.includes(s))
   const targetCount = Math.max(pinnedClean.length, 2)
+  const orderedHomeSubjects = [...pinnedClean, ...HOME_SUBJECTS.filter(subject => !pinnedClean.includes(subject))]
   const visibleSubjectCards = showAllSubjects
-    ? HOME_SUBJECTS
+    ? orderedHomeSubjects
     : [...pinnedClean, ...fillerSubjects].slice(0, targetCount)
 
   useEffect(() => {
@@ -676,6 +677,7 @@ const examenesFiltrados =
 
 const aniosDisponibles = isCatalunaMates
   ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
+      .sort((a, b) => b - a)
   : isCatalunaFisica
     ? Array.from(new Set(examenesFisicaCataluna
         .filter(examen => examen.convocatoria === tipo.toLowerCase())
@@ -697,6 +699,7 @@ const aniosDisponibles = isCatalunaMates
         .filter((value, index, values) => values.indexOf(value) === index)
         .sort((a, b) => b - a)
   : Array.from(new Set(examenesFiltrados.map(e => e.año)))
+      .sort((a, b) => b - a)
 
 const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
 

@@ -12,7 +12,7 @@ const SUBJECT_STYLES: Record<string, { color: string; light: string; border: str
   fisica: { color: '#CA8A04', light: '#FEFCE8', border: '#FEF08A' },
   quimica: { color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
   biologia: { color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
-  lengua: { color: '#4f46e5', light: '#eef2ff', border: '#e0e7ff' },
+  lengua: { color: '#0284C7', light: '#E0F2FE', border: '#BAE6FD' },
   historia: { color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' },
   ingles: { color: '#0284c7', light: '#f0f9ff', border: '#e0f2fe' },
   historia_filosofia: { color: '#64748B', light: '#F8FAFC', border: '#E2E8F0' }

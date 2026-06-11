@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Camera, ChevronRight, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
@@ -220,20 +220,68 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
 
   return (
     <div className="mb-8 grid gap-5">
-      <section className="rounded-[24px] border bg-white px-5 py-5 shadow-[0_14px_34px_rgba(100,116,139,0.08)]" style={{ borderColor: UI.border }}>
-        <div className="mb-4 text-xs font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Ruta del examen</div>
-        <div className="flex flex-wrap items-end gap-3">
-          <Selector label="Convocatoria" value={convocatoria} onChange={value => setConvocatoria(value as Convocatoria)} options={[...new Set((ccaa === 'Madrid' ? examenesHistoriaFilosofiaMadrid : examenesHistoriaFilosofiaCataluna).map(exam => exam.convocatoria))].map(value => ({ value, label: titleCase(value) }))} />
-          <Step />
-          <Selector label="Año" value={String(year)} onChange={value => setYear(Number(value))} options={years.map(value => ({ value: String(value), label: String(value) }))} />
-          {examsForYear.length > 1 && <><Step /><Selector label={ccaa === 'Madrid' ? 'Variante' : 'Serie'} value={selectedExam.id} onChange={setExamId} options={examsForYear.map(exam => ({ value: exam.id, label: ccaa === 'Madrid' ? ('variante' in exam && exam.variante ? exam.variante : 'Principal') : ('serie' in exam ? exam.serie : 'Principal') }))} /></>}
-          {ccaa === 'Madrid' ? (
-            <><Step /><Selector label="Texto" value={textOption} onChange={value => setTextOption(value as 'A' | 'B')} options={(madridExam?.textos ?? []).map(text => ({ value: text.opcion, label: `Texto ${text.opcion}` }))} /></>
-          ) : (
-            <><Step /><Selector label="Ejercicio" value={String(selectedExercise?.numero)} onChange={value => setExerciseNumber(Number(value))} options={(catalunaExam?.ejercicios ?? []).map(exercise => ({ value: String(exercise.numero), label: `Ejercicio ${exercise.numero}` }))} />{selectedExercise?.opciones && <><Step /><Selector label="Opción" value={exerciseOption} onChange={value => setExerciseOption(value as 'A' | 'B')} options={selectedExercise.opciones.map(option => ({ value: option.opcion, label: `Opción ${option.opcion}` }))} /></>}</>
-          )}
-          <Step />
-          <Selector label={ccaa === 'Madrid' ? 'Pregunta concreta' : 'Apartado concreto'} value={selectedQuestion?.id ?? ''} onChange={setQuestionId} options={questions.map(question => ({ value: question.id, label: `${question.id} · ${question.titulo}` }))} wide />
+      <section className="rounded-[28px] border bg-white px-6 py-6 shadow-[0_18px_45px_rgba(100,116,139,0.08)]" style={{ borderColor: UI.border }}>
+        <div className="mb-4 text-xs font-black uppercase tracking-[0.08em] text-slate-400">Filtros</div>
+        <div className="grid gap-4">
+          <div className="flex flex-wrap gap-4">
+            <FilterGroup
+              label="Convocatoria"
+              value={convocatoria}
+              onChange={value => setConvocatoria(value as Convocatoria)}
+              options={[...new Set((ccaa === 'Madrid' ? examenesHistoriaFilosofiaMadrid : examenesHistoriaFilosofiaCataluna).map(exam => exam.convocatoria))].map(value => ({ value, label: titleCase(value) }))}
+            />
+            <FilterGroup
+              label="Año"
+              value={String(year)}
+              onChange={value => setYear(Number(value))}
+              options={years.map(value => ({ value: String(value), label: String(value) }))}
+            />
+            {examsForYear.length > 1 && (
+              <FilterGroup
+                label={ccaa === 'Madrid' ? 'Variante' : 'Serie'}
+                value={selectedExam.id}
+                onChange={setExamId}
+                options={examsForYear.map(exam => ({
+                  value: exam.id,
+                  label: ccaa === 'Madrid' ? ('variante' in exam && exam.variante ? exam.variante : 'Principal') : ('serie' in exam ? exam.serie : 'Principal')
+                }))}
+              />
+            )}
+          </div>
+          <div className="flex flex-wrap gap-4">
+            {ccaa === 'Madrid' ? (
+              <FilterGroup
+                label="Texto"
+                value={textOption}
+                onChange={value => setTextOption(value as 'A' | 'B')}
+                options={(madridExam?.textos ?? []).map(text => ({ value: text.opcion, label: `Texto ${text.opcion}` }))}
+              />
+            ) : (
+              <>
+                <FilterGroup
+                  label="Ejercicio"
+                  value={String(selectedExercise?.numero)}
+                  onChange={value => setExerciseNumber(Number(value))}
+                  options={(catalunaExam?.ejercicios ?? []).map(exercise => ({ value: String(exercise.numero), label: `Ejercicio ${exercise.numero}` }))}
+                />
+                {selectedExercise?.opciones && (
+                  <FilterGroup
+                    label="Opción"
+                    value={exerciseOption}
+                    onChange={value => setExerciseOption(value as 'A' | 'B')}
+                    options={selectedExercise.opciones.map(option => ({ value: option.opcion, label: `Opción ${option.opcion}` }))}
+                  />
+                )}
+              </>
+            )}
+          </div>
+          <FilterGroup
+            label={ccaa === 'Madrid' ? 'Pregunta' : 'Apartados'}
+            value={selectedQuestion?.id ?? ''}
+            onChange={setQuestionId}
+            options={questions.map(question => ({ value: question.id, label: `${question.id} · ${question.titulo}` }))}
+            wide
+          />
         </div>
       </section>
 
@@ -295,7 +343,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
             </div>
           )}
           {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
-          <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}><WandSparkles size={17} />{loading ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}</button>
+          <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}><WandSparkles size={17} />{loading ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}</button>
         </section>
         {correction && <section className="border-t-2" style={{ borderColor: UI.color }}><div className="px-6 py-4 text-sm font-black text-white" style={{ background: UI.color }}>CORRECCIÓN DE PAUSIA</div><CorrectionResultCard correction={correction} officialMaxScore={maxScore} className="p-6 text-sm leading-7" /></section>}
       </article>
@@ -303,14 +351,42 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
   )
 }
 
-function Step() {
-  return <ChevronRight className="mb-2.5 text-slate-300" size={17} />
+function FilterGroup({ label, value, onChange, options, wide = false }: { label: string, value: string, onChange: (value: string) => void, options: { value: string, label: string }[], wide?: boolean }) {
+  if (!options.length) return null
+  return (
+    <div className={wide ? 'min-w-[260px] flex-1' : 'min-w-[150px]'}>
+      <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">{label}</span>
+      <div className="flex flex-wrap gap-2">
+        {options.map(option => {
+          const active = value === option.value
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange(option.value)}
+              className="campus-hover rounded-2xl border px-4 py-2.5 text-sm font-black transition"
+              style={{
+                '--hover-color': UI.color,
+                '--hover-bg': UI.light,
+                '--hover-border': UI.accent,
+                '--hover-shadow': `${UI.accent}33`,
+                background: active ? UI.color : '#fff',
+                borderColor: active ? UI.color : UI.border,
+                color: active ? '#fff' : '#334155',
+                boxShadow: active ? `0 14px 28px ${UI.accent}33` : '0 8px 18px rgba(100,116,139,0.05)',
+                maxWidth: wide ? '100%' : undefined,
+                textAlign: 'left',
+              } as CSSProperties}
+            >
+              {option.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
-function Selector({ label, value, onChange, options, wide = false }: { label: string, value: string, onChange: (value: string) => void, options: { value: string, label: string }[], wide?: boolean }) {
-  return <label className={wide ? 'min-w-[260px] flex-1' : 'min-w-[130px]'}><span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">{label}</span><select value={value} onChange={event => onChange(event.target.value)} className="w-full rounded-xl border bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none" style={{ borderColor: UI.border }}>{options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-}
-
-function ModeButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
-  return <button type="button" onClick={onClick} className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black" style={{ background: active ? UI.color : UI.light, color: active ? '#fff' : UI.color }}>{icon}{label}</button>
+function ModeButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: ReactNode, label: string }) {
+  return <button type="button" onClick={onClick} className="campus-hover flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black" style={{ '--hover-color': UI.color, '--hover-bg': UI.light, '--hover-border': UI.accent, '--hover-shadow': `${UI.accent}33`, background: active ? UI.color : UI.light, borderColor: active ? UI.color : UI.border, color: active ? '#fff' : UI.color } as CSSProperties}>{icon}{label}</button>
 }

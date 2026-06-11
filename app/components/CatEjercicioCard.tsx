@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
@@ -42,6 +42,11 @@ type UploadedImage = {
 type ColorScheme = { color: string; accent: string; light: string; border: string }
 
 const DEFAULT_UI: ColorScheme = { color: '#2563eb', accent: '#60a5fa', light: '#eff6ff', border: '#dbeafe' }
+
+function formatPts(value?: number) {
+  if (value == null) return ''
+  return Number.isInteger(value) ? String(value) : String(value).replace('.', ',')
+}
 
 export default function CatEjercicioCard({
   asignatura,
@@ -208,12 +213,34 @@ export default function CatEjercicioCard({
       </header>
       <div className="grid gap-4 p-6">
         {ejercicio.apartados.length > 1 && (
-          <label>
-            <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Pregunta / apartado</span>
-            <select value={apartadoIdx} onChange={event => cambiarApartado(Number(event.target.value))} className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm font-bold text-slate-700 outline-none" style={{ borderColor: UI.border }}>
-              {ejercicio.apartados.map((item, index) => <option key={item.id} value={index}>{item.id} · {item.enunciado}</option>)}
-            </select>
-          </label>
+          <div>
+            <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Apartados</span>
+            <div className="flex flex-wrap gap-2">
+              {ejercicio.apartados.map((item, index) => {
+                const active = apartadoIdx === index
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => cambiarApartado(index)}
+                    className="campus-hover rounded-2xl border px-4 py-2 text-sm font-black transition"
+                    style={{
+                      '--hover-color': UI.color,
+                      '--hover-bg': UI.light,
+                      '--hover-border': UI.accent,
+                      '--hover-shadow': `${UI.accent}33`,
+                      background: active ? UI.color : '#fff',
+                      borderColor: active ? UI.color : UI.border,
+                      color: active ? '#fff' : UI.color,
+                      boxShadow: active ? `0 14px 28px ${UI.accent}33` : '0 8px 18px rgba(37,99,235,0.05)'
+                    } as CSSProperties}
+                  >
+                    {item.id}{item.puntos ? ` · ${formatPts(item.puntos)} pts` : ''}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         )}
         {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
         {textoFuente && (
@@ -250,9 +277,13 @@ export default function CatEjercicioCard({
                 onClick={() => setModo(nextMode)}
                 className={modo === nextMode ? 'campus-primary' : 'campus-hover'}
                 style={{
+                  '--hover-color': UI.color,
+                  '--hover-bg': UI.light,
+                  '--hover-border': UI.accent,
+                  '--hover-shadow': `${UI.accent}33`,
                   background: modo === nextMode ? `linear-gradient(135deg, ${UI.color}, ${UI.accent})` : UI.light,
                   color: modo === nextMode ? '#fff' : UI.color,
-                }}
+                } as CSSProperties}
               >
                 <span className="flex items-center gap-2 rounded-full px-[18px] py-[9px] text-[13px] font-bold">
                   {nextMode === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}
@@ -282,7 +313,7 @@ export default function CatEjercicioCard({
               )}
             </div>
           )}
-          <button type="button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` }}>
+          <button type="button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>
             <WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
           </button>
         </section>

@@ -28,7 +28,7 @@ const SUBJECT_COLORS = {
   fisica: { color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', border: '#FEF08A' },
   historia: { color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', border: '#dcfce7' },
   quimica: { color: '#ea580c', light: '#fff7ed', accent: '#fb923c', border: '#ffedd5' },
-  lengua: { color: '#4f46e5', light: '#eef2ff', accent: '#fb7185', border: '#ffe4e6' },
+  lengua: { color: '#0284C7', light: '#E0F2FE', accent: '#38BDF8', border: '#BAE6FD' },
   ingles: { color: '#0284c7', light: '#f0f9ff', accent: '#38bdf8', border: '#e0f2fe' },
   bio: { color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', border: '#ecfccb' },
   geo: { color: '#075985', light: '#f0f9ff', accent: '#7dd3fc', border: '#e0f2fe' },

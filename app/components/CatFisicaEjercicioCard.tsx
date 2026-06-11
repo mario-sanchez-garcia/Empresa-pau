@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/fisica_cataluna'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
@@ -20,6 +20,11 @@ const UI = {
 }
 
 type UploadedImage = { name: string; type: string; data: string; preview: string }
+
+function formatPts(value?: number) {
+  if (value == null) return ''
+  return Number.isInteger(value) ? String(value) : String(value).replace('.', ',')
+}
 
 export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: ExamenFisicaCataluna; ejercicio: EjercicioFisicaCataluna }) {
   const [opcionIdx, setOpcionIdx] = useState(0)
@@ -169,19 +174,41 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
         {ejercicio.opciones && (
           <div className="flex gap-2">
             {ejercicio.opciones.map((item, index) => (
-              <button key={item.opcion} type="button" onClick={() => cambiarOpcion(index)} className="rounded-xl px-4 py-2 text-sm font-black" style={{ background: opcionIdx === index ? UI.color : UI.light, color: opcionIdx === index ? '#fff' : UI.color }}>
+              <button key={item.opcion} type="button" onClick={() => cambiarOpcion(index)} className="campus-hover rounded-xl px-4 py-2 text-sm font-black" style={{ '--hover-color': UI.color, '--hover-bg': UI.light, '--hover-border': UI.accent, '--hover-shadow': `${UI.accent}33`, background: opcionIdx === index ? UI.color : UI.light, color: opcionIdx === index ? '#fff' : UI.color } as CSSProperties}>
                 Opción {item.opcion}
               </button>
             ))}
           </div>
         )}
         {(apartados?.length ?? 0) > 1 && (
-          <label>
-            <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Apartado</span>
-            <select value={apartadoIdx} onChange={event => cambiarApartado(Number(event.target.value))} className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm font-bold text-slate-700 outline-none" style={{ borderColor: UI.border }}>
-              {apartados?.map((item, index) => <option key={item.letra} value={index}>{item.letra} · {item.enunciado}</option>)}
-            </select>
-          </label>
+          <div>
+            <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Apartados</span>
+            <div className="flex flex-wrap gap-2">
+              {apartados?.map((item, index) => {
+                const active = apartadoIdx === index
+                return (
+                  <button
+                    key={item.letra}
+                    type="button"
+                    onClick={() => cambiarApartado(index)}
+                    className="campus-hover rounded-2xl border px-4 py-2 text-sm font-black transition"
+                    style={{
+                      '--hover-color': UI.color,
+                      '--hover-bg': UI.light,
+                      '--hover-border': UI.accent,
+                      '--hover-shadow': `${UI.accent}33`,
+                      background: active ? UI.color : '#fff',
+                      borderColor: active ? UI.color : UI.border,
+                      color: active ? '#fff' : UI.color,
+                      boxShadow: active ? `0 14px 28px ${UI.accent}33` : '0 8px 18px rgba(37,99,235,0.05)'
+                    } as CSSProperties}
+                  >
+                    {item.letra}{item.puntos ? ` · ${formatPts(item.puntos)} pts` : ''}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         )}
         {requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
         {enunciado && (
@@ -205,9 +232,13 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
                 onClick={() => setModo(nextMode)}
                 className={modo === nextMode ? 'campus-primary' : 'campus-hover'}
                 style={{
+                  '--hover-color': UI.color,
+                  '--hover-bg': UI.light,
+                  '--hover-border': UI.accent,
+                  '--hover-shadow': `${UI.accent}33`,
                   background: modo === nextMode ? `linear-gradient(135deg, ${UI.color}, ${UI.accent})` : UI.light,
                   color: modo === nextMode ? '#fff' : UI.color,
-                }}
+                } as CSSProperties}
               >
                 <span className="flex items-center gap-2 rounded-full px-[18px] py-[9px] text-[13px] font-bold">
                   {nextMode === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}
@@ -237,7 +268,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
               )}
             </div>
           )}
-          <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` }}>
+          <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>
             <WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
           </button>
         </section>

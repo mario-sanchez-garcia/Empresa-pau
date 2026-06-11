@@ -14,7 +14,7 @@ const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[
   { id: 'quimica', label: 'Química', color: '#ea580c', soft: '#fff7ed' },
   { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' },
   { id: 'ingles', label: 'Inglés', color: '#0891B2', soft: '#CFFAFE' },
-  { id: 'lengua', label: 'Lengua', color: '#4f46e5', soft: '#eef2ff' },
+  { id: 'lengua', label: 'Lengua', color: '#0284C7', soft: '#E0F2FE' },
   { id: 'historia', label: 'Historia', color: '#2f6f4e', soft: '#f0fdf4' },
   { id: 'historia_filosofia', label: 'Filosofía', color: '#64748B', soft: '#F8FAFC' }
 ]

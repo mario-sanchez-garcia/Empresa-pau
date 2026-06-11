@@ -17,7 +17,7 @@ export const SUBJECTS = {
   quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
   biologia: { label: 'Biología', short: 'Bio', color: '#4d7c0f', light: '#f7fee7', icon: Dna, available: true },
   ingles: { label: 'Inglés', short: 'Inglés', color: '#0891B2', light: '#CFFAFE', icon: Globe, available: true },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#4f46e5', light: '#eef2ff', icon: BookOpen, available: true },
+  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#0284C7', light: '#E0F2FE', icon: BookOpen, available: true },
   historia: { label: 'Historia de España', short: 'Historia', color: '#2f6f4e', light: '#f0fdf4', icon: Landmark, available: true }
 } as const
 

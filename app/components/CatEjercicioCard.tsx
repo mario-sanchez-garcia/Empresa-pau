@@ -5,6 +5,7 @@ import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
 export type CatEjercicioView = {
@@ -207,12 +208,18 @@ export default function CatEjercicioCard({
           </label>
         )}
         {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
-        {ejercicio.instrucciones && <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}><MathMarkdown text={ejercicio.instrucciones} /></div>}
-        {ejercicio.texto && <MathMarkdown text={ejercicio.texto} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
-        {ejercicio.fuente && <MathMarkdown text={ejercicio.fuente} className="text-xs italic text-slate-500" />}
-        {ejercicio.enunciado && <MathMarkdown text={ejercicio.enunciado} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
-        {apartadoTexto && <MathMarkdown text={apartadoTexto} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
-        {ejercicio.datos?.map((dato, index) => <MathMarkdown key={index} text={dato} className="text-sm text-slate-600" />)}
+        {enunciadoCompleto && (
+          <div className="rounded-2xl border bg-white px-5 py-4 shadow-[0_12px_30px_rgba(37,99,235,0.06)]" style={{ borderColor: '#e5edf9' }}>
+            <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+            <ExamStatement
+              text={enunciadoCompleto}
+              storageKey={`cat-${asignatura}:${examen.id}:${ejercicio.id}:${apartado?.id ?? apartadoIdx}:enunciado`}
+              accentColor={UI.color}
+              softColor={UI.light}
+              readingMode={asignatura === 'lengua'}
+            />
+          </div>
+        )}
         {ejercicio.imagenes?.map((imagen, index) => <div key={index} className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">{imagen}</div>)}
 
         <section className="mt-2 border-t pt-5" style={{ borderColor: UI.border }}>

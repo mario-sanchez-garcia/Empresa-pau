@@ -19,6 +19,13 @@ type ExamStatementProps = {
 
 const MAX_HIGHLIGHTS = 40
 
+type HighlightRange = {
+  id: string
+  start: number
+  end: number
+  text: string
+}
+
 export default function ExamStatement({
   text,
   className = '',
@@ -32,7 +39,8 @@ export default function ExamStatement({
   toolbar = true,
 }: ExamStatementProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
-  const [highlights, setHighlights] = useState<string[]>([])
+  const [highlighterActive, setHighlighterActive] = useState(false)
+  const [highlights, setHighlights] = useState<HighlightRange[]>([])
   const safeStorageKey = useMemo(() => storageKey ? `pausia:statement-highlights:${storageKey}` : '', [storageKey])
 
   useEffect(() => {
@@ -54,7 +62,7 @@ export default function ExamStatement({
     applyHighlights(root, highlights)
   }, [text, format, highlights])
 
-  function persist(next: string[]) {
+  function persist(next: HighlightRange[]) {
     if (!safeStorageKey || typeof window === 'undefined') return
     try {
       if (next.length) window.localStorage.setItem(safeStorageKey, JSON.stringify(next))
@@ -62,7 +70,8 @@ export default function ExamStatement({
     } catch {}
   }
 
-  function addHighlight() {
+  function addHighlightFromSelection() {
+    if (!highlighterActive) return
     if (typeof window === 'undefined') return
     const root = bodyRef.current
     const selection = window.getSelection()
@@ -73,11 +82,13 @@ export default function ExamStatement({
     }
 
     const selectedText = normalizeHighlight(selection.toString())
-    selection.removeAllRanges()
     if (selectedText.length < 3) return
+    const selectedRange = selectionToHighlightRange(root, selection, selectedText)
+    selection.removeAllRanges()
+    if (!selectedRange) return
 
     setHighlights(current => {
-      const next = sanitizeHighlights([...current, selectedText]).slice(-MAX_HIGHLIGHTS)
+      const next = sanitizeHighlights([...current, selectedRange]).slice(-MAX_HIGHLIGHTS)
       persist(next)
       return next
     })
@@ -97,9 +108,14 @@ export default function ExamStatement({
     <div className={`exam-statement ${readingMode ? 'exam-statement-reading' : ''} ${className}`} style={style}>
       {toolbar && (
         <div className="exam-statement-toolbar">
-          <button className="exam-statement-action" type="button" onClick={addHighlight}>
+          <button
+            aria-pressed={highlighterActive}
+            className={`exam-statement-action ${highlighterActive ? 'exam-statement-action-active' : ''}`}
+            type="button"
+            onClick={() => setHighlighterActive(active => !active)}
+          >
             <Highlighter size={15} />
-            Subrayar
+            {highlighterActive ? 'Marcador activo' : 'Subrayar'}
           </button>
           <button className="exam-statement-action exam-statement-action-muted" type="button" onClick={clearHighlights} disabled={!highlights.length}>
             <Eraser size={15} />
@@ -107,7 +123,12 @@ export default function ExamStatement({
           </button>
         </div>
       )}
-      <div ref={bodyRef} className={`exam-statement-body ${bodyClassName}`}>
+      <div
+        ref={bodyRef}
+        className={`exam-statement-body ${highlighterActive ? 'exam-statement-body-marking' : ''} ${bodyClassName}`}
+        onKeyUp={addHighlightFromSelection}
+        onMouseUp={addHighlightFromSelection}
+      >
         <MathMarkdown text={text} format={format} components={components} />
       </div>
     </div>
@@ -116,11 +137,21 @@ export default function ExamStatement({
 
 function sanitizeHighlights(value: unknown) {
   if (!Array.isArray(value)) return []
-  return Array.from(new Set(
-    value
-      .map(item => normalizeHighlight(String(item ?? '')))
-      .filter(item => item.length >= 3)
-  )).slice(0, MAX_HIGHLIGHTS)
+  const seen = new Set<string>()
+  const clean: HighlightRange[] = []
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue
+    const candidate = item as Partial<HighlightRange>
+    const start = Number(candidate.start)
+    const end = Number(candidate.end)
+    const text = normalizeHighlight(String(candidate.text ?? ''))
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || text.length < 3) continue
+    const key = `${start}:${end}:${text}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    clean.push({ id: String(candidate.id ?? key), start, end, text })
+  }
+  return clean.slice(0, MAX_HIGHLIGHTS)
 }
 
 function normalizeHighlight(value: string) {
@@ -145,10 +176,10 @@ function nodeInsideSelector(node: Node | null, selector: string) {
   return Boolean(element?.closest(selector))
 }
 
-function applyHighlights(root: HTMLElement, highlights: string[]) {
+function applyHighlights(root: HTMLElement, highlights: HighlightRange[]) {
   unwrapHighlights(root)
   for (const highlight of highlights) {
-    highlightSnippet(root, highlight)
+    highlightRange(root, highlight)
   }
 }
 
@@ -162,40 +193,68 @@ function unwrapHighlights(root: HTMLElement) {
   })
 }
 
-function highlightSnippet(root: HTMLElement, snippet: string) {
-  const pattern = snippet.split(/\s+/).filter(Boolean).map(escapeRegExp).join('\\s+')
-  if (!pattern) return
-  const regex = new RegExp(pattern, 'gi')
-
-  for (const node of collectTextNodes(root)) {
-    const text = node.textContent ?? ''
-    const matches: Array<{ start: number; length: number }> = []
-    regex.lastIndex = 0
-    let match = regex.exec(text)
-    while (match && matches.length < 8) {
-      matches.push({ start: match.index, length: match[0].length })
-      match = regex.exec(text)
-    }
-    for (const range of matches.reverse()) {
-      const selected = node.splitText(range.start)
-      selected.splitText(range.length)
-      const mark = document.createElement('mark')
-      mark.className = 'pausia-highlight'
-      mark.dataset.pausiaHighlight = 'true'
-      selected.parentNode?.replaceChild(mark, selected)
-      mark.appendChild(selected)
-    }
+function highlightRange(root: HTMLElement, highlight: HighlightRange) {
+  if (highlight.end <= highlight.start) return
+  for (const part of rangeToTextParts(root, highlight).reverse()) {
+    const selected = part.node.splitText(part.start)
+    selected.splitText(part.length)
+    const mark = document.createElement('mark')
+    mark.className = 'pausia-highlight'
+    mark.dataset.pausiaHighlight = 'true'
+    selected.parentNode?.replaceChild(mark, selected)
+    mark.appendChild(selected)
   }
 }
 
-function collectTextNodes(root: HTMLElement) {
+function selectionToHighlightRange(root: HTMLElement, selection: Selection, text: string): HighlightRange | null {
+  const range = selection.getRangeAt(0)
+  const nodes = collectTextNodes(root, { includeExistingHighlights: true })
+  let start: number | null = null
+  let end: number | null = null
+  let offset = 0
+
+  for (const node of nodes) {
+    const length = node.textContent?.length ?? 0
+    if (node === range.startContainer) start = offset + range.startOffset
+    if (node === range.endContainer) end = offset + range.endOffset
+    offset += length
+  }
+
+  if (start === null || end === null || end <= start) return null
+  return {
+    id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${start}-${end}`,
+    start,
+    end,
+    text,
+  }
+}
+
+function rangeToTextParts(root: HTMLElement, highlight: HighlightRange) {
+  const parts: Array<{ node: Text; start: number; length: number }> = []
+  let offset = 0
+  for (const node of collectTextNodes(root)) {
+    const length = node.textContent?.length ?? 0
+    const nodeStart = offset
+    const nodeEnd = offset + length
+    const start = Math.max(highlight.start, nodeStart)
+    const end = Math.min(highlight.end, nodeEnd)
+    if (end > start) parts.push({ node, start: start - nodeStart, length: end - start })
+    offset = nodeEnd
+  }
+  return parts
+}
+
+function collectTextNodes(root: HTMLElement, options: { includeExistingHighlights?: boolean } = {}) {
   const nodes: Text[] = []
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const text = node.textContent
       const parent = node.parentElement
       if (!text?.trim() || !parent) return NodeFilter.FILTER_REJECT
-      if (parent.closest('.katex, .katex-display, mark[data-pausia-highlight="true"], script, style, textarea, button')) {
+      const excluded = options.includeExistingHighlights
+        ? '.katex, .katex-display, script, style, textarea, button'
+        : '.katex, .katex-display, mark[data-pausia-highlight="true"], script, style, textarea, button'
+      if (parent.closest(excluded)) {
         return NodeFilter.FILTER_REJECT
       }
       return NodeFilter.FILTER_ACCEPT
@@ -208,8 +267,4 @@ function collectTextNodes(root: HTMLElement) {
     node = walker.nextNode()
   }
   return nodes
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

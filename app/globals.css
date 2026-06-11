@@ -85,6 +85,14 @@ body {
   transform: translateY(-1px);
 }
 
+.exam-statement-action-active,
+.exam-statement-action-active:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--statement-accent), color-mix(in srgb, var(--statement-accent) 72%, #ffffff));
+  border-color: var(--statement-accent);
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--statement-accent) 22%, transparent);
+  color: #ffffff;
+}
+
 .exam-statement-action:disabled {
   cursor: not-allowed;
   opacity: 0.48;
@@ -110,18 +118,21 @@ body {
 }
 
 .exam-statement-body .math-markdown p:has(> strong:first-child) {
-  background: linear-gradient(135deg, #ffffff, color-mix(in srgb, var(--statement-soft) 74%, #ffffff));
-  border: 1px solid color-mix(in srgb, var(--statement-accent) 16%, #e5edf9);
-  border-left: 4px solid color-mix(in srgb, var(--statement-accent) 68%, #ffffff);
-  border-radius: 18px;
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.045);
-  margin: 1rem 0;
-  padding: 0.78rem 0.95rem;
+  margin: 1.05rem 0 0.72rem;
+  padding-left: 0.2rem;
 }
 
 .exam-statement-body .math-markdown strong {
   color: #0f172a;
   font-weight: 900;
+}
+
+.exam-statement-body-marking {
+  cursor: text;
+}
+
+.exam-statement-body-marking ::selection {
+  background: color-mix(in srgb, var(--statement-accent) 24%, #ffffff);
 }
 
 .exam-statement-body .math-markdown mark.pausia-highlight {

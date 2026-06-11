@@ -214,27 +214,14 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       </header>
       <div className="grid gap-5 p-6">
         <RenderFuente fuente={ejercicio.fuente} storageKeyPrefix={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:fuente`} />
-        {ejercicio.instrucciones && (
-          <div className="rounded-2xl border px-5 py-4 text-sm" style={{ borderColor: UI.border, backgroundColor: UI.light }}>
-            <ExamStatement
-              text={ejercicio.instrucciones}
-              storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:instrucciones`}
-              accentColor={UI.color}
-              softColor={UI.light}
-            />
-          </div>
-        )}
-        <div className="grid gap-3">
-          {preguntas.map((pregunta: string, index: number) => (
-            <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
-              <ExamStatement
-                text={pregunta}
-                storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:pregunta:${index}`}
-                accentColor={UI.color}
-                softColor={UI.light}
-              />
-            </div>
-          ))}
+        <div className="rounded-2xl border bg-white px-5 py-4 shadow-[0_12px_30px_rgba(37,99,235,0.06)]" style={{ borderColor: '#e5edf9' }}>
+          <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+          <ExamStatement
+            text={enunciadoOficial}
+            storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:enunciado`}
+            accentColor={UI.color}
+            softColor={UI.light}
+          />
         </div>
         <div className="border-t pt-5" style={{ borderColor: UI.border }}>
           <label className="mb-3 block text-xs font-black uppercase tracking-[0.08em] text-slate-500">Tu respuesta</label>

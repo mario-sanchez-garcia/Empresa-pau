@@ -10,7 +10,7 @@ import type { Flashcard, ZonaSubject } from './types'
 
 const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[] = [
   { id: 'mates', label: 'Mates', color: '#2563eb', soft: '#eff6ff' },
-  { id: 'fisica', label: 'Física', color: '#7C3AED', soft: '#F3E8FF' },
+  { id: 'fisica', label: 'Física', color: '#CA8A04', soft: '#FEFCE8' },
   { id: 'quimica', label: 'Química', color: '#ea580c', soft: '#fff7ed' },
   { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' },
   { id: 'ingles', label: 'Inglés', color: '#0891B2', soft: '#CFFAFE' },

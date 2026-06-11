@@ -13,7 +13,7 @@ import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSub
 
 export const SUBJECTS = {
   mates: { label: 'Matemáticas II', short: 'Mates', color: '#2563eb', light: '#eff6ff', icon: Sigma, available: true },
-  fisica: { label: 'Física', short: 'Física', color: '#7C3AED', light: '#F3E8FF', icon: Atom, available: true },
+  fisica: { label: 'Física', short: 'Física', color: '#CA8A04', light: '#FEFCE8', icon: Atom, available: true },
   quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
   biologia: { label: 'Biología', short: 'Bio', color: '#4d7c0f', light: '#f7fee7', icon: Dna, available: true },
   ingles: { label: 'Inglés', short: 'Inglés', color: '#0891B2', light: '#CFFAFE', icon: Globe, available: true },

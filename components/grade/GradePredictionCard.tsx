@@ -9,7 +9,7 @@ type GradePredictionCardProps = {
 
 const SUBJECT_STYLES: Record<string, { color: string; light: string; border: string }> = {
   mates: { color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
-  fisica: { color: '#6d28d9', light: '#f5f3ff', border: '#ede9fe' },
+  fisica: { color: '#CA8A04', light: '#FEFCE8', border: '#FEF08A' },
   quimica: { color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
   biologia: { color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
   lengua: { color: '#4f46e5', light: '#eef2ff', border: '#e0e7ff' },

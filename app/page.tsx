@@ -54,7 +54,7 @@ import {
 } from 'lucide-react'
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
-  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#7C3AED', light: '#F3E8FF', accent: '#A78BFA', soft: '#ede9fe' },
+  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', soft: '#FEF08A' },
   quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
   biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
   lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#4f46e5', light: '#eef2ff', accent: '#fb7185', soft: '#ffe4e6' },
@@ -392,6 +392,19 @@ function SubjectIllustration({ subject, color, accent }: { subject: Asignatura; 
         <path d="M104 18C116 23 121 34 117 48C113 37 107 29 96 24C99 22 101 20 104 18Z" fill={accent} opacity="0.42" />
         <path d="M96 24C108 29 114 38 117 48" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.52" />
         <path d="M95 71C102 79 112 80 121 72" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.36" />
+      </svg>
+    )
+  }
+
+  if (subject === 'historia_filosofia') {
+    return (
+      <svg viewBox="0 0 150 105" style={common} aria-hidden="true">
+        <path d="M58 88C57 75 50 70 42 62C33 53 32 38 42 28C51 18 68 17 79 25C90 18 107 22 113 35C119 48 112 61 101 67C94 71 90 77 91 88" fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" opacity="0.52" />
+        <path d="M55 38C61 31 70 31 76 38M82 39C89 33 99 35 103 43M49 53C58 51 64 56 68 63M80 61C87 53 98 54 104 62" fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round" opacity="0.78" />
+        <path d="M39 82H110" stroke={color} strokeWidth="4" strokeLinecap="round" opacity="0.32" />
+        <path d="M98 20H125C131 20 135 24 135 30V49C135 55 131 59 125 59H119L112 69V59H102" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.46" />
+        <path d="M108 34H126M108 45H121" stroke={accent} strokeWidth="3" strokeLinecap="round" opacity="0.74" />
+        <circle cx="77" cy="24" r="5" fill={accent} opacity="0.72" />
       </svg>
     )
   }

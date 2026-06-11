@@ -6,13 +6,14 @@ import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/f
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 
 const UI = {
-  color: '#6d28d9',
-  accent: '#a78bfa',
-  light: '#f5f3ff',
-  border: '#ede9fe',
+  color: '#CA8A04',
+  accent: '#FACC15',
+  light: '#FEFCE8',
+  border: '#FEF08A',
   muted: '#64748b',
 }
 
@@ -179,9 +180,17 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
           </label>
         )}
         {requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
-        {(opcion?.enunciado ?? ejercicio.enunciado) && <MathMarkdown text={opcion?.enunciado ?? ejercicio.enunciado} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7" />}
-        {apartadoTexto && <MathMarkdown text={apartadoTexto} className="rounded-2xl border border-slate-200 px-5 py-4 text-sm leading-7" />}
-        {(opcion?.datos ?? ejercicio.datos)?.map((dato, index) => <MathMarkdown key={index} text={dato} className="text-sm text-slate-600" />)}
+        {enunciado && (
+          <div className="rounded-2xl border bg-white px-5 py-4 shadow-[0_12px_30px_rgba(37,99,235,0.06)]" style={{ borderColor: '#e5edf9' }}>
+            <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: UI.color }}>Enunciado oficial</div>
+            <ExamStatement
+              text={enunciado}
+              storageKey={`cat-fisica:${examen.id}:${ejercicio.numero}:${opcion?.opcion ?? 'unica'}:${apartado?.letra ?? apartadoIdx}:enunciado`}
+              accentColor={UI.color}
+              softColor={UI.light}
+            />
+          </div>
+        )}
 
         <section className="border-t pt-5" style={{ borderColor: UI.border }}>
           <div className="mb-3 text-[13px] font-bold uppercase tracking-[0.06em]" style={{ color: UI.muted }}>Tu respuesta</div>

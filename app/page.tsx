@@ -1246,7 +1246,8 @@ function cambiarTipo(t: Tipo) {
       opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
       enunciado: enunciadoActivo?.substring(0, 500),
       respuesta: respuesta?.substring(0, 1000),
-      correccion: correccionVisible?.substring(0, 2000)
+      // Do not truncate full correction: History modal needs complete feedback.
+      correccion: correccionVisible
     }).then(() => {})
     setCargando(false)
   }

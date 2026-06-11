@@ -120,7 +120,8 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           nota_maxima: notaMax,
           enunciado: officialPrompt.substring(0, 500),
           respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 1000),
-          correccion: correccionVisible?.substring(0, 2000)
+          // Do not truncate full correction: History modal needs complete feedback.
+          correccion: correccionVisible
         })
       }
     } finally {

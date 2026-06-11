@@ -198,7 +198,8 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
           nota_maxima: maxScore,
           enunciado: selectedQuestion.enunciado.substring(0, 500),
           respuesta: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen.' : answer.substring(0, 1000),
-          correccion: visible.substring(0, 2000)
+          // Do not truncate full correction: History modal needs complete feedback.
+          correccion: visible
         })
       }
     } catch (caught) {

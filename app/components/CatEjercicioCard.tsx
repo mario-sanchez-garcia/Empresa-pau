@@ -173,7 +173,8 @@ export default function CatEjercicioCard({
           nota_maxima: maxScore,
           enunciado: enunciadoCompleto.substring(0, 500),
           respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 1000),
-          correccion: visible.substring(0, 2000),
+          // Do not truncate full correction: History modal needs complete feedback.
+          correccion: visible,
         })
       }
     } finally {

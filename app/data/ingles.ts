@@ -1,9 +1,11 @@
-export type DiaIngles = "Lunes" | "Martes" | "9:30" | "12:00"
+import { examenesInglesCataluna } from "./ingles_cataluna"
+
+export type DiaIngles = "Lunes" | "Martes" | "9:30" | "12:00" | `Sèrie ${number} - A`
 export type OpcionIngles = "A" | "B" | "Única"
 
 export interface PreguntaIngles {
   id: string
-  numero: 1 | 2 | 3 | 4 | 5
+  numero: number
   bloque: string
   label: string
   tema: string
@@ -11,18 +13,20 @@ export interface PreguntaIngles {
   enunciado: string
   criterios: string
   texto_fuente?: string
+  requiereRevision?: boolean
 }
 
 export interface ExamenIngles {
   id: number
   año: number
-  tipo: "Ordinaria"
-  convocatoria: "Ordinaria"
+  tipo: "Ordinaria" | "Extraordinaria"
+  convocatoria: "Ordinaria" | "Extraordinaria"
   opcion: OpcionIngles
   dia?: DiaIngles
   asignatura: "Inglés"
-  comunidad: "Madrid"
+  comunidad: "Madrid" | "Cataluña"
   titulo: string
+  fuenteDocumento?: string
   preguntas: PreguntaIngles[]
 }
 
@@ -1254,4 +1258,5 @@ Remember: DO NOT SIGN OR IDENTIFY YOUR EMAIL.`,
       },
     ],
   },
+  ...examenesInglesCataluna,
 ]

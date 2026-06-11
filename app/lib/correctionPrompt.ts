@@ -97,6 +97,10 @@ Historia de España:
 - Uso correcto de vocabulario histórico específico: valoración positiva de hasta +0.25 pts.
 
 Inglés:
+- Aplica siempre primero los criterios oficiales incluidos en el bloque. No fuerces el formato de Madrid cuando la comunidad sea Cataluña.
+- Cataluña Reading (2020-2024): cada pregunta tipo test vale 0,375 pts; una respuesta incorrecta resta 0,125 pts y una pregunta no contestada no penaliza.
+- Cataluña Reading (2025): cada respuesta abierta vale 0,5 pts y la falta de inteligibilidad puede descontar hasta 0,3 pts del total de Reading.
+- Cataluña Writing: máximo 4 pts. Evalúa gramática, vocabulario, organización del texto y madurez/adecuación según el enunciado oficial.
 - Q1 True/False (pre-2024): 1 pt por apartado. La respuesta TRUE o FALSE debe ir acompañada de la cita textual exacta del texto que la justifica. Sin cita = 0 en ese apartado. No penalices imprecisiones menores en la cita si la idea es correcta.
 - Q1 True/False/Not Given (2024-2025): el alumno elige 2 de 3 enunciados. Mismos criterios que T/F pero si la respuesta es NG no debe aportar cita; si aporta cita cuando es NG = 0.
 - Q2 Comprensión abierta: 1 pt por pregunta (total 2 pts). 0,5 pts por las ideas parafraseadas correctas; 0,5 pts por la expresión escrita. Penaliza copia literal del texto (máximo 0,25 pts en ese subapartado).

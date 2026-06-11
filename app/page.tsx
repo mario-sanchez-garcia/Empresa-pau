@@ -1068,7 +1068,7 @@ const bloqueActivoLabel =
 const opcionMostrada = asignatura === 'lengua'
   ? (versionLenguaSeleccionada ?? 'Única')
   : asignatura === 'ingles'
-    ? ((examenIngles as any)?.opcion ?? (diaInglesSeleccionado ? `${diaInglesSeleccionado} · ${(examenIngles as any)?.opcion ?? ''}` : 'Única'))
+    ? (diaInglesSeleccionado ? `${diaInglesSeleccionado} · ${(examenIngles as any)?.opcion ?? 'Única'}` : ((examenIngles as any)?.opcion ?? 'Única'))
     : (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
 
 const preguntaActivaKey = [
@@ -1928,7 +1928,7 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
                     )}
                     <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : 'Opción'} {opcionMostrada}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' ? 'Sesión / opción' : 'Opción'} {opcionMostrada}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{formatPts(puntuacionPreguntaActiva)}</span>
@@ -1936,29 +1936,30 @@ function cambiarTipo(t: Tipo) {
                   </div>
                 </div>
                 <div style={{ padding: '24px', overflowY: 'auto' }}>
-                  {asignatura === 'ingles' && (
-                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)', marginBottom: '18px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Preguntas del apartado</div>
+                  {asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
+                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Text</div>
                       <ExamStatement
-                        key={`${preguntaActivaKey}-enunciado`}
-                        text={enunciadoActivo}
+                        key={`${preguntaActivaKey}-texto`}
+                        text={(preguntaActiva as any).texto_fuente}
                         format={false}
                         components={mdComponents}
-                        storageKey={enunciadoStorageKey}
+                        storageKey={fuenteStorageKey}
                         accentColor={cfg.color}
                         softColor={cfg.light}
                         readingMode
                       />
                     </div>
                   )}
-                  {asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
-                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto oficial del examen</div>
+                  {asignatura === 'ingles' && (
+                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)', marginBottom: '18px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Question</div>
                       <ExamStatement
-                        key={`${preguntaActivaKey}-texto`}
-                        text={(preguntaActiva as any).texto_fuente}
+                        key={`${preguntaActivaKey}-enunciado`}
+                        text={enunciadoActivo}
+                        format={false}
                         components={mdComponents}
-                        storageKey={fuenteStorageKey}
+                        storageKey={enunciadoStorageKey}
                         accentColor={cfg.color}
                         softColor={cfg.light}
                         readingMode

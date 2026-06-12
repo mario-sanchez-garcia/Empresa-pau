@@ -67,7 +67,7 @@ export const caminoRoutes: CaminoRoute[] = [
   {
     id: 'completa',
     nombre: 'Ruta completa',
-    meses: 'Septiembre -> Junio',
+    meses: 'Septiembre → Junio',
     duracionAproximada: '38 semanas',
     intensidadDiaria: '20-30 min/dia',
     logica: 'Base + habito + mezcla + simulacros',
@@ -122,21 +122,21 @@ export const caminoRoutes: CaminoRoute[] = [
 ]
 
 export const caminoWeeks: CaminoWeek[] = [
-  { semana: 1, fase: 'Fase 1', fechasAproximadas: '1-7 sep', objetivo: 'Bienvenida, diagnostico y configuracion del perfil', matematicas: 'Algebra base + diagnostico', historia: 'Antiguo Regimen', ingles: 'Vocabulario PAU + diagnostico', mision: 'flashcard + test', duracion: '15-20 min', nota: 'Semana corta para activar habito sin abrumar' },
+  { semana: 1, fase: 'Fase 1', fechasAproximadas: '1-7 sep', objetivo: 'Bienvenida, diagnostico y configuracion del perfil', matematicas: 'Álgebra base + diagnostico', historia: 'Antiguo Regimen', ingles: 'Vocabulario PAU + diagnostico', mision: 'flashcard + test', duracion: '15-20 min', nota: 'Semana corta para activar habito sin abrumar' },
   { semana: 2, fase: 'Fase 1', fechasAproximadas: '8-14 sep', objetivo: 'Primeras tareas reales', matematicas: 'Sistemas de ecuaciones', historia: 'Antiguo Regimen: economia y sociedad', ingles: 'Reading comprension general', mision: 'flashcard + ejercicio_corto', duracion: '20 min', nota: 'Primer contacto con tareas de bloque' },
   { semana: 3, fase: 'Fase 1', fechasAproximadas: '15-21 sep', objetivo: 'Consolidar habito diario', matematicas: 'Matrices y determinantes', historia: 'Reformismo borbonico e Ilustracion', ingles: 'Reading preguntas tipo PAU', mision: 'ejercicio_corto + flashcard', duracion: '20 min', nota: 'Verificar ejercicios reales disponibles' },
-  { semana: 4, fase: 'Fase 1', fechasAproximadas: '22-28 sep', objetivo: 'Primer repaso guiado', matematicas: 'Repaso algebra', historia: 'Crisis Antiguo Regimen: contexto', ingles: 'Use of English: lexico', mision: 'repaso_error + ejercicio_corto', duracion: '20 min', nota: 'Repaso sin meter presion' },
-  { semana: 5, fase: 'Fase 1', fechasAproximadas: '29 sep - 5 oct', objetivo: 'Primer bloque analisis', matematicas: 'Limites y continuidad', historia: 'Guerra de Independencia', ingles: 'Word formation', mision: 'ejercicio_corto + flashcard', duracion: '20-25 min', nota: 'Validar diferencias Madrid/Cataluna' },
+  { semana: 4, fase: 'Fase 1', fechasAproximadas: '22-28 sep', objetivo: 'Primer repaso guiado', matematicas: 'Repaso álgebra', historia: 'Crisis Antiguo Regimen: contexto', ingles: 'Use of English: lexico', mision: 'repaso_error + ejercicio_corto', duracion: '20 min', nota: 'Repaso sin meter presion' },
+  { semana: 5, fase: 'Fase 1', fechasAproximadas: '29 sep - 5 oct', objetivo: 'Primer bloque análisis', matematicas: 'Limites y continuidad', historia: 'Guerra de Independencia', ingles: 'Word formation', mision: 'ejercicio_corto + flashcard', duracion: '20-25 min', nota: 'Validar diferencias Madrid/Cataluna' },
   { semana: 6, fase: 'Fase 1', fechasAproximadas: '6-12 oct', objetivo: 'Derivadas', matematicas: 'Derivadas y reglas', historia: 'Constitucion 1812 y liberalismo', ingles: 'Collocations y conectores', mision: 'ejercicio_corto + correccion_ia', duracion: '20-25 min', nota: 'Primera correccion IA corta' },
-  { semana: 7, fase: 'Fase 1', fechasAproximadas: '13-19 oct', objetivo: 'Analisis aplicado', matematicas: 'Maximos y minimos', historia: 'Fernando VII: absolutismo', ingles: 'Tiempos verbales', mision: 'ejercicio_corto + flashcard', duracion: '20-25 min', nota: 'Consolidar bloque antes del repaso' },
-  { semana: 8, fase: 'Fase 1', fechasAproximadas: '20-26 oct', objetivo: 'Repaso y writing', matematicas: 'Repaso mixto algebra + analisis', historia: 'Estado liberal: introduccion', ingles: 'Mini writing PAU 100-120 palabras', mision: 'repaso_error + writing + flashcard', duracion: '25 min', nota: 'Revisar si el alumno entiende su progreso' },
+  { semana: 7, fase: 'Fase 1', fechasAproximadas: '13-19 oct', objetivo: 'Análisis aplicado', matematicas: 'Maximos y minimos', historia: 'Fernando VII: absolutismo', ingles: 'Tiempos verbales', mision: 'ejercicio_corto + flashcard', duracion: '20-25 min', nota: 'Consolidar bloque antes del repaso' },
+  { semana: 8, fase: 'Fase 1', fechasAproximadas: '20-26 oct', objetivo: 'Repaso y writing', matematicas: 'Repaso mixto álgebra + análisis', historia: 'Estado liberal: introduccion', ingles: 'Mini writing PAU 100-120 palabras', mision: 'repaso_error + writing + flashcard', duracion: '25 min', nota: 'Revisar si el alumno entiende su progreso' },
   { semana: 17, fase: 'Fase 2', fechasAproximadas: '12-18 ene', objetivo: 'Vuelta al habito tras Navidad', matematicas: 'Integrales indefinidas', historia: 'Guerra Civil: causas y sublevacion', ingles: 'Reported speech', mision: 'ejercicio_corto + flashcard', duracion: '20 min', nota: 'Mision reducida si lleva mas de 2 dias sin entrar' },
   { semana: 18, fase: 'Fase 2', fechasAproximadas: '19-25 ene', objetivo: 'Integrales y primera correccion del trimestre', matematicas: 'Integrales definidas', historia: 'Guerra Civil: desarrollo y bandos', ingles: 'Argumentativo con correccion IA', mision: 'ejercicio_corto + correccion_ia', duracion: '25 min', nota: 'Primer feedback serio del trimestre' },
   { semana: 19, fase: 'Fase 2', fechasAproximadas: '26 ene - 1 feb', objetivo: 'Integrales aplicadas', matematicas: 'Areas entre curvas', historia: 'Guerra Civil: consecuencias', ingles: 'Reading actualidad PAU', mision: 'ejercicio_corto + reading', duracion: '25 min', nota: 'Verificar ejercicios PAU de areas' },
-  { semana: 20, fase: 'Fase 2', fechasAproximadas: '2-8 feb', objetivo: 'Primer mini simulacro de analisis', matematicas: 'Mini simulacro: limites, derivadas, integrales', historia: 'Franquismo: etapas y bases', ingles: 'Phrasal verbs PAU', mision: 'mini_simulacro', duracion: '30 min', nota: 'Centrar el mini simulacro en analisis' },
+  { semana: 20, fase: 'Fase 2', fechasAproximadas: '2-8 feb', objetivo: 'Primer mini simulacro de análisis', matematicas: 'Mini simulacro: limites, derivadas, integrales', historia: 'Franquismo: etapas y bases', ingles: 'Phrasal verbs PAU', mision: 'mini_simulacro', duracion: '30 min', nota: 'Centrar el mini simulacro en análisis' },
   { semana: 24, fase: 'Fase 2', fechasAproximadas: '2-8 mar', objetivo: 'Transicion y repaso de estadistica', matematicas: 'Estadistica repaso PAU', historia: 'Transicion y Constitucion 1978', ingles: 'Articulo de opinion', mision: 'ejercicio_corto + reading', duracion: '25 min', nota: 'Validar diferencias Madrid/Cataluna' },
   { semana: 25, fase: 'Fase 2', fechasAproximadas: '9-15 mar', objetivo: 'Espana democratica y repaso de puntos debiles', matematicas: 'Probabilidad repaso', historia: 'Espana democratica y Europa', ingles: 'Conditionals y modal verbs', mision: 'repaso_error + ejercicio_corto', duracion: '25 min', nota: 'Validar temario por CCAA' },
-  { semana: 26, fase: 'Fase 2', fechasAproximadas: '16-22 mar', objetivo: 'Prediccion de nota con datos reales', matematicas: 'Simulacro parcial analisis', historia: 'Mini simulacro mixto historia', ingles: 'Simulacro parcial ingles', mision: 'mini_simulacro + correccion_ia', duracion: '35 min', nota: 'Prediccion solo si hay datos suficientes' },
+  { semana: 26, fase: 'Fase 2', fechasAproximadas: '16-22 mar', objetivo: 'Prediccion de nota con datos reales', matematicas: 'Simulacro parcial análisis', historia: 'Mini simulacro mixto historia', ingles: 'Simulacro parcial ingles', mision: 'mini_simulacro + correccion_ia', duracion: '35 min', nota: 'Prediccion solo si hay datos suficientes' },
   { semana: 29, fase: 'Fase 3', fechasAproximadas: '6-12 abr', objetivo: 'Estrategia de examen', matematicas: 'Estrategia: orden y eleccion', historia: 'Estrategia: comentario y tema', ingles: 'Estrategia: tiempo y orden', mision: 'estrategia_examen + ejercicio_corto', duracion: '25 min', nota: 'Crear guias por asignatura antes' },
   { semana: 30, fase: 'Fase 3', fechasAproximadas: '13-19 abr', objetivo: 'Formato PAU con rubricas', matematicas: 'Simulacro parcial PAU', historia: 'Comentario/fuente con rubrica PAU', ingles: 'Writing completo con IA', mision: 'correccion_ia + mini_simulacro', duracion: '40 min', nota: 'No llamar examen real a tarea parcial' },
   { semana: 34, fase: 'Fase 4', fechasAproximadas: '11-17 may', objetivo: 'Primera semana de simulacros completos escalonados', matematicas: 'Simulacro completo Matemáticas II', historia: 'Simulacro completo Historia', ingles: 'Simulacro completo Ingles', mision: 'simulacro_completo_escalonado', duracion: '60-90 min / 25-30 min', nota: 'No hacer los tres simulacros el mismo dia' },
@@ -170,15 +170,15 @@ export const todayMission = {
 
 export const dailyTasks: DailyCaminoTask[] = [
   { id: 'flashcards-integrales', title: '5 flashcards de integrales', type: 'flashcard', xp: 25, subject: 'Matemáticas II', detail: 'Calienta con formulas, primitivas inmediatas y errores frecuentes.' },
-  { id: 'ejercicios-analisis', title: '2 ejercicios cortos de analisis', type: 'ejercicio_corto', xp: 30, subject: 'Matemáticas II', detail: 'Practica limites, derivadas e integrales sin formato de examen completo.' },
+  { id: 'ejercicios-análisis', title: '2 ejercicios cortos de análisis', type: 'ejercicio_corto', xp: 30, subject: 'Matemáticas II', detail: 'Practica limites, derivadas e integrales sin formato de examen completo.' },
   { id: 'correccion-corta', title: '1 correccion IA corta', type: 'correccion_ia', xp: 30, subject: 'Matemáticas II', detail: 'Deja preparada una respuesta para feedback cuando conectemos IA real.' },
   { id: 'repaso-areas', title: 'Repasar error reciente: calculo de areas', type: 'repaso_error', xp: 20, subject: 'Matemáticas II', detail: 'Vuelve al fallo típico: limites de integracion y signo del area.' }
 ]
 
 export const progressNodes: ProgressNode[] = [
-  { id: 'algebra', label: 'Algebra', description: 'Base completada', status: 'completed' },
-  { id: 'analisis', label: 'Analisis', description: 'Bloque actual', status: 'current' },
-  { id: 'geometria', label: 'Geometria', description: 'Siguiente fase', status: 'next' },
+  { id: 'algebra', label: 'Álgebra', description: 'Base completada', status: 'completed' },
+  { id: 'análisis', label: 'Análisis', description: 'Bloque actual', status: 'current' },
+  { id: 'geometria', label: 'Geometría', description: 'Siguiente fase', status: 'next' },
   { id: 'simulacros', label: 'Simulacros', description: 'Bloqueado hasta consolidar', status: 'locked' }
 ]
 
@@ -186,7 +186,7 @@ export const nextObjectives = [
   { week: 17, label: 'Integrales indefinidas', detail: 'Volver al habito tras Navidad' },
   { week: 18, label: 'Integrales definidas', detail: 'Primera correccion del trimestre' },
   { week: 19, label: 'Areas entre curvas', detail: 'Integrales aplicadas' },
-  { week: 20, label: 'Mini simulacro de analisis', detail: 'Limites, derivadas e integrales' }
+  { week: 20, label: 'Mini simulacro de análisis', detail: 'Limites, derivadas e integrales' }
 ]
 
 export function getRouteById(routeId: CaminoRouteId) {

@@ -63,7 +63,7 @@ export default function CaminoPauClient() {
       <Sidebar activeItem="camino" />
 
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 border-b border-[#dbe7fb] bg-white/80 px-8 py-5 backdrop-blur-xl max-md:px-4">
+        <header className="sticky top-0 z-40 border-b border-[#dbe7fb] bg-white/80 px-8 py-3 backdrop-blur-xl max-md:px-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_18px_42px_rgba(37,99,235,0.26)]">
@@ -81,14 +81,14 @@ export default function CaminoPauClient() {
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-xs font-black text-blue-700 shadow-[0_10px_24px_rgba(37,99,235,0.08)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none"
             >
-              <RotateCcw size={15} /> Reset progreso
+              <RotateCcw size={13} /> Reset progreso
             </button>
           </div>
         </header>
 
-        <main className="mx-auto grid max-w-7xl gap-6 p-6 max-md:p-4">
+        <main className="mx-auto grid max-w-7xl gap-5 p-5 max-md:p-4">
           <MissionCard
             routeId={progress.selectedRouteId}
             completedCount={completedCount}
@@ -174,10 +174,10 @@ function MetricCard({ icon, label, value, tone }: { icon: ReactNode; label: stri
   }[tone]
 
   return (
-    <article className="rounded-[26px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.07)]">
-      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border ${toneClass}`}>{icon}</div>
+    <article className="rounded-[26px] border border-[#dbe7fb] bg-white/90 p-4 shadow-[0_16px_42px_rgba(37,99,235,0.07)]">
+      <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl border ${toneClass}`}>{icon}</div>
       <p className="text-xs font-black uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{value}</p>
+      <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-950">{value}</p>
     </article>
   )
 }

@@ -6,6 +6,16 @@
 
 ---
 
+> **Versión vigente de los archivos de currículum:**
+> - Excel: `docs/camino-pau/camino-pau-curriculum-revisado.xlsx` (pestañas: `calendario_38_semanas`, `vista_revision`, `rutas_entrada`)
+> - Calendario TSV: `docs/camino-pau/calendario-38-semanas-revisado.tsv`
+> - Rutas de entrada: `docs/camino-pau/rutas-entrada.tsv`
+> - Vista de revisión: `docs/camino-pau/vista-revision.tsv`
+>
+> Los archivos CSV originales (v0) se han movido a `docs/camino-pau/archive/` y no deben usarse como referencia.
+
+---
+
 ## 1. Visión de Camino PAU
 
 ### El problema que resuelve
@@ -285,4 +295,44 @@ Antes de pasar al diseño técnico, el equipo debe responder estas preguntas:
 
 ---
 
-*Documento creado como borrador v0. Actualizar este archivo con los resultados de la revisión del equipo antes de comenzar el desarrollo.*
+## 10. Nuevos tipos de tarea (añadidos en revisión v1)
+
+Estos tres tipos de tarea se añaden al listado original para cubrir las semanas de estrategia, simulacros escalonados y última semana.
+
+| Tipo | Qué hace el alumno | Cuándo se usa | Duración est. | Requiere IA | Suma XP |
+|------|-------------------|--------------|--------------|-------------|---------|
+| **estrategia_examen** | Lee o revisa una guía breve sobre cómo abordar el examen PAU: qué preguntas elegir, en qué orden, cómo distribuir el tiempo por sección. No es contenido nuevo, es táctica. | Fase 3, especialmente semana 29. También disponible en fases previas para alumnos que lo pidan. | 15-20 min | No | Sí (+10 XP) |
+| **simulacro_completo_escalonado** | Igual que `simulacro_completo`, pero los tres simulacros (Mates, Historia, Inglés) se reparten a lo largo de la semana, nunca el mismo día. La semana alterna días de simulacro con días de repaso de errores. | Fase 4, semanas 34 y 36. | 60-90 min el día de simulacro / 25-30 min los días de repaso | Sí (corrección IA respuestas abiertas) | Sí (+100 XP por simulacro) |
+| **repaso_ligero** | Repaso suave de última semana: flashcards de fórmulas, conectores y fechas clave. Sin ejercicios nuevos, sin correcciones largas. Pensado para mantener el estado mental sin añadir presión. | Solo semana 38 (última semana antes de la PAU). | 10-15 min | No | Sí (+5 XP) |
+
+> **Nota editorial:** `estrategia_examen` requiere que el equipo cree guías de estrategia por asignatura antes de implementarlo. No se puede lanzar sin ese contenido. Marcar como bloqueante para fase 3.
+
+---
+
+## 11. Adaptación según fecha de entrada
+
+No todos los alumnos empiezan en septiembre. Camino PAU debe ofrecer una ruta adaptada según cuándo empiece el alumno.
+
+La tabla completa está en `docs/camino-pau/rutas-entrada.tsv`. Resumen:
+
+| Mes de entrada | Nombre de ruta | Duración aprox. | Intensidad diaria | Qué no hacer |
+|----------------|---------------|-----------------|-------------------|--------------|
+| Septiembre | Ruta completa | 38 semanas | 20-30 min/día | No meter presión desde el día 1 |
+| Octubre-Noviembre | Ruta normal ajustada | 28-34 semanas | 25-30 min/día | No mostrar "vas tarde" |
+| Diciembre-Enero | Ruta acelerada | 20-26 semanas | 30-40 min/día | No obligar a completar septiembre |
+| Febrero-Marzo | Ruta sprint | 10-16 semanas | 35-45 min/día | No empezar desde teoría básica |
+| Abril-Mayo | Ruta intensiva | 4-8 semanas | 45-60 min/día | No introducir contenido nuevo innecesario |
+
+### Principios clave de adaptación
+
+1. **Nunca mostrar "vas tarde"** — el sistema adapta la ruta sin culpabilizar.
+2. **Cuanto más tarde entra, más se prioriza el impacto en nota** — menos teoría base, más simulacros y repaso de errores.
+3. **El diagnóstico inicial es obligatorio** para todas las rutas — permite saltar bloques ya dominados.
+4. **La misión de reactivación** (10 min) aplica a cualquier ruta si el alumno lleva 2+ días sin entrar.
+5. **La predicción de nota** solo se muestra cuando hay suficiente historial. En rutas cortas puede ser poco fiable al principio — comunicarlo claramente.
+
+> **Revisión del equipo:** ¿Cómo se detecta la fecha de inicio del alumno? ¿Por registro en Pausia, por pregunta explícita en onboarding, o por primera misión completada? Definir antes de implementar el sistema de rutas.
+
+---
+
+*Documento actualizado a revisión v1 (calendario corregido, nuevos tipos de tarea, rutas de entrada). Versión vigente de los archivos: `docs/camino-pau/camino-pau-curriculum-revisado.xlsx`. Actualizar este archivo con los resultados de la revisión del equipo antes de comenzar el desarrollo.*

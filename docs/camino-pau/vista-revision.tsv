@@ -1,0 +1,39 @@
+semana	fechas	fase	objetivo	mates_resumen	historia_resumen	ingles_resumen	mision	duracion	nota_clave
+1	1-7 sep	1	Bienvenida y diagnóstico	Álgebra base + diagnóstico	Antiguo Régimen	Vocabulario PAU + diagnóstico	flashcard + test	15-20 min	Semana corta; activar hábito sin abrumar
+2	8-14 sep	1	Primeras tareas reales	Sistemas de ecuaciones	Antiguo Régimen: economía y sociedad	Reading comprensión general	flashcard + ejercicio_corto	20 min	—
+3	15-21 sep	1	Consolidar hábito	Matrices y determinantes	Reformismo borbónico e Ilustración	Reading preguntas tipo PAU	ejercicio_corto + flashcard	20 min	Verificar ejercicios reales disponibles
+4	22-28 sep	1	Primer repaso	Repaso álgebra	Crisis Antiguo Régimen: contexto	Use of English: léxico	repaso_error + ejercicio_corto	20 min	—
+5	29 sep - 5 oct	1	Primer bloque análisis	Límites y continuidad	Guerra de Independencia	Word formation	ejercicio_corto + flashcard	20-25 min	Validar diferencias Madrid/Cataluña
+6	6-12 oct	1	Derivadas	Derivadas y reglas	Constitución 1812 y liberalismo	Collocations y conectores	ejercicio_corto + correccion_ia	20-25 min	Primera corrección IA corta
+7	13-19 oct	1	Análisis aplicado	Máximos y mínimos	Fernando VII: absolutismo	Tiempos verbales	ejercicio_corto + flashcard	20-25 min	—
+8	20-26 oct	1	Repaso y writing	Repaso mixto álgebra + análisis	Estado liberal: introducción	Mini writing PAU 100-120 palabras	repaso_error + writing + flashcard	25 min	Revisar si el alumno entiende su progreso
+9	27 oct - 2 nov	1	Geometría inicial	Vectores y representación	Isabel II y partidos políticos	Estructura párrafo PAU	ejercicio_corto + flashcard	20-25 min	Validar profundidad geometría por CCAA
+10	3-9 nov	1	Geometría analítica	Ecuaciones recta y plano	Sexenio Democrático	Conectores y coherencia	ejercicio_corto	25 min	—
+11	10-16 nov	1	Geometría con IA	Distancias y posiciones	Restauración: Cánovas y turno	Writing guiado con corrección IA	correccion_ia	25 min	Revisar prompt y criterios corrección
+12	17-23 nov	1	Estadística básica	Variables y distribuciones	Crisis del 98 y regeneracionismo	Transformación de frases	ejercicio_corto + flashcard	20-25 min	Validar estadística por CCAA
+13	24-30 nov	1	Probabilidad básica	Combinatoria y probabilidad condicionada	Alfonso XIII y crisis 1917	Vocabulario temas sociales	flashcard + ejercicio_corto	20-25 min	Bayes como ampliación por CCAA
+14	1-7 dic	1	Repaso estadística	Repaso estadística y probabilidad	Segunda República: proclamación	Reading texto de prensa	repaso_error + ejercicio_corto	20-25 min	—
+15	8-14 dic	1	Primer mini simulacro	Mini simulacro álgebra + análisis	Mini simulacro siglo XIX + Restauración	Mini test: reading + use of english	mini_simulacro	30 min	Verificar feedback claro al alumno
+16	15-21 dic	1	Cierre fase 1	Repaso general fase 1	Repaso general fase 1	Repaso general fase 1	repaso_error + flashcard + test	20 min	Misión ligera; mensaje de progreso trimestral
+17	12-18 ene	2	Vuelta del hábito	Integrales indefinidas	Guerra Civil: causas y sublevación	Reported speech	ejercicio_corto + flashcard	20 min	Misión reducida si lleva +2 días sin entrar
+18	19-25 ene	2	Integrales y corrección IA	Integrales definidas	Guerra Civil: desarrollo y bandos	Argumentativo con corrección IA	ejercicio_corto + correccion_ia	25 min	—
+19	26 ene - 1 feb	2	Integrales aplicadas	Áreas entre curvas	Guerra Civil: consecuencias	Reading actualidad PAU	ejercicio_corto + reading	25 min	Verificar ejercicios PAU de áreas
+20	2-8 feb	2	Mini simulacro análisis	Mini simulacro: límites, derivadas, integrales	Franquismo: etapas y bases	Phrasal verbs PAU	mini_simulacro	30 min	No mezclar bloques todavía
+21	9-15 feb	2	Puntos débiles	Bloque con más errores	Franquismo: desarrollismo	Writing libre con IA	correccion_ia + repaso_error	25 min	Adaptar al historial real
+22	16-22 feb	2	Geometría y franquismo tardío	Geometría repaso PAU	Franquismo tardío y oposición	Vocabulario económico y político	ejercicio_corto + flashcard	25 min	—
+23	23 feb - 1 mar	2	Simulacro mixto	Mini simulacro álgebra + análisis	Mini simulacro: GC + Franquismo	Mini test inglés completo	mini_simulacro	35 min	Revisar criterios puntuación inglés
+24	2-8 mar	2	Transición y estadística	Estadística repaso PAU	Transición y Constitución 1978	Artículo de opinión	ejercicio_corto + reading	25 min	Validar diferencias Madrid/Cataluña
+25	9-15 mar	2	España democrática	Probabilidad repaso	España democrática y Europa	Conditionals y modal verbs	repaso_error + ejercicio_corto	25 min	Validar temario por CCAA
+26	16-22 mar	2	Predicción orientativa	Simulacro parcial análisis	Mini simulacro mixto historia	Simulacro parcial inglés	mini_simulacro + correccion_ia	35 min	Predicción solo si hay datos suficientes
+27	23-29 mar	2	Repaso cierre fase 2	Errores recurrentes	Historia repaso con flashcards	Vocabulario y gramática	repaso_error + flashcard	20 min	—
+28	30 mar - 5 abr	2	Cierre fase 2	Simulacro parcial álgebra + estadística	Simulacro 3 temas históricos	Mini simulacro inglés completo	mini_simulacro	35 min	Revisar intensidad de transición
+29	6-12 abr	3	Estrategia de examen	Estrategia: orden y elección	Estrategia: comentario y tema	Estrategia: tiempo y orden	estrategia_examen + ejercicio_corto	25 min	Crear guías por asignatura antes
+30	13-19 abr	3	Formato PAU real	Simulacro parcial PAU	Comentario/fuente con rúbrica PAU	Writing completo con IA	correccion_ia + mini_simulacro	40 min	No llamar "examen real" a tarea parcial
+31	20-26 abr	3	Bloques débiles	Bloque con más errores del año	Temas con peor resultado	Tipo de tarea con más errores	repaso_error + ejercicio_corto	30 min	Basarse en historial real
+32	27 abr - 3 may	3	Simulacro parcial intenso	2 preguntas formato PAU	Tema + fuente histórica	Reading + writing parcial	mini_simulacro + correccion_ia	40 min	—
+33	4-10 may	3	Repaso final fase 3	Consolidación de errores	Repaso cronológico rápido	Vocabulario y gramática sistemática	repaso_error + flashcard	25 min	No añadir teoría nueva
+34	11-17 may	4	Simulacros completos semana 1	Simulacro completo Matemáticas II	Simulacro completo Historia	Simulacro completo Inglés	simulacro_completo_escalonado	60-90 min / 25-30 min	No hacer los 3 el mismo día
+35	18-24 may	4	Repaso errores simulacro 1	Repaso errores por bloque	Repaso comentario y temas	Repaso writing, reading y UoE	repaso_error	30 min	Usar errores reales del simulacro
+36	25-31 may	4	Simulacros completos semana 2	Segundo simulacro Matemáticas II	Segundo simulacro Historia	Segundo simulacro Inglés	simulacro_completo_escalonado	60-90 min / 25-30 min	Exámenes distintos a semana 34
+37	1-7 jun	4	Repaso intenso final	Errores recurrentes del año	Errores recurrentes y estructuras	Errores writing, reading y grammar	repaso_error + flashcard	25-30 min	Comunicación calmada; sin contenido nuevo
+38	8-14 jun	4	Semana PAU — repaso ligero	Fórmulas y conceptos clave	Fechas y estructura de respuesta	Vocabulary y grammar muy ligero	flashcard + repaso_ligero	10-15 min	Ajustar fechas según convocatoria oficial

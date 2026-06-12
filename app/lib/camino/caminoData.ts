@@ -1,3 +1,5 @@
+import { buildCaminoAction } from './caminoActions'
+
 export type CaminoRouteId = 'completa' | 'ajustada' | 'acelerada' | 'sprint' | 'intensiva'
 
 export interface CaminoRoute {
@@ -47,19 +49,17 @@ export interface CaminoTaskType {
   variant: 'blue' | 'sky' | 'violet' | 'emerald' | 'amber' | 'slate'
 }
 
-export type CaminoActionType = 'flashcards' | 'practice' | 'correction' | 'review_error' | 'simulacro'
-
 export interface DailyCaminoTask {
   id: string
   title: string
   type: CaminoTaskTypeId
   xp: number
-  subject: string
-  block?: string
+  subject: string       // display name, e.g. 'Matemáticas II'
+  subjectKey?: string   // URL param key, e.g. 'mates' — used by buildCaminoAction
+  block?: string        // display name, e.g. 'Análisis'
   detail: string
   actionLabel: string
   actionHref: string
-  actionType: CaminoActionType
 }
 
 export interface ProgressNode {
@@ -174,6 +174,11 @@ export const todayMission = {
   week: 17
 }
 
+function taskAction(type: CaminoTaskTypeId, subject?: string, labelOverride?: string): { actionLabel: string; actionHref: string } {
+  const a = buildCaminoAction(type, subject)
+  return { actionLabel: labelOverride ?? a.label, actionHref: a.href }
+}
+
 export const dailyTasks: DailyCaminoTask[] = [
   {
     id: 'flashcards-integrales',
@@ -181,23 +186,21 @@ export const dailyTasks: DailyCaminoTask[] = [
     type: 'flashcard',
     xp: 25,
     subject: 'Matemáticas II',
+    subjectKey: 'mates',
     block: 'Análisis',
-    detail: 'Calienta con formulas, primitivas inmediatas y errores frecuentes.',
-    actionLabel: 'Repasar flashcards',
-    actionHref: '/zona',
-    actionType: 'flashcards'
+    detail: 'Calienta con fórmulas, primitivas inmediatas y errores frecuentes.',
+    ...taskAction('flashcard', 'mates'),
   },
   {
-    id: 'ejercicios-análisis',
+    id: 'ejercicios-analisis',
     title: '2 ejercicios cortos de análisis',
     type: 'ejercicio_corto',
     xp: 30,
     subject: 'Matemáticas II',
+    subjectKey: 'mates',
     block: 'Análisis',
-    detail: 'Practica limites, derivadas e integrales sin formato de examen completo.',
-    actionLabel: 'Practicar ahora',
-    actionHref: '/?subject=mates',
-    actionType: 'practice'
+    detail: 'Practica límites, derivadas e integrales sin formato de examen completo.',
+    ...taskAction('ejercicio_corto', 'mates', 'Practicar análisis'),
   },
   {
     id: 'correccion-corta',
@@ -205,11 +208,10 @@ export const dailyTasks: DailyCaminoTask[] = [
     type: 'correccion_ia',
     xp: 30,
     subject: 'Matemáticas II',
+    subjectKey: 'mates',
     block: 'Análisis',
     detail: 'Deja preparada una respuesta para feedback cuando conectemos IA real.',
-    actionLabel: 'Hacer corrección',
-    actionHref: '/?subject=mates',
-    actionType: 'correction'
+    ...taskAction('correccion_ia', 'mates'),
   },
   {
     id: 'repaso-areas',
@@ -217,12 +219,11 @@ export const dailyTasks: DailyCaminoTask[] = [
     type: 'repaso_error',
     xp: 20,
     subject: 'Matemáticas II',
+    subjectKey: 'mates',
     block: 'Análisis',
     detail: 'Vuelve al fallo típico: límites de integración y signo del área.',
-    actionLabel: 'Ver historial',
-    actionHref: '/?view=historial',
-    actionType: 'review_error'
-  }
+    ...taskAction('repaso_error'),
+  },
 ]
 
 export const progressNodes: ProgressNode[] = [

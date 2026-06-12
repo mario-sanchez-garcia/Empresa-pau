@@ -153,10 +153,13 @@ export default function CaminoPauClient() {
             <WhyCard title="Ruta adaptable" text="Tu ruta se adapta según cuándo empiezas." />
           </section>
 
-          <section className="rounded-[28px] border border-dashed border-blue-200 bg-blue-50/70 p-5 text-sm font-bold leading-6 text-blue-950">
+          <section className="rounded-[28px] border border-dashed border-blue-200 bg-blue-50/70 p-5">
             <div className="flex items-start gap-3">
               <Target className="mt-0.5 shrink-0 text-blue-700" size={19} />
-              <p>Esta es una vista previa interna. La conexión con ejercicios reales, IA y Supabase irá en la siguiente fase.</p>
+              <div>
+                <p className="text-sm font-bold leading-6 text-blue-950">Las tareas ya te llevan a las zonas reales de Pausia. La personalización automática — tareas generadas desde tu progreso, historial de errores e IA — llegará en la siguiente fase.</p>
+                <p className="mt-1 text-xs font-semibold text-blue-500">Vista previa interna · Sin persistencia real todavía</p>
+              </div>
             </div>
           </section>
         </main>

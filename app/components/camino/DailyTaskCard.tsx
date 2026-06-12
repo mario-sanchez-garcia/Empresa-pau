@@ -1,4 +1,5 @@
-import { CheckCircle2, Circle, Sparkles } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowRight, CheckCircle2, Circle, Sparkles } from 'lucide-react'
 import { caminoTaskTypes, type DailyCaminoTask } from '@/app/lib/camino/caminoData'
 
 interface DailyTaskCardProps {
@@ -40,7 +41,15 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
           </div>
           <h3 className="mt-3 text-base font-black text-slate-900">{task.title}</h3>
           <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">{task.detail}</p>
-          <p className="mt-2 text-xs font-bold text-slate-400">{task.subject} · {type.description}</p>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <p className="text-xs font-bold text-slate-400">{task.subject}{task.block ? ` · ${task.block}` : ''}</p>
+            <Link
+              href={task.actionHref}
+              className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            >
+              {task.actionLabel} <ArrowRight size={11} />
+            </Link>
+          </div>
         </div>
       </div>
     </article>

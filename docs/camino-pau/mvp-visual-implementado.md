@@ -48,6 +48,48 @@ Los datos se han derivado de:
 
 La app no lee el `.xlsx` ni los TSV en runtime.
 
+## Fase 2A — Navegación desde tareas
+
+Implementado en `feat: connect camino tasks to app sections`.
+
+Cada tarea de la misión diaria tiene ahora un botón de acción secundario que lleva al alumno a la zona correspondiente de la app.
+
+### Acciones añadidas a cada tarea
+
+| Tarea | `actionType` | `actionLabel` | `actionHref` | Estado |
+|---|---|---|---|---|
+| 5 flashcards de integrales | `flashcards` | Repasar flashcards | `/zona` | Real — La Zona tiene flashcards reales vía Supabase |
+| 2 ejercicios cortos de análisis | `practice` | Practicar ahora | `/?subject=mates` | Real — navega a Exámenes de Matemáticas II |
+| 1 corrección IA corta | `correction` | Hacer corrección | `/?subject=mates` | Provisional — lleva a Exámenes donde está la corrección IA; en Fase 2B debería llevar a flujo de corrección directamente |
+| Repasar error reciente: cálculo de áreas | `review_error` | Ver historial | `/?view=historial` | Real — navega al Historial de correcciones |
+
+### Qué es real
+
+- `/?subject=mates` — soportado por `readSubjectFromUrl()` en `app/page.tsx:284`. Carga directamente Exámenes de Matemáticas II.
+- `/?view=historial` — soportado por `readHomeSectionFromUrl()` en `app/page.tsx:278`. Carga directamente el Historial.
+- `/zona` — página real con flashcards conectadas a Supabase.
+
+### Qué sigue siendo provisional
+
+- El enlace de corrección (`/?subject=mates`) lleva a los exámenes generales, no a un flujo de corrección pre-cargado. En Fase 2B debería existir algo como `/?subject=mates&mode=correccion` o una ruta dedicada.
+- Las tareas diarias son datos mock estáticos (todas de Semana 17, Análisis). En Fase 2B se generarán dinámicamente desde el currículum y el progreso del alumno.
+- No existe filtro por bloque (`block: 'Análisis'`). El campo está definido en la interfaz para cuando exista soporte.
+
+### Cambios técnicos
+
+- `DailyCaminoTask` (en `caminoData.ts`) tiene ahora: `block?`, `actionLabel`, `actionHref`, `actionType`.
+- `DailyTaskCard.tsx` muestra el botón de acción como enlace `<Link>` secundario a la derecha del footer de la tarea.
+- Completar una tarea y pulsar la acción son acciones independientes: el usuario puede hacer una sin la otra.
+
+### Qué queda para Fase 2B
+
+- Filtros reales por asignatura y bloque (query params `block=analisis`, etc.).
+- Generación dinámica de tareas desde el currículum de 38 semanas.
+- Guardar progreso en Supabase (tabla `camino_progress`).
+- Usar historial real de errores para poblar `repaso_error`.
+- Tracking de Camino PAU en el panel admin.
+- Beta con alumnos reales.
+
 ## Qué queda para fase 2
 
 - Persistencia real en Supabase.

@@ -47,13 +47,19 @@ export interface CaminoTaskType {
   variant: 'blue' | 'sky' | 'violet' | 'emerald' | 'amber' | 'slate'
 }
 
+export type CaminoActionType = 'flashcards' | 'practice' | 'correction' | 'review_error' | 'simulacro'
+
 export interface DailyCaminoTask {
   id: string
   title: string
   type: CaminoTaskTypeId
   xp: number
   subject: string
+  block?: string
   detail: string
+  actionLabel: string
+  actionHref: string
+  actionType: CaminoActionType
 }
 
 export interface ProgressNode {
@@ -169,10 +175,54 @@ export const todayMission = {
 }
 
 export const dailyTasks: DailyCaminoTask[] = [
-  { id: 'flashcards-integrales', title: '5 flashcards de integrales', type: 'flashcard', xp: 25, subject: 'Matemáticas II', detail: 'Calienta con formulas, primitivas inmediatas y errores frecuentes.' },
-  { id: 'ejercicios-análisis', title: '2 ejercicios cortos de análisis', type: 'ejercicio_corto', xp: 30, subject: 'Matemáticas II', detail: 'Practica limites, derivadas e integrales sin formato de examen completo.' },
-  { id: 'correccion-corta', title: '1 correccion IA corta', type: 'correccion_ia', xp: 30, subject: 'Matemáticas II', detail: 'Deja preparada una respuesta para feedback cuando conectemos IA real.' },
-  { id: 'repaso-areas', title: 'Repasar error reciente: calculo de areas', type: 'repaso_error', xp: 20, subject: 'Matemáticas II', detail: 'Vuelve al fallo típico: limites de integracion y signo del area.' }
+  {
+    id: 'flashcards-integrales',
+    title: '5 flashcards de integrales',
+    type: 'flashcard',
+    xp: 25,
+    subject: 'Matemáticas II',
+    block: 'Análisis',
+    detail: 'Calienta con formulas, primitivas inmediatas y errores frecuentes.',
+    actionLabel: 'Repasar flashcards',
+    actionHref: '/zona',
+    actionType: 'flashcards'
+  },
+  {
+    id: 'ejercicios-análisis',
+    title: '2 ejercicios cortos de análisis',
+    type: 'ejercicio_corto',
+    xp: 30,
+    subject: 'Matemáticas II',
+    block: 'Análisis',
+    detail: 'Practica limites, derivadas e integrales sin formato de examen completo.',
+    actionLabel: 'Practicar ahora',
+    actionHref: '/?subject=mates',
+    actionType: 'practice'
+  },
+  {
+    id: 'correccion-corta',
+    title: '1 corrección IA corta',
+    type: 'correccion_ia',
+    xp: 30,
+    subject: 'Matemáticas II',
+    block: 'Análisis',
+    detail: 'Deja preparada una respuesta para feedback cuando conectemos IA real.',
+    actionLabel: 'Hacer corrección',
+    actionHref: '/?subject=mates',
+    actionType: 'correction'
+  },
+  {
+    id: 'repaso-areas',
+    title: 'Repasar error reciente: cálculo de áreas',
+    type: 'repaso_error',
+    xp: 20,
+    subject: 'Matemáticas II',
+    block: 'Análisis',
+    detail: 'Vuelve al fallo típico: límites de integración y signo del área.',
+    actionLabel: 'Ver historial',
+    actionHref: '/?view=historial',
+    actionType: 'review_error'
+  }
 ]
 
 export const progressNodes: ProgressNode[] = [

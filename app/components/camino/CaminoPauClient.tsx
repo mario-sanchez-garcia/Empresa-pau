@@ -1,7 +1,6 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { CalendarDays, Flame, GraduationCap, RotateCcw, Route, Sparkles, Target, TrendingUp } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import DailyTaskCard from '@/app/components/camino/DailyTaskCard'
@@ -9,54 +8,24 @@ import MissionCard from '@/app/components/camino/MissionCard'
 import ProgressPath from '@/app/components/camino/ProgressPath'
 import RouteCard from '@/app/components/camino/RouteCard'
 import { dailyTasks, nextObjectives } from '@/app/lib/camino/caminoData'
-import {
-  completeCaminoTask,
-  completedTasksForDate,
-  createInitialProgress,
-  loadCaminoProgress,
-  resetCaminoProgress,
-  saveCaminoProgress,
-  setCaminoRoute,
-  todayKey,
-  type CaminoProgress
-} from '@/app/lib/camino/caminoProgress'
-import type { CaminoRouteId, DailyCaminoTask } from '@/app/lib/camino/caminoData'
+import { completedTasksForDate } from '@/app/lib/camino/caminoProgress'
+import { useCaminoProgress } from '@/app/hooks/useCaminoProgress'
 
 export default function CaminoPauClient() {
-  const dayKey = useMemo(() => todayKey(), [])
-  const [progress, setProgress] = useState<CaminoProgress>(() => createInitialProgress(dayKey))
-  const [ready, setReady] = useState(false)
-  const tasksRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    setProgress(loadCaminoProgress(dayKey))
-    setReady(true)
-  }, [dayKey])
-
-  useEffect(() => {
-    if (ready) saveCaminoProgress(progress)
-  }, [progress, ready])
+  const {
+    progress,
+    loading,
+    source,
+    dayKey,
+    completeTask,
+    changeRoute,
+    resetProgress
+  } = useCaminoProgress()
 
   const completedTaskIds = completedTasksForDate(progress, dayKey)
   const completedCount = completedTaskIds.length
   const missionCompleted = completedCount === dailyTasks.length
   const missionProgress = Math.round((completedCount / dailyTasks.length) * 100)
-
-  function handleCompleteTask(task: DailyCaminoTask) {
-    setProgress(current => completeCaminoTask(current, dayKey, task, dailyTasks))
-  }
-
-  function handleRouteChange(routeId: CaminoRouteId) {
-    setProgress(current => setCaminoRoute(current, routeId))
-  }
-
-  function handleReset() {
-    setProgress(resetCaminoProgress(dayKey))
-  }
-
-  function scrollToTasks() {
-    tasksRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   return (
     <div className="flex min-h-screen bg-[radial-gradient(circle_at_16%_12%,rgba(219,234,254,0.88),transparent_30%),radial-gradient(circle_at_86%_8%,rgba(224,231,255,0.72),transparent_28%),radial-gradient(circle_at_82%_82%,rgba(186,230,253,0.45),transparent_30%),linear-gradient(135deg,#fbfdff_0%,#f8fafc_48%,#eff6ff_100%)] text-slate-900 max-lg:block">
@@ -71,7 +40,9 @@ export default function CaminoPauClient() {
             <div className="min-w-0">
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-black tracking-tight text-slate-950 md:text-3xl">Camino PAU</h1>
-                <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-blue-700">Beta interna</span>
+                <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-blue-700">
+                  {source === 'supabase' ? 'En vivo' : 'Beta interna'}
+                </span>
               </div>
               <p className="text-sm font-bold text-slate-500">Tu misión diaria para llegar preparado a la PAU</p>
               <p className="mt-1 text-xs font-semibold text-slate-400">Cada día sabes exactamente qué estudiar.</p>
@@ -85,17 +56,39 @@ export default function CaminoPauClient() {
             completedCount={completedCount}
             totalTasks={dailyTasks.length}
             missionCompleted={missionCompleted}
-            onPrimaryAction={scrollToTasks}
+            onPrimaryAction={() => {
+              document.getElementById('camino-tasks')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
           />
 
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <MetricCard icon={<Flame size={19} />} label="Racha actual" value={`${progress.streakDays} días`} tone="amber" />
-            <MetricCard icon={<Sparkles size={19} />} label="XP total" value={formatNumber(progress.xpTotal)} tone="blue" />
-            <MetricCard icon={<GraduationCap size={19} />} label="Nivel Matemáticas II" value={String(progress.levelBySubject.mates)} tone="slate" />
-            <MetricCard icon={<TrendingUp size={19} />} label="Progreso hacia la PAU" value={`${progress.progressTowardsPau}%`} tone="emerald" />
+            <MetricCard
+              icon={<Flame size={19} />}
+              label="Racha actual"
+              value={loading ? '–' : `${progress.streakDays} días`}
+              tone="amber"
+            />
+            <MetricCard
+              icon={<Sparkles size={19} />}
+              label="XP total"
+              value={loading ? '–' : formatNumber(progress.xpTotal)}
+              tone="blue"
+            />
+            <MetricCard
+              icon={<GraduationCap size={19} />}
+              label="Nivel Matemáticas II"
+              value={loading ? '–' : String(progress.levelBySubject.mates)}
+              tone="slate"
+            />
+            <MetricCard
+              icon={<TrendingUp size={19} />}
+              label="Progreso hacia la PAU"
+              value={loading ? '–' : `${progress.progressTowardsPau}%`}
+              tone="emerald"
+            />
           </section>
 
-          <section ref={tasksRef} className="grid gap-6 xl:grid-cols-[1fr_380px]">
+          <section id="camino-tasks" className="grid gap-6 xl:grid-cols-[1fr_380px]">
             <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
                 <div>
@@ -107,24 +100,34 @@ export default function CaminoPauClient() {
                 </span>
               </div>
               <div className="mb-5 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-all duration-500" style={{ width: `${missionProgress}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-all duration-500"
+                  style={{ width: `${missionProgress}%` }}
+                />
               </div>
               <div className="grid gap-3">
                 {dailyTasks.map(task => (
-                  <DailyTaskCard key={task.id} task={task} completed={completedTaskIds.includes(task.id)} onComplete={handleCompleteTask} />
+                  <DailyTaskCard
+                    key={task.id}
+                    task={task}
+                    completed={completedTaskIds.includes(task.id)}
+                    onComplete={completeTask}
+                  />
                 ))}
               </div>
             </div>
 
             <div className="grid content-start gap-6">
-              <RouteCard selectedRouteId={progress.selectedRouteId} onRouteChange={handleRouteChange} />
+              <RouteCard selectedRouteId={progress.selectedRouteId} onRouteChange={changeRoute} />
               <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">Próximos objetivos</p>
                 <h2 className="mt-1 text-xl font-black text-slate-950">Lo que viene después</h2>
                 <div className="mt-4 grid gap-3">
                   {nextObjectives.map(item => (
                     <div key={item.week} className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-blue-700 shadow-sm">{item.week}</div>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-blue-700 shadow-sm">
+                        {item.week}
+                      </div>
                       <div>
                         <h3 className="text-sm font-black text-slate-900">Semana {item.week}: {item.label}</h3>
                         <p className="mt-1 text-xs font-bold text-slate-500">{item.detail}</p>
@@ -148,8 +151,17 @@ export default function CaminoPauClient() {
             <div className="flex items-start gap-3">
               <Target className="mt-0.5 shrink-0 text-blue-700" size={19} />
               <div>
-                <p className="text-sm font-bold leading-6 text-blue-950">Las tareas te acercan a las zonas reales de Pausia. La personalización automática — tareas generadas desde tu progreso, historial de errores e IA — llegará en la siguiente fase.</p>
-                <p className="mt-2 text-xs font-semibold leading-5 text-blue-600">Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo. No hay persistencia real todavía.</p>
+                {source === 'supabase' ? (
+                  <>
+                    <p className="text-sm font-bold leading-6 text-blue-950">Tu progreso se guarda automáticamente en Pausia. XP, racha y misiones completadas están sincronizados en todos tus dispositivos.</p>
+                    <p className="mt-2 text-xs font-semibold leading-5 text-blue-600">La personalización automática — tareas generadas desde tu historial de errores e IA — llegará en la siguiente fase.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold leading-6 text-blue-950">Las tareas te acercan a las zonas reales de Pausia. La personalización automática — tareas generadas desde tu progreso, historial de errores e IA — llegará en la siguiente fase.</p>
+                    <p className="mt-2 text-xs font-semibold leading-5 text-blue-600">Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo. No hay persistencia real todavía.</p>
+                  </>
+                )}
               </div>
             </div>
           </section>
@@ -161,7 +173,7 @@ export default function CaminoPauClient() {
             </div>
             <button
               type="button"
-              onClick={handleReset}
+              onClick={resetProgress}
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 focus:outline-none"
             >
               <RotateCcw size={12} /> Reiniciar demo local

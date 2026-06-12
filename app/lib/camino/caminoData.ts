@@ -76,10 +76,10 @@ export const caminoRoutes: CaminoRoute[] = [
     meses: 'Septiembre → Junio',
     duracionAproximada: '38 semanas',
     intensidadDiaria: '20-30 min/dia',
-    logica: 'Base + habito + mezcla + simulacros',
+    logica: 'Base + hábito + mezcla + simulacros',
     prioridad: 'Aprender bien',
     mensajeAlumno: 'Empiezas desde el principio con una ruta completa hasta la PAU.',
-    queNoHacer: 'No meter presion desde el dia 1'
+    queNoHacer: 'No meter presión desde el día 1'
   },
   {
     id: 'ajustada',
@@ -89,7 +89,7 @@ export const caminoRoutes: CaminoRoute[] = [
     intensidadDiaria: '25-30 min/dia',
     logica: 'Saltar bienvenida y comprimir base',
     prioridad: 'Recuperar ritmo',
-    mensajeAlumno: 'Te hemos creado una ruta ajustada para ponerte al dia sin agobio.',
+    mensajeAlumno: 'Te hemos creado una ruta ajustada para ponerte al día sin agobio.',
     queNoHacer: 'No mostrar "vas tarde"'
   },
   {
@@ -98,8 +98,8 @@ export const caminoRoutes: CaminoRoute[] = [
     meses: 'Diciembre-Enero',
     duracionAproximada: '20-26 semanas',
     intensidadDiaria: '30-40 min/dia',
-    logica: 'Diagnostico + bloques clave + mini simulacros antes',
-    prioridad: 'Ponerse al dia',
+    logica: 'Diagnóstico + bloques clave + mini simulacros antes',
+    prioridad: 'Ponerse al día',
     mensajeAlumno: 'Te hemos creado una ruta acelerada hasta la PAU.',
     queNoHacer: 'No obligar a completar septiembre'
   },
@@ -110,9 +110,9 @@ export const caminoRoutes: CaminoRoute[] = [
     duracionAproximada: '10-16 semanas',
     intensidadDiaria: '35-45 min/dia',
     logica: 'Bloques de alto impacto + simulacros parciales + errores',
-    prioridad: 'Subir nota rapido',
-    mensajeAlumno: 'Vamos a priorizar lo que mas impacto tiene en tu nota.',
-    queNoHacer: 'No empezar desde teoria basica'
+    prioridad: 'Subir nota rápido',
+    mensajeAlumno: 'Vamos a priorizar lo que más impacto tiene en tu nota.',
+    queNoHacer: 'No empezar desde teoría básica'
   },
   {
     id: 'intensiva',
@@ -153,7 +153,7 @@ export const caminoWeeks: CaminoWeek[] = [
 ]
 
 export const caminoTaskTypes: Record<CaminoTaskTypeId, CaminoTaskType> = {
-  flashcard: { id: 'flashcard', label: 'Flashcards', baseXp: 5, description: 'Repaso rapido de conceptos clave.', variant: 'blue' },
+  flashcard: { id: 'flashcard', label: 'Flashcards', baseXp: 5, description: 'Repaso rápido de conceptos clave.', variant: 'blue' },
   ejercicio_corto: { id: 'ejercicio_corto', label: 'Ejercicio corto', baseXp: 15, description: 'Practica concreta de un bloque PAU.', variant: 'sky' },
   correccion_ia: { id: 'correccion_ia', label: 'Correccion IA', baseXp: 30, description: 'Respuesta enviada para feedback guiado.', variant: 'violet' },
   repaso_error: { id: 'repaso_error', label: 'Repaso de error', baseXp: 20, description: 'Volver sobre un fallo reciente.', variant: 'amber' },
@@ -234,7 +234,7 @@ export const progressNodes: ProgressNode[] = [
 ]
 
 export const nextObjectives = [
-  { week: 17, label: 'Integrales indefinidas', detail: 'Volver al habito tras Navidad' },
+  { week: 17, label: 'Integrales indefinidas', detail: 'Volver al hábito tras Navidad' },
   { week: 18, label: 'Integrales definidas', detail: 'Primera correccion del trimestre' },
   { week: 19, label: 'Areas entre curvas', detail: 'Integrales aplicadas' },
   { week: 20, label: 'Mini simulacro de análisis', detail: 'Limites, derivadas e integrales' }

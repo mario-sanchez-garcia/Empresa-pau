@@ -64,27 +64,18 @@ export default function CaminoPauClient() {
 
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-40 border-b border-[#dbe7fb] bg-white/80 px-8 py-3 backdrop-blur-xl max-md:px-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_18px_42px_rgba(37,99,235,0.26)]">
-                <Route size={27} strokeWidth={2.2} />
-              </div>
-              <div className="min-w-0">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-black tracking-tight text-slate-950 md:text-3xl">Camino PAU</h1>
-                  <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-blue-700">MVP interno</span>
-                </div>
-                <p className="text-sm font-bold text-slate-500">Tu misión diaria para llegar preparado a la PAU</p>
-                <p className="mt-1 text-xs font-semibold text-slate-400">Cada día sabes exactamente qué estudiar.</p>
-              </div>
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_18px_42px_rgba(37,99,235,0.26)]">
+              <Route size={27} strokeWidth={2.2} />
             </div>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none"
-            >
-              <RotateCcw size={13} /> Reset progreso
-            </button>
+            <div className="min-w-0">
+              <div className="mb-1 flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-black tracking-tight text-slate-950 md:text-3xl">Camino PAU</h1>
+                <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-blue-700">Beta interna</span>
+              </div>
+              <p className="text-sm font-bold text-slate-500">Tu misión diaria para llegar preparado a la PAU</p>
+              <p className="mt-1 text-xs font-semibold text-slate-400">Cada día sabes exactamente qué estudiar.</p>
+            </div>
           </div>
         </header>
 
@@ -157,10 +148,24 @@ export default function CaminoPauClient() {
             <div className="flex items-start gap-3">
               <Target className="mt-0.5 shrink-0 text-blue-700" size={19} />
               <div>
-                <p className="text-sm font-bold leading-6 text-blue-950">Las tareas ya te llevan a las zonas reales de Pausia. La personalización automática — tareas generadas desde tu progreso, historial de errores e IA — llegará en la siguiente fase.</p>
-                <p className="mt-1 text-xs font-semibold text-blue-500">Vista previa interna · Sin persistencia real todavía</p>
+                <p className="text-sm font-bold leading-6 text-blue-950">Las tareas te acercan a las zonas reales de Pausia. La personalización automática — tareas generadas desde tu progreso, historial de errores e IA — llegará en la siguiente fase.</p>
+                <p className="mt-2 text-xs font-semibold leading-5 text-blue-600">Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo. No hay persistencia real todavía.</p>
               </div>
             </div>
+          </section>
+
+          <section className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Opciones de demo</p>
+              <p className="mt-0.5 text-xs font-semibold text-slate-400">Solo para pruebas internas</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 focus:outline-none"
+            >
+              <RotateCcw size={12} /> Reiniciar demo local
+            </button>
           </section>
         </main>
       </div>

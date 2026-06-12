@@ -6,7 +6,7 @@ Se ha creado la primera versión funcional interna de Camino PAU en `/camino`.
 
 Incluye:
 
-- Header de Camino PAU con badge `MVP interno`.
+- Header de Camino PAU con badge `Beta interna`.
 - Misión diaria con día, ruta activa, objetivo, tiempo estimado y progreso.
 - 4 tareas completables con XP y estado visual.
 - Métricas de racha, XP total, nivel de Matemáticas II y progreso hacia la PAU.
@@ -56,12 +56,14 @@ Cada tarea de la misión diaria tiene ahora un botón de acción secundario que 
 
 ### Acciones añadidas a cada tarea
 
-| Tarea | `actionType` | `actionLabel` | `actionHref` | Estado |
+`actionType` fue el nombre original del campo. En Fase 2B se eliminó y se consolida en el campo `type` (de tipo `CaminoTaskTypeId`). El helper `buildCaminoAction(type, subject?)` en `caminoActions.ts` hace la resolución de `actionLabel` y `actionHref`. Los documentos anteriores que mencionen `actionType` como campo de `DailyCaminoTask` están desactualizados.
+
+| Tarea | `type` | `actionLabel` | `actionHref` | Estado |
 |---|---|---|---|---|
-| 5 flashcards de integrales | `flashcards` | Repasar flashcards | `/zona` | Real — La Zona tiene flashcards reales vía Supabase |
-| 2 ejercicios cortos de análisis | `practice` | Practicar ahora | `/?subject=mates` | Real — navega a Exámenes de Matemáticas II |
-| 1 corrección IA corta | `correction` | Hacer corrección | `/?subject=mates` | Provisional — lleva a Exámenes donde está la corrección IA; en Fase 2B debería llevar a flujo de corrección directamente |
-| Repasar error reciente: cálculo de áreas | `review_error` | Ver historial | `/?view=historial` | Real — navega al Historial de correcciones |
+| 5 flashcards de integrales | `flashcard` | Repasar flashcards | `/zona` | Real — La Zona tiene flashcards reales vía Supabase |
+| 2 ejercicios cortos de análisis | `ejercicio_corto` | Practicar análisis | `/?subject=mates` | Real — navega a Exámenes de Matemáticas II |
+| 1 corrección IA corta | `correccion_ia` | Hacer corrección | `/?subject=mates` | Provisional — lleva a Exámenes donde está la corrección IA |
+| Repasar error reciente: cálculo de áreas | `repaso_error` | Ver historial | `/?view=historial` | Real — navega al Historial de correcciones |
 
 ### Qué es real
 
@@ -77,7 +79,7 @@ Cada tarea de la misión diaria tiene ahora un botón de acción secundario que 
 
 ### Cambios técnicos
 
-- `DailyCaminoTask` (en `caminoData.ts`) tiene ahora: `block?`, `actionLabel`, `actionHref`, `actionType`.
+- `DailyCaminoTask` (en `caminoData.ts`) tiene: `type`, `block?`, `subjectKey?`, `actionLabel`, `actionHref`. El campo `actionType` fue eliminado en Fase 2B — `type` cumple la misma función y es la fuente de verdad.
 - `DailyTaskCard.tsx` muestra el botón de acción como enlace `<Link>` secundario a la derecha del footer de la tarea.
 - Completar una tarea y pulsar la acción son acciones independientes: el usuario puede hacer una sin la otra.
 
@@ -179,6 +181,40 @@ El ID `'ejercicios-análisis'` (con acento) se cambió a `'ejercicios-analisis'`
 - **Beta con alumnos reales** — fase de prueba cerrada antes de lanzamiento general.
 - **Página de estrategia de examen dedicada** — actualmente `estrategia_examen` redirige a `/planning` como fallback.
 
+## Saneamiento previo a Supabase
+
+Implementado en `chore: clarify camino pau preview state`.
+
+### Qué sigue siendo local/mock
+
+- XP, racha, nivel y progreso son valores demo en `localStorage`. No están vinculados a ningún usuario real.
+- Las tareas son las mismas para todos los usuarios y todos los días (Semana 17, Análisis).
+- La misión diaria no sabe en qué semana está el alumno ni qué errores ha cometido.
+- `todayKey()` usaba UTC — corregido a hora local para que la misión no cambie a las 11pm.
+
+### Qué se ha aclarado en UI
+
+- Badge cambiado de `MVP interno` a `Beta interna` — más honesto, menos técnico.
+- Botón "Reset progreso" movido de la cabecera a una zona discreta "Opciones de demo" al final de la página. Texto: "Reiniciar demo local". Microcopy: "Solo para pruebas internas".
+- Microcopy del aviso inferior actualizado: "Las tareas te **acercan** a las zonas reales de Pausia" (no "ya te llevan"). Añadida nota explícita: "Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo."
+- Tildes corregidas en strings de rutas y tipos de tarea visibles en la UI: `hábito`, `presión`, `día`, `rápido`, `Diagnóstico`, `más`, `teoría básica`.
+
+### Por qué no se debe vender todavía como personalización real
+
+1. El XP no distingue entre usuarios — dos alumnos con distinto rendimiento ven los mismos valores.
+2. Las tareas no provienen del historial real de errores del alumno.
+3. La racha no sobrevive entre dispositivos ni entre sesiones si se borra el localStorage.
+4. No hay ningún tracking de qué alumnos completan qué tareas.
+5. La "ruta de entrada" seleccionada no cambia las tareas — es solo cosmética en esta fase.
+
+### Qué queda para Fase 2C
+
+Ver sección `## Pendiente Fase 2C` en este documento.
+
+### Decisión sobre `actionType`
+
+El campo `actionType: CaminoActionType` fue eliminado de `DailyCaminoTask` en Fase 2B. La documentación de Fase 2A que lo menciona está desactualizada. El campo `type: CaminoTaskTypeId` cumple la misma función y es la fuente de verdad para `buildCaminoAction()`. No se ha añadido un alias para no introducir deuda técnica.
+
 ## Cómo probar `/camino`
 
 1. Abrir `/camino`.
@@ -187,6 +223,6 @@ El ID `'ejercicios-análisis'` (con acento) se cambió a `'ejercicios-analisis'`
 4. Completar tareas y comprobar que sube el XP.
 5. Completar todas las tareas y comprobar el estado `Misión completada`.
 6. Recargar y comprobar que el estado se mantiene con `localStorage`.
-7. Pulsar `Reset progreso` y comprobar que vuelve al estado demo inicial.
+7. Abrir "Opciones de demo" y pulsar "Reiniciar demo local" — comprobar que vuelve al estado demo inicial.
 8. Revisar la vista en móvil.
 9. Comprobar que Exámenes, Simulacros, Historial y Admin siguen accesibles desde el sidebar.

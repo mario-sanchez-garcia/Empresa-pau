@@ -215,6 +215,71 @@ Ver sección `## Pendiente Fase 2C` en este documento.
 
 El campo `actionType: CaminoActionType` fue eliminado de `DailyCaminoTask` en Fase 2B. La documentación de Fase 2A que lo menciona está desactualizada. El campo `type: CaminoTaskTypeId` cumple la misma función y es la fuente de verdad para `buildCaminoAction()`. No se ha añadido un alias para no introducir deuda técnica.
 
+## Fase 2C — Persistencia Supabase
+
+Implementado en tres commits: `feat: add camino supabase tables and rls`, `feat: add camino api routes`, `feat: connect camino ui to supabase`.
+
+### Tablas creadas
+
+Migración: `supabase/migrations/20260613120000_create_camino_pau_tables.sql`
+
+| Tabla | Propósito |
+|---|---|
+| `camino_user_progress` | XP, racha, niveles, progreso — una fila por usuario |
+| `camino_daily_missions` | Registro de misión por día — unique (user_id, mission_date) |
+| `camino_task_completions` | Ledger append-only de tareas completadas — unique (user_id, task_id, mission_date) |
+| `camino_route_settings` | Ruta activa del alumno — unique (user_id) |
+| `camino_xp_events` | Ledger inmutable de XP ganado — unique (user_id, source_type, source_id, mission_date) |
+
+RLS activado en todas. Todas las policies usan `auth.uid() = user_id`. `camino_task_completions` y `camino_xp_events` son append-only (sin DELETE ni UPDATE policy).
+
+### APIs creadas
+
+`app/lib/camino/caminoProgressServer.ts` — helper server-side con:
+- `TASK_XP_MAP`: mapa hardcodeado taskId → XP. El cliente NO manda XP, el servidor lo calcula.
+- `getAuthContext(request)`: Bearer → getUser (patrón idéntico a `/api/planning/route.ts`)
+- `createUserSupabase(accessToken)`: cliente con Bearer en headers para que RLS aplique
+- `createServiceSupabase()`: cliente con service role para operaciones de reset
+
+| Ruta | Método | Función |
+|---|---|---|
+| `/api/camino/state` | GET | Lee progreso, ruta y tareas completadas hoy |
+| `/api/camino/complete-task` | POST | Completa tarea — idempotente |
+| `/api/camino/route` | PATCH | Cambia ruta activa — upsert |
+| `/api/camino/reset` | POST | Solo internal — borra progreso del día y resetea agregados |
+
+### Cómo se evita doble XP
+
+1. `unique (user_id, task_id, mission_date)` en `camino_task_completions`.
+2. INSERT via `upsert({ ignoreDuplicates: true })`. Si el INSERT retorna `data.length === 0`, la tarea ya estaba completada → no se tocan `camino_xp_events` ni `camino_user_progress`.
+3. `unique (user_id, source_type, source_id, mission_date)` en `camino_xp_events` como segunda barrera.
+4. La misión completa se registra con el mismo patrón — el API comprueba `camino_daily_missions.completed` antes de sumar racha.
+
+### Qué pasa con localStorage
+
+- **Usuario no logueado**: localStorage funciona exactamente igual que antes.
+- **Usuario logueado**: Supabase es la fuente de verdad. localStorage se actualiza como caché.
+- **Supabase falla**: fallback silencioso a localStorage — UI no se rompe.
+- **No se migran valores demo**: un usuario que ve /camino por primera vez con sesión empieza con 0 XP real, no 1840.
+
+### Qué sigue siendo mock
+
+- Las 4 tareas diarias siguen siendo hardcoded en `caminoData.ts` (Fase 2D las generará dinámicamente).
+- La misión no varía según usuario ni según semana del currículum (Fase 2D).
+- Los "Próximos objetivos" son datos estáticos (Semanas 17-20).
+- `progressTowardsPau` se incrementa +1 por tarea, +2 por misión completa — no es un cálculo real del plan.
+
+### Qué queda para Fase 2D
+
+- Generación dinámica de tareas desde el currículum de 38 semanas (`caminoWeeks`).
+- `calculateCaminoWeek(entryDate, routeId)` para saber en qué semana del plan está el alumno.
+- Integración real con `historial_examenes` para tareas `repaso_error`.
+- `/?subject=mates&block=Analisis` — deep link a bloque específico (requiere refactor de inicialización en `app/page.tsx`).
+- Admin tracking de métricas de Camino en `adminMetrics.ts`.
+- Apagar los valores demo en `createInitialProgress()` una vez que todos los usuarios estén en Supabase.
+
+---
+
 ## Cómo probar `/camino`
 
 1. Abrir `/camino`.

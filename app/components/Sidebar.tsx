@@ -4,37 +4,27 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  Atom,
   BarChart3,
-  BookOpen,
   BrainCircuit,
   ClipboardList,
-  Dna,
-  FlaskConical,
-  Globe,
   GraduationCap,
-  Landmark,
   LayoutDashboard,
   LogOut,
   MessageCircle,
   Rocket,
   Route,
   Settings,
-  Sigma,
   TimerReset
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 
 export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'settings'
-export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 
 interface SidebarProps {
   activeItem?: SidebarItemId
-  activeSubject?: SidebarSubjectId
   email?: string | null
   onNavigate?: (item: SidebarItemId) => void
-  onSubjectChange?: (subject: SidebarSubjectId) => void
   onLogout?: () => void | Promise<void>
 }
 
@@ -49,17 +39,6 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Ajustes / Perfil', desc: 'Cuenta y preferencias', href: '/settings', icon: Settings }
 ] as const
 
-const SUBJECTS = [
-  { id: 'mates', label: 'Matemáticas II', icon: Sigma, color: '#2563eb', light: '#eff6ff', border: '#dbeafe' },
-  { id: 'fisica', label: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', border: '#FEF08A' },
-  { id: 'quimica', label: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', border: '#ffedd5' },
-  { id: 'biologia', label: 'Biología', icon: Dna, color: '#4d7c0f', light: '#f7fee7', border: '#ecfccb' },
-  { id: 'ingles', label: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', border: '#A5F3FC' },
-  { id: 'lengua', label: 'Lengua', icon: BookOpen, color: '#0284C7', light: '#E0F2FE', border: '#BAE6FD' },
-  { id: 'historia', label: 'Historia de España', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', border: '#dcfce7' },
-  { id: 'historia_filosofia', label: 'Historia de la Filosofía', icon: BrainCircuit, color: '#64748B', light: '#F8FAFC', border: '#E2E8F0' }
-] as const
-
 function routeItem(pathname: string): SidebarItemId {
   if (pathname.startsWith('/camino')) return 'camino'
   if (pathname.startsWith('/simulacros')) return 'simulacros'
@@ -69,7 +48,7 @@ function routeItem(pathname: string): SidebarItemId {
   return 'examenes'
 }
 
-export default function Sidebar({ activeItem, activeSubject, email, onNavigate, onSubjectChange, onLogout }: SidebarProps) {
+export default function Sidebar({ activeItem, email, onNavigate, onLogout }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [sessionEmail, setSessionEmail] = useState('')
@@ -168,22 +147,6 @@ export default function Sidebar({ activeItem, activeSubject, email, onNavigate, 
           </Link>
         )}
 
-        <div className="mb-2.5 mt-[22px] px-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Asignaturas</div>
-        {SUBJECTS.map(subject => {
-          const Icon = subject.icon
-          const active = currentItem === 'examenes' && activeSubject === subject.id
-          const classes = `mb-1.5 flex w-full items-center gap-3 rounded-[18px] border px-[13px] py-[11px] text-left no-underline transition hover:translate-x-0.5 ${active ? 'bg-gradient-to-br from-white to-blue-50' : 'border-transparent bg-transparent'}`
-          const style = { borderColor: active ? subject.border : 'transparent', color: active ? subject.color : '#64748b' }
-          const content = (
-            <>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={{ color: subject.color, background: subject.light }}><Icon size={16} /></span>
-              <span className={`text-[13px] ${active ? 'font-bold' : 'font-semibold'}`}>{subject.label}</span>
-            </>
-          )
-          return onSubjectChange
-            ? <button key={subject.id} className={classes} style={style} onClick={() => onSubjectChange(subject.id)}>{content}</button>
-            : <Link key={subject.id} className={classes} style={style} href={`/?subject=${subject.id}`}>{content}</Link>
-        })}
       </nav>
 
       <div className="border-t border-[#dbe7fb] p-4">

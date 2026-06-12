@@ -15,7 +15,7 @@ import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCo
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
-import Sidebar, { type SidebarItemId, type SidebarSubjectId } from './components/Sidebar'
+import Sidebar, { type SidebarItemId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
 import CatFisicaEjercicioCard from './components/CatFisicaEjercicioCard'
@@ -1484,10 +1484,8 @@ function cambiarTipo(t: Tipo) {
       `}</style>
       <Sidebar
         activeItem={seccion === 'planning' ? 'plan-estudio' : seccion as SidebarItemId}
-        activeSubject={asignatura as SidebarSubjectId}
         email={usuario?.email}
         onNavigate={(item) => navegarASeccion(item === 'plan-estudio' ? 'planning' : item as Seccion)}
-        onSubjectChange={(subject) => navegarAAsignatura(subject as Asignatura)}
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -1525,15 +1523,6 @@ function cambiarTipo(t: Tipo) {
             </div>
             </div>
           </div>
-          {seccion === 'examenes' && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '8px' }}>
-              {(Object.entries(ASIGNATURAS) as [Asignatura, typeof ASIGNATURAS.mates][]).map(([key, val]) => {
-                const Icon = val.icon
-                return (
-                <button className={asignatura === key ? 'campus-primary' : 'campus-hover'} key={key} onClick={() => navegarAAsignatura(key)} style={{ ...hoverVars(val.color, val.light, val.accent), padding: '8px 14px', borderRadius: '999px', border: asignatura === key ? '1px solid transparent' : '1px solid #dbe7fb', cursor: 'pointer', background: asignatura === key ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : 'rgba(255,255,255,0.92)', color: asignatura === key ? '#fff' : WARM.muted, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '7px', boxShadow: asignatura === key ? '0 12px 24px ' + val.accent + '33' : '0 8px 20px rgba(37,99,235,0.04)' }}><Icon size={15} />{val.short}</button>
-              )})}
-            </div>
-          )}
         </header>
 
         {seccion === 'examenes' && (

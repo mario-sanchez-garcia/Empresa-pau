@@ -18,6 +18,7 @@ import {
   LogOut,
   MessageCircle,
   Rocket,
+  Route,
   Settings,
   Sigma,
   TimerReset
@@ -25,7 +26,7 @@ import {
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 
-export type SidebarItemId = 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'settings'
+export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'settings'
 export type SidebarSubjectId = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 
 interface SidebarProps {
@@ -38,6 +39,7 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
+  { id: 'camino', label: 'Camino PAU', desc: 'Tu misión diaria', href: '/camino', icon: Route },
   { id: 'examenes', label: 'Exámenes', desc: 'Practica y corrige', href: '/', icon: ClipboardList },
   { id: 'simulacros', label: 'Simulacros', desc: 'Condiciones reales', href: '/simulacros', icon: TimerReset },
   { id: 'zona', label: 'La Zona', desc: 'Estudia a tu manera', href: '/zona', icon: BrainCircuit },
@@ -59,6 +61,7 @@ const SUBJECTS = [
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {
+  if (pathname.startsWith('/camino')) return 'camino'
   if (pathname.startsWith('/simulacros')) return 'simulacros'
   if (pathname.startsWith('/zona')) return 'zona'
   if (pathname.startsWith('/planning')) return 'plan-estudio'

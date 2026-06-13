@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import {
   DEFAULT_SUBJECTS,
+  isOnboardingComplete,
   markOnboardingComplete,
   saveOnboarding,
   startModeToRouteId,
@@ -21,6 +22,7 @@ import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Phase =
+  | 'already-done'
   | 'step-community'
   | 'step-subjects'
   | 'step-time'
@@ -60,7 +62,7 @@ const ONBOARDING_TASKS: DailyCaminoTask[] = [
     id: 'ob-open-1',
     title: 'Respuesta corta de práctica',
     type: 'correccion_ia',
-    xp: 20,
+    xp: 30,
     subject: 'Matemáticas II',
     subjectKey: 'mates',
     detail: 'En una frase: ¿qué significa que una función sea derivable en un punto?',
@@ -88,6 +90,10 @@ export default function OnboardingFlow() {
   const [openAnswer, setOpenAnswer] = useState('')
   const [openFeedback, setOpenFeedback] = useState<string | null>(null)
   const [submittingTask, setSubmittingTask] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isOnboardingComplete()) setPhase('already-done')
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -199,6 +205,35 @@ export default function OnboardingFlow() {
             phase === 'step-subjects' ? 1 :
             phase === 'step-time' ? 2 : 3
           } total={4} />
+        )}
+
+        {/* ── ALREADY DONE ────────────────────────────────────────────── */}
+        {phase === 'already-done' && (
+          <Card>
+            <div className="flex flex-col items-center gap-4 py-2 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)]">
+                <Route size={26} strokeWidth={2.2} />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-950">Ya tienes tu Camino PAU creado</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-400">Tu ruta y primera misión ya están activas.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push('/camino')}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition hover:-translate-y-0.5"
+              >
+                Ver mi Camino <ArrowRight size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPhase('step-community')}
+                className="text-xs font-semibold text-slate-400 underline underline-offset-2 hover:text-slate-600"
+              >
+                Repetir onboarding
+              </button>
+            </div>
+          </Card>
         )}
 
         {/* ── STEP 1: Community ───────────────────────────────────────── */}

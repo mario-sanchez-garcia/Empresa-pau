@@ -1,6 +1,4 @@
-// Server-only. Never import in client components.
-// Secure token generation and hashing for parent checkout links.
-// Raw token is returned once to the caller; only the SHA-256 hash is stored.
+import 'server-only'
 
 import { createHash, randomBytes } from 'crypto'
 

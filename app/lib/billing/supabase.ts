@@ -1,6 +1,4 @@
-// Server-only. Never import in client components.
-// Service role client for billing operations that bypass RLS (webhook, admin).
-// User-scoped client for operations under RLS (student creates link).
+import 'server-only'
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 

@@ -22,14 +22,14 @@ export function todayKey(date = new Date()) {
 
 export function createInitialProgress(dayKey = todayKey()): CaminoProgress {
   return {
-    xpTotal: 1840,
-    streakDays: 6,
+    xpTotal: 0,
+    streakDays: 0,
     lastCompletedDate: null,
-    completedTasksByDate: { [dayKey]: ['flashcards-integrales'] },
+    completedTasksByDate: {},
     selectedRouteId: 'completa',
     completedMissions: [],
-    levelBySubject: { mates: 8, historia: 5, ingles: 6 },
-    progressTowardsPau: 34
+    levelBySubject: { mates: 1, historia: 1, ingles: 1 },
+    progressTowardsPau: 0
   }
 }
 

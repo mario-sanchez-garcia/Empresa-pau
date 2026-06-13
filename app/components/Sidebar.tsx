@@ -174,6 +174,12 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
             <Settings size={16} aria-hidden="true" />
           </Link>
         </div>
+        <Link
+          href="/contacto"
+          className="mb-2 block text-center text-[11px] font-semibold text-slate-400 transition hover:text-blue-600"
+        >
+          Soporte beta · Feedback
+        </Link>
         <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-3 py-2.5 text-xs font-black text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"><LogOut size={15} />Cerrar sesión</button>
       </div>
     </aside>

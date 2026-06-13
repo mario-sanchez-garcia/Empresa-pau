@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   getAuthContext,
   createUserSupabase,
-  TASK_XP_MAP,
-  TASK_TYPE_MAP,
+  resolveTaskXp,
+  TASK_TYPE_XP_MAP,
   DAILY_TASK_IDS,
   MISSION_COMPLETION_XP,
   isValidDateString,
   isDateWithinWindow,
   getYesterday
 } from '@/app/lib/camino/caminoProgressServer'
+
+const VALID_ROUTE_IDS = ['completa', 'ajustada', 'acelerada', 'sprint', 'intensiva'] as const
 
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -23,37 +25,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   }
 
-  const { taskId, subjectKey } = body
+  const { taskId, taskType, subjectKey, missionTaskIds } = body
   const missionDate = typeof body.missionDate === 'string' ? body.missionDate : null
   const routeIdFromClient = typeof body.routeId === 'string' ? body.routeId : 'completa'
 
-  if (typeof taskId !== 'string' || !TASK_XP_MAP[taskId]) {
-    return NextResponse.json({ error: 'taskId inválido' }, { status: 400 })
+  if (typeof taskId !== 'string' || !taskId) {
+    return NextResponse.json({ error: 'taskId requerido' }, { status: 400 })
+  }
+  if (typeof taskType !== 'string' || !TASK_TYPE_XP_MAP[taskType]) {
+    return NextResponse.json({ error: 'taskType inválido' }, { status: 400 })
   }
 
   if (!missionDate || !isValidDateString(missionDate) || !isDateWithinWindow(missionDate)) {
     return NextResponse.json({ error: 'missionDate inválida o fuera de ventana' }, { status: 422 })
   }
 
-  const xpAmount = TASK_XP_MAP[taskId]
-  const taskType = TASK_TYPE_MAP[taskId]
+  const xpAmount = resolveTaskXp(taskId, taskType)
+  if (!xpAmount) {
+    return NextResponse.json({ error: 'Tarea no reconocida' }, { status: 400 })
+  }
+
   const userId = user.id
   const supabase = createUserSupabase(accessToken)
 
-  // 1. Asegurar que la misión del día existe (ON CONFLICT DO NOTHING)
+  // Los task IDs que conforman la misión de hoy (enviados por el cliente, basados en el generador)
+  const todayTaskIds = Array.isArray(missionTaskIds) && missionTaskIds.length > 0
+    ? (missionTaskIds as string[])
+    : DAILY_TASK_IDS
+
+  const safeRouteId = VALID_ROUTE_IDS.includes(routeIdFromClient as typeof VALID_ROUTE_IDS[number])
+    ? routeIdFromClient
+    : 'completa'
+
+  // 1. Crear misión del día si no existe (ON CONFLICT DO NOTHING)
   await supabase.from('camino_daily_missions').upsert(
-    {
-      user_id: userId,
-      mission_date: missionDate,
-      route_id: VALID_ROUTE_IDS.includes(routeIdFromClient as typeof VALID_ROUTE_IDS[number])
-        ? routeIdFromClient
-        : 'completa',
-      task_ids: DAILY_TASK_IDS
-    },
+    { user_id: userId, mission_date: missionDate, route_id: safeRouteId, task_ids: todayTaskIds },
     { onConflict: 'user_id,mission_date', ignoreDuplicates: true }
   )
 
-  // 2. Insertar completion — si ya existe, DO NOTHING
+  // 2. Insertar completion — idempotente por unique constraint
   const { data: inserted } = await supabase
     .from('camino_task_completions')
     .upsert(
@@ -87,17 +97,23 @@ export async function POST(request: NextRequest) {
 
   // 3. Registrar XP event de la tarea
   await supabase.from('camino_xp_events').upsert(
-    {
-      user_id: userId,
-      source_type: 'task_completion',
-      source_id: taskId,
-      xp_amount: xpAmount,
-      mission_date: missionDate
-    },
+    { user_id: userId, source_type: 'task_completion', source_id: taskId, xp_amount: xpAmount, mission_date: missionDate },
     { onConflict: 'user_id,source_type,source_id,mission_date', ignoreDuplicates: true }
   )
 
   // 4. ¿Están todas las tareas del día completadas?
+  // Usar task_ids guardado en la misión (que puede incluir los taskIds dinámicos)
+  const { data: missionRow } = await supabase
+    .from('camino_daily_missions')
+    .select('task_ids, completed')
+    .eq('user_id', userId)
+    .eq('mission_date', missionDate)
+    .single()
+
+  const storedTaskIds: string[] = Array.isArray(missionRow?.task_ids) && missionRow.task_ids.length > 0
+    ? missionRow.task_ids
+    : todayTaskIds
+
   const { data: allCompleted } = await supabase
     .from('camino_task_completions')
     .select('task_id')
@@ -105,34 +121,18 @@ export async function POST(request: NextRequest) {
     .eq('mission_date', missionDate)
 
   const completedIds = (allCompleted ?? []).map((r: { task_id: string }) => r.task_id)
-  const allDone = DAILY_TASK_IDS.every(id => completedIds.includes(id))
-
-  // 5. ¿La misión ya estaba marcada como completada?
-  const { data: missionRow } = await supabase
-    .from('camino_daily_missions')
-    .select('completed')
-    .eq('user_id', userId)
-    .eq('mission_date', missionDate)
-    .single()
+  const allDone = storedTaskIds.every(id => completedIds.includes(id))
 
   const missionWasCompleted = missionRow?.completed ?? false
   const missionJustCompleted = allDone && !missionWasCompleted
 
   let totalXp = xpAmount
   if (missionJustCompleted) {
-    // XP de completar la misión
     await supabase.from('camino_xp_events').upsert(
-      {
-        user_id: userId,
-        source_type: 'mission_completion',
-        source_id: missionDate,
-        xp_amount: MISSION_COMPLETION_XP,
-        mission_date: missionDate
-      },
+      { user_id: userId, source_type: 'mission_completion', source_id: missionDate, xp_amount: MISSION_COMPLETION_XP, mission_date: missionDate },
       { onConflict: 'user_id,source_type,source_id,mission_date', ignoreDuplicates: true }
     )
     totalXp += MISSION_COMPLETION_XP
-
     await supabase
       .from('camino_daily_missions')
       .update({ completed: true, completed_at: new Date().toISOString() })
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       .eq('mission_date', missionDate)
   }
 
-  // 6. Actualizar progreso del usuario (read-modify-write)
+  // 5. Actualizar progreso del usuario (read-modify-write)
   const { data: currentProgress } = await supabase
     .from('camino_user_progress')
     .select('*')
@@ -198,5 +198,3 @@ export async function POST(request: NextRequest) {
     newStreak
   })
 }
-
-const VALID_ROUTE_IDS = ['completa', 'ajustada', 'acelerada', 'sprint', 'intensiva'] as const

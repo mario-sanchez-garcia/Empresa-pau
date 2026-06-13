@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
 import type { CaminoRouteId, DailyCaminoTask } from '@/app/lib/camino/caminoData'
-import { dailyTasks } from '@/app/lib/camino/caminoData'
+import { dailyTasks as fallbackTasks } from '@/app/lib/camino/caminoData'
 import {
   completeCaminoTask,
   createInitialProgress,
@@ -14,6 +14,7 @@ import {
   todayKey,
   type CaminoProgress
 } from '@/app/lib/camino/caminoProgress'
+import { getMissionForDate, type WeekContext } from '@/app/lib/camino/caminoMissionGenerator'
 
 export type CaminoSource = 'local' | 'supabase'
 
@@ -46,10 +47,6 @@ function mapToProgress(data: SupabaseStateResponse, dayKey: string): CaminoProgr
     completedByDate[data.todayMission.missionDate] = data.todayMission.completedTaskIds
   }
   const completedMissions = data.todayMission.missionCompleted ? [data.todayMission.missionDate] : []
-  // Preserve any completed-mission history from today that may not be in todayMission
-  if (data.todayMission.missionCompleted && !completedMissions.includes(dayKey)) {
-    completedMissions.push(dayKey)
-  }
   return {
     xpTotal: data.progress.xpTotal,
     streakDays: data.progress.streakDays,
@@ -66,12 +63,38 @@ function mapToProgress(data: SupabaseStateResponse, dayKey: string): CaminoProgr
   }
 }
 
+// Genera las tareas del día desde el currículum o usa fallback local.
+function generateTasks(
+  routeId: string,
+  entryDate: string | null,
+  today: string,
+  weakBlocks: string[] = []
+): { tasks: DailyCaminoTask[]; weekContext: WeekContext | null } {
+  try {
+    const result = getMissionForDate({ entryDate, routeId, today, weakBlocks })
+    if (result.tasks.length > 0) return result
+  } catch {
+    // Fallback silencioso
+  }
+  return { tasks: fallbackTasks, weekContext: null }
+}
+
 export function useCaminoProgress() {
   const dayKey = useMemo(() => todayKey(), [])
   const [progress, setProgress] = useState<CaminoProgress>(() => createInitialProgress(dayKey))
   const [loading, setLoading] = useState(true)
   const [source, setSource] = useState<CaminoSource>('local')
+  const [weekContext, setWeekContext] = useState<WeekContext | null>(null)
+  const [currentTasks, setCurrentTasks] = useState<DailyCaminoTask[]>(fallbackTasks)
   const accessTokenRef = useRef<string | null>(null)
+  const entryDateRef = useRef<string | null>(null)
+  const weakBlocksRef = useRef<string[]>([])
+
+  const updateMission = useCallback((routeId: string, entryDate: string | null, weakBlocks: string[]) => {
+    const { tasks, weekContext: ctx } = generateTasks(routeId, entryDate, dayKey, weakBlocks)
+    setCurrentTasks(tasks)
+    setWeekContext(ctx)
+  }, [dayKey])
 
   const fetchFromSupabase = useCallback(async (token: string) => {
     try {
@@ -84,32 +107,42 @@ export function useCaminoProgress() {
       setProgress(mapped)
       setSource('supabase')
       saveCaminoProgress(mapped)
+      // Actualizar misión con datos reales de ruta + weak areas
+      entryDateRef.current = data.route.entryDate
+      updateMission(data.route.routeId, data.route.entryDate, weakBlocksRef.current)
       return true
     } catch {
       return false
     }
-  }, [dayKey])
+  }, [dayKey, updateMission])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.access_token) {
-        setProgress(loadCaminoProgress(dayKey))
+        const localProgress = loadCaminoProgress(dayKey)
+        setProgress(localProgress)
         setSource('local')
+        // Generar misión desde datos locales
+        updateMission(localProgress.selectedRouteId, null, [])
         setLoading(false)
         return
       }
       accessTokenRef.current = session.access_token
-      fetchFromSupabase(session.access_token).finally(() => {
-        setLoading(false)
-      })
+      fetchFromSupabase(session.access_token).catch(() => {
+        const localProgress = loadCaminoProgress(dayKey)
+        setProgress(localProgress)
+        updateMission(localProgress.selectedRouteId, null, [])
+      }).finally(() => setLoading(false))
     }).catch(() => {
-      setProgress(loadCaminoProgress(dayKey))
+      const localProgress = loadCaminoProgress(dayKey)
+      setProgress(localProgress)
       setSource('local')
+      updateMission(localProgress.selectedRouteId, null, [])
       setLoading(false)
     })
-  }, [dayKey, fetchFromSupabase])
+  }, [dayKey, fetchFromSupabase, updateMission])
 
-  // Guardar en localStorage cuando source='local' para que persista entre sesiones
+  // Guardar en localStorage cuando source='local'
   useEffect(() => {
     if (source === 'local' && !loading) {
       saveCaminoProgress(progress)
@@ -121,15 +154,15 @@ export function useCaminoProgress() {
 
     if (!token) {
       setProgress(current => {
-        const next = completeCaminoTask(current, dayKey, task, dailyTasks)
+        const next = completeCaminoTask(current, dayKey, task, currentTasks)
         saveCaminoProgress(next)
         return next
       })
       return
     }
 
-    // Optimistic update
-    setProgress(current => completeCaminoTask(current, dayKey, task, dailyTasks))
+    // Actualización optimista
+    setProgress(current => completeCaminoTask(current, dayKey, task, currentTasks))
 
     try {
       const res = await fetch('/api/camino/complete-task', {
@@ -140,21 +173,21 @@ export function useCaminoProgress() {
           taskType: task.type,
           subjectKey: task.subjectKey ?? null,
           missionDate: dayKey,
-          routeId: progress.selectedRouteId
+          routeId: progress.selectedRouteId,
+          missionTaskIds: currentTasks.map(t => t.id)
         })
       })
       if (res.ok) {
-        // Reconciliar con estado real del servidor
         await fetchFromSupabase(token)
       }
     } catch {
-      // Fallo silencioso — el estado optimista local se mantiene
+      // Fallo silencioso — estado optimista local se mantiene
     }
-  }, [dayKey, progress.selectedRouteId, fetchFromSupabase])
+  }, [dayKey, progress.selectedRouteId, currentTasks, fetchFromSupabase])
 
   const changeRoute = useCallback(async (routeId: CaminoRouteId) => {
-    // Actualización inmediata local
     setProgress(current => setCaminoRoute(current, routeId))
+    updateMission(routeId, entryDateRef.current, weakBlocksRef.current)
 
     const token = accessTokenRef.current
     if (!token) return
@@ -166,15 +199,16 @@ export function useCaminoProgress() {
         body: JSON.stringify({ routeId })
       })
     } catch {
-      // Fallo silencioso — el cambio de ruta ya está en estado local
+      // Fallo silencioso
     }
-  }, [])
+  }, [updateMission])
 
   const resetProgress = useCallback(async () => {
     const token = accessTokenRef.current
 
     if (!token) {
-      setProgress(resetCaminoProgress(dayKey))
+      const next = resetCaminoProgress(dayKey)
+      setProgress(next)
       setSource('local')
       return
     }
@@ -188,11 +222,12 @@ export function useCaminoProgress() {
       if (res.ok) {
         await fetchFromSupabase(token)
       } else if (res.status === 403) {
-        // Usuario no interno — reset solo local
-        setProgress(resetCaminoProgress(dayKey))
+        const next = resetCaminoProgress(dayKey)
+        setProgress(next)
       }
     } catch {
-      setProgress(resetCaminoProgress(dayKey))
+      const next = resetCaminoProgress(dayKey)
+      setProgress(next)
     }
   }, [dayKey, fetchFromSupabase])
 
@@ -201,6 +236,8 @@ export function useCaminoProgress() {
     loading,
     source,
     dayKey,
+    currentTasks,
+    weekContext,
     completeTask,
     changeRoute,
     resetProgress

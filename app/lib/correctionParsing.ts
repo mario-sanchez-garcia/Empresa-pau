@@ -47,9 +47,11 @@ export function correctionPayloadToMarkdown(input: unknown, options: { officialM
   if (typeof input === 'string') {
     const text = stripCodeFence(input)
     if (looksLikeRawJsonCorrection(text)) {
+      const recovered = recoverMalformedCorrectionMarkdown(text)
+      if (recovered) return recovered
       return 'No hemos podido formatear esta corrección automáticamente, pero tus datos están guardados. Vuelve a intentarlo para regenerar una corrección limpia.'
     }
-    return text
+    return text && !/^#{1,6}\s/m.test(text) ? `# Corrección de Pausia\n\n${text}` : text
   }
 
   return ''
@@ -90,6 +92,49 @@ function stripCodeFence(value: string) {
 
 function looksLikeRawJsonCorrection(value: string) {
   return /^\s*\{/.test(value) || /"(?:feedback_general|errores_principales|plan_repaso|simulacro_id|nota_final)"\s*:/.test(value)
+}
+
+function recoverMalformedCorrectionMarkdown(value: string) {
+  const feedback = extractJsonString(value, 'feedback_general')
+  const strengths = extractJsonStringArray(value, 'fortalezas')
+  const errors = extractJsonStringArray(value, 'errores_principales')
+  const detail = extractJsonString(value, 'correccion_detalle')
+  const modelAnswer = extractJsonString(value, 'solucion_orientativa') || extractJsonString(value, 'solucion_correcta_corta')
+  const advice = extractJsonString(value, 'consejo_especifico') || extractJsonString(value, 'consejo_para_mejorar')
+  const theory = extractJsonString(value, 'teoria_ejercicio')
+  const hasUsefulContent = Boolean(feedback || strengths.length || errors.length || detail || modelAnswer || advice || theory)
+
+  const sections = [
+    feedback ? `# Corrección de Pausia\n\n${feedback}` : '# Corrección de Pausia',
+    strengths.length ? `## Lo que está bien\n\n${strengths.map(item => `- ${item}`).join('\n')}` : '',
+    errors.length ? `## Errores o mejoras\n\n${errors.map(item => `- ${item}`).join('\n')}` : '',
+    detail ? `## Corrección paso a paso\n\n${detail}` : '',
+    modelAnswer ? `## Respuesta modelo\n\n${modelAnswer}` : '',
+    advice ? `## Consejo final\n\n${advice}` : '',
+    theory ? `## Teoría del ejercicio\n\n${theory}` : '',
+  ].filter(Boolean)
+
+  return hasUsefulContent ? sections.join('\n\n') : ''
+}
+
+function extractJsonString(value: string, key: string) {
+  const match = value.match(new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`))
+  if (!match) return ''
+  return decodeJsonString(match[1])
+}
+
+function extractJsonStringArray(value: string, key: string) {
+  const match = value.match(new RegExp(`"${key}"\\s*:\\s*\\[([\\s\\S]*?)\\]`))
+  if (!match) return []
+
+  return Array.from(match[1].matchAll(/"((?:[^"\\]|\\.)*)"/g))
+    .map(item => decodeJsonString(item[1]))
+    .filter(Boolean)
+}
+
+function decodeJsonString(value: string) {
+  const parsed = parseCorrectionJson(`{"value":"${value}"}`)
+  return typeof parsed?.value === 'string' ? parsed.value : value
 }
 
 function isPlainRecord(value: unknown): value is PlainRecord {

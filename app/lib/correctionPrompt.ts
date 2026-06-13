@@ -147,7 +147,7 @@ Lengua Castellana y Literatura II:
 17. Escribe las fórmulas matemáticas, físicas y químicas con LaTeX: inline con $...$ y en bloque con $$...$$.
 18. No uses HTML ni párrafos largos y apelmazados. Separa claramente aciertos, errores, corrección paso a paso, respuesta modelo y consejo final.
 19. Aunque la salida completa sea JSON puro, los valores de texto dentro del JSON pueden y deben contener Markdown y LaTeX válidos.
-20. Incluye en cada bloque una teoría breve, específica y pedagógica para resolver ese tipo de ejercicio. Debe usar Markdown y LaTeX cuando proceda, y contener exactamente estos apartados: "### Qué tienes que saber", "### Cómo reconocer este tipo de ejercicio", "### Pasos para resolverlo", "### Errores típicos" y "### Mini resumen".
+20. teoria_ejercicio es opcional. Inclúyela solo si puedes mantenerla breve y cerrar el JSON correctamente. Si la incluyes, usa Markdown y LaTeX cuando proceda con estos apartados: "### Qué tienes que saber", "### Cómo reconocer este tipo de ejercicio", "### Pasos para resolverlo", "### Errores típicos" y "### Mini resumen". Si falta espacio, devuelve teoria_ejercicio como cadena vacía y prioriza siempre la corrección principal y un JSON válido.
 
 ### FORMATO DE SALIDA
 
@@ -221,22 +221,62 @@ export function parseCorrectionJson(text: string) {
     const lastBrace = cleaned.lastIndexOf('}')
     const jsonText = firstBrace >= 0 && lastBrace > firstBrace ? cleaned.slice(firstBrace, lastBrace + 1) : cleaned
 
-    // First attempt: direct parse
-    try {
-      return restoreLatexEscapes(JSON.parse(jsonText))
-    } catch {
-      // AI commonly writes LaTeX with single backslashes inside JSON strings
-      // (e.g. \sqrt, \sigma, \cdot) which are invalid JSON escape sequences.
-      // Repair: inside each string literal, double any \ not followed by a
-      // recognised JSON escape character (" \ / b f n r t u).
-      const repaired = jsonText.replace(/"(?:[^"\\]|\\.)*"/g, m =>
-        m.replace(/\\(?!["\\\/bfnrtu])/g, '\\\\')
-      )
-      return restoreLatexEscapes(JSON.parse(repaired))
+    const latexRepaired = repairLatexEscapes(jsonText)
+    const closedJson = closeTruncatedJson(jsonText)
+    const attempts = [jsonText, latexRepaired, closedJson, repairLatexEscapes(closedJson)]
+
+    for (const attempt of attempts) {
+      try {
+        return restoreLatexEscapes(JSON.parse(attempt))
+      } catch {
+        // Try the next progressively more tolerant representation.
+      }
     }
+    return null
   } catch {
     return null
   }
+}
+
+function repairLatexEscapes(jsonText: string) {
+  return jsonText.replace(/"(?:[^"\\]|\\.)*"/g, match =>
+    match.replace(/\\(?!["\\\/bfnrtu])/g, '\\\\')
+  )
+}
+
+function closeTruncatedJson(jsonText: string) {
+  const stack: string[] = []
+  let inString = false
+  let escaped = false
+
+  for (const char of jsonText) {
+    if (inString) {
+      if (escaped) {
+        escaped = false
+      } else if (char === '\\') {
+        escaped = true
+      } else if (char === '"') {
+        inString = false
+      }
+      continue
+    }
+
+    if (char === '"') inString = true
+    else if (char === '{' || char === '[') stack.push(char)
+    else if (char === '}' && stack.at(-1) === '{') stack.pop()
+    else if (char === ']' && stack.at(-1) === '[') stack.pop()
+  }
+
+  let repaired = jsonText.trimEnd()
+  if (inString) {
+    if (escaped) repaired += '\\'
+    repaired += '"'
+  }
+  repaired = repaired.replace(/,\s*$/, '')
+  if (/:\s*$/.test(repaired)) repaired += 'null'
+
+  while (stack.length) repaired += stack.pop() === '{' ? '}' : ']'
+  return repaired
 }
 
 // After parsing, restore LaTeX commands that were silently corrupted by valid JSON escapes.

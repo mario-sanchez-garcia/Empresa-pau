@@ -35,8 +35,7 @@ const NAV_ITEMS = [
   { id: 'zona', label: 'La Zona', desc: 'Estudia a tu manera', href: '/zona', icon: BrainCircuit },
   { id: 'chat', label: 'Chat con Pausia', desc: 'Resuelve dudas', href: '/?view=chat', icon: MessageCircle },
   { id: 'historial', label: 'Historial', desc: 'Tus correcciones', href: '/?view=historial', icon: BarChart3 },
-  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/planning', icon: Rocket },
-  { id: 'settings', label: 'Ajustes / Perfil', desc: 'Cuenta y preferencias', href: '/settings', icon: Settings }
+  { id: 'plan-estudio', label: 'Mi Plan', desc: 'Semana organizada', href: '/planning', icon: Rocket }
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {
@@ -162,10 +161,18 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
         </label>
         <div className="mb-3 flex items-center gap-3">
           <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-blue-100 bg-blue-50 text-[13px] font-black text-blue-700">{profile.photo ? <img src={profile.photo} alt="" className="h-full w-full object-cover" /> : (profile.displayName || displayedEmail)[0]?.toUpperCase() ?? '?'}</div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-bold text-slate-900">{profile.displayName || 'Estudiante'}</div>
             <div className="truncate text-[11px] text-slate-400">{displayedEmail || 'Estudiante'}</div>
           </div>
+          <Link
+            href="/settings"
+            aria-label="Ajustes"
+            title="Ajustes"
+            className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-xl border transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 ${currentItem === 'settings' ? 'border-blue-300 bg-blue-50 text-blue-700 shadow-sm' : 'border-transparent text-slate-400'}`}
+          >
+            <Settings size={16} aria-hidden="true" />
+          </Link>
         </div>
         <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-3 py-2.5 text-xs font-black text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"><LogOut size={15} />Cerrar sesión</button>
       </div>

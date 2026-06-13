@@ -9,6 +9,7 @@ import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
 import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
 import ExamStatement from '@/components/shared/ExamStatement'
+import CorrectionLoading from '@/components/shared/CorrectionLoading'
 
 const TOTAL_SECONDS = 90 * 60
 
@@ -319,7 +320,7 @@ export default function SimulacroActivoPage() {
           <div className="w-full max-w-md rounded-[28px] border border-[#dbe7fb] bg-white p-6 shadow-2xl">
             <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-blue-700" /> : <CheckCircle2 className="text-blue-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
             <p className="text-sm font-semibold text-slate-600">Has respondido {answeredCount} de {record.bloques.length} bloques. Quedan {record.bloques.length - answeredCount} vacíos.</p>
-            {submitting && <p className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm font-black text-blue-700">{submitStage || 'Preparando entrega...'}</p>}
+            {submitting && <CorrectionLoading stage={submitStage || 'Preparando entrega...'} />}
             {submitError && <p className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-900">{submitError}</p>}
             <div className="mt-6 flex justify-end gap-3">
               {!timeUp && <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="rounded-2xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-60">Volver</button>}

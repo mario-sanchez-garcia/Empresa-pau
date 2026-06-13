@@ -9,6 +9,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import CorrectionLoading from '@/components/shared/CorrectionLoading'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 const UI = {
@@ -271,6 +272,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
           <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>
             <WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
           </button>
+          {cargando && <CorrectionLoading />}
         </section>
         {correccion && (
           <section className="overflow-hidden rounded-[22px] border-2" style={{ borderColor: UI.color }}>

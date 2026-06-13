@@ -26,7 +26,7 @@ export default function TheoryToggle({
         className="ml-auto flex items-center gap-2 rounded-md border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
       >
         <BookOpenText className="h-4 w-4" aria-hidden="true" />
-        {isOpen ? 'Ocultar teoría' : 'Teoría'}
+        {isOpen ? 'Ocultar teoría' : 'T Teoría'}
         <ChevronDown
           className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           aria-hidden="true"

@@ -110,22 +110,32 @@ export const CAMINO_ACTION_DEFAULTS: Record<CaminoTaskTypeId, CaminoAction> = {
   },
 }
 
+// Params appended to all camino deep links so destination pages can show a back button.
+const CAMINO_LINK_PARAMS = 'source=camino&returnTo=%2Fcamino'
+
 /**
  * Returns the action for a task type, adjusting the href for the given subject when possible.
- * Pass a subject key (e.g. 'ingles', 'historia', 'mates') to get a subject-specific href.
- * Block-level filtering is not yet supported — deferred to Phase 2C.
+ * All deep links include source=camino&returnTo=/camino so destination pages can show a back button.
  */
 export function buildCaminoAction(
   taskType: CaminoTaskTypeId,
   subject?: string
 ): CaminoAction {
   const base = { ...CAMINO_ACTION_DEFAULTS[taskType] }
-  if (subject && base.isDeepLink && !base.href.includes('view=')) {
-    const param = SUBJECT_PARAM[subject]
-    if (param) {
-      base.href = `/?subject=${param}`
-      base.subject = param
+
+  if (base.isDeepLink) {
+    // Adjust subject if provided
+    if (subject && !base.href.includes('view=')) {
+      const param = SUBJECT_PARAM[subject]
+      if (param) {
+        base.href = `/?subject=${param}`
+        base.subject = param
+      }
     }
+    // Append camino tracking params
+    const separator = base.href.includes('?') ? '&' : '?'
+    base.href = `${base.href}${separator}${CAMINO_LINK_PARAMS}`
   }
+
   return base
 }

@@ -4,12 +4,16 @@ import { hashToken } from '@/app/lib/billing/tokens'
 import { getPlan } from '@/app/lib/billing/plans'
 import ParentCheckoutClient from './ParentCheckoutClient'
 
+// In Next.js App Router (v15+), params is a Promise — must be awaited.
 interface Props {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }
 
 // Resolve the token server-side — never trust client to do this.
 async function resolveLink(rawToken: string) {
+  // Guard: never pass non-string to crypto
+  if (!rawToken || typeof rawToken !== 'string') return null
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) return null
@@ -27,7 +31,8 @@ async function resolveLink(rawToken: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const link = await resolveLink(params.token)
+  const { token } = await params
+  const link = await resolveLink(token)
   const name = link?.student_display_name
 
   return {
@@ -42,7 +47,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ParentCheckoutPage({ params }: Props) {
-  const rawToken = params.token
+  const { token: rawToken } = await params
+
+  if (!rawToken || typeof rawToken !== 'string') {
+    return <ErrorPage message="Este enlace no está disponible." />
+  }
+
   const link = await resolveLink(rawToken)
 
   // Invalid token

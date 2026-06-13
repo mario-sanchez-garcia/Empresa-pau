@@ -9,6 +9,9 @@ export function generateRawToken(): string {
 }
 
 export function hashToken(rawToken: string): string {
+  if (!rawToken || typeof rawToken !== 'string') {
+    throw new TypeError('hashToken: expected a non-empty string')
+  }
   return createHash('sha256').update(rawToken).digest('hex')
 }
 

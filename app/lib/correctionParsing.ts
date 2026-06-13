@@ -55,6 +55,18 @@ export function correctionPayloadToMarkdown(input: unknown, options: { officialM
   return ''
 }
 
+export function splitCorrectionTheory(markdown: string) {
+  const theoryHeading = /^## Teoría del ejercicio\s*$/im
+  const match = theoryHeading.exec(markdown)
+
+  if (!match) return { correction: markdown.trim(), theory: '' }
+
+  return {
+    correction: markdown.slice(0, match.index).trim(),
+    theory: markdown.slice(match.index + match[0].length).trim(),
+  }
+}
+
 function hideTechnicalFields(value: PlainRecord): PlainRecord {
   return Object.fromEntries(
     Object.entries(value)

@@ -1,7 +1,8 @@
 'use client'
 
-import { correctionPayloadToMarkdown } from '@/app/lib/correctionParsing'
+import { correctionPayloadToMarkdown, splitCorrectionTheory } from '@/app/lib/correctionParsing'
 import MathMarkdown from './MathMarkdown'
+import TheoryToggle from './TheoryToggle'
 
 export default function CorrectionResultCard({
   correction,
@@ -14,12 +15,13 @@ export default function CorrectionResultCard({
   className?: string
   components?: Record<string, any>
 }) {
+  const markdown = correctionPayloadToMarkdown(correction, { officialMaxScore })
+  const { correction: mainCorrection, theory } = splitCorrectionTheory(markdown)
+
   return (
-    <MathMarkdown
-      text={correctionPayloadToMarkdown(correction, { officialMaxScore })}
-      format={false}
-      className={className}
-      components={components}
-    />
+    <div className={className}>
+      <MathMarkdown text={mainCorrection} format={false} components={components} />
+      <TheoryToggle theory={theory} components={components} />
+    </div>
   )
 }

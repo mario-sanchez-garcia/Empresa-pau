@@ -147,6 +147,7 @@ Lengua Castellana y Literatura II:
 17. Escribe las fórmulas matemáticas, físicas y químicas con LaTeX: inline con $...$ y en bloque con $$...$$.
 18. No uses HTML ni párrafos largos y apelmazados. Separa claramente aciertos, errores, corrección paso a paso, respuesta modelo y consejo final.
 19. Aunque la salida completa sea JSON puro, los valores de texto dentro del JSON pueden y deben contener Markdown y LaTeX válidos.
+20. Incluye en cada bloque una teoría breve, específica y pedagógica para resolver ese tipo de ejercicio. Debe usar Markdown y LaTeX cuando proceda, y contener exactamente estos apartados: "### Qué tienes que saber", "### Cómo reconocer este tipo de ejercicio", "### Pasos para resolverlo", "### Errores típicos" y "### Mini resumen".
 
 ### FORMATO DE SALIDA
 
@@ -191,7 +192,8 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
       "solucion_correcta_corta": "",
       "solucion_orientativa": "",
       "consejo_especifico": "",
-      "consejo_para_mejorar": ""
+      "consejo_para_mejorar": "",
+      "teoria_ejercicio": ""
     }
   ],
   "resumen_por_bloque_tematico": [
@@ -293,7 +295,13 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
       `## Consejo final\n${block.consejo_especifico ?? block.consejo_para_mejorar ?? ''}`
     ].filter(Boolean).join('\n\n')),
     plan.length ? `### Plan de repaso\n${plan.map((item: any) => `${item.prioridad}. **${item.tema}**: ${item.accion} (${item.tiempo_recomendado}). ${item.recurso_sugerido}`).join('\n')}` : '',
-    resumen.length ? `### Resumen por bloque\n${resumen.map((item: any) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : ''
+    resumen.length ? `### Resumen por bloque\n${resumen.map((item: any) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : '',
+    bloques.some((block: any) => block.teoria_ejercicio)
+      ? `## Teoría del ejercicio\n${bloques
+        .filter((block: any) => block.teoria_ejercicio)
+        .map((block: any) => `## ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}\n${block.teoria_ejercicio}`)
+        .join('\n\n')}`
+      : ''
   ].filter(Boolean).join('\n\n')
 }
 

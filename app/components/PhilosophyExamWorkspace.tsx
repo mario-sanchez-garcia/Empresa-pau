@@ -10,7 +10,6 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
-import CorrectionLoading from '@/components/shared/CorrectionLoading'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 type Comunidad = 'Madrid' | 'Cataluña'
@@ -344,8 +343,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
             </div>
           )}
           {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
-          <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}><WandSparkles size={17} />{loading ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}</button>
-          {loading && <CorrectionLoading />}
+          <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}><WandSparkles size={17} className={loading ? 'animate-pulse' : ''} />{loading ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}</button>
         </section>
         {correction && <section className="border-t-2" style={{ borderColor: UI.color }}><div className="px-6 py-4 text-sm font-black text-white" style={{ background: UI.color }}>CORRECCIÓN DE PAUSIA</div><CorrectionResultCard correction={correction} officialMaxScore={maxScore} className="p-6 text-sm leading-7" /></section>}
       </article>

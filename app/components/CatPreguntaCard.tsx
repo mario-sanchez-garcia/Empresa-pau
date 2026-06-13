@@ -9,7 +9,6 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
-import CorrectionLoading from '@/components/shared/CorrectionLoading'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 const CAT_UI = {
@@ -217,9 +216,8 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           style={{ background: `linear-gradient(135deg, ${CAT_UI.color}, ${CAT_UI.accent})`, boxShadow: `0 16px 34px ${CAT_UI.accent}33` }}
           type="button"
         >
-          <WandSparkles size={17} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
+          <WandSparkles size={17} className={cargando ? 'animate-pulse' : ''} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
         </button>
-        {cargando && <CorrectionLoading />}
       </section>
 
       {correccion && (

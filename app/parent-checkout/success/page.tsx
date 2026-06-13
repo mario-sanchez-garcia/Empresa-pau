@@ -1,0 +1,86 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Pago recibido · Pausia',
+  description: 'Tu pago ha sido recibido. Estamos activando el Pack Curso PAU.',
+}
+
+// This page is intentionally passive — it does NOT activate any entitlement.
+// Activation happens exclusively in the Stripe webhook.
+export default function ParentCheckoutSuccess() {
+  return (
+    <main style={styles.page}>
+      <div style={styles.card}>
+        {/* Logo */}
+        <div style={styles.logoRow}>
+          <div style={styles.logoIcon}>P</div>
+          <span style={styles.logoText}>Pausia</span>
+        </div>
+
+        <div style={{ fontSize: 48, textAlign: 'center' as const }}>✅</div>
+
+        <h1 style={styles.title}>Pago recibido</h1>
+
+        <p style={styles.body}>
+          Hemos recibido tu pago. El Pack Curso PAU se activará automáticamente
+          en los próximos minutos una vez que confirmemos el pago con Stripe.
+        </p>
+
+        <p style={styles.body}>
+          El alumno recibirá acceso completo al Camino PAU en su cuenta de Pausia.
+          No es necesario hacer nada más.
+        </p>
+
+        <div style={styles.infoBox}>
+          <p style={styles.infoText}>
+            Si el acceso no aparece en 10 minutos, escríbenos a{' '}
+            <strong>hola@pausia.es</strong> con el número de pedido que Stripe
+            te ha enviado por email.
+          </p>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: 'radial-gradient(circle at 20% 10%, rgba(219,234,254,0.9), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    padding: '24px 16px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  card: {
+    background: 'white',
+    borderRadius: 28,
+    boxShadow: '0 24px 64px rgba(37,99,235,0.12)',
+    padding: '40px 36px',
+    maxWidth: 440,
+    width: '100%',
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: 20,
+    alignItems: 'center' as const,
+    textAlign: 'center' as const,
+  },
+  logoRow: { display: 'flex' as const, alignItems: 'center' as const, gap: 10 },
+  logoIcon: {
+    width: 36, height: 36, borderRadius: 10,
+    background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
+    display: 'flex' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
+    color: 'white', fontWeight: 900, fontSize: 16
+  },
+  logoText: { fontWeight: 800, fontSize: 18, color: '#111827' },
+  title: { fontSize: 24, fontWeight: 900, color: '#111827', margin: 0 },
+  body: { fontSize: 15, color: '#64748b', lineHeight: 1.7, margin: 0 },
+  infoBox: {
+    background: '#eff6ff',
+    borderRadius: 12,
+    padding: '14px 18px',
+    width: '100%',
+  },
+  infoText: { fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0, textAlign: 'left' as const },
+}

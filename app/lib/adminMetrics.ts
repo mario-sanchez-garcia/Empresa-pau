@@ -135,12 +135,39 @@ export type AdminMetrics = {
     missionCompletionRate: number
     routeDistribution: Record<string, number>
   }
+  billingMetrics: {
+    linksCreated7d: number
+    linksPaid7d: number
+    linksCreated30d: number
+    linksPaid30d: number
+    activeEntitlements: number
+    revenueEurCents7d: number
+    recentLinks: Array<{
+      id: string
+      status: string
+      planId: string
+      priceCents: number
+      studentUserId: string
+      createdAt: string
+      paidAt: string | null
+    }>
+  }
   calculatedAt: string
 }
 
 const EMPTY_RANGE: RangeSummary = {
   calls: 0, tokens: 0, costEur: 0, errors: 0,
   activeUsers: 0, corrections: 0, simulacros: 0, plans: 0
+}
+
+const EMPTY_BILLING = {
+  linksCreated7d: 0,
+  linksPaid7d: 0,
+  linksCreated30d: 0,
+  linksPaid30d: 0,
+  activeEntitlements: 0,
+  revenueEurCents7d: 0,
+  recentLinks: [] as AdminMetrics['billingMetrics']['recentLinks'],
 }
 
 const EMPTY_CAMINO = {
@@ -165,6 +192,7 @@ const EMPTY: AdminMetrics = {
   recentErrors: [],
   productActivity: { recentCorrections: [], recentSimulacros: [] },
   caminoMetrics: { ...EMPTY_CAMINO },
+  billingMetrics: { ...EMPTY_BILLING },
   calculatedAt: ''
 }
 
@@ -410,6 +438,50 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       }
     } catch { /* camino tables may not exist — safe to skip */ }
 
+    // Billing metrics — separate try/catch so missing tables don't break admin panel
+    let billingMetrics: AdminMetrics['billingMetrics'] = { ...EMPTY_BILLING }
+    try {
+      const [linksRes, entitlementsRes, recentLinksRes] = await Promise.all([
+        db.from('parent_checkout_links')
+          .select('status, price_cents, created_at, paid_at')
+          .gte('created_at', ago30d),
+        db.from('user_entitlements')
+          .select('id')
+          .eq('status', 'active'),
+        db.from('parent_checkout_links')
+          .select('id, status, plan_id, price_cents, student_user_id, created_at, paid_at')
+          .order('created_at', { ascending: false })
+          .limit(20)
+      ])
+
+      const allLinks = linksRes.data ?? []
+      const linksCreated7d = allLinks.filter(r => r.created_at >= ago7d).length
+      const linksPaid7d = allLinks.filter(r => r.status === 'paid' && r.paid_at && r.paid_at >= ago7d).length
+      const linksCreated30d = allLinks.length
+      const linksPaid30d = allLinks.filter(r => r.status === 'paid').length
+      const revenueEurCents7d = allLinks
+        .filter(r => r.status === 'paid' && r.paid_at && r.paid_at >= ago7d)
+        .reduce((s: number, r: { price_cents: number }) => s + (r.price_cents ?? 0), 0)
+
+      billingMetrics = {
+        linksCreated7d,
+        linksPaid7d,
+        linksCreated30d,
+        linksPaid30d,
+        activeEntitlements: entitlementsRes.data?.length ?? 0,
+        revenueEurCents7d,
+        recentLinks: (recentLinksRes.data ?? []).map(r => ({
+          id: r.id,
+          status: r.status,
+          planId: r.plan_id,
+          priceCents: r.price_cents,
+          studentUserId: r.student_user_id,
+          createdAt: r.created_at,
+          paidAt: r.paid_at ?? null,
+        }))
+      }
+    } catch { /* billing tables may not exist */ }
+
     return {
       summaryToday,
       summary7d,
@@ -421,6 +493,7 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       recentErrors,
       productActivity: { recentCorrections, recentSimulacros },
       caminoMetrics,
+      billingMetrics,
       calculatedAt: new Date().toISOString()
     }
   } catch (err) {

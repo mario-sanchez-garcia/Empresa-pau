@@ -1,0 +1,259 @@
+'use client'
+
+import { useState } from 'react'
+import { CheckCircle2, Lock, Shield, Timer } from 'lucide-react'
+
+interface Props {
+  token: string
+  planId: string
+  planLabel: string
+  planFeatures: string[]
+  priceCents: number
+  currency: string
+  studentDisplayName: string | null
+  expiresAt: string
+}
+
+function formatPrice(cents: number, currency: string): string {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: 2,
+  }).format(cents / 100)
+}
+
+function formatExpiry(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+  } catch { return '' }
+}
+
+export default function ParentCheckoutClient({
+  token, planLabel, planFeatures, priceCents, currency, studentDisplayName, expiresAt
+}: Props) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleCheckout() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/checkout/parent-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Error al iniciar el pago. Inténtalo de nuevo.')
+        return
+      }
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      }
+    } catch {
+      setError('Error de conexión. Inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const price = formatPrice(priceCents, currency)
+  const expiry = formatExpiry(expiresAt)
+  const name = studentDisplayName
+
+  return (
+    <main style={styles.page}>
+      <div style={styles.container}>
+        {/* Header */}
+        <div style={styles.header}>
+          <Logo />
+          <div style={styles.badge}>Pago seguro</div>
+        </div>
+
+        {/* Hero */}
+        <div style={styles.hero}>
+          <h1 style={styles.heroTitle}>
+            {name ? `Camino PAU para ${name}` : 'Camino PAU · Pausia'}
+          </h1>
+          <p style={styles.heroSub}>
+            Plan de estudio PAU de septiembre a junio con misiones diarias personalizadas,
+            correcciones con IA y simulacros completos.
+          </p>
+        </div>
+
+        {/* Features */}
+        <div style={styles.featuresCard}>
+          <p style={styles.featuresTitle}>Qué incluye el {planLabel}</p>
+          <ul style={styles.featuresList}>
+            {planFeatures.map(f => (
+              <li key={f} style={styles.featureItem}>
+                <CheckCircle2 size={16} style={{ color: '#16a34a', flexShrink: 0, marginTop: 2 }} />
+                <span style={styles.featureText}>{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Guarantee */}
+        <div style={styles.guarantee}>
+          <Shield size={18} style={{ color: '#2563eb', flexShrink: 0 }} />
+          <p style={styles.guaranteeText}>
+            <strong>Garantía de 7 días.</strong> Si el alumno no está satisfecho en los primeros 7 días, devolvemos el importe completo sin preguntas.
+          </p>
+        </div>
+
+        {/* Price + CTA */}
+        <div style={styles.ctaSection}>
+          <div style={styles.priceRow}>
+            <span style={styles.priceLabel}>Precio único</span>
+            <span style={styles.priceValue}>{price}</span>
+          </div>
+          <p style={styles.priceNote}>Un solo pago. Sin suscripción mensual.</p>
+
+          {error && <p style={styles.errorMsg}>{error}</p>}
+
+          <button
+            type="button"
+            onClick={handleCheckout}
+            disabled={loading}
+            style={{ ...styles.ctaButton, opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer' }}
+          >
+            <Lock size={16} />
+            {loading ? 'Redirigiendo a pago…' : `Desbloquear ${planLabel}`}
+          </button>
+
+          <div style={styles.securityRow}>
+            <span style={styles.securityText}>🔒 Pago procesado por Stripe · Datos cifrados</span>
+          </div>
+        </div>
+
+        {/* Expiry notice */}
+        {expiry && (
+          <div style={styles.expiryRow}>
+            <Timer size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
+            <p style={styles.expiryText}>Este enlace caduca el {expiry}</p>
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
+
+function Logo() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{
+        width: 36, height: 36, borderRadius: 10,
+        background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'white', fontWeight: 900, fontSize: 16
+      }}>P</div>
+      <span style={{ fontWeight: 800, fontSize: 18, color: '#111827' }}>Pausia</span>
+    </div>
+  )
+}
+
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: 'radial-gradient(circle at 20% 10%, rgba(219,234,254,0.9), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)',
+    display: 'flex' as const,
+    alignItems: 'flex-start' as const,
+    justifyContent: 'center' as const,
+    padding: '32px 16px 64px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  container: {
+    background: 'white',
+    borderRadius: 28,
+    boxShadow: '0 24px 64px rgba(37,99,235,0.12)',
+    padding: '36px 32px',
+    maxWidth: 460,
+    width: '100%',
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: 24,
+  },
+  header: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+  },
+  badge: {
+    background: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    color: '#15803d',
+    borderRadius: 20,
+    padding: '4px 12px',
+    fontSize: 12,
+    fontWeight: 700,
+  },
+  hero: { display: 'flex' as const, flexDirection: 'column' as const, gap: 8 },
+  heroTitle: { fontSize: 24, fontWeight: 900, color: '#111827', margin: 0, lineHeight: 1.2 },
+  heroSub: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0 },
+  featuresCard: {
+    background: '#f8fafc',
+    borderRadius: 16,
+    padding: '20px',
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: 12,
+  },
+  featuresTitle: { fontSize: 13, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.08em', margin: 0 },
+  featuresList: { listStyle: 'none', margin: 0, padding: 0, display: 'flex' as const, flexDirection: 'column' as const, gap: 8 },
+  featureItem: { display: 'flex' as const, alignItems: 'flex-start' as const, gap: 10 },
+  featureText: { fontSize: 14, color: '#374151', lineHeight: 1.5 },
+  guarantee: {
+    display: 'flex' as const,
+    gap: 12,
+    background: '#eff6ff',
+    borderRadius: 12,
+    padding: '14px 16px',
+    alignItems: 'flex-start' as const,
+  },
+  guaranteeText: { fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0 },
+  ctaSection: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
+  priceRow: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    padding: '0 4px',
+  },
+  priceLabel: { fontSize: 14, fontWeight: 600, color: '#64748b' },
+  priceValue: { fontSize: 28, fontWeight: 900, color: '#111827' },
+  priceNote: { fontSize: 12, color: '#94a3b8', margin: 0, textAlign: 'right' as const },
+  errorMsg: {
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: 10,
+    padding: '10px 14px',
+    fontSize: 13,
+    color: '#dc2626',
+    margin: 0,
+  },
+  ctaButton: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: 16,
+    padding: '16px 24px',
+    fontSize: 16,
+    fontWeight: 800,
+    width: '100%',
+    transition: 'transform 0.15s',
+  },
+  securityRow: { display: 'flex' as const, justifyContent: 'center' as const },
+  securityText: { fontSize: 12, color: '#94a3b8' },
+  expiryRow: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    gap: 6,
+    justifyContent: 'center' as const,
+  },
+  expiryText: { fontSize: 12, color: '#94a3b8', margin: 0 },
+}

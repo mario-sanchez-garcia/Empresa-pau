@@ -1,0 +1,33 @@
+// Server-only. Never import in client components.
+// Service role client for billing operations that bypass RLS (webhook, admin).
+// User-scoped client for operations under RLS (student creates link).
+
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+
+export function createServiceClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error('Supabase service role not configured')
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  })
+}
+
+export function createUserClient(accessToken: string): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  return createClient(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } }
+  })
+}
+
+export function getAuthUser(accessToken: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anon) return null
+  const client = createClient(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  })
+  return client.auth.getUser(accessToken)
+}

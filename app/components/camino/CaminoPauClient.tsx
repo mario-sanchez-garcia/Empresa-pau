@@ -10,6 +10,8 @@ import RouteCard from '@/app/components/camino/RouteCard'
 import { nextObjectives } from '@/app/lib/camino/caminoData'
 import { completedTasksForDate } from '@/app/lib/camino/caminoProgress'
 import { useCaminoProgress } from '@/app/hooks/useCaminoProgress'
+import { useBillingStatus } from '@/app/hooks/useBillingStatus'
+import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 
 export default function CaminoPauClient() {
   const {
@@ -23,6 +25,8 @@ export default function CaminoPauClient() {
     changeRoute,
     resetProgress
   } = useCaminoProgress()
+
+  const billing = useBillingStatus()
 
   const completedTaskIds = completedTasksForDate(progress, dayKey)
   const completedCount = completedTaskIds.length
@@ -203,6 +207,9 @@ export default function CaminoPauClient() {
               </div>
             </div>
           </section>
+
+          {/* Pack Curso PAU — Parent Checkout */}
+          <ParentLinkModule billing={billing} />
 
           {/* Opciones de demo */}
           <section className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">

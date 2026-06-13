@@ -475,6 +475,37 @@ function Dashboard({ m }: { m: AdminMetrics }) {
         />
       </Panel>
 
+      {/* Billing */}
+      <SectionHeader>Billing · Parent Checkout</SectionHeader>
+      <Panel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, padding: 16 }}>
+          <StatCard label="Links creados (7d)" value={String(m.billingMetrics.linksCreated7d)} />
+          <StatCard label="Pagos completados (7d)" value={String(m.billingMetrics.linksPaid7d)} accent />
+          <StatCard label="Links creados (30d)" value={String(m.billingMetrics.linksCreated30d)} />
+          <StatCard label="Pagos completados (30d)" value={String(m.billingMetrics.linksPaid30d)} accent />
+          <StatCard label="Entitlements activos" value={String(m.billingMetrics.activeEntitlements)} accent />
+          <StatCard label="Revenue (7d)" value={fmtCurrency(m.billingMetrics.revenueEurCents7d / 100)} accent />
+        </div>
+        {m.billingMetrics.recentLinks.length > 0 && (
+          <>
+            <p style={{ fontSize: 11, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, padding: '0 16px 8px' }}>
+              Últimos parent links
+            </p>
+            <Table
+              cols={['Fecha', 'Estado', 'Plan', 'Precio', 'User ID']}
+              rows={m.billingMetrics.recentLinks.map(r => [
+                fmtDate(r.createdAt),
+                r.status,
+                r.planId,
+                fmtCurrency(r.priceCents / 100),
+                maskUserId(r.studentUserId)
+              ])}
+              emptyMsg=""
+            />
+          </>
+        )}
+      </Panel>
+
       {/* Camino PAU */}
       <SectionHeader>Camino PAU</SectionHeader>
       <Panel>

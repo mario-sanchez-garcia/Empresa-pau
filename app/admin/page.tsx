@@ -475,6 +475,32 @@ function Dashboard({ m }: { m: AdminMetrics }) {
         />
       </Panel>
 
+      {/* Camino PAU */}
+      <SectionHeader>Camino PAU</SectionHeader>
+      <Panel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, padding: 16 }}>
+          <StatCard label="Usuarios activos (7d)" value={String(m.caminoMetrics.activeUsers7d)} />
+          <StatCard label="Tareas completadas (7d)" value={String(m.caminoMetrics.tasksCompleted7d)} />
+          <StatCard label="Tareas completadas (30d)" value={String(m.caminoMetrics.tasksCompleted30d)} />
+          <StatCard label="Misiones completadas (7d)" value={String(m.caminoMetrics.missionsCompleted7d)} />
+          <StatCard label="XP generado (7d)" value={String(m.caminoMetrics.xpGenerated7d)} />
+          <StatCard label="Racha media (días)" value={String(m.caminoMetrics.avgStreak)} />
+          <StatCard label="Tasa misión completada" value={`${Math.round(m.caminoMetrics.missionCompletionRate * 100)}%`} />
+        </div>
+        {Object.keys(m.caminoMetrics.routeDistribution).length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <p style={{ fontSize: 11, color: C.muted, marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Distribución de rutas</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {Object.entries(m.caminoMetrics.routeDistribution).sort((a, b) => b[1] - a[1]).map(([route, count]) => (
+                <span key={route} style={{ background: C.border, borderRadius: 6, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
+                  {route}: {count}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </Panel>
+
       <p style={{ marginTop: 28, fontSize: 10, color: C.muted, textAlign: 'right', borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
         Actualizado: {fmtDate(m.calculatedAt)} · Coste estimado — input: ×0,0000028 €/token · output: ×0,000014 €/token · Estimación aproximada, no facturación real.
       </p>

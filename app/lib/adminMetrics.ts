@@ -125,12 +125,33 @@ export type AdminMetrics = {
       notaFinal: number | null
     }>
   }
+  caminoMetrics: {
+    activeUsers7d: number
+    tasksCompleted7d: number
+    tasksCompleted30d: number
+    missionsCompleted7d: number
+    xpGenerated7d: number
+    avgStreak: number
+    missionCompletionRate: number
+    routeDistribution: Record<string, number>
+  }
   calculatedAt: string
 }
 
 const EMPTY_RANGE: RangeSummary = {
   calls: 0, tokens: 0, costEur: 0, errors: 0,
   activeUsers: 0, corrections: 0, simulacros: 0, plans: 0
+}
+
+const EMPTY_CAMINO = {
+  activeUsers7d: 0,
+  tasksCompleted7d: 0,
+  tasksCompleted30d: 0,
+  missionsCompleted7d: 0,
+  xpGenerated7d: 0,
+  avgStreak: 0,
+  missionCompletionRate: 0,
+  routeDistribution: {}
 }
 
 const EMPTY: AdminMetrics = {
@@ -143,6 +164,7 @@ const EMPTY: AdminMetrics = {
   recentEvents: [],
   recentErrors: [],
   productActivity: { recentCorrections: [], recentSimulacros: [] },
+  caminoMetrics: { ...EMPTY_CAMINO },
   calculatedAt: ''
 }
 
@@ -329,6 +351,65 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       }))
     } catch { /* ignore */ }
 
+    // Camino PAU metrics — separate try/catch so Camino tables not existing doesn't break admin panel
+    let caminoMetrics: AdminMetrics['caminoMetrics'] = { ...EMPTY_CAMINO }
+    try {
+      const [taskCompletionsRes, missionsRes, progressRes, routeSettingsRes] = await Promise.all([
+        db.from('camino_task_completions')
+          .select('user_id, completed_at')
+          .gte('completed_at', ago30d),
+        db.from('camino_daily_missions')
+          .select('user_id, completed, mission_date')
+          .gte('mission_date', ago7d),
+        db.from('camino_user_progress')
+          .select('streak_days'),
+        db.from('camino_route_settings')
+          .select('route_id')
+      ])
+
+      const allTaskCompletions = taskCompletionsRes.data ?? []
+      const tasksCompleted7d = allTaskCompletions.filter(r => r.completed_at >= ago7d).length
+      const tasksCompleted30d = allTaskCompletions.length
+      const activeUsers7d = new Set(allTaskCompletions.filter(r => r.completed_at >= ago7d).map(r => r.user_id)).size
+
+      const missions = missionsRes.data ?? []
+      const completedMissions = missions.filter(r => r.completed)
+      const missionsCompleted7d = completedMissions.length
+      const missionCompletionRate = missions.length > 0 ? completedMissions.length / missions.length : 0
+
+      const progressRows = progressRes.data ?? []
+      const avgStreak = progressRows.length > 0
+        ? Math.round(progressRows.reduce((s: number, r: { streak_days: number }) => s + (r.streak_days ?? 0), 0) / progressRows.length)
+        : 0
+
+      // XP generated in last 7d via xp_events (best effort)
+      let xpGenerated7d = 0
+      try {
+        const { data: xpRows } = await db
+          .from('camino_xp_events')
+          .select('xp_amount')
+          .gte('created_at', ago7d)
+        xpGenerated7d = (xpRows ?? []).reduce((s: number, r: { xp_amount: number }) => s + (r.xp_amount ?? 0), 0)
+      } catch { /* camino_xp_events may not exist */ }
+
+      const routeDistribution: Record<string, number> = {}
+      for (const r of routeSettingsRes.data ?? []) {
+        const key = r.route_id ?? 'completa'
+        routeDistribution[key] = (routeDistribution[key] ?? 0) + 1
+      }
+
+      caminoMetrics = {
+        activeUsers7d,
+        tasksCompleted7d,
+        tasksCompleted30d,
+        missionsCompleted7d,
+        xpGenerated7d,
+        avgStreak,
+        missionCompletionRate,
+        routeDistribution
+      }
+    } catch { /* camino tables may not exist — safe to skip */ }
+
     return {
       summaryToday,
       summary7d,
@@ -339,6 +420,7 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       recentEvents,
       recentErrors,
       productActivity: { recentCorrections, recentSimulacros },
+      caminoMetrics,
       calculatedAt: new Date().toISOString()
     }
   } catch (err) {

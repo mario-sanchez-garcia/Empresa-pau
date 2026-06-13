@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createUserSupabase, isValidDateString } from '@/app/lib/camino/caminoProgressServer'
+import { getWeakAreas } from '@/app/lib/camino/caminoWeakAreasServer'
 
 export async function GET(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -11,11 +12,12 @@ export async function GET(request: NextRequest) {
 
   const supabase = createUserSupabase(accessToken)
 
-  const [progressResult, routeResult, completionsResult, missionResult] = await Promise.all([
+  const [progressResult, routeResult, completionsResult, missionResult, weakAreas] = await Promise.all([
     supabase.from('camino_user_progress').select('*').eq('user_id', user.id).maybeSingle(),
     supabase.from('camino_route_settings').select('route_id, entry_date, pau_target_date').eq('user_id', user.id).maybeSingle(),
     supabase.from('camino_task_completions').select('task_id').eq('user_id', user.id).eq('mission_date', date),
-    supabase.from('camino_daily_missions').select('completed').eq('user_id', user.id).eq('mission_date', date).maybeSingle()
+    supabase.from('camino_daily_missions').select('completed').eq('user_id', user.id).eq('mission_date', date).maybeSingle(),
+    getWeakAreas(supabase, user.id)
   ])
 
   const p = progressResult.data
@@ -42,6 +44,7 @@ export async function GET(request: NextRequest) {
       missionDate: date,
       completedTaskIds,
       missionCompleted: missionResult.data?.completed ?? false
-    }
+    },
+    weakAreas
   })
 }

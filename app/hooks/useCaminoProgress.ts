@@ -18,6 +18,14 @@ import { getMissionForDate, type WeekContext } from '@/app/lib/camino/caminoMiss
 
 export type CaminoSource = 'local' | 'supabase'
 
+interface WeakAreaResponse {
+  subjectKey: string
+  blockSlug: string
+  label: string
+  avgScore: number
+  attempts: number
+}
+
 interface SupabaseStateResponse {
   progress: {
     xpTotal: number
@@ -39,6 +47,7 @@ interface SupabaseStateResponse {
     completedTaskIds: string[]
     missionCompleted: boolean
   }
+  weakAreas?: WeakAreaResponse[]
 }
 
 function mapToProgress(data: SupabaseStateResponse, dayKey: string): CaminoProgress {
@@ -109,7 +118,9 @@ export function useCaminoProgress() {
       saveCaminoProgress(mapped)
       // Actualizar misión con datos reales de ruta + weak areas
       entryDateRef.current = data.route.entryDate
-      updateMission(data.route.routeId, data.route.entryDate, weakBlocksRef.current)
+      const freshWeakBlocks = (data.weakAreas ?? []).map(w => w.label)
+      weakBlocksRef.current = freshWeakBlocks
+      updateMission(data.route.routeId, data.route.entryDate, freshWeakBlocks)
       return true
     } catch {
       return false

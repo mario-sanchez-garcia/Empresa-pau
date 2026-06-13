@@ -87,7 +87,9 @@ export async function POST(request: NextRequest) {
     },
     success_url: `${appUrl}/parent-checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/parent-checkout/${rawToken}`,
-    expires_at: Math.floor(new Date(link.expires_at).getTime() / 1000),
+    // Stripe requires expires_at < 24h from now. The parent link may live 7 days,
+    // but the Stripe session only needs to stay open long enough to complete payment.
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
   })
 
   // Update link status

@@ -40,7 +40,7 @@ export const PLANS: Record<string, BillingPlan> = {
     accessDays: null,
     features: [
       'Camino PAU: misiones diarias personalizadas',
-      'Correcciones IA ilimitadas',
+      'Correcciones IA con uso razonable',
       'Simulacros completos con corrección automática',
       'Historial de progreso y análisis de errores',
       'Seguimiento semana a semana hasta la PAU',

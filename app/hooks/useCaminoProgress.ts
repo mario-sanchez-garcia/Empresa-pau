@@ -93,6 +93,7 @@ export function useCaminoProgress() {
   const [progress, setProgress] = useState<CaminoProgress>(() => createInitialProgress(dayKey))
   const [loading, setLoading] = useState(true)
   const [source, setSource] = useState<CaminoSource>('local')
+  const [syncError, setSyncError] = useState(false)
   const [weekContext, setWeekContext] = useState<WeekContext | null>(null)
   const [currentTasks, setCurrentTasks] = useState<DailyCaminoTask[]>(fallbackTasks)
   const accessTokenRef = useRef<string | null>(null)
@@ -139,11 +140,23 @@ export function useCaminoProgress() {
         return
       }
       accessTokenRef.current = session.access_token
-      fetchFromSupabase(session.access_token).catch(() => {
-        const localProgress = loadCaminoProgress(dayKey)
-        setProgress(localProgress)
-        updateMission(localProgress.selectedRouteId, null, [])
-      }).finally(() => setLoading(false))
+      fetchFromSupabase(session.access_token)
+        .then(success => {
+          if (!success) {
+            setSyncError(true)
+            const localProgress = loadCaminoProgress(dayKey)
+            setProgress(localProgress)
+            updateMission(localProgress.selectedRouteId, null, [])
+          }
+        })
+        .catch(() => {
+          setSyncError(true)
+          const localProgress = loadCaminoProgress(dayKey)
+          setProgress(localProgress)
+          setSource('local')
+          updateMission(localProgress.selectedRouteId, null, [])
+        })
+        .finally(() => setLoading(false))
     }).catch(() => {
       const localProgress = loadCaminoProgress(dayKey)
       setProgress(localProgress)
@@ -246,6 +259,7 @@ export function useCaminoProgress() {
     progress,
     loading,
     source,
+    syncError,
     dayKey,
     currentTasks,
     weekContext,

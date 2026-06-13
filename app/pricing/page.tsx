@@ -358,6 +358,18 @@ export default function PricingPage() {
           <span>Los pagos todavía no están activos. Estos planes forman parte de la validación de beta.</span>
         </div>
       </section>
+
+      <footer style={{ padding: '4px 24px 36px', display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <Link href="/legal/privacidad" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Privacidad</Link>
+        <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+        <Link href="/legal/terminos" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Términos</Link>
+        <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+        <Link href="/legal/reembolsos" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Reembolsos</Link>
+        <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+        <Link href="/legal/ia" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Uso de IA</Link>
+        <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+        <Link href="/contacto" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Contacto</Link>
+      </footer>
     </main>
   )
 }

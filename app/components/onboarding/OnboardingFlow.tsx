@@ -90,6 +90,8 @@ export default function OnboardingFlow() {
   const [openAnswer, setOpenAnswer] = useState('')
   const [openFeedback, setOpenFeedback] = useState<string | null>(null)
   const [submittingTask, setSubmittingTask] = useState<string | null>(null)
+  const [setupWarning, setSetupWarning] = useState<string | null>(null)
+  const [taskError, setTaskError] = useState<string | null>(null)
 
   useEffect(() => {
     if (isOnboardingComplete()) setPhase('already-done')
@@ -129,12 +131,17 @@ export default function OnboardingFlow() {
     const token = accessTokenRef.current
     if (token) {
       try {
-        await fetch('/api/onboarding/setup', {
+        const res = await fetch('/api/onboarding/setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ routeId, community, dailyMinutes, startMode })
         })
-      } catch { /* non-critical, localStorage already saved */ }
+        if (!res.ok) {
+          setSetupWarning('Tu ruta se guardó localmente. El servidor no está disponible en este momento.')
+        }
+      } catch {
+        setSetupWarning('Sin conexión. Tu ruta se guardó localmente y se sincronizará al reconectar.')
+      }
     }
 
     setTimeout(() => setPhase('first-mission'), 2400)
@@ -151,15 +158,19 @@ export default function OnboardingFlow() {
     }
 
     setSubmittingTask(task.id)
+    setTaskError(null)
 
-    // Optimistic update
+    // Optimistic checkmark (no XP yet for authenticated users)
     setCompletedTaskIds(prev => [...prev, task.id])
-    setXpEarned(prev => prev + task.xp)
 
     const token = accessTokenRef.current
-    if (token) {
+
+    if (!token) {
+      // Local-only mode — add XP immediately
+      setXpEarned(prev => prev + task.xp)
+    } else {
       try {
-        await fetch('/api/camino/complete-task', {
+        const res = await fetch('/api/camino/complete-task', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
@@ -170,7 +181,14 @@ export default function OnboardingFlow() {
             missionTaskIds: ONBOARDING_TASKS.map(t => t.id)
           })
         })
-      } catch { /* non-critical */ }
+        if (res.ok) {
+          setXpEarned(prev => prev + task.xp)
+        } else {
+          setTaskError('No se pudo guardar la tarea. Inténtalo de nuevo o continúa.')
+        }
+      } catch {
+        setTaskError('Error de conexión al guardar. Continúa igualmente.')
+      }
     }
 
     setSubmittingTask(null)
@@ -408,6 +426,17 @@ export default function OnboardingFlow() {
                 {completedTaskIds.length}/{ONBOARDING_TASKS.length} completadas
               </p>
             </Card>
+
+            {setupWarning && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-800">
+                {setupWarning}
+              </div>
+            )}
+            {taskError && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700">
+                {taskError}
+              </div>
+            )}
 
             {ONBOARDING_TASKS.map(task => (
               <OnboardingTaskCard

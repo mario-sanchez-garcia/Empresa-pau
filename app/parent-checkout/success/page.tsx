@@ -34,9 +34,19 @@ export default function ParentCheckoutSuccess() {
         <div style={styles.infoBox}>
           <p style={styles.infoText}>
             Si el acceso no aparece en 10 minutos, escríbenos a{' '}
-            <strong>hola@pausia.es</strong> con el número de pedido que Stripe
+            <a href="mailto:hola@pausia.es" style={{ color: '#1e40af', fontWeight: 700 }}>hola@pausia.es</a> con el número de pedido que Stripe
             te ha enviado por email.
           </p>
+        </div>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 8, justifyContent: 'center' as const }}>
+          <a href="/legal/privacidad" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Privacidad</a>
+          <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+          <a href="/legal/terminos" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Términos</a>
+          <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+          <a href="/legal/reembolsos" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Reembolsos</a>
+          <span style={{ fontSize: 12, color: '#d1d5db' }}>·</span>
+          <a href="/contacto" style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>Contacto</a>
         </div>
       </div>
     </main>

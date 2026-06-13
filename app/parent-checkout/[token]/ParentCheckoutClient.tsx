@@ -99,7 +99,15 @@ export default function ParentCheckoutClient({
         <div style={styles.guarantee}>
           <Shield size={18} style={{ color: '#2563eb', flexShrink: 0 }} />
           <p style={styles.guaranteeText}>
-            <strong>Garantía de 7 días.</strong> Si el alumno no está satisfecho en los primeros 7 días, devolvemos el importe completo sin preguntas.
+            <strong>Garantía de 7 días.</strong> Si el alumno no está satisfecho en los primeros 7 días, puedes solicitar el reembolso escribiendo a <a href="mailto:hola@pausia.es" style={{ color: '#1e40af' }}>hola@pausia.es</a>. Ver <a href="/legal/reembolsos" style={{ color: '#1e40af' }}>política de reembolsos</a>.
+          </p>
+        </div>
+
+        {/* IA disclaimer */}
+        <div style={styles.disclaimer}>
+          <p style={styles.disclaimerText}>
+            Las correcciones generadas por IA son orientativas y pueden contener errores. No sustituyen a un profesor ni a los criterios oficiales de corrección PAU.{' '}
+            <a href="/legal/ia" style={{ color: '#94a3b8', textDecoration: 'underline' }}>Política de uso de IA</a>
           </p>
         </div>
 
@@ -135,6 +143,19 @@ export default function ParentCheckoutClient({
             <p style={styles.expiryText}>Este enlace caduca el {expiry}</p>
           </div>
         )}
+
+        {/* Legal footer */}
+        <div style={styles.legalFooter}>
+          <a href="/legal/privacidad" style={styles.legalLink}>Privacidad</a>
+          <span style={styles.legalSep}>·</span>
+          <a href="/legal/terminos" style={styles.legalLink}>Términos</a>
+          <span style={styles.legalSep}>·</span>
+          <a href="/legal/reembolsos" style={styles.legalLink}>Reembolsos</a>
+          <span style={styles.legalSep}>·</span>
+          <a href="/legal/ia" style={styles.legalLink}>Uso de IA</a>
+          <span style={styles.legalSep}>·</span>
+          <a href="/contacto" style={styles.legalLink}>Contacto</a>
+        </div>
       </div>
     </main>
   )
@@ -256,4 +277,9 @@ const styles = {
     justifyContent: 'center' as const,
   },
   expiryText: { fontSize: 12, color: '#94a3b8', margin: 0 },
+  disclaimer: { background: '#f8fafc', borderRadius: 10, padding: '10px 14px' },
+  disclaimerText: { fontSize: 12, color: '#94a3b8', lineHeight: 1.5, margin: 0 },
+  legalFooter: { display: 'flex' as const, flexWrap: 'wrap' as const, gap: 8, justifyContent: 'center' as const, paddingTop: 4 },
+  legalLink: { fontSize: 12, color: '#94a3b8', textDecoration: 'none' },
+  legalSep: { fontSize: 12, color: '#d1d5db' },
 }

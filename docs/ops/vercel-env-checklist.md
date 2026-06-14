@@ -1,7 +1,8 @@
 # Vercel · Environment Variables Checklist
 
 > No incluir valores reales aquí. Solo nombres y descripción.  
-> Configurar en: Vercel Dashboard → Project → Settings → Environment Variables
+> Configurar en: Vercel Dashboard → Project → Settings → Environment Variables  
+> Última verificación: 14 junio 2026 (rehearsal final)
 
 ---
 

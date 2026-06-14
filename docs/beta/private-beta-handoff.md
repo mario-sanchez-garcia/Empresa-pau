@@ -1,7 +1,20 @@
 # Pausia · Private Beta Handoff
 
 > Estado: lista para beta privada controlada (2-3 usuarios reales)  
-> Fecha: junio 2026
+> Fecha: junio 2026 · Rehearsal final: 14 junio 2026
+
+---
+
+## Qué es Pausia ahora
+
+Una app web para preparar la PAU con estructura y progresión real. El alumno hace onboarding una vez, recibe misiones diarias organizadas por currículum (38 semanas), puede corregir ejercicios con IA, hacer simulacros cronometrados con corrección automática, y enviar un enlace a sus padres para que paguen el Pack Curso PAU.
+
+**Flujo principal:**
+```
+/onboarding → primera misión → /camino → enviar enlace a padres
+```
+
+**El alumno nunca decide qué estudiar** — Pausia lo decide por él según su ruta y semana del currículum.
 
 ---
 

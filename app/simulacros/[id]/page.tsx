@@ -193,10 +193,14 @@ export default function SimulacroActivoPage() {
       router.push(`/simulacros/${record.id}/results`)
     } catch (error) {
       console.error('SIMULACRO_SUBMIT_ERROR', error)
-      await supabase.from('historial_simulacros').update({
-        respuestas_parciales: answersSnapshot,
-        updated_at: new Date().toISOString()
-      }).eq('id', record.id)
+      try {
+        await supabase.from('historial_simulacros').update({
+          respuestas_parciales: answersSnapshot,
+          updated_at: new Date().toISOString()
+        }).eq('id', record.id)
+      } catch {
+        // Best-effort save — ignore if it also fails
+      }
       setSubmitError('No hemos podido entregar la corrección. Tus respuestas están guardadas y puedes volver a intentarlo.')
       setSubmitStage('')
       setSubmitting(false)

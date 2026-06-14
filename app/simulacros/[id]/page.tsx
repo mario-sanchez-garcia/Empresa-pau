@@ -208,17 +208,17 @@ export default function SimulacroActivoPage() {
   }
 
   if (!record) {
-    return <SimulacroShell title="Simulacro" subtitle="Cargando examen..."><div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-8 font-black text-slate-500 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">Preparando simulacro...</div></SimulacroShell>
+    return <SimulacroShell title="Simulacro" subtitle="Cargando examen..."><div className="pau-card-section"><div className="pau-skeleton" style={{ height: 24, width: '50%', borderRadius: 8, marginBottom: 12 }} /><div className="pau-skeleton" style={{ height: 16, width: '30%', borderRadius: 6 }} /></div></SimulacroShell>
   }
 
   return (
     <SimulacroShell
       title="Examen activo"
       subtitle={`90 minutos, ${record.bloques.length} bloques y corrección completa`}
-      actions={<button onClick={() => { setSubmitError(''); setConfirmOpen(true) }} disabled={submitting} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-4 py-2 text-sm font-black text-white shadow-[0_16px_34px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5 disabled:opacity-60"><Send size={16} />Entregar examen</button>}
+      actions={<button onClick={() => { setSubmitError(''); setConfirmOpen(true) }} disabled={submitting} className="campus-primary" style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12 }}><Send size={15} />Entregar examen</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-5">
-        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+        <section className="pau-card-section">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <Badge color={cfg.color}>{cfg.label}</Badge>
@@ -229,7 +229,7 @@ export default function SimulacroActivoPage() {
             <div className="flex items-center gap-2 text-2xl font-black" style={{ color: secondsLeft < 15 * 60 ? '#1d4ed8' : '#0f172a' }}><Clock size={24} />{formatTime(secondsLeft)}</div>
           </div>
           <div className="mb-3 flex justify-end"><SaveBadge status={saveStatus} /></div>
-          <div className="h-3 overflow-hidden rounded-full bg-blue-50"><div className={`h-full ${timerColor} transition-all`} style={{ width: `${percentLeft}%` }} /></div>
+          <div className="pau-progress-bar"><div className={`pau-progress-fill ${timerColor}`} style={{ width: `${percentLeft}%` }} /></div>
           <div className="mt-4 flex flex-wrap gap-2">
             {record.bloques.map((block, index) => {
               const ok = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)
@@ -240,7 +240,7 @@ export default function SimulacroActivoPage() {
 
         {record.bloques.map((block, index) => (
           <section key={block.id} className={active === index ? 'grid gap-4' : 'hidden'}>
-            <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+            <div className="pau-card-section">
               <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="mb-2 flex items-center gap-2">
@@ -254,10 +254,10 @@ export default function SimulacroActivoPage() {
                   </div>
                 </div>
               </div>
-              <div className="grid gap-4 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
+              <div className="grid gap-3" style={{ borderRadius: 12, border: '1px solid var(--pau-border)', background: '#f8fbff', padding: 14 }}>
                 {(record.asignatura === 'lengua' || record.asignatura === 'ingles') && block.textoFuente && (
-                  <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
-                    <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>{record.asignatura === 'ingles' ? 'Texto oficial' : 'Texto fuente oficial'}</div>
+                  <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
+                    <div className="mb-3 text-[11px] font-black" style={{ color: cfg.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{record.asignatura === 'ingles' ? 'Texto oficial' : 'Texto fuente oficial'}</div>
                     <ExamStatement
                       text={block.textoFuente}
                       storageKey={`simulacro:${record.id}:bloque:${block.id}:fuente`}
@@ -267,8 +267,8 @@ export default function SimulacroActivoPage() {
                     />
                   </div>
                 )}
-                <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
-                  <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Enunciado oficial</div>
+                <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
+                  <div className="mb-3 text-[11px] font-black" style={{ color: cfg.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Enunciado oficial</div>
                   <ExamStatement
                     text={block.enunciado}
                     storageKey={`simulacro:${record.id}:bloque:${block.id}:enunciado`}
@@ -278,8 +278,8 @@ export default function SimulacroActivoPage() {
                   />
                 </div>
                 {record.asignatura !== 'lengua' && record.asignatura !== 'ingles' && block.textoFuente && (
-                  <div className="rounded-3xl border border-[#e5edf9] bg-white p-5 shadow-[0_12px_30px_rgba(37,99,235,0.06)]">
-                    <div className="mb-3 text-[11px] font-black uppercase tracking-[0.08em]" style={{ color: cfg.color }}>Texto fuente oficial</div>
+                  <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
+                    <div className="mb-3 text-[11px] font-black" style={{ color: cfg.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Texto fuente oficial</div>
                     <ExamStatement
                       text={block.textoFuente}
                       storageKey={`simulacro:${record.id}:bloque:${block.id}:fuente`}
@@ -291,10 +291,10 @@ export default function SimulacroActivoPage() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+            <div className="pau-card-section">
               <div className="mb-4 flex gap-2">
-                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'text' }))} className={`rounded-2xl px-4 py-2 text-sm font-black transition hover:-translate-y-0.5 ${mode[block.id] !== 'image' ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Escribir</button>
-                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'image' }))} className={`rounded-2xl px-4 py-2 text-sm font-black transition hover:-translate-y-0.5 ${mode[block.id] === 'image' ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Subir foto</button>
+                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'text' }))} className={`rounded-xl px-4 py-2 text-sm font-black transition ${mode[block.id] !== 'image' ? 'bg-blue-600 text-white shadow-[0_10px_22px_rgba(37,99,235,0.2)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Escribir</button>
+                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'image' }))} className={`rounded-xl px-4 py-2 text-sm font-black transition ${mode[block.id] === 'image' ? 'bg-blue-600 text-white shadow-[0_10px_22px_rgba(37,99,235,0.2)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Subir foto</button>
               </div>
               {mode[block.id] === 'image' ? (
                 <div className="grid gap-4">
@@ -319,15 +319,15 @@ export default function SimulacroActivoPage() {
       </div>
 
       {(confirmOpen || timeUp) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-          <div className="w-full max-w-md rounded-[28px] border border-[#dbe7fb] bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 'var(--z-modal-bg)' as any, background: 'rgba(15,23,42,0.48)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-md bg-white p-6" style={{ borderRadius: 20, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-xl)', zIndex: 'var(--z-modal)' as any }}>
             <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-blue-700" /> : <CheckCircle2 className="text-blue-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
             <p className="text-sm font-semibold text-slate-600">Has respondido {answeredCount} de {record.bloques.length} bloques. Quedan {record.bloques.length - answeredCount} vacíos.</p>
             {submitting && <div className="mt-4 flex items-center gap-2 text-sm font-black text-blue-700"><Cog className="h-4 w-4 animate-spin [animation-duration:3s]" aria-hidden="true" />{submitStage || 'Preparando entrega...'}</div>}
-            {submitError && <p className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-900">{submitError}</p>}
+            {submitError && <div className="pau-info mt-4">{submitError}</div>}
             <div className="mt-6 flex justify-end gap-3">
-              {!timeUp && <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="rounded-2xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-60">Volver</button>}
-              <button onClick={submitExam} disabled={submitting} className="rounded-2xl bg-blue-600 px-4 py-2 font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5 disabled:opacity-60">Ver corrección</button>
+              {!timeUp && <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="rounded-xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-60">Volver</button>}
+              <button onClick={submitExam} disabled={submitting} className="campus-primary" style={{ padding: '10px 20px', borderRadius: 12 }}>Ver corrección</button>
             </div>
           </div>
         </div>

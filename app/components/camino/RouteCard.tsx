@@ -9,10 +9,10 @@ export default function RouteCard({ selectedRouteId, onRouteChange }: RouteCardP
   const route = getRouteById(selectedRouteId)
 
   return (
-    <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
+    <section style={{ borderRadius: 16, border: '1px solid var(--pau-border)', background: '#fff', padding: 20, boxShadow: 'var(--shadow-sm)' }}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-widest text-slate-400">Ruta de entrada</p>
+          <p className="text-xs font-bold text-slate-400">Ruta de entrada</p>
           <h2 className="mt-1 text-xl font-black text-slate-950">{route.nombre}</h2>
         </div>
         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{route.prioridad}</span>
@@ -45,8 +45,8 @@ export default function RouteCard({ selectedRouteId, onRouteChange }: RouteCardP
 
 function RouteFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+      <p className="text-[10px] font-bold text-slate-400">{label}</p>
       <p className="mt-1 text-sm font-black text-slate-800">{value}</p>
     </div>
   )

@@ -100,7 +100,7 @@ export default function ParentLinkModule({ billing }: Props) {
   }
 
   return (
-    <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
+    <section style={{ borderRadius: 16, border: '1px solid var(--pau-border)', background: '#fff', padding: 20, boxShadow: 'var(--shadow-sm)' }}>
       <div className="mb-3 flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
           <Send size={19} />
@@ -125,7 +125,8 @@ export default function ParentLinkModule({ billing }: Props) {
         <button
           type="button"
           onClick={handleGenerateLink}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(37,99,235,0.35)] focus:outline-none"
+          className="campus-primary w-full"
+          style={{ padding: '12px 20px', borderRadius: 12, fontSize: 14, gap: 8 }}
         >
           <Send size={16} /> Enviar a mis padres
         </button>
@@ -145,7 +146,7 @@ export default function ParentLinkModule({ billing }: Props) {
 
           {/* WhatsApp copy text */}
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-            <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-400">Mensaje sugerido</p>
+            <p className="mb-2 text-xs font-bold text-slate-400">Mensaje sugerido</p>
             <p className="text-xs font-semibold leading-5 text-slate-600 select-all">
               {SHARE_TEXT}
               <span className="text-blue-600">{ui.url}</span>

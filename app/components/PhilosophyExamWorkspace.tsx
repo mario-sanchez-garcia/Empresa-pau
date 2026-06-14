@@ -220,8 +220,8 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
 
   return (
     <div className="mb-8 grid gap-5">
-      <section className="rounded-[28px] border bg-white px-6 py-6 shadow-[0_18px_45px_rgba(100,116,139,0.08)]" style={{ borderColor: UI.border }}>
-        <div className="mb-4 text-xs font-black uppercase tracking-[0.08em] text-slate-400">Filtros</div>
+      <section className="bg-white px-6 py-6" style={{ borderRadius: 16, border: `1px solid ${UI.border}`, boxShadow: 'var(--shadow-sm)' }}>
+        <div className="mb-4 text-xs font-bold text-slate-400">Filtros</div>
         <div className="grid gap-4">
           <div className="flex flex-wrap gap-4">
             <FilterGroup

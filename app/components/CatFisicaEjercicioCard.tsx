@@ -159,7 +159,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
   const sinRespuesta = modo === 'texto' ? !respuesta.trim() : imagenes.length === 0
 
   return (
-    <article className="overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_45px_rgba(37,99,235,0.08)]" style={{ borderColor: UI.border }}>
+    <article className="overflow-hidden bg-white" style={{ borderRadius: 16, border: `1px solid ${UI.border}`, boxShadow: 'var(--shadow-sm)' }}>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4" style={{ backgroundColor: UI.light, borderBottom: `2px solid ${UI.accent}` }}>
         <div className="min-w-0">
           <ExamMetaChips color={UI.color} accent={UI.accent} items={['PAU Catalunya', String(examen.anio), examen.convocatoria, examen.serie, `Ejercicio ${ejercicio.numero}`, opcion?.opcion ? `Opción ${opcion.opcion}` : null, apartado?.letra ? `Apartado ${apartado.letra}` : null]} />

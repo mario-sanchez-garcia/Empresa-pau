@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* ─── Brand tokens ──────────────────────────────────────────────── */
 :root {
   --background: #f8fbff;
   --foreground: #172033;
@@ -11,6 +12,41 @@
   --warm-blue: #2563eb;
   --warm-amber: #2563eb;
   --warm-coral: #60a5fa;
+
+  /* Design system */
+  --pau-blue: #2563eb;
+  --pau-blue-deep: #1d4ed8;
+  --pau-blue-sky: #38bdf8;
+  --pau-blue-50: #eff6ff;
+  --pau-border: #e2ecf9;
+  --pau-ink: #0f172a;
+  --pau-muted: #64748b;
+  --pau-soft: #94a3b8;
+
+  /* Radius scale — max 16px on cards (impeccable rule) */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* Shadow tiers — tinted blue, no pure-black */
+  --shadow-xs: 0 2px 6px rgba(37, 99, 235, 0.05);
+  --shadow-sm: 0 4px 14px rgba(37, 99, 235, 0.06);
+  --shadow-md: 0 8px 28px rgba(37, 99, 235, 0.09);
+  --shadow-lg: 0 16px 48px rgba(37, 99, 235, 0.11);
+  --shadow-xl: 0 28px 72px rgba(37, 99, 235, 0.14);
+
+  /* Easing curves (Emil Kowalski) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Z-index scale */
+  --z-dropdown: 30;
+  --z-sticky: 40;
+  --z-modal-bg: 50;
+  --z-modal: 60;
+  --z-toast: 70;
 }
 
 @theme inline {
@@ -20,12 +56,244 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ─── Base ──────────────────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Arial, Helvetica, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+/* Cap body line length */
+p, li { max-width: 72ch; }
+
+/* ─── Focus ─────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--pau-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ─── Selection ─────────────────────────────────────────────────── */
+::selection {
+  background: rgba(37, 99, 235, 0.14);
+  color: #0f172a;
+}
+
+/* ─── Scrollbar (subtle) ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.18); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(37, 99, 235, 0.32); }
+
+/* ─── Button feedback (Emil Kowalski: scale on :active) ─────────── */
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Hover elevate — touch devices only fire if cursor present */
+@media (hover: hover) and (pointer: fine) {
+  .pau-hover-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────── */
+@keyframes pau-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes pau-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pau-shimmer {
+  to { background-position: 200% center; }
+}
+
+@keyframes pau-pulse-ring {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.97); }
+}
+
+@keyframes pau-progress-grow {
+  from { width: 0; }
+}
+
+/* Staggered list entrance */
+.pau-stagger > * {
+  animation: pau-fade-up 360ms var(--ease-out) both;
+}
+.pau-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.pau-stagger > *:nth-child(2) { animation-delay: 50ms; }
+.pau-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.pau-stagger > *:nth-child(4) { animation-delay: 150ms; }
+.pau-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.pau-stagger > *:nth-child(6) { animation-delay: 250ms; }
+.pau-stagger > *:nth-child(7) { animation-delay: 300ms; }
+.pau-stagger > *:nth-child(8) { animation-delay: 350ms; }
+
+/* ─── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pau-stagger > * { animation: none; }
+}
+
+/* ─── Skeleton shimmer ───────────────────────────────────────────── */
+.pau-skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e8eff8 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: pau-shimmer 1.6s ease infinite;
+  border-radius: var(--r-md);
+}
+
+/* ─── Card base ──────────────────────────────────────────────────── */
+.pau-card {
+  background: #fff;
+  border: 1px solid var(--pau-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 220ms var(--ease-out), transform 220ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pau-card:hover { box-shadow: var(--shadow-md); }
+}
+
+/* ─── Primary button base ─────────────────────────────────────────── */
+.campus-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border-radius: var(--r-pill);
+  border: none;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #38bdf8 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.22);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), filter 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .campus-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 48px rgba(37, 99, 235, 0.28);
+    filter: brightness(1.04);
+  }
+}
+.campus-primary:active:not(:disabled) {
+  transform: scale(0.97) !important;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
+}
+.campus-primary:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+/* ─── Badge ──────────────────────────────────────────────────────── */
+.pau-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+.pau-badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.pau-badge-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.pau-badge-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+
+/* ─── Alert / info strip ─────────────────────────────────────────── */
+.pau-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  border: 1px solid #bfdbfe;
+  background: rgba(239, 246, 255, 0.92);
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* ─── Section card (simulacros, camino panels) ───────────────────── */
+.pau-card-section {
+  border-radius: 18px;
+  border: 1px solid var(--pau-border);
+  background: #fff;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Empty state ────────────────────────────────────────────────── */
+.pau-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 24px;
+  border-radius: var(--r-xl);
+  border: 1.5px dashed #bfdbfe;
+  background: rgba(239, 246, 255, 0.5);
+  color: #3b82f6;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ─── Error state ────────────────────────────────────────────────── */
+.pau-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  border: 1px solid #fecaca;
+  background: rgba(254, 242, 242, 0.92);
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* ─── Progress bar ───────────────────────────────────────────────── */
+.pau-progress-bar {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.pau-progress-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, #1d4ed8, #2563eb, #38bdf8);
+  transition: width 600ms var(--ease-out);
+  animation: pau-progress-grow 600ms var(--ease-out);
+}
+
+/* ─── Section reveal ─────────────────────────────────────────────── */
+.pau-reveal {
+  animation: pau-fade-up 400ms var(--ease-out) both;
+}
+
+/* ─── Math / KaTeX — do NOT touch these ─────────────────────────── */
 .math-markdown {
   color: inherit;
   font-size: inherit;
@@ -50,6 +318,7 @@ body {
   max-width: none;
 }
 
+/* ─── ExamStatement ──────────────────────────────────────────────── */
 .exam-statement {
   --statement-accent: #2563eb;
   --statement-soft: #eff6ff;
@@ -67,7 +336,7 @@ body {
   align-items: center;
   background: linear-gradient(135deg, #ffffff, var(--statement-soft));
   border: 1px solid color-mix(in srgb, var(--statement-accent) 22%, #dbe7fb);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   color: var(--statement-accent);
   cursor: pointer;
   display: inline-flex;
@@ -75,13 +344,13 @@ body {
   font-weight: 850;
   gap: 0.42rem;
   padding: 0.45rem 0.8rem;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), border-color 160ms var(--ease-out), background 160ms var(--ease-out);
 }
 
 .exam-statement-action:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--statement-accent), color-mix(in srgb, var(--statement-accent) 66%, #ffffff));
   border-color: var(--statement-accent);
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--statement-accent) 20%, transparent);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--statement-accent) 18%, transparent);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -90,7 +359,7 @@ body {
 .exam-statement-action-active:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--statement-accent), color-mix(in srgb, var(--statement-accent) 72%, #ffffff));
   border-color: var(--statement-accent);
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--statement-accent) 22%, transparent);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--statement-accent) 22%, transparent);
   color: #ffffff;
 }
 
@@ -110,7 +379,7 @@ body {
   align-items: center;
   background: #fffdf5;
   border: 1px solid #fde68a;
-  border-radius: 0.9rem;
+  border-radius: var(--r-lg);
   color: #854d0e;
   display: flex;
   flex-wrap: wrap;
@@ -125,7 +394,7 @@ body {
 .exam-statement-highlight-menu button {
   align-items: center;
   border: 1px solid #dbe7fb;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   display: inline-flex;
   font-size: 0.72rem;
@@ -148,15 +417,15 @@ body {
 .exam-statement-highlight-menu {
   background: #ffffff;
   border: 1px solid color-mix(in srgb, var(--statement-accent) 24%, #dbe7fb);
-  border-radius: 0.85rem;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
   display: grid;
   gap: 0.45rem;
   max-width: min(260px, calc(100vw - 32px));
   padding: 0.55rem;
   position: absolute;
   width: 212px;
-  z-index: 20;
+  z-index: var(--z-dropdown);
 }
 
 .exam-statement-highlight-menu-above {

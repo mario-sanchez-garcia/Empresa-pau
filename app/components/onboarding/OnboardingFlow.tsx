@@ -239,7 +239,8 @@ export default function OnboardingFlow() {
               <button
                 type="button"
                 onClick={() => router.push('/camino')}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition hover:-translate-y-0.5"
+                className="campus-primary w-full"
+                style={{ padding: '13px 20px', borderRadius: 14, fontSize: 14, gap: 8 }}
               >
                 Ver mi Camino <ArrowRight size={15} />
               </button>
@@ -410,17 +411,13 @@ export default function OnboardingFlow() {
         {phase === 'first-mission' && (
           <div className="space-y-5">
             <Card>
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">Tu primera misión</p>
+              <p className="text-xs font-bold text-slate-400">Tu primera misión</p>
               <h2 className="mt-1 text-xl font-black text-slate-950">Activación · Semana 1</h2>
               <p className="mt-1 text-sm font-semibold text-slate-500">
                 3 tareas cortas para calibrar tu punto de partida. Sin presión.
               </p>
-              {/* Progress bar */}
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-blue-700 to-sky-400 transition-all duration-500"
-                  style={{ width: `${Math.round((completedTaskIds.length / ONBOARDING_TASKS.length) * 100)}%` }}
-                />
+              <div className="pau-progress-bar mt-4">
+                <div className="pau-progress-fill" style={{ width: `${Math.round((completedTaskIds.length / ONBOARDING_TASKS.length) * 100)}%` }} />
               </div>
               <p className="mt-1 text-xs font-semibold text-slate-400">
                 {completedTaskIds.length}/{ONBOARDING_TASKS.length} completadas
@@ -491,7 +488,7 @@ export default function OnboardingFlow() {
 
             {/* Parent CTA */}
             <Card>
-              <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Tu Camino PAU está creado</p>
+              <p className="mb-3 text-xs font-bold text-slate-400">Tu Camino PAU está creado</p>
               <ParentLinkModule billing={billing} />
             </Card>
 
@@ -515,7 +512,7 @@ export default function OnboardingFlow() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
+    <div style={{ borderRadius: 20, border: '1px solid var(--pau-border)', background: '#fff', padding: 24, boxShadow: 'var(--shadow-sm)' }}>
       {children}
     </div>
   )
@@ -529,7 +526,8 @@ function PrimaryButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
+      className="campus-primary mt-6 w-full"
+      style={{ padding: '13px 20px', borderRadius: 14, fontSize: 14, gap: 8 }}
     >
       {children}
     </button>
@@ -584,11 +582,13 @@ function OnboardingTaskCard({
   const isOpenTask = task.id === 'ob-open-1'
 
   return (
-    <div className={`rounded-[24px] border p-4 transition ${
-      completed
-        ? 'border-emerald-200 bg-emerald-50/70'
-        : 'border-[#dbe7fb] bg-white hover:border-blue-200'
-    }`}>
+    <div style={{
+      borderRadius: 14,
+      border: `1px solid ${completed ? '#bbf7d0' : 'var(--pau-border)'}`,
+      background: completed ? 'rgba(240,253,244,0.8)' : '#fff',
+      padding: 16,
+      transition: 'border-color 180ms var(--ease-out)',
+    }}>
       <div className="flex items-start gap-3">
         <button
           type="button"

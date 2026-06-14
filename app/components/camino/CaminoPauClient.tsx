@@ -36,46 +36,67 @@ export default function CaminoPauClient() {
   const missionProgress = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(circle_at_16%_12%,rgba(219,234,254,0.88),transparent_30%),radial-gradient(circle_at_86%_8%,rgba(224,231,255,0.72),transparent_28%),radial-gradient(circle_at_82%_82%,rgba(186,230,253,0.45),transparent_30%),linear-gradient(135deg,#fbfdff_0%,#f8fafc_48%,#eff6ff_100%)] text-slate-900 max-lg:block">
+    <div
+      className="max-lg:block"
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        background: 'radial-gradient(circle at 14% 10%, rgba(219,234,254,0.7), transparent 28%), radial-gradient(circle at 88% 6%, rgba(224,231,255,0.55), transparent 26%), linear-gradient(160deg, #fbfdff 0%, #f4f8fe 100%)',
+        color: '#0f172a',
+      }}
+    >
       <Sidebar activeItem="camino" />
 
-      <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 border-b border-[#dbe7fb] bg-white/80 px-8 py-3 backdrop-blur-xl max-md:px-4">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_18px_42px_rgba(37,99,235,0.26)]">
-              <Route size={27} strokeWidth={2.2} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Header */}
+        <header style={{
+          position: 'sticky', top: 0, zIndex: 40,
+          borderBottom: '1px solid var(--pau-border)',
+          background: 'rgba(255,255,255,0.88)',
+          backdropFilter: 'blur(20px)',
+          padding: '12px 28px',
+        }} className="max-md:px-4">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+            <div style={{
+              width: 48, height: 48, flexShrink: 0, borderRadius: 14,
+              background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #38bdf8 100%)',
+              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 10px 28px rgba(37,99,235,0.22)',
+            }}>
+              <Route size={24} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <div className="mb-1 flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-black tracking-tight text-slate-950 md:text-3xl">Camino PAU</h1>
-                <span className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wide ${
-                  source === 'supabase'
-                    ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
-                    : 'border-blue-100 bg-blue-50 text-blue-700'
-                }`}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: '-0.025em', color: '#0f172a' }}>
+                  Camino PAU
+                </h1>
+                <span className={`pau-badge ${source === 'supabase' ? 'pau-badge-green' : 'pau-badge-blue'}`}>
                   {source === 'supabase' ? 'En vivo' : 'Beta interna'}
                 </span>
                 {weekContext && (
-                  <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-500">
+                  <span className="pau-badge" style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }}>
                     Semana {weekContext.semana} · {weekContext.faseLabel}
                   </span>
                 )}
               </div>
-              <p className="text-sm font-bold text-slate-500">Tu misión diaria para llegar preparado a la PAU</p>
-              {weekContext && (
-                <p className="mt-0.5 text-xs font-semibold text-slate-400">{weekContext.objetivo}</p>
-              )}
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#64748b' }}>
+                Tu misión diaria para llegar preparado a la PAU
+              </p>
             </div>
           </div>
         </header>
 
+        {/* Sync warning */}
         {syncError && !loading && (
-          <div className="mx-5 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800">
+          <div style={{ margin: '12px 20px 0' }} className="pau-info">
+            <Target size={15} style={{ flexShrink: 0, marginTop: 1 }} />
             Modo local — no se pudo sincronizar con el servidor. Tu progreso se guarda en este dispositivo.
           </div>
         )}
 
-        <main className="mx-auto grid max-w-7xl gap-5 p-5 max-md:p-4">
+        {/* Main */}
+        <main style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 20px 40px' }} className="max-md:px-4">
+
           <MissionCard
             routeId={progress.selectedRouteId}
             completedCount={completedCount}
@@ -86,70 +107,78 @@ export default function CaminoPauClient() {
             }}
           />
 
-          {/* Métricas */}
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <MetricCard icon={<Flame size={19} />} label="Racha actual" value={loading ? '–' : `${progress.streakDays} días`} tone="amber" />
-            <MetricCard icon={<Sparkles size={19} />} label="XP total" value={loading ? '–' : formatNumber(progress.xpTotal)} tone="blue" />
-            <MetricCard icon={<GraduationCap size={19} />} label="Nivel Matemáticas II" value={loading ? '–' : String(progress.levelBySubject.mates)} tone="slate" />
-            <MetricCard icon={<TrendingUp size={19} />} label="Progreso hacia la PAU" value={loading ? '–' : `${progress.progressTowardsPau}%`} tone="emerald" />
+          {/* Metrics */}
+          <section style={{ display: 'grid', gap: 12, marginTop: 16 }} className="md:grid-cols-2 xl:grid-cols-4">
+            <MetricCard icon={<Flame size={18} />} label="Racha actual" value={loading ? '–' : `${progress.streakDays} días`} tone="amber" />
+            <MetricCard icon={<Sparkles size={18} />} label="XP total" value={loading ? '–' : formatNumber(progress.xpTotal)} tone="blue" />
+            <MetricCard icon={<GraduationCap size={18} />} label="Nivel Matemáticas II" value={loading ? '–' : String(progress.levelBySubject.mates)} tone="slate" />
+            <MetricCard icon={<TrendingUp size={18} />} label="Progreso PAU" value={loading ? '–' : `${progress.progressTowardsPau}%`} tone="emerald" />
           </section>
 
-          {/* Tareas del día */}
-          <section id="camino-tasks" className="grid gap-6 xl:grid-cols-[1fr_380px]">
-            <div className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
-              {/* Cabecera de misión */}
-              <div className="mb-4">
-                <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+          {/* Tasks + sidebar */}
+          <section id="camino-tasks" style={{ display: 'grid', gap: 16, marginTop: 16 }} className="xl:grid-cols-[1fr_360px]">
+            {/* Task card */}
+            <div style={{
+              background: '#fff', border: '1px solid var(--pau-border)',
+              borderRadius: 20, padding: '20px 20px 16px',
+              boxShadow: 'var(--shadow-sm)',
+            }}>
+              {/* Card header */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Tareas del día</p>
-                    <h2 className="mt-1 text-xl font-black text-slate-950">
+                    <h2 style={{ margin: 0, fontSize: 17, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.015em' }}>
                       {weekContext ? `Semana ${weekContext.semana} · ${weekContext.objetivo}` : 'Tu misión de hoy'}
                     </h2>
                     {weekContext && (
-                      <p className="mt-1 text-xs font-semibold text-slate-400">
+                      <p style={{ margin: '3px 0 0', fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>
                         {weekContext.faseLabel} · {weekContext.duracion} estimados
                       </p>
                     )}
                   </div>
                   {missionCompleted ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
-                      <CheckCircle2 size={13} /> Misión completada
+                    <span className="pau-badge pau-badge-green" style={{ gap: 5 }}>
+                      <CheckCircle2 size={12} /> Misión completada
                     </span>
                   ) : (
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
+                    <span className="pau-badge pau-badge-blue">
                       {completedCount}/{totalTasks} completadas
                     </span>
                   )}
                 </div>
 
-                {/* Barra de progreso */}
-                <div className="mb-1 h-2 overflow-hidden rounded-full bg-slate-100">
+                {/* Progress bar */}
+                <div className="pau-progress-bar">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-all duration-500"
+                    className="pau-progress-fill"
                     style={{ width: `${missionProgress}%` }}
+                    role="progressbar"
+                    aria-valuenow={missionProgress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Progreso misión: ${missionProgress}%`}
                   />
                 </div>
 
-                {/* Mensaje de misión completada */}
                 {missionCompleted && (
-                  <p className="mt-2 text-xs font-semibold text-emerald-700">
+                  <p style={{ margin: '8px 0 0', fontSize: 12, fontWeight: 600, color: '#16a34a' }}>
                     Misión completada. Vuelve mañana para mantener la racha.
                   </p>
                 )}
               </div>
 
-              {/* Skeleton de carga */}
+              {/* Skeleton */}
               {loading && (
-                <div className="grid gap-3">
+                <div style={{ display: 'grid', gap: 10 }}>
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+                    <div key={i} className="pau-skeleton" style={{ height: 76 }} />
                   ))}
                 </div>
               )}
 
-              {/* Lista de tareas */}
+              {/* Task list */}
               {!loading && (
-                <div className="grid gap-3">
+                <div className="pau-stagger" style={{ display: 'grid', gap: 10 }}>
                   {currentTasks.map(task => (
                     <DailyTaskCard
                       key={task.id}
@@ -162,23 +191,39 @@ export default function CaminoPauClient() {
               )}
             </div>
 
-            {/* Sidebar derecho */}
-            <div className="grid content-start gap-6">
+            {/* Right column */}
+            <div style={{ display: 'grid', alignContent: 'start', gap: 16 }}>
               <RouteCard selectedRouteId={progress.selectedRouteId} onRouteChange={changeRoute} />
 
-              {/* Próximos objetivos */}
-              <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Próximos objetivos</p>
-                <h2 className="mt-1 text-xl font-black text-slate-950">Lo que viene después</h2>
-                <div className="mt-4 grid gap-3">
+              {/* Next objectives */}
+              <section style={{
+                background: '#fff', border: '1px solid var(--pau-border)',
+                borderRadius: 20, padding: 18, boxShadow: 'var(--shadow-sm)',
+              }}>
+                <h2 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Lo que viene</h2>
+                <div style={{ display: 'grid', gap: 10 }}>
                   {nextObjectives.map(item => (
-                    <div key={item.week} className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-blue-700 shadow-sm">
+                    <div key={item.week} style={{
+                      display: 'flex', gap: 12, padding: '10px 12px',
+                      borderRadius: 12, background: '#f8fbff',
+                      border: '1px solid var(--pau-border)',
+                    }}>
+                      <div style={{
+                        width: 36, height: 36, flexShrink: 0, borderRadius: 10,
+                        background: '#fff', border: '1px solid var(--pau-border)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 13, fontWeight: 900, color: '#2563eb',
+                        boxShadow: 'var(--shadow-xs)',
+                      }}>
                         {item.week}
                       </div>
-                      <div>
-                        <h3 className="text-sm font-black text-slate-900">Semana {item.week}: {item.label}</h3>
-                        <p className="mt-1 text-xs font-bold text-slate-500">{item.detail}</p>
+                      <div style={{ minWidth: 0 }}>
+                        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#0f172a' }}>
+                          Semana {item.week}: {item.label}
+                        </h3>
+                        <p style={{ margin: '3px 0 0', fontSize: 12, fontWeight: 600, color: '#64748b' }}>
+                          {item.detail}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -189,49 +234,60 @@ export default function CaminoPauClient() {
 
           <ProgressPath />
 
-          <section className="grid gap-4 lg:grid-cols-3">
+          {/* Why cards */}
+          <section style={{ display: 'grid', gap: 14, marginTop: 16 }} className="lg:grid-cols-3">
             <WhyCard title="No decides cada día" text="No tienes que decidir qué estudiar. Pausia te lo ordena." />
             <WhyCard title="Primero hábito" text="Primero hábito, luego bloques, después simulacros." />
             <WhyCard title="Ruta adaptable" text="Tu ruta ajusta la semana del currículum en la que empiezas." />
           </section>
 
-          {/* Estado del progreso */}
-          <section className="rounded-[28px] border border-dashed border-blue-200 bg-blue-50/70 p-5">
-            <div className="flex items-start gap-3">
-              <Target className="mt-0.5 shrink-0 text-blue-700" size={19} />
-              <div>
-                {source === 'supabase' ? (
-                  <>
-                    <p className="text-sm font-bold leading-6 text-blue-950">Tu progreso se guarda automáticamente en Pausia. XP, racha y misiones están sincronizados en todos tus dispositivos.</p>
-                    <p className="mt-2 text-xs font-semibold leading-5 text-blue-600">Las misiones se generan desde el currículum PAU de 38 semanas según tu ruta de entrada. La personalización por errores reales e IA llegará en la siguiente fase.</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-bold leading-6 text-blue-950">Las tareas te acercan a las zonas reales de Pausia. La personalización automática llegará en la siguiente fase.</p>
-                    <p className="mt-2 text-xs font-semibold leading-5 text-blue-600">Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo.</p>
-                  </>
-                )}
-              </div>
+          {/* Progress state */}
+          <section className="pau-info" style={{ marginTop: 14, alignItems: 'flex-start' }}>
+            <Target size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+            <div>
+              {source === 'supabase' ? (
+                <>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e40af', lineHeight: 1.6 }}>
+                    Tu progreso se guarda automáticamente. XP, racha y misiones sincronizados.
+                  </p>
+                  <p style={{ margin: '6px 0 0', fontWeight: 600, fontSize: 12, color: '#3b82f6', lineHeight: 1.6 }}>
+                    Las misiones se generan desde el currículum PAU de 38 semanas según tu ruta de entrada.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e40af', lineHeight: 1.6 }}>
+                    Las tareas te acercan a las zonas reales de Pausia.
+                  </p>
+                  <p style={{ margin: '6px 0 0', fontWeight: 600, fontSize: 12, color: '#3b82f6', lineHeight: 1.6 }}>
+                    Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo.
+                  </p>
+                </>
+              )}
             </div>
           </section>
 
-          {/* Pack Curso PAU — Parent Checkout */}
-          <ParentLinkModule billing={billing} />
+          {/* Parent checkout */}
+          <div style={{ marginTop: 14 }}>
+            <ParentLinkModule billing={billing} />
+          </div>
 
-          {/* Opciones de demo */}
-          <section className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Opciones de demo</p>
-              <p className="mt-0.5 text-xs font-semibold text-slate-400">Solo para pruebas internas</p>
-            </div>
+          {/* Demo reset — discrete */}
+          <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
             <button
               type="button"
               onClick={resetProgress}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 focus:outline-none"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '6px 12px', borderRadius: 8,
+                border: '1px solid #e2e8f0', background: 'transparent',
+                fontSize: 11, fontWeight: 600, color: '#94a3b8',
+                cursor: 'pointer', transition: 'color 150ms, border-color 150ms',
+              }}
             >
-              <RotateCcw size={12} /> Reiniciar demo local
+              <RotateCcw size={11} aria-hidden="true" /> Reiniciar demo local
             </button>
-          </section>
+          </div>
         </main>
       </div>
     </div>
@@ -239,28 +295,54 @@ export default function CaminoPauClient() {
 }
 
 function MetricCard({ icon, label, value, tone }: { icon: ReactNode; label: string; value: string; tone: 'amber' | 'blue' | 'slate' | 'emerald' }) {
-  const toneClass = {
-    amber: 'bg-amber-50 text-amber-700 border-amber-100',
-    blue: 'bg-blue-50 text-blue-700 border-blue-100',
-    slate: 'bg-slate-50 text-slate-700 border-slate-100',
-    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-100'
+  const tones = {
+    amber: { bg: '#fffbeb', color: '#b45309', border: '#fde68a', iconBg: '#fef3c7' },
+    blue:  { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', iconBg: '#dbeafe' },
+    slate: { bg: '#f8fafc', color: '#475569', border: '#e2e8f0', iconBg: '#f1f5f9' },
+    emerald: { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', iconBg: '#dcfce7' },
   }[tone]
 
   return (
-    <article className="rounded-[26px] border border-[#dbe7fb] bg-white/90 p-4 shadow-[0_16px_42px_rgba(37,99,235,0.07)]">
-      <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl border ${toneClass}`}>{icon}</div>
-      <p className="text-xs font-black uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-950">{value}</p>
+    <article style={{
+      background: '#fff', border: '1px solid var(--pau-border)',
+      borderRadius: 16, padding: '16px 16px 14px',
+      boxShadow: 'var(--shadow-xs)',
+      transition: 'box-shadow 200ms var(--ease-out), transform 200ms var(--ease-out)',
+    }}>
+      <div style={{
+        width: 36, height: 36, borderRadius: 10, marginBottom: 12,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: tones.iconBg, color: tones.color,
+        border: `1px solid ${tones.border}`,
+      }}>
+        {icon}
+      </div>
+      <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+        {label}
+      </p>
+      <p style={{ margin: '6px 0 0', fontSize: 24, fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a', lineHeight: 1 }}>
+        {value}
+      </p>
     </article>
   )
 }
 
 function WhyCard({ title, text }: { title: string; text: string }) {
   return (
-    <article className="rounded-[26px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.07)]">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-700"><CalendarDays size={18} /></div>
-      <h3 className="text-lg font-black text-slate-950">{title}</h3>
-      <p className="mt-2 text-sm font-bold leading-6 text-slate-500">{text}</p>
+    <article style={{
+      background: '#fff', border: '1px solid var(--pau-border)',
+      borderRadius: 16, padding: 18,
+      boxShadow: 'var(--shadow-xs)',
+    }}>
+      <div style={{
+        width: 36, height: 36, borderRadius: 10, marginBottom: 12,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe',
+      }}>
+        <CalendarDays size={17} />
+      </div>
+      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>{title}</h3>
+      <p style={{ margin: '6px 0 0', fontSize: 13, fontWeight: 600, color: '#64748b', lineHeight: 1.65 }}>{text}</p>
     </article>
   )
 }

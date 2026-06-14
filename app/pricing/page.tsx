@@ -81,19 +81,22 @@ export default function PricingPage() {
       }}
     >
       <style>{`
+        @media (hover: hover) and (pointer: fine) {
+          .pricing-action:hover {
+            filter: brightness(1.04) saturate(1.05);
+            transform: translateY(-1px);
+          }
+          .pricing-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 52px rgba(37,99,235,0.12) !important;
+          }
+        }
         .pricing-action {
-          transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease, filter 160ms ease;
+          transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), filter 160ms var(--ease-out);
         }
-        .pricing-action:hover {
-          transform: translateY(-2px);
-          filter: saturate(1.06) brightness(1.02);
-        }
+        .pricing-action:active { transform: scale(0.97) !important; }
         .pricing-card {
-          transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-        }
-        .pricing-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 30px 76px rgba(37,99,235,0.13) !important;
+          transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
         }
       `}</style>
 

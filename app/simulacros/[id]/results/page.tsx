@@ -37,7 +37,7 @@ export default function SimulacroResultsPage() {
   }, [params.id, router])
 
   if (!record) {
-    return <SimulacroShell title="Resultados" subtitle="Cargando corrección..."><div className="rounded-xl bg-white p-8 font-black text-slate-500">Buscando resultados...</div></SimulacroShell>
+    return <SimulacroShell title="Resultados" subtitle="Cargando corrección..."><div className="pau-card-section"><div className="pau-skeleton" style={{ height: 24, width: '40%', borderRadius: 8, marginBottom: 12 }} /><div className="pau-skeleton" style={{ height: 80, borderRadius: 12 }} /></div></SimulacroShell>
   }
 
   const result = record.resultado_json ?? {}
@@ -60,10 +60,10 @@ export default function SimulacroResultsPage() {
     <SimulacroShell
       title="Resultados del simulacro"
       subtitle="Corrección completa bloque a bloque"
-      actions={<a href="/simulacros" className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-4 py-2 text-sm font-black text-white no-underline shadow-[0_16px_34px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5"><RotateCcw size={16} />Nuevo simulacro</a>}
+      actions={<a href="/simulacros" className="campus-primary" style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}><RotateCcw size={15} />Nuevo simulacro</a>}
     >
       <div className="mx-auto grid max-w-6xl gap-6">
-        <section className="overflow-hidden rounded-[28px] border border-[#dbe7fb] bg-white/90 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+        <section style={{ overflow: 'hidden', borderRadius: 20, border: '1px solid var(--pau-border)', background: '#fff', boxShadow: 'var(--shadow-md)' }}>
           <div className="p-8 text-center">
             <div className="mx-auto mb-3 inline-flex rounded-full px-4 py-2 text-sm font-black text-white" style={{ background: cfg.color }}>{cfg.label} · {record.dificultad_real ?? record.dificultad}</div>
             <div className="text-7xl font-black tracking-tight" style={{ color: hasGrade ? gradeColor(nota) : '#64748b' }}>{hasGrade ? nota.toFixed(2) : 'Sin nota'}</div>
@@ -82,10 +82,10 @@ export default function SimulacroResultsPage() {
             )}
             {(record.tiempo_empleado ?? 0) > 90 && <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-800">En el examen real habrías entregado al llegar a 90 min.</div>}
           </div>
-          <div className="h-3 bg-blue-50"><div className="h-full" style={{ width: `${hasGrade ? Math.min(100, nota * 10) : 0}%`, background: hasGrade ? gradeColor(nota) : '#cbd5e1' }} /></div>
+          <div className="pau-progress-bar" style={{ borderRadius: 0 }}><div className="pau-progress-fill" style={{ width: `${hasGrade ? Math.min(100, nota * 10) : 0}%`, background: hasGrade ? gradeColor(nota) : '#cbd5e1' }} /></div>
         </section>
 
-        <nav className="flex flex-wrap gap-2 rounded-3xl border border-[#dbe7fb] bg-white/90 p-2 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+        <nav className="flex flex-wrap gap-2 p-2" style={{ borderRadius: 16, border: '1px solid var(--pau-border)', background: '#fff', boxShadow: 'var(--shadow-sm)' }}>
           {[
             ['resumen', 'Resumen'],
             ['detalle', 'Corrección detallada'],
@@ -106,7 +106,7 @@ export default function SimulacroResultsPage() {
         {tab === 'detalle' && (
           <section className="grid gap-4">
             {detail.map((block, index) => (
-              <article key={`${block.numero_bloque}-${index}`} className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+              <article key={`${block.numero_bloque}-${index}`} className="pau-card-section">
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h2 className="text-xl font-black">{block.numero_bloque} · {block.tema}</h2>
@@ -151,7 +151,7 @@ export default function SimulacroResultsPage() {
         {tab === 'plan' && (
           <section className="grid gap-4 md:grid-cols-3">
             {plan.map((item: any) => (
-              <article key={item.prioridad} className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+              <article key={item.prioridad} className="pau-card-section">
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-black text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">{item.prioridad}</div>
                 <h3 className="mb-2 text-lg font-black">{item.tema}</h3>
                 <Markdown text={item.accion} />
@@ -165,7 +165,7 @@ export default function SimulacroResultsPage() {
         {tab === 'bloques' && (
           <section className="grid gap-4 md:grid-cols-4">
             {resumen.map((item: any, index: number) => (
-              <article key={`${item.bloque}-${index}`} className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+              <article key={`${item.bloque}-${index}`} className="pau-card-section">
                 <h3 className="font-black">{item.bloque}</h3>
                 <p className="mt-1 text-sm font-bold text-slate-500">{format(item.puntos_conseguidos)}/{format(item.puntos_maximos)} puntos</p>
                 <div className="my-4 h-2 overflow-hidden rounded-full bg-blue-50"><div className={`h-full ${barClass(item.nivel)}`} style={{ width: `${clamp(item.porcentaje, 0, 100)}%` }} /></div>
@@ -187,7 +187,7 @@ export default function SimulacroResultsPage() {
 
 function ResultCard({ icon, title, text, tone = 'blue' }: { icon: ReactNode; title: string; text?: string; tone?: 'blue' | 'green' | 'orange' }) {
   const bg = tone === 'green' ? 'bg-sky-50' : tone === 'orange' ? 'bg-blue-50' : 'bg-white/90'
-  return <article className={`rounded-[28px] border border-[#dbe7fb] p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur-xl ${bg}`}><div className="mb-3 flex items-center gap-2 font-black text-blue-800">{icon}{title}</div><Markdown text={text || 'Sin datos disponibles.'} /></article>
+  return <article className={`pau-card-section ${bg}`}><div className="mb-3 flex items-center gap-2 font-black text-blue-800">{icon}{title}</div><Markdown text={text || 'Sin datos disponibles.'} /></article>
 }
 
 function TextPanel({ title, text }: { title: string; text?: string }) {

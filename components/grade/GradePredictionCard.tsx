@@ -20,7 +20,7 @@ const SUBJECT_STYLES: Record<string, { color: string; light: string; border: str
 
 export default function GradePredictionCard({ predictions, loading, error }: GradePredictionCardProps) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-[#dbe7fb] bg-white/95 shadow-[0_24px_70px_rgba(37,99,235,0.09)] backdrop-blur-xl">
+    <section className="overflow-hidden bg-white" style={{ borderRadius: 16, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-md)' }}>
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#dbe7fb] bg-gradient-to-br from-white via-blue-50/50 to-sky-50/60 p-5">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_16px_34px_rgba(37,99,235,0.24)]">

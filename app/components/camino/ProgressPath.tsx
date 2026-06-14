@@ -10,15 +10,15 @@ const nodeStyles = {
 
 export default function ProgressPath() {
   return (
-    <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
-      <p className="text-xs font-black uppercase tracking-widest text-slate-400">Mini mapa de progreso</p>
+    <section style={{ borderRadius: 16, border: '1px solid var(--pau-border)', background: '#fff', padding: 20, boxShadow: 'var(--shadow-sm)' }}>
+      <p className="text-xs font-bold text-slate-400">Mini mapa de progreso</p>
       <h2 className="mt-1 text-xl font-black text-slate-950">Bloques del camino</h2>
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         {progressNodes.map((node, index) => (
           <div key={node.id} className="relative">
             {index < progressNodes.length - 1 && <div className="absolute left-1/2 top-6 hidden h-px w-full bg-blue-100 md:block" />}
-            <div className="relative rounded-3xl border border-[#dbe7fb] bg-white p-4">
-              <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border ${nodeStyles[node.status]}`}>
+            <div className="relative border border-[#dbe7fb] bg-white p-4" style={{ borderRadius: 12 }}>
+              <div className={`mb-3 flex h-11 w-11 items-center justify-center border ${nodeStyles[node.status]}`} style={{ borderRadius: 10 }}>
                 {node.status === 'completed' ? <Check size={20} /> : node.status === 'locked' ? <Lock size={18} /> : <MapPin size={19} />}
               </div>
               <h3 className="font-black text-slate-900">{node.label}</h3>

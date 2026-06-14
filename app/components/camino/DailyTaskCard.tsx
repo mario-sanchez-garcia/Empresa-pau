@@ -21,14 +21,24 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
   const type = caminoTaskTypes[task.type]
 
   return (
-    <article className={`group rounded-[24px] border p-4 transition ${completed ? 'border-emerald-200 bg-emerald-50/70' : 'border-[#dbe7fb] bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_18px_42px_rgba(37,99,235,0.09)]'}`}>
+    <article
+      style={{
+        borderRadius: 14,
+        border: `1px solid ${completed ? '#bbf7d0' : 'var(--pau-border)'}`,
+        background: completed ? 'rgba(240,253,244,0.8)' : '#fff',
+        padding: '14px 14px',
+        transition: 'transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out), border-color 180ms var(--ease-out)',
+        boxShadow: completed ? 'none' : 'var(--shadow-xs)',
+      }}
+      className={!completed ? 'pau-card-hover-effect' : ''}
+    >
       <div className="flex items-start gap-4">
         <button
           type="button"
           onClick={() => onComplete(task)}
           disabled={completed}
           aria-label={completed ? `${task.title} completada` : `Completar ${task.title}`}
-          className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${completed ? 'border-emerald-300 bg-emerald-600 text-white' : 'border-blue-100 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100'}`}
+          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${completed ? 'border-emerald-300 bg-emerald-600 text-white' : 'border-blue-100 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100'}`}
         >
           {completed ? <CheckCircle2 size={21} /> : <Circle size={20} />}
         </button>

@@ -114,7 +114,7 @@ export default function SimulacrosPage() {
       actions={<button onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }} className="flex items-center gap-2 rounded-2xl border border-[#dbe7fb] bg-white/90 px-4 py-2 text-sm font-black text-slate-700 shadow-[0_12px_28px_rgba(37,99,235,0.08)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"><Eye size={16} />Ver mis simulacros</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-6">
-        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+        <section style={{ borderRadius: 18, border: '1px solid var(--pau-border)', background: '#fff', padding: '20px 20px 18px', boxShadow: 'var(--shadow-sm)' }}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-black">Tus estadísticas</h2>
@@ -123,7 +123,7 @@ export default function SimulacrosPage() {
             {stats.lastCompleted && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Último: {SUBJECTS[stats.lastCompleted.asignatura]?.label ?? stats.lastCompleted.asignatura} · {formatScore(stats.lastCompleted.nota_final)}/10</span>}
           </div>
           {stats.completedCount === 0 ? (
-            <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/60 p-5 text-sm font-bold text-blue-900">
+            <div className="pau-empty">
               Todavía no hay estadísticas porque no has completado ningún simulacro. Cuando entregues el primero, Pausia calculará tu media, mejor nota y tiempo medio.
             </div>
           ) : (
@@ -137,10 +137,10 @@ export default function SimulacrosPage() {
           )}
         </section>
 
-        {errorMessage && <div className="rounded-[24px] border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-900 shadow-[0_12px_30px_rgba(37,99,235,0.08)]">{errorMessage}</div>}
+        {errorMessage && <div className="pau-info" style={{ borderColor: '#fecaca', background: 'rgba(254,242,242,0.9)', color: '#991b1b' }}>{errorMessage}</div>}
 
         {historyOpen && (
-          <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
+          <section style={{ borderRadius: 18, border: '1px solid var(--pau-border)', background: '#fff', padding: 18, boxShadow: 'var(--shadow-sm)' }}>
             <h2 className="mb-4 text-lg font-black">Mis simulacros anteriores</h2>
             <div className="grid gap-2">
               {history.length === 0 && <p className="text-sm font-semibold text-slate-500">Todavía no tienes simulacros guardados.</p>}
@@ -157,8 +157,8 @@ export default function SimulacrosPage() {
           </section>
         )}
 
-        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
-          <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Paso 1 · Asignatura</p>
+        <section className="pau-card-section">
+          <p className="mb-3 text-xs font-bold text-slate-400">Paso 1 · Asignatura</p>
           <div className="grid grid-cols-5 gap-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
               const cfg = SUBJECTS[key]
@@ -179,8 +179,8 @@ export default function SimulacrosPage() {
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
-          <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Paso 2 · Dificultad</p>
+        <section className="pau-card-section">
+          <p className="mb-3 text-xs font-bold text-slate-400">Paso 2 · Dificultad</p>
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
             {DIFFICULTIES.map(item => (
               <button key={item.id} onClick={() => setDifficulty(item.id)} className={`rounded-2xl border p-5 text-left transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 ${difficulty === item.id ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-[#dbe7fb] bg-white'}`}>
@@ -192,8 +192,8 @@ export default function SimulacrosPage() {
         </section>
 
         {subject !== 'lengua' && (
-          <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] backdrop-blur-xl">
-            <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Paso 3 · Opción</p>
+          <section className="pau-card-section">
+            <p className="mb-3 text-xs font-bold text-slate-400">Paso 3 · Opción</p>
             <div className="flex gap-3">
               {(['A', 'B'] as SimulacroOption[]).map(item => (
                 <button key={item} onClick={() => setOption(item)} className={`h-12 w-14 rounded-2xl text-lg font-black transition hover:-translate-y-0.5 ${option === item ? 'bg-blue-600 text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)]' : 'border border-[#dbe7fb] bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700'}`}>{item}</button>
@@ -202,7 +202,7 @@ export default function SimulacrosPage() {
           </section>
         )}
 
-        <button onClick={createSimulacro} disabled={loading || !userId || !SUBJECTS[subject].available} className="flex items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-6 py-4 text-lg font-black text-white shadow-[0_20px_45px_rgba(37,99,235,0.24)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(37,99,235,0.3)] disabled:opacity-60">
+        <button onClick={createSimulacro} disabled={loading || !userId || !SUBJECTS[subject].available} className="campus-primary" style={{ width: '100%', borderRadius: 14, padding: '15px 24px', fontSize: 16, gap: 10 }}>
           <PlayCircle size={22} />{loading ? 'Generando...' : !SUBJECTS[subject].available ? `Simulacros de ${SUBJECTS[subject].short} próximamente` : userId ? 'Generar simulacro' : 'Cargando sesión...'}
         </button>
       </div>
@@ -213,7 +213,7 @@ export default function SimulacrosPage() {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4 shadow-[0_10px_24px_rgba(37,99,235,0.06)]">
-      <p className="text-xs font-black uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="text-xs font-bold text-slate-400">{label}</p>
       <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
     </div>
   )

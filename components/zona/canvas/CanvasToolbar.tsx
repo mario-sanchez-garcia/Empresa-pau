@@ -95,7 +95,7 @@ export function CanvasToolbar(props: CanvasToolbarProps) {
   return (
     <>
       <aside className="w-56 shrink-0 overflow-hidden border-r border-[#dbe7fb] bg-white/95 p-3 max-md:w-full max-md:border-b max-md:border-r-0">
-        <div className="mb-3 text-xs font-black uppercase tracking-widest text-slate-400">Mis espacios</div>
+        <div className="mb-3 text-xs font-bold text-slate-400">Mis espacios</div>
         <button type="button" onClick={() => props.createCanvas('Nuevo canvas')} className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-3 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)] transition hover:-translate-y-0.5"><Plus size={15} />Nuevo</button>
         <div className="space-y-2">
           {props.canvases.map(canvas => (

@@ -151,7 +151,7 @@ export default function CaminoPauClient() {
                 <div className="pau-progress-bar">
                   <div
                     className="pau-progress-fill"
-                    style={{ width: `${missionProgress}%` }}
+                    style={{ transform: `scaleX(${missionProgress / 100})` }}
                     role="progressbar"
                     aria-valuenow={missionProgress}
                     aria-valuemin={0}

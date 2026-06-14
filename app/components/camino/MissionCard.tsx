@@ -39,7 +39,7 @@ export default function MissionCard({ routeId, completedCount, totalTasks, missi
               <span>{progress}%</span>
             </div>
             <div className="pau-progress-bar">
-              <div className="pau-progress-fill" style={{ width: `${progress}%` }} />
+              <div className="pau-progress-fill" style={{ transform: `scaleX(${progress / 100})` }} />
             </div>
           </div>
         </div>

@@ -269,7 +269,7 @@ export default function OnboardingFlow() {
                   className={`rounded-2xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
                     community === c
                       ? 'border-blue-400 bg-blue-50 text-blue-800 shadow-[0_0_0_3px_rgba(37,99,235,0.12)]'
-                      : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/60'
+                      : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/60 hover:text-blue-800'
                   }`}
                 >
                   {c}
@@ -334,7 +334,7 @@ export default function OnboardingFlow() {
                   className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
                     dailyMinutes === m
                       ? 'border-blue-400 bg-blue-50 text-blue-800'
-                      : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/60'
+                      : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/60 hover:text-blue-800'
                   }`}
                 >
                   <span>{m} min</span>
@@ -417,7 +417,7 @@ export default function OnboardingFlow() {
                 3 tareas cortas para calibrar tu punto de partida. Sin presión.
               </p>
               <div className="pau-progress-bar mt-4">
-                <div className="pau-progress-fill" style={{ width: `${Math.round((completedTaskIds.length / ONBOARDING_TASKS.length) * 100)}%` }} />
+                <div className="pau-progress-fill" style={{ transform: `scaleX(${completedTaskIds.length / ONBOARDING_TASKS.length})` }} />
               </div>
               <p className="mt-1 text-xs font-semibold text-slate-400">
                 {completedTaskIds.length}/{ONBOARDING_TASKS.length} completadas
@@ -540,7 +540,7 @@ function StepDots({ current, total }: { current: number; total: number }) {
       {Array.from({ length: total }, (_, i) => (
         <div
           key={i}
-          className={`h-1.5 rounded-full transition-all duration-300 ${
+          className={`h-1.5 rounded-full [transition:width_300ms_var(--ease-out),background-color_300ms_var(--ease-out)] ${
             i < current ? 'w-6 bg-blue-600' :
             i === current ? 'w-6 bg-blue-400' :
             'w-3 bg-slate-200'

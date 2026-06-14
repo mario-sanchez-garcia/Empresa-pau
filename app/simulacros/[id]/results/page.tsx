@@ -82,7 +82,7 @@ export default function SimulacroResultsPage() {
             )}
             {(record.tiempo_empleado ?? 0) > 90 && <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-800">En el examen real habrías entregado al llegar a 90 min.</div>}
           </div>
-          <div className="pau-progress-bar" style={{ borderRadius: 0 }}><div className="pau-progress-fill" style={{ width: `${hasGrade ? Math.min(100, nota * 10) : 0}%`, background: hasGrade ? gradeColor(nota) : '#cbd5e1' }} /></div>
+          <div className="pau-progress-bar" style={{ borderRadius: 0 }}><div className="pau-progress-fill" style={{ transform: `scaleX(${hasGrade ? Math.min(100, nota * 10) / 100 : 0})`, background: hasGrade ? gradeColor(nota) : '#cbd5e1' }} /></div>
         </section>
 
         <nav className="flex flex-wrap gap-2 p-2" style={{ borderRadius: 16, border: '1px solid var(--pau-border)', background: '#fff', boxShadow: 'var(--shadow-sm)' }}>

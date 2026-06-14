@@ -229,7 +229,7 @@ export default function SimulacroActivoPage() {
             <div className="flex items-center gap-2 text-2xl font-black" style={{ color: secondsLeft < 15 * 60 ? '#1d4ed8' : '#0f172a' }}><Clock size={24} />{formatTime(secondsLeft)}</div>
           </div>
           <div className="mb-3 flex justify-end"><SaveBadge status={saveStatus} /></div>
-          <div className="pau-progress-bar"><div className={`pau-progress-fill ${timerColor}`} style={{ width: `${percentLeft}%` }} /></div>
+          <div className="pau-progress-bar"><div className={`pau-progress-fill ${timerColor}`} style={{ transform: `scaleX(${percentLeft / 100})` }} /></div>
           <div className="mt-4 flex flex-wrap gap-2">
             {record.bloques.map((block, index) => {
               const ok = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)

@@ -121,7 +121,7 @@ button:active:not(:disabled),
 }
 
 @keyframes pau-progress-grow {
-  from { width: 0; }
+  from { transform: scaleX(0); }
 }
 
 /* Staggered list entrance */
@@ -282,9 +282,12 @@ button:active:not(:disabled),
 }
 .pau-progress-fill {
   height: 100%;
+  width: 100%;
   border-radius: var(--r-pill);
   background: linear-gradient(90deg, #1d4ed8, #2563eb, #38bdf8);
-  transition: width 600ms var(--ease-out);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 600ms var(--ease-out);
   animation: pau-progress-grow 600ms var(--ease-out);
 }
 

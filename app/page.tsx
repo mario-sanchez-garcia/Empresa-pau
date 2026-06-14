@@ -1560,7 +1560,7 @@ function cambiarTipo(t: Tipo) {
                 const pinned = pinnedClean.includes(key)
                 return (
                   <div
-                    className="campus-subject-card"
+                    className="campus-subject-card pau-subject-card"
                     key={key}
                     onClick={() => navegarAAsignatura(key)}
                     onKeyDown={(event) => {
@@ -1620,13 +1620,14 @@ function cambiarTipo(t: Tipo) {
               </div>
             </div>
            {!isPhilosophy && <div style={{
-  background: 'rgba(255, 255, 255, 0.92)',
+  background: 'rgba(255, 255, 255, 0.78)',
   borderRadius: '24px',
-  border: '1px solid rgba(219, 231, 251, 0.95)',
+  border: '1px solid rgba(219, 231, 251, 0.85)',
   padding: '24px',
   marginBottom: '22px',
-  boxShadow: WARM.shadow,
-  backdropFilter: 'blur(12px)'
+  boxShadow: '0 2px 12px rgba(37,99,235,0.06), 0 1px 3px rgba(37,99,235,0.04)',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)'
 }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
@@ -1912,12 +1913,14 @@ function cambiarTipo(t: Tipo) {
 
             {!isCatalunaExam && preguntaActiva && (
              <div key={preguntaActivaKey} style={{
-  background: 'rgba(255, 255, 255, 0.95)',
+  background: 'rgba(255, 255, 255, 0.82)',
   borderRadius: '24px',
-  border: '1px solid rgba(219, 231, 251, 0.95)',
+  border: '1px solid rgba(219, 231, 251, 0.80)',
   overflow: 'clip',
   marginBottom: '22px',
-  boxShadow: WARM.shadow
+  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)'
 }}>
                 <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -2049,12 +2052,14 @@ function cambiarTipo(t: Tipo) {
             )}
 
            {!isCatalunaExam && preguntaActiva && <div style={{
-  background: 'rgba(255, 255, 255, 0.95)',
+  background: 'rgba(255, 255, 255, 0.82)',
   borderRadius: '24px',
-  border: '1px solid rgba(219, 231, 251, 0.95)',
+  border: '1px solid rgba(219, 231, 251, 0.80)',
   padding: '26px',
   marginBottom: '22px',
-  boxShadow: WARM.shadow
+  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)'
 }}>
               <div style={{ fontSize: '13px', fontWeight: 700, color: WARM.muted, marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
@@ -2087,12 +2092,12 @@ function cambiarTipo(t: Tipo) {
             </div>}
 
             {!isCatalunaExam && correccion && (
-              <div style={{ background: WARM.surface, borderRadius: '24px', border: '2px solid ' + cfg.color, overflow: 'hidden', boxShadow: WARM.shadow }}>
-                <div style={{ padding: '16px 24px', background: cfg.color, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
-                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>CORRECCIÓN DE PAUSIA</span>
+              <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
+                <div style={{ padding: '14px 22px', background: 'linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
+                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Pausia</span>
                 </div>
-                <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #fafafa)' }}>
+                <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
                   <CorrectionResultCard correction={correccion} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
                 </div>
               </div>
@@ -2156,35 +2161,35 @@ function cambiarTipo(t: Tipo) {
             ) : (
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
                     <div style={{ fontSize: '36px', fontWeight: 800, color: WARM.ink }}>{historial.length}</div>
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matemáticas</div>
                     {mediaM ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaM)) }}>{mediaM}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Física</div>
                     {mediaFisica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaFisica)) }}>{mediaFisica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Química</div>
                     {mediaQuimica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaQuimica)) }}>{mediaQuimica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Biología</div>
                     {mediaBiologia ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaBiologia)) }}>{mediaBiologia}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Inglés</div>
                     {mediaIngles ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaIngles)) }}>{mediaIngles}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Lengua</div>
                     {mediaLengua ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaLengua)) }}>{mediaLengua}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>
-                  <div style={{ background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', textAlign: 'center', boxShadow: '0 14px 34px rgba(37,99,235,0.06)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
                     {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
                   </div>

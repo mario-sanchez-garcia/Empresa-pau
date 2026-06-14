@@ -114,7 +114,7 @@ export default function SimulacrosPage() {
       actions={<button onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }} className="flex items-center gap-2 rounded-2xl border border-[#dbe7fb] bg-white/90 px-4 py-2 text-sm font-black text-slate-700 shadow-[0_12px_28px_rgba(37,99,235,0.08)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"><Eye size={16} />Ver mis simulacros</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-6">
-        <section style={{ borderRadius: 18, border: '1px solid var(--pau-border)', background: '#fff', padding: '20px 20px 18px', boxShadow: 'var(--shadow-sm)' }}>
+        <section style={{ borderRadius: 18, border: '1px solid rgba(219,231,251,0.80)', background: 'rgba(255,255,255,0.78)', padding: '20px 20px 18px', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-black">Tus estadísticas</h2>
@@ -140,7 +140,7 @@ export default function SimulacrosPage() {
         {errorMessage && <div className="pau-info" style={{ borderColor: '#fecaca', background: 'rgba(254,242,242,0.9)', color: '#991b1b' }}>{errorMessage}</div>}
 
         {historyOpen && (
-          <section style={{ borderRadius: 18, border: '1px solid var(--pau-border)', background: '#fff', padding: 18, boxShadow: 'var(--shadow-sm)' }}>
+          <section style={{ borderRadius: 18, border: '1px solid rgba(219,231,251,0.80)', background: 'rgba(255,255,255,0.78)', padding: 18, boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
             <h2 className="mb-4 text-lg font-black">Mis simulacros anteriores</h2>
             <div className="grid gap-2">
               {history.length === 0 && <p className="text-sm font-semibold text-slate-500">Todavía no tienes simulacros guardados.</p>}

@@ -155,7 +155,7 @@ export default function CaminoPauClient() {
                       )}
                     </div>
                     {missionCompleted ? (
-                      <span className="pau-badge pau-badge-green" style={{ gap: 5 }}>
+                      <span className="pau-badge pau-badge-mint" style={{ gap: 5 }}>
                         <CheckCircle2 size={11} /> Misión completada
                       </span>
                     ) : (
@@ -340,11 +340,11 @@ interface MetricCardProps {
 }
 
 const METRIC_TONES: Record<MetricTone, { bg: string; iconBg: string; color: string; border: string; valueBg: string }> = {
-  amber:   { bg: 'linear-gradient(145deg,#fffbeb,#fef9e0)', iconBg: '#fef3c7', color: '#b45309', border: '#fde68a', valueBg: '#fef9e7' },
+  amber:   { bg: 'linear-gradient(145deg,rgba(255,251,235,0.9),rgba(254,243,199,0.7))', iconBg: 'rgba(245,158,11,0.14)', color: '#92400e', border: 'rgba(245,158,11,0.28)', valueBg: '#fef9e7' },
   blue:    { bg: 'linear-gradient(145deg,#eff6ff,#e8f2ff)', iconBg: '#dbeafe', color: '#1d4ed8', border: '#bfdbfe', valueBg: '#edf6ff' },
   slate:   { bg: 'linear-gradient(145deg,#f8fafc,#f1f5f9)', iconBg: '#e2e8f0', color: '#475569', border: '#cbd5e1', valueBg: '#f4f7fa' },
-  emerald: { bg: 'linear-gradient(145deg,#f0fdf4,#e8fdf1)', iconBg: '#dcfce7', color: '#15803d', border: '#a7f3d0', valueBg: '#effdf5' },
-  violet:  { bg: 'linear-gradient(145deg,#f5f3ff,#eef2ff)', iconBg: '#ede9fe', color: '#6d28d9', border: '#c4b5fd', valueBg: '#f3f0ff' },
+  emerald: { bg: 'linear-gradient(145deg,rgba(240,253,244,0.9),rgba(209,250,229,0.7))', iconBg: 'rgba(5,150,105,0.12)', color: '#065f46', border: 'rgba(5,150,105,0.22)', valueBg: '#effdf5' },
+  violet:  { bg: 'linear-gradient(145deg,rgba(245,243,255,0.9),rgba(237,233,254,0.7))', iconBg: 'rgba(124,58,237,0.10)', color: '#5b21b6', border: 'rgba(124,58,237,0.20)', valueBg: '#f3f0ff' },
 }
 
 function MetricCard({ icon, label, value, unit, tone, sublabel }: MetricCardProps) {

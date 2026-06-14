@@ -128,10 +128,10 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
           </div>
           <span style={{
             marginLeft: 'auto',
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-            padding: '2px 7px', borderRadius: 999,
-            background: 'rgba(37,99,235,0.08)', color: '#2563eb',
-            border: '1px solid rgba(37,99,235,0.14)',
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
+            padding: '2px 8px', borderRadius: 999,
+            background: 'rgba(124,58,237,0.08)', color: '#5b21b6',
+            border: '1px solid rgba(124,58,237,0.18)',
           }}>
             Beta
           </span>

@@ -76,7 +76,8 @@ export default function SimulacroResultsPage() {
             </div>
             {correctionFailed && (
               <div className="mx-auto mt-5 max-w-2xl rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-900">
-                {result.mensaje_usuario ?? result.feedback_general ?? 'No hemos podido corregir este simulacro. Tus respuestas están guardadas y puedes intentarlo de nuevo.'}
+                <p>{result.mensaje_usuario ?? result.feedback_general ?? 'No hemos podido corregir este simulacro. Tus respuestas están guardadas y puedes intentarlo de nuevo.'}</p>
+                <a href={`/simulacros/${params.id}`} className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white no-underline shadow-[0_12px_24px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5">Reintentar corrección</a>
               </div>
             )}
             {(record.tiempo_empleado ?? 0) > 90 && <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-black text-blue-800">En el examen real habrías entregado al llegar a 90 min.</div>}

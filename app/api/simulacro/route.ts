@@ -6,7 +6,9 @@ import { buildCorrectionPrompt, parseCorrectionJson } from '@/app/lib/correction
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// 50s SDK timeout leaves ~10s for the function to return a clean JSON error
+// before Vercel's 60s maxDuration kills the process and returns an HTML 504.
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000 })
 
 export const maxDuration = 60
 
@@ -220,7 +222,12 @@ export async function POST(request: NextRequest) {
     const parsed = parseCorrectionJson(raw)
 
     if (!parsed) {
-      console.error('SIMULACRO_CORRECTION_PARSE_ERROR_RAW', raw)
+      console.error('SIMULACRO_CORRECTION_PARSE_ERROR', {
+        simulacroId: simulacro_id,
+        subject,
+        rawLength: raw.length,
+        rawPreview: raw.slice(0, 200)
+      })
       const errorResult = createCorrectionError({
         simulacroId: simulacro_id,
         subject,
@@ -248,7 +255,9 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json(result)
   } catch (error) {
-    console.error('SIMULACRO_CORRECTION_ERROR', error)
+    const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'
+    const errorName = (error as any)?.name ?? (error as any)?.constructor?.name ?? 'Error'
+    console.error('SIMULACRO_CORRECTION_ERROR', { errorCode, errorName, message: (error as any)?.message?.slice(0, 120) })
     const errorResult = createCorrectionError({
       message: 'No hemos podido corregir este simulacro ahora mismo. Tus respuestas siguen guardadas.'
     })
@@ -308,7 +317,10 @@ function rateLimitResponse(action: RateLimitAction, result: { limit: number; cou
 }
 
 async function updateSimulacro(supabase: any, id: string, userId: string, result: any, tiempo: number) {
-  const { data, error } = await supabase
+  // No .select().maybeSingle(): Boolean(data) would return false on 0 rows even on success
+  // (e.g. when service role is absent and RLS SELECT returns empty after UPDATE).
+  // Trust the error check instead.
+  const { error } = await supabase
     .from('historial_simulacros')
     .update({
       nota_final: result?.nota_final ?? null,
@@ -319,18 +331,16 @@ async function updateSimulacro(supabase: any, id: string, userId: string, result
     })
     .eq('id', id)
     .eq('user_id', userId)
-    .select('id')
-    .maybeSingle()
   if (error) {
-    console.error('SIMULACRO_UPDATE_ERROR', error)
+    console.error('SIMULACRO_UPDATE_ERROR', { simulacroId: id, code: error.code, message: error.message })
     return false
   }
-  return Boolean(data)
+  return true
 }
 
 async function updateSimulacroError(supabase: any, id: string, userId: string, result: any, tiempo: number) {
   if (!id) return false
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('historial_simulacros')
     .update({
       resultado_json: result,
@@ -339,13 +349,11 @@ async function updateSimulacroError(supabase: any, id: string, userId: string, r
     })
     .eq('id', id)
     .eq('user_id', userId)
-    .select('id')
-    .maybeSingle()
   if (error) {
-    console.error('SIMULACRO_ERROR_UPDATE_ERROR', error)
+    console.error('SIMULACRO_ERROR_UPDATE_ERROR', { simulacroId: id, code: error.code, message: error.message })
     return false
   }
-  return Boolean(data)
+  return true
 }
 
 function createCorrectionError({ simulacroId, subject, message, raw }: { simulacroId?: string; subject?: string; message: string; raw?: string }) {

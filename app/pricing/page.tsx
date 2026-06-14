@@ -171,26 +171,6 @@ export default function PricingPage() {
 
       <section style={{ maxWidth: 1120, margin: '0 auto', padding: 'clamp(56px, 8vw, 94px) clamp(20px, 5vw, 32px)' }}>
         <div style={{ maxWidth: 720, margin: '0 auto 42px', textAlign: 'center' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '7px 16px',
-              borderRadius: 999,
-              background: 'rgba(239,246,255,0.95)',
-              border: `1px solid ${C.border}`,
-              color: C.blue,
-              fontSize: 13,
-              fontWeight: 900,
-              marginBottom: 24,
-              boxShadow: '0 8px 20px rgba(37,99,235,0.07)',
-            }}
-          >
-            <Sparkles size={14} />
-            Premium próximamente
-          </div>
-
           <h1
             style={{
               margin: '0 0 18px',
@@ -244,12 +224,14 @@ export default function PricingPage() {
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(255,255,255,0.94)',
-                border: `1.5px solid ${plan.recommended ? '#60a5fa' : C.border}`,
-                borderRadius: 28,
+                background: plan.recommended ? 'rgba(239,246,255,0.96)' : '#fff',
+                border: plan.recommended ? '1.5px solid rgba(96,165,250,0.35)' : 'none',
+                borderRadius: 14,
                 padding: 26,
-                boxShadow: plan.recommended ? '0 28px 72px rgba(37,99,235,0.15)' : '0 18px 48px rgba(37,99,235,0.08)',
-                minHeight: 520,
+                boxShadow: plan.recommended
+                  ? '0 4px 12px rgba(37,99,235,0.10)'
+                  : '0 2px 8px rgba(37,99,235,0.06), 0 8px 24px rgba(37,99,235,0.05)',
+                minHeight: 480,
               }}
             >
               {plan.recommended && (
@@ -304,13 +286,13 @@ export default function PricingPage() {
                       gap: 9,
                       width: '100%',
                       minHeight: 48,
-                      borderRadius: 18,
+                      borderRadius: 999,
                       background: C.grad,
                       color: '#fff',
                       textDecoration: 'none',
                       fontSize: 15,
-                      fontWeight: 950,
-                      boxShadow: '0 16px 36px rgba(37,99,235,0.2)',
+                      fontWeight: 800,
+                      boxShadow: '0 8px 20px rgba(37,99,235,0.20)',
                     }}
                   >
                     {plan.cta} <ArrowRight size={16} />
@@ -323,13 +305,13 @@ export default function PricingPage() {
                     style={{
                       width: '100%',
                       minHeight: 48,
-                      borderRadius: 18,
+                      borderRadius: 999,
                       border: plan.recommended ? 'none' : `1.5px solid ${C.border}`,
                       background: plan.recommended ? C.grad : '#fff',
                       color: plan.recommended ? '#fff' : C.blue,
                       fontSize: 15,
                       fontWeight: 950,
-                      boxShadow: plan.recommended ? '0 16px 36px rgba(37,99,235,0.22)' : '0 10px 24px rgba(37,99,235,0.06)',
+                      boxShadow: plan.recommended ? '0 8px 20px rgba(37,99,235,0.20)' : 'none',
                       cursor: 'pointer',
                     }}
                   >
@@ -346,7 +328,7 @@ export default function PricingPage() {
             marginTop: 24,
             border: `1px solid ${C.border}`,
             background: 'rgba(255,255,255,0.86)',
-            borderRadius: 24,
+            borderRadius: 12,
             padding: 20,
             display: 'flex',
             alignItems: 'center',

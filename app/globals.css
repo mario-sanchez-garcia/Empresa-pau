@@ -30,12 +30,12 @@
   --pau-surface-1: #f8fbff;
   --pau-surface-2: #f0f6ff;
 
-  /* Radius scale — Impeccable: max 16px on cards */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
-  --r-2xl: 24px;
+  /* Radius scale — Impeccable: cards cap at 14px, no 24/28/32px on cards */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-xl: 14px;
+  --r-2xl: 16px;
   --r-pill: 999px;
 
   /* Shadow tiers — colored blue, no pure-black (redesign-skill) */

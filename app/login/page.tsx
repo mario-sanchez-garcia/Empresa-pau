@@ -81,8 +81,8 @@ export default function Login() {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="rounded-3xl p-8 w-full max-w-md" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 28px 76px rgba(37, 99, 235, 0.1)', backdropFilter: 'blur(18px)' }}>
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style={{ background: '#eff6ff', color: config.bg, border: '1px solid #dbeafe' }}><Sparkles size={23} /></div>
+        <div className="p-8 w-full max-w-md" style={{ borderRadius: '16px', background: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.06), 0 8px 28px rgba(37,99,235,0.08)' }}>
+          <div className="w-11 h-11 flex items-center justify-center mb-5" style={{ borderRadius: '12px', background: '#eff6ff', color: config.bg }}><Sparkles size={22} /></div>
           <h1 className="text-2xl font-bold mb-1" style={{ color: config.ink }}>
             {modo === 'login' ? 'Bienvenido de vuelta' : 'Crear cuenta'}
           </h1>
@@ -91,7 +91,7 @@ export default function Login() {
           </p>
 
           <div className="flex flex-col gap-3 mb-4">
-            <div className="campus-field flex items-center gap-3 rounded-2xl px-4 py-3" style={{ border: '1.5px solid #dbe7fb', background: '#fafafa' }}>
+            <div className="campus-field flex items-center gap-3 px-4 py-3" style={{ borderRadius: '10px', border: '1.5px solid #dbe7fb', background: '#fafafa' }}>
               <Mail size={17} color="#2563eb" />
               <input
                 type="email"
@@ -102,7 +102,7 @@ export default function Login() {
                 style={{ background: 'transparent', color: config.ink }}
               />
             </div>
-            <div className="campus-field flex items-center gap-3 rounded-2xl px-4 py-3" style={{ border: '1.5px solid #dbe7fb', background: '#fafafa' }}>
+            <div className="campus-field flex items-center gap-3 px-4 py-3" style={{ borderRadius: '10px', border: '1.5px solid #dbe7fb', background: '#fafafa' }}>
               <LockKeyhole size={17} color="#1d4ed8" />
               <input
                 type="password"
@@ -122,8 +122,8 @@ export default function Login() {
           )}
 
           <button onClick={handleSubmit} disabled={cargando}
-            className="campus-primary w-full rounded-2xl py-3 font-bold text-white disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', boxShadow: '0 18px 38px rgba(37, 99, 235, 0.2)' }}>
+            className="campus-primary w-full py-3 font-bold text-white disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 8px 20px rgba(37,99,235,0.24)' }}>
             {cargando ? 'Cargando...' : modo === 'login' ? 'Entrar' : 'Crear cuenta'} <ArrowRight size={17} />
           </button>
 

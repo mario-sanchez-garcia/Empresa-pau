@@ -205,7 +205,7 @@ export default function OnboardingFlow() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="flex min-h-screen items-start justify-center bg-[radial-gradient(circle_at_20%_8%,rgba(219,234,254,0.9),transparent_30%),linear-gradient(135deg,#fbfdff_0%,#eff6ff_100%)] px-4 py-12">
+    <div className="pau-bg-atmosphere flex min-h-screen items-start justify-center px-4 py-12">
       <div className="w-full max-w-lg">
 
         {/* Logo mark */}

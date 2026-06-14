@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function IaPage() {
   return (
-    <main style={page}>
+    <main className="pau-bg-atmosphere" style={page}>
       <div style={container}>
         <Link href="/contacto" style={backLink}>← Volver</Link>
 
@@ -82,7 +82,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-const page: React.CSSProperties = { minHeight: '100vh', background: 'linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)', padding: '48px 16px 80px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }
+const page: React.CSSProperties = { minHeight: '100vh', padding: '48px 16px 80px' }
 const container: React.CSSProperties = { maxWidth: 680, margin: '0 auto', background: 'white', borderRadius: 24, padding: '40px 36px', boxShadow: '0 16px 48px rgba(37,99,235,0.08)' }
 const backLink: React.CSSProperties = { fontSize: 13, color: '#6b7280', textDecoration: 'none', display: 'inline-block', marginBottom: 24 }
 const h1: React.CSSProperties = { fontSize: 28, fontWeight: 900, color: '#111827', margin: '0 0 4px' }

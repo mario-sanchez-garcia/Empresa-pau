@@ -2,13 +2,13 @@
 
 /* ─── Brand tokens ──────────────────────────────────────────────── */
 :root {
-  --background: #f8fbff;
-  --foreground: #172033;
-  --warm-bg: #f8fbff;
+  --background: #f5f8fe;
+  --foreground: #0d1424;
+  --warm-bg: #f5f8fe;
   --warm-surface: #ffffff;
   --warm-border: #dbe7fb;
   --warm-muted: #64748b;
-  --warm-ink: #172033;
+  --warm-ink: #0d1424;
   --warm-blue: #2563eb;
   --warm-amber: #2563eb;
   --warm-coral: #60a5fa;
@@ -18,28 +18,38 @@
   --pau-blue-deep: #1d4ed8;
   --pau-blue-sky: #38bdf8;
   --pau-blue-50: #eff6ff;
-  --pau-border: #e2ecf9;
-  --pau-ink: #0f172a;
-  --pau-muted: #64748b;
-  --pau-soft: #94a3b8;
+  --pau-border: #dde8f8;
+  --pau-border-strong: #c0d4f5;
+  --pau-ink: #0d1424;
+  --pau-ink-2: #1e293b;
+  --pau-muted: #5a6b82;
+  --pau-soft: #8fa3bc;
 
-  /* Radius scale — max 16px on cards (impeccable rule) */
+  /* Surface tiers */
+  --pau-surface-0: #ffffff;
+  --pau-surface-1: #f8fbff;
+  --pau-surface-2: #f0f6ff;
+
+  /* Radius scale — Impeccable: max 16px on cards */
   --r-sm: 8px;
   --r-md: 12px;
   --r-lg: 16px;
   --r-xl: 20px;
+  --r-2xl: 24px;
   --r-pill: 999px;
 
-  /* Shadow tiers — tinted blue, no pure-black */
-  --shadow-xs: 0 2px 6px rgba(37, 99, 235, 0.05);
-  --shadow-sm: 0 4px 14px rgba(37, 99, 235, 0.06);
-  --shadow-md: 0 8px 28px rgba(37, 99, 235, 0.09);
-  --shadow-lg: 0 16px 48px rgba(37, 99, 235, 0.11);
-  --shadow-xl: 0 28px 72px rgba(37, 99, 235, 0.14);
+  /* Shadow tiers — colored blue, no pure-black (redesign-skill) */
+  --shadow-xs: 0 1px 4px rgba(37,99,235,0.04), 0 2px 8px rgba(37,99,235,0.04);
+  --shadow-sm: 0 2px 8px rgba(37,99,235,0.05), 0 4px 20px rgba(37,99,235,0.06);
+  --shadow-md: 0 4px 16px rgba(37,99,235,0.07), 0 8px 32px rgba(37,99,235,0.08);
+  --shadow-lg: 0 8px 28px rgba(37,99,235,0.09), 0 16px 52px rgba(37,99,235,0.10);
+  --shadow-xl: 0 16px 48px rgba(37,99,235,0.12), 0 32px 80px rgba(37,99,235,0.12);
+  --shadow-glow: 0 0 0 3px rgba(37,99,235,0.12), 0 8px 28px rgba(37,99,235,0.18);
 
   /* Easing curves (Emil Kowalski) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Z-index scale */
   --z-dropdown: 30;
@@ -47,6 +57,7 @@
   --z-modal-bg: 50;
   --z-modal: 60;
   --z-toast: 70;
+  --z-overlay: 80;
 }
 
 @theme inline {
@@ -67,6 +78,15 @@ body {
 
 /* Cap body line length */
 p, li { max-width: 72ch; }
+
+/* ─── Atmospheric page background ───────────────────────────────── */
+.pau-bg-atmosphere {
+  background:
+    radial-gradient(ellipse 90% 60% at -5% -5%, rgba(219,234,254,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 105% -10%, rgba(224,231,255,0.42) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 70% at 50% 110%, rgba(239,246,255,0.35) 0%, transparent 60%),
+    linear-gradient(165deg, #f7faff 0%, #f0f5fe 60%, #edf2fd 100%);
+}
 
 /* ─── Focus ─────────────────────────────────────────────────────── */
 :focus-visible {
@@ -102,13 +122,23 @@ button:active:not(:disabled),
 
 /* ─── Animations ─────────────────────────────────────────────────── */
 @keyframes pau-fade-up {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0);    }
 }
 
 @keyframes pau-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes pau-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes pau-slide-right {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0);     }
 }
 
 @keyframes pau-shimmer {
@@ -126,16 +156,29 @@ button:active:not(:disabled),
 
 /* Staggered list entrance */
 .pau-stagger > * {
-  animation: pau-fade-up 360ms var(--ease-out) both;
+  animation: pau-fade-up 380ms var(--ease-out) both;
 }
-.pau-stagger > *:nth-child(1) { animation-delay: 0ms; }
-.pau-stagger > *:nth-child(2) { animation-delay: 50ms; }
-.pau-stagger > *:nth-child(3) { animation-delay: 100ms; }
-.pau-stagger > *:nth-child(4) { animation-delay: 150ms; }
-.pau-stagger > *:nth-child(5) { animation-delay: 200ms; }
-.pau-stagger > *:nth-child(6) { animation-delay: 250ms; }
-.pau-stagger > *:nth-child(7) { animation-delay: 300ms; }
-.pau-stagger > *:nth-child(8) { animation-delay: 350ms; }
+.pau-stagger > *:nth-child(1)  { animation-delay:   0ms; }
+.pau-stagger > *:nth-child(2)  { animation-delay:  45ms; }
+.pau-stagger > *:nth-child(3)  { animation-delay:  90ms; }
+.pau-stagger > *:nth-child(4)  { animation-delay: 135ms; }
+.pau-stagger > *:nth-child(5)  { animation-delay: 180ms; }
+.pau-stagger > *:nth-child(6)  { animation-delay: 225ms; }
+.pau-stagger > *:nth-child(7)  { animation-delay: 270ms; }
+.pau-stagger > *:nth-child(8)  { animation-delay: 315ms; }
+.pau-stagger > *:nth-child(9)  { animation-delay: 360ms; }
+.pau-stagger > *:nth-child(10) { animation-delay: 405ms; }
+.pau-stagger > *:nth-child(11) { animation-delay: 450ms; }
+.pau-stagger > *:nth-child(12) { animation-delay: 495ms; }
+
+/* Section / grid reveal */
+.pau-reveal       { animation: pau-fade-up    420ms var(--ease-out) both; }
+.pau-reveal-scale { animation: pau-scale-in   350ms var(--ease-out) both; }
+.pau-reveal-slide { animation: pau-slide-right 380ms var(--ease-out) both; }
+.pau-reveal-delay-1 { animation-delay:  60ms; }
+.pau-reveal-delay-2 { animation-delay: 120ms; }
+.pau-reveal-delay-3 { animation-delay: 180ms; }
+.pau-reveal-delay-4 { animation-delay: 240ms; }
 
 /* ─── Reduced motion ─────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
@@ -150,56 +193,128 @@ button:active:not(:disabled),
 
 /* ─── Skeleton shimmer ───────────────────────────────────────────── */
 .pau-skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e8eff8 50%, #f1f5f9 75%);
-  background-size: 200% 100%;
-  animation: pau-shimmer 1.6s ease infinite;
+  background: linear-gradient(90deg, #edf2fb 20%, #dde8f8 45%, #e8f0fc 55%, #edf2fb 80%);
+  background-size: 300% 100%;
+  animation: pau-shimmer 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   border-radius: var(--r-md);
 }
 
-/* ─── Card base ──────────────────────────────────────────────────── */
+/* ─── Card base (redesign-skill: one signal — no border+shadow combo) */
 .pau-card {
   background: #fff;
-  border: 1px solid var(--pau-border);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 220ms var(--ease-out), transform 220ms var(--ease-out);
+  transition: box-shadow 240ms var(--ease-out), transform 240ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  .pau-card:hover { box-shadow: var(--shadow-md); }
+  .pau-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
 }
 
-/* ─── Primary button base ─────────────────────────────────────────── */
+/* Double-bezel card (High-End Visual Design — Doppelrand) */
+.pau-card-bezel {
+  background: rgba(237,244,255,0.6);
+  border: 1px solid rgba(213,230,252,0.9);
+  border-radius: var(--r-2xl);
+  padding: 4px;
+}
+.pau-card-bezel-inner {
+  background: var(--pau-surface-0);
+  border-radius: calc(var(--r-2xl) - 4px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), var(--shadow-xs);
+}
+
+/* Elevated card — lifts on hover */
+.pau-card-elevated {
+  background: #fff;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 240ms var(--ease-out), transform 240ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pau-card-elevated:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+}
+
+/* Glass surface — subtle frosted (only for fixed/sticky; not scrolling content) */
+.pau-glass {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.7);
+}
+
+/* ─── Primary button (Emil: press feedback + specific transitions) ── */
 .campus-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 22px;
+  padding: 13px 22px;
   border-radius: var(--r-pill);
   border: none;
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #38bdf8 100%);
+  background: linear-gradient(135deg, #1a43cc 0%, #2563eb 50%, #3b7cf8 100%);
   color: #fff;
   font-size: 15px;
   font-weight: 800;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.22);
-  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), filter 160ms var(--ease-out);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 8px 24px rgba(37,99,235,0.24), 0 2px 6px rgba(37,99,235,0.18);
+  transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.campus-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 60%);
+  pointer-events: none;
 }
 @media (hover: hover) and (pointer: fine) {
   .campus-primary:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 20px 48px rgba(37, 99, 235, 0.28);
-    filter: brightness(1.04);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 16px 40px rgba(37,99,235,0.30), 0 4px 10px rgba(37,99,235,0.20);
   }
 }
 .campus-primary:active:not(:disabled) {
   transform: scale(0.97) !important;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 4px 14px rgba(37,99,235,0.20);
 }
 .campus-primary:disabled {
-  opacity: 0.52;
+  opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ─── Secondary / ghost button ──────────────────────────────────── */
+.pau-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--pau-border-strong);
+  background: #fff;
+  color: var(--pau-ink-2);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 150ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pau-button-secondary:hover:not(:disabled) {
+    background: var(--pau-surface-2);
+    border-color: #a0b8e8;
+    box-shadow: var(--shadow-xs);
+  }
+}
+.pau-button-secondary:active:not(:disabled) { transform: scale(0.97); }
+.pau-button-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ─── Badge ──────────────────────────────────────────────────────── */
 .pau-badge {
@@ -232,30 +347,48 @@ button:active:not(:disabled),
   line-height: 1.6;
 }
 
-/* ─── Section card (simulacros, camino panels) ───────────────────── */
+/* ─── Section card ───────────────────────────────────────────────── */
 .pau-card-section {
-  border-radius: 18px;
-  border: 1px solid var(--pau-border);
+  border-radius: var(--r-xl);
   background: #fff;
   padding: 20px;
   box-shadow: var(--shadow-sm);
 }
 
-/* ─── Empty state ────────────────────────────────────────────────── */
+/* ─── Metric card — used in Camino for stats ─────────────────────── */
+.pau-metric-card {
+  border-radius: var(--r-lg);
+  padding: 18px 16px 16px;
+  transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pau-metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+}
+
+/* ─── Divider ─────────────────────────────────────────────────────── */
+.pau-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--pau-border) 20%, var(--pau-border) 80%, transparent);
+  border: none;
+  margin: 0;
+}
+
+/* ─── Empty state — teaches (UI UX Pro Max: empty-states rule) ────── */
 .pau-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 40px 24px;
+  gap: 12px;
+  padding: 44px 28px;
   border-radius: var(--r-xl);
-  border: 1.5px dashed #bfdbfe;
-  background: rgba(239, 246, 255, 0.5);
-  color: #3b82f6;
+  background: linear-gradient(145deg, rgba(239,246,255,0.7), rgba(224,236,255,0.4));
+  border: 1.5px dashed rgba(147,185,245,0.7);
+  color: #1d4ed8;
   text-align: center;
   font-size: 14px;
   font-weight: 700;
+  line-height: 1.6;
 }
 
 /* ─── Error state ────────────────────────────────────────────────── */
@@ -291,9 +424,9 @@ button:active:not(:disabled),
   animation: pau-progress-grow 600ms var(--ease-out);
 }
 
-/* ─── Section reveal ─────────────────────────────────────────────── */
-.pau-reveal {
-  animation: pau-fade-up 400ms var(--ease-out) both;
+/* ─── hover-lift ─────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .pau-hover-lift:hover { transform: translateY(-2px); }
 }
 
 /* ─── Math / KaTeX — do NOT touch these ─────────────────────────── */

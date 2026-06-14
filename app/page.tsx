@@ -1406,11 +1406,9 @@ function cambiarTipo(t: Tipo) {
         : null
 
   return (
-    <div className="pausia-app-shell" style={{
+    <div className="pausia-app-shell pau-bg-atmosphere" style={{
   display: 'flex',
   minHeight: '100vh',
-  background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.78), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.52), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
 }}>
       <style>{`
         .campus-hover,
@@ -1485,12 +1483,10 @@ function cambiarTipo(t: Tipo) {
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-       <header className="pausia-app-header" style={{
-  background: 'rgba(255, 255, 255, 0.78)',
-  backdropFilter: 'blur(22px)',
-  borderBottom: '1px solid rgba(219, 231, 251, 0.9)',
+       <header className="pausia-app-header pau-glass" style={{
+  borderBottom: '1px solid var(--pau-border)',
   padding: '12px 34px',
-  minHeight: '78px',
+  minHeight: '68px',
   display: 'flex',
   flexWrap: 'wrap',
   gap: '12px',

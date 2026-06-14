@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ContactoPage() {
   return (
-    <main style={page}>
+    <main className="pau-bg-atmosphere" style={page}>
       <div style={container}>
         <div style={logoRow}>
           <div style={logoIcon}>P</div>
@@ -96,7 +96,7 @@ function ContactCard({
   )
 }
 
-const page: React.CSSProperties = { minHeight: '100vh', background: 'radial-gradient(circle at 20% 8%, rgba(219,234,254,0.9), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)', padding: '48px 16px 80px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }
+const page: React.CSSProperties = { minHeight: '100vh', padding: '48px 16px 80px' }
 const container: React.CSSProperties = { maxWidth: 640, margin: '0 auto' }
 const logoRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }
 const logoIcon: React.CSSProperties = { width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: 16 }

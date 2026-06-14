@@ -97,7 +97,7 @@ export default async function ParentCheckoutPage({ params }: Props) {
 
 function ErrorPage({ message }: { message: string }) {
   return (
-    <main style={styles.page}>
+    <main className="pau-bg-atmosphere" style={styles.page}>
       <div style={styles.card}>
         <Logo />
         <p style={styles.errorTitle}>Enlace no disponible</p>
@@ -109,7 +109,7 @@ function ErrorPage({ message }: { message: string }) {
 
 function SuccessStaticPage({ name }: { name: string | null }) {
   return (
-    <main style={styles.page}>
+    <main className="pau-bg-atmosphere" style={styles.page}>
       <div style={styles.card}>
         <Logo />
         <div style={{ fontSize: 40, textAlign: 'center' as const }}>✅</div>
@@ -140,12 +140,10 @@ function Logo() {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: 'radial-gradient(circle at 20% 10%, rgba(219,234,254,0.9), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)',
     display: 'flex' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     padding: '24px 16px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   },
   card: {
     background: 'white',

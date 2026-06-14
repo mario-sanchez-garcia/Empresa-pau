@@ -73,11 +73,10 @@ export default function PricingPage() {
 
   return (
     <main
+      className="pau-bg-atmosphere"
       style={{
         minHeight: '100vh',
-        background: C.bg,
         color: C.ink,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
       }}
     >
       <style>{`

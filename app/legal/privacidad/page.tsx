@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PrivacidadPage() {
   return (
-    <main style={page}>
+    <main className="pau-bg-atmosphere" style={page}>
       <div style={container}>
         <Link href="/contacto" style={backLink}>← Volver</Link>
 
@@ -98,9 +98,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const page: React.CSSProperties = {
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)',
   padding: '48px 16px 80px',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 }
 const container: React.CSSProperties = {
   maxWidth: 680,

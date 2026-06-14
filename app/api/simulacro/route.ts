@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
-import { buildCorrectionPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildBlockPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
 
@@ -127,50 +127,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const prompt = buildCorrectionPrompt({
-      subject,
-      community: correctionCommunity,
-      simulacroId: simulacro_id,
-      option: storedOption || opcion,
-      elapsedMinutes: elapsed,
-      difficulty: 'Media',
-      blocks: blocks.map((block: any, index: number) => {
-        const answer = storedAnswers?.[block.id]
-        return {
-          numeroBloque: `Bloque ${index + 1}`,
-          tema: block.tema,
-          community: block.comunidad ?? correctionCommunity,
-          year: block.year,
-          convocatoria: block.convocatoria,
-          option: block.option,
-          maxScore: block.puntuacion,
-          officialPrompt: block.enunciado,
-          criteria: block.criterios,
-          sourceText: block.textoFuente,
-          concepts: block.conceptos,
-          studentAnswer: answer?.image
-            ? `Respuesta manuscrita adjunta como imagen para el ${block.tema}. Texto adicional: ${answer?.text ?? ''}`
-            : (answer?.text ?? '')
-        }
-      })
-    })
-
-    const content: any[] = []
-    for (const block of blocks) {
-      const answer = storedAnswers?.[block.id]
-      if (answer?.image) {
-        content.push({
-          type: 'image',
-          source: {
-            type: 'base64',
-            media_type: answer.imageType || 'image/jpeg',
-            data: answer.image
-          }
-        })
-      }
-    }
-    content.push({ type: 'text', text: prompt })
-
+    const t0 = Date.now()
     const model = 'claude-sonnet-4-6'
     const usageMetadata = {
       asignatura: subject,
@@ -179,71 +136,182 @@ export async function POST(request: NextRequest) {
       bloquesCount: blocks.length,
       tiempoEmpleado: elapsed
     }
-    let message
-    try {
-      message = await client.messages.create({
-        model,
-        max_tokens: 6000,
-        system: `Eres Pausia, corrector experto de ${examSystemLabel(correctionCommunity)}. Devuelve exclusivamente JSON válido cuando el usuario lo pida. No añadas markdown ni texto fuera del JSON.`,
-        messages: [{ role: 'user', content }]
-      })
-    } catch (error) {
-      await logAiUsageEvent({
-        userId: authContext.user.id,
-        route: '/api/simulacro',
-        action: 'simulacro_correction',
-        model,
-        status: 'error',
-        errorCode: getAiErrorCode(error),
-        metadata: usageMetadata,
-        accessToken: authContext.accessToken
-      })
-      throw error
-    }
 
-    const usage = extractAnthropicTokenUsage(message)
-    await logAiUsageEvent({
-      userId: authContext.user.id,
-      route: '/api/simulacro',
-      action: 'simulacro_correction',
-      model,
-      inputTokens: usage.inputTokens,
-      outputTokens: usage.outputTokens,
-      totalTokens: usage.totalTokens,
-      status: 'success',
-      metadata: usageMetadata,
-      accessToken: authContext.accessToken
-    })
+    console.info('[simulacro] start', { simulacroId: simulacro_id, subject, blocksCount: blocks.length })
 
-    const raw = message.content
-      .filter(item => item.type === 'text')
-      .map(item => item.text)
-      .join('\n')
-    const parsed = parseCorrectionJson(raw)
+    // Correct each block with its own focused AI call; run all in parallel.
+    // A single call for all blocks exceeded Vercel's 60 s function limit.
+    const blockResults: (any | null)[] = await Promise.all(
+      blocks.map(async (block: any, index: number) => {
+        const answer = storedAnswers?.[block.id]
+        console.info('[simulacro] correcting_block', { blockIndex: index })
 
-    if (!parsed) {
-      console.error('SIMULACRO_CORRECTION_PARSE_ERROR', {
-        simulacroId: simulacro_id,
-        subject,
-        rawLength: raw.length,
-        rawPreview: raw.slice(0, 200)
+        const blockContent: any[] = []
+        if (answer?.image) {
+          blockContent.push({
+            type: 'image',
+            source: { type: 'base64', media_type: answer.imageType || 'image/jpeg', data: answer.image }
+          })
+        }
+        blockContent.push({
+          type: 'text',
+          text: buildBlockPrompt({
+            block: {
+              numeroBloque: `Bloque ${index + 1}`,
+              tema: block.tema,
+              community: block.comunidad ?? correctionCommunity,
+              year: block.year,
+              convocatoria: block.convocatoria,
+              option: block.option,
+              maxScore: block.puntuacion,
+              officialPrompt: block.enunciado,
+              criteria: block.criterios,
+              sourceText: block.textoFuente,
+              concepts: block.conceptos,
+              studentAnswer: answer?.image
+                ? `Respuesta manuscrita adjunta. Texto adicional: ${answer?.text ?? ''}`
+                : (answer?.text ?? '')
+            },
+            blockIndex: index,
+            totalBlocks: blocks.length,
+            subject,
+            community: correctionCommunity
+          })
+        })
+
+        try {
+          const msg = await client.messages.create({
+            model,
+            max_tokens: 1800,
+            system: `Eres Pausia, corrector experto de ${examSystemLabel(correctionCommunity)}. Devuelve exclusivamente JSON válido. Sin texto fuera del JSON.`,
+            messages: [{ role: 'user', content: blockContent }]
+          })
+
+          const raw = msg.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
+          const parsed = parseCorrectionJson(raw)
+
+          const usage = extractAnthropicTokenUsage(msg)
+          logAiUsageEvent({
+            userId: authContext.user.id,
+            route: '/api/simulacro',
+            action: 'simulacro_correction',
+            model,
+            inputTokens: usage.inputTokens,
+            outputTokens: usage.outputTokens,
+            totalTokens: usage.totalTokens,
+            status: parsed ? 'success' : 'error',
+            metadata: { ...usageMetadata, blockIndex: index },
+            accessToken: authContext.accessToken
+          }).catch(() => {})
+
+          if (!parsed) {
+            console.error('[simulacro] failed', {
+              phase: 'block_parse',
+              blockIndex: index,
+              ms: Date.now() - t0,
+              rawPreview: raw.slice(0, 150)
+            })
+            return null
+          }
+          console.info('[simulacro] block_done', { blockIndex: index, ms: Date.now() - t0 })
+          return parsed
+        } catch (error: any) {
+          console.error('[simulacro] failed', {
+            phase: 'block_correction',
+            blockIndex: index,
+            ms: Date.now() - t0,
+            message: error?.message?.slice(0, 120)
+          })
+          logAiUsageEvent({
+            userId: authContext.user.id,
+            route: '/api/simulacro',
+            action: 'simulacro_correction',
+            model,
+            status: 'error',
+            errorCode: getAiErrorCode(error),
+            metadata: { ...usageMetadata, blockIndex: index },
+            accessToken: authContext.accessToken
+          }).catch(() => {})
+          return null
+        }
       })
+    )
+
+    // All blocks failed — hard error, nothing to show
+    if (blockResults.every(r => r === null)) {
+      console.error('[simulacro] failed', { phase: 'all_blocks_failed', ms: Date.now() - t0 })
       const errorResult = createCorrectionError({
         simulacroId: simulacro_id,
         subject,
-        message: 'No hemos podido interpretar la corrección generada por la IA. Tus respuestas están guardadas.',
-        raw
+        message: 'No hemos podido corregir ningún bloque del simulacro. Tus respuestas están guardadas.'
       })
       await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, errorResult, elapsed)
       return NextResponse.json(errorResult, { status: 502 })
     }
 
-    const result = normalizeCorrectionResult(parsed, {
+    // Build desglose_bloques: successful blocks get parsed result; failed ones get error placeholder
+    const failedCount = blockResults.filter(r => r === null).length
+    const desglose_bloques = blockResults.map((br, i) => {
+      if (!br) {
+        return {
+          numero_bloque: `Bloque ${i + 1}`,
+          tema: blocks[i]?.tema ?? `Bloque ${i + 1}`,
+          año_origen: blocks[i]?.year ?? null,
+          convocatoria_origen: blocks[i]?.convocatoria ?? '',
+          nota: 0,
+          max_puntos: blocks[i]?.puntuacion ?? 0,
+          puntos_conseguidos: 0,
+          puntos_maximos: blocks[i]?.puntuacion ?? 0,
+          porcentaje_logrado: 0,
+          que_hizo_bien: 'No disponible: este bloque no pudo corregirse.',
+          errores_detectados: ['La corrección de este bloque no se completó. Vuelve a intentarlo.'],
+          que_faltaba: '',
+          penalizaciones_aplicadas: [] as any[],
+          correccion_detalle: 'Este bloque no se pudo corregir. Pulsa "Reintentar corrección" para volver a intentarlo.',
+          solucion_orientativa: '',
+          consejo_para_mejorar: 'Vuelve a entregar el simulacro para corregir este bloque.'
+        }
+      }
+      return {
+        ...br,
+        numero_bloque: br.numero_bloque ?? `Bloque ${i + 1}`,
+        tema: br.tema ?? blocks[i]?.tema ?? `Bloque ${i + 1}`,
+        año_origen: br.año_origen ?? blocks[i]?.year ?? null,
+        convocatoria_origen: br.convocatoria_origen ?? blocks[i]?.convocatoria ?? ''
+      }
+    })
+
+    const feedback_general = failedCount > 0
+      ? `Se corrigieron ${blocks.length - failedCount} de ${blocks.length} bloques. ${failedCount} bloque(s) no se completaron; pulsa "Reintentar corrección" para verlos.`
+      : `Corrección completada para los ${blocks.length} bloques del simulacro.`
+
+    const merged = {
+      simulacro_id,
+      asignatura: subject,
+      nota_final: null as number | null,
+      tiempo_empleado_minutos: elapsed,
+      feedback_general,
+      fortalezas: desglose_bloques
+        .filter(b => b.que_hizo_bien && !(b.que_hizo_bien as string).startsWith('No disponible'))
+        .map(b => (b.que_hizo_bien as string).slice(0, 120))
+        .slice(0, 3),
+      errores_principales: desglose_bloques
+        .flatMap(b => Array.isArray(b.errores_detectados) ? (b.errores_detectados as string[]) : [])
+        .filter(e => e && !e.startsWith('La corrección de este bloque'))
+        .slice(0, 4),
+      plan_repaso: [] as any[],
+      desglose_bloques,
+      resumen_por_bloque_tematico: [] as any[]
+    }
+
+    const result = normalizeCorrectionResult(merged, {
       simulacroId: simulacro_id,
       subject,
       elapsed,
       blocks
     })
+
+    console.info('[simulacro] saving_result')
 
     const updated = await updateSimulacro(authContext.supabase, simulacro_id, authContext.user.id, result, elapsed)
     if (!updated) {
@@ -253,6 +321,7 @@ export async function POST(request: NextRequest) {
         message: 'No hemos podido guardar la corrección del simulacro.'
       }), { status: 500 })
     }
+    console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })
     return NextResponse.json(result)
   } catch (error) {
     const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'

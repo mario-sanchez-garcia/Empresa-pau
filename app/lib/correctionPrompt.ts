@@ -209,6 +209,91 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
 }`
 }
 
+// Compact subject-specific grading rules for per-block prompts.
+// Full version lives in buildCorrectionPrompt; this covers the key deductions only.
+const BLOCK_SUBJECT_CRITERIA: Record<string, string> = {
+  'Matemáticas II': `- Resultado sin desarrollo: máx 0.5 pts por apartado.
+- Sin unidades en resultado final: -0.25 pts por apartado.
+- Error de cálculo arrastrado desde paso correcto: máx -0.5 pts adicionales sobre el bloque.
+- Planteamiento correcto con resultado erróneo: hasta 60% de la puntuación.
+- Geometría y análisis: exige justificación explícita de todos los pasos intermedios.`,
+  'Física': `- Sin enunciar la ley o principio físico aplicado: -0.5 pts por apartado.
+- Sin unidades en resultado numérico: -0.25 pts por apartado.
+- Orden de magnitud incorrecto en resultado final: máx 0.5 pts en ese apartado.
+- Planteamiento correcto con error numérico: hasta 70% de la puntuación.`,
+  'Química': `- Reacción sin ajustar o mal ajustada: -0.5 pts por apartado.
+- Sin estados de agregación cuando sean relevantes: -0.25 pts.
+- IUPAC incorrecta en compuestos clave: -0.25 pts.
+- Sin factor de conversión explícito en estequiometría: máx 0.5 pts por apartado.
+- Resultado correcto sin desarrollo: máx 0.5 pts.`,
+  'Biología': `- Valora precisión conceptual y uso correcto de terminología biológica.
+- En procesos biológicos exige orden causal: moléculas → estructuras → mecanismos → consecuencias.
+- Respuesta memorística sin aplicación al caso planteado: máx 60%.`,
+  'Historia de España': `- Error cronológico grave (>10 años en fecha clave): -0.5 pts/error, máx -1 pt total.
+- Sin identificar naturaleza, contexto, ideas principales y conclusión: descuento proporcional.
+- Sin estructura (introducción, argumentación, conclusión): máx 60%.
+- Enumeración sin argumentación histórica: máx 1.0 pt.`,
+  'Inglés': `- Aplica primero los criterios oficiales incluidos en el bloque.
+- Cataluña: sigue el modelo de corrección de Cataluña, no el de Madrid.
+- Evalúa en español; cita partes relevantes del alumno en inglés.`,
+  'Lengua Castellana y Literatura II': `- Penalización ortográfica: desde la 2ª falta distinta, -0.25 pts por falta, máx -2 pts total.
+- Errores de redacción, presentación, coherencia o gramática: hasta -1 pt adicional, máx -2 pts global.`
+}
+
+export function buildBlockPrompt({
+  block,
+  blockIndex,
+  totalBlocks,
+  subject,
+  community
+}: {
+  block: CorrectionPromptBlock
+  blockIndex: number
+  totalBlocks: number
+  subject: string
+  community: string
+}): string {
+  const criteria = BLOCK_SUBJECT_CRITERIA[subject] ?? ''
+  const studentAnswer = block.studentAnswer?.trim() ? block.studentAnswer : '(sin respuesta)'
+
+  return `Eres el corrector oficial certificado de ${subject} para ${community}. Corrige el siguiente ejercicio oficial de acceso a la universidad.
+
+CONTEXTO:
+- Bloque: ${blockIndex + 1} de ${totalBlocks}
+- Tema: ${block.tema}
+- Año/convocatoria: ${block.year} · ${block.convocatoria}
+- Puntuación máxima oficial: ${block.maxScore}
+${block.criteria ? `\nCRITERIOS OFICIALES DEL EJERCICIO:\n${block.criteria}` : ''}
+ENUNCIADO OFICIAL:
+${block.officialPrompt}
+${block.sourceText ? `\nTEXTO FUENTE:\n${block.sourceText.slice(0, 1500)}` : ''}
+RESPUESTA DEL ALUMNO:
+${studentAnswer}
+${criteria ? `\nCRITERIOS DE CORRECCIÓN:\n${criteria}` : ''}
+INSTRUCCIONES:
+1. Aplica el criterio oficial exacto de ${block.year}. La nota no puede superar ${block.maxScore}.
+2. Si la respuesta está en blanco, puntúa 0 y justifícalo brevemente.
+3. Cada punto descontado en penalizaciones_aplicadas debe tener motivo concreto.
+4. Usa Markdown y LaTeX ($...$, $$...$$) en los campos de texto cuando sea útil.
+5. Feedback directo y específico a la respuesta real, no genérico.
+6. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
+
+{
+  "nota": 0.00,
+  "max_puntos": ${block.maxScore},
+  "porcentaje_logrado": 0,
+  "que_hizo_bien": "",
+  "errores_detectados": [""],
+  "que_faltaba": "",
+  "penalizaciones_aplicadas": [
+    {"motivo": "", "puntos_descontados": -0.25}
+  ],
+  "correccion_detalle": "",
+  "solucion_orientativa": "",
+  "consejo_para_mejorar": ""
+}`
+}
+
 export function parseCorrectionJson(text: string) {
   try {
     const cleaned = text

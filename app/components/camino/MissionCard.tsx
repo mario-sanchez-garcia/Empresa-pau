@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, Clock3, Target } from 'lucide-react'
 import { getRouteById, todayMission, type CaminoRouteId } from '@/app/lib/camino/caminoData'
+import PauMascot from '@/app/components/PauMascot'
 
 interface MissionCardProps {
   routeId: CaminoRouteId
@@ -32,13 +33,25 @@ export default function MissionCard({ routeId, completedCount, totalTasks, missi
           </span>
         </div>
 
-        {/* Mission title */}
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-          Tu misión de hoy
-        </h2>
-        <p style={{ margin: '8px 0 0', fontSize: 15, color: '#64748b', lineHeight: 1.6, fontWeight: 500 }}>
-          {todayMission.objective}
-        </p>
+        {/* Mission title + Pau guide */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              Tu misión de hoy
+            </h2>
+            <p style={{ margin: '8px 0 0', fontSize: 15, color: '#64748b', lineHeight: 1.6, fontWeight: 500 }}>
+              {todayMission.objective}
+            </p>
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            <PauMascot
+              variant={missionCompleted ? 'celebrate' : 'guide'}
+              size="sm"
+              presentation="halo"
+              className={missionCompleted ? 'pau-mascot-enter' : 'pau-mascot-float'}
+            />
+          </div>
+        </div>
 
         {/* Meta row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 14 }}>

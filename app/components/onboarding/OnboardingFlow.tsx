@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowRight, CheckCircle2, Route, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Route, Sparkles } from 'lucide-react'
 import PauMascot from '@/app/components/PauMascot'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
@@ -128,7 +128,6 @@ export default function OnboardingFlow() {
     saveOnboarding({ startMode })
     setPhase('generating')
 
-    // Save to Supabase if authenticated
     const token = accessTokenRef.current
     if (token) {
       try {
@@ -152,7 +151,6 @@ export default function OnboardingFlow() {
   const completeTask = useCallback(async (task: DailyCaminoTask) => {
     if (completedTaskIds.includes(task.id) || submittingTask) return
 
-    // For open answer task, require some input
     if (task.id === 'ob-open-1') {
       if (!openAnswer.trim()) return
       setOpenFeedback(OPEN_TASK_FEEDBACK)
@@ -160,14 +158,11 @@ export default function OnboardingFlow() {
 
     setSubmittingTask(task.id)
     setTaskError(null)
-
-    // Optimistic checkmark (no XP yet for authenticated users)
     setCompletedTaskIds(prev => [...prev, task.id])
 
     const token = accessTokenRef.current
 
     if (!token) {
-      // Local-only mode — add XP immediately
       setXpEarned(prev => prev + task.xp)
     } else {
       try {
@@ -194,7 +189,6 @@ export default function OnboardingFlow() {
 
     setSubmittingTask(null)
 
-    // All done → tiny win
     const newCompleted = [...completedTaskIds, task.id]
     if (ONBOARDING_TASKS.every(t => newCompleted.includes(t.id))) {
       setTimeout(() => {
@@ -259,8 +253,15 @@ export default function OnboardingFlow() {
         {/* ── STEP 1: Community ───────────────────────────────────────── */}
         {phase === 'step-community' && (
           <Card>
-            <div className="mb-4 flex justify-center">
-              <PauMascot variant="welcome" size="lg" priority />
+            {/* Pau welcome with speech bubble — the greeting moment */}
+            <div className="pau-mascot-enter mb-6 flex justify-center">
+              <PauMascot
+                variant="welcome"
+                size="md"
+                presentation="bubble"
+                message="¡Hola! Vamos a crear tu Camino PAU. Solo necesito saber un poco sobre ti."
+                priority
+              />
             </div>
             <h1 className="text-2xl font-black text-slate-950">Crea tu Camino PAU</h1>
             <p className="mt-2 text-sm font-semibold text-slate-500">Dinos tu comunidad autónoma para adaptar tu ruta oficial.</p>
@@ -391,8 +392,9 @@ export default function OnboardingFlow() {
         {phase === 'generating' && (
           <Card>
             <div className="flex flex-col items-center gap-6 py-4 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_12px_32px_rgba(37,99,235,0.28)]">
-                <Route size={30} strokeWidth={2.2} />
+              {/* Pau thinking replaces generic icon */}
+              <div className="pau-mascot-enter">
+                <PauMascot variant="thinking" size="md" presentation="halo" className="pau-mascot-float" priority />
               </div>
               <div>
                 <h2 className="text-xl font-black text-slate-950">Creando tu Camino PAU…</h2>
@@ -415,6 +417,15 @@ export default function OnboardingFlow() {
         {phase === 'first-mission' && (
           <div className="space-y-5">
             <Card>
+              {/* Pau guide strip */}
+              <div style={{ marginBottom: 14 }}>
+                <PauMascot
+                  variant="guide"
+                  size="xs"
+                  presentation="helper"
+                  message="Estas 3 tareas calibran tu punto de partida. ¡Sin presión!"
+                />
+              </div>
               <p className="text-xs font-bold text-slate-400">Tu primera misión</p>
               <h2 className="mt-1 text-xl font-black text-slate-950">Activación · Semana 1</h2>
               <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -463,13 +474,30 @@ export default function OnboardingFlow() {
         {/* ── TINY WIN + DONE ─────────────────────────────────────────── */}
         {(phase === 'tiny-win' || phase === 'done') && (
           <div className="space-y-5">
-            {/* XP celebration */}
+
+            {/* XP celebration card */}
             <Card>
-              <div className="flex flex-col items-center gap-3 py-2 text-center">
-                <PauMascot variant="celebrate" size="lg" priority />
+              <div className="flex flex-col items-center text-center" style={{ gap: 16 }}>
+                {/* Pau celebrate with success ring */}
+                <div className="pau-mascot-enter flex justify-center">
+                  <PauMascot variant="celebrate" size="xl" presentation="success" priority />
+                </div>
+                {/* XP callout */}
                 <div>
-                  <p className="text-3xl font-black text-slate-950">+{xpEarned} XP</p>
-                  <p className="mt-1 text-lg font-black text-slate-800">Primera misión completada</p>
+                  <div style={{
+                    display: 'inline-block',
+                    background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                    border: '1.5px solid #f59e0b',
+                    borderRadius: 14,
+                    padding: '6px 22px',
+                    marginBottom: 10,
+                    boxShadow: '0 4px 16px rgba(245,158,11,0.18)',
+                  }}>
+                    <p style={{ margin: 0, fontSize: 34, fontWeight: 900, color: '#92400e', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                      +{xpEarned} XP
+                    </p>
+                  </div>
+                  <p className="text-xl font-black text-slate-950">Primera misión completada</p>
                   <p className="mt-1 text-sm font-semibold text-slate-400">Tu Camino ya no empieza desde cero</p>
                 </div>
               </div>
@@ -617,7 +645,6 @@ function OnboardingTaskCard({
           <h3 className="mt-2 text-sm font-black text-slate-900">{task.title}</h3>
           <p className="mt-1 text-xs font-semibold leading-5 text-slate-500 whitespace-pre-line">{task.detail}</p>
 
-          {/* Open answer input */}
           {isOpenTask && !completed && (
             <div className="mt-3 space-y-2">
               <textarea
@@ -638,7 +665,6 @@ function OnboardingTaskCard({
             </div>
           )}
 
-          {/* Open answer feedback */}
           {openFeedback && (
             <p className="mt-2 text-xs font-semibold text-slate-400 italic">{openFeedback}</p>
           )}

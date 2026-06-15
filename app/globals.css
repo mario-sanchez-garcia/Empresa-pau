@@ -785,14 +785,27 @@ button:active:not(:disabled),
   }
 }
 
-/* ─── Pau mascot float animation ─────────────────────────────────── */
+/* ─── Pau mascot animations ──────────────────────────────────────── */
 @keyframes pau-float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-5px); }
 }
-.pau-mascot-float {
-  animation: pau-float 3s ease-in-out infinite;
+.pau-mascot-float { animation: pau-float 3s ease-in-out infinite; }
+
+@keyframes pau-success-ring {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.1); opacity: 0.18; }
 }
+.pau-success-ring { animation: pau-success-ring 2.4s ease-in-out infinite; }
+
+@keyframes pau-mascot-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+.pau-mascot-enter { animation: pau-mascot-enter 380ms cubic-bezier(0.16,1,0.3,1) both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .pau-mascot-float { animation: none; }
+  .pau-mascot-float  { animation: none; }
+  .pau-success-ring  { animation: none; }
+  .pau-mascot-enter  { animation: none; }
 }

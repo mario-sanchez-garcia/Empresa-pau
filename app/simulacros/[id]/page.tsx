@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { AlertTriangle, Camera, CheckCircle2, Clock, Cog, Send, Trash2 } from 'lucide-react'
+import { AlertTriangle, Camera, CheckCircle2, Clock, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
 import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
 import ExamStatement from '@/components/shared/ExamStatement'
+import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
 const TOTAL_SECONDS = 90 * 60
 
@@ -323,7 +324,7 @@ export default function SimulacroActivoPage() {
           <div className="w-full max-w-md bg-white p-6" style={{ borderRadius: 20, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-xl)', zIndex: 'var(--z-modal)' as any }}>
             <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-blue-700" /> : <CheckCircle2 className="text-blue-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
             <p className="text-sm font-semibold text-slate-600">Has respondido {answeredCount} de {record.bloques.length} bloques. Quedan {record.bloques.length - answeredCount} vacíos.</p>
-            {submitting && <div className="mt-4 flex items-center gap-2 text-sm font-black text-blue-700"><Cog className="h-4 w-4 animate-spin [animation-duration:3s]" aria-hidden="true" />{submitStage || 'Preparando entrega...'}</div>}
+            {submitting && <div className="mt-4 flex items-center gap-2 text-sm font-black text-blue-700"><PausiaLoadingDot />{submitStage || 'Preparando entrega...'}</div>}
             {submitError && <div className="pau-info mt-4">{submitError}</div>}
             <div className="mt-6 flex justify-end gap-3">
               {!timeUp && <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="rounded-xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-60">Volver</button>}

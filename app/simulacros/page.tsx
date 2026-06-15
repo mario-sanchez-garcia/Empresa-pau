@@ -8,6 +8,7 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { DIFFICULTIES, SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
 import type { SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
+import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
 export default function SimulacrosPage() {
   const [userId, setUserId] = useState('')
@@ -203,7 +204,7 @@ export default function SimulacrosPage() {
         )}
 
         <button onClick={createSimulacro} disabled={loading || !userId || !SUBJECTS[subject].available} className="campus-primary" style={{ width: '100%', borderRadius: 14, padding: '15px 24px', fontSize: 16, gap: 10 }}>
-          <PlayCircle size={22} />{loading ? 'Generando...' : !SUBJECTS[subject].available ? `Simulacros de ${SUBJECTS[subject].short} próximamente` : userId ? 'Generar simulacro' : 'Cargando sesión...'}
+          {loading ? <PausiaLoadingDot /> : <PlayCircle size={22} />}{loading ? 'Generando...' : !SUBJECTS[subject].available ? `Simulacros de ${SUBJECTS[subject].short} próximamente` : userId ? 'Generar simulacro' : 'Cargando sesión...'}
         </button>
       </div>
     </SimulacroShell>

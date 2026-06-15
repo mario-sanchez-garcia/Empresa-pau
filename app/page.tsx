@@ -25,6 +25,7 @@ import { useCCAA } from './hooks/useCCAA'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 import {
   ArrowUpRight,
   Atom,
@@ -3077,7 +3078,7 @@ function cambiarTipo(t: Tipo) {
                 </div>
               )}
               <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
-                <WandSparkles size={17} className={cargando ? 'animate-pulse' : ''} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con IA'}
+                {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Pausia...' : 'Corregir con IA'}
               </button>
             </div>}
 
@@ -3203,7 +3204,7 @@ function cambiarTipo(t: Tipo) {
               {cargandoChat && (
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 58%, #38bdf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>P</div>
-                  <div style={{ padding: '12px 16px', borderRadius: '18px', background: WARM.surface, border: '1px solid #dbe7fb', color: WARM.muted, fontSize: '14px' }}>Pausia está escribiendo...</div>
+                  <div style={{ padding: '12px 16px', borderRadius: '18px', background: WARM.surface, border: '1px solid #dbe7fb', color: WARM.muted, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}><PausiaLoadingDot className="text-blue-500" />Pausia está escribiendo...</div>
                 </div>
               )}
               <div ref={chatEndRef} />
@@ -3211,7 +3212,7 @@ function cambiarTipo(t: Tipo) {
             <div style={{ padding: '16px 0 24px', borderTop: '1px solid #dbe7fb' }}>
               <div style={{ display: 'flex', gap: '10px', background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '8px 8px 8px 16px', alignItems: 'flex-end', boxShadow: '0 16px 38px rgba(37,99,235,0.08)' }}>
                 <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '14px', lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#1f2937', fontFamily: 'inherit', maxHeight: '120px' }} />
-                <button className="campus-primary" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '10px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer', background: inputChat.trim() && !cargandoChat ? 'linear-gradient(135deg, #1d4ed8, #60a5fa)' : '#dbe7fb', color: inputChat.trim() && !cargandoChat ? '#fff' : WARM.softText, fontSize: '13px', fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7px' }}><SendHorizontal size={15} />Enviar</button>
+                <button className="campus-primary" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '10px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer', background: inputChat.trim() && !cargandoChat ? 'linear-gradient(135deg, #1d4ed8, #60a5fa)' : '#dbe7fb', color: inputChat.trim() && !cargandoChat ? '#fff' : WARM.softText, fontSize: '13px', fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7px' }}>{cargandoChat ? <PausiaLoadingDot /> : <SendHorizontal size={15} />}{cargandoChat ? 'Pensando...' : 'Enviar'}</button>
               </div>
               <p style={{ textAlign: 'center', fontSize: '11px', color: WARM.softText, margin: '8px 0 0' }}>Enter para enviar · Shift+Enter para nueva línea</p>
             </div>
@@ -3302,8 +3303,8 @@ function cambiarTipo(t: Tipo) {
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>
               <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos débiles</div>
               <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.22)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
-                <BrainCircuit size={17} />
-                Abrir Mi Plan
+                {cargandoPlan ? <PausiaLoadingDot /> : <BrainCircuit size={17} />}
+                {cargandoPlan ? 'Generando...' : 'Abrir Mi Plan'}
               </button>
             </div>
             {planIA && (

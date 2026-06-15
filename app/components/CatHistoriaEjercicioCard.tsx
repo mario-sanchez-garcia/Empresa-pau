@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
@@ -270,7 +271,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
             </div>
           )}
           <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>
-            <WandSparkles size={17} className={cargando ? 'animate-pulse' : ''} /> {cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
+            {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />} {cargando ? 'Corrigiendo con Pausia...' : 'Corregir con Pausia'}
           </button>
         </div>
         <RespuestaIA contenido={correccion} officialMaxScore={puntuacion} />

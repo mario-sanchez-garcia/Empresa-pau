@@ -28,48 +28,36 @@ export default function CaminoPauClient() {
 
   return (
     <div
-      className="max-lg:block pau-bg-atmosphere"
-      style={{ display: 'flex', minHeight: '100vh', color: 'var(--pau-ink)' }}
+      className="max-lg:block"
+      style={{ display: 'flex', minHeight: '100vh', color: 'var(--pau-ink)', background: '#f7faff' }}
     >
       <Sidebar activeItem="camino" />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* ── Header ────────────────────────────────────────────────── */}
         <header
-          className="pau-glass max-md:px-4"
+          className="max-md:px-4"
           style={{
             position: 'sticky', top: 0, zIndex: 40,
-            borderBottom: '1px solid var(--pau-border)',
-            padding: '11px 28px',
+            borderBottom: '1px solid #f1f5f9',
+            background: '#ffffff',
+            padding: '0 28px',
+            height: 52,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-            <div style={{
-              width: 44, height: 44, flexShrink: 0, borderRadius: 13,
-              background: 'linear-gradient(135deg, #1a43cc 0%, #2563eb 55%, #3b8ef8 100%)',
-              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 6px 20px rgba(37,99,235,0.28), inset 0 1px 0 rgba(255,255,255,0.18)',
-            }}>
-              <Route size={22} strokeWidth={2.2} />
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 7, marginBottom: 2 }}>
-                <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.03em', color: 'var(--pau-ink)' }}>
-                  Camino PAU
-                </h1>
-                <span className={`pau-badge ${source === 'supabase' ? 'pau-badge-green' : 'pau-badge-blue'}`}>
-                  {source === 'supabase' ? 'En vivo' : 'Beta interna'}
-                </span>
-                {weekContext && (
-                  <span className="pau-badge" style={{ background: 'var(--pau-surface-1)', color: 'var(--pau-muted)', border: '1px solid var(--pau-border)' }}>
-                    Semana {weekContext.semana} · {weekContext.faseLabel}
-                  </span>
-                )}
-              </div>
-              <p style={{ margin: 0, fontSize: 12.5, fontWeight: 600, color: 'var(--pau-muted)' }}>
-                Tu misión diaria para llegar preparado a la PAU
-              </p>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h1 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em' }}>
+              Camino PAU
+            </h1>
+            <span className={`pau-badge ${source === 'supabase' ? 'pau-badge-green' : 'pau-badge-blue'}`} style={{ fontSize: 10 }}>
+              {source === 'supabase' ? 'En vivo' : 'Beta interna'}
+            </span>
+            {weekContext && (
+              <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
+                · Semana {weekContext.semana} · {weekContext.faseLabel}
+              </span>
+            )}
           </div>
         </header>
 
@@ -84,7 +72,8 @@ export default function CaminoPauClient() {
         {/* ── Main ──────────────────────────────────────────────────── */}
         <main style={{ maxWidth: 1300, margin: '0 auto', padding: '20px 20px 48px' }} className="max-md:px-4">
 
-          <div className="pau-reveal">
+          {/* ── Mission + Metrics (2-col on xl like Stitch) ────────── */}
+          <div style={{ display: 'grid', gap: 14, marginBottom: 14 }} className="xl:grid-cols-[1fr_256px] pau-reveal">
             <MissionCard
               routeId={progress.selectedRouteId}
               completedCount={completedCount}
@@ -94,13 +83,9 @@ export default function CaminoPauClient() {
                 document.getElementById('camino-tasks')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }}
             />
-          </div>
 
-          {/* ── Metrics ──────────────────────────────────────────────── */}
-          <section
-            style={{ display: 'grid', gap: 10, marginTop: 14 }}
-            className="md:grid-cols-2 xl:grid-cols-4 pau-stagger"
-          >
+            {/* Metrics column */}
+            <section style={{ display: 'grid', gap: 10, alignContent: 'start' }} className="pau-stagger md:grid-cols-2 xl:grid-cols-1">
             <MetricCard
               icon={<Flame size={17} />}
               label="Racha actual"
@@ -133,7 +118,8 @@ export default function CaminoPauClient() {
               tone="emerald"
               sublabel="del temario cubierto"
             />
-          </section>
+            </section>
+          </div>
 
           {/* ── Tasks + sidebar ────────────────────────────────────── */}
           <section id="camino-tasks" style={{ display: 'grid', gap: 14, marginTop: 14 }} className="xl:grid-cols-[1fr_356px]">

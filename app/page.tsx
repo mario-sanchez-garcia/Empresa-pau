@@ -1406,9 +1406,10 @@ function cambiarTipo(t: Tipo) {
         : null
 
   return (
-    <div className="pausia-app-shell pau-bg-atmosphere" style={{
+    <div className="pausia-app-shell" style={{
   display: 'flex',
   minHeight: '100vh',
+  background: '#f7faff',
 }}>
       <style>{`
         .campus-hover,
@@ -1483,47 +1484,51 @@ function cambiarTipo(t: Tipo) {
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-       <header className="pausia-app-header pau-glass" style={{
-  borderBottom: '1px solid var(--pau-border)',
-  padding: '12px 34px',
-  minHeight: '68px',
+       <header className="pausia-app-header" style={{
+  borderBottom: '1px solid #f1f5f9',
+  padding: '0 32px',
+  height: '52px',
   display: 'flex',
-  flexWrap: 'wrap',
-  gap: '12px',
   alignItems: 'center',
   justifyContent: 'space-between',
   position: 'sticky',
   top: 0,
-  zIndex: 40
+  zIndex: 40,
+  background: '#ffffff',
 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '15px', background: cfg.light, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + cfg.soft }}>
-              <HeaderIcon size={20} />
-            </div>
-            <div>
-            <div style={{ fontWeight: 700, fontSize: '18px', color: WARM.ink }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em' }}>
               {seccion === 'examenes' && cfg.label}
               {seccion === 'chat' && 'Chat con Pausia'}
               {seccion === 'historial' && 'Historial de correcciones'}
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
-            <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>
-              {seccion === 'examenes' && `Practica con exámenes oficiales ${examSystemLabel(ccaa)}`}
-              {seccion === 'chat' && 'Resuelve dudas sin quedarte bloqueado'}
-              {seccion === 'historial' && 'Todas tus correcciones guardadas'}
-              {seccion === 'planning' && 'Tu semana de estudio, aterrizada'}
-            </div>
+            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
+              {seccion === 'examenes' && `· ${examSystemLabel(ccaa)}`}
+              {seccion === 'chat' && '· Resuelve dudas'}
+              {seccion === 'historial' && '· Correcciones guardadas'}
+              {seccion === 'planning' && '· Tu semana'}
             </div>
           </div>
         </header>
 
         {seccion === 'examenes' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '980px', width: '100%', margin: '0 auto' }}>
+
+            {/* ── Page title (Stitch) ──────────────────────────────── */}
+            <div style={{ marginBottom: 28 }}>
+              <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                Corrección Inteligente
+              </h1>
+              <p style={{ margin: '6px 0 0', fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
+                Practica con exámenes oficiales de la PAU y recibe feedback instantáneo detallado por nuestra IA.
+              </p>
+            </div>
+
             <div style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{showAllSubjects ? 'Todas las asignaturas' : 'Asignaturas ancladas'}</div>
-                  <div style={{ marginTop: 3, color: WARM.muted, fontSize: 13, fontWeight: 650 }}>Elige rápido tus favoritas o abre el catálogo completo.</div>
+                  <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{showAllSubjects ? 'Todas las asignaturas' : 'Selecciona una asignatura'}</div>
                 </div>
                 <button
                   className="campus-hover"

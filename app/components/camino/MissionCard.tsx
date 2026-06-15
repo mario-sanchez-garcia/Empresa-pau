@@ -17,50 +17,74 @@ export default function MissionCard({ routeId, completedCount, totalTasks, missi
   const cta = missionCompleted ? 'Misión completada' : started ? 'Continuar misión' : 'Empezar misión'
 
   return (
-    <section style={{ overflow: 'hidden', borderRadius: 20, border: '1px solid var(--pau-border)', background: '#fff', boxShadow: 'var(--shadow-md)' }}>
-      <div className="grid gap-6 p-6 lg:grid-cols-[1fr_280px] lg:p-8">
-        <div>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="pau-badge pau-badge-blue">Día {todayMission.day} de tu Camino PAU</span>
-            <span className="pau-badge" style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }}>{route.nombre}</span>
-          </div>
-          <h2 className="text-2xl font-black tracking-tight text-slate-950 md:text-3xl">Tu misión de hoy</h2>
-          <p className="mt-3 max-w-2xl text-lg font-bold leading-8 text-slate-600">{todayMission.objective}</p>
+    <section style={{ overflow: 'hidden', borderRadius: 16, border: '1px solid #dbe7fb', background: '#fff', boxShadow: '0 1px 4px rgba(15,23,42,0.04)' }}>
+      <div style={{ padding: '24px 28px' }}>
+        {/* Badge row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <span style={{
+            fontSize: 10, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase',
+            background: '#1e293b', color: '#fff', padding: '3px 10px', borderRadius: 999,
+          }}>
+            MISIÓN DE HOY
+          </span>
+          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+            Día {todayMission.day} · {route.nombre}
+          </span>
+        </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <InfoPill icon={<Target size={16} />} label="Objetivo" value="Integrales + errores" />
-            <InfoPill icon={<Clock3 size={16} />} label="Tiempo estimado" value={todayMission.estimatedTime} />
-            <InfoPill icon={<CheckCircle2 size={16} />} label="Progreso" value={`${completedCount}/${totalTasks} tareas`} />
-          </div>
+        {/* Mission title */}
+        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+          Tu misión de hoy
+        </h2>
+        <p style={{ margin: '8px 0 0', fontSize: 15, color: '#64748b', lineHeight: 1.6, fontWeight: 500 }}>
+          {todayMission.objective}
+        </p>
 
-          <div className="mt-7">
-            <div className="mb-2 flex items-center justify-between" style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>
-              <span>Progreso de misión</span>
-              <span>{progress}%</span>
-            </div>
-            <div className="pau-progress-bar">
-              <div className="pau-progress-fill" style={{ transform: `scaleX(${progress / 100})` }} />
-            </div>
+        {/* Meta row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 14 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
+            <Clock3 size={14} style={{ color: '#94a3b8' }} /> {todayMission.estimatedTime}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
+            <CheckCircle2 size={14} style={{ color: '#94a3b8' }} /> {completedCount}/{totalTasks} tareas
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>
+            +250 XP
+          </span>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{ marginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>
+            <span>Progreso de misión</span><span>{progress}%</span>
+          </div>
+          <div className="pau-progress-bar">
+            <div className="pau-progress-fill" style={{ transform: `scaleX(${progress / 100})` }} />
           </div>
         </div>
 
-        <div className="flex flex-col justify-between p-5" style={{ borderRadius: 14, border: '1px solid #bfdbfe', background: 'linear-gradient(145deg, #eff6ff, #fff)' }}>
-          <div>
-            <p className="text-xs font-bold text-blue-400">Ruta activa</p>
-            <h3 className="mt-2 text-xl font-black text-slate-950">{route.nombre}</h3>
-            <p className="mt-2 text-sm font-bold leading-6 text-slate-600">{route.mensajeAlumno}</p>
-            <div className="mt-4 p-3 text-sm font-bold text-slate-600" style={{ borderRadius: 10, border: '1px solid #dbeafe', background: 'rgba(255,255,255,0.9)' }}>
-              {route.duracionAproximada} · {route.intensidadDiaria}
-            </div>
-          </div>
+        {/* CTA + route info */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginTop: 20, flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={onPrimaryAction}
-            className={`campus-primary mt-6 w-full ${missionCompleted ? '' : ''}`}
-            style={missionCompleted ? { background: '#16a34a', boxShadow: '0 8px 20px rgba(22,163,74,0.22)' } : {}}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '11px 22px', borderRadius: 12,
+              background: missionCompleted ? '#16a34a' : '#7c3aed',
+              color: '#fff', border: 'none', cursor: 'pointer',
+              fontSize: 14, fontWeight: 800, letterSpacing: '-0.01em',
+              boxShadow: missionCompleted
+                ? '0 6px 20px rgba(22,163,74,0.24)'
+                : '0 6px 20px rgba(124,58,237,0.26)',
+              transition: 'transform 160ms ease, box-shadow 160ms ease',
+            }}
           >
-            {cta} {!missionCompleted && <ArrowRight size={16} />}
+            {cta} {!missionCompleted && <ArrowRight size={15} />}
           </button>
+          <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500, textAlign: 'right' }}>
+            {route.duracionAproximada} · {route.intensidadDiaria}
+          </div>
         </div>
       </div>
     </section>

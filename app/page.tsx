@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { examenes, examenesCatMates, examenesHistoria } from './data/examenes'
 import { examenesCataluna } from './data/examenes_cataluna'
 import { examenesFisica } from './data/fisica'
@@ -322,6 +322,32 @@ type FilterDropdownOption = {
   onSelect: () => void
 }
 
+type ExamSearchResult = {
+  id: string
+  year: string
+  convocatoria: string
+  title: string
+  subtitle: string
+  points: string
+  searchText: string
+  onSelect: () => void
+}
+
+function normalizeSearchText(value: unknown) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+function stringifyForSearch(value: unknown): string {
+  if (value == null) return ''
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (Array.isArray(value)) return value.map(stringifyForSearch).join(' ')
+  if (typeof value === 'object') return Object.values(value as Record<string, unknown>).map(stringifyForSearch).join(' ')
+  return ''
+}
+
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
   const [open, setOpen] = useState(false)
   return (
@@ -526,6 +552,8 @@ export default function Home() {
   const [showAllSubjects, setShowAllSubjects] = useState(false)
   const [pinnedSubjects, setPinnedSubjects] = useState<Asignatura[]>([])
   const [pinnedLimitMsg, setPinnedLimitMsg] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
   const [tipo, setTipo] = useState<Tipo>('Ordinaria')
   const [examenIdx, setExamenIdx] = useState(0)
   const [catEjercicioIdx, setCatEjercicioIdx] = useState(0)
@@ -1536,6 +1564,285 @@ function cambiarTipo(t: Tipo) {
                 }
               }))
   const questionFilterValue = questionFilterOptions.find(option => option.active)?.label ?? (isCatalunaExam ? 'Selecciona ejercicio' : 'Selecciona pregunta')
+  const examSearchResults = useMemo<ExamSearchResult[]>(() => {
+    if (asignatura === 'historia_filosofia') return []
+
+    const withSearchText = (result: Omit<ExamSearchResult, 'searchText'>, rawParts: unknown[]): ExamSearchResult => ({
+      ...result,
+      searchText: normalizeSearchText(rawParts.map(stringifyForSearch).join(' '))
+    })
+
+    const tipoFromCataluna = (convocatoria: string): Tipo =>
+      convocatoria === 'extraordinaria' ? 'Extraordinaria' : 'Ordinaria'
+
+    const normalSource: any[] =
+      asignatura === 'mates' ? examenes :
+      asignatura === 'fisica' ? examenesFisica :
+      asignatura === 'quimica' ? examenesQuimica :
+      asignatura === 'biologia' ? examenesBiologia :
+      asignatura === 'lengua' ? examenesLengua :
+      asignatura === 'ingles' ? examenesIngles :
+      examenesHistoria
+
+    const selectNormalResult = (exam: any, question: any, questionIndex: number) => {
+      const years = Array.from(new Set(
+        normalSource
+          .filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate))
+          .map(candidate => candidate.año)
+      )).sort((a: any, b: any) => Number(b) - Number(a))
+      setTipo(exam.tipo)
+      setExamenIdx(Math.max(0, years.findIndex(year => year === exam.año)))
+      setCatEjercicioIdx(0)
+      setCatHistoriaEjercicioIdx(0)
+      setCatFisicaEjercicioIdx(0)
+      setCatAsignaturaEjercicioIdx(0)
+
+      if (asignatura === 'historia') {
+        const examsOfYear = normalSource.filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate) && candidate.año === exam.año)
+        const dias = Array.from(new Set(examsOfYear.map(candidate => candidate.dia).filter(Boolean)))
+        setDiaHistoriaIdx(Math.max(0, dias.findIndex(dia => dia === exam.dia)))
+        setOpcion(exam.opcion === 'B' ? 1 : 0)
+        setBloqueIdx(questionIndex)
+      } else if (asignatura === 'lengua') {
+        const examsOfYear = normalSource.filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate) && candidate.año === exam.año)
+        const versiones = Array.from(new Set(examsOfYear.map(candidate => candidate.dia ?? candidate.opcion).filter(Boolean)))
+        setDiaHistoriaIdx(Math.max(0, versiones.findIndex(version => version === (exam.dia ?? exam.opcion))))
+        setBloqueIdx(questionIndex)
+        setOpcion(0)
+      } else if (asignatura === 'ingles') {
+        const examsOfYear = normalSource.filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate) && candidate.año === exam.año)
+        const dias = Array.from(new Set(examsOfYear.map(candidate => candidate.dia).filter(Boolean)))
+        setDiaHistoriaIdx(Math.max(0, dias.findIndex(dia => dia === exam.dia)))
+        setOpcion(question.opcion === 'B' || exam.opcion === 'B' ? 1 : 0)
+        setBloqueIdx(questionIndex)
+      } else if (asignatura === 'biologia') {
+        const examsOfYear = normalSource.filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate) && candidate.año === exam.año)
+        const series = Array.from(new Set(examsOfYear.map(candidate => candidate.dia).filter(Boolean)))
+        const blocks = Array.from(new Set((exam.preguntas ?? []).map((p: any) => p.bloque)))
+        setDiaHistoriaIdx(Math.max(0, series.findIndex(serie => serie === exam.dia)))
+        setOpcion(question.opcion === 'B' ? 1 : 0)
+        setBloqueIdx(Math.max(0, blocks.findIndex(block => block === question.bloque)))
+      } else if (asignatura === 'fisica') {
+        setDiaHistoriaIdx(0)
+        setOpcion(question.opcion === 'B' ? 1 : 0)
+        setBloqueIdx(Math.max(0, TIPOS_FISICA.findIndex(item => item.tipo === question.bloque)))
+      } else {
+        const blocks = Array.from(new Set((exam.preguntas ?? []).map((p: any) => p.bloque)))
+        setDiaHistoriaIdx(0)
+        setOpcion(question.opcion === 'B' ? 1 : 0)
+        setBloqueIdx(Math.max(0, blocks.findIndex(block => block === question.bloque)))
+      }
+
+      setSearchQuery('')
+      setSearchFocused(false)
+      reset()
+    }
+
+    if (!isCatalunaExam) {
+      return normalSource
+        .filter(exam => perteneceAComunidadSeleccionada(exam))
+        .flatMap((exam: any) => ((exam.preguntas ?? []) as any[]).map((question, questionIndex) => {
+          const points = question.puntuacion ?? question.puntos ?? question.pts
+          const questionName = question.numero ?? question.id ?? question.bloque ?? question.tipo ?? `Pregunta ${questionIndex + 1}`
+          const title = `${questionName}${question.opcion ? ` · Opción ${question.opcion}` : exam.opcion ? ` · Opción ${exam.opcion}` : ''}`
+          const subtitle = question.label ?? question.tema ?? question.bloque ?? LABELS_HISTORIA[question.tipo] ?? exam.dia ?? exam.asignatura ?? cfg.label
+          return withSearchText({
+            id: `normal-${asignatura}-${exam.id ?? `${exam.año}-${exam.tipo}`}-${question.id ?? questionIndex}`,
+            year: String(exam.año),
+            convocatoria: exam.tipo,
+            title,
+            subtitle,
+            points: points ? `${formatPts(points)} pts` : '',
+            onSelect: () => selectNormalResult(exam, question, questionIndex)
+          }, [
+            asignatura,
+            cfg.label,
+            exam.año,
+            exam.tipo,
+            exam.dia,
+            exam.opcion,
+            questionName,
+            subtitle,
+            points,
+            question
+          ])
+        }))
+    }
+
+    if (isCatalunaMates) {
+      return examenesCatMates.map((question: any, index: number) => {
+        const years = Array.from(new Set(examenesCatMates.filter(p => p.tipo === question.tipo).map(p => p.year))).sort((a, b) => b - a)
+        const preguntasDelAnio = examenesCatMates.filter(p => p.tipo === question.tipo && p.year === question.year)
+        const ejerciciosUnicos = preguntasDelAnio.filter((pregunta, i, preguntas) =>
+          preguntas.findIndex(candidate => candidate.ejercicio === pregunta.ejercicio && candidate.opcion === pregunta.opcion) === i
+        )
+        const exerciseIndex = Math.max(0, ejerciciosUnicos.findIndex(candidate => candidate.ejercicio === question.ejercicio && candidate.opcion === question.opcion))
+        return withSearchText({
+          id: `cat-mates-${question.year}-${question.tipo}-${question.ejercicio}-${question.opcion ?? index}`,
+          year: String(question.year),
+          convocatoria: question.tipo,
+          title: question.opcion ? `Ejercicio ${question.ejercicio} · Opción ${question.opcion}` : `Ejercicio ${question.ejercicio}`,
+          subtitle: question.tema ?? question.bloque ?? 'Matemáticas Cataluña',
+          points: question.puntos ? `${formatPts(question.puntos)} pts` : '',
+          onSelect: () => {
+            setTipo(question.tipo)
+            setExamenIdx(Math.max(0, years.findIndex(year => year === question.year)))
+            setCatEjercicioIdx(exerciseIndex)
+            setCatHistoriaEjercicioIdx(0)
+            setCatFisicaEjercicioIdx(0)
+            setCatAsignaturaEjercicioIdx(0)
+            setBloqueIdx(0)
+            setDiaHistoriaIdx(0)
+            setOpcion(0)
+            setSearchQuery('')
+            setSearchFocused(false)
+            reset()
+          }
+        }, [asignatura, question.year, question.tipo, question.ejercicio, question.opcion, question.tema, question.bloque, question.puntos, question])
+      })
+    }
+
+    if (isCatalunaFisica) {
+      return examenesFisicaCataluna.flatMap(exam => exam.ejercicios.map((exercise, exerciseIndex) => {
+        const selectedTipo = tipoFromCataluna(exam.convocatoria)
+        const years = Array.from(new Set(examenesFisicaCataluna.filter(candidate => candidate.convocatoria === exam.convocatoria).map(candidate => candidate.anio))).sort((a, b) => b - a)
+        const points = exercise.apartados?.reduce((total, apartado) => total + Number(apartado.puntos ?? 0), 0) || 2.5
+        return withSearchText({
+          id: `cat-fisica-${exam.id}-${exercise.numero}`,
+          year: String(exam.anio),
+          convocatoria: selectedTipo,
+          title: `Ejercicio ${exercise.numero}`,
+          subtitle: exercise.bloque ?? exercise.titulo,
+          points: `${formatPts(points)} pts`,
+          onSelect: () => {
+            setTipo(selectedTipo)
+            setExamenIdx(Math.max(0, years.findIndex(year => year === exam.anio)))
+            setCatFisicaEjercicioIdx(exerciseIndex)
+            setCatEjercicioIdx(0)
+            setCatHistoriaEjercicioIdx(0)
+            setCatAsignaturaEjercicioIdx(0)
+            setBloqueIdx(0)
+            setDiaHistoriaIdx(0)
+            setOpcion(0)
+            setSearchQuery('')
+            setSearchFocused(false)
+            reset()
+          }
+        }, [asignatura, exam, exercise, points])
+      }))
+    }
+
+    if (isCatalunaQuimica || isCatalunaLengua) {
+      const catExams = isCatalunaQuimica ? examenesQuimicaCataluna : examenesLenguaCataluna
+      const flattenLengua = (exam: any): CatEjercicioView[] => [
+        ...((exam.opciones ?? []).flatMap((op: any) => op.bloques.map((bloque: any) => ({
+          id: `${op.opcion}-${bloque.id}`,
+          titulo: `${op.titulo} · ${bloque.titulo}`,
+          instrucciones: bloque.instrucciones,
+          texto: [op.texto, bloque.texto].filter(Boolean).join('\n\n'),
+          fuente: [op.fuente, bloque.fuente].filter(Boolean).join('\n\n'),
+          apartados: bloque.apartados,
+          opcion: op.opcion,
+        })))),
+        ...((exam.partesComunes ?? []).map((bloque: any) => ({
+          id: `comun-${bloque.id}`,
+          titulo: `Parte común · ${bloque.titulo}`,
+          instrucciones: bloque.instrucciones,
+          texto: bloque.texto,
+          fuente: bloque.fuente,
+          apartados: bloque.apartados,
+          opcion: 'Parte común',
+        }))),
+        ...((exam.partesObligatorias ?? []).map((bloque: any) => ({
+          id: bloque.id,
+          titulo: bloque.titulo,
+          instrucciones: bloque.instrucciones,
+          texto: bloque.texto,
+          fuente: bloque.fuente,
+          apartados: bloque.apartados,
+        }))),
+      ]
+      return catExams.flatMap((exam: any) => {
+        const selectedTipo = tipoFromCataluna(exam.convocatoria)
+        const years = Array.from(new Set(catExams.filter((candidate: any) => candidate.convocatoria === exam.convocatoria).map((candidate: any) => candidate.anio))).sort((a: any, b: any) => Number(b) - Number(a))
+        const exercises: any[] = isCatalunaQuimica
+          ? (exam.ejercicios ?? []).map((exercise: any) => ({
+              id: String(exercise.numero),
+              titulo: exercise.titulo,
+              instrucciones: exercise.instrucciones,
+              enunciado: exercise.enunciado,
+              apartados: exercise.apartados,
+              datos: exercise.datos,
+              imagenes: exercise.imagenes,
+              requiereRevision: exercise.requiereRevision,
+            }))
+          : flattenLengua(exam)
+        return exercises.map((exercise, exerciseIndex) => {
+          const points = (exercise.apartados ?? []).reduce((total: number, apartado: any) => total + Number(apartado.puntos ?? 0), 0) || 2.5
+          return withSearchText({
+            id: `cat-${asignatura}-${exam.id}-${exercise.id}`,
+            year: String(exam.anio),
+            convocatoria: selectedTipo,
+            title: isCatalunaQuimica ? `Ejercicio ${exercise.id}` : exercise.titulo,
+            subtitle: isCatalunaQuimica ? exercise.titulo : (exercise.opcion ?? 'Lengua Cataluña'),
+            points: `${formatPts(points)} pts`,
+            onSelect: () => {
+              setTipo(selectedTipo)
+              setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio)))
+              setCatAsignaturaEjercicioIdx(exerciseIndex)
+              setCatEjercicioIdx(0)
+              setCatHistoriaEjercicioIdx(0)
+              setCatFisicaEjercicioIdx(0)
+              setBloqueIdx(0)
+              setDiaHistoriaIdx(0)
+              setOpcion(0)
+              setSearchQuery('')
+              setSearchFocused(false)
+              reset()
+            }
+          }, [asignatura, exam, exercise, points])
+        })
+      })
+    }
+
+    if (isCatalunaHistoria) {
+      return Object.values(examenesCataluna).flatMap((exam: any) => {
+        const years = Object.values(examenesCataluna).map((e: any) => e.anio).filter((value, index, values) => values.indexOf(value) === index).sort((a: any, b: any) => Number(b) - Number(a))
+        return (exam.ejercicios ?? []).map((exercise: any, exerciseIndex: number) => withSearchText({
+          id: `cat-historia-${exam.id}-${exercise.numero}`,
+          year: String(exam.anio),
+          convocatoria: exam.serie ?? 'Ordinaria',
+          title: `Ejercicio ${exercise.numero}`,
+          subtitle: exercise.fuente?.titulo ?? exercise.tipo ?? 'Historia Cataluña',
+          points: '2.5 pts',
+          onSelect: () => {
+            setTipo('Ordinaria')
+            setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio)))
+            setCatHistoriaEjercicioIdx(exerciseIndex)
+            setCatEjercicioIdx(0)
+            setCatFisicaEjercicioIdx(0)
+            setCatAsignaturaEjercicioIdx(0)
+            setBloqueIdx(0)
+            setDiaHistoriaIdx(0)
+            setOpcion(0)
+            setSearchQuery('')
+            setSearchFocused(false)
+            reset()
+          }
+        }, [asignatura, exam, exercise]))
+      })
+    }
+
+    return []
+  }, [asignatura, ccaa, cfg.label, isCatalunaExam, isCatalunaFisica, isCatalunaHistoria, isCatalunaLengua, isCatalunaMates, isCatalunaQuimica])
+  const normalizedSearchQuery = normalizeSearchText(searchQuery.trim())
+  const filteredSearchResults = useMemo(
+    () => normalizedSearchQuery
+      ? examSearchResults.filter(result => result.searchText.includes(normalizedSearchQuery)).slice(0, 10)
+      : [],
+    [examSearchResults, normalizedSearchQuery]
+  )
+  const showSearchResults = searchFocused && searchQuery.trim().length > 0
 
   return (
     <div className="pausia-app-shell pausia-premium-shell" style={{
@@ -1645,6 +1952,8 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exams-search-bar {
+          position: relative;
+          z-index: 110;
           min-width: 260px;
           max-width: 340px;
           flex: 0 1 320px;
@@ -1656,6 +1965,74 @@ function cambiarTipo(t: Tipo) {
           font-size: 13px;
           font-weight: 700;
           box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+        }
+
+        .exams-search-input {
+          width: 100%;
+          border: 0;
+          outline: 0;
+          background: transparent;
+          color: #111827;
+          font: inherit;
+        }
+
+        .exams-search-input::placeholder {
+          color: #94a3b8;
+        }
+
+        .exam-search-results {
+          position: absolute;
+          right: 0;
+          top: calc(100% + 10px);
+          z-index: 130;
+          width: min(460px, calc(100vw - 48px));
+          max-height: 360px;
+          overflow-y: auto;
+          border-radius: 18px;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          box-shadow: 0 24px 70px rgba(15, 23, 42, 0.16);
+          padding: 8px;
+        }
+
+        .exam-search-result {
+          width: 100%;
+          border: 0;
+          border-radius: 14px;
+          background: transparent;
+          padding: 10px 12px;
+          text-align: left;
+          cursor: pointer;
+          display: grid;
+          gap: 5px;
+        }
+
+        .exam-search-result:hover {
+          background: #f8fafc;
+        }
+
+        .exam-search-result-title {
+          color: #111827;
+          font-size: 13px;
+          font-weight: 850;
+          line-height: 1.35;
+        }
+
+        .exam-search-result-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          color: #6b7280;
+          font-size: 11px;
+          font-weight: 750;
+        }
+
+        .exam-search-empty {
+          padding: 14px 12px;
+          color: #6b7280;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.5;
         }
 
         .exams-filter-bar {
@@ -2031,8 +2408,47 @@ function cambiarTipo(t: Tipo) {
                   Convocatoria {tipo} {anioSeleccionado ? `· ${anioSeleccionado}` : ''} · {examSystemLabel(ccaa)}
                 </p>
               </div>
-              <div className="exams-search-bar" aria-hidden="true">
-                Buscar examen...
+              <div className="exams-search-bar">
+                <input
+                  className="exams-search-input"
+                  value={searchQuery}
+                  onChange={event => setSearchQuery(event.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => window.setTimeout(() => setSearchFocused(false), 120)}
+                  placeholder="Buscar examen..."
+                  aria-label="Buscar ejercicio"
+                />
+                {showSearchResults && (
+                  <div className="exam-search-results">
+                    {filteredSearchResults.length > 0 ? filteredSearchResults.map(result => (
+                      <button
+                        type="button"
+                        key={result.id}
+                        className="exam-search-result"
+                        onMouseDown={event => {
+                          event.preventDefault()
+                          result.onSelect()
+                        }}
+                      >
+                        <span className="exam-search-result-title">{result.title}</span>
+                        <span style={{ color: '#4b5563', fontSize: 12, fontWeight: 760, lineHeight: 1.35 }}>{result.subtitle}</span>
+                        <span className="exam-search-result-meta">
+                          <span>{result.year}</span>
+                          <span>·</span>
+                          <span>{result.convocatoria}</span>
+                          {result.points && (
+                            <>
+                              <span>·</span>
+                              <span>{result.points}</span>
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    )) : (
+                      <div className="exam-search-empty">No se han encontrado ejercicios para esta búsqueda.</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

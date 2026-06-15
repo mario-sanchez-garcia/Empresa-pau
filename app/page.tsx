@@ -1426,8 +1426,6 @@ function cambiarTipo(t: Tipo) {
     window.location.href = '/planning'
   }
 
-  if (!usuario) return null
-
   const HeaderIcon =
     seccion === 'examenes' ? cfg.icon :
     seccion === 'chat' ? MessageCircle :
@@ -1848,6 +1846,8 @@ function cambiarTipo(t: Tipo) {
     [examSearchResults, normalizedSearchQuery]
   )
   const showSearchResults = searchFocused && searchQuery.trim().length > 0
+
+  if (!usuario) return null
 
   return (
     <div className="pausia-app-shell pausia-premium-shell" style={{

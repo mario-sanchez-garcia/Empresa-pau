@@ -1,5 +1,7 @@
 # Pau — Mascota oficial de Pausia
 
+> **Estado actual:** Pau está guardado como asset de marca, pero no se muestra en la plataforma hasta nueva decisión de producto. El componente `app/components/PauMascot.tsx` y todos los assets están listos para reactivarse.
+
 Pau es la mascota oficial de Pausia.
 
 Es un lince ibérico estilizado, diseñado como acompañante visual del alumno durante el Camino PAU.

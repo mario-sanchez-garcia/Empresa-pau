@@ -1452,15 +1452,118 @@ function cambiarTipo(t: Tipo) {
         }
 
         .subject-card-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-          gap: 16px;
+          display: flex;
+          gap: 12px;
           width: 100%;
+          overflow-x: auto;
+          padding: 2px 2px 8px;
+          scrollbar-width: thin;
+        }
+
+        .subject-card-grid > .pau-subject-card {
+          flex: 1 0 214px;
+          max-width: 280px;
+        }
+
+        .exams-screen .pau-subject-card > svg {
+          display: none;
+        }
+
+        .exams-hero {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          margin-bottom: 28px;
+        }
+
+        .exams-search-bar {
+          min-width: 260px;
+          max-width: 340px;
+          flex: 0 1 320px;
+          border: 1px solid rgba(219, 231, 251, 0.95);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.92);
+          color: #94a3b8;
+          padding: 12px 16px;
+          font-size: 13px;
+          font-weight: 700;
+          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+        }
+
+        .exams-workspace {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 324px;
+          gap: 22px;
+          align-items: start;
+        }
+
+        .exams-main-column {
+          min-width: 0;
+        }
+
+        .exams-ai-panel {
+          position: sticky;
+          top: 88px;
+          display: grid;
+          gap: 14px;
+        }
+
+        .exams-side-card {
+          width: 100%;
+          border: 1px solid rgba(219, 231, 251, 0.9);
+          border-radius: 24px;
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 24px 60px rgba(37, 99, 235, 0.09);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          padding: 18px;
+        }
+
+        .exams-side-section {
+          border-radius: 18px;
+          border: 1px solid #e5edf9;
+          background: #f8fbff;
+          padding: 13px 14px;
+        }
+
+        .exams-side-label {
+          font-size: 11px;
+          font-weight: 850;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #94a3b8;
+        }
+
+        .exams-side-text {
+          margin: 6px 0 0;
+          color: #64748b;
+          font-size: 13px;
+          line-height: 1.55;
+          font-weight: 600;
+        }
+
+        .exams-metric-row {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
         }
 
         @media (max-width: 920px) {
           .subject-card-grid {
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            padding-bottom: 10px;
+          }
+
+          .subject-card-grid > .pau-subject-card {
+            flex-basis: 220px;
+          }
+
+          .exams-workspace {
+            grid-template-columns: 1fr;
+          }
+
+          .exams-ai-panel {
+            position: static;
           }
         }
 
@@ -1473,6 +1576,17 @@ function cambiarTipo(t: Tipo) {
         @media (max-width: 640px) {
           .pausia-app-header {
             padding: 14px 16px !important;
+          }
+
+          .exams-hero {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .exams-search-bar {
+            min-width: 0;
+            max-width: none;
+            width: 100%;
           }
         }
       `}</style>
@@ -1511,16 +1625,21 @@ function cambiarTipo(t: Tipo) {
         </header>
 
         {seccion === 'examenes' && (
-          <main style={{ flex: 1, padding: '32px 32px', maxWidth: '1080px', width: '100%', margin: '0 auto' }}>
+          <main className="exams-screen" style={{ flex: 1, padding: '32px 32px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
             {/* ── Page title (Stitch) ──────────────────────────────── */}
-            <div style={{ marginBottom: 28 }}>
-              <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                Corrección Inteligente
-              </h1>
-              <p style={{ margin: '6px 0 0', fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
-                Practica con exámenes oficiales de la PAU y recibe feedback instantáneo detallado por nuestra IA.
-              </p>
+            <div className="exams-hero">
+              <div>
+                <h1 style={{ margin: 0, fontSize: 30, fontWeight: 860, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                  Corrección Inteligente
+                </h1>
+                <p style={{ margin: '8px 0 0', fontSize: 14, color: '#64748b', lineHeight: 1.6, maxWidth: 620 }}>
+                  Practica con exámenes oficiales de la PAU y recibe feedback instantáneo detallado por nuestra IA.
+                </p>
+              </div>
+              <div className="exams-search-bar" aria-hidden="true">
+                Buscar examen, año o bloque...
+              </div>
             </div>
 
             <div style={{ marginBottom: '22px' }}>
@@ -1580,17 +1699,17 @@ function cambiarTipo(t: Tipo) {
                       overflow: 'hidden',
                       width: '100%',
                       textAlign: 'left',
-                      minHeight: '178px',
-                      padding: '20px',
-                      borderRadius: '24px',
+                      minHeight: '104px',
+                      padding: '16px',
+                      borderRadius: '20px',
                       border: active ? '1px solid ' + val.accent : '1px solid rgba(219,231,251,0.95)',
-                      background: 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 58%, ' + val.soft + ' 100%)',
+                      background: active ? 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 100%)' : 'rgba(255,255,255,0.9)',
                       cursor: 'pointer',
                       outline: 'none',
-                      boxShadow: active ? '0 24px 55px ' + val.accent + '28' : '0 18px 45px rgba(37, 99, 235, 0.08)'
+                      boxShadow: active ? '0 18px 42px ' + val.accent + '22' : '0 12px 30px rgba(15, 23, 42, 0.06)'
                     }}
                   >
-                    <div style={{ position: 'absolute', right: '-34px', bottom: '-42px', width: '128px', height: '128px', borderRadius: '50%', background: val.accent + '22' }} />
+                    <div style={{ position: 'absolute', right: '-46px', bottom: '-54px', width: '120px', height: '120px', borderRadius: '50%', background: val.accent + '14' }} />
                     <SubjectIllustration subject={key} color={val.color} accent={val.accent} />
                     <button
                       aria-label={pinned ? `Desanclar ${card.title}` : `Anclar ${card.title}`}
@@ -1599,22 +1718,21 @@ function cambiarTipo(t: Tipo) {
                         event.stopPropagation()
                         togglePinnedSubject(key)
                       }}
-                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '66px', top: '20px', width: '36px', height: '36px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as any}
+                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '14px', top: '14px', width: '34px', height: '34px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as any}
                       type="button"
                     >
                       <Pin size={16} fill={pinned ? 'currentColor' : 'none'} />
                     </button>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px' }}>
-                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)', position: 'relative', zIndex: 2 }}>
-                        <Icon size={26} strokeWidth={2.1} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '13px', paddingRight: '34px', position: 'relative', zIndex: 2 }}>
+                      <div style={{ width: '46px', height: '46px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : val.light, color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)', flex: '0 0 auto' }}>
+                        <Icon size={22} strokeWidth={2.1} />
                       </div>
-                      <div className="campus-arrow" style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#ffffff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)', position: 'relative', zIndex: 2 }}>
-                        <ArrowUpRight size={19} />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '15px', fontWeight: 820, color: WARM.ink, lineHeight: 1.25 }}>{card.title}</div>
+                        <div style={{ marginTop: '4px', color: WARM.muted, fontSize: '12px', lineHeight: '1.35', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.subtitle}</div>
                       </div>
                     </div>
-                    <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 760, color: WARM.ink, position: 'relative', zIndex: 2 }}>{card.title}</div>
-                    <div style={{ marginTop: '5px', color: WARM.muted, fontSize: '13px', lineHeight: '1.45', position: 'relative', zIndex: 2, maxWidth: '72%' }}>{card.subtitle}</div>
-                    <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.76)', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
+                    <div style={{ marginTop: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: active ? '#ffffff' : val.light, color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
                       <Flame size={13} />{card.kicker}
                     </div>
                   </div>
@@ -1622,17 +1740,17 @@ function cambiarTipo(t: Tipo) {
               })}
               </div>
             </div>
-           {!isPhilosophy && <div style={{
-  background: 'rgba(255, 255, 255, 0.78)',
-  borderRadius: '24px',
+           {!isPhilosophy && <div className="exams-filter-card" style={{
+  background: 'rgba(255, 255, 255, 0.92)',
+  borderRadius: '22px',
   border: '1px solid rgba(219, 231, 251, 0.85)',
-  padding: '24px',
+  padding: '20px',
   marginBottom: '22px',
-  boxShadow: '0 2px 12px rgba(37,99,235,0.06), 0 1px 3px rgba(37,99,235,0.04)',
+  boxShadow: '0 20px 50px rgba(37,99,235,0.08)',
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)'
 }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
+              <div style={{ fontSize: '12px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Filtros del examen</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
                   <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
@@ -1831,6 +1949,9 @@ function cambiarTipo(t: Tipo) {
                 </div>
               )}
             </div>}
+
+            <div className="exams-workspace">
+              <div className="exams-main-column">
 
             {isPhilosophy && <PhilosophyExamWorkspace ccaa={ccaa} />}
 
@@ -2038,7 +2159,7 @@ function cambiarTipo(t: Tipo) {
                   )}
                   {asignatura !== 'ingles' && (
                     <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado oficial</div>
+                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado</div>
                       <ExamStatement
                         text={enunciadoActivo}
                         format={false}
@@ -2071,7 +2192,7 @@ function cambiarTipo(t: Tipo) {
                 ))}
               </div>
               {modo === 'texto' ? (
-                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder={asignatura === 'historia' || asignatura === 'lengua' ? 'Escribe tu respuesta aquí...' : 'Escribe tu resolución paso a paso...'} style={{ width: '100%', height: asignatura === 'historia' || asignatura === 'lengua' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #dbe7fb', background: WARM.field, color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder="Empieza a resolver el problema aquí..." style={{ width: '100%', height: asignatura === 'historia' || asignatura === 'lengua' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #dbe7fb', background: WARM.field, color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               ) : (
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
@@ -2105,6 +2226,71 @@ function cambiarTipo(t: Tipo) {
                 </div>
               </div>
             )}
+              </div>
+
+              <aside className="exams-ai-panel" aria-label="Panel de feedback de Pausia">
+                <div className="exams-side-card">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+                    <div>
+                      <div className="exams-side-label">Pausia IA</div>
+                      <div style={{ marginTop: 4, color: WARM.ink, fontSize: 18, fontWeight: 860 }}>Feedback del ejercicio</div>
+                    </div>
+                    <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.soft }}>
+                      <WandSparkles size={20} />
+                    </div>
+                  </div>
+
+                  <div className="exams-metric-row" style={{ marginBottom: 14 }}>
+                    <div className="exams-side-section">
+                      <div className="exams-side-label">Puntos</div>
+                      <div style={{ marginTop: 4, color: cfg.color, fontSize: 22, fontWeight: 900 }}>{!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'}</div>
+                    </div>
+                    <div className="exams-side-section">
+                      <div className="exams-side-label">Estado</div>
+                      <div style={{ marginTop: 7, color: correccion ? '#16a34a' : cargando ? cfg.color : WARM.muted, fontSize: 13, fontWeight: 850 }}>
+                        {correccion ? 'Corregido' : cargando ? 'Corrigiendo' : 'Pendiente'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    <div className="exams-side-section">
+                      <div className="exams-side-label">Puntos fuertes</div>
+                      <p className="exams-side-text">
+                        {correccion ? 'Disponibles en la corrección detallada generada por Pausia.' : 'Resuelve el ejercicio y Pausia destacará lo que has hecho bien.'}
+                      </p>
+                    </div>
+                    <div className="exams-side-section">
+                      <div className="exams-side-label">Errores a corregir</div>
+                      <p className="exams-side-text">
+                        {correccion ? 'Consulta el detalle para ver fallos concretos, pasos omitidos y mejoras.' : 'Cuando envíes tu respuesta, aquí tendrás una guía rápida de revisión.'}
+                      </p>
+                    </div>
+                    <div className="exams-side-section">
+                      <div className="exams-side-label">Teoría relacionada</div>
+                      <p className="exams-side-text">
+                        {!isCatalunaExam && preguntaActiva ? bloqueActivoLabel : 'Selecciona un ejercicio para ver el bloque asociado.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="exams-side-card" style={{ background: 'linear-gradient(145deg, #ffffff, ' + cfg.light + ')' }}>
+                  <div className="exams-side-label">Racha de estudio</div>
+                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#ffffff', color: cfg.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' }}>
+                      <Flame size={20} />
+                    </div>
+                    <div>
+                      <div style={{ color: WARM.ink, fontSize: 15, fontWeight: 850 }}>Sesión activa</div>
+                      <div style={{ color: WARM.muted, fontSize: 12, fontWeight: 650, marginTop: 2 }}>
+                        {respuesta.trim() || imagen ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </div>
           </main>
         )}
 

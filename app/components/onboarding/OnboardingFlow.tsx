@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowRight, CheckCircle2, Route, Sparkles, Zap } from 'lucide-react'
+import PauMascot from '@/app/components/PauMascot'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import {
@@ -258,6 +259,9 @@ export default function OnboardingFlow() {
         {/* ── STEP 1: Community ───────────────────────────────────────── */}
         {phase === 'step-community' && (
           <Card>
+            <div className="mb-4 flex justify-center">
+              <PauMascot variant="welcome" size="lg" priority />
+            </div>
             <h1 className="text-2xl font-black text-slate-950">Crea tu Camino PAU</h1>
             <p className="mt-2 text-sm font-semibold text-slate-500">Dinos tu comunidad autónoma para adaptar tu ruta oficial.</p>
             <div className="mt-6 grid gap-3">
@@ -462,9 +466,7 @@ export default function OnboardingFlow() {
             {/* XP celebration */}
             <Card>
               <div className="flex flex-col items-center gap-3 py-2 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-amber-400 to-orange-400 text-white shadow-[0_8px_24px_rgba(251,191,36,0.3)]">
-                  <Zap size={26} />
-                </div>
+                <PauMascot variant="celebrate" size="lg" priority />
                 <div>
                   <p className="text-3xl font-black text-slate-950">+{xpEarned} XP</p>
                   <p className="mt-1 text-lg font-black text-slate-800">Primera misión completada</p>

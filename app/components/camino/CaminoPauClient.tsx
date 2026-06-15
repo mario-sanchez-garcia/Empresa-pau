@@ -12,6 +12,7 @@ import { completedTasksForDate } from '@/app/lib/camino/caminoProgress'
 import { useCaminoProgress } from '@/app/hooks/useCaminoProgress'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
+import PauMascot from '@/app/components/PauMascot'
 
 export default function CaminoPauClient() {
   const {
@@ -128,15 +129,22 @@ export default function CaminoPauClient() {
                 {/* Card header */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
-                    <div>
-                      <h2 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: 'var(--pau-ink)', letterSpacing: '-0.02em' }}>
-                        {weekContext ? `Semana ${weekContext.semana} · ${weekContext.objetivo}` : 'Tu misión de hoy'}
-                      </h2>
-                      {weekContext && (
-                        <p style={{ margin: '2px 0 0', fontSize: 11.5, fontWeight: 600, color: 'var(--pau-soft)' }}>
-                          {weekContext.faseLabel} · {weekContext.duracion} estimados
-                        </p>
-                      )}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <PauMascot
+                        variant={missionCompleted ? 'celebrate' : 'guide'}
+                        size="sm"
+                        className={missionCompleted ? undefined : 'pau-mascot-float'}
+                      />
+                      <div>
+                        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: 'var(--pau-ink)', letterSpacing: '-0.02em' }}>
+                          {weekContext ? `Semana ${weekContext.semana} · ${weekContext.objetivo}` : 'Tu misión de hoy'}
+                        </h2>
+                        {weekContext && (
+                          <p style={{ margin: '2px 0 0', fontSize: 11.5, fontWeight: 600, color: 'var(--pau-soft)' }}>
+                            {weekContext.faseLabel} · {weekContext.duracion} estimados
+                          </p>
+                        )}
+                      </div>
                     </div>
                     {missionCompleted ? (
                       <span className="pau-badge pau-badge-mint" style={{ gap: 5 }}>

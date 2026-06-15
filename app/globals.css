@@ -784,3 +784,15 @@ button:active:not(:disabled),
     transform: translateY(-4px);
   }
 }
+
+/* ─── Pau mascot float animation ─────────────────────────────────── */
+@keyframes pau-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+.pau-mascot-float {
+  animation: pau-float 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pau-mascot-float { animation: none; }
+}

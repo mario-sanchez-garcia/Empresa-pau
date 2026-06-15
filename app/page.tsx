@@ -1406,10 +1406,9 @@ function cambiarTipo(t: Tipo) {
         : null
 
   return (
-    <div className="pausia-app-shell" style={{
+    <div className="pausia-app-shell pausia-premium-shell" style={{
   display: 'flex',
   minHeight: '100vh',
-  background: '#f7faff',
 }}>
       <style>{`
         .campus-hover,
@@ -1484,17 +1483,16 @@ function cambiarTipo(t: Tipo) {
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-       <header className="pausia-app-header" style={{
-  borderBottom: '1px solid #f1f5f9',
+       <header className="pausia-app-header pausia-topbar" style={{
+  borderBottom: '1px solid rgba(219,231,251,0.78)',
   padding: '0 32px',
-  height: '52px',
+  minHeight: '64px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   position: 'sticky',
   top: 0,
   zIndex: 40,
-  background: '#ffffff',
 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em' }}>
@@ -1513,7 +1511,7 @@ function cambiarTipo(t: Tipo) {
         </header>
 
         {seccion === 'examenes' && (
-          <main style={{ flex: 1, padding: '28px 32px', maxWidth: '980px', width: '100%', margin: '0 auto' }}>
+          <main style={{ flex: 1, padding: '32px 32px', maxWidth: '1080px', width: '100%', margin: '0 auto' }}>
 
             {/* ── Page title (Stitch) ──────────────────────────────── */}
             <div style={{ marginBottom: 28 }}>

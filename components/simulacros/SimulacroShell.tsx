@@ -12,14 +12,14 @@ interface SimulacroShellProps {
 
 export default function SimulacroShell({ children, title, subtitle, actions }: SimulacroShellProps) {
   return (
-    <div className="flex min-h-screen text-slate-900 max-lg:block" style={{ background: '#f7faff' }}>
+    <div className="pausia-premium-shell flex min-h-screen text-slate-900 max-lg:block">
       <Sidebar />
 
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 flex items-center justify-between gap-4 px-8 max-md:flex-wrap max-md:px-4" style={{ height: 52, background: '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
+        <header className="pausia-topbar sticky top-0 z-40 flex items-center justify-between gap-4 px-8 max-md:flex-wrap max-md:px-4" style={{ minHeight: 64 }}>
           <div>
-            <h1 className="text-lg font-black tracking-tight" style={{ color: '#0f172a', letterSpacing: '-0.02em' }}>{title}</h1>
-            <p className="text-xs font-semibold" style={{ color: '#94a3b8', marginTop: 1 }}>{subtitle}</p>
+            <h1 className="text-xl font-black tracking-tight" style={{ color: '#0f172a', letterSpacing: '-0.03em' }}>{title}</h1>
+            <p className="text-xs font-bold" style={{ color: '#94a3b8', marginTop: 2 }}>{subtitle}</p>
           </div>
           {actions}
         </header>

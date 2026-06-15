@@ -111,10 +111,10 @@ export default function SimulacrosPage() {
     <SimulacroShell
       title="Simulacros"
       subtitle="Ponte a prueba en condiciones reales"
-      actions={<button onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }} className="flex items-center gap-2 rounded-2xl border border-[#dbe7fb] bg-white/90 px-4 py-2 text-sm font-black text-slate-700 shadow-[0_12px_28px_rgba(37,99,235,0.08)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"><Eye size={16} />Ver mis simulacros</button>}
+      actions={<button onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }} className="pausia-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"><Eye size={16} />Ver mis simulacros</button>}
     >
       <div className="mx-auto grid max-w-6xl gap-6">
-        <section style={{ borderRadius: 18, border: '1px solid rgba(219,231,251,0.80)', background: 'rgba(255,255,255,0.78)', padding: '20px 20px 18px', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
+        <section className="pausia-glass-card rounded-[22px] p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-black">Tus estadísticas</h2>
@@ -140,7 +140,7 @@ export default function SimulacrosPage() {
         {errorMessage && <div className="pau-info" style={{ borderColor: '#fecaca', background: 'rgba(254,242,242,0.9)', color: '#991b1b' }}>{errorMessage}</div>}
 
         {historyOpen && (
-          <section style={{ borderRadius: 18, border: '1px solid rgba(219,231,251,0.80)', background: 'rgba(255,255,255,0.78)', padding: 18, boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
+          <section className="pausia-glass-card rounded-[22px] p-[18px]">
             <h2 className="mb-4 text-lg font-black">Mis simulacros anteriores</h2>
             <div className="grid gap-2">
               {history.length === 0 && <p className="text-sm font-semibold text-slate-500">Todavía no tienes simulacros guardados.</p>}
@@ -212,7 +212,7 @@ export default function SimulacrosPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4 shadow-[0_10px_24px_rgba(37,99,235,0.06)]">
+    <div className="pausia-stitch-card rounded-2xl p-4">
       <p className="text-xs font-bold text-slate-400">{label}</p>
       <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
     </div>

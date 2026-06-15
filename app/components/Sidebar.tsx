@@ -95,29 +95,37 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
 
   return (
     <aside
-      className="max-lg:relative max-lg:h-auto max-lg:w-full"
+      className="pausia-sidebar max-lg:relative max-lg:h-auto max-lg:w-full"
       style={{
         position: 'sticky', top: 0,
         zIndex: 'var(--z-sticky)' as never,
         display: 'flex', flexDirection: 'column',
-        height: '100vh', width: 220, flexShrink: 0,
-        borderRight: '1px solid #f1f5f9',
-        background: '#ffffff',
+        height: '100vh', width: 248, flexShrink: 0,
+        borderRight: '1px solid rgba(219,231,251,0.82)',
+        background: 'rgba(255,255,255,0.76)',
+        backdropFilter: 'blur(22px) saturate(1.18)',
+        WebkitBackdropFilter: 'blur(22px) saturate(1.18)',
+        boxShadow: '10px 0 36px rgba(37,99,235,0.05)',
       }}
     >
       {/* ── Logo ──────────────────────────────────────────────────── */}
-      <div style={{ padding: '20px 16px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+      <div style={{ padding: '22px 16px 18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-            background: 'linear-gradient(135deg, #1a43cc 0%, #2563eb 55%, #3b8ef8 100%)',
+            width: 42, height: 42, borderRadius: 15, flexShrink: 0,
+            background: 'linear-gradient(135deg, #0f172a 0%, #1d4ed8 54%, #38bdf8 100%)',
             color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(37,99,235,0.24)',
+            boxShadow: '0 14px 32px rgba(37,99,235,0.24)',
           }}>
-            <GraduationCap size={18} strokeWidth={2.2} />
+            <GraduationCap size={22} strokeWidth={2.3} />
           </div>
-          <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-            Pausia
+          <span style={{ minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 17, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1 }}>
+              Pausia
+            </span>
+            <span style={{ display: 'block', fontSize: 10.5, fontWeight: 700, color: '#94a3b8', marginTop: 3 }}>
+              Academia IA · PAU Madrid
+            </span>
           </span>
           <span style={{
             marginLeft: 'auto',
@@ -132,35 +140,57 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
       </div>
 
       {/* ── Nav ────────────────────────────────────────────────────── */}
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px' }}>
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 10px' }}>
         {NAV_ITEMS.map(item => {
           const Icon = item.icon
           const active = currentItem === item.id
 
           const baseStyle: React.CSSProperties = {
             display: 'flex', width: '100%', alignItems: 'center', gap: 10,
-            padding: '9px 10px', borderRadius: 10,
-            border: 'none', textDecoration: 'none', cursor: 'pointer',
-            background: active ? '#eff6ff' : 'none', textAlign: 'left',
-            transition: 'background 150ms ease',
-            marginBottom: 2,
+            padding: '10px 10px', borderRadius: 14,
+            border: active ? '1px solid rgba(96,165,250,0.32)' : '1px solid transparent',
+            textDecoration: 'none', cursor: 'pointer',
+            background: active ? 'linear-gradient(135deg, rgba(239,246,255,0.96), rgba(255,255,255,0.9))' : 'transparent',
+            textAlign: 'left',
+            transition: 'background 150ms ease, border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease',
+            marginBottom: 6,
+            boxShadow: active ? '0 14px 30px rgba(37,99,235,0.08)' : 'none',
           }
 
           const iconEl = (
-            <Icon
-              size={16}
-              strokeWidth={active ? 2.4 : 2}
-              style={{ flexShrink: 0, color: active ? '#2563eb' : '#94a3b8' }}
-            />
+            <span style={{
+              width: 34, height: 34, borderRadius: 12, flexShrink: 0,
+              display: 'grid', placeItems: 'center',
+              background: active ? 'linear-gradient(135deg, #2563eb, #38bdf8)' : '#f8fbff',
+              border: active ? 'none' : '1px solid #e5edf9',
+              color: active ? '#ffffff' : '#8fa3bc',
+              boxShadow: active ? '0 12px 24px rgba(37,99,235,0.18)' : '0 8px 18px rgba(37,99,235,0.04)',
+            }}>
+              <Icon size={17} strokeWidth={active ? 2.4 : 2} />
+            </span>
           )
 
           const textEl = (
-            <span style={{
-              fontSize: 13, fontWeight: active ? 700 : 500,
-              color: active ? '#1e40af' : '#64748b',
-              letterSpacing: active ? '-0.01em' : '0',
-            }}>
-              {item.label}
+            <span style={{ minWidth: 0 }}>
+              <span style={{
+                display: 'block',
+                fontSize: 13, fontWeight: active ? 850 : 700,
+                color: active ? '#1e40af' : '#475569',
+                letterSpacing: active ? '-0.01em' : '0',
+                lineHeight: 1.1,
+              }}>
+                {item.label}
+              </span>
+              <span style={{
+                display: 'block',
+                marginTop: 3,
+                fontSize: 10.5,
+                fontWeight: 650,
+                color: active ? '#60a5fa' : '#9aa9bd',
+                lineHeight: 1.1,
+              }}>
+                {item.desc}
+              </span>
             </span>
           )
 
@@ -208,7 +238,7 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
       </nav>
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #f1f5f9', padding: '12px 12px 16px' }}>
+      <div style={{ borderTop: '1px solid rgba(219,231,251,0.78)', padding: '14px 12px 16px', background: 'rgba(248,251,255,0.58)' }}>
         {/* CCAA */}
         <label style={{ display: 'block', marginBottom: 10 }}>
           <span style={{
@@ -222,8 +252,8 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
             onChange={e => setCCAA(e.target.value as CCAA)}
             aria-label="Comunidad autónoma"
             style={{
-              width: '100%', borderRadius: 8, border: '1px solid #e2e8f0',
-              background: '#fff', padding: '6px 26px 6px 9px', fontSize: 12, fontWeight: 600,
+              width: '100%', borderRadius: 10, border: '1px solid #dbe7fb',
+              background: 'rgba(255,255,255,0.88)', padding: '8px 28px 8px 10px', fontSize: 12, fontWeight: 700,
               color: '#374151', outline: 'none', cursor: 'pointer',
               transition: 'border-color 150ms ease',
               appearance: 'none',
@@ -305,7 +335,9 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
 
       <style>{`
         .pau-nav-btn:hover:not([aria-current="page"]) {
-          background: #f8fafc !important;
+          background: rgba(248,250,252,0.92) !important;
+          border-color: rgba(219,231,251,0.8) !important;
+          transform: translateX(2px);
         }
         .pau-nav-btn:active { transform: scale(0.98); }
         .pau-footer-link:hover {
@@ -314,6 +346,13 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
           background: #eff6ff !important;
         }
         select:focus { border-color: #93c5fd !important; box-shadow: 0 0 0 3px rgba(147,197,253,0.2) !important; }
+        @media (max-width: 1024px) {
+          .pausia-sidebar {
+            width: 100% !important;
+            height: auto !important;
+            position: relative !important;
+          }
+        }
       `}</style>
     </aside>
   )

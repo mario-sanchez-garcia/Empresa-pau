@@ -265,6 +265,65 @@ button:active:not(:disabled),
   border: 1px solid rgba(255,255,255,0.7);
 }
 
+/* ─── Stitch-inspired chrome ────────────────────────────────────── */
+.pausia-premium-shell {
+  background:
+    radial-gradient(circle at 13% 10%, rgba(219,234,254,0.62), transparent 30%),
+    radial-gradient(circle at 86% 6%, rgba(237,233,254,0.54), transparent 28%),
+    radial-gradient(circle at 82% 84%, rgba(186,230,253,0.42), transparent 32%),
+    linear-gradient(135deg, #fbfdff 0%, #f8fbff 46%, #f1f6ff 100%);
+}
+
+.pausia-glass-card {
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: blur(18px) saturate(1.18);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+  border: 1px solid rgba(219,231,251,0.82);
+  box-shadow: 0 18px 48px rgba(37,99,235,0.08), 0 2px 8px rgba(37,99,235,0.05);
+}
+
+.pausia-stitch-card {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(219,231,251,0.82);
+  box-shadow: 0 14px 38px rgba(37,99,235,0.07), 0 1px 4px rgba(15,23,42,0.03);
+}
+
+.pausia-topbar {
+  background: rgba(255,255,255,0.76);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  border-bottom: 1px solid rgba(219,231,251,0.78);
+  box-shadow: 0 8px 28px rgba(37,99,235,0.05);
+}
+
+.pausia-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(219,231,251,0.86);
+  background: rgba(255,255,255,0.82);
+  color: var(--pau-muted);
+  font-weight: 850;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.05);
+}
+
+.pausia-page-container {
+  width: min(100%, 1160px);
+  margin-inline: auto;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pausia-stitch-card,
+  .pausia-glass-card {
+    transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
+  }
+  .pausia-stitch-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 52px rgba(37,99,235,0.1), 0 2px 8px rgba(15,23,42,0.04);
+  }
+}
+
 /* ─── Primary button (Emil: press feedback + specific transitions) ── */
 .campus-primary {
   display: inline-flex;
@@ -367,9 +426,12 @@ button:active:not(:disabled),
 /* ─── Section card ───────────────────────────────────────────────── */
 .pau-card-section {
   border-radius: var(--r-xl);
-  background: #fff;
+  background: rgba(255,255,255,0.84);
+  border: 1px solid rgba(219,231,251,0.82);
   padding: 20px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 14px 36px rgba(37,99,235,0.07), 0 1px 4px rgba(15,23,42,0.03);
+  backdrop-filter: blur(14px) saturate(1.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
 }
 
 /* ─── Metric card — used in Camino for stats ─────────────────────── */

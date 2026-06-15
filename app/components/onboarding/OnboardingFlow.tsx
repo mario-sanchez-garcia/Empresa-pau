@@ -205,7 +205,7 @@ export default function OnboardingFlow() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="pau-bg-atmosphere flex min-h-screen items-start justify-center px-4 py-12">
+    <div className="pausia-premium-shell flex min-h-screen items-start justify-center px-4 py-12">
       <div className="w-full max-w-lg">
 
         {/* Logo mark */}
@@ -512,7 +512,7 @@ export default function OnboardingFlow() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ borderRadius: 20, border: '1px solid var(--pau-border)', background: '#fff', padding: 24, boxShadow: 'var(--shadow-sm)' }}>
+    <div className="pausia-glass-card" style={{ borderRadius: 22, padding: 24 }}>
       {children}
     </div>
   )

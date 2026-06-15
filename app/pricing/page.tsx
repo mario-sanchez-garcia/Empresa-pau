@@ -73,7 +73,7 @@ export default function PricingPage() {
 
   return (
     <main
-      className="pau-bg-atmosphere"
+      className="pausia-premium-shell"
       style={{
         minHeight: '100vh',
         color: C.ink,
@@ -224,7 +224,9 @@ export default function PricingPage() {
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
-                background: plan.recommended ? 'rgba(239,246,255,0.96)' : '#fff',
+                background: plan.recommended ? 'rgba(239,246,255,0.92)' : 'rgba(255,255,255,0.86)',
+                backdropFilter: 'blur(16px) saturate(1.12)',
+                WebkitBackdropFilter: 'blur(16px) saturate(1.12)',
                 border: plan.recommended ? '1.5px solid rgba(96,165,250,0.35)' : 'none',
                 borderRadius: 14,
                 padding: 26,

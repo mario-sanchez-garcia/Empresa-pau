@@ -28,21 +28,19 @@ export default function CaminoPauClient() {
 
   return (
     <div
-      className="max-lg:block"
-      style={{ display: 'flex', minHeight: '100vh', color: 'var(--pau-ink)', background: '#f7faff' }}
+      className="pausia-premium-shell max-lg:block"
+      style={{ display: 'flex', minHeight: '100vh', color: 'var(--pau-ink)' }}
     >
       <Sidebar activeItem="camino" />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* ── Header ────────────────────────────────────────────────── */}
         <header
-          className="max-md:px-4"
+          className="pausia-topbar max-md:px-4"
           style={{
             position: 'sticky', top: 0, zIndex: 40,
-            borderBottom: '1px solid #f1f5f9',
-            background: '#ffffff',
             padding: '0 28px',
-            height: 52,
+            minHeight: 64,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}
         >
@@ -70,7 +68,7 @@ export default function CaminoPauClient() {
         )}
 
         {/* ── Main ──────────────────────────────────────────────────── */}
-        <main style={{ maxWidth: 1300, margin: '0 auto', padding: '20px 20px 48px' }} className="max-md:px-4">
+        <main className="pausia-page-container max-md:px-4" style={{ padding: '24px 20px 56px' }}>
 
           {/* ── Mission + Metrics (2-col on xl like Stitch) ────────── */}
           <div style={{ display: 'grid', gap: 14, marginBottom: 14 }} className="xl:grid-cols-[1fr_256px] pau-reveal">
@@ -368,11 +366,7 @@ function MetricCard({ icon, label, value, unit, tone, sublabel }: MetricCardProp
 /* ── WhyCard ────────────────────────────────────────────────────── */
 function WhyCard({ title, text, icon }: { title: string; text: string; icon: string }) {
   return (
-    <article style={{
-      borderRadius: 'var(--r-xl)', padding: '18px 16px',
-      background: '#fff', boxShadow: 'var(--shadow-xs)',
-      transition: 'transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out)',
-    }}>
+    <article className="pausia-stitch-card" style={{ borderRadius: 'var(--r-xl)', padding: '18px 16px' }}>
       <div style={{
         width: 28, height: 28, borderRadius: 7, marginBottom: 12,
         display: 'flex', alignItems: 'center', justifyContent: 'center',

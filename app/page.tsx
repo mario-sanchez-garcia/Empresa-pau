@@ -1659,11 +1659,20 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exams-filter-bar {
+          position: relative;
+          z-index: 90;
           display: flex;
           align-items: stretch;
           gap: 0;
           width: 100%;
           overflow: visible;
+        }
+
+        .exams-filter-card {
+          position: relative;
+          z-index: 90;
+          overflow: visible !important;
+          margin-bottom: 34px !important;
         }
 
         .exams-filter-card > div:not(:first-child):not(.exams-filter-bar) {
@@ -1680,6 +1689,7 @@ function cambiarTipo(t: Tipo) {
 
         .exam-filter-dropdown {
           position: relative;
+          z-index: 91;
           min-width: 150px;
           flex: 0 1 auto;
         }
@@ -1731,7 +1741,7 @@ function cambiarTipo(t: Tipo) {
           position: absolute;
           left: 0;
           top: calc(100% + 8px);
-          z-index: 80;
+          z-index: 120;
           min-width: 220px;
           max-height: 310px;
           overflow-y: auto;
@@ -1801,6 +1811,8 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exams-workspace {
+          position: relative;
+          z-index: 1;
           display: grid;
           grid-template-columns: minmax(0, 1fr) 324px;
           gap: 22px;

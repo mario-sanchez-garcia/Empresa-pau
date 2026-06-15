@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, PlayCircle } from 'lucide-react'
+import { Eye, EyeOff, PlayCircle } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { DIFFICULTIES, SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
@@ -108,114 +108,294 @@ export default function SimulacrosPage() {
     }
   }
 
+  const cfg = SUBJECTS[subject]
+
   return (
     <SimulacroShell
       title="Simulacros"
-      subtitle="Ponte a prueba en condiciones reales"
-      actions={<button onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }} className="pausia-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"><Eye size={16} />Ver mis simulacros</button>}
+      subtitle="Ponte a prueba en condiciones reales de examen"
+      actions={
+        <button
+          onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}
+          className="pausia-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+        >
+          {historyOpen ? <EyeOff size={15} /> : <Eye size={15} />}
+          {historyOpen ? 'Ocultar historial' : 'Mis simulacros'}
+        </button>
+      }
     >
-      <div className="mx-auto grid max-w-6xl gap-6">
-        <section className="pausia-glass-card rounded-[22px] p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-black">Tus estadísticas</h2>
-              <p className="text-sm font-semibold text-slate-500">Solo cuentan simulacros completados.</p>
-            </div>
-            {stats.lastCompleted && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Último: {SUBJECTS[stats.lastCompleted.asignatura]?.label ?? stats.lastCompleted.asignatura} · {formatScore(stats.lastCompleted.nota_final)}/10</span>}
-          </div>
+      <div className="mx-auto grid max-w-6xl gap-7">
+
+        {/* Stats */}
+        <section className="pau-reveal">
+          <p className="mb-3 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>Tus estadísticas</p>
           {stats.completedCount === 0 ? (
-            <div className="pau-empty">
-              Todavía no hay estadísticas porque no has completado ningún simulacro. Cuando entregues el primero, Pausia calculará tu media, mejor nota y tiempo medio.
+            <div className="pau-empty text-sm">
+              Completa tu primer simulacro para ver tu media, mejor nota y tiempo medio aquí.
             </div>
           ) : (
-            <div className="grid grid-cols-5 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-1">
+            <div className="pau-stagger grid grid-cols-5 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
               <StatCard label="Completados" value={String(stats.completedCount)} />
               <StatCard label="Media" value={`${formatScore(stats.averageScore)}/10`} />
-              <StatCard label="Mejor nota" value={`${formatScore(stats.bestScore)}/10`} />
+              <StatCard label="Mejor nota" value={`${formatScore(stats.bestScore)}/10`} accent />
               <StatCard label="Tiempo medio" value={`${stats.averageTime} min`} />
-              <StatCard label="Último" value={stats.lastCompleted ? formatDate(stats.lastCompleted.updated_at ?? stats.lastCompleted.created_at) : '-'} />
+              <StatCard
+                label="Último simulacro"
+                value={stats.lastCompleted ? formatDate(stats.lastCompleted.updated_at ?? stats.lastCompleted.created_at) : '-'}
+              />
+            </div>
+          )}
+          {stats.lastCompleted && (
+            <div className="mt-3 flex items-center gap-2">
+              <span
+                className="rounded-full px-3 py-1 text-xs font-black"
+                style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
+              >
+                Último: {SUBJECTS[stats.lastCompleted.asignatura]?.label ?? stats.lastCompleted.asignatura} · {formatScore(stats.lastCompleted.nota_final)}/10
+              </span>
             </div>
           )}
         </section>
 
-        {errorMessage && <div className="pau-info" style={{ borderColor: '#fecaca', background: 'rgba(254,242,242,0.9)', color: '#991b1b' }}>{errorMessage}</div>}
-
+        {/* History panel */}
         {historyOpen && (
-          <section className="pausia-glass-card rounded-[22px] p-[18px]">
-            <h2 className="mb-4 text-lg font-black">Mis simulacros anteriores</h2>
-            <div className="grid gap-2">
-              {history.length === 0 && <p className="text-sm font-semibold text-slate-500">Todavía no tienes simulacros guardados.</p>}
-              {history.map(item => (
-                <a key={item.id} href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`} className="flex items-center justify-between rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-3 no-underline transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50">
-                  <div>
-                    <strong className="block text-sm text-slate-900">{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad}</strong>
-                    <small className="text-slate-500">{item.id.slice(0, 8)} · {item.estado === 'completado' ? `Nota ${item.nota_final ?? '-'}/10` : 'En progreso'}</small>
-                  </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600">{item.opcion}</span>
-                </a>
-              ))}
+          <section className="pau-card-section pau-reveal grid gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-black" style={{ color: '#0f172a' }}>Mis simulacros anteriores</h2>
+              <span
+                className="rounded-full px-3 py-1 text-xs font-black"
+                style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
+              >
+                {history.length} total
+              </span>
             </div>
+            {history.length === 0 ? (
+              <p className="text-sm font-semibold" style={{ color: '#94a3b8' }}>Todavía no tienes simulacros guardados.</p>
+            ) : (
+              <div className="pau-stagger grid gap-2" style={{ maxHeight: 320, overflowY: 'auto' }}>
+                {history.map(item => (
+                  <a
+                    key={item.id}
+                    href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
+                    className="flex items-center justify-between rounded-xl border p-3 no-underline transition hover:-translate-y-0.5 hover:shadow-sm"
+                    style={{
+                      borderColor: '#dbe7fb',
+                      background: '#f8fbff',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'
+                      ;(e.currentTarget as HTMLElement).style.background = '#eff6ff'
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#dbe7fb'
+                      ;(e.currentTarget as HTMLElement).style.background = '#f8fbff'
+                    }}
+                  >
+                    <div className="min-w-0">
+                      <strong className="block truncate text-sm" style={{ color: '#0f172a' }}>
+                        {SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad}
+                      </strong>
+                      <small style={{ color: '#94a3b8' }}>
+                        {item.id.slice(0, 8)} · {item.estado === 'completado' ? `Nota ${item.nota_final ?? '-'}/10` : 'En progreso'}
+                      </small>
+                    </div>
+                    <div className="ml-3 flex shrink-0 items-center gap-2">
+                      {item.estado === 'completado' ? (
+                        <span className="rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#f0fdf4', color: '#15803d' }}>✓ Completado</span>
+                      ) : (
+                        <span className="rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#fffbeb', color: '#b45309' }}>En progreso</span>
+                      )}
+                      <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f1f5f9', color: '#475569' }}>{item.opcion}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
-        <section className="pau-card-section">
-          <p className="mb-3 text-xs font-bold text-slate-400">Paso 1 · Asignatura</p>
-          <div className="grid grid-cols-5 gap-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
+        {/* Error */}
+        {errorMessage && (
+          <div className="pau-error pau-reveal" role="alert">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Step 1: Subject */}
+        <section className="pau-reveal pau-reveal-delay-1">
+          <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+            Paso 1 · Asignatura
+          </p>
+          <div className="pau-stagger grid grid-cols-4 gap-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
-              const cfg = SUBJECTS[key]
-              const available = cfg.available
-              const Icon = cfg.icon
+              const s = SUBJECTS[key]
+              const available = s.available
+              const Icon = s.icon
+              const isActive = subject === key
               return (
-                <button key={key} disabled={!available} onClick={() => available && setSubject(key)} className={`relative overflow-hidden rounded-3xl border p-5 text-left transition ${available ? 'hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]' : 'cursor-not-allowed opacity-70'}`} style={{ borderColor: subject === key ? cfg.color : '#dbe7fb', background: subject === key ? `linear-gradient(145deg,#ffffff,${cfg.light})` : '#fff', boxShadow: subject === key ? `0 0 0 2px ${cfg.color}22, 0 18px 44px ${cfg.color}1f` : undefined }}>
-                  <Icon size={92} className="pointer-events-none absolute -bottom-5 -right-4 opacity-10" style={{ color: cfg.color }} />
-                  <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm" style={{ background: cfg.light, color: cfg.color }}><Icon size={24} /></div>
-                  <div className="relative flex items-center gap-2">
-                    <h3 className="font-black">{cfg.label}</h3>
-                    {!available && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-emerald-700">Próximamente</span>}
+                <button
+                  key={key}
+                  disabled={!available}
+                  onClick={() => available && setSubject(key)}
+                  className="pau-subject-card relative overflow-hidden rounded-2xl border p-5 text-left"
+                  style={{
+                    borderColor: isActive ? s.color : 'rgba(219,231,251,0.82)',
+                    background: isActive
+                      ? `linear-gradient(145deg, #ffffff 0%, ${s.light} 100%)`
+                      : 'rgba(255,255,255,0.82)',
+                    boxShadow: isActive
+                      ? `0 0 0 2.5px ${s.color}28, 0 14px 36px ${s.color}18`
+                      : '0 2px 8px rgba(37,99,235,0.05)',
+                    cursor: available ? 'pointer' : 'not-allowed',
+                    opacity: available ? 1 : 0.6,
+                  }}
+                >
+                  {/* Watermark icon */}
+                  <Icon
+                    size={96}
+                    className="pointer-events-none absolute -bottom-5 -right-4"
+                    style={{ color: s.color, opacity: isActive ? 0.13 : 0.07 }}
+                  />
+                  {/* Icon badge */}
+                  <div
+                    className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl"
+                    style={{
+                      background: isActive ? s.color : s.light,
+                      color: isActive ? '#fff' : s.color,
+                      boxShadow: isActive ? `0 6px 16px ${s.color}33` : 'none',
+                      transition: 'background 220ms, color 220ms, box-shadow 220ms',
+                    }}
+                  >
+                    <Icon size={22} />
                   </div>
-                  <p className="relative text-sm font-semibold text-slate-500">{available ? (key === 'lengua' ? 'Examen oficial completo' : 'Simulacro oficial mezclado') : 'Estamos cargando ejercicios oficiales'}</p>
+                  <h3 className="relative mb-1 text-sm font-black" style={{ color: '#0f172a' }}>{s.label}</h3>
+                  <p className="relative text-xs font-semibold" style={{ color: '#94a3b8' }}>
+                    {available
+                      ? key === 'lengua'
+                        ? 'Examen oficial completo'
+                        : 'Simulacro mezclado oficial'
+                      : 'Cargando ejercicios oficiales'}
+                  </p>
+                  {!available && (
+                    <span
+                      className="absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
+                      style={{ background: '#f0fdf4', color: '#15803d' }}
+                    >
+                      Pronto
+                    </span>
+                  )}
                 </button>
               )
             })}
           </div>
         </section>
 
-        <section className="pau-card-section">
-          <p className="mb-3 text-xs font-bold text-slate-400">Paso 2 · Dificultad</p>
-          <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-            {DIFFICULTIES.map(item => (
-              <button key={item.id} onClick={() => setDifficulty(item.id)} className={`rounded-2xl border p-5 text-left transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 ${difficulty === item.id ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-[#dbe7fb] bg-white'}`}>
-                <h3 className="font-black">{item.label}</h3>
-                <p className="mt-1 text-sm font-semibold text-slate-500">{item.description}</p>
-              </button>
-            ))}
+        {/* Step 2: Difficulty */}
+        <section className="pau-reveal pau-reveal-delay-2">
+          <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+            Paso 2 · Dificultad
+          </p>
+          <div className="pau-stagger grid grid-cols-3 gap-4 max-md:grid-cols-1">
+            {DIFFICULTIES.map((item, idx) => {
+              const isActive = difficulty === item.id
+              const bars = idx + 1
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setDifficulty(item.id)}
+                  className="rounded-2xl border p-5 text-left transition hover:-translate-y-0.5"
+                  style={{
+                    borderColor: isActive ? '#2563eb' : 'rgba(219,231,251,0.82)',
+                    background: isActive
+                      ? 'linear-gradient(145deg, #eff6ff, #dbeafe)'
+                      : 'rgba(255,255,255,0.82)',
+                    boxShadow: isActive
+                      ? '0 0 0 2.5px rgba(37,99,235,0.18), 0 12px 28px rgba(37,99,235,0.1)'
+                      : '0 2px 8px rgba(37,99,235,0.04)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div className="mb-3 flex items-center gap-1.5">
+                    {[1, 2, 3].map(n => (
+                      <div
+                        key={n}
+                        className="h-1.5 rounded-full transition"
+                        style={{
+                          width: 28,
+                          background: n <= bars
+                            ? isActive ? '#2563eb' : '#94a3b8'
+                            : '#e2e8f0',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <h3 className="font-black" style={{ color: '#0f172a' }}>{item.label}</h3>
+                  <p className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>{item.description}</p>
+                </button>
+              )
+            })}
           </div>
         </section>
 
+        {/* Step 3: Option */}
         {subject !== 'lengua' && (
-          <section className="pau-card-section">
-            <p className="mb-3 text-xs font-bold text-slate-400">Paso 3 · Opción</p>
+          <section className="pau-reveal pau-reveal-delay-3">
+            <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+              Paso 3 · Opción de examen
+            </p>
             <div className="flex gap-3">
               {(['A', 'B'] as SimulacroOption[]).map(item => (
-                <button key={item} onClick={() => setOption(item)} className={`h-12 w-14 rounded-2xl text-lg font-black transition hover:-translate-y-0.5 ${option === item ? 'bg-blue-600 text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)]' : 'border border-[#dbe7fb] bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700'}`}>{item}</button>
+                <button
+                  key={item}
+                  onClick={() => setOption(item)}
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-black transition"
+                  style={{
+                    background: option === item ? '#2563eb' : 'rgba(255,255,255,0.82)',
+                    color: option === item ? '#fff' : '#334155',
+                    border: `1.5px solid ${option === item ? '#2563eb' : 'rgba(219,231,251,0.82)'}`,
+                    boxShadow: option === item
+                      ? '0 0 0 2.5px rgba(37,99,235,0.18), 0 10px 28px rgba(37,99,235,0.22)'
+                      : '0 2px 8px rgba(37,99,235,0.04)',
+                    transform: option === item ? 'translateY(-2px)' : 'none',
+                    transition: 'all 200ms var(--ease-out)',
+                  }}
+                >
+                  {item}
+                </button>
               ))}
             </div>
           </section>
         )}
 
-        <button onClick={createSimulacro} disabled={loading || !userId || !SUBJECTS[subject].available} className="campus-primary" style={{ width: '100%', borderRadius: 14, padding: '15px 24px', fontSize: 16, gap: 10 }}>
-          {loading ? <PausiaLoadingDot /> : <PlayCircle size={22} />}{loading ? 'Generando...' : !SUBJECTS[subject].available ? `Simulacros de ${SUBJECTS[subject].short} próximamente` : userId ? 'Generar simulacro' : 'Cargando sesión...'}
+        {/* Generate CTA */}
+        <button
+          onClick={createSimulacro}
+          disabled={loading || !userId || !SUBJECTS[subject].available}
+          className="campus-primary"
+          style={{ width: '100%', borderRadius: 16, padding: '16px 24px', fontSize: 16, gap: 10 }}
+        >
+          {loading ? <PausiaLoadingDot /> : <PlayCircle size={20} />}
+          {loading
+            ? 'Generando simulacro...'
+            : !SUBJECTS[subject].available
+            ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
+            : userId
+            ? `Generar simulacro de ${cfg.short}`
+            : 'Cargando sesión...'}
         </button>
       </div>
     </SimulacroShell>
   )
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="pausia-stitch-card rounded-2xl p-4">
-      <p className="text-xs font-bold text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
+    <div
+      className="pausia-stitch-card rounded-2xl p-4"
+      style={accent ? { background: 'linear-gradient(145deg, #eff6ff, #dbeafe)', borderColor: '#bfdbfe' } : undefined}
+    >
+      <p className="text-[11px] font-black uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>
+      <p className="mt-2 text-2xl font-black" style={{ color: '#0f172a' }}>{value}</p>
     </div>
   )
 }

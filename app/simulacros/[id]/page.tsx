@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { AlertTriangle, Camera, CheckCircle2, Clock, Send, Trash2 } from 'lucide-react'
+import { AlertTriangle, Camera, CheckCircle2, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -12,6 +12,8 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
 const TOTAL_SECONDS = 90 * 60
+const RING_RADIUS = 48
+const RING_CIRC = 2 * Math.PI * RING_RADIUS
 
 export default function SimulacroActivoPage() {
   const params = useParams<{ id: string }>()
@@ -96,8 +98,11 @@ export default function SimulacroActivoPage() {
   const answeredCount = useMemo(() => Object.values(answers).filter(answer => answer?.text?.trim() || answer?.image).length, [answers])
   const elapsedMinutes = Math.ceil((TOTAL_SECONDS - secondsLeft) / 60)
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
-  const percentLeft = secondsLeft / TOTAL_SECONDS * 100
-  const timerColor = secondsLeft > 45 * 60 ? 'bg-blue-500' : secondsLeft > 15 * 60 ? 'bg-sky-500' : 'bg-indigo-500'
+  const percentLeft = secondsLeft / TOTAL_SECONDS
+  const isUrgent = secondsLeft <= 15 * 60
+  const isWarning = secondsLeft <= 45 * 60 && secondsLeft > 15 * 60
+  const timerColor = isUrgent ? '#ef4444' : isWarning ? '#f59e0b' : '#2563eb'
+  const ringOffset = RING_CIRC * (1 - percentLeft)
 
   async function autosave(nextAnswers = answers) {
     if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
@@ -209,56 +214,189 @@ export default function SimulacroActivoPage() {
   }
 
   if (!record) {
-    return <SimulacroShell title="Simulacro" subtitle="Cargando examen..."><div className="pau-card-section"><div className="pau-skeleton" style={{ height: 24, width: '50%', borderRadius: 8, marginBottom: 12 }} /><div className="pau-skeleton" style={{ height: 16, width: '30%', borderRadius: 6 }} /></div></SimulacroShell>
+    return (
+      <SimulacroShell title="Simulacro" subtitle="Cargando examen...">
+        <div className="pau-card-section mx-auto max-w-6xl">
+          <div className="pau-skeleton" style={{ height: 24, width: '50%', borderRadius: 8, marginBottom: 12 }} />
+          <div className="pau-skeleton" style={{ height: 16, width: '30%', borderRadius: 6 }} />
+        </div>
+      </SimulacroShell>
+    )
   }
 
   return (
     <SimulacroShell
       title="Examen activo"
-      subtitle={`90 minutos, ${record.bloques.length} bloques y corrección completa`}
-      actions={<button onClick={() => { setSubmitError(''); setConfirmOpen(true) }} disabled={submitting} className="campus-primary" style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12 }}><Send size={15} />Entregar examen</button>}
+      subtitle={`${cfg.label} · ${record.dificultad_real ?? record.dificultad} · ${record.bloques.length} bloques`}
+      actions={
+        <button
+          onClick={() => { setSubmitError(''); setConfirmOpen(true) }}
+          disabled={submitting}
+          className="campus-primary"
+          style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12 }}
+        >
+          <Send size={14} />Entregar examen
+        </button>
+      }
     >
       <div className="mx-auto grid max-w-6xl gap-5">
-        <section className="pau-card-section">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
+
+        {/* Exam header: metadata + ring timer */}
+        <section className="pau-card-section pau-reveal">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Left: chips */}
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Badge color={cfg.color}>{cfg.label}</Badge>
               <Badge color="#475569">{record.id.slice(0, 8)}</Badge>
               <Badge color="#2563eb">{record.dificultad_real ?? record.dificultad}</Badge>
               {record.asignatura !== 'lengua' && <Badge color={cfg.color}>Opción {record.opcion}</Badge>}
+              <SaveBadge status={saveStatus} />
             </div>
-            <div className="flex items-center gap-2 text-2xl font-black" style={{ color: secondsLeft < 15 * 60 ? '#1d4ed8' : '#0f172a' }}><Clock size={24} />{formatTime(secondsLeft)}</div>
+
+            {/* Right: circular ring timer */}
+            <div
+              className={`relative flex-shrink-0 ${isUrgent ? 'sim-ring-urgent' : ''}`}
+              aria-label={`Tiempo restante: ${formatTime(secondsLeft)}`}
+            >
+              <svg width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
+                {/* Background track */}
+                <circle
+                  cx="56" cy="56" r={RING_RADIUS}
+                  fill="none"
+                  stroke="#e2e8f0"
+                  strokeWidth="7"
+                />
+                {/* Draining arc */}
+                <circle
+                  cx="56" cy="56" r={RING_RADIUS}
+                  fill="none"
+                  stroke={timerColor}
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  strokeDasharray={RING_CIRC}
+                  strokeDashoffset={ringOffset}
+                  style={{
+                    transform: 'rotate(-90deg)',
+                    transformOrigin: '50% 50%',
+                    transition: 'stroke-dashoffset 1s linear, stroke 600ms ease',
+                  }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-black leading-none" style={{ color: timerColor, letterSpacing: '-0.03em' }}>
+                  {formatTime(secondsLeft)}
+                </span>
+                <span className="mt-0.5 text-[10px] font-bold" style={{ color: '#94a3b8' }}>
+                  {isUrgent ? '¡Rápido!' : isWarning ? 'Atención' : 'restantes'}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="mb-3 flex justify-end"><SaveBadge status={saveStatus} /></div>
-          <div className="pau-progress-bar"><div className={`pau-progress-fill ${timerColor}`} style={{ transform: `scaleX(${percentLeft / 100})` }} /></div>
+
+          {/* Timer progress bar (thin, below content) */}
+          <div className="mt-4 pau-progress-bar">
+            <div
+              className="pau-progress-fill"
+              style={{
+                transform: `scaleX(${percentLeft})`,
+                background: `linear-gradient(90deg, ${timerColor}, ${timerColor}cc)`,
+                transition: 'transform 1s linear, background 600ms ease',
+              }}
+            />
+          </div>
+
+          {/* Block navigation tabs */}
           <div className="mt-4 flex flex-wrap gap-2">
             {record.bloques.map((block, index) => {
-              const ok = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)
-              return <button key={block.id} onClick={() => void changeActive(index)} className={`rounded-full px-4 py-2 text-sm font-black transition hover:-translate-y-0.5 ${active === index ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.2)]' : ok ? 'bg-sky-50 text-sky-700' : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-700'}`}>{index + 1}</button>
+              const answered = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)
+              const isActive = active === index
+              return (
+                <button
+                  key={block.id}
+                  onClick={() => void changeActive(index)}
+                  className="relative flex h-10 min-w-[40px] items-center justify-center rounded-xl px-3 text-sm font-black transition"
+                  style={{
+                    background: isActive
+                      ? cfg.color
+                      : answered
+                      ? `${cfg.color}14`
+                      : '#f1f5f9',
+                    color: isActive
+                      ? '#fff'
+                      : answered
+                      ? cfg.color
+                      : '#94a3b8',
+                    border: `1.5px solid ${isActive ? cfg.color : answered ? `${cfg.color}33` : '#e2e8f0'}`,
+                    boxShadow: isActive ? `0 6px 18px ${cfg.color}30` : 'none',
+                    transform: isActive ? 'translateY(-1px)' : 'none',
+                    transition: 'all 180ms var(--ease-out)',
+                  }}
+                >
+                  {index + 1}
+                  {answered && !isActive && (
+                    <span
+                      className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full"
+                      style={{ background: cfg.color, border: '1.5px solid #fff' }}
+                    />
+                  )}
+                </button>
+              )
             })}
           </div>
         </section>
 
+        {/* Block panels */}
         {record.bloques.map((block, index) => (
-          <section key={block.id} className={active === index ? 'grid gap-4' : 'hidden'}>
+          <section key={block.id} className={active === index ? 'grid gap-4 pau-reveal' : 'hidden'}>
+
+            {/* Statement panel */}
             <div className="pau-card-section">
               <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className={`h-3 w-3 rounded-full ${answers[block.id]?.text?.trim() || answers[block.id]?.image ? 'bg-blue-500' : 'bg-slate-300'}`} />
-                    <h2 className="text-xl font-black">Bloque {index + 1} · {block.tema}</h2>
+                  <div className="mb-2 flex items-center gap-2.5">
+                    <span
+                      className="h-3 w-3 rounded-full"
+                      style={{
+                        background: answers[block.id]?.text?.trim() || answers[block.id]?.image
+                          ? cfg.color
+                          : '#e2e8f0',
+                        boxShadow: answers[block.id]?.text?.trim() || answers[block.id]?.image
+                          ? `0 0 0 3px ${cfg.color}20`
+                          : 'none',
+                        transition: 'background 250ms, box-shadow 250ms',
+                      }}
+                    />
+                    <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
+                      Bloque {index + 1} · {block.tema}
+                    </h2>
                   </div>
-                  <div className="flex flex-wrap gap-2 text-xs font-black text-slate-500">
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">Año {block.year}</span>
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{block.convocatoria}</span>
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{block.puntuacion} pts</span>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { text: `Año ${block.year}` },
+                      { text: block.convocatoria },
+                      { text: `${block.puntuacion} pts` },
+                    ].map(chip => (
+                      <span
+                        key={chip.text}
+                        className="rounded-full px-3 py-1 text-xs font-black"
+                        style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
+                      >
+                        {chip.text}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
-              <div className="grid gap-3" style={{ borderRadius: 12, border: '1px solid var(--pau-border)', background: '#f8fbff', padding: 14 }}>
+
+              <div className="grid gap-3" style={{ borderRadius: 12, border: '1px solid #dde8f8', background: '#f8fbff', padding: 14 }}>
                 {(record.asignatura === 'lengua' || record.asignatura === 'ingles') && block.textoFuente && (
                   <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
-                    <div className="mb-3 text-[11px] font-black" style={{ color: cfg.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{record.asignatura === 'ingles' ? 'Texto oficial' : 'Texto fuente oficial'}</div>
+                    <div
+                      className="mb-3 text-[11px] font-black uppercase tracking-widest"
+                      style={{ color: cfg.color }}
+                    >
+                      {record.asignatura === 'ingles' ? 'Texto oficial' : 'Texto fuente oficial'}
+                    </div>
                     <ExamStatement
                       text={block.textoFuente}
                       storageKey={`simulacro:${record.id}:bloque:${block.id}:fuente`}
@@ -269,7 +407,12 @@ export default function SimulacroActivoPage() {
                   </div>
                 )}
                 <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
-                  <div className="mb-3 text-[11px] font-black" style={{ color: cfg.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Enunciado oficial</div>
+                  <div
+                    className="mb-3 text-[11px] font-black uppercase tracking-widest"
+                    style={{ color: cfg.color }}
+                  >
+                    Enunciado oficial
+                  </div>
                   <ExamStatement
                     text={block.enunciado}
                     storageKey={`simulacro:${record.id}:bloque:${block.id}:enunciado`}
@@ -280,7 +423,12 @@ export default function SimulacroActivoPage() {
                 </div>
                 {record.asignatura !== 'lengua' && record.asignatura !== 'ingles' && block.textoFuente && (
                   <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
-                    <div className="mb-3 text-[11px] font-black" style={{ color: cfg.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Texto fuente oficial</div>
+                    <div
+                      className="mb-3 text-[11px] font-black uppercase tracking-widest"
+                      style={{ color: cfg.color }}
+                    >
+                      Texto fuente oficial
+                    </div>
                     <ExamStatement
                       text={block.textoFuente}
                       storageKey={`simulacro:${record.id}:bloque:${block.id}:fuente`}
@@ -292,43 +440,171 @@ export default function SimulacroActivoPage() {
               </div>
             </div>
 
+            {/* Answer panel */}
             <div className="pau-card-section">
-              <div className="mb-4 flex gap-2">
-                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'text' }))} className={`rounded-xl px-4 py-2 text-sm font-black transition ${mode[block.id] !== 'image' ? 'bg-blue-600 text-white shadow-[0_10px_22px_rgba(37,99,235,0.2)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Escribir</button>
-                <button onClick={() => setMode(prev => ({ ...prev, [block.id]: 'image' }))} className={`rounded-xl px-4 py-2 text-sm font-black transition ${mode[block.id] === 'image' ? 'bg-blue-600 text-white shadow-[0_10px_22px_rgba(37,99,235,0.2)]' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}>Subir foto</button>
+              <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex gap-2">
+                  {(['text', 'image'] as const).map(m => (
+                    <button
+                      key={m}
+                      onClick={() => setMode(prev => ({ ...prev, [block.id]: m }))}
+                      className="rounded-xl px-4 py-2 text-sm font-black transition"
+                      style={{
+                        background: (mode[block.id] ?? 'text') === m ? cfg.color : '#f1f5f9',
+                        color: (mode[block.id] ?? 'text') === m ? '#fff' : '#475569',
+                        boxShadow: (mode[block.id] ?? 'text') === m ? `0 8px 20px ${cfg.color}30` : 'none',
+                        border: 'none',
+                        transition: 'all 180ms var(--ease-out)',
+                      }}
+                    >
+                      {m === 'text' ? 'Escribir' : 'Subir foto'}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-xs font-semibold" style={{ color: '#94a3b8' }}>
+                  {answers[block.id]?.text?.trim()
+                    ? `${answers[block.id].text.length} caracteres`
+                    : answers[block.id]?.image
+                    ? 'Imagen adjunta'
+                    : 'Sin respuesta aún'}
+                </span>
               </div>
+
               {mode[block.id] === 'image' ? (
                 <div className="grid gap-4">
-                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-blue-200 bg-blue-50/70 p-8 text-center transition hover:border-blue-300 hover:bg-blue-50">
-                    <Camera size={32} className="mb-2 text-blue-600" />
-                    <span className="font-black">Sube una foto de tu respuesta</span>
+                  <label
+                    className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center transition hover:-translate-y-0.5"
+                    style={{
+                      borderColor: `${cfg.color}40`,
+                      background: `${cfg.color}08`,
+                    }}
+                  >
+                    <Camera size={32} className="mb-3" style={{ color: cfg.color }} />
+                    <span className="font-black" style={{ color: cfg.color }}>Sube una foto de tu respuesta</span>
+                    <span className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>JPG, PNG, HEIC hasta 10 MB</span>
                     <input type="file" accept="image/*" className="hidden" onChange={event => void handleImage(block.id, event.target.files?.[0])} />
                   </label>
                   {answers[block.id]?.image && (
-                    <div className="relative overflow-hidden rounded-3xl border border-[#dbe7fb] bg-white">
-                      <img src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`} alt="Respuesta" className="max-h-96 w-full object-contain" />
-                      <button onClick={() => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? { text: '' }), image: null, imageType: null } }))} className="absolute right-3 top-3 rounded-full bg-white p-2 text-blue-700 shadow"><Trash2 size={16} /></button>
+                    <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: '#dbe7fb' }}>
+                      <img
+                        src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`}
+                        alt="Respuesta"
+                        className="max-h-96 w-full object-contain"
+                        style={{ background: '#f8fbff' }}
+                      />
+                      <button
+                        onClick={() => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? { text: '' }), image: null, imageType: null } }))}
+                        className="absolute right-3 top-3 rounded-full bg-white p-2 shadow-md transition hover:bg-red-50"
+                        style={{ border: '1px solid #fecaca' }}
+                      >
+                        <Trash2 size={15} style={{ color: '#ef4444' }} />
+                      </button>
                     </div>
                   )}
                 </div>
               ) : (
-                <textarea value={answers[block.id]?.text ?? ''} onChange={event => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text: event.target.value } }))} placeholder="Desarrolla tu respuesta paso a paso..." className="h-56 w-full resize-y rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-4 text-sm leading-7 outline-none transition focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(96,165,250,0.14)]" />
+                <textarea
+                  value={answers[block.id]?.text ?? ''}
+                  onChange={event => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text: event.target.value } }))}
+                  placeholder="Desarrolla tu respuesta paso a paso..."
+                  className="w-full resize-y rounded-2xl border p-4 text-sm leading-7 outline-none transition"
+                  style={{
+                    height: 224,
+                    minHeight: 160,
+                    borderColor: '#dde8f8',
+                    background: '#f8fbff',
+                    color: '#0f172a',
+                  }}
+                  onFocus={e => {
+                    e.target.style.borderColor = cfg.color
+                    e.target.style.background = '#fff'
+                    e.target.style.boxShadow = `0 0 0 4px ${cfg.color}14`
+                  }}
+                  onBlur={e => {
+                    e.target.style.borderColor = '#dde8f8'
+                    e.target.style.background = '#f8fbff'
+                    e.target.style.boxShadow = 'none'
+                  }}
+                />
               )}
             </div>
           </section>
         ))}
       </div>
 
+      {/* Confirm / Time Up modal */}
       {(confirmOpen || timeUp) && (
-        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 'var(--z-modal-bg)' as any, background: 'rgba(15,23,42,0.48)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-md bg-white p-6" style={{ borderRadius: 20, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-xl)', zIndex: 'var(--z-modal)' as any }}>
-            <div className="mb-3 flex items-center gap-3 text-xl font-black">{timeUp ? <AlertTriangle className="text-blue-700" /> : <CheckCircle2 className="text-blue-600" />}{timeUp ? 'Tiempo agotado' : 'Entregar examen'}</div>
-            <p className="text-sm font-semibold text-slate-600">Has respondido {answeredCount} de {record.bloques.length} bloques. Quedan {record.bloques.length - answeredCount} vacíos.</p>
-            {submitting && <div className="mt-4 flex items-center gap-2 text-sm font-black text-blue-700"><PausiaLoadingDot />{submitStage || 'Preparando entrega...'}</div>}
-            {submitError && <div className="pau-info mt-4">{submitError}</div>}
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ zIndex: 'var(--z-modal-bg)' as any, background: 'rgba(15,23,42,0.52)', backdropFilter: 'blur(6px)' }}
+        >
+          <div
+            className="pau-reveal-scale w-full max-w-md"
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              border: '1px solid var(--pau-border)',
+              boxShadow: 'var(--shadow-xl)',
+              padding: 28,
+              zIndex: 'var(--z-modal)' as any,
+            }}
+          >
+            <div className="mb-3 flex items-center gap-3">
+              {timeUp
+                ? <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
+                : <CheckCircle2 size={22} style={{ color: cfg.color }} />}
+              <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
+                {timeUp ? 'Tiempo agotado' : 'Entregar examen'}
+              </h2>
+            </div>
+
+            <p className="text-sm font-semibold" style={{ color: '#475569' }}>
+              Has respondido{' '}
+              <strong style={{ color: '#0f172a' }}>{answeredCount}</strong> de{' '}
+              <strong style={{ color: '#0f172a' }}>{record.bloques.length}</strong> bloques.
+              {record.bloques.length - answeredCount > 0 && (
+                <> Quedan <strong style={{ color: '#0f172a' }}>{record.bloques.length - answeredCount}</strong> sin responder.</>
+              )}
+            </p>
+
+            {/* Mini progress */}
+            <div className="mt-3 pau-progress-bar">
+              <div
+                className="pau-progress-fill"
+                style={{
+                  transform: `scaleX(${answeredCount / record.bloques.length})`,
+                  background: `linear-gradient(90deg, ${cfg.color}, ${cfg.color}cc)`,
+                }}
+              />
+            </div>
+
+            {submitting && (
+              <div className="mt-4 flex items-center gap-2 text-sm font-black" style={{ color: cfg.color }}>
+                <PausiaLoadingDot />
+                {submitStage || 'Preparando entrega...'}
+              </div>
+            )}
+            {submitError && <div className="pau-info mt-4" role="alert">{submitError}</div>}
+
             <div className="mt-6 flex justify-end gap-3">
-              {!timeUp && <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="rounded-xl border border-[#dbe7fb] px-4 py-2 font-black text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-60">Volver</button>}
-              <button onClick={submitExam} disabled={submitting} className="campus-primary" style={{ padding: '10px 20px', borderRadius: 12 }}>Ver corrección</button>
+              {!timeUp && (
+                <button
+                  onClick={() => setConfirmOpen(false)}
+                  disabled={submitting}
+                  className="pau-button-secondary"
+                  style={{ padding: '10px 20px' }}
+                >
+                  Volver al examen
+                </button>
+              )}
+              <button
+                onClick={submitExam}
+                disabled={submitting}
+                className="campus-primary"
+                style={{ padding: '10px 20px', borderRadius: 12 }}
+              >
+                Ver corrección
+              </button>
             </div>
           </div>
         </div>
@@ -338,13 +614,32 @@ export default function SimulacroActivoPage() {
 }
 
 function Badge({ children, color }: { children: ReactNode; color: string }) {
-  return <span className="rounded-full px-3 py-1 text-xs font-black text-white" style={{ background: color }}>{children}</span>
+  return (
+    <span
+      className="rounded-full px-3 py-1 text-xs font-black text-white"
+      style={{ background: color }}
+    >
+      {children}
+    </span>
+  )
 }
 
 function SaveBadge({ status }: { status: 'saved' | 'saving' | 'error' | 'dirty' }) {
-  const label = status === 'saving' ? 'Guardando...' : status === 'error' ? 'Error al guardar' : status === 'dirty' ? 'Cambios sin guardar' : 'Guardado'
-  const classes = status === 'error' ? 'border-red-200 bg-red-50 text-red-700' : status === 'dirty' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-blue-100 bg-blue-50 text-blue-700'
-  return <span className={`rounded-full border px-3 py-1 text-xs font-black ${classes}`}>{label}</span>
+  const configs = {
+    saved:  { label: 'Guardado',           bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
+    saving: { label: 'Guardando...',        bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+    error:  { label: 'Error al guardar',    bg: '#fef2f2', color: '#991b1b', border: '#fecaca' },
+    dirty:  { label: 'Sin guardar',         bg: '#fffbeb', color: '#b45309', border: '#fde68a' },
+  }
+  const c = configs[status]
+  return (
+    <span
+      className="rounded-full px-3 py-1 text-xs font-black"
+      style={{ background: c.bg, color: c.color, border: `1px solid ${c.border}` }}
+    >
+      {c.label}
+    </span>
+  )
 }
 
 function formatTime(seconds: number) {

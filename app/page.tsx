@@ -1565,26 +1565,27 @@ function cambiarTipo(t: Tipo) {
               }))
   const questionFilterValue = questionFilterOptions.find(option => option.active)?.label ?? (isCatalunaExam ? 'Selecciona ejercicio' : 'Selecciona pregunta')
   const examSearchResults = useMemo<ExamSearchResult[]>(() => {
-    if (asignatura === 'historia_filosofia') return []
+    if (!searchFocused || !searchQuery.trim() || asignatura === 'historia_filosofia') return []
 
-    const withSearchText = (result: Omit<ExamSearchResult, 'searchText'>, rawParts: unknown[]): ExamSearchResult => ({
-      ...result,
-      searchText: normalizeSearchText(rawParts.map(stringifyForSearch).join(' '))
-    })
+    try {
+      const withSearchText = (result: Omit<ExamSearchResult, 'searchText'>, rawParts: unknown[]): ExamSearchResult => ({
+        ...result,
+        searchText: normalizeSearchText(rawParts.map(stringifyForSearch).join(' '))
+      })
 
-    const tipoFromCataluna = (convocatoria: string): Tipo =>
-      convocatoria === 'extraordinaria' ? 'Extraordinaria' : 'Ordinaria'
+      const tipoFromCataluna = (convocatoria: string): Tipo =>
+        convocatoria === 'extraordinaria' ? 'Extraordinaria' : 'Ordinaria'
 
-    const normalSource: any[] =
-      asignatura === 'mates' ? examenes :
-      asignatura === 'fisica' ? examenesFisica :
-      asignatura === 'quimica' ? examenesQuimica :
-      asignatura === 'biologia' ? examenesBiologia :
-      asignatura === 'lengua' ? examenesLengua :
-      asignatura === 'ingles' ? examenesIngles :
-      examenesHistoria
+      const normalSource: any[] =
+        asignatura === 'mates' ? examenes :
+        asignatura === 'fisica' ? examenesFisica :
+        asignatura === 'quimica' ? examenesQuimica :
+        asignatura === 'biologia' ? examenesBiologia :
+        asignatura === 'lengua' ? examenesLengua :
+        asignatura === 'ingles' ? examenesIngles :
+        examenesHistoria
 
-    const selectNormalResult = (exam: any, question: any, questionIndex: number) => {
+      const selectNormalResult = (exam: any, question: any, questionIndex: number) => {
       const years = Array.from(new Set(
         normalSource
           .filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate))
@@ -1833,8 +1834,12 @@ function cambiarTipo(t: Tipo) {
       })
     }
 
-    return []
-  }, [asignatura, ccaa, cfg.label, isCatalunaExam, isCatalunaFisica, isCatalunaHistoria, isCatalunaLengua, isCatalunaMates, isCatalunaQuimica])
+      return []
+    } catch (error) {
+      console.error('Exam search failed safely', error)
+      return []
+    }
+  }, [asignatura, ccaa, cfg.label, isCatalunaExam, isCatalunaFisica, isCatalunaHistoria, isCatalunaLengua, isCatalunaMates, isCatalunaQuimica, searchFocused, searchQuery])
   const normalizedSearchQuery = normalizeSearchText(searchQuery.trim())
   const filteredSearchResults = useMemo(
     () => normalizedSearchQuery

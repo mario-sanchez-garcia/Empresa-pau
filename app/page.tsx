@@ -316,6 +316,47 @@ function colorNota(n: number) {
   return n >= 7 ? '#0f5ea8' : n >= 5 ? '#2563eb' : '#1d4ed8'
 }
 
+type FilterDropdownOption = {
+  label: string
+  active?: boolean
+  onSelect: () => void
+}
+
+function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="exam-filter-dropdown">
+      <button
+        type="button"
+        className="exam-filter-trigger"
+        aria-expanded={open}
+        onClick={() => setOpen(current => !current)}
+      >
+        <span className="exam-filter-label">{label}</span>
+        <span className="exam-filter-value">{value}</span>
+        <ChevronDown size={14} />
+      </button>
+      {open && (
+        <div className="exam-filter-menu">
+          {options.map(option => (
+            <button
+              type="button"
+              key={option.label}
+              className={`exam-filter-option ${option.active ? 'is-active' : ''}`}
+              onClick={() => {
+                option.onSelect()
+                setOpen(false)
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SubjectIllustration({ subject, color, accent }: { subject: Asignatura; color: string; accent: string }) {
   const common = {
     position: 'absolute' as const,
@@ -1108,6 +1149,10 @@ const preguntaActivaStorageId = [
 
 const enunciadoStorageKey = `principal:${preguntaActivaStorageId}:enunciado`
 const fuenteStorageKey = `principal:${preguntaActivaStorageId}:fuente`
+const correctionScoreMatch = correccion.match(/(?:nota|puntuaci[oó]n|calificaci[oó]n)[^\n:]*[:\s]+([0-9]+(?:[.,][0-9]+)?)\s*(?:\/|de)\s*([0-9]+(?:[.,][0-9]+)?)/i)
+const correctionScoreLabel = correctionScoreMatch
+  ? `${correctionScoreMatch[1].replace(',', '.')}/${correctionScoreMatch[2].replace(',', '.')}`
+  : '--'
 
 function puntosBloqueFisica(tipoBloque: string) {
   return (
@@ -1404,6 +1449,93 @@ function cambiarTipo(t: Tipo) {
         : asignatura === 'biologia'
           ? serieBiologiaSeleccionada
         : null
+  const convocatoriaOptions = (isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]
+  const yearFilterOptions: FilterDropdownOption[] = aniosDisponibles.map((anio, i) => ({
+    label: String(anio),
+    active: examenIdx === i,
+    onSelect: () => {
+      setExamenIdx(i)
+      setCatEjercicioIdx(0)
+      setCatHistoriaEjercicioIdx(0)
+      setCatFisicaEjercicioIdx(0)
+      setCatAsignaturaEjercicioIdx(0)
+      setBloqueIdx(0)
+      setDiaHistoriaIdx(0)
+      setOpcion(0)
+      reset()
+    }
+  }))
+  const convocatoriaFilterOptions: FilterDropdownOption[] = convocatoriaOptions.map(t => ({
+    label: t,
+    active: tipo === t,
+    onSelect: () => cambiarTipo(t)
+  }))
+  const versionFilterOptions: FilterDropdownOption[] = versionesExamenDisponibles.map((version, i) => ({
+    label: version,
+    active: diaHistoriaIdx === i,
+    onSelect: () => {
+      setDiaHistoriaIdx(i)
+      setBloqueIdx(0)
+      setOpcion(0)
+      reset()
+    }
+  }))
+  const questionFilterOptions: FilterDropdownOption[] = isCatalunaMates
+    ? ejerciciosDisponiblesCat.map((pregunta, i) => ({
+        label: pregunta.opcion
+          ? `Ej. ${pregunta.ejercicio} · Opción ${pregunta.opcion}`
+          : `Ejercicio ${pregunta.ejercicio} · ${pregunta.tema}`,
+        active: catEjercicioIdx === i,
+        onSelect: () => setCatEjercicioIdx(i)
+      }))
+    : isCatalunaFisica
+      ? ejerciciosFisicaCataluna.map((ejercicio, i) => ({
+          label: `Ejercicio ${ejercicio.numero} · ${ejercicio.bloque ?? ejercicio.titulo}`,
+          active: catFisicaEjercicioIdx === i,
+          onSelect: () => setCatFisicaEjercicioIdx(i)
+        }))
+      : (isCatalunaQuimica || isCatalunaLengua)
+        ? ejerciciosAsignaturaCataluna.map((ejercicio, i) => ({
+            label: ejercicio.titulo,
+            active: catAsignaturaEjercicioIdx === i,
+            onSelect: () => setCatAsignaturaEjercicioIdx(i)
+          }))
+        : isCatalunaHistoria
+          ? ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => {
+              const labels: Record<string, string> = {
+                analisis_fuentes: 'Análisis crítico de fuentes',
+                redaccion_terminos: 'Redacción con términos históricos',
+                exposicion_tema: 'Expón un tema',
+                test: 'Test'
+              }
+              const label = labels[ejercicio.tipo]
+              return {
+                label: `Ejercicio ${ejercicio.numero}${label ? ` · ${label}` : ''}`,
+                active: catHistoriaEjercicioIdx === i,
+                onSelect: () => setCatHistoriaEjercicioIdx(i)
+              }
+            })
+          : asignatura === 'mates'
+            ? bloquesMates.map((bloque: string, i: number) => ({
+                label: `${i + 1}. ${bloque} · ${puntosBloqueMates(bloque)}pts`,
+                active: bloqueIdx === i,
+                onSelect: () => cambiarBloqueMates(i, bloque)
+              }))
+            : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => ({
+                label: `${t.label} · ${asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts`,
+                active: bloqueIdx === i,
+                onSelect: () => {
+                  asignatura === 'fisica'
+                    ? cambiarBloqueFisica(i, t.tipo)
+                    : asignatura === 'quimica'
+                      ? cambiarBloqueQuimica(i, t.tipo)
+                      : asignatura === 'biologia'
+                        ? cambiarBloqueBiologia(i, t.tipo)
+                        : setBloqueIdx(i)
+                  if (asignatura !== 'fisica' && asignatura !== 'quimica' && asignatura !== 'biologia') reset()
+                }
+              }))
+  const questionFilterValue = questionFilterOptions.find(option => option.active)?.label ?? (isCatalunaExam ? 'Selecciona ejercicio' : 'Selecciona pregunta')
 
   return (
     <div className="pausia-app-shell pausia-premium-shell" style={{
@@ -1465,8 +1597,43 @@ function cambiarTipo(t: Tipo) {
           max-width: 280px;
         }
 
+        .exams-screen {
+          color: #111827;
+        }
+
         .exams-screen .pau-subject-card > svg {
           display: none;
+        }
+
+        .exams-subject-strip {
+          padding: 2px 0 10px;
+        }
+
+        .exams-subject-strip > .pau-subject-card {
+          flex: 0 0 auto !important;
+          min-width: 178px;
+          max-width: 245px;
+          min-height: 64px !important;
+          padding: 10px 14px !important;
+          border-radius: 999px !important;
+          background: #f7f7f8 !important;
+          border: 1px solid #e5e7eb !important;
+          box-shadow: none !important;
+        }
+
+        .exams-subject-strip > .pau-subject-card.is-active {
+          background: #ffffff !important;
+          border-color: #4f46e5 !important;
+          box-shadow: 0 14px 34px rgba(79, 70, 229, 0.12) !important;
+        }
+
+        .exams-subject-strip > .pau-subject-card:hover {
+          transform: translateY(-1px) !important;
+          box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08) !important;
+        }
+
+        .exams-subject-strip .subject-kicker {
+          display: none !important;
         }
 
         .exams-hero {
@@ -1489,6 +1656,148 @@ function cambiarTipo(t: Tipo) {
           font-size: 13px;
           font-weight: 700;
           box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+        }
+
+        .exams-filter-bar {
+          display: flex;
+          align-items: stretch;
+          gap: 0;
+          width: 100%;
+          overflow: visible;
+        }
+
+        .exams-filter-card > div:not(:first-child):not(.exams-filter-bar) {
+          display: none !important;
+        }
+
+        .exams-filter-divider {
+          width: 1px;
+          align-self: stretch;
+          background: #eef0f4;
+          margin: 4px 10px;
+          flex: 0 0 auto;
+        }
+
+        .exam-filter-dropdown {
+          position: relative;
+          min-width: 150px;
+          flex: 0 1 auto;
+        }
+
+        .exam-filter-trigger {
+          min-height: 54px;
+          width: 100%;
+          border: 0;
+          border-radius: 16px;
+          background: transparent;
+          color: #111827;
+          display: grid;
+          grid-template-columns: 1fr auto;
+          align-items: center;
+          column-gap: 8px;
+          padding: 8px 10px;
+          cursor: pointer;
+          text-align: left;
+          transition: background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .exam-filter-trigger:hover,
+        .exam-filter-trigger[aria-expanded="true"] {
+          background: #f8fafc;
+          box-shadow: inset 0 0 0 1px #e5e7eb;
+        }
+
+        .exam-filter-label {
+          grid-column: 1 / -1;
+          color: #9ca3af;
+          font-size: 10px;
+          font-weight: 850;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+        }
+
+        .exam-filter-value {
+          min-width: 0;
+          max-width: 260px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: #111827;
+          font-size: 13px;
+          font-weight: 850;
+        }
+
+        .exam-filter-menu {
+          position: absolute;
+          left: 0;
+          top: calc(100% + 8px);
+          z-index: 80;
+          min-width: 220px;
+          max-height: 310px;
+          overflow-y: auto;
+          padding: 7px;
+          border-radius: 16px;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        }
+
+        .exam-filter-option {
+          width: 100%;
+          min-height: 36px;
+          border: 0;
+          border-radius: 12px;
+          background: transparent;
+          color: #374151;
+          padding: 8px 10px;
+          text-align: left;
+          font-size: 13px;
+          font-weight: 740;
+          cursor: pointer;
+        }
+
+        .exam-filter-option:hover,
+        .exam-filter-option.is-active {
+          background: #eef2ff;
+          color: #3730a3;
+        }
+
+        .exams-option-group {
+          min-height: 54px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 4px;
+        }
+
+        .exam-option-label {
+          color: #9ca3af;
+          font-size: 10px;
+          font-weight: 850;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+          margin-right: 2px;
+        }
+
+        .exam-option-button {
+          width: 36px;
+          height: 36px;
+          border-radius: 999px;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          color: #374151;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 900;
+          display: inline-grid;
+          place-items: center;
+        }
+
+        .exam-option-button.is-active {
+          border-color: transparent;
+          background: linear-gradient(135deg, #2563eb, #7c3aed);
+          color: #ffffff;
+          box-shadow: 0 12px 26px rgba(79, 70, 229, 0.18);
         }
 
         .exams-workspace {
@@ -1520,6 +1829,10 @@ function cambiarTipo(t: Tipo) {
           padding: 18px;
         }
 
+        .exams-ai-panel .exams-side-card:first-child {
+          border-left: 4px solid #8b5cf6;
+        }
+
         .exams-side-section {
           border-radius: 18px;
           border: 1px solid #e5edf9;
@@ -1549,6 +1862,56 @@ function cambiarTipo(t: Tipo) {
           gap: 10px;
         }
 
+        .exams-question-card {
+          background: #ffffff !important;
+          border: 1px solid #e5e7eb !important;
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.07) !important;
+        }
+
+        .exams-question-card > div:first-child {
+          background: #ffffff !important;
+          border-bottom: 1px solid #eef0f4 !important;
+        }
+
+        .exams-answer-card {
+          background: #ffffff !important;
+          border: 1px solid #e5e7eb !important;
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.07) !important;
+        }
+
+        .exams-answer-card textarea {
+          background: #fafafb !important;
+          border-color: #e5e7eb !important;
+        }
+
+        .exams-correct-button {
+          width: auto !important;
+          margin-left: auto !important;
+          padding: 13px 20px !important;
+          border-radius: 16px !important;
+          background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+          box-shadow: 0 16px 34px rgba(79, 70, 229, 0.2) !important;
+        }
+
+        .exams-footer {
+          margin-top: 26px;
+          padding: 20px 4px 0;
+          border-top: 1px solid #eef0f4;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          color: #6b7280;
+          font-size: 12px;
+          font-weight: 650;
+        }
+
+        .exams-footer-links {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px;
+        }
+
         @media (max-width: 920px) {
           .subject-card-grid {
             padding-bottom: 10px;
@@ -1564,6 +1927,21 @@ function cambiarTipo(t: Tipo) {
 
           .exams-ai-panel {
             position: static;
+          }
+
+          .exams-filter-bar {
+            overflow-x: auto;
+            padding-bottom: 4px;
+          }
+
+          .exam-filter-dropdown {
+            min-width: 170px;
+            flex: 0 0 auto;
+          }
+
+          .exams-footer {
+            align-items: flex-start;
+            flex-direction: column;
           }
         }
 
@@ -1587,6 +1965,10 @@ function cambiarTipo(t: Tipo) {
             min-width: 0;
             max-width: none;
             width: 100%;
+          }
+
+          .exams-correct-button {
+            width: 100% !important;
           }
         }
       `}</style>
@@ -1630,15 +2012,15 @@ function cambiarTipo(t: Tipo) {
             {/* ── Page title (Stitch) ──────────────────────────────── */}
             <div className="exams-hero">
               <div>
-                <h1 style={{ margin: 0, fontSize: 30, fontWeight: 860, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-                  Corrección Inteligente
+                <h1 style={{ margin: 0, fontSize: 30, fontWeight: 860, color: '#111827', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                  {cfg.label}
                 </h1>
-                <p style={{ margin: '8px 0 0', fontSize: 14, color: '#64748b', lineHeight: 1.6, maxWidth: 620 }}>
-                  Practica con exámenes oficiales de la PAU y recibe feedback instantáneo detallado por nuestra IA.
+                <p style={{ margin: '8px 0 0', fontSize: 14, color: '#6b7280', lineHeight: 1.6, maxWidth: 620 }}>
+                  Convocatoria {tipo} {anioSeleccionado ? `· ${anioSeleccionado}` : ''} · {examSystemLabel(ccaa)}
                 </p>
               </div>
               <div className="exams-search-bar" aria-hidden="true">
-                Buscar examen, año o bloque...
+                Buscar examen...
               </div>
             </div>
 
@@ -1664,7 +2046,7 @@ function cambiarTipo(t: Tipo) {
               )}
 
               <div
-                className="subject-card-grid"
+                className="subject-card-grid exams-subject-strip"
                 style={!showAllSubjects ? {
                   gridTemplateColumns:
                     visibleSubjectCards.length === 1 ? 'minmax(280px, 520px)' :
@@ -1682,7 +2064,7 @@ function cambiarTipo(t: Tipo) {
                 const pinned = pinnedClean.includes(key)
                 return (
                   <div
-                    className="campus-subject-card pau-subject-card"
+                    className={`campus-subject-card pau-subject-card ${active ? 'is-active' : ''}`}
                     key={key}
                     onClick={() => navegarAAsignatura(key)}
                     onKeyDown={(event) => {
@@ -1732,7 +2114,7 @@ function cambiarTipo(t: Tipo) {
                         <div style={{ marginTop: '4px', color: WARM.muted, fontSize: '12px', lineHeight: '1.35', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.subtitle}</div>
                       </div>
                     </div>
-                    <div style={{ marginTop: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: active ? '#ffffff' : val.light, color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
+                    <div className="subject-kicker" style={{ marginTop: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: active ? '#ffffff' : val.light, color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
                       <Flame size={13} />{card.kicker}
                     </div>
                   </div>
@@ -1751,6 +2133,57 @@ function cambiarTipo(t: Tipo) {
   WebkitBackdropFilter: 'blur(16px)'
 }}>
               <div style={{ fontSize: '12px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Filtros del examen</div>
+              <div className="exams-filter-bar">
+                <FilterDropdown
+                  label="Año"
+                  value={String(anioSeleccionado ?? aniosDisponibles[examenIdx] ?? 'Año')}
+                  options={yearFilterOptions}
+                />
+                <div className="exams-filter-divider" />
+                <FilterDropdown
+                  label="Convocatoria"
+                  value={tipo}
+                  options={convocatoriaFilterOptions}
+                />
+                {versionFilterOptions.length > 1 && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <FilterDropdown
+                      label={asignatura === 'historia' || asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Versión'}
+                      value={versionExamenSeleccionada ?? 'Única'}
+                      options={versionFilterOptions}
+                    />
+                  </>
+                )}
+                {questionFilterOptions.length > 0 && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <FilterDropdown
+                      label={isCatalunaExam ? 'Ejercicio' : 'Pregunta'}
+                      value={questionFilterValue}
+                      options={questionFilterOptions}
+                    />
+                  </>
+                )}
+                {!isCatalunaExam && opcionesDisponibles.length > 0 && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <div className="exams-option-group">
+                      <span className="exam-option-label">Opción</span>
+                      {opcionesDisponibles.map(op => (
+                        <button
+                          type="button"
+                          className={`exam-option-button ${opcion === op ? 'is-active' : ''}`}
+                          key={op}
+                          onClick={() => { setOpcion(op); reset() }}
+                        >
+                          {op === 0 ? 'A' : 'B'}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
                   <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
@@ -2036,7 +2469,7 @@ function cambiarTipo(t: Tipo) {
             )}
 
             {!isCatalunaExam && preguntaActiva && (
-             <div key={preguntaActivaKey} style={{
+             <div className="exams-question-card" key={preguntaActivaKey} style={{
   background: 'rgba(255, 255, 255, 0.82)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.80)',
@@ -2175,7 +2608,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-           {!isCatalunaExam && preguntaActiva && <div style={{
+           {!isCatalunaExam && preguntaActiva && <div className="exams-answer-card" style={{
   background: 'rgba(255, 255, 255, 0.82)',
   borderRadius: '24px',
   border: '1px solid rgba(219, 231, 251, 0.80)',
@@ -2210,8 +2643,8 @@ function cambiarTipo(t: Tipo) {
                   )}
                 </div>
               )}
-              <button className="campus-primary" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
-                <WandSparkles size={17} className={cargando ? 'animate-pulse' : ''} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
+              <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
+                <WandSparkles size={17} className={cargando ? 'animate-pulse' : ''} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con IA'}
               </button>
             </div>}
 
@@ -2230,60 +2663,62 @@ function cambiarTipo(t: Tipo) {
 
               <aside className="exams-ai-panel" aria-label="Panel de feedback de Pausia">
                 <div className="exams-side-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
                     <div>
-                      <div className="exams-side-label">Pausia IA</div>
-                      <div style={{ marginTop: 4, color: WARM.ink, fontSize: 18, fontWeight: 860 }}>Feedback del ejercicio</div>
-                    </div>
-                    <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.soft }}>
-                      <WandSparkles size={20} />
-                    </div>
-                  </div>
-
-                  <div className="exams-metric-row" style={{ marginBottom: 14 }}>
-                    <div className="exams-side-section">
-                      <div className="exams-side-label">Puntos</div>
-                      <div style={{ marginTop: 4, color: cfg.color, fontSize: 22, fontWeight: 900 }}>{!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'}</div>
-                    </div>
-                    <div className="exams-side-section">
-                      <div className="exams-side-label">Estado</div>
-                      <div style={{ marginTop: 7, color: correccion ? '#16a34a' : cargando ? cfg.color : WARM.muted, fontSize: 13, fontWeight: 850 }}>
-                        {correccion ? 'Corregido' : cargando ? 'Corrigiendo' : 'Pendiente'}
+                      <div className="exams-side-label">Nota estimada</div>
+                      <div style={{ marginTop: 6, color: '#111827', fontSize: 38, lineHeight: 1, fontWeight: 920 }}>
+                        {correccion ? correctionScoreLabel : '--'}
+                        <span style={{ marginLeft: 5, color: '#6b7280', fontSize: 14, fontWeight: 800 }}>{correctionScoreLabel === '--' ? '' : 'pts'}</span>
                       </div>
+                      <p className="exams-side-text" style={{ marginTop: 8 }}>
+                        {correccion ? `Corrección generada. Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts.` : 'Resuelve el ejercicio y Pausia te dará feedback específico.'}
+                      </p>
+                    </div>
+                    <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }}>
+                      <WandSparkles size={20} />
                     </div>
                   </div>
 
                   <div style={{ display: 'grid', gap: 10 }}>
                     <div className="exams-side-section">
-                      <div className="exams-side-label">Puntos fuertes</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 12, fontWeight: 900 }}>✓</span>
+                        <div className="exams-side-label" style={{ color: '#15803d' }}>Puntos fuertes</div>
+                      </div>
                       <p className="exams-side-text">
-                        {correccion ? 'Disponibles en la corrección detallada generada por Pausia.' : 'Resuelve el ejercicio y Pausia destacará lo que has hecho bien.'}
+                        {correccion ? 'Disponibles en la corrección detallada generada por Pausia.' : 'Aquí aparecerán tus puntos fuertes.'}
                       </p>
                     </div>
                     <div className="exams-side-section">
-                      <div className="exams-side-label">Errores a corregir</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#ffedd5', color: '#ea580c', fontSize: 12, fontWeight: 900 }}>!</span>
+                        <div className="exams-side-label" style={{ color: '#c2410c' }}>Errores a corregir</div>
+                      </div>
                       <p className="exams-side-text">
-                        {correccion ? 'Consulta el detalle para ver fallos concretos, pasos omitidos y mejoras.' : 'Cuando envíes tu respuesta, aquí tendrás una guía rápida de revisión.'}
+                        {correccion ? 'Consulta el detalle para ver fallos concretos, pasos omitidos y mejoras.' : 'Aquí verás qué debes corregir.'}
                       </p>
                     </div>
-                    <div className="exams-side-section">
-                      <div className="exams-side-label">Teoría relacionada</div>
+                    <div className="exams-side-section" style={{ background: '#f5f3ff', borderColor: '#ddd6fe' }}>
+                      <div className="exams-side-label" style={{ color: '#7c3aed' }}>Teoría relacionada</div>
                       <p className="exams-side-text">
                         {!isCatalunaExam && preguntaActiva ? bloqueActivoLabel : 'Selecciona un ejercicio para ver el bloque asociado.'}
                       </p>
+                      <a href="/planning" style={{ marginTop: 12, border: '1px solid #ddd6fe', background: '#ffffff', color: '#6d28d9', borderRadius: 999, padding: '8px 11px', fontSize: 12, fontWeight: 850, display: 'inline-flex', textDecoration: 'none' }}>
+                        Ver material de repaso
+                      </a>
                     </div>
                   </div>
                 </div>
 
-                <div className="exams-side-card" style={{ background: 'linear-gradient(145deg, #ffffff, ' + cfg.light + ')' }}>
+                <div className="exams-side-card" style={{ background: 'linear-gradient(145deg, #ffffff, #f8fafc)' }}>
                   <div className="exams-side-label">Racha de estudio</div>
                   <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#ffffff', color: cfg.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#fff7ed', color: '#ea580c', boxShadow: '0 10px 22px rgba(15,23,42,0.06)' }}>
                       <Flame size={20} />
                     </div>
                     <div>
-                      <div style={{ color: WARM.ink, fontSize: 15, fontWeight: 850 }}>Sesión activa</div>
-                      <div style={{ color: WARM.muted, fontSize: 12, fontWeight: 650, marginTop: 2 }}>
+                      <div style={{ color: '#111827', fontSize: 15, fontWeight: 850 }}>Sesión activa</div>
+                      <div style={{ color: '#6b7280', fontSize: 12, fontWeight: 650, marginTop: 2 }}>
                         {respuesta.trim() || imagen ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
                       </div>
                     </div>
@@ -2291,6 +2726,19 @@ function cambiarTipo(t: Tipo) {
                 </div>
               </aside>
             </div>
+
+            <footer className="exams-footer">
+              <div>
+                <strong style={{ color: '#111827' }}>Pausia</strong>
+                <span style={{ marginLeft: 8 }}>Preparación EBAU de alto rendimiento.</span>
+              </div>
+              <div className="exams-footer-links" aria-label="Enlaces informativos">
+                <a href="/legal/privacidad" style={{ color: '#6b7280', textDecoration: 'none' }}>Privacidad</a>
+                <a href="/legal/terminos" style={{ color: '#6b7280', textDecoration: 'none' }}>Términos</a>
+                <span>Metodología</span>
+                <a href="/contacto" style={{ color: '#6b7280', textDecoration: 'none' }}>Contacto</a>
+              </div>
+            </footer>
           </main>
         )}
 

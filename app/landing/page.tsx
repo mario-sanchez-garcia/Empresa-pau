@@ -21,6 +21,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
+import SmoothScrollHero from '@/components/ui/smooth-scroll-hero'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -187,8 +188,6 @@ export default function LandingPage() {
         @media (max-width: 768px) {
           .lp-bento { grid-template-columns: 1fr !important; }
           .lp-bento-card { grid-column: auto !important; flex-direction: column !important; }
-          .lp-hero-split { grid-template-columns: 1fr !important; }
-          .lp-mock-wrap { display: none !important; }
           .lp-compare-table { font-size: 12px !important; }
           .lp-plan-grid { grid-template-columns: 1fr !important; }
           .lp-tgrid { grid-template-columns: 1fr !important; }
@@ -253,177 +252,106 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section style={{
-        maxWidth: 1100, margin: '0 auto',
-        padding: 'clamp(72px,10vw,112px) clamp(20px,5vw,40px) clamp(56px,8vw,80px)',
-      }}>
-        <div className="lp-hero-split" style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gap: 'clamp(40px,6vw,80px)', alignItems: 'center',
-        }}>
-          {/* Copy */}
-          <div>
-            <div className="lp-h1" style={{ marginBottom: 18 }}>
+      {/* ── Hero — SmoothScrollHero ──────────────────────────────────────── */}
+      <SmoothScrollHero
+        scrollHeight={1400}
+        desktopImage="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1920&q=85&auto=format&fit=crop"
+        mobileImage="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=900&q=85&auto=format&fit=crop"
+        initialClipPercentage={22}
+        finalClipPercentage={78}
+      >
+        {/* Hero text — white on dark image overlay */}
+        <div className="lp-h1" style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto' }}>
+          {/* Badge */}
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 14px', borderRadius: 999,
+            background: 'rgba(255,255,255,0.12)',
+            border: '1px solid rgba(255,255,255,0.25)',
+            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+            fontSize: 11, fontWeight: 800, letterSpacing: '0.07em',
+            color: 'rgba(255,255,255,0.92)', textTransform: 'uppercase',
+            marginBottom: 24,
+          } as React.CSSProperties}>
+            <Sparkles size={10} style={{ color: '#60a5fa' }} /> Beta privada · EBAU Madrid 2025
+          </span>
+
+          {/* Headline */}
+          <h1 className="lp-h1" style={{
+            fontSize: 'clamp(2.6rem,6vw,4rem)', fontWeight: 900,
+            lineHeight: 1.08, letterSpacing: '-0.03em',
+            color: '#ffffff',
+            margin: '0 0 20px',
+            textWrap: 'balance' as never,
+            textShadow: '0 2px 24px rgba(0,0,0,0.3)',
+            animationDelay: '60ms',
+          }}>
+            La forma más inteligente de preparar la{' '}
+            <span style={{ color: '#93c5fd' }}>PAU</span>
+          </h1>
+
+          {/* Subtext */}
+          <p className="lp-p" style={{
+            fontSize: 'clamp(1rem,2.2vw,1.15rem)',
+            color: 'rgba(255,255,255,0.72)',
+            lineHeight: 1.8, margin: '0 auto 36px',
+            maxWidth: 520, fontWeight: 400,
+          }}>
+            Resuelve exámenes reales de la EBAU Madrid, recibe nota al instante
+            y deja que la IA convierta tus errores en un plan de estudio personalizado.
+          </p>
+
+          {/* CTAs */}
+          <div className="lp-ctas" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/login" className="lp-btn-primary" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              padding: '13px 28px', borderRadius: 999,
+              background: C.grad, color: '#fff',
+              fontWeight: 800, fontSize: 15, textDecoration: 'none',
+              boxShadow: '0 12px 32px rgba(37,99,235,0.40)',
+              letterSpacing: '-0.01em',
+            }}>
+              Empezar gratis
               <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '4px 12px', borderRadius: 999,
-                background: C.bgBlue, border: `1px solid ${C.bgBlueMid}`,
-                fontSize: 11, fontWeight: 800, letterSpacing: '0.07em',
-                color: C.blue, textTransform: 'uppercase',
+                width: 24, height: 24, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <Sparkles size={10} /> Beta privada · EBAU Madrid 2025
+                <ArrowRight size={13} />
               </span>
-            </div>
-
-            <h1 className="lp-h1" style={{
-              fontSize: 'clamp(2.4rem,5.2vw,3.6rem)', fontWeight: 900,
-              lineHeight: 1.1, letterSpacing: '-0.03em', color: C.ink,
-              margin: '0 0 18px', textWrap: 'balance' as never,
-              animationDelay: '50ms',
+            </Link>
+            <a href="#como-funciona" className="lp-btn-ghost" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '13px 24px', borderRadius: 999,
+              border: '1.5px solid rgba(255,255,255,0.30)',
+              background: 'rgba(255,255,255,0.10)',
+              backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+              color: 'rgba(255,255,255,0.88)', fontWeight: 600, fontSize: 15, textDecoration: 'none',
             }}>
-              La forma más inteligente de preparar la{' '}
-              <span style={{ color: C.blue }}>PAU</span>
-            </h1>
-
-            <p className="lp-p" style={{
-              fontSize: 'clamp(1rem,2vw,1.1rem)', color: C.muted,
-              lineHeight: 1.8, maxWidth: 460, margin: '0 0 32px', fontWeight: 400,
-            }}>
-              Resuelve exámenes reales de la EBAU Madrid, recibe nota al instante y deja que
-              la IA convierta tus errores en un plan de estudio personalizado.
-            </p>
-
-            <div className="lp-ctas" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <Link href="/login" className="lp-btn-primary" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                padding: '12px 26px', borderRadius: 999,
-                background: C.grad, color: '#fff',
-                fontWeight: 800, fontSize: 14, textDecoration: 'none',
-                boxShadow: '0 10px 28px rgba(37,99,235,0.26)',
-                letterSpacing: '-0.01em',
-              }}>
-                Empezar gratis
-                <span style={{
-                  width: 22, height: 22, borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <ArrowRight size={12} />
-                </span>
-              </Link>
-              <a href="#como-funciona" className="lp-btn-ghost" style={{
-                display: 'inline-flex', alignItems: 'center',
-                padding: '12px 22px', borderRadius: 999,
-                border: `1.5px solid ${C.border}`, background: C.bg,
-                color: C.muted, fontWeight: 600, fontSize: 14, textDecoration: 'none',
-              }}>
-                Ver cómo funciona
-              </a>
-            </div>
-
-            {/* Trust pills */}
-            <div className="lp-ctas" style={{
-              display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20,
-              animationDelay: '220ms',
-            }}>
-              {['Exámenes oficiales EBAU', 'Criterios Ministerio Educación', 'Currículum 2025'].map((t) => (
-                <span key={t} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 5,
-                  fontSize: 11, fontWeight: 600, color: C.muted,
-                  padding: '4px 10px', borderRadius: 999,
-                  background: C.bgSub, border: `1px solid ${C.border}`,
-                }}>
-                  <CheckCircle2 size={11} style={{ color: C.green }} /> {t}
-                </span>
-              ))}
-            </div>
+              Ver cómo funciona
+            </a>
           </div>
 
-          {/* Product mockup */}
-          <div className="lp-mock-wrap" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="lp-mock lp-float" style={{ width: '100%', maxWidth: 320 }}>
-              <div style={{
-                borderRadius: 20,
-                background: C.bg,
-                border: `1px solid ${C.border}`,
-                boxShadow: '0 24px 64px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.05)',
-                overflow: 'hidden',
+          {/* Trust pills */}
+          <div className="lp-ctas" style={{
+            display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 28,
+            justifyContent: 'center', animationDelay: '220ms',
+          }}>
+            {['Exámenes oficiales EBAU', 'Criterios Ministerio Educación', 'Currículum 2025'].map((t) => (
+              <span key={t} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.70)',
+                padding: '4px 12px', borderRadius: 999,
+                background: 'rgba(255,255,255,0.10)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
               }}>
-                {/* Header */}
-                <div style={{
-                  padding: '14px 18px', borderBottom: `1px solid ${C.border}`,
-                  background: C.bgSub,
-                  display: 'flex', alignItems: 'center', gap: 10,
-                }}>
-                  <div style={{
-                    width: 30, height: 30, borderRadius: 9,
-                    background: C.bgBlue, color: C.blue,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  }}>
-                    <Sigma size={15} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '-0.02em' }}>Matemáticas II</div>
-                    <div style={{ fontSize: 10, color: C.soft, fontWeight: 500 }}>EBAU Madrid · Junio 2024</div>
-                  </div>
-                  <span style={{
-                    marginLeft: 'auto', fontSize: 9, fontWeight: 800,
-                    letterSpacing: '0.05em', textTransform: 'uppercase',
-                    color: C.green, background: C.greenBg,
-                    border: `1px solid ${C.greenBd}`,
-                    padding: '2px 8px', borderRadius: 999,
-                  }}>
-                    Corregido
-                  </span>
-                </div>
-
-                {/* Score */}
-                <div style={{ padding: '20px 18px 16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 56, fontWeight: 900, color: C.ink, letterSpacing: '-0.05em', lineHeight: 1 }}>
-                    8.<span style={{ color: C.blue }}>4</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: C.soft, fontWeight: 500, marginTop: 3 }}>sobre 10 puntos</div>
-
-                  <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 7 }}>
-                    {[
-                      { label: 'Análisis funcional', pct: 97, score: '9,7', color: C.green },
-                      { label: 'Geometría vectorial', pct: 80, score: '8,0', color: C.blue },
-                      { label: 'Probabilidad', pct: 63, score: '6,3', color: C.amber },
-                    ].map((r) => (
-                      <div key={r.label} style={{ textAlign: 'left' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                          <span style={{ fontSize: 10, fontWeight: 600, color: C.muted }}>{r.label}</span>
-                          <span style={{ fontSize: 10, fontWeight: 900, color: r.color }}>{r.score}</span>
-                        </div>
-                        <div style={{ height: 5, borderRadius: 999, background: C.bgMuted, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${r.pct}%`, background: r.color, borderRadius: 999 }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* AI feedback */}
-                <div style={{
-                  margin: '0 12px 12px',
-                  padding: '10px 12px',
-                  borderRadius: 12,
-                  background: C.bgBlue,
-                  border: `1px solid ${C.bgBlueMid}`,
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7 }}>
-                    <Sparkles size={11} style={{ color: C.blue, marginTop: 2, flexShrink: 0 }} />
-                    <p style={{ margin: 0, fontSize: 10, lineHeight: 1.65, color: C.muted, fontWeight: 500 }}>
-                      Buen dominio del análisis. Revisa el producto vectorial — cometiste el mismo error en los apartados 3a y 4b.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <CheckCircle2 size={11} style={{ color: '#86efac' }} /> {t}
+              </span>
+            ))}
           </div>
         </div>
-      </section>
+      </SmoothScrollHero>
 
       {/* ── Stats ────────────────────────────────────────────────────────── */}
       <section style={{

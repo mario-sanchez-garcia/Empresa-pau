@@ -1454,9 +1454,15 @@ function cambiarTipo(t: Tipo) {
 
         .subject-card-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-          gap: 10px;
+          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+          gap: 16px;
           width: 100%;
+        }
+
+        @media (max-width: 920px) {
+          .subject-card-grid {
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+          }
         }
 
         @media (max-width: 1024px) {
@@ -1540,7 +1546,17 @@ function cambiarTipo(t: Tipo) {
                 </div>
               )}
 
-              <div className="subject-card-grid">
+              <div
+                className="subject-card-grid"
+                style={!showAllSubjects ? {
+                  gridTemplateColumns:
+                    visibleSubjectCards.length === 1 ? 'minmax(280px, 520px)' :
+                    visibleSubjectCards.length === 2 ? 'repeat(2, 1fr)' :
+                    visibleSubjectCards.length === 3 ? 'repeat(3, 1fr)' :
+                    'repeat(4, 1fr)',
+                  justifyContent: visibleSubjectCards.length === 1 ? 'center' : undefined,
+                } : {}}
+              >
               {visibleSubjectCards.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
@@ -1549,6 +1565,7 @@ function cambiarTipo(t: Tipo) {
                 const pinned = pinnedClean.includes(key)
                 return (
                   <div
+                    className="campus-subject-card pau-subject-card"
                     key={key}
                     onClick={() => navegarAAsignatura(key)}
                     onKeyDown={(event) => {
@@ -1560,31 +1577,47 @@ function cambiarTipo(t: Tipo) {
                     role="button"
                     tabIndex={0}
                     style={{
+                      ...hoverVars(val.color, val.light, val.accent),
                       position: 'relative',
-                      padding: '14px',
-                      borderRadius: '12px',
-                      border: active ? `1.5px solid ${val.accent}` : '1px solid #dbe7fb',
-                      background: active ? val.light : '#ffffff',
+                      overflow: 'hidden',
+                      width: '100%',
+                      textAlign: 'left',
+                      minHeight: '178px',
+                      padding: '20px',
+                      borderRadius: '24px',
+                      border: active ? '1px solid ' + val.accent : '1px solid rgba(219,231,251,0.95)',
+                      background: 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 58%, ' + val.soft + ' 100%)',
                       cursor: 'pointer',
                       outline: 'none',
-                      boxShadow: active ? `0 4px 16px ${val.accent}20` : '0 1px 4px rgba(15,23,42,0.04)',
-                      transition: 'border-color 150ms ease, box-shadow 150ms ease',
+                      boxShadow: active ? '0 24px 55px ' + val.accent + '28' : '0 18px 45px rgba(37, 99, 235, 0.08)'
                     }}
                   >
+                    <div style={{ position: 'absolute', right: '-34px', bottom: '-42px', width: '128px', height: '128px', borderRadius: '50%', background: val.accent + '22' }} />
+                    <SubjectIllustration subject={key} color={val.color} accent={val.accent} />
                     <button
                       aria-label={pinned ? `Desanclar ${card.title}` : `Anclar ${card.title}`}
-                      onClick={(event) => { event.stopPropagation(); togglePinnedSubject(key) }}
-                      style={{ position: 'absolute', right: 8, top: 8, width: 22, height: 22, borderRadius: 6, border: `1px solid ${pinned ? val.accent : '#e2e8f0'}`, background: pinned ? val.light : 'transparent', color: pinned ? val.color : '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      className="campus-hover"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        togglePinnedSubject(key)
+                      }}
+                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '66px', top: '20px', width: '36px', height: '36px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as any}
                       type="button"
                     >
-                      <Pin size={11} fill={pinned ? 'currentColor' : 'none'} />
+                      <Pin size={16} fill={pinned ? 'currentColor' : 'none'} />
                     </button>
-                    <div style={{ width: 32, height: 32, borderRadius: 9, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: val.light, color: val.color }}>
-                      <Icon size={16} strokeWidth={2} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '19px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)', position: 'relative', zIndex: 2 }}>
+                        <Icon size={26} strokeWidth={2.1} />
+                      </div>
+                      <div className="campus-arrow" style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'linear-gradient(135deg, ' + val.color + ', ' + val.accent + ')' : '#ffffff', color: active ? '#fff' : val.color, boxShadow: '0 10px 22px rgba(37,99,235,0.08)', position: 'relative', zIndex: 2 }}>
+                        <ArrowUpRight size={19} />
+                      </div>
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', paddingRight: 20, lineHeight: 1.3 }}>{card.title}</div>
-                    <div style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', padding: '2px 7px', borderRadius: 999, background: pinned ? `${val.color}12` : 'rgba(100,116,139,0.07)', color: pinned ? val.color : '#94a3b8' }}>
-                      {pinned ? 'Anclado' : 'Disponible'}
+                    <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 760, color: WARM.ink, position: 'relative', zIndex: 2 }}>{card.title}</div>
+                    <div style={{ marginTop: '5px', color: WARM.muted, fontSize: '13px', lineHeight: '1.45', position: 'relative', zIndex: 2, maxWidth: '72%' }}>{card.subtitle}</div>
+                    <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.76)', color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
+                      <Flame size={13} />{card.kicker}
                     </div>
                   </div>
                 )
@@ -1592,11 +1625,16 @@ function cambiarTipo(t: Tipo) {
               </div>
             </div>
            {!isPhilosophy && <div style={{
-  padding: '14px 0',
-  marginBottom: '20px',
-  borderTop: '1px solid #f1f5f9',
-  borderBottom: '1px solid #f1f5f9',
+  background: 'rgba(255, 255, 255, 0.78)',
+  borderRadius: '24px',
+  border: '1px solid rgba(219, 231, 251, 0.85)',
+  padding: '24px',
+  marginBottom: '22px',
+  boxShadow: '0 2px 12px rgba(37,99,235,0.06), 0 1px 3px rgba(37,99,235,0.04)',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)'
 }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Filtros</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
                   <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
@@ -1879,14 +1917,17 @@ function cambiarTipo(t: Tipo) {
             )}
 
             {!isCatalunaExam && preguntaActiva && (
-              <div style={{ display: 'grid', gap: 16, alignItems: 'start', marginBottom: 22 }} className="xl:grid-cols-[3fr_2fr]">
              <div key={preguntaActivaKey} style={{
-  background: '#ffffff',
-  borderRadius: '12px',
-  border: '1px solid #dbe7fb',
+  background: 'rgba(255, 255, 255, 0.82)',
+  borderRadius: '24px',
+  border: '1px solid rgba(219, 231, 251, 0.80)',
   overflow: 'clip',
+  marginBottom: '22px',
+  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)'
 }}>
-                <div style={{ padding: '12px 18px', backgroundColor: cfg.light, borderBottom: '1px solid #f1f5f9', display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
                     {asignatura === 'historia' && diaHistoriaSeleccionado && (
@@ -2013,13 +2054,17 @@ function cambiarTipo(t: Tipo) {
                   )}
                 </div>
               </div>
-           <div style={{
-  background: '#ffffff',
-  borderRadius: '12px',
-  border: '1px solid #dbe7fb',
-  padding: '18px',
-  display: 'flex',
-  flexDirection: 'column',
+            )}
+
+           {!isCatalunaExam && preguntaActiva && <div style={{
+  background: 'rgba(255, 255, 255, 0.82)',
+  borderRadius: '24px',
+  border: '1px solid rgba(219, 231, 251, 0.80)',
+  padding: '26px',
+  marginBottom: '22px',
+  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)'
 }}>
               <div style={{ fontSize: '13px', fontWeight: 700, color: WARM.muted, marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
@@ -2046,14 +2091,10 @@ function cambiarTipo(t: Tipo) {
                   )}
                 </div>
               )}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                <button className="campus-primary" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '11px 22px', borderRadius: '12px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : '#2563eb', color: '#fff', fontSize: '14px', fontWeight: 700, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 8px 20px rgba(37,99,235,0.22)', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                  <WandSparkles size={15} className={cargando ? 'animate-pulse' : ''} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con IA'}
-                </button>
-              </div>
-            </div>
-            </div>
-            )}
+              <button className="campus-primary" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
+                <WandSparkles size={17} className={cargando ? 'animate-pulse' : ''} />{cargando ? 'Pausia está corrigiendo...' : 'Corregir con Pausia'}
+              </button>
+            </div>}
 
             {!isCatalunaExam && correccion && (
               <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>

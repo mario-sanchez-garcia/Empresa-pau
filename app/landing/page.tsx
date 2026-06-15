@@ -21,7 +21,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import SmoothScrollHero from '@/components/ui/smooth-scroll-hero'
+import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -252,16 +252,22 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Hero — SmoothScrollHero ──────────────────────────────────────── */}
-      <SmoothScrollHero
-        scrollHeight={1400}
-        desktopImage="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1920&q=85&auto=format&fit=crop"
-        mobileImage="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=900&q=85&auto=format&fit=crop"
-        initialClipPercentage={22}
-        finalClipPercentage={78}
+      {/* ── Hero — ScrollExpandMedia ─────────────────────────────────────── */}
+      <ScrollExpandMedia
+        mediaType="image"
+        mediaSrc="https://images.unsplash.com/photo-1513258496099-48168024aec0?w=1280&q=85&auto=format&fit=crop"
+        bgImageSrc="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1920&q=85&auto=format&fit=crop"
+        title="Prepara la PAU"
+        date="EBAU Madrid 2025"
+        scrollToExpand="Scroll para explorar"
+        textBlend
       >
-        {/* Hero text — white on dark image overlay */}
-        <div className="lp-h1" style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto' }}>
+        {/* Hero content — revealed after full image expansion */}
+        <div style={{
+          background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
+          borderRadius: 20, padding: 'clamp(40px,6vw,64px) clamp(24px,5vw,56px)',
+          textAlign: 'center', maxWidth: 680, margin: '0 auto',
+        }}>
           {/* Badge */}
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -351,7 +357,7 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-      </SmoothScrollHero>
+      </ScrollExpandMedia>
 
       {/* ── Stats ────────────────────────────────────────────────────────── */}
       <section style={{

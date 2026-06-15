@@ -314,7 +314,7 @@ function hoverVars(color: string, light: string, accent = color) {
 }
 
 function colorNota(n: number) {
-  return n >= 7 ? '#0f5ea8' : n >= 5 ? '#2563eb' : '#1d4ed8'
+  return n >= 7 ? '#16a34a' : n >= 5 ? '#d97706' : '#dc2626'
 }
 
 type FilterDropdownOption = {
@@ -1935,14 +1935,15 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exams-subject-strip > .pau-subject-card.is-active {
-          background: #ffffff !important;
-          border-color: #4f46e5 !important;
-          box-shadow: 0 14px 34px rgba(79, 70, 229, 0.12) !important;
+          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #eff6ff)) !important;
+          border-color: var(--hover-border, #4f46e5) !important;
+          box-shadow: 0 14px 34px var(--hover-shadow, rgba(79, 70, 229, 0.12)) !important;
         }
 
         .exams-subject-strip > .pau-subject-card:hover {
-          transform: translateY(-1px) !important;
-          box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08) !important;
+          transform: translateY(-2px) !important;
+          border-color: var(--hover-border, #60a5fa) !important;
+          box-shadow: 0 16px 36px var(--hover-shadow, rgba(15, 23, 42, 0.1)) !important;
         }
 
         .exams-subject-strip .subject-kicker {
@@ -2258,34 +2259,19 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exams-question-card {
-          background: #ffffff !important;
-          border: 1px solid #e5e7eb !important;
-          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.07) !important;
-        }
-
-        .exams-question-card > div:first-child {
-          background: #ffffff !important;
-          border-bottom: 1px solid #eef0f4 !important;
+          animation: pau-fade-up 300ms var(--ease-out) both;
         }
 
         .exams-answer-card {
-          background: #ffffff !important;
-          border: 1px solid #e5e7eb !important;
-          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.07) !important;
-        }
-
-        .exams-answer-card textarea {
-          background: #fafafb !important;
-          border-color: #e5e7eb !important;
+          animation: pau-fade-up 340ms var(--ease-out) 60ms both;
         }
 
         .exams-correct-button {
-          width: auto !important;
-          margin-left: auto !important;
-          padding: 13px 20px !important;
-          border-radius: 16px !important;
-          background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
-          box-shadow: 0 16px 34px rgba(79, 70, 229, 0.2) !important;
+          transition: filter 200ms ease, box-shadow 200ms ease, transform 200ms var(--ease-out) !important;
+        }
+        .exams-correct-button:not(:disabled):hover {
+          filter: brightness(1.05) saturate(1.08);
+          transform: translateY(-1px);
         }
 
         .exams-footer {
@@ -2385,7 +2371,12 @@ function cambiarTipo(t: Tipo) {
   top: 0,
   zIndex: 40,
 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {seccion === 'examenes' && (
+              <div style={{ width: 30, height: 30, borderRadius: 10, background: cfg.light, border: '1px solid ' + cfg.soft, color: cfg.color, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                <cfg.icon size={16} />
+              </div>
+            )}
             <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em' }}>
               {seccion === 'examenes' && cfg.label}
               {seccion === 'chat' && 'Chat con Pausia'}
@@ -2404,17 +2395,22 @@ function cambiarTipo(t: Tipo) {
         {seccion === 'examenes' && (
           <main className="exams-screen" style={{ flex: 1, padding: '32px 32px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
-            {/* ── Page title (Stitch) ──────────────────────────────── */}
+            {/* ── Page title ──────────────────────────────── */}
             <div className="exams-hero">
-              <div>
-                <h1 style={{ margin: 0, fontSize: 30, fontWeight: 860, color: '#111827', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-                  {cfg.label}
-                </h1>
-                <p style={{ margin: '8px 0 0', fontSize: 14, color: '#6b7280', lineHeight: 1.6, maxWidth: 620 }}>
-                  Convocatoria {tipo} {anioSeleccionado ? `· ${anioSeleccionado}` : ''} · {examSystemLabel(ccaa)}
-                </p>
+              <div className="pau-reveal" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 18, background: cfg.light, border: '1.5px solid ' + cfg.soft, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 24px ' + cfg.accent + '28', flexShrink: 0 }}>
+                  <cfg.icon size={26} />
+                </div>
+                <div>
+                  <h1 style={{ margin: 0, fontSize: 28, fontWeight: 860, color: '#111827', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                    {cfg.label}
+                  </h1>
+                  <p style={{ margin: '5px 0 0', fontSize: 13, color: '#6b7280', lineHeight: 1.5 }}>
+                    {tipo} {anioSeleccionado ? `· ${anioSeleccionado}` : ''} · {examSystemLabel(ccaa)}
+                  </p>
+                </div>
               </div>
-              <div className="exams-search-bar">
+              <div className="exams-search-bar pau-reveal pau-reveal-delay-1">
                 <input
                   className="exams-search-input"
                   value={searchQuery}
@@ -2480,7 +2476,7 @@ function cambiarTipo(t: Tipo) {
               )}
 
               <div
-                className="subject-card-grid exams-subject-strip"
+                className="subject-card-grid exams-subject-strip pau-stagger"
                 style={!showAllSubjects ? {
                   gridTemplateColumns:
                     visibleSubjectCards.length === 1 ? 'minmax(280px, 520px)' :
@@ -2556,7 +2552,7 @@ function cambiarTipo(t: Tipo) {
               })}
               </div>
             </div>
-           {!isPhilosophy && <div className="exams-filter-card" style={{
+           {!isPhilosophy && <div className="exams-filter-card pau-reveal pau-reveal-delay-2" style={{
   background: 'rgba(255, 255, 255, 0.92)',
   borderRadius: '22px',
   border: '1px solid rgba(219, 231, 251, 0.85)',
@@ -2566,7 +2562,10 @@ function cambiarTipo(t: Tipo) {
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)'
 }}>
-              <div style={{ fontSize: '12px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Filtros del examen</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '14px' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+                <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Filtros del examen · {cfg.short}</div>
+              </div>
               <div className="exams-filter-bar">
                 <FilterDropdown
                   label="Año"
@@ -2817,7 +2816,7 @@ function cambiarTipo(t: Tipo) {
               )}
             </div>}
 
-            <div className="exams-workspace">
+            <div className="exams-workspace pau-reveal pau-reveal-delay-3">
               <div className="exams-main-column">
 
             {isPhilosophy && <PhilosophyExamWorkspace ccaa={ccaa} />}
@@ -3059,7 +3058,7 @@ function cambiarTipo(t: Tipo) {
                 ))}
               </div>
               {modo === 'texto' ? (
-                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder="Empieza a resolver el problema aquí..." style={{ width: '100%', height: asignatura === 'historia' || asignatura === 'lengua' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid #dbe7fb', background: WARM.field, color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                <textarea value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder="Empieza a resolver el problema aquí..." onFocus={e => { e.currentTarget.style.border = '1.5px solid ' + cfg.accent; e.currentTarget.style.boxShadow = '0 0 0 3px ' + cfg.accent + '22' }} onBlur={e => { e.currentTarget.style.border = '1.5px solid ' + cfg.soft; e.currentTarget.style.boxShadow = 'none' }} style={{ width: '100%', height: asignatura === 'historia' || asignatura === 'lengua' ? '280px' : '180px', borderRadius: '16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid ' + cfg.soft, background: '#fafafa', color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color 150ms ease, box-shadow 150ms ease' }} />
               ) : (
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
@@ -3100,12 +3099,19 @@ function cambiarTipo(t: Tipo) {
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
                     <div>
                       <div className="exams-side-label">Nota estimada</div>
-                      <div style={{ marginTop: 6, color: '#111827', fontSize: 38, lineHeight: 1, fontWeight: 920 }}>
-                        {correccion ? correctionScoreLabel : '--'}
-                        <span style={{ marginLeft: 5, color: '#6b7280', fontSize: 14, fontWeight: 800 }}>{correctionScoreLabel === '--' ? '' : 'pts'}</span>
-                      </div>
+                      {(() => {
+                        const parts = correctionScoreLabel !== '--' ? correctionScoreLabel.split('/') : null
+                        const ratio = parts ? (parseFloat(parts[0]) / parseFloat(parts[1])) * 10 : null
+                        const scoreColor = ratio !== null ? colorNota(ratio) : '#111827'
+                        return (
+                          <div style={{ marginTop: 6, color: correccion ? scoreColor : '#94a3b8', fontSize: 40, lineHeight: 1, fontWeight: 920, transition: 'color 400ms ease', letterSpacing: '-0.02em' }}>
+                            {correccion ? correctionScoreLabel : '--'}
+                            <span style={{ marginLeft: 5, color: '#94a3b8', fontSize: 13, fontWeight: 700 }}>{correctionScoreLabel === '--' ? '' : 'pts'}</span>
+                          </div>
+                        )
+                      })()}
                       <p className="exams-side-text" style={{ marginTop: 8 }}>
-                        {correccion ? `Corrección generada. Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts.` : 'Resuelve el ejercicio y Pausia te dará feedback específico.'}
+                        {correccion ? `Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts` : 'Resuelve el ejercicio y Pausia te dará feedback.'}
                       </p>
                     </div>
                     <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }}>
@@ -3231,63 +3237,70 @@ function cambiarTipo(t: Tipo) {
               </div>
             ) : (
               <div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Total correcciones</div>
-                    <div style={{ fontSize: '36px', fontWeight: 800, color: WARM.ink }}>{historial.length}</div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Matemáticas</div>
-                    {mediaM ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaM)) }}>{mediaM}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Física</div>
-                    {mediaFisica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaFisica)) }}>{mediaFisica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Química</div>
-                    {mediaQuimica ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaQuimica)) }}>{mediaQuimica}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Biología</div>
-                    {mediaBiologia ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaBiologia)) }}>{mediaBiologia}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Inglés</div>
-                    {mediaIngles ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaIngles)) }}>{mediaIngles}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Lengua</div>
-                    {mediaLengua ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaLengua)) }}>{mediaLengua}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.78)', borderRadius: '18px', border: '1px solid rgba(219,231,251,0.80)', padding: '20px', textAlign: 'center', boxShadow: '0 2px 12px rgba(37,99,235,0.06)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Media Historia</div>
-                    {mediaHist ? <div style={{ fontSize: '36px', fontWeight: 800, color: colorNota(parseFloat(mediaHist)) }}>{mediaHist}<span style={{ fontSize: '16px', color: WARM.softText }}>/10</span></div> : <div style={{ fontSize: '16px', color: WARM.softText, marginTop: '8px' }}>Sin datos</div>}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {(() => {
+                  const statItems: Array<{ label: string; media: string | null; cfg: typeof ASIGNATURAS.mates }> = [
+                    { label: 'Matemáticas', media: mediaM, cfg: ASIGNATURAS.mates },
+                    { label: 'Física', media: mediaFisica, cfg: ASIGNATURAS.fisica },
+                    { label: 'Química', media: mediaQuimica, cfg: ASIGNATURAS.quimica },
+                    { label: 'Biología', media: mediaBiologia, cfg: ASIGNATURAS.biologia },
+                    { label: 'Inglés', media: mediaIngles, cfg: ASIGNATURAS.ingles },
+                    { label: 'Lengua', media: mediaLengua, cfg: ASIGNATURAS.lengua },
+                    { label: 'Historia', media: mediaHist, cfg: ASIGNATURAS.historia },
+                  ]
+                  return (
+                    <div className="pau-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '28px' }}>
+                      <div style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(37,99,235,0.06)' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Total</div>
+                        <div style={{ fontSize: '34px', fontWeight: 820, color: WARM.ink, letterSpacing: '-0.02em' }}>{historial.length}</div>
+                        <div style={{ fontSize: '11px', color: WARM.softText, marginTop: '4px' }}>correcciones</div>
+                      </div>
+                      {statItems.map(({ label, media, cfg: sCfg }) => (
+                        <div key={label} style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(37,99,235,0.06)', position: 'relative', overflow: 'hidden' }}>
+                          {media && (
+                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: sCfg.soft }}>
+                              <div style={{ height: '100%', width: `${Math.min(parseFloat(media) * 10, 100)}%`, background: colorNota(parseFloat(media)), borderRadius: 999, transition: 'width 800ms var(--ease-out)' }} />
+                            </div>
+                          )}
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: sCfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>{label}</div>
+                          {media ? (
+                            <div style={{ fontSize: '30px', fontWeight: 820, color: colorNota(parseFloat(media)), letterSpacing: '-0.02em' }}>
+                              {media}<span style={{ fontSize: '13px', color: WARM.softText, fontWeight: 600 }}>/10</span>
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '14px', color: WARM.softText, marginTop: '6px' }}>—</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
+                <div className="pau-stagger" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {historial.map((item, i) => {
                     const itemCfg = ASIGNATURAS[item.asignatura as Asignatura] ?? ASIGNATURAS.historia
+                    const ItemIcon = itemCfg.icon
                     return (
-                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(itemCfg.color, itemCfg.light, itemCfg.accent), background: WARM.surface, borderRadius: '18px', border: '1px solid #dbe7fb', padding: '20px', cursor: 'pointer', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                        <div>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: itemCfg.color }}>{nombreAsignatura(item.asignatura)}</span>
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.tipo}</span>
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.año}</span>
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', background: WARM.wash, color: WARM.muted, fontSize: '11px' }}>{item.bloque}</span>
-                          </div>
-                          <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '4px' }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(itemCfg.color, itemCfg.light, itemCfg.accent), background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px 20px', cursor: 'pointer', boxShadow: '0 6px 20px rgba(37,99,235,0.05)', borderLeft: '4px solid ' + itemCfg.color, display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 14, background: itemCfg.light, color: itemCfg.color, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                        <ItemIcon size={18} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
+                          <span style={{ fontSize: '13px', fontWeight: 750, color: '#111827' }}>{nombreAsignatura(item.asignatura)}</span>
+                          <span style={{ padding: '1px 8px', borderRadius: '20px', background: itemCfg.light, color: itemCfg.color, fontSize: '11px', fontWeight: 700, border: '1px solid ' + itemCfg.soft }}>{item.tipo}</span>
+                          <span style={{ padding: '1px 8px', borderRadius: '20px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.año}</span>
+                          {item.bloque && <span style={{ padding: '1px 8px', borderRadius: '20px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.bloque}</span>}
                         </div>
+                        <div style={{ fontSize: '12px', color: WARM.softText }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                         {item.nota !== null && item.nota_maxima !== null && (
-                          <div>
-                            <span style={{ fontSize: '28px', fontWeight: 800, color: colorNota(item.nota / item.nota_maxima * 10) }}>{item.nota}</span>
-                            <span style={{ fontSize: '14px', color: WARM.softText }}>/{item.nota_maxima}</span>
+                          <div style={{ textAlign: 'right' }}>
+                            <span style={{ fontSize: '26px', fontWeight: 820, color: colorNota(item.nota / item.nota_maxima * 10), letterSpacing: '-0.02em' }}>{item.nota}</span>
+                            <span style={{ fontSize: '13px', color: WARM.softText }}>/{item.nota_maxima}</span>
                           </div>
                         )}
+                        <ArrowUpRight size={16} color={WARM.softText} />
                       </div>
-                      <div style={{ fontSize: '13px', color: WARM.muted, display: 'flex', alignItems: 'center', gap: '6px' }}>Haz clic para ver la corrección completa <ArrowUpRight size={14} /></div>
                     </div>
                   )})}
                 </div>

@@ -23,6 +23,7 @@ import {
   Zap,
 } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
+import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero'
 import HeroCardsAnimator from '@/app/landing/HeroCardsAnimator'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -903,11 +904,23 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      {/* ── Scroll hero ──────────────────────────────────────────────────── */}
+      <ScrollExpandMedia
+        mediaType="image"
+        mediaSrc="/brand/hero-student.jpg"
+        bgImageSrc="/brand/hero-student.jpg"
+        title="Prepara la PAU"
+        date="EBAU Madrid 2026"
+        scrollToExpand="Scroll para explorar"
+        textBlend
+        overlayClass="absolute inset-0 rounded-xl"
+      />
+
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="lp-hero-section" style={{
         position: 'relative',
         overflow: 'hidden',
-        padding: 'clamp(104px,13vw,148px) clamp(20px,5vw,48px) clamp(56px,7vw,88px)',
+        padding: 'clamp(72px,9vw,112px) clamp(20px,5vw,48px) clamp(56px,7vw,88px)',
         background: 'radial-gradient(circle at 14% 12%, rgba(219,234,254,0.92), transparent 32%), radial-gradient(circle at 86% 16%, rgba(221,214,254,0.72), transparent 30%), radial-gradient(circle at 72% 84%, rgba(207,250,254,0.58), transparent 32%), linear-gradient(180deg, #ffffff 0%, #f8fbff 58%, #eff6ff 100%)',
       }}>
         <HeroCloudCurtain />

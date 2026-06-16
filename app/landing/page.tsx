@@ -762,6 +762,7 @@ export default function LandingPage() {
         scrollToExpand="Scroll para explorar"
         textBlend
         overlayClass="absolute inset-0 rounded-xl"
+        objectFit="contain"
       >
         <div style={{
           background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',

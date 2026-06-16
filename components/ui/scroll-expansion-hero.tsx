@@ -21,6 +21,7 @@ interface ScrollExpandMediaProps {
   scrollToExpand?: string;
   textBlend?: boolean;
   overlayClass?: string;
+  objectFit?: 'cover' | 'contain';
   children?: ReactNode;
 }
 
@@ -34,6 +35,7 @@ const ScrollExpandMedia = ({
   scrollToExpand,
   textBlend,
   overlayClass,
+  objectFit = 'cover',
   children,
 }: ScrollExpandMediaProps) => {
   const [scrollProgress, setScrollProgress] = useState<number>(0);
@@ -268,13 +270,13 @@ const ScrollExpandMedia = ({
                     </div>
                   )
                 ) : (
-                  <div className='relative w-full h-full'>
+                  <div className='relative w-full h-full bg-white'>
                     <Image
                       src={mediaSrc}
                       alt={title || 'Media content'}
                       width={1280}
                       height={720}
-                      className='w-full h-full object-cover rounded-xl'
+                      className={`w-full h-full rounded-xl ${objectFit === 'contain' ? 'object-contain' : 'object-cover'}`}
                     />
                     <motion.div
                       className={overlayClass ?? 'absolute inset-0 bg-black/50 rounded-xl'}

@@ -223,13 +223,14 @@ export default function CaminoPauClient() {
           <div
             id="camino-tasks"
             className="lg:grid-cols-[1fr_268px] pau-reveal pau-reveal-delay-3"
-            style={{ display: 'grid', gap: 12, marginTop: 12, alignItems: 'start' }}
+            style={{ display: 'grid', gap: 12, marginTop: 12 }}
           >
             {/* Task panel */}
             <div style={{
               borderRadius: 20, background: '#fff', overflow: 'hidden',
               border: '1.5px solid rgba(219,231,248,0.85)',
               boxShadow: '0 2px 14px rgba(37,99,235,0.05)',
+              display: 'flex', flexDirection: 'column',
             }}>
               {/* Panel header */}
               <div style={{ padding: '16px 18px 14px', borderBottom: '1px solid rgba(219,231,248,0.55)' }}>
@@ -290,141 +291,147 @@ export default function CaminoPauClient() {
                 </div>
               </div>
 
-              {/* Task list */}
-              {loading ? (
-                <div style={{ padding: '12px 0' }}>
-                  {[1, 2, 3].map(i => (
-                    <div key={i} style={{ padding: '10px 18px', borderBottom: i < 3 ? '1px solid rgba(219,231,248,0.5)' : 'none' }}>
-                      <div className="pau-skeleton" style={{ height: 42, borderRadius: 14 }} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div>
-                  {currentTasks.map((task, i) => (
-                    <div
-                      key={task.id}
-                      style={{ borderTop: i > 0 ? '1px solid rgba(219,231,248,0.5)' : 'none' }}
-                    >
-                      <DailyTaskCard
-                        task={task}
-                        completed={completedTaskIds.includes(task.id)}
-                        onComplete={handleCompleteTask}
-                      />
-                    </div>
-                  ))}
-                  {missionCompleted && (
-                    <motion.p
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{ margin: 0, padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#16a34a', borderTop: '1px solid rgba(219,231,248,0.5)' }}
-                    >
-                      ¡Vuelve mañana para mantener la racha! 🔥
-                    </motion.p>
-                  )}
-                </div>
-              )}
+              {/* Task list — flex:1 so the card fills height when stretched */}
+              <div style={{ flex: 1 }}>
+                {loading ? (
+                  <div style={{ padding: '12px 0' }}>
+                    {[1, 2, 3].map(i => (
+                      <div key={i} style={{ padding: '10px 18px', borderBottom: i < 3 ? '1px solid rgba(219,231,248,0.5)' : 'none' }}>
+                        <div className="pau-skeleton" style={{ height: 42, borderRadius: 14 }} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div>
+                    {currentTasks.map((task, i) => (
+                      <div
+                        key={task.id}
+                        style={{ borderTop: i > 0 ? '1px solid rgba(219,231,248,0.5)' : 'none' }}
+                      >
+                        <DailyTaskCard
+                          task={task}
+                          completed={completedTaskIds.includes(task.id)}
+                          onComplete={handleCompleteTask}
+                        />
+                      </div>
+                    ))}
+                    {missionCompleted && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{ margin: 0, padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#16a34a', borderTop: '1px solid rgba(219,231,248,0.5)' }}
+                      >
+                        ¡Vuelve mañana para mantener la racha! 🔥
+                      </motion.p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Right column */}
-            <div style={{ display: 'grid', gap: 12, alignContent: 'start' }}>
+            {/* XP card — dark, stretches to match task panel height */}
+            <div style={{
+              borderRadius: 18,
+              background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
+              padding: '24px 22px',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.18)',
+              overflow: 'hidden', position: 'relative',
+              display: 'flex', flexDirection: 'column',
+            }}>
+              <div aria-hidden style={{
+                position: 'absolute', top: -30, right: -30, width: 140, height: 140,
+                borderRadius: '50%', pointerEvents: 'none',
+                background: 'radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 70%)',
+              }} />
+              <div aria-hidden style={{
+                position: 'absolute', bottom: -20, left: -20, width: 100, height: 100,
+                borderRadius: '50%', pointerEvents: 'none',
+                background: 'radial-gradient(circle, rgba(37,99,235,0.20) 0%, transparent 70%)',
+              }} />
+              <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                  <TrendingUp size={14} color="rgba(255,255,255,0.45)" aria-hidden />
+                  <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                    Total XP
+                  </p>
+                </div>
+                <p style={{
+                  margin: 0, fontSize: 42, fontWeight: 900, color: '#fff',
+                  letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {loading ? '–' : fmtNum(progress.xpTotal)}
+                </p>
+                <p style={{ margin: '10px 0 0', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
+                  {loading ? '…' : `Faltan ${fmtNum(xpToNext)} XP para el Nivel ${currentLevel + 1}`}
+                </p>
 
-              {/* XP card — dark */}
-              <div style={{
-                borderRadius: 18,
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-                padding: '20px 20px',
-                boxShadow: '0 6px 24px rgba(0,0,0,0.18)',
-                overflow: 'hidden', position: 'relative',
-              }}>
-                {/* Glow */}
-                <div aria-hidden style={{
-                  position: 'absolute', top: -30, right: -30, width: 120, height: 120,
-                  borderRadius: '50%', pointerEvents: 'none',
-                  background: 'radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 70%)',
-                }} />
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                    <TrendingUp size={14} color="rgba(255,255,255,0.45)" aria-hidden />
-                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                      Total XP
-                    </p>
+                {/* Spacer pushes level bar to bottom */}
+                <div style={{ flex: 1 }} />
+
+                {/* Level bar */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>Nv. {currentLevel}</span>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>Nv. {currentLevel + 1}</span>
                   </div>
-                  <p style={{
-                    margin: 0, fontSize: 38, fontWeight: 900, color: '#fff',
-                    letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
-                  }}>
-                    {loading ? '–' : fmtNum(progress.xpTotal)}
-                  </p>
-                  <p style={{ margin: '8px 0 14px', fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>
-                    {loading ? '…' : `Faltan ${fmtNum(xpToNext)} XP para el Nivel ${currentLevel + 1}`}
-                  </p>
-                  {/* Level progress bar */}
-                  <div style={{ height: 3.5, borderRadius: 99, background: 'rgba(255,255,255,0.10)' }}>
+                  <div style={{ height: 4, borderRadius: 99, background: 'rgba(255,255,255,0.10)' }}>
                     <motion.div
-                      style={{
-                        height: '100%', borderRadius: 99,
-                        background: 'linear-gradient(90deg, #7c3aed, #a78bfa)',
-                      }}
+                      style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #7c3aed, #a78bfa)' }}
                       animate={{ width: loading ? '0%' : `${Math.round(levelPct * 100)}%` }}
                       transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
                     />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>
-                      Nv. {currentLevel}
-                    </span>
-                    <span style={{ fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>
-                      Nv. {currentLevel + 1}
-                    </span>
-                  </div>
                 </div>
               </div>
-
-              {/* Route card */}
-              <RouteCard selectedRouteId={progress.selectedRouteId} onRouteChange={changeRoute} />
-
-              {/* Next objectives */}
-              <section style={{
-                borderRadius: 18, background: '#fff',
-                border: '1.5px solid rgba(219,231,248,0.85)',
-                padding: '16px 16px',
-                boxShadow: '0 2px 10px rgba(37,99,235,0.04)',
-              }}>
-                <h2 style={{ margin: '0 0 12px', fontSize: 12.5, fontWeight: 800, color: '#111827', letterSpacing: '-0.01em' }}>
-                  Lo que viene
-                </h2>
-                <div style={{ display: 'grid', gap: 8 }}>
-                  {nextObjectives.map((item, i) => (
-                    <div key={item.week} style={{
-                      display: 'flex', gap: 10, padding: '9px 10px', borderRadius: 12,
-                      background: i === 0 ? 'linear-gradient(135deg, rgba(239,246,255,0.95), rgba(224,236,255,0.55))' : '#f8fbff',
-                      border: `1.5px solid ${i === 0 ? 'rgba(190,218,255,0.8)' : 'rgba(219,231,248,0.5)'}`,
-                    }}>
-                      <div style={{
-                        width: 30, height: 30, flexShrink: 0, borderRadius: 8,
-                        background: i === 0 ? 'linear-gradient(135deg, #1d4ed8, #3b8ef8)' : '#fff',
-                        border: i === 0 ? 'none' : '1.5px solid rgba(219,231,248,0.9)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 10, fontWeight: 900,
-                        color: i === 0 ? '#fff' : '#2563eb',
-                        boxShadow: i === 0 ? '0 3px 10px rgba(37,99,235,0.22)' : 'none',
-                      }}>
-                        {item.week}
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <h3 style={{ margin: 0, fontSize: 11.5, fontWeight: 800, color: '#111827', letterSpacing: '-0.01em' }}>
-                          S{item.week}: {item.label}
-                        </h3>
-                        <p style={{ margin: '2px 0 0', fontSize: 10.5, fontWeight: 500, color: '#94a3b8' }}>
-                          {item.detail}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
             </div>
+          </div>
+
+          {/* ── Row 4: Route + Next objectives ───────────────────────── */}
+          <div
+            className="md:grid-cols-2"
+            style={{ display: 'grid', gap: 12, marginTop: 12 }}
+          >
+            <RouteCard selectedRouteId={progress.selectedRouteId} onRouteChange={changeRoute} />
+
+            <section style={{
+              borderRadius: 18, background: '#fff',
+              border: '1.5px solid rgba(219,231,248,0.85)',
+              padding: '18px 18px',
+              boxShadow: '0 2px 10px rgba(37,99,235,0.04)',
+            }}>
+              <h2 style={{ margin: '0 0 14px', fontSize: 13, fontWeight: 800, color: '#111827', letterSpacing: '-0.01em' }}>
+                Lo que viene
+              </h2>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {nextObjectives.map((item, i) => (
+                  <div key={item.week} style={{
+                    display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 12,
+                    background: i === 0 ? 'linear-gradient(135deg, rgba(239,246,255,0.95), rgba(224,236,255,0.55))' : '#f8fbff',
+                    border: `1.5px solid ${i === 0 ? 'rgba(190,218,255,0.8)' : 'rgba(219,231,248,0.5)'}`,
+                  }}>
+                    <div style={{
+                      width: 32, height: 32, flexShrink: 0, borderRadius: 9,
+                      background: i === 0 ? 'linear-gradient(135deg, #1d4ed8, #3b8ef8)' : '#fff',
+                      border: i === 0 ? 'none' : '1.5px solid rgba(219,231,248,0.9)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 900,
+                      color: i === 0 ? '#fff' : '#2563eb',
+                      boxShadow: i === 0 ? '0 3px 10px rgba(37,99,235,0.22)' : 'none',
+                    }}>
+                      {item.week}
+                    </div>
+                    <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <h3 style={{ margin: 0, fontSize: 12, fontWeight: 800, color: '#111827', letterSpacing: '-0.01em' }}>
+                        S{item.week}: {item.label}
+                      </h3>
+                      <p style={{ margin: '2px 0 0', fontSize: 11, fontWeight: 500, color: '#94a3b8' }}>
+                        {item.detail}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
 
           {/* ── Utilities ─────────────────────────────────────────────── */}

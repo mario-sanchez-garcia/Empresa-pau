@@ -2,6 +2,7 @@
 
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useRef } from 'react';
+import { ShaderAnimation } from '@/components/ui/shader-animation';
 
 interface Image {
     src: string;
@@ -55,12 +56,14 @@ export function ZoomParallax({ images, centerReveal }: ZoomParallaxProps) {
                     );
                 })}
 
-                {/* White fade overlay so the logo appears cleanly */}
+                {/* Shader animation background — fades in before logo */}
                 {centerReveal && (
                     <motion.div
                         style={{ opacity: overlayOpacity }}
-                        className="absolute inset-0 bg-white pointer-events-none z-10"
-                    />
+                        className="absolute inset-0 pointer-events-none z-10"
+                    >
+                        <ShaderAnimation />
+                    </motion.div>
                 )}
 
                 {/* Center reveal element (logo) */}

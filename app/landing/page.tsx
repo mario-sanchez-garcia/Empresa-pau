@@ -917,8 +917,8 @@ export default function LandingPage() {
         ]}
         centerReveal={
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <img src="/brand/pausia-lockup.png" alt="Pausia" style={{ width: 'clamp(180px,28vw,360px)', height: 'auto' }} />
-            <p style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', color: '#0f172a', fontWeight: 600, opacity: 0.7, letterSpacing: '-0.02em' }}>
+            <img src="/brand/pausia-lockup.png" alt="Pausia" style={{ width: 'clamp(180px,28vw,360px)', height: 'auto', filter: 'brightness(0) invert(1)' }} />
+            <p style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', color: '#ffffff', fontWeight: 600, opacity: 0.85, letterSpacing: '-0.02em' }}>
               Prepara la PAU con claridad.
             </p>
           </div>

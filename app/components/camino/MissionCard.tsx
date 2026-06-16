@@ -10,190 +10,176 @@ interface MissionCardProps {
   completedCount: number
   totalTasks: number
   missionCompleted: boolean
+  weekTitle?: string
   onPrimaryAction: () => void
 }
 
-const R = 38
+const R    = 46
 const CIRC = 2 * Math.PI * R
 
 export default function MissionCard({
-  routeId, completedCount, totalTasks, missionCompleted, onPrimaryAction,
+  routeId, completedCount, totalTasks, missionCompleted, weekTitle, onPrimaryAction,
 }: MissionCardProps) {
   const route    = getRouteById(routeId)
   const started  = completedCount > 0
   const progress = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0
-  const cta      = missionCompleted ? '¡Misión completada!' : started ? 'Continuar misión' : 'Empezar misión'
   const offset   = CIRC - (progress / 100) * CIRC
+  const heading  = weekTitle ?? 'Tu misión de hoy'
+  const cta      = missionCompleted ? '¡Misión completada!' : started ? 'Continuar misión' : 'Empezar misión'
 
   return (
     <section
       style={{
-        borderRadius: 24, overflow: 'hidden', position: 'relative',
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%)',
+        borderRadius: 20, background: '#fff',
+        border: '1.5px solid rgba(219,231,248,0.85)',
+        boxShadow: '0 2px 14px rgba(37,99,235,0.06)',
+        padding: '26px 28px',
+        display: 'flex', alignItems: 'center', gap: 24,
+        overflow: 'hidden', position: 'relative',
       }}
       aria-label="Misión de hoy"
     >
-      {/* Decorative glows */}
-      <div aria-hidden style={{
-        position: 'absolute', top: -50, right: -50, width: 220, height: 220,
-        borderRadius: '50%', pointerEvents: 'none',
-        background: 'radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%)',
-      }} />
-      <div aria-hidden style={{
-        position: 'absolute', bottom: -30, left: '35%', width: 180, height: 180,
-        borderRadius: '50%', pointerEvents: 'none',
-        background: 'radial-gradient(circle, rgba(96,165,250,0.14) 0%, transparent 70%)',
-      }} />
+      {/* Left: text */}
+      <div style={{ flex: 1, minWidth: 0 }}>
 
-      <div style={{
-        position: 'relative', zIndex: 1,
-        padding: '28px 28px',
-        display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
-      }}>
-
-        {/* Pau avatar */}
-        <div style={{ flexShrink: 0, position: 'relative' }}>
-          <motion.div
-            initial={{ scale: 0.82, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 22, delay: 0.08 }}
-            style={{
-              width: 90, height: 90, borderRadius: '50%', overflow: 'hidden',
-              border: '3px solid rgba(255,255,255,0.22)',
-              boxShadow: '0 0 0 8px rgba(255,255,255,0.07), 0 16px 40px rgba(0,0,0,0.32)',
-            }}
-          >
+        {/* Badge row */}
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.04 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, flexWrap: 'wrap' }}
+        >
+          <div style={{
+            width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+            border: '2px solid rgba(109,40,217,0.18)',
+            boxShadow: '0 2px 8px rgba(109,40,217,0.12)',
+          }}>
             <Image
               src="/mascots/pau/pau-guide.png" alt="Pau"
-              width={90} height={90}
+              width={34} height={34}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               priority
             />
-          </motion.div>
+          </div>
+          <span style={{
+            background: '#111827', color: '#fff',
+            fontSize: 10, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase',
+            padding: '4px 12px', borderRadius: 99, whiteSpace: 'nowrap',
+          }}>
+            Misión de hoy · Día {todayMission.day}
+          </span>
+          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            {route.nombre}
+          </span>
+        </motion.div>
 
-          {/* XP orb */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 16, delay: 0.38 }}
-            aria-hidden
-            style={{
-              position: 'absolute', bottom: -5, right: -5,
-              width: 28, height: 28, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              border: '2.5px solid #312e81',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14,
-            }}
-          >
-            ⚡
-          </motion.div>
-        </div>
-
-        {/* Mission text */}
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <motion.div
+        {/* Heading — BIG */}
+        <AnimatePresence mode="wait">
+          <motion.h2
+            key={missionCompleted ? 'done' : heading}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14, duration: 0.3 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}
-          >
-            <span style={{
-              fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-              background: 'rgba(255,255,255,0.13)', color: 'rgba(255,255,255,0.88)',
-              padding: '3px 10px', borderRadius: 99, backdropFilter: 'blur(8px)',
-            }}>
-              Misión de hoy · Día {todayMission.day}
-            </span>
-            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>
-              {route.nombre}
-            </span>
-          </motion.div>
-
-          <AnimatePresence mode="wait">
-            <motion.h2
-              key={missionCompleted ? 'done' : 'active'}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22 }}
-              style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.2 }}
-            >
-              {missionCompleted ? '¡Misión completada! 🎉' : 'Tu misión de hoy'}
-            </motion.h2>
-          </AnimatePresence>
-
-          <p style={{ margin: '6px 0 0', fontSize: 14, color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.55 }}>
-            {todayMission.objective}
-          </p>
-
-          {/* Meta chips */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, marginTop: 14 }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
-              <Clock3 size={13} /> {todayMission.estimatedTime}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
-              <CheckCircle2 size={13} /> {completedCount}/{totalTasks} tareas
-            </span>
-            <span style={{ fontSize: 12.5, fontWeight: 900, color: '#fbbf24', letterSpacing: '-0.01em' }}>
-              +250 XP
-            </span>
-          </div>
-
-          {/* CTA */}
-          <motion.button
-            type="button"
-            onClick={onPrimaryAction}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 20 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.22 }}
             style={{
-              marginTop: 18,
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '12px 22px', borderRadius: 14, border: 'none', cursor: 'pointer',
-              background: missionCompleted ? 'rgba(22,163,74,0.85)' : '#fff',
-              color: missionCompleted ? '#fff' : '#1e1b4b',
-              fontSize: 14, fontWeight: 800, letterSpacing: '-0.01em',
-              boxShadow: missionCompleted
-                ? '0 6px 22px rgba(22,163,74,0.38)'
-                : '0 6px 22px rgba(0,0,0,0.22)',
+              margin: 0,
+              fontSize: 'clamp(22px, 2.8vw, 32px)',
+              fontWeight: 900,
+              color: missionCompleted ? '#059669' : '#111827',
+              letterSpacing: '-0.033em',
+              lineHeight: 1.18,
+              maxWidth: '26ch',
             }}
           >
-            {cta}
-            {!missionCompleted && <ArrowRight size={15} />}
-          </motion.button>
+            {missionCompleted ? '¡Misión completada!' : heading}
+          </motion.h2>
+        </AnimatePresence>
+
+        <p style={{
+          margin: '10px 0 0',
+          fontSize: 13.5, color: '#64748b', fontWeight: 500, lineHeight: 1.65, maxWidth: '44ch',
+        }}>
+          {todayMission.objective}
+        </p>
+
+        {/* Meta row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+            <Clock3 size={13} aria-hidden /> {todayMission.estimatedTime}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+            <CheckCircle2 size={13} aria-hidden /> {completedCount}/{totalTasks} tareas
+          </span>
+          <span style={{ fontSize: 12.5, fontWeight: 900, color: '#7c3aed', letterSpacing: '-0.01em' }}>
+            +250 XP
+          </span>
         </div>
 
-        {/* Circular progress ring (hidden on small mobile) */}
-        <div className="hidden sm:flex" style={{ flexShrink: 0, alignItems: 'center', justifyContent: 'center' }}
-          aria-hidden>
-          <svg width={108} height={108} viewBox="-4 -4 108 108">
-            <circle cx="50" cy="50" r={R} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="7.5" />
-            <motion.circle
-              cx="50" cy="50" r={R}
-              fill="none"
-              stroke={missionCompleted ? '#4ade80' : 'rgba(255,255,255,0.92)'}
-              strokeWidth="7.5"
-              strokeLinecap="round"
-              strokeDasharray={CIRC}
-              initial={{ strokeDashoffset: CIRC }}
-              animate={{ strokeDashoffset: offset }}
-              transition={{ duration: 1.15, ease: [0.4, 0, 0.2, 1], delay: 0.25 }}
-              transform="rotate(-90 50 50)"
-            />
-            <text x="50" y="44" textAnchor="middle"
-              fill="rgba(255,255,255,0.5)" fontSize="9" fontWeight="700" letterSpacing="0.07em"
-              style={{ fontFamily: 'system-ui, sans-serif' }}>
-              MISIÓN
-            </text>
-            <text x="50" y="63" textAnchor="middle"
-              fill={missionCompleted ? '#4ade80' : '#fff'} fontSize="21" fontWeight="900"
-              style={{ fontFamily: 'system-ui, sans-serif' }}>
-              {progress}%
-            </text>
-          </svg>
-        </div>
+        {/* CTA */}
+        <motion.button
+          type="button"
+          onClick={onPrimaryAction}
+          whileHover={{ scale: 1.025 }}
+          whileTap={{ scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 440, damping: 20 }}
+          style={{
+            marginTop: 20,
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '11px 22px', borderRadius: 12, border: 'none', cursor: 'pointer',
+            background: missionCompleted
+              ? 'linear-gradient(135deg, #059669, #10b981)'
+              : 'linear-gradient(135deg, #6d28d9, #7c3aed)',
+            color: '#fff',
+            fontSize: 13.5, fontWeight: 800, letterSpacing: '-0.01em',
+            boxShadow: missionCompleted
+              ? '0 5px 18px rgba(5,150,105,0.30)'
+              : '0 5px 18px rgba(109,40,217,0.35)',
+          }}
+        >
+          {cta}
+          {!missionCompleted && <ArrowRight size={14} />}
+        </motion.button>
+      </div>
 
+      {/* Right: circular day ring */}
+      <div
+        className="hidden sm:flex"
+        style={{ flexShrink: 0, alignItems: 'center', justifyContent: 'center' }}
+        aria-hidden
+      >
+        <svg width={124} height={124} viewBox="-8 -8 116 116">
+          <circle
+            cx="50" cy="50" r={R}
+            fill="none" stroke="#f1f5f9" strokeWidth="7.5"
+          />
+          <motion.circle
+            cx="50" cy="50" r={R}
+            fill="none"
+            stroke={missionCompleted ? '#10b981' : '#7c3aed'}
+            strokeWidth="7.5"
+            strokeLinecap="round"
+            strokeDasharray={CIRC}
+            initial={{ strokeDashoffset: CIRC }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 1.25, ease: [0.4, 0, 0.2, 1], delay: 0.2 }}
+            transform="rotate(-90 50 50)"
+          />
+          <text x="50" y="42" textAnchor="middle"
+            fill="#94a3b8" fontSize="8.5" fontWeight="700" letterSpacing="0.07em"
+            style={{ fontFamily: 'system-ui, sans-serif', textTransform: 'uppercase' }}>
+            DÍA
+          </text>
+          <text x="50" y="65" textAnchor="middle"
+            fill={missionCompleted ? '#10b981' : '#111827'} fontSize="28" fontWeight="900"
+            style={{ fontFamily: 'system-ui, sans-serif', letterSpacing: '-0.04em' }}>
+            {todayMission.day}
+          </text>
+          <text x="50" y="79" textAnchor="middle"
+            fill="#cbd5e1" fontSize="8" fontWeight="600"
+            style={{ fontFamily: 'system-ui, sans-serif' }}>
+            {progress}% hoy
+          </text>
+        </svg>
       </div>
     </section>
   )

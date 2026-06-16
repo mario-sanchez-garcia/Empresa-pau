@@ -7,130 +7,129 @@ import { progressNodes } from '@/app/lib/camino/caminoData'
 type NodeStatus = 'completed' | 'current' | 'next' | 'locked'
 
 const NODE_CFG: Record<NodeStatus, {
-  cardBg: string; cardBorder: string;
-  iconBg: string; iconColor: string; iconBorder: string;
-  pillBg: string; pillText: string;
-  label: string
+  circleBg: string; circleColor: string; circleBorder: string; circleShadow: string;
+  pillBg: string; pillText: string; label: string; dotColor: string;
 }> = {
   completed: {
-    cardBg: '#f0fdf4', cardBorder: '#86efac',
-    iconBg: 'linear-gradient(135deg, #16a34a, #22c55e)', iconColor: '#fff', iconBorder: '#4ade80',
-    pillBg: '#dcfce7', pillText: '#166534',
-    label: 'Completado',
+    circleBg: 'linear-gradient(135deg, #16a34a, #22c55e)',
+    circleColor: '#fff', circleBorder: '#4ade80',
+    circleShadow: '0 6px 18px rgba(22,163,74,0.28)',
+    pillBg: '#dcfce7', pillText: '#166534', label: 'Completado', dotColor: '#4ade80',
   },
   current: {
-    cardBg: '#eff6ff', cardBorder: '#93c5fd',
-    iconBg: 'linear-gradient(135deg, #1d4ed8, #3b82f6)', iconColor: '#fff', iconBorder: '#60a5fa',
-    pillBg: '#dbeafe', pillText: '#1e40af',
-    label: 'Actual',
+    circleBg: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+    circleColor: '#fff', circleBorder: '#60a5fa',
+    circleShadow: '0 6px 20px rgba(37,99,235,0.32)',
+    pillBg: '#dbeafe', pillText: '#1e40af', label: 'Actual', dotColor: '#3b82f6',
   },
   next: {
-    cardBg: '#f8fafc', cardBorder: '#e2e8f0',
-    iconBg: '#fff', iconColor: '#2563eb', iconBorder: '#dbeafe',
-    pillBg: '#f1f5f9', pillText: '#475569',
-    label: 'Próximo',
+    circleBg: '#fff',
+    circleColor: '#2563eb', circleBorder: '#dbeafe',
+    circleShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    pillBg: '#f1f5f9', pillText: '#475569', label: 'Próximo', dotColor: '#e2e8f0',
   },
   locked: {
-    cardBg: '#f8fafc', cardBorder: '#e2e8f0',
-    iconBg: '#f1f5f9', iconColor: '#94a3b8', iconBorder: '#e2e8f0',
-    pillBg: '#f1f5f9', pillText: '#9ca3af',
-    label: 'Bloqueado',
+    circleBg: '#f8fafc',
+    circleColor: '#94a3b8', circleBorder: '#e2e8f0',
+    circleShadow: 'none',
+    pillBg: '#f1f5f9', pillText: '#9ca3af', label: 'Bloqueado', dotColor: '#e2e8f0',
   },
 }
 
 function NodeIcon({ status }: { status: NodeStatus }) {
   const props = { strokeWidth: 2.5 }
-  if (status === 'completed') return <Check   size={20} {...props} />
-  if (status === 'current')   return <MapPin  size={19} {...props} />
-  if (status === 'next')      return <Star    size={18} {...props} />
+  if (status === 'completed') return <Check   size={21} {...props} />
+  if (status === 'current')   return <MapPin  size={20} {...props} />
+  if (status === 'next')      return <Star    size={19} {...props} />
   return <Lock size={17} {...props} />
 }
 
 export default function ProgressPath() {
   return (
-    <section style={{
-      borderRadius: 20, background: '#fff',
-      border: '1.5px solid rgba(219,231,248,0.9)',
-      padding: '20px 20px',
-      boxShadow: '0 2px 12px rgba(37,99,235,0.06)',
-    }}>
-      <div style={{ marginBottom: 18 }}>
-        <p style={{ margin: 0, fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-          Mini mapa de progreso
-        </p>
-        <h2 style={{ margin: '2px 0 0', fontSize: 18, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>
-          Bloques del camino
-        </h2>
+    <section
+      style={{
+        borderRadius: 20, background: '#fff',
+        border: '1.5px solid rgba(219,231,248,0.85)',
+        boxShadow: '0 2px 10px rgba(37,99,235,0.05)',
+        padding: '22px 24px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 22, flexWrap: 'wrap', gap: 4 }}>
+        <div>
+          <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+            Tu ruta de aprendizaje
+          </p>
+          <h2 style={{ margin: '2px 0 0', fontSize: 17, fontWeight: 900, color: '#111827', letterSpacing: '-0.022em' }}>
+            Bloques del camino
+          </h2>
+        </div>
       </div>
 
+      {/* Nodes */}
       <div style={{ position: 'relative' }}>
         {/* Connector track */}
-        <div aria-hidden style={{
-          position: 'absolute', top: 27, left: 28, right: 28, height: 2, zIndex: 0,
-          borderRadius: 99,
-          background: 'linear-gradient(90deg, #4ade80 0%, #93c5fd 28%, #e2e8f0 55%, #e2e8f0 100%)',
-        }} />
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', top: 26, left: 26, right: 26, height: 2, zIndex: 0,
+            borderRadius: 99,
+            background: 'linear-gradient(90deg, #4ade80 0%, #4ade80 20%, #93c5fd 40%, #e2e8f0 60%, #e2e8f0 100%)',
+          }}
+        />
 
         <div
           className="grid-cols-2 md:grid-cols-4"
-          style={{ display: 'grid', gap: 12, position: 'relative', zIndex: 1 }}
+          style={{ display: 'grid', gap: 16, position: 'relative', zIndex: 1 }}
         >
           {progressNodes.map((node, i) => {
-            const cfg = NODE_CFG[node.status]
+            const cfg       = NODE_CFG[node.status]
             const isCurrent = node.status === 'current'
 
             return (
               <motion.div
                 key={node.id}
-                initial={{ opacity: 0, y: 14 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-                style={{
-                  borderRadius: 16,
-                  border: `1.5px solid ${cfg.cardBorder}`,
-                  background: cfg.cardBg,
-                  padding: '14px 12px',
-                }}
+                transition={{ delay: i * 0.07, duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
               >
-                {/* Icon wrapper */}
-                <div style={{ position: 'relative', display: 'inline-block', marginBottom: 10 }}>
+                {/* Circle */}
+                <div style={{ position: 'relative', marginBottom: 10 }}>
                   <div style={{
-                    width: 46, height: 46, borderRadius: 13,
-                    background: cfg.iconBg,
-                    border: `1.5px solid ${cfg.iconBorder}`,
+                    width: 52, height: 52, borderRadius: '50%',
+                    background: cfg.circleBg,
+                    border: `2px solid ${cfg.circleBorder}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: cfg.iconColor,
-                    boxShadow: isCurrent ? '0 6px 20px rgba(37,99,235,0.30)' : 'none',
+                    color: cfg.circleColor,
+                    boxShadow: cfg.circleShadow,
                   }}>
                     <NodeIcon status={node.status} />
                   </div>
 
-                  {/* Pulse ring for current */}
                   {isCurrent && (
                     <motion.div
-                      animate={{ scale: [1, 1.40, 1], opacity: [0.65, 0, 0.65] }}
+                      animate={{ scale: [1, 1.45, 1], opacity: [0.6, 0, 0.6] }}
                       transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
                       aria-hidden
                       style={{
-                        position: 'absolute', inset: -7,
-                        borderRadius: 20,
-                        border: '2px solid #3b82f6',
-                        pointerEvents: 'none',
+                        position: 'absolute', inset: -7, borderRadius: '50%',
+                        border: '2px solid #3b82f6', pointerEvents: 'none',
                       }}
                     />
                   )}
                 </div>
 
-                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
+                {/* Label */}
+                <h3 style={{ margin: 0, fontSize: 12.5, fontWeight: 800, color: '#111827', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
                   {node.label}
                 </h3>
-                <p style={{ margin: '3px 0 0', fontSize: 11.5, fontWeight: 500, color: '#64748b', lineHeight: 1.45 }}>
+                <p style={{ margin: '3px 0 6px', fontSize: 11, fontWeight: 500, color: '#64748b', lineHeight: 1.4 }}>
                   {node.description}
                 </p>
                 <span style={{
-                  display: 'inline-block', marginTop: 9,
-                  padding: '2.5px 9px', borderRadius: 99,
-                  fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase',
+                  display: 'inline-block',
+                  padding: '2.5px 10px', borderRadius: 99,
+                  fontSize: 9.5, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase',
                   background: cfg.pillBg, color: cfg.pillText,
                 }}>
                   {cfg.label}

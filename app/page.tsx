@@ -3259,7 +3259,7 @@ function cambiarTipo(t: Tipo) {
                       </p>
                     </div>
                     <div className="exams-side-section" style={{ background: '#f5f3ff', borderColor: '#ddd6fe' }}>
-                      <div className="exams-side-label" style={{ color: '#7c3aed' }}>¿Por qué es así?</div>
+                      <div className="exams-side-label" style={{ color: '#7c3aed' }}>Bloque asociado</div>
                       <p className="exams-side-text">
                         {!isCatalunaExam && preguntaActiva ? bloqueActivoLabel : 'Selecciona un ejercicio para ver el bloque asociado.'}
                       </p>

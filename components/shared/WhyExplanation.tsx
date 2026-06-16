@@ -15,7 +15,8 @@ export default function WhyExplanation({
   components?: Record<string, any>
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const content = (markdown?.trim() || whyExplanationToMarkdown(explanation)).trim()
+  const structuredContent = whyExplanationToMarkdown(explanation)
+  const content = (structuredContent || markdown?.trim() || '').trim()
 
   if (!content) return null
 

@@ -1,4 +1,4 @@
-export type WhyExplanationStatus = 'generated' | 'needs_review' | 'verified'
+export type WhyExplanationStatus = 'generated' | 'needs_review' | 'verified' | 'not_available'
 
 export interface WhyExplanation {
   title?: string
@@ -18,6 +18,7 @@ const WHY_HEADING = '¿Por qué es así?'
 export function normalizeWhyExplanation(value: unknown): WhyExplanation | null {
   if (typeof value === 'string') {
     const text = value.trim()
+    if (!text || text === 'not_available') return null
     return text ? { title: WHY_HEADING, keyIdea: text, status: 'generated' } : null
   }
 
@@ -36,6 +37,7 @@ export function normalizeWhyExplanation(value: unknown): WhyExplanation | null {
     status: isWhyStatus(record.status) ? record.status : 'generated',
   }
 
+  if (explanation.status === 'not_available') return null
   return hasWhyContent(explanation) ? explanation : null
 }
 
@@ -84,5 +86,5 @@ function stringValue(value: unknown) {
 }
 
 function isWhyStatus(value: unknown): value is WhyExplanationStatus {
-  return value === 'generated' || value === 'needs_review' || value === 'verified'
+  return value === 'generated' || value === 'needs_review' || value === 'verified' || value === 'not_available'
 }

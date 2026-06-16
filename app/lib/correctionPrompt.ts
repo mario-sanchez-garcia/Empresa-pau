@@ -150,7 +150,7 @@ Lengua Castellana y Literatura II:
 18. No uses HTML ni párrafos largos y apelmazados. Separa claramente aciertos, errores, corrección paso a paso, respuesta modelo y consejo final.
 19. Aunque la salida completa sea JSON puro, los valores de texto dentro del JSON pueden y deben contener Markdown y LaTeX válidos.
 20. porqueEsAsi es opcional. Inclúyelo solo si puedes cerrar el JSON correctamente. Debe sonar como una explicación de un profesor PAU: concepto central, por qué se aplica al enunciado concreto, cómo pensarlo, qué ocurrió en la respuesta del alumno, error típico, mini ejemplo original y frase/checklist para sacar puntos. No copies apuntes ni libros. Usa Markdown y LaTeX cuando proceda, preservando $...$ y $$...$$.
-21. Mantén teoria_ejercicio solo como compatibilidad legacy si aparece en datos antiguos; para respuestas nuevas usa porqueEsAsi. Si falta espacio, devuelve porqueEsAsi como null y prioriza siempre la corrección principal y un JSON válido.
+21. Mantén teoria_ejercicio solo como compatibilidad legacy si aparece en datos antiguos; para respuestas nuevas usa porqueEsAsi. Si falta espacio o no hay información suficiente, devuelve porqueEsAsi como null o con status "not_available" y prioriza siempre la corrección principal y un JSON válido.
 
 ### FORMATO DE SALIDA
 
@@ -291,7 +291,7 @@ INSTRUCCIONES:
 3. Cada punto descontado en penalizaciones_aplicadas debe tener motivo concreto.
 4. Usa Markdown y LaTeX ($...$, $$...$$) en los campos de texto cuando sea útil.
 5. Feedback directo y específico a la respuesta real, no genérico.
-6. Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. No copies material externo.
+6. Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. Si falta contexto, usa status "not_available" sin inventar. No copies material externo.
 7. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
 
 {
@@ -449,12 +449,12 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
     ].filter(Boolean).join('\n\n')),
     plan.length ? `### Plan de repaso\n${plan.map((item: any) => `${item.prioridad}. **${item.tema}**: ${item.accion} (${item.tiempo_recomendado}). ${item.recurso_sugerido}`).join('\n')}` : '',
     resumen.length ? `### Resumen por bloque\n${resumen.map((item: any) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : '',
-    bloques.some((block: any) => block.porqueEsAsi || block.whyExplanation || block.teoria_ejercicio)
+    bloques.some((block: any) => whyBlockMarkdown(block))
       ? `## ¿Por qué es así?\n${bloques
-        .filter((block: any) => block.porqueEsAsi || block.whyExplanation || block.teoria_ejercicio)
+        .filter((block: any) => whyBlockMarkdown(block))
         .map((block: any) => [
           `### ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}`,
-          whyExplanationToMarkdown(block.porqueEsAsi ?? block.whyExplanation) || block.teoria_ejercicio
+          whyBlockMarkdown(block)
         ].filter(Boolean).join('\n\n'))
         .join('\n\n')}`
       : ''
@@ -510,6 +510,10 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
 function penaltiesToMarkdown(items: any) {
   if (!Array.isArray(items) || !items.length) return ''
   return `**Penalizaciones aplicadas:**\n${items.map((item: any) => `- ${item.motivo}: ${item.puntos_descontados}`).join('\n')}`
+}
+
+function whyBlockMarkdown(block: any) {
+  return whyExplanationToMarkdown(block?.porqueEsAsi ?? block?.whyExplanation) || block?.teoria_ejercicio || ''
 }
 
 function listOrText(items: any, fallback = '') {

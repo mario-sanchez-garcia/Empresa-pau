@@ -367,7 +367,7 @@ function stringifyForSearch(value: unknown): string {
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="exam-filter-dropdown">
+    <div className={`exam-filter-dropdown ${open ? 'is-open' : ''}`}>
       <button
         type="button"
         className="exam-filter-trigger"
@@ -2064,8 +2064,15 @@ function cambiarTipo(t: Tipo) {
           z-index: 90;
           display: flex;
           align-items: stretch;
-          gap: 0;
+          gap: 4px;
           width: 100%;
+          padding: 6px;
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.62);
+          box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           overflow: visible;
         }
 
@@ -2083,8 +2090,8 @@ function cambiarTipo(t: Tipo) {
         .exams-filter-divider {
           width: 1px;
           align-self: stretch;
-          background: #eef0f4;
-          margin: 4px 10px;
+          background: linear-gradient(180deg, transparent, #e5e7eb, transparent);
+          margin: 7px 5px;
           flex: 0 0 auto;
         }
 
@@ -2099,23 +2106,58 @@ function cambiarTipo(t: Tipo) {
           min-height: 54px;
           width: 100%;
           border: 0;
-          border-radius: 16px;
+          border-radius: 999px;
           background: transparent;
           color: #111827;
           display: grid;
           grid-template-columns: 1fr auto;
           align-items: center;
           column-gap: 8px;
-          padding: 8px 10px;
+          padding: 9px 16px;
           cursor: pointer;
           text-align: left;
-          transition: background 160ms ease, box-shadow 160ms ease;
+          position: relative;
+          isolation: isolate;
+          transition: background 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
         }
 
         .exam-filter-trigger:hover,
         .exam-filter-trigger[aria-expanded="true"] {
-          background: #f8fafc;
-          box-shadow: inset 0 0 0 1px #e5e7eb;
+          background: rgba(248, 250, 252, 0.95);
+          box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.95), 0 12px 26px rgba(37, 99, 235, 0.08);
+          transform: translateY(-1px);
+        }
+
+        .exam-filter-dropdown:hover .exam-filter-trigger::before,
+        .exam-filter-dropdown.is-open .exam-filter-trigger::before {
+          content: '';
+          position: absolute;
+          left: 50%;
+          top: -7px;
+          width: 34px;
+          height: 4px;
+          transform: translateX(-50%);
+          border-radius: 999px 999px 0 0;
+          background: #2563eb;
+          box-shadow: 0 0 18px rgba(37, 99, 235, 0.34), 0 8px 20px rgba(37, 99, 235, 0.14);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .exam-filter-dropdown:hover .exam-filter-trigger::after,
+        .exam-filter-dropdown.is-open .exam-filter-trigger::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          top: -13px;
+          width: 58px;
+          height: 28px;
+          transform: translateX(-50%);
+          border-radius: 999px;
+          background: rgba(37, 99, 235, 0.13);
+          filter: blur(10px);
+          pointer-events: none;
+          z-index: -1;
         }
 
         .exam-filter-label {
@@ -2135,7 +2177,7 @@ function cambiarTipo(t: Tipo) {
           white-space: nowrap;
           color: #111827;
           font-size: 13px;
-          font-weight: 850;
+          font-weight: 880;
         }
 
         .exam-filter-menu {
@@ -2146,31 +2188,40 @@ function cambiarTipo(t: Tipo) {
           min-width: 220px;
           max-height: 310px;
           overflow-y: auto;
-          padding: 7px;
-          border-radius: 16px;
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
-          box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+          padding: 8px;
+          border-radius: 22px;
+          border: 1px solid rgba(226, 232, 240, 0.95);
+          background: rgba(255, 255, 255, 0.96);
+          box-shadow: 0 26px 70px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
         }
 
         .exam-filter-option {
           width: 100%;
           min-height: 36px;
           border: 0;
-          border-radius: 12px;
+          border-radius: 999px;
           background: transparent;
           color: #374151;
-          padding: 8px 10px;
+          padding: 9px 12px;
           text-align: left;
           font-size: 13px;
           font-weight: 740;
           cursor: pointer;
+          transition: background 160ms ease, color 160ms ease, transform 160ms ease;
         }
 
-        .exam-filter-option:hover,
+        .exam-filter-option:hover {
+          background: #f8fafc;
+          color: #1d4ed8;
+          transform: translateX(2px);
+        }
+
         .exam-filter-option.is-active {
-          background: #eef2ff;
-          color: #3730a3;
+          background: #eff6ff;
+          color: #1d4ed8;
+          box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
         }
 
         .exams-option-group {
@@ -2178,7 +2229,10 @@ function cambiarTipo(t: Tipo) {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 6px 4px;
+          padding: 7px 8px 7px 12px;
+          border-radius: 999px;
+          position: relative;
+          background: transparent;
         }
 
         .exam-option-label {
@@ -2191,24 +2245,31 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exam-option-button {
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
           border-radius: 999px;
           border: 1px solid #e5e7eb;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.82);
           color: #374151;
           cursor: pointer;
           font-size: 13px;
           font-weight: 900;
           display: inline-grid;
           place-items: center;
+          transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        }
+
+        .exam-option-button:hover {
+          background: #f8fafc;
+          color: #1d4ed8;
+          transform: translateY(-1px);
         }
 
         .exam-option-button.is-active {
-          border-color: transparent;
-          background: linear-gradient(135deg, #2563eb, #7c3aed);
-          color: #ffffff;
-          box-shadow: 0 12px 26px rgba(79, 70, 229, 0.18);
+          border-color: rgba(37, 99, 235, 0.14);
+          background: #eff6ff;
+          color: #1d4ed8;
+          box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08), 0 10px 24px rgba(37, 99, 235, 0.12);
         }
 
         .exams-workspace {

@@ -197,7 +197,7 @@ function HeroProductCloud() {
     }}>
       <AmbientLayer />
       <div style={{ position: 'absolute', inset: 26, zIndex: 2 }}>
-        <div className="lp-card-1" style={{
+        <div className="lp-card-1 lp-scroll-panel" style={{
           width: '72%',
           borderRadius: 24,
           padding: 18,
@@ -222,7 +222,7 @@ function HeroProductCloud() {
           </div>
         </div>
 
-        <div className="lp-card-2" style={{
+        <div className="lp-card-2 lp-scroll-panel" style={{
           position: 'absolute',
           right: 0,
           top: 122,
@@ -250,7 +250,7 @@ function HeroProductCloud() {
           </div>
         </div>
 
-        <div className="lp-card-3" style={{
+        <div className="lp-card-3 lp-scroll-panel" style={{
           position: 'absolute',
           left: 38,
           bottom: 18,

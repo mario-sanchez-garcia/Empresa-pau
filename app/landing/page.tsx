@@ -197,7 +197,7 @@ function HeroProductCloud() {
     }}>
       <AmbientLayer />
       <div style={{ position: 'absolute', inset: 26, zIndex: 2 }}>
-        <div style={{
+        <div className="lp-card-1" style={{
           width: '72%',
           borderRadius: 24,
           padding: 18,
@@ -222,7 +222,7 @@ function HeroProductCloud() {
           </div>
         </div>
 
-        <div style={{
+        <div className="lp-card-2" style={{
           position: 'absolute',
           right: 0,
           top: 122,
@@ -250,7 +250,7 @@ function HeroProductCloud() {
           </div>
         </div>
 
-        <div style={{
+        <div className="lp-card-3" style={{
           position: 'absolute',
           left: 38,
           bottom: 18,
@@ -707,11 +707,15 @@ export default function LandingPage() {
           .lp-stats-item + .lp-stats-item { border-top: 1px solid ${C.border} !important; border-left: none !important; }
         }
 
+        .lp-card-1 { animation: lp-in 600ms cubic-bezier(0.22,1,0.36,1) 300ms both; }
+        .lp-card-2 { animation: lp-in 620ms cubic-bezier(0.22,1,0.36,1) 500ms both; }
+        .lp-card-3 { animation: lp-in 600ms cubic-bezier(0.22,1,0.36,1) 700ms both; }
         /* ── Reduced motion ── */
         @media (prefers-reduced-motion: reduce) {
           .lp-h1, .lp-p, .lp-ctas, .lp-mock { animation: none !important; }
           .lp-float { animation: none !important; }
           .lp-scroll-reveal, .lp-cloud, .lp-particle, .lp-hero-grid, .lp-hero-cloud, .lp-hero-vapor { animation: none !important; }
+          .lp-card-1, .lp-card-2, .lp-card-3 { animation: none !important; }
         }
       `}</style>
 

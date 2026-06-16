@@ -1,4 +1,5 @@
 import { correctionJsonToMarkdownWithOptions, parseCorrectionJson } from './correctionPrompt'
+import { splitWhyExplanationMarkdown } from './whyExplanation'
 
 type PlainRecord = Record<string, unknown>
 
@@ -58,14 +59,10 @@ export function correctionPayloadToMarkdown(input: unknown, options: { officialM
 }
 
 export function splitCorrectionTheory(markdown: string) {
-  const theoryHeading = /^## Teoría del ejercicio\s*$/im
-  const match = theoryHeading.exec(markdown)
-
-  if (!match) return { correction: markdown.trim(), theory: '' }
-
+  const { main, why } = splitWhyExplanationMarkdown(markdown)
   return {
-    correction: markdown.slice(0, match.index).trim(),
-    theory: markdown.slice(match.index + match[0].length).trim(),
+    correction: main,
+    theory: why,
   }
 }
 
@@ -102,7 +99,8 @@ function recoverMalformedCorrectionMarkdown(value: string) {
   const modelAnswer = extractJsonString(value, 'solucion_orientativa') || extractJsonString(value, 'solucion_correcta_corta')
   const advice = extractJsonString(value, 'consejo_especifico') || extractJsonString(value, 'consejo_para_mejorar')
   const theory = extractJsonString(value, 'teoria_ejercicio')
-  const hasUsefulContent = Boolean(feedback || strengths.length || errors.length || detail || modelAnswer || advice || theory)
+  const why = extractJsonString(value, 'porqueEsAsi') || extractJsonString(value, 'whyExplanation')
+  const hasUsefulContent = Boolean(feedback || strengths.length || errors.length || detail || modelAnswer || advice || theory || why)
 
   const sections = [
     feedback ? `# Corrección de Pausia\n\n${feedback}` : '# Corrección de Pausia',
@@ -111,7 +109,7 @@ function recoverMalformedCorrectionMarkdown(value: string) {
     detail ? `## Corrección paso a paso\n\n${detail}` : '',
     modelAnswer ? `## Respuesta modelo\n\n${modelAnswer}` : '',
     advice ? `## Consejo final\n\n${advice}` : '',
-    theory ? `## Teoría del ejercicio\n\n${theory}` : '',
+    (why || theory) ? `## ¿Por qué es así?\n\n${why || theory}` : '',
   ].filter(Boolean)
 
   return hasUsefulContent ? sections.join('\n\n') : ''

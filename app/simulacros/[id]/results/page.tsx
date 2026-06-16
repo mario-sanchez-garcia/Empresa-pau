@@ -8,7 +8,7 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroRecord } from '@/components/simulacros/types'
 import MathMarkdown from '@/components/shared/MathMarkdown'
-import TheoryToggle from '@/components/shared/TheoryToggle'
+import WhyExplanation from '@/components/shared/WhyExplanation'
 
 type Tab = 'resumen' | 'detalle' | 'plan' | 'bloques'
 
@@ -400,7 +400,7 @@ export default function SimulacroResultsPage() {
                     <strong className="mb-2 block font-black" style={{ color: '#1e40af' }}>Solución orientativa</strong>
                     <Markdown text={block.solucion_orientativa} />
                   </div>
-                  <TheoryToggle theory={block.teoria_ejercicio} />
+                  <WhyExplanation explanation={block.porqueEsAsi} markdown={block.teoria_ejercicio} />
                 </article>
               ))}
             </section>
@@ -562,6 +562,7 @@ function normalizeDetail(result: any, record: SimulacroRecord, correctionFailed:
       penalizaciones_aplicadas: Array.isArray(block.penalizaciones_aplicadas) ? block.penalizaciones_aplicadas : [],
       correccion_detalle: textOrFallback(block.correccion_detalle, unavailable ? 'No hay corrección detallada disponible porque la corrección falló o quedó incompleta.' : 'La IA no añadió corrección detallada para este bloque.'),
       solucion_orientativa: textOrFallback(block.solucion_orientativa ?? block.solucion_correcta_corta, unavailable ? 'No hay solución orientativa disponible todavía.' : 'No se ha incluido solución orientativa.'),
+      porqueEsAsi: block.porqueEsAsi ?? block.whyExplanation ?? null,
       teoria_ejercicio: typeof block.teoria_ejercicio === 'string' ? block.teoria_ejercicio : '',
       consejo_para_mejorar: textOrFallback(block.consejo_para_mejorar ?? block.consejo_especifico, unavailable ? 'Conserva tu respuesta y vuelve a corregir el simulacro cuando el servicio responda.' : 'Rehaz el bloque comparando tu desarrollo con el criterio oficial.')
     }

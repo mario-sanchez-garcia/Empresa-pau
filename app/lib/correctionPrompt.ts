@@ -1,3 +1,5 @@
+import { whyExplanationToMarkdown } from './whyExplanation'
+
 export interface CorrectionPromptBlock {
   numeroBloque: string
   tema: string
@@ -147,7 +149,8 @@ Lengua Castellana y Literatura II:
 17. Escribe las fórmulas matemáticas, físicas y químicas con LaTeX: inline con $...$ y en bloque con $$...$$.
 18. No uses HTML ni párrafos largos y apelmazados. Separa claramente aciertos, errores, corrección paso a paso, respuesta modelo y consejo final.
 19. Aunque la salida completa sea JSON puro, los valores de texto dentro del JSON pueden y deben contener Markdown y LaTeX válidos.
-20. teoria_ejercicio es opcional. Inclúyela solo si puedes cerrar el JSON correctamente y mantenla entre 300 y 500 palabras. Debe sonar como una explicación magistral de un buen profesor antes de empezar los ejercicios: explica el concepto profundo del temario, de dónde surge la fórmula, método, criterio o razonamiento, por qué se aplica al enunciado concreto, qué intenta evaluar la PAU/EBAU y qué debe comprender el alumno antes de mecanizar el procedimiento. Conecta la base conceptual con ejercicios parecidos sin repetir la corrección ni limitarte a enumerar pasos. Usa Markdown y LaTeX cuando proceda con exactamente estos apartados: "### 1. Idea central", "### 2. De dónde sale", "### 3. Por qué se aplica aquí", "### 4. Cómo pensarlo antes de calcular", "### 5. Errores de comprensión habituales" y "### 6. Frase clave para recordarlo". Adapta el enfoque a la asignatura y al ejercicio real. Si falta espacio, devuelve teoria_ejercicio como cadena vacía y prioriza siempre la corrección principal y un JSON válido.
+20. porqueEsAsi es opcional. Inclúyelo solo si puedes cerrar el JSON correctamente. Debe sonar como una explicación de un profesor PAU: concepto central, por qué se aplica al enunciado concreto, cómo pensarlo, qué ocurrió en la respuesta del alumno, error típico, mini ejemplo original y frase/checklist para sacar puntos. No copies apuntes ni libros. Usa Markdown y LaTeX cuando proceda, preservando $...$ y $$...$$.
+21. Mantén teoria_ejercicio solo como compatibilidad legacy si aparece en datos antiguos; para respuestas nuevas usa porqueEsAsi. Si falta espacio, devuelve porqueEsAsi como null y prioriza siempre la corrección principal y un JSON válido.
 
 ### FORMATO DE SALIDA
 
@@ -193,7 +196,19 @@ Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero
       "solucion_orientativa": "",
       "consejo_especifico": "",
       "consejo_para_mejorar": "",
-      "teoria_ejercicio": ""
+      "teoria_ejercicio": "",
+      "porqueEsAsi": {
+        "title": "¿Por qué es así?",
+        "keyIdea": "",
+        "whyHere": "",
+        "method": "",
+        "studentConnection": "",
+        "commonMistake": "",
+        "miniExample": "",
+        "examTip": "",
+        "sourcesUsed": [],
+        "status": "generated"
+      }
     }
   ],
   "resumen_por_bloque_tematico": [
@@ -276,7 +291,8 @@ INSTRUCCIONES:
 3. Cada punto descontado en penalizaciones_aplicadas debe tener motivo concreto.
 4. Usa Markdown y LaTeX ($...$, $$...$$) en los campos de texto cuando sea útil.
 5. Feedback directo y específico a la respuesta real, no genérico.
-6. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
+6. Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. No copies material externo.
+7. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
 
 {
   "nota": 0.00,
@@ -290,7 +306,19 @@ INSTRUCCIONES:
   ],
   "correccion_detalle": "",
   "solucion_orientativa": "",
-  "consejo_para_mejorar": ""
+  "consejo_para_mejorar": "",
+  "porqueEsAsi": {
+    "title": "¿Por qué es así?",
+    "keyIdea": "",
+    "whyHere": "",
+    "method": "",
+    "studentConnection": "",
+    "commonMistake": "",
+    "miniExample": "",
+    "examTip": "",
+    "sourcesUsed": [],
+    "status": "generated"
+  }
 }`
 }
 
@@ -421,10 +449,13 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
     ].filter(Boolean).join('\n\n')),
     plan.length ? `### Plan de repaso\n${plan.map((item: any) => `${item.prioridad}. **${item.tema}**: ${item.accion} (${item.tiempo_recomendado}). ${item.recurso_sugerido}`).join('\n')}` : '',
     resumen.length ? `### Resumen por bloque\n${resumen.map((item: any) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : '',
-    bloques.some((block: any) => block.teoria_ejercicio)
-      ? `## Teoría del ejercicio\n${bloques
-        .filter((block: any) => block.teoria_ejercicio)
-        .map((block: any) => `## ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}\n${block.teoria_ejercicio}`)
+    bloques.some((block: any) => block.porqueEsAsi || block.whyExplanation || block.teoria_ejercicio)
+      ? `## ¿Por qué es así?\n${bloques
+        .filter((block: any) => block.porqueEsAsi || block.whyExplanation || block.teoria_ejercicio)
+        .map((block: any) => [
+          `### ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}`,
+          whyExplanationToMarkdown(block.porqueEsAsi ?? block.whyExplanation) || block.teoria_ejercicio
+        ].filter(Boolean).join('\n\n'))
         .join('\n\n')}`
       : ''
   ].filter(Boolean).join('\n\n')

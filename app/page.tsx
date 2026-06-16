@@ -13,6 +13,7 @@ import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
+import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import Sidebar, { type SidebarItemId } from './components/Sidebar'
@@ -25,6 +26,7 @@ import { useCCAA } from './hooks/useCCAA'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import WhyExplanation from '@/components/shared/WhyExplanation'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 import {
@@ -1412,6 +1414,7 @@ function cambiarTipo(t: Tipo) {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({
         pregunta: `Eres Pausia, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
+          'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Pausia. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n' +
           (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
           hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
           '\nResponde solo como Pausia.'
@@ -3256,7 +3259,7 @@ function cambiarTipo(t: Tipo) {
                       </p>
                     </div>
                     <div className="exams-side-section" style={{ background: '#f5f3ff', borderColor: '#ddd6fe' }}>
-                      <div className="exams-side-label" style={{ color: '#7c3aed' }}>Teoría relacionada</div>
+                      <div className="exams-side-label" style={{ color: '#7c3aed' }}>¿Por qué es así?</div>
                       <p className="exams-side-text">
                         {!isCatalunaExam && preguntaActiva ? bloqueActivoLabel : 'Selecciona un ejercicio para ver el bloque asociado.'}
                       </p>
@@ -3347,9 +3350,17 @@ function cambiarTipo(t: Tipo) {
                         <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Pausia</div>
-                        <div style={{ fontSize: 15, lineHeight: 1.85, color: '#334155' }}>
-                          <MathMarkdown text={msg.texto} format={false} components={darkMdComponents} />
-                        </div>
+                        {(() => {
+                          const { main, why } = splitWhyExplanationMarkdown(msg.texto)
+                          return (
+                            <>
+                              <div style={{ fontSize: 15, lineHeight: 1.85, color: '#334155' }}>
+                                <MathMarkdown text={main} format={false} components={darkMdComponents} />
+                              </div>
+                              <WhyExplanation markdown={why} components={darkMdComponents} />
+                            </>
+                          )
+                        })()}
                       </div>
                     </div>
                     </div>

@@ -269,7 +269,8 @@ export async function POST(request: NextRequest) {
           penalizaciones_aplicadas: [] as any[],
           correccion_detalle: 'Este bloque no se pudo corregir. Pulsa "Reintentar corrección" para volver a intentarlo.',
           solucion_orientativa: '',
-          consejo_para_mejorar: 'Vuelve a entregar el simulacro para corregir este bloque.'
+          consejo_para_mejorar: 'Vuelve a entregar el simulacro para corregir este bloque.',
+          porqueEsAsi: null
         }
       }
       return {
@@ -464,7 +465,8 @@ function normalizeCorrectionResult(result: any, context: { simulacroId: string; 
       solucion_correcta_corta: textOrFallback(block.solucion_correcta_corta ?? block.solucion_orientativa, 'No hay solución orientativa disponible.'),
       solucion_orientativa: textOrFallback(block.solucion_orientativa ?? block.solucion_correcta_corta, 'No hay solución orientativa disponible.'),
       consejo_especifico: textOrFallback(block.consejo_especifico ?? block.consejo_para_mejorar, 'Repite este bloque explicando cada paso y comparándolo con el criterio oficial.'),
-      consejo_para_mejorar: textOrFallback(block.consejo_para_mejorar ?? block.consejo_especifico, 'Repite este bloque explicando cada paso y comparándolo con el criterio oficial.')
+      consejo_para_mejorar: textOrFallback(block.consejo_para_mejorar ?? block.consejo_especifico, 'Repite este bloque explicando cada paso y comparándolo con el criterio oficial.'),
+      porqueEsAsi: block.porqueEsAsi ?? block.whyExplanation ?? null
     }
   })
 

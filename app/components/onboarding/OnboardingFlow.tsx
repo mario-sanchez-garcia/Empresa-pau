@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Check, ChevronRight } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import {
-  saveOnboarding, markOnboardingComplete, isOnboardingComplete,
+  saveOnboarding, markOnboardingComplete,
   startModeToRouteId,
   type OnboardingCommunity, type OnboardingDailyMinutes, type OnboardingStartMode,
 } from '@/app/lib/onboarding/onboardingStorage'
@@ -138,7 +138,6 @@ export default function OnboardingFlow() {
 
   useEffect(() => {
     mountedRef.current = true
-    if (isOnboardingComplete()) { router.push('/camino'); return }
     supabase.auth.getSession().then(({ data: { session } }) => { tokenRef.current = session?.access_token ?? null })
     ;(async () => {
       await delay(350)

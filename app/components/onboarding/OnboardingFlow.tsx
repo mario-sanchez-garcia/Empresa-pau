@@ -1,646 +1,691 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowRight, CheckCircle2, Route, Sparkles } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight, Check, ChevronRight } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import {
-  DEFAULT_SUBJECTS,
-  isOnboardingComplete,
-  markOnboardingComplete,
-  saveOnboarding,
+  saveOnboarding, markOnboardingComplete, isOnboardingComplete,
   startModeToRouteId,
-  type OnboardingCommunity,
-  type OnboardingDailyMinutes,
-  type OnboardingStartMode,
+  type OnboardingCommunity, type OnboardingDailyMinutes, type OnboardingStartMode,
 } from '@/app/lib/onboarding/onboardingStorage'
-import { getMissionForDate } from '@/app/lib/camino/caminoMissionGenerator'
-import { todayKey } from '@/app/lib/camino/caminoProgress'
-import type { DailyCaminoTask } from '@/app/lib/camino/caminoData'
-import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
-import { useBillingStatus } from '@/app/hooks/useBillingStatus'
-import PausiaBrand from '@/components/shared/PausiaBrand'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-type Phase =
-  | 'already-done'
-  | 'step-community'
-  | 'step-subjects'
-  | 'step-time'
-  | 'step-start'
-  | 'generating'
-  | 'first-mission'
-  | 'tiny-win'
-  | 'done'
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// ─── Onboarding first mission tasks ──────────────────────────────────────────
-// These 3 lightweight tasks are hardcoded for the activation experience.
-// They use the complete-task API just like normal missions.
-const ONBOARDING_TASKS: DailyCaminoTask[] = [
-  {
-    id: 'ob-flash-1',
-    title: '3 flashcards de activación',
-    type: 'flashcard',
-    xp: 15,
-    subject: 'Matemáticas II',
-    subjectKey: 'mates',
-    detail: 'Repasa conceptos clave: derivada, integral y límite. 30 segundos.',
-    actionLabel: 'Empezar',
-    actionHref: '/?subject=mates',
-  },
-  {
-    id: 'ob-test-1',
-    title: 'Mini check: 1 pregunta tipo test',
-    type: 'test',
-    xp: 10,
-    subject: 'Historia de España',
-    subjectKey: 'historia',
-    detail: '¿Qué sistema político caracteriza al Antiguo Régimen?\nA) Monarquía parlamentaria  B) Monarquía absoluta  C) República constitucional',
-    actionLabel: 'Responder',
-    actionHref: '/?subject=historia',
-  },
-  {
-    id: 'ob-open-1',
-    title: 'Respuesta corta de práctica',
-    type: 'correccion_ia',
-    xp: 30,
-    subject: 'Matemáticas II',
-    subjectKey: 'mates',
-    detail: 'En una frase: ¿qué significa que una función sea derivable en un punto?',
-    actionLabel: 'Escribir respuesta',
-    actionHref: '/?subject=mates',
-  },
+const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+const COMMUNITY_OPTS = [
+  { id: 'Madrid',   label: 'Madrid',           desc: 'Examen EBAU Madrid' },
+  { id: 'Cataluña', label: 'Cataluña',          desc: 'Examen PAU Cataluña' },
+  { id: 'Otra',     label: 'Otra comunidad',    desc: 'Ruta troncal común' },
 ]
 
-const OPEN_TASK_FEEDBACK = 'Respuesta guardada. En las próximas fases Pausia corregirá este tipo de respuestas con rúbricas detalladas.'
+const DATE_OPTS = [
+  { id: 'jun-25',  label: 'Junio 2025'              },
+  { id: 'sep-25',  label: 'Septiembre 2025'         },
+  { id: 'jun-26',  label: 'Junio 2026'              },
+  { id: 'jun-27+', label: 'Junio 2027 o posterior'  },
+  { id: 'no-se',   label: 'Todavía no lo sé'        },
+]
 
-// ─── Main component ───────────────────────────────────────────────────────────
+const GOAL_OPTS = [
+  { id: 'nota-corte', label: 'Llegar a mi nota de corte', desc: 'Tengo universidad en mente' },
+  { id: 'subir',      label: 'Subir mi nota',              desc: 'Quiero mejorar lo que tengo' },
+  { id: 'aprobar',    label: 'Aprobar todas',               desc: 'Lo primero es superarlas' },
+  { id: 'la-mejor',   label: 'La mejor nota posible',       desc: 'Sin límites' },
+]
+
+const SUBJECT_OPTS = [
+  { id: 'Matemáticas II',      label: 'Matemáticas II',      color: '#2563eb', bg: '#eff6ff' },
+  { id: 'Física',              label: 'Física',              color: '#ca8a04', bg: '#fefce8' },
+  { id: 'Historia de España',  label: 'Historia de España',  color: '#78350f', bg: '#fff8f1' },
+  { id: 'Química',             label: 'Química',             color: '#ea580c', bg: '#fff7ed' },
+  { id: 'Biología',            label: 'Biología',            color: '#047857', bg: '#d1fae5' },
+  { id: 'Lengua y Literatura', label: 'Lengua y Literatura', color: '#7c3aed', bg: '#f5f3ff' },
+]
+
+const LEVEL_OPTS = [
+  { id: 'perdido',  label: 'Muy perdido/a', desc: 'Necesito empezar desde cero' },
+  { id: 'regular',  label: 'Regular',       desc: 'Sé algo pero me cuesta' },
+  { id: 'bien',     label: 'Bastante bien', desc: 'Entiendo la mayor parte' },
+  { id: 'muy-bien', label: 'Muy bien',      desc: 'Me siento muy seguro/a' },
+]
+
+const TIME_OPTS: { id: OnboardingDailyMinutes; label: string; desc: string; recommended?: boolean }[] = [
+  { id: 15, label: '15 min al día', desc: 'Sesiones cortas y constantes' },
+  { id: 25, label: '25 min al día', desc: 'Ritmo ideal',  recommended: true },
+  { id: 40, label: '40 min al día', desc: 'Modo intensivo' },
+]
+
+const START_OPTS: { id: OnboardingStartMode; label: string; desc: string }[] = [
+  { id: 'septiembre', label: 'Desde septiembre',  desc: 'Empiezo con margen, ruta completa' },
+  { id: 'empezado',   label: 'Ya he empezado',    desc: 'Llevo algo de base, ajustamos ritmo' },
+  { id: 'retraso',    label: 'Voy con retraso',   desc: 'Priorizamos lo que más impacta' },
+  { id: 'intensivo',  label: 'Modo intensivo',    desc: 'Poco tiempo, foco máximo' },
+]
+
+const GEN_ITEMS = [
+  'Adaptando a tu comunidad autónoma...',
+  'Construyendo tu ruta PAU...',
+  'Calibrando tu ritmo de estudio...',
+  'Preparando tu primera misión...',
+]
+
+const CONFETTI_COLORS = ['#2563eb','#16a34a','#dc2626','#ca8a04','#7c3aed','#0891b2','#f59e0b','#ec4899']
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ChatMsg { id: string; role: 'pau' | 'user'; text: string }
+
+type Phase =
+  | 'welcome' | 'community' | 'pau-date' | 'goal'
+  | 'subjects' | 'subject-level' | 'daily-time'
+  | 'start-mode' | 'generating' | 'done'
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function OnboardingFlow() {
-  const router = useRouter()
-  const billing = useBillingStatus()
-  const today = todayKey()
-  const accessTokenRef = useRef<string | null>(null)
+  const router      = useRouter()
+  const tokenRef    = useRef<string | null>(null)
+  const commRef     = useRef<OnboardingCommunity | null>(null)
+  const minutesRef  = useRef<OnboardingDailyMinutes | null>(null)
+  const chatEndRef  = useRef<HTMLDivElement>(null)
+  const confettiRef = useRef<HTMLCanvasElement>(null)
+  const mountedRef  = useRef(true)
 
-  const [phase, setPhase] = useState<Phase>('step-community')
-  const [community, setCommunity] = useState<OnboardingCommunity | null>(null)
-  const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS)
-  const [dailyMinutes, setDailyMinutes] = useState<OnboardingDailyMinutes | null>(null)
-  const [startMode, setStartMode] = useState<OnboardingStartMode | null>(null)
-  const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([])
-  const [xpEarned, setXpEarned] = useState(0)
-  const [openAnswer, setOpenAnswer] = useState('')
-  const [openFeedback, setOpenFeedback] = useState<string | null>(null)
-  const [submittingTask, setSubmittingTask] = useState<string | null>(null)
-  const [setupWarning, setSetupWarning] = useState<string | null>(null)
-  const [taskError, setTaskError] = useState<string | null>(null)
+  const [messages,    setMessages]    = useState<ChatMsg[]>([])
+  const [phase,       setPhase]       = useState<Phase>('welcome')
+  const [isTyping,    setIsTyping]    = useState(false)
+  const [showOptions, setShowOptions] = useState(false)
+  const [subjects,    setSubjects]    = useState<string[]>([])
+  const [subjIdx,     setSubjIdx]     = useState(0)
+  const [genIdx,      setGenIdx]      = useState(0)
 
-  useEffect(() => {
-    if (isOnboardingComplete()) setPhase('already-done')
-  }, [])
+  // ─── Messaging helpers ───────────────────────────────────────────────────────
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      accessTokenRef.current = session?.access_token ?? null
-    })
-  }, [])
+  const addPauMsg  = (text: string) => setMessages(p => [...p, { id: `${Date.now()}-${Math.random()}`, role: 'pau',  text }])
+  const addUserMsg = (text: string) => setMessages(p => [...p, { id: `${Date.now()}-${Math.random()}`, role: 'user', text }])
+  const scrollEnd  = ()             => setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 60)
 
-  // ─── Navigation helpers ───────────────────────────────────────────────────
-  function nextFromCommunity() {
-    if (!community) return
-    saveOnboarding({ community })
-    setPhase('step-subjects')
+  async function deliverPau(texts: string[]) {
+    for (let i = 0; i < texts.length; i++) {
+      if (!mountedRef.current) return
+      setIsTyping(true); scrollEnd()
+      await delay(i === 0 ? 780 : 900)
+      if (!mountedRef.current) return
+      setIsTyping(false)
+      addPauMsg(texts[i]); scrollEnd()
+      if (i < texts.length - 1) await delay(260)
+    }
   }
 
-  function nextFromSubjects() {
+  async function advance(userText: string, pauTexts: string[], next: Phase) {
+    addUserMsg(userText); setShowOptions(false); scrollEnd()
+    await deliverPau(pauTexts)
+    if (!mountedRef.current) return
+    setPhase(next)
+    if (next !== 'generating' && next !== 'done') {
+      await delay(120); setShowOptions(true)
+    }
+    scrollEnd()
+  }
+
+  // ─── Mount ───────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    mountedRef.current = true
+    if (isOnboardingComplete()) { router.push('/camino'); return }
+    supabase.auth.getSession().then(({ data: { session } }) => { tokenRef.current = session?.access_token ?? null })
+    ;(async () => {
+      await delay(350)
+      if (!mountedRef.current) return
+      await deliverPau([
+        '¡Hola! Soy Pau, tu asistente para la PAU.',
+        'Voy a hacerte unas preguntas para prepararte una ruta de estudio completamente personalizada.',
+      ])
+      if (!mountedRef.current) return
+      setShowOptions(true); scrollEnd()
+    })()
+    return () => { mountedRef.current = false }
+  }, []) // eslint-disable-line
+
+  // ─── Progress ────────────────────────────────────────────────────────────────
+
+  const totalQ = 6 + subjects.length
+  const stepMap: Partial<Record<Phase, number>> = {
+    community: 1, 'pau-date': 2, goal: 3, subjects: 4,
+    'subject-level': 4 + subjIdx + 1,
+    'daily-time': 4 + subjects.length + 1,
+    'start-mode': 4 + subjects.length + 2,
+    generating: totalQ, done: totalQ,
+  }
+  const progressPct = phase === 'done' ? 100
+    : phase === 'welcome' ? 0
+    : Math.min(((stepMap[phase] ?? 0) / totalQ) * 100, 98)
+
+  // ─── Handlers ────────────────────────────────────────────────────────────────
+
+  function handleStart() {
+    advance('¡Vamos!', ['¿De qué comunidad autónoma es tu examen?'], 'community')
+  }
+
+  function handleCommunity(id: string, label: string) {
+    const c = id as OnboardingCommunity
+    commRef.current = c
+    saveOnboarding({ community: c })
+    advance(label, ['¿Cuándo tienes la PAU?'], 'pau-date')
+  }
+
+  function handleDate(label: string) {
+    advance(label, ['¿Qué quieres conseguir con tu nota PAU?'], 'goal')
+  }
+
+  function handleGoal(label: string) {
+    advance(label, [
+      '¿Qué asignaturas quieres preparar?',
+      'Elige todas las que necesitas para tu examen.',
+    ], 'subjects')
+  }
+
+  function handleSubjectsConfirm() {
+    if (subjects.length === 0) return
     saveOnboarding({ subjects })
-    setPhase('step-time')
+    const s = subjects
+    const label = s.length === 1 ? s[0]
+      : `${s.slice(0, -1).join(', ')} y ${s[s.length - 1]}`
+    setSubjIdx(0)
+    advance(label, [`¿Cómo te sientes ahora mismo con ${s[0]}?`], 'subject-level')
   }
 
-  function nextFromTime() {
-    if (!dailyMinutes) return
-    saveOnboarding({ dailyMinutes })
-    setPhase('step-start')
-  }
-
-  async function nextFromStart() {
-    if (!startMode) return
-    const routeId = startModeToRouteId(startMode)
-    saveOnboarding({ startMode })
-    setPhase('generating')
-
-    const token = accessTokenRef.current
-    if (token) {
-      try {
-        const res = await fetch('/api/onboarding/setup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ routeId, community, dailyMinutes, startMode })
-        })
-        if (!res.ok) {
-          setSetupWarning('Tu ruta se guardó localmente. El servidor no está disponible en este momento.')
-        }
-      } catch {
-        setSetupWarning('Sin conexión. Tu ruta se guardó localmente y se sincronizará al reconectar.')
-      }
-    }
-
-    setTimeout(() => setPhase('first-mission'), 2400)
-  }
-
-  // ─── Task completion ──────────────────────────────────────────────────────
-  const completeTask = useCallback(async (task: DailyCaminoTask) => {
-    if (completedTaskIds.includes(task.id) || submittingTask) return
-
-    if (task.id === 'ob-open-1') {
-      if (!openAnswer.trim()) return
-      setOpenFeedback(OPEN_TASK_FEEDBACK)
-    }
-
-    setSubmittingTask(task.id)
-    setTaskError(null)
-    setCompletedTaskIds(prev => [...prev, task.id])
-
-    const token = accessTokenRef.current
-
-    if (!token) {
-      setXpEarned(prev => prev + task.xp)
+  function handleSubjectLevel(label: string) {
+    const next = subjIdx + 1
+    if (next < subjects.length) {
+      setSubjIdx(next)
+      advance(label, [`¿Y con ${subjects[next]}?`], 'subject-level')
     } else {
-      try {
-        const res = await fetch('/api/camino/complete-task', {
+      advance(label, ['¿Cuánto tiempo puedes dedicar cada día a estudiar?'], 'daily-time')
+    }
+  }
+
+  function handleDailyTime(minutes: OnboardingDailyMinutes, label: string) {
+    minutesRef.current = minutes
+    saveOnboarding({ dailyMinutes: minutes })
+    advance(label, ['¡Último paso! ¿Desde dónde arrancas con la preparación?'], 'start-mode')
+  }
+
+  function handleStartMode(mode: OnboardingStartMode, label: string) {
+    saveOnboarding({ startMode: mode })
+    ;(async () => {
+      addUserMsg(label); setShowOptions(false); scrollEnd()
+      await deliverPau(['Perfecto. Déjame preparar tu ruta personalizada...'])
+      if (!mountedRef.current) return
+      setPhase('generating'); scrollEnd()
+
+      // API call (non-blocking)
+      const token    = tokenRef.current
+      const comm     = commRef.current
+      const mins     = minutesRef.current
+      const routeId  = startModeToRouteId(mode)
+      if (token && comm && mins) {
+        fetch('/api/onboarding/setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            taskId: task.id,
-            taskType: task.type,
-            subjectKey: task.subjectKey ?? null,
-            missionDate: today,
-            missionTaskIds: ONBOARDING_TASKS.map(t => t.id)
-          })
-        })
-        if (res.ok) {
-          setXpEarned(prev => prev + task.xp)
-        } else {
-          setTaskError('No se pudo guardar la tarea. Inténtalo de nuevo o continúa.')
-        }
-      } catch {
-        setTaskError('Error de conexión al guardar. Continúa igualmente.')
+          body: JSON.stringify({ routeId, community: comm, dailyMinutes: mins, startMode: mode }),
+        }).catch(() => {})
       }
+
+      for (let i = 0; i < GEN_ITEMS.length; i++) {
+        await delay(780)
+        if (!mountedRef.current) return
+        setGenIdx(i + 1)
+      }
+      await delay(600)
+      if (!mountedRef.current) return
+      markOnboardingComplete()
+      setPhase('done'); scrollEnd()
+      triggerConfetti()
+    })()
+  }
+
+  // ─── Confetti ─────────────────────────────────────────────────────────────────
+
+  function triggerConfetti() {
+    const canvas = confettiRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    if (!ctx) return
+    const W = window.innerWidth, H = window.innerHeight
+    canvas.width = W; canvas.height = H
+    const ps = Array.from({ length: 130 }, () => ({
+      x: W * 0.5 + (Math.random() - 0.5) * W * 0.7,
+      y: H * 0.25,
+      vx: (Math.random() - 0.5) * 18,
+      vy: -(Math.random() * 14 + 4),
+      w: Math.random() * 11 + 5, h: Math.random() * 5 + 3,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 11, alpha: 1,
+    }))
+    let raf: number
+    function animate() {
+      ctx.clearRect(0, 0, W, H)
+      let alive = false
+      for (const p of ps) {
+        if (p.alpha <= 0) continue
+        alive = true
+        p.vy += 0.38; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.rotV
+        if (p.y > H * 0.8) p.alpha -= 0.035
+        ctx.save()
+        ctx.globalAlpha = Math.max(0, p.alpha)
+        ctx.translate(p.x, p.y)
+        ctx.rotate((p.rot * Math.PI) / 180)
+        ctx.fillStyle = p.color
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+        ctx.restore()
+      }
+      if (alive) raf = requestAnimationFrame(animate)
+      else { ctx.clearRect(0, 0, W, H); if (canvas) canvas.style.display = 'none' }
     }
+    canvas.style.display = 'block'
+    raf = requestAnimationFrame(animate)
+    // eslint-disable-next-line consistent-return
+    return () => cancelAnimationFrame(raf)
+  }
 
-    setSubmittingTask(null)
+  // ─── Options renderer ─────────────────────────────────────────────────────────
 
-    const newCompleted = [...completedTaskIds, task.id]
-    if (ONBOARDING_TASKS.every(t => newCompleted.includes(t.id))) {
-      setTimeout(() => {
-        markOnboardingComplete()
-        setPhase('tiny-win')
-      }, 600)
+  function renderOptions() {
+    switch (phase) {
+      case 'welcome':
+        return (
+          <motion.div key="welcome-opt" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="px-4 py-5">
+            <button
+              onClick={handleStart}
+              className="w-full flex items-center justify-center gap-2 text-white font-bold rounded-2xl py-4 transition-all active:scale-[0.98]"
+              style={{ fontSize: 15, background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 8px 28px rgba(37,99,235,0.32)' }}
+            >
+              ¡Empezar! <ArrowRight size={17} />
+            </button>
+          </motion.div>
+        )
+
+      case 'community':
+        return (
+          <OptionList key="community-opts">
+            {COMMUNITY_OPTS.map((o, i) => (
+              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
+                onClick={() => handleCommunity(o.id, o.label)} />
+            ))}
+          </OptionList>
+        )
+
+      case 'pau-date':
+        return (
+          <OptionList key="date-opts">
+            {DATE_OPTS.map((o, i) => (
+              <OptionBtn key={o.id} index={i} label={o.label}
+                onClick={() => handleDate(o.label)} />
+            ))}
+          </OptionList>
+        )
+
+      case 'goal':
+        return (
+          <OptionList key="goal-opts">
+            {GOAL_OPTS.map((o, i) => (
+              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
+                onClick={() => handleGoal(o.label)} />
+            ))}
+          </OptionList>
+        )
+
+      case 'subjects':
+        return (
+          <motion.div key="subject-opts" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="px-4 py-4 space-y-2">
+            {SUBJECT_OPTS.map((s, i) => {
+              const sel = subjects.includes(s.id)
+              return (
+                <motion.button
+                  key={s.id}
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.045 }}
+                  onClick={() => setSubjects(p => sel ? p.filter(x => x !== s.id) : [...p, s.id])}
+                  className="w-full flex items-center gap-3 px-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98]"
+                  style={{
+                    minHeight: 56,
+                    borderColor: sel ? s.color : '#e2e8f0',
+                    background: sel ? s.bg : '#fff',
+                    boxShadow: sel ? `0 0 0 3px ${s.color}1a` : '0 1px 3px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div className="flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
+                    style={{ borderColor: sel ? s.color : '#cbd5e1', background: sel ? s.color : 'white' }}>
+                    {sel && <Check size={11} color="white" strokeWidth={3} />}
+                  </div>
+                  <span className="font-bold text-sm transition-colors"
+                    style={{ color: sel ? s.color : '#334155' }}>
+                    {s.label}
+                  </span>
+                </motion.button>
+              )
+            })}
+            <motion.button
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: SUBJECT_OPTS.length * 0.045 }}
+              disabled={subjects.length === 0}
+              onClick={handleSubjectsConfirm}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] transition-all mt-1 active:scale-[0.98]"
+              style={{
+                background: subjects.length > 0 ? 'linear-gradient(135deg, #1d4ed8, #2563eb)' : '#f1f5f9',
+                color: subjects.length > 0 ? 'white' : '#94a3b8',
+                boxShadow: subjects.length > 0 ? '0 8px 24px rgba(37,99,235,0.28)' : 'none',
+              }}
+            >
+              Confirmar {subjects.length > 0 && `(${subjects.length})`}
+              <ArrowRight size={16} />
+            </motion.button>
+          </motion.div>
+        )
+
+      case 'subject-level':
+        return (
+          <OptionList key={`level-opts-${subjIdx}`}>
+            {LEVEL_OPTS.map((o, i) => (
+              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
+                onClick={() => handleSubjectLevel(o.label)} />
+            ))}
+          </OptionList>
+        )
+
+      case 'daily-time':
+        return (
+          <OptionList key="time-opts">
+            {TIME_OPTS.map((o, i) => (
+              <OptionBtn key={String(o.id)} index={i} label={o.label} desc={o.desc}
+                badge={o.recommended ? 'Recomendado' : undefined}
+                onClick={() => handleDailyTime(o.id, o.label)} />
+            ))}
+          </OptionList>
+        )
+
+      case 'start-mode':
+        return (
+          <OptionList key="start-opts">
+            {START_OPTS.map((o, i) => (
+              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
+                onClick={() => handleStartMode(o.id, o.label)} />
+            ))}
+          </OptionList>
+        )
+
+      default: return null
     }
-  }, [completedTaskIds, submittingTask, openAnswer, today])
+  }
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
   return (
-    <div className="pausia-premium-shell flex min-h-screen items-start justify-center px-4 py-12">
-      <div className="w-full max-w-lg">
+    <div className="flex flex-col bg-slate-50"
+      style={{ minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
 
-        {/* Logo mark */}
-        <div className="mb-8 flex items-center gap-3">
-          <PausiaBrand subtitle={null} size="md" />
-        </div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        * { box-sizing: border-box; }
+      `}</style>
 
-        {/* Step progress dots */}
-        {['step-community', 'step-subjects', 'step-time', 'step-start'].includes(phase) && (
-          <StepDots current={
-            phase === 'step-community' ? 0 :
-            phase === 'step-subjects' ? 1 :
-            phase === 'step-time' ? 2 : 3
-          } total={4} />
-        )}
+      {/* Confetti canvas */}
+      <canvas ref={confettiRef} className="fixed inset-0 pointer-events-none z-50"
+        style={{ display: 'none' }} />
 
-        {/* ── ALREADY DONE ────────────────────────────────────────────── */}
-        {phase === 'already-done' && (
-          <Card>
-            <div className="flex flex-col items-center gap-4 py-2 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)]">
-                <Route size={26} strokeWidth={2.2} />
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-slate-950">Ya tienes tu Camino PAU creado</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-400">Tu ruta y primera misión ya están activas.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => router.push('/camino')}
-                className="campus-primary w-full"
-                style={{ padding: '13px 20px', borderRadius: 14, fontSize: 14, gap: 8 }}
-              >
-                Ver mi Camino <ArrowRight size={15} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setPhase('step-community')}
-                className="text-xs font-semibold text-slate-400 underline underline-offset-2 hover:text-slate-600"
-              >
-                Repetir onboarding
-              </button>
-            </div>
-          </Card>
-        )}
-
-        {/* ── STEP 1: Community ───────────────────────────────────────── */}
-        {phase === 'step-community' && (
-          <Card>
-            <h1 className="text-2xl font-black text-slate-950">Crea tu Camino PAU</h1>
-            <p className="mt-2 text-sm font-semibold text-slate-500">Dinos tu comunidad autónoma para adaptar tu ruta oficial.</p>
-            <div className="mt-6 grid gap-3">
-              {(['Madrid', 'Cataluña', 'Andalucía', 'Otra'] as OnboardingCommunity[]).map(c => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCommunity(c)}
-                  className={`rounded-2xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                    community === c
-                      ? 'border-blue-400 bg-blue-50 text-blue-800 shadow-[0_0_0_3px_rgba(37,99,235,0.12)]'
-                      : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/60 hover:text-blue-800'
-                  }`}
-                >
-                  {c}
-                  {c === 'Otra' && community === 'Otra' && (
-                    <p className="mt-1 text-xs font-semibold text-slate-400">
-                      Usaremos la Ruta Troncal PAU, centrada en el temario común.
-                    </p>
-                  )}
-                </button>
-              ))}
-            </div>
-            <PrimaryButton disabled={!community} onClick={nextFromCommunity}>
-              Continuar <ArrowRight size={15} />
-            </PrimaryButton>
-          </Card>
-        )}
-
-        {/* ── STEP 2: Subjects ────────────────────────────────────────── */}
-        {phase === 'step-subjects' && (
-          <Card>
-            <h1 className="text-2xl font-black text-slate-950">Tus asignaturas PAU</h1>
-            <p className="mt-2 text-sm font-semibold text-slate-500">Las misiones se centran en estas tres. Puedes ajustarlo más adelante.</p>
-            <div className="mt-6 grid gap-3">
-              {DEFAULT_SUBJECTS.map(s => {
-                const selected = subjects.includes(s)
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSubjects(selected ? subjects.filter(x => x !== s) : [...subjects, s])}
-                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                      selected
-                        ? 'border-blue-400 bg-blue-50 text-blue-800'
-                        : 'border-slate-100 bg-white text-slate-500 hover:border-blue-200'
-                    }`}
-                  >
-                    <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-xs transition ${selected ? 'border-blue-500 bg-blue-600 text-white' : 'border-slate-200 bg-white'}`}>
-                      {selected && '✓'}
-                    </div>
-                    {s}
-                  </button>
-                )
-              })}
-            </div>
-            <PrimaryButton disabled={subjects.length === 0} onClick={nextFromSubjects}>
-              Continuar <ArrowRight size={15} />
-            </PrimaryButton>
-          </Card>
-        )}
-
-        {/* ── STEP 3: Daily time ──────────────────────────────────────── */}
-        {phase === 'step-time' && (
-          <Card>
-            <h1 className="text-2xl font-black text-slate-950">¿Cuánto tiempo tienes al día?</h1>
-            <p className="mt-2 text-sm font-semibold text-slate-500">Pausia te preparará misiones que encajen en tu rutina.</p>
-            <div className="mt-6 grid gap-3">
-              {([15, 25, 40] as OnboardingDailyMinutes[]).map(m => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setDailyMinutes(m)}
-                  className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                    dailyMinutes === m
-                      ? 'border-blue-400 bg-blue-50 text-blue-800'
-                      : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/60 hover:text-blue-800'
-                  }`}
-                >
-                  <span>{m} min</span>
-                  {m === 25 && (
-                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-black text-blue-700">Recomendado</span>
-                  )}
-                </button>
-              ))}
-            </div>
-            <PrimaryButton disabled={!dailyMinutes} onClick={nextFromTime}>
-              Continuar <ArrowRight size={15} />
-            </PrimaryButton>
-          </Card>
-        )}
-
-        {/* ── STEP 4: Start mode ──────────────────────────────────────── */}
-        {phase === 'step-start' && (
-          <Card>
-            <h1 className="text-2xl font-black text-slate-950">¿Desde dónde empiezas?</h1>
-            <p className="mt-2 text-sm font-semibold text-slate-500">Pausia ajustará la semana del currículum para que la ruta tenga sentido.</p>
-            <div className="mt-6 grid gap-3">
-              {([
-                { id: 'septiembre', label: 'Desde septiembre', desc: 'Empiezo con margen, ruta completa' },
-                { id: 'empezado',   label: 'Ya he empezado',   desc: 'Llevo algo de base, ajustamos el ritmo' },
-                { id: 'retraso',    label: 'Voy con retraso',  desc: 'Priorizamos lo que más impacta en nota' },
-                { id: 'intensivo',  label: 'Modo intensivo',   desc: 'Poco tiempo, foco máximo en el examen' },
-              ] as { id: OnboardingStartMode; label: string; desc: string }[]).map(opt => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setStartMode(opt.id)}
-                  className={`rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                    startMode === opt.id
-                      ? 'border-blue-400 bg-blue-50'
-                      : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-blue-50/60'
-                  }`}
-                >
-                  <p className={`text-sm font-black ${startMode === opt.id ? 'text-blue-800' : 'text-slate-800'}`}>{opt.label}</p>
-                  <p className="mt-0.5 text-xs font-semibold text-slate-400">{opt.desc}</p>
-                </button>
-              ))}
-            </div>
-            <PrimaryButton disabled={!startMode} onClick={nextFromStart}>
-              Crear mi primera misión gratis <ArrowRight size={15} />
-            </PrimaryButton>
-          </Card>
-        )}
-
-        {/* ── GENERATING ──────────────────────────────────────────────── */}
-        {phase === 'generating' && (
-          <Card>
-            <div className="flex flex-col items-center gap-6 py-4 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_12px_32px_rgba(37,99,235,0.28)]">
-                <Route size={30} strokeWidth={2.2} />
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-slate-950">Creando tu Camino PAU…</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-400">Un momento</p>
-              </div>
-              <div className="w-full space-y-3 text-left">
-                {[
-                  'Ruta adaptada a tu comunidad',
-                  'Misiones diarias hasta la PAU',
-                  'Repaso inteligente de errores',
-                ].map((item, i) => (
-                  <GeneratingCheck key={item} label={item} delay={i * 600} />
-                ))}
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* ── FIRST MISSION ───────────────────────────────────────────── */}
-        {phase === 'first-mission' && (
-          <div className="space-y-5">
-            <Card>
-              <p className="text-xs font-bold text-slate-400">Tu primera misión</p>
-              <h2 className="mt-1 text-xl font-black text-slate-950">Activación · Semana 1</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-500">
-                3 tareas cortas para calibrar tu punto de partida. Sin presión.
-              </p>
-              <div className="pau-progress-bar mt-4">
-                <div className="pau-progress-fill" style={{ transform: `scaleX(${completedTaskIds.length / ONBOARDING_TASKS.length})` }} />
-              </div>
-              <p className="mt-1 text-xs font-semibold text-slate-400">
-                {completedTaskIds.length}/{ONBOARDING_TASKS.length} completadas
-              </p>
-            </Card>
-
-            {setupWarning && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-800">
-                {setupWarning}
-              </div>
-            )}
-            {taskError && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700">
-                {taskError}
-              </div>
-            )}
-
-            {ONBOARDING_TASKS.map(task => (
-              <OnboardingTaskCard
-                key={task.id}
-                task={task}
-                completed={completedTaskIds.includes(task.id)}
-                onComplete={completeTask}
-                openAnswer={openAnswer}
-                onOpenAnswerChange={setOpenAnswer}
-                openFeedback={task.id === 'ob-open-1' ? openFeedback : null}
-                loading={submittingTask === task.id}
+      {/* ── Header ── */}
+      <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-lg border-b border-slate-100/80">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+          <img src="/brand/pausia-lockup.png" alt="Pausia"
+            style={{ height: 26, objectFit: 'contain', flexShrink: 0 }} />
+          <div className="flex-1 mx-2">
+            <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: 'linear-gradient(90deg, #1d4ed8, #3b82f6)' }}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
               />
+            </div>
+          </div>
+          {phase !== 'welcome' && phase !== 'generating' && phase !== 'done' && (
+            <span className="text-xs font-bold text-slate-400 shrink-0 tabular-nums">
+              {stepMap[phase] ?? 0} / {totalQ}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Chat area ── */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 pt-6 pb-4 space-y-3">
+
+          <AnimatePresence>
+            {messages.map(msg => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.role === 'pau' && (
+                  <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-2 ring-white shadow-sm">
+                    <Image src="/mascots/pau/pau-guide.png" alt="Pau"
+                      width={36} height={36} className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <div
+                  className="max-w-[78%] rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed"
+                  style={msg.role === 'pau' ? {
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    color: '#1e293b',
+                    borderTopLeftRadius: 6,
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                  } : {
+                    background: 'linear-gradient(135deg, #1d4ed8, #2563eb)',
+                    color: '#ffffff',
+                    borderTopRightRadius: 6,
+                    boxShadow: '0 4px 16px rgba(37,99,235,0.30)',
+                  }}
+                >
+                  {msg.text}
+                </div>
+              </motion.div>
             ))}
 
-            {completedTaskIds.length > 0 && completedTaskIds.length < ONBOARDING_TASKS.length && (
-              <p className="text-center text-xs font-semibold text-blue-600">
-                +{xpEarned} XP ganados hasta ahora · Sigue completando
-              </p>
+            {/* Typing indicator */}
+            {isTyping && (
+              <motion.div
+                key="typing"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex gap-2.5 justify-start"
+              >
+                <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-2 ring-white shadow-sm">
+                  <Image src="/mascots/pau/pau-guide.png" alt="Pau"
+                    width={36} height={36} className="w-full h-full object-cover" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-2xl px-4 py-4 flex items-center gap-1.5 shadow-sm"
+                  style={{ borderTopLeftRadius: 6 }}>
+                  {[0, 1, 2].map(i => (
+                    <motion.div key={i} className="w-2 h-2 rounded-full bg-slate-300"
+                      animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+                      transition={{ duration: 0.85, repeat: Infinity, delay: i * 0.18, ease: 'easeInOut' }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
             )}
-          </div>
-        )}
+          </AnimatePresence>
 
-        {/* ── TINY WIN + DONE ─────────────────────────────────────────── */}
-        {(phase === 'tiny-win' || phase === 'done') && (
-          <div className="space-y-5">
-
-            {/* XP celebration card */}
-            <Card>
-              <div className="flex flex-col items-center gap-3 py-2 text-center">
-                <div style={{
-                  display: 'inline-block',
-                  background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
-                  border: '1.5px solid #f59e0b',
-                  borderRadius: 14,
-                  padding: '6px 22px',
-                  boxShadow: '0 4px 16px rgba(245,158,11,0.18)',
-                }}>
-                  <p style={{ margin: 0, fontSize: 34, fontWeight: 900, color: '#92400e', letterSpacing: '-0.03em', lineHeight: 1 }}>
-                    +{xpEarned} XP
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xl font-black text-slate-950">Primera misión completada</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-400">Tu Camino ya no empieza desde cero</p>
-                </div>
+          {/* ── Generating ── */}
+          {phase === 'generating' && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-3">
+              <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-4">
+                {GEN_ITEMS.map((item, i) => (
+                  <motion.div key={item}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: genIdx > i ? 1 : 0.22, x: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="flex items-center gap-3"
+                  >
+                    <motion.div
+                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                      animate={{ background: genIdx > i ? '#2563eb' : '#e2e8f0' }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {genIdx > i && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400 }}>
+                          <Check size={11} color="white" strokeWidth={3} />
+                        </motion.div>
+                      )}
+                    </motion.div>
+                    <span className="text-sm font-semibold"
+                      style={{ color: genIdx > i ? '#1e293b' : '#94a3b8' }}>
+                      {item}
+                    </span>
+                  </motion.div>
+                ))}
               </div>
-            </Card>
+            </motion.div>
+          )}
 
-            {/* Soft diagnosis */}
-            <Card>
-              <div className="flex items-start gap-3">
-                <Sparkles size={18} className="mt-0.5 shrink-0 text-blue-600" />
-                <div>
-                  <p className="text-sm font-black text-slate-900">Diagnóstico inicial en progreso</p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
-                    Pausia todavía está calibrando tu ruta. Completa 3 misiones para desbloquear tu primer diagnóstico inicial.
+          {/* ── Done ── */}
+          {phase === 'done' && (
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }} className="mt-3">
+              <div className="bg-white rounded-3xl border border-slate-100 p-7 shadow-sm text-center space-y-5">
+
+                <motion.div
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 18, delay: 0.2 }}
+                  className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl ring-4 ring-blue-100"
+                >
+                  <Image src="/mascots/pau/pau-celebrate.png" alt="Pau celebrando"
+                    width={96} height={96} className="w-full h-full object-cover" priority />
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                  <h2 className="text-2xl font-black text-slate-950 tracking-tight">¡Tu ruta PAU está lista!</h2>
+                  <p className="mt-1.5 text-sm font-semibold text-slate-400">
+                    Pausia ya tiene todo lo que necesita para guiarte.
                   </p>
-                </div>
+                </motion.div>
+
+                {/* Subject pills */}
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}
+                  className="flex flex-wrap gap-2 justify-center"
+                >
+                  {subjects.map(s => {
+                    const opt = SUBJECT_OPTS.find(o => o.id === s)
+                    return opt ? (
+                      <span key={s} className="px-3 py-1 rounded-full text-xs font-bold"
+                        style={{ background: opt.bg, color: opt.color }}>
+                        {s}
+                      </span>
+                    ) : null
+                  })}
+                </motion.div>
+
+                <motion.button
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  onClick={() => router.push('/camino')}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] text-white"
+                  style={{ background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 10px 28px rgba(37,99,235,0.30)' }}
+                >
+                  Ver mi Camino PAU <ArrowRight size={16} />
+                </motion.button>
               </div>
-            </Card>
+            </motion.div>
+          )}
 
-            {/* Parent CTA */}
-            <Card>
-              <p className="mb-3 text-xs font-bold text-slate-400">Tu Camino PAU está creado</p>
-              <ParentLinkModule billing={billing} />
-            </Card>
-
-            {/* CTA to /camino */}
-            <button
-              type="button"
-              onClick={() => router.push('/camino')}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
-            >
-              Ver mi Camino completo <ArrowRight size={15} />
-            </button>
-          </div>
-        )}
-
+          <div ref={chatEndRef} style={{ paddingBottom: 4 }} />
+        </div>
       </div>
+
+      {/* ── Options panel ── */}
+      <AnimatePresence>
+        {showOptions && (
+          <div className="sticky bottom-0 z-20 bg-slate-50/96 backdrop-blur-md border-t border-slate-100"
+            style={{ maxHeight: '58vh', overflowY: 'auto' }}>
+            {renderOptions()}
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function Card({ children }: { children: React.ReactNode }) {
+function OptionList({ children }: { children: React.ReactNode }) {
   return (
-    <div className="pausia-glass-card" style={{ borderRadius: 22, padding: 24 }}>
-      {children}
-    </div>
-  )
-}
-
-function PrimaryButton({
-  children, onClick, disabled
-}: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="campus-primary mt-6 w-full"
-      style={{ padding: '13px 20px', borderRadius: 14, fontSize: 14, gap: 8 }}
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="px-4 py-4 space-y-2"
     >
       {children}
-    </button>
+    </motion.div>
   )
 }
 
-function StepDots({ current, total }: { current: number; total: number }) {
-  return (
-    <div className="mb-6 flex items-center gap-2">
-      {Array.from({ length: total }, (_, i) => (
-        <div
-          key={i}
-          className={`h-1.5 rounded-full [transition:width_300ms_var(--ease-out),background-color_300ms_var(--ease-out)] ${
-            i < current ? 'w-6 bg-blue-600' :
-            i === current ? 'w-6 bg-blue-400' :
-            'w-3 bg-slate-200'
-          }`}
-        />
-      ))}
-      <span className="ml-2 text-xs font-bold text-slate-400">{current + 1} / {total}</span>
-    </div>
-  )
+interface OptionBtnProps {
+  label: string
+  desc?: string
+  badge?: string
+  index: number
+  onClick: () => void
 }
 
-function GeneratingCheck({ label, delay }: { label: string; delay: number }) {
-  const [visible, setVisible] = useState(false)
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), delay)
-    return () => clearTimeout(t)
-  }, [delay])
+function OptionBtn({ label, desc, badge, index, onClick }: OptionBtnProps) {
   return (
-    <div className={`flex items-center gap-2.5 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-      <CheckCircle2 size={16} className="shrink-0 text-emerald-500" />
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
-    </div>
-  )
-}
-
-interface OnboardingTaskCardProps {
-  task: DailyCaminoTask
-  completed: boolean
-  onComplete: (task: DailyCaminoTask) => void
-  openAnswer: string
-  onOpenAnswerChange: (v: string) => void
-  openFeedback: string | null
-  loading: boolean
-}
-
-function OnboardingTaskCard({
-  task, completed, onComplete, openAnswer, onOpenAnswerChange, openFeedback, loading
-}: OnboardingTaskCardProps) {
-  const isOpenTask = task.id === 'ob-open-1'
-
-  return (
-    <div style={{
-      borderRadius: 14,
-      border: `1px solid ${completed ? '#bbf7d0' : 'var(--pau-border)'}`,
-      background: completed ? 'rgba(240,253,244,0.8)' : '#fff',
-      padding: 16,
-      transition: 'border-color 180ms var(--ease-out)',
-    }}>
-      <div className="flex items-start gap-3">
-        <button
-          type="button"
-          disabled={completed || loading}
-          onClick={() => !isOpenTask && onComplete(task)}
-          aria-label={completed ? `${task.title} completada` : `Completar ${task.title}`}
-          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition focus:outline-none ${
-            completed
-              ? 'border-emerald-300 bg-emerald-600 text-white'
-              : 'border-blue-100 bg-blue-50 text-blue-600 hover:border-blue-300'
-          }`}
-        >
-          {completed ? <CheckCircle2 size={18} /> : <span className="text-xs font-black">○</span>}
-        </button>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-black text-blue-700">{task.type.replace(/_/g, ' ')}</span>
-            <span className="flex items-center gap-1 text-[11px] font-black text-amber-600">
-              <Sparkles size={11} />{task.xp} XP
-            </span>
-            {completed && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-black text-emerald-700">Completada</span>}
-          </div>
-          <h3 className="mt-2 text-sm font-black text-slate-900">{task.title}</h3>
-          <p className="mt-1 text-xs font-semibold leading-5 text-slate-500 whitespace-pre-line">{task.detail}</p>
-
-          {isOpenTask && !completed && (
-            <div className="mt-3 space-y-2">
-              <textarea
-                value={openAnswer}
-                onChange={e => onOpenAnswerChange(e.target.value)}
-                placeholder="Escribe tu respuesta aquí (1-2 frases)…"
-                rows={2}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 resize-none"
-              />
-              <button
-                type="button"
-                disabled={!openAnswer.trim() || loading}
-                onClick={() => onComplete(task)}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-black text-white disabled:opacity-40"
-              >
-                {loading ? 'Guardando…' : 'Guardar respuesta'}
-              </button>
-            </div>
-          )}
-
-          {openFeedback && (
-            <p className="mt-2 text-xs font-semibold text-slate-400 italic">{openFeedback}</p>
-          )}
-        </div>
+    <motion.button
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.048 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-4 rounded-2xl border border-slate-200 bg-white text-left group transition-all"
+      style={{
+        minHeight: 56,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = '#93c5fd'
+        e.currentTarget.style.background = '#f0f7ff'
+        e.currentTarget.style.boxShadow = '0 2px 12px rgba(37,99,235,0.10)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = '#e2e8f0'
+        e.currentTarget.style.background = '#ffffff'
+        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'
+      }}
+    >
+      <div className="flex-1 min-w-0">
+        <span className="block text-sm font-bold text-slate-800">{label}</span>
+        {desc && <span className="block text-xs font-semibold text-slate-400 mt-0.5">{desc}</span>}
       </div>
-    </div>
+      {badge && (
+        <span className="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-700">
+          {badge}
+        </span>
+      )}
+      <ChevronRight size={16} className="shrink-0 text-slate-300 transition-colors" />
+    </motion.button>
   )
 }

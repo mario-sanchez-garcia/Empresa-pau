@@ -825,6 +825,8 @@ export default function LandingPage() {
           .lp-hero-grid, .lp-moment-grid { grid-template-columns: 1fr !important; }
           .lp-screens-grid { grid-template-columns: 1fr !important; }
           .lp-footer-grid { grid-template-columns: 1fr 1fr !important; }
+          .lp-story-panel { grid-template-columns: 1fr !important; min-height: auto !important; }
+          .lp-story-panel > div { order: unset !important; min-height: 280px; }
           .lp-hero-visual { order: -1; }
           .lp-scroll-moment { padding: 24px !important; }
           .lp-hero-cloud-curtain { inset: -16% -34% -10% !important; }
@@ -1011,8 +1013,55 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-          <div className="lp-hero-visual">
-            <HeroProductCloud />
+          <div className="lp-hero-visual" style={{ position: 'relative' }}>
+            <div style={{
+              position: 'relative',
+              borderRadius: 24,
+              overflow: 'hidden',
+              boxShadow: '0 40px 90px rgba(15,23,42,0.18), 0 0 0 1px rgba(255,255,255,0.7)',
+              aspectRatio: '4/5',
+            }}>
+              <img
+                src="/brand/hero-student.jpg"
+                alt="Estudiante preparando la PAU con Pausia"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+              {/* floating correction card */}
+              <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20 }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.92)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  borderRadius: 14, padding: '13px 16px',
+                  border: '1px solid rgba(255,255,255,0.95)',
+                  boxShadow: '0 8px 32px rgba(15,23,42,0.12)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: C.soft, fontWeight: 600 }}>Corrección · Matemáticas II</div>
+                      <div style={{ fontSize: 14, fontWeight: 900, color: C.ink, letterSpacing: '-0.02em', marginTop: 2 }}>8.4 / 10 — Muy bien</div>
+                    </div>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: C.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <WandSparkles size={15} color="#fff" />
+                    </div>
+                  </div>
+                  <div style={{ height: 4, background: C.bgBlueMid, borderRadius: 2 }}>
+                    <div style={{ width: '84%', height: '100%', background: C.grad, borderRadius: 2 }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* floating streak badge */}
+            <div style={{
+              position: 'absolute', top: -12, right: -12,
+              background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+              borderRadius: 12, padding: '8px 14px',
+              boxShadow: '0 8px 24px rgba(109,40,217,0.35)',
+              border: '2px solid rgba(255,255,255,0.9)',
+            }}>
+              <div style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Racha</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>12 días</div>
+            </div>
           </div>
         </div>
       </section>
@@ -1068,82 +1117,87 @@ export default function LandingPage() {
       </section>
 
       {/* ── Scroll narrative ─────────────────────────────────────────────── */}
-      <section id="como-funciona" style={{
-        position: 'relative',
-        overflow: 'hidden',
-        padding: 'clamp(48px,7vw,80px) clamp(20px,5vw,48px)',
-        background: 'linear-gradient(180deg, #eff6ff 0%, #ffffff 30%, #f8fafc 100%)',
-      }}>
-        <div style={{ maxWidth: 1140, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-          <div style={{ maxWidth: 660, marginBottom: 'clamp(34px,5vw,56px)' }}>
-            <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
-              Cómo funciona
-            </p>
-            <h2 style={{ fontSize: 'clamp(2rem,4.6vw,3.3rem)', fontWeight: 950, color: C.ink, margin: '0 0 14px', letterSpacing: '-0.05em', lineHeight: 1.04, textWrap: 'balance' as never }}>
-              Un scroll, cuatro momentos clave.
-            </h2>
-            <p style={{ fontSize: 'clamp(0.98rem,2vw,1.08rem)', color: C.muted, lineHeight: 1.8, margin: 0 }}>
-              Pausia no solo corrige: organiza el proceso completo desde el examen real hasta el siguiente paso de estudio.
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gap: 'clamp(24px,4vw,34px)' }}>
-            {SCROLL_MOMENTS.map((moment, i) => {
-              const Icon = moment.icon
-              return (
-                <article key={moment.n} className="lp-scroll-moment lp-scroll-reveal" style={{
-                  borderRadius: 28,
-                  padding: 'clamp(20px,3vw,32px)',
-                  border: '1px solid rgba(191,219,254,0.76)',
-                  background: 'rgba(255,255,255,0.76)',
-                  boxShadow: '0 24px 70px rgba(37,99,235,0.08)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}>
-                  <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at ${i % 2 ? '16% 24%' : '84% 18%'}, ${moment.soft}, transparent 36%)`, pointerEvents: 'none' }} />
-                  <div className="lp-moment-grid" style={{
-                    position: 'relative',
-                    zIndex: 2,
-                    display: 'grid',
-                    gridTemplateColumns: i % 2 ? '1.04fr 0.96fr' : '0.96fr 1.04fr',
-                    gap: 'clamp(26px,5vw,58px)',
-                    alignItems: 'center',
-                  }}>
-                    <div style={{ order: i % 2 ? 2 : 1 }}>
-                      <div style={{
-                        width: 52,
-                        height: 52,
-                        borderRadius: 18,
-                        display: 'grid',
-                        placeItems: 'center',
-                        background: moment.soft,
-                        color: moment.color,
-                        boxShadow: `0 16px 36px ${moment.accent}44`,
-                        marginBottom: 22,
-                      }}>
-                        <Icon size={24} />
-                      </div>
-                      <div style={{ fontSize: 12, fontWeight: 950, letterSpacing: '0.1em', textTransform: 'uppercase', color: moment.color, marginBottom: 10 }}>
-                        Momento {moment.n}
-                      </div>
-                      <h3 style={{ margin: '0 0 12px', fontSize: 'clamp(1.5rem,3.2vw,2.1rem)', lineHeight: 1.08, fontWeight: 950, letterSpacing: '-0.04em', color: C.ink, textWrap: 'balance' as never }}>
-                        {moment.title}
-                      </h3>
-                      <p style={{ margin: 0, fontSize: 'clamp(0.98rem,2vw,1.1rem)', lineHeight: 1.8, color: C.muted, maxWidth: 430, fontWeight: 500 }}>
-                        {moment.desc}
-                      </p>
-                    </div>
-                    <div style={{ order: i % 2 ? 1 : 2 }}>
-                      <MomentVisual moment={moment} />
-                    </div>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
+      <section id="como-funciona">
+        {/* section header — contained */}
+        <div style={{ maxWidth: 1140, margin: '0 auto', padding: 'clamp(48px,7vw,80px) clamp(20px,5vw,48px) clamp(28px,4vw,44px)' }}>
+          <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
+            Cómo funciona
+          </p>
+          <h2 style={{ fontSize: 'clamp(2rem,4.6vw,3.3rem)', fontWeight: 950, color: C.ink, margin: '0 0 14px', letterSpacing: '-0.05em', lineHeight: 1.04, textWrap: 'balance' as never }}>
+            Un scroll, cuatro momentos clave.
+          </h2>
+          <p style={{ fontSize: 'clamp(0.98rem,2vw,1.08rem)', color: C.muted, lineHeight: 1.8, margin: 0, maxWidth: 600 }}>
+            Pausia no solo corrige: organiza el proceso completo desde el examen real hasta el siguiente paso de estudio.
+          </p>
         </div>
+
+        {/* editorial photo panels — full bleed */}
+        {SCROLL_MOMENTS.map((moment, i) => {
+          const Icon = moment.icon
+          const PHOTOS: Record<string, string | null> = {
+            exams:      '/brand/scene-exam.jpg',
+            correction: null,
+            path:       '/brand/scene-laptop.jpg',
+            upload:     '/brand/scene-books.jpg',
+          }
+          const photo     = PHOTOS[moment.kind] ?? null
+          const visualLeft = i % 2 === 1   // odd → visual on left
+
+          return (
+            <div key={moment.n} className="lp-story-panel" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 460 }}>
+
+              {/* ── text side ─────────────────────────────────────────── */}
+              <div style={{
+                order: visualLeft ? 2 : 1,
+                padding: 'clamp(40px,6vw,80px) clamp(28px,4vw,64px)',
+                display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                background: i % 2 === 0 ? '#ffffff' : C.bgSub,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 13,
+                    background: moment.soft, color: moment.color,
+                    display: 'grid', placeItems: 'center', flexShrink: 0,
+                    boxShadow: `0 6px 18px ${moment.accent}55`,
+                  }}>
+                    <Icon size={20} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: moment.color, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Momento {moment.n}
+                  </span>
+                </div>
+                <h3 style={{ margin: '0 0 14px', fontSize: 'clamp(1.6rem,3.2vw,2.3rem)', lineHeight: 1.08, fontWeight: 950, letterSpacing: '-0.04em', color: C.ink, textWrap: 'balance' as never }}>
+                  {moment.title}
+                </h3>
+                <p style={{ margin: 0, fontSize: 'clamp(0.95rem,1.8vw,1.05rem)', lineHeight: 1.8, color: C.muted, maxWidth: 380, fontWeight: 500 }}>
+                  {moment.desc}
+                </p>
+              </div>
+
+              {/* ── visual side ───────────────────────────────────────── */}
+              <div style={{ order: visualLeft ? 1 : 2, position: 'relative', overflow: 'hidden', minHeight: 360 }}>
+                {photo ? (
+                  <img
+                    src={photo}
+                    alt=""
+                    aria-hidden
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '100%', height: '100%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: `linear-gradient(135deg, ${moment.soft} 0%, #fff 100%)`,
+                    padding: '32px',
+                  }}>
+                    <MomentVisual moment={moment} />
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )
+        })}
       </section>
 
       {/* ── Stats ────────────────────────────────────────────────────────── */}

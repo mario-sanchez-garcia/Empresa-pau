@@ -1,7 +1,6 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
 import { ArrowRight, CheckCircle2, Clock3 } from 'lucide-react'
 import { getRouteById, todayMission, type CaminoRouteId } from '@/app/lib/camino/caminoData'
 
@@ -49,18 +48,6 @@ export default function MissionCard({
           transition={{ duration: 0.3, delay: 0.04 }}
           style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, flexWrap: 'wrap' }}
         >
-          <div style={{
-            width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-            border: '2px solid rgba(109,40,217,0.18)',
-            boxShadow: '0 2px 8px rgba(109,40,217,0.12)',
-          }}>
-            <Image
-              src="/mascots/pau/pau-guide.png" alt="Pau"
-              width={34} height={34}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              priority
-            />
-          </div>
           <span style={{
             background: '#111827', color: '#fff',
             fontSize: 10, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase',

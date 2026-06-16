@@ -7,7 +7,6 @@ import {
   BarChart3,
   BrainCircuit,
   ClipboardList,
-  GraduationCap,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'settings'
 
@@ -111,22 +111,7 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
       {/* ── Logo ──────────────────────────────────────────────────── */}
       <div style={{ padding: '22px 16px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 42, height: 42, borderRadius: 15, flexShrink: 0,
-            background: 'linear-gradient(135deg, #0f172a 0%, #1d4ed8 54%, #38bdf8 100%)',
-            color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 14px 32px rgba(37,99,235,0.24)',
-          }}>
-            <GraduationCap size={22} strokeWidth={2.3} />
-          </div>
-          <span style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontSize: 17, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1 }}>
-              Pausia
-            </span>
-            <span style={{ display: 'block', fontSize: 10.5, fontWeight: 700, color: '#94a3b8', marginTop: 3 }}>
-              Academia IA · PAU Madrid
-            </span>
-          </span>
+          <PausiaBrand subtitle={ccaa === 'Cataluña' ? 'PAU Catalunya' : 'PAU Madrid'} size="md" />
           <span style={{
             marginLeft: 'auto',
             fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',

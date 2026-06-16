@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, CheckCircle2, GraduationCap, Sparkles, TimerReset } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Sparkles, TimerReset } from 'lucide-react'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 const C = {
   ink: '#111827',
@@ -112,25 +113,7 @@ export default function PricingPage() {
         }}
       >
         <Link href="/landing" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-          <span
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 15,
-              background: C.grad,
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 12px 28px rgba(37,99,235,0.22)',
-            }}
-          >
-            <GraduationCap size={21} />
-          </span>
-          <span>
-            <strong style={{ display: 'block', color: C.ink, fontSize: 18, lineHeight: 1 }}>Pausia</strong>
-            <small style={{ display: 'block', color: C.soft, marginTop: 2 }}>Planes en beta</small>
-          </span>
+          <PausiaBrand subtitle="Planes en beta" size="md" />
         </Link>
 
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Bug, CreditCard, FlaskConical, Mail, Shield, type LucideIcon } from 'lucide-react'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 export const metadata: Metadata = {
   title: 'Contacto · Pausia',
@@ -11,8 +13,7 @@ export default function ContactoPage() {
     <main className="pau-bg-atmosphere" style={page}>
       <div style={container}>
         <div style={logoRow}>
-          <div style={logoIcon}>P</div>
-          <span style={logoText}>Pausia</span>
+          <PausiaBrand subtitle={null} size="md" />
         </div>
 
         <h1 style={h1}>Contacto</h1>
@@ -20,35 +21,35 @@ export default function ContactoPage() {
 
         <div style={cards}>
           <ContactCard
-            icon="📬"
+            icon={Mail}
             title="Soporte general"
             description="Preguntas sobre el producto, bugs, sugerencias o dudas de uso."
             email="hola@pausia.es"
             subject="Soporte"
           />
           <ContactCard
-            icon="🔒"
+            icon={Shield}
             title="Privacidad y datos"
             description="Solicitudes de acceso, rectificación o eliminación de tus datos."
             email="hola@pausia.es"
             subject="Privacidad"
           />
           <ContactCard
-            icon="💳"
+            icon={CreditCard}
             title="Reembolsos y pagos"
             description="Solicitudes de reembolso o problemas con el pago del Pack Curso PAU."
             email="hola@pausia.es"
             subject="Reembolso"
           />
           <ContactCard
-            icon="🐛"
+            icon={Bug}
             title="Problema técnico"
             description="Si algo no funciona correctamente o encuentras un error."
             email="hola@pausia.es"
             subject="Problema técnico"
           />
           <ContactCard
-            icon="🧪"
+            icon={FlaskConical}
             title="Beta privada"
             description="Feedback sobre tu experiencia, ideas o preguntas sobre la fase beta."
             email="hola@pausia.es"
@@ -78,10 +79,11 @@ export default function ContactoPage() {
 
 function ContactCard({
   icon, title, description, email, subject
-}: { icon: string; title: string; description: string; email: string; subject: string }) {
+}: { icon: LucideIcon; title: string; description: string; email: string; subject: string }) {
+  const Icon = icon
   return (
     <div style={card}>
-      <span style={cardIcon}>{icon}</span>
+      <span style={cardIcon}><Icon size={20} strokeWidth={2.2} /></span>
       <div>
         <p style={cardTitle}>{title}</p>
         <p style={cardDesc}>{description}</p>
@@ -99,13 +101,11 @@ function ContactCard({
 const page: React.CSSProperties = { minHeight: '100vh', padding: '48px 16px 80px' }
 const container: React.CSSProperties = { maxWidth: 640, margin: '0 auto' }
 const logoRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }
-const logoIcon: React.CSSProperties = { width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: 16 }
-const logoText: React.CSSProperties = { fontWeight: 800, fontSize: 18, color: '#111827' }
 const h1: React.CSSProperties = { fontSize: 32, fontWeight: 900, color: '#111827', margin: '0 0 8px' }
 const sub: React.CSSProperties = { fontSize: 15, color: '#64748b', margin: '0 0 36px', lineHeight: 1.6 }
 const cards: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 12 }
 const card: React.CSSProperties = { background: 'white', borderRadius: 14, padding: '18px 20px', display: 'flex', gap: 16, alignItems: 'flex-start', border: '1px solid var(--pau-border, #dbe7fb)' }
-const cardIcon: React.CSSProperties = { fontSize: 22, flexShrink: 0, marginTop: 2 }
+const cardIcon: React.CSSProperties = { width: 38, height: 38, borderRadius: 12, flexShrink: 0, marginTop: 2, display: 'grid', placeItems: 'center', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #dbeafe' }
 const cardTitle: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#111827', margin: '0 0 4px' }
 const cardDesc: React.CSSProperties = { fontSize: 13, color: '#6b7280', margin: '0 0 6px', lineHeight: 1.5 }
 const cardLink: React.CSSProperties = { fontSize: 13, color: '#2563eb', textDecoration: 'none', fontWeight: 600 }

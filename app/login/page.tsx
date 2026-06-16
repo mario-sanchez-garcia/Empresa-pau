@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { ArrowRight, Eye, EyeOff, GraduationCap, LockKeyhole, Mail } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -203,19 +204,7 @@ export default function Login() {
           position: 'absolute', top: 36, left: 40,
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 11, flexShrink: 0,
-            background: 'rgba(255,255,255,0.18)',
-            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.28)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-          }}>
-            <GraduationCap size={19} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 17, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1 }}>Pausia</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>EBAU Madrid</div>
-          </div>
+          <PausiaBrand variant="inverse" subtitle="EBAU Madrid" size="md" />
         </div>
 
         {/* Center: tagline */}
@@ -270,18 +259,7 @@ export default function Login() {
           <div className="lg-mobile-logo lg-up" style={{
             alignItems: 'center', gap: 10, marginBottom: 32,
           }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-              background: C.grad, color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(37,99,235,0.24)',
-            }}>
-              <GraduationCap size={18} />
-            </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: C.ink, letterSpacing: '-0.03em' }}>Pausia</div>
-              <div style={{ fontSize: 10, color: C.soft, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>EBAU Madrid</div>
-            </div>
+            <PausiaBrand subtitle="EBAU Madrid" size="sm" />
           </div>
 
           {/* Heading */}

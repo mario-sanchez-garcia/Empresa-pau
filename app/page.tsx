@@ -26,6 +26,7 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 import {
   ArrowUpRight,
   Atom,
@@ -3303,7 +3304,7 @@ function cambiarTipo(t: Tipo) {
               {mensajes.length === 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '60px 20px', minHeight: '55vh' }}>
                   {/* Glowing avatar */}
-                  <div className="chat-avatar-pulse" style={{ width: 84, height: 84, borderRadius: '28px', background: 'linear-gradient(145deg, #064e3b 0%, #059669 55%, #10b981 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px', fontSize: 36, fontWeight: 900, letterSpacing: '-0.02em' }}>P</div>
+                  <PausiaBrand variant="mark" size="lg" className="chat-avatar-pulse" style={{ width: 84, height: 84, borderRadius: '28px', margin: '0 auto 30px', background: 'rgba(255,255,255,0.94)', border: '1px solid rgba(191,219,254,0.9)', boxShadow: '0 22px 54px rgba(37,99,235,0.18)' }} />
                   <h2 style={{ margin: '0 0 12px', fontSize: 32, fontWeight: 860, color: '#f0f0ff', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
                     Hola, soy{' '}
                     <span style={{ background: 'linear-gradient(90deg, #10b981 0%, #34d399 60%, #6ee7b7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pausia</span>
@@ -3331,7 +3332,7 @@ function cambiarTipo(t: Tipo) {
                   /* Pausia — full-width editorial card */
                   <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '24px 0', borderBottom: i < mensajes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                      <div style={{ width: 38, height: 38, borderRadius: 13, background: 'linear-gradient(135deg, #064e3b, #10b981)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 15, flexShrink: 0, boxShadow: '0 6px 18px rgba(16,185,129,0.28)' }}>P</div>
+                        <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 11, fontWeight: 800, color: '#10b981', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Pausia</div>
                         <div style={{ fontSize: 15, lineHeight: 1.85, color: '#b8b8d8' }}>
@@ -3353,7 +3354,7 @@ function cambiarTipo(t: Tipo) {
               {cargandoChat && (
                 <div className="chat-msg-ai" style={{ padding: '24px 0' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 13, background: 'linear-gradient(135deg, #064e3b, #10b981)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 15, flexShrink: 0, boxShadow: '0 6px 18px rgba(16,185,129,0.28)' }}>P</div>
+                    <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
                       <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
                       <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />

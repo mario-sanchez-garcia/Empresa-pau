@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { CalendarDays, CheckCircle2, Flame, GraduationCap, RotateCcw, Route, Sparkles, Target, TrendingUp, Zap } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Flame, RotateCcw, Route, Sparkles, Target, TrendingUp, Zap } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import DailyTaskCard from '@/app/components/camino/DailyTaskCard'
 import MissionCard from '@/app/components/camino/MissionCard'

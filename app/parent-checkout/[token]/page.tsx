@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { hashToken } from '@/app/lib/billing/tokens'
 import { getPlan } from '@/app/lib/billing/plans'
 import ParentCheckoutClient from './ParentCheckoutClient'
+import PausiaBrand from '@/components/shared/PausiaBrand'
+import { CheckCircle2 } from 'lucide-react'
 
 // In Next.js App Router (v15+), params is a Promise — must be awaited.
 interface Props {
@@ -112,7 +114,7 @@ function SuccessStaticPage({ name }: { name: string | null }) {
     <main className="pau-bg-atmosphere" style={styles.page}>
       <div style={styles.card}>
         <Logo />
-        <div style={{ fontSize: 40, textAlign: 'center' as const }}>✅</div>
+        <div style={styles.successIcon}><CheckCircle2 size={30} strokeWidth={2.4} /></div>
         <p style={styles.successTitle}>Pack ya activado</p>
         <p style={styles.bodyText}>
           {name ? `El Pack Curso PAU de ${name} ya está activado.` : 'Este Pack Curso PAU ya está activado.'}
@@ -125,15 +127,7 @@ function SuccessStaticPage({ name }: { name: string | null }) {
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-      <div style={{
-        width: 40, height: 40, borderRadius: 12,
-        background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'white', fontWeight: 900, fontSize: 18
-      }}>P</div>
-      <span style={{ fontWeight: 800, fontSize: 20, color: '#111827' }}>Pausia</span>
-    </div>
+    <PausiaBrand subtitle={null} size="md" style={{ marginBottom: 8 }} />
   )
 }
 
@@ -158,6 +152,17 @@ const styles = {
   },
   errorTitle: { fontSize: 20, fontWeight: 800, color: '#111827', margin: 0 },
   errorText: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0 },
+  successIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    display: 'grid' as const,
+    placeItems: 'center' as const,
+    alignSelf: 'center' as const,
+    color: '#16a34a',
+    background: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+  },
   successTitle: { fontSize: 20, fontWeight: 800, color: '#111827', margin: 0, textAlign: 'center' as const },
   bodyText: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0, textAlign: 'center' as const },
 }

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { CheckCircle2 } from 'lucide-react'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 export const metadata: Metadata = {
   title: 'Pago recibido · Pausia',
@@ -13,11 +15,10 @@ export default function ParentCheckoutSuccess() {
       <div style={styles.card}>
         {/* Logo */}
         <div style={styles.logoRow}>
-          <div style={styles.logoIcon}>P</div>
-          <span style={styles.logoText}>Pausia</span>
+          <PausiaBrand subtitle={null} size="md" />
         </div>
 
-        <div style={{ fontSize: 48, textAlign: 'center' as const }}>✅</div>
+        <div style={styles.successIcon}><CheckCircle2 size={34} strokeWidth={2.4} /></div>
 
         <h1 style={styles.title}>Pago recibido</h1>
 
@@ -80,13 +81,17 @@ const styles = {
     textAlign: 'center' as const,
   },
   logoRow: { display: 'flex' as const, alignItems: 'center' as const, gap: 10 },
-  logoIcon: {
-    width: 36, height: 36, borderRadius: 10,
-    background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
-    display: 'flex' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
-    color: 'white', fontWeight: 900, fontSize: 16
+  successIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 20,
+    display: 'grid' as const,
+    placeItems: 'center' as const,
+    color: '#16a34a',
+    background: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    boxShadow: '0 16px 34px rgba(22,163,74,0.12)',
   },
-  logoText: { fontWeight: 800, fontSize: 18, color: '#111827' },
   title: { fontSize: 24, fontWeight: 900, color: '#111827', margin: 0 },
   body: { fontSize: 15, color: '#64748b', lineHeight: 1.7, margin: 0 },
   infoBox: {

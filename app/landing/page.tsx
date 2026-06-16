@@ -10,7 +10,6 @@ import {
   ClipboardList,
   Dna,
   FlaskConical,
-  GraduationCap,
   Landmark,
   MessageCircle,
   Sigma,
@@ -22,6 +21,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -272,7 +272,7 @@ function MomentVisual({ moment }: { moment: ScrollMoment }) {
     return (
       <div className="lp-visual-stage">
         <AmbientLayer />
-        <div className="lp-glass-card" style={{ ...commonCard, width: '78%', margin: '42px auto 0', padding: 22, borderRadius: 28 }}>
+        <div className="lp-glass-card lp-scroll-panel" style={{ ...commonCard, width: '78%', margin: '42px auto 0', padding: 22, borderRadius: 28 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 900, color: moment.color, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Corrección oficial</div>
@@ -306,7 +306,7 @@ function MomentVisual({ moment }: { moment: ScrollMoment }) {
     return (
       <div className="lp-visual-stage">
         <AmbientLayer />
-        <div style={{ ...commonCard, width: '76%', margin: '38px auto 0', padding: 22, borderRadius: 28 }}>
+        <div className="lp-scroll-panel" style={{ ...commonCard, width: '76%', margin: '38px auto 0', padding: 22, borderRadius: 28 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 900, color: moment.color, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Camino PAU</div>
@@ -336,7 +336,7 @@ function MomentVisual({ moment }: { moment: ScrollMoment }) {
     return (
       <div className="lp-visual-stage">
         <AmbientLayer />
-        <div style={{ ...commonCard, width: '74%', margin: '34px auto 0', padding: 20, borderRadius: 28 }}>
+        <div className="lp-scroll-panel" style={{ ...commonCard, width: '74%', margin: '34px auto 0', padding: 20, borderRadius: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 50, height: 50, borderRadius: 18, display: 'grid', placeItems: 'center', background: moment.soft, color: moment.color }}><UploadCloud size={24} /></div>
             <div>
@@ -365,7 +365,7 @@ function MomentVisual({ moment }: { moment: ScrollMoment }) {
   return (
     <div className="lp-visual-stage">
       <AmbientLayer />
-      <div style={{ ...commonCard, width: '80%', margin: '36px auto 0', padding: 20, borderRadius: 28 }}>
+      <div className="lp-scroll-panel" style={{ ...commonCard, width: '80%', margin: '36px auto 0', padding: 20, borderRadius: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 900, color: moment.color, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Exámenes reales</div>
@@ -423,6 +423,14 @@ export default function LandingPage() {
           from { opacity: 0; transform: translateY(44px) scale(0.98); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes lp-cloud-scroll-away {
+          from { opacity: 0.78; transform: translate3d(0,42px,0) scale(1.08); }
+          to { opacity: 0.04; transform: translate3d(var(--cloud-drift-x, 0px), -180px,0) scale(0.9); }
+        }
+        @keyframes lp-panel-approach {
+          from { opacity: 0.70; transform: translateY(38px) scale(0.93); filter: blur(1px); }
+          to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
         .lp-h1   { animation: lp-up 560ms cubic-bezier(0.22,1,0.36,1) both; }
         .lp-p    { animation: lp-up 560ms cubic-bezier(0.22,1,0.36,1) 80ms both; }
         .lp-ctas { animation: lp-up 560ms cubic-bezier(0.22,1,0.36,1) 160ms both; }
@@ -455,6 +463,17 @@ export default function LandingPage() {
           background: rgba(207,250,254,0.68);
           animation-delay: -6s;
         }
+        .lp-scroll-moment .lp-cloud {
+          animation-name: lp-cloud-scroll-away;
+          animation-duration: 1s;
+          animation-timing-function: linear;
+          animation-fill-mode: both;
+          animation-timeline: view();
+          animation-range: entry 0% cover 72%;
+        }
+        .lp-scroll-moment .lp-cloud-a { --cloud-drift-x: -42px; }
+        .lp-scroll-moment .lp-cloud-b { --cloud-drift-x: 34px; }
+        .lp-scroll-moment .lp-cloud-c { --cloud-drift-x: -16px; }
         .lp-particle {
           position: absolute;
           width: 8px; height: 8px;
@@ -477,6 +496,12 @@ export default function LandingPage() {
         }
         .lp-glass-card {
           transition: transform 240ms cubic-bezier(0.22,1,0.36,1), box-shadow 240ms ease;
+        }
+        .lp-scroll-panel {
+          transform-origin: center;
+          animation: lp-panel-approach 1s cubic-bezier(0.22,1,0.36,1) both;
+          animation-timeline: view();
+          animation-range: entry 8% cover 46%;
         }
         @media (hover: hover) {
           .lp-glass-card:hover { transform: translateY(-4px); box-shadow: 0 30px 70px rgba(37,99,235,0.16) !important; }
@@ -561,18 +586,7 @@ export default function LandingPage() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-            background: C.grad, color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(37,99,235,0.24)',
-          }}>
-            <GraduationCap size={17} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: C.ink, letterSpacing: '-0.03em', lineHeight: 1.1 }}>Pausia</div>
-            <div style={{ fontSize: 9, color: C.soft, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>EBAU Madrid</div>
-          </div>
+          <PausiaBrand subtitle="EBAU Madrid" size="sm" />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Link href="/pricing" className="lp-nav-link" style={{ padding: '8px 14px', fontSize: 13, fontWeight: 600, color: C.muted, textDecoration: 'none' }}>
@@ -1237,17 +1251,7 @@ export default function LandingPage() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexWrap: 'wrap', gap: 12,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: 8,
-            background: C.grad, color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 3px 10px rgba(37,99,235,0.2)',
-          }}>
-            <GraduationCap size={13} />
-          </div>
-          <span style={{ fontWeight: 700, color: C.ink, fontSize: 14, letterSpacing: '-0.02em' }}>Pausia</span>
-        </div>
+        <PausiaBrand subtitle={null} size="sm" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 12, color: C.soft }}>EBAU Madrid · 2º Bachillerato</span>
           <Link href="/legal/privacidad" style={{ fontSize: 12, color: C.soft, textDecoration: 'none' }} className="lp-nav-link">Privacidad</Link>

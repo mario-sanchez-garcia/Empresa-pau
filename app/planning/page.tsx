@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, GraduationCap, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target } from 'lucide-react'
+import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import GradePredictionCard from '@/components/grade/GradePredictionCard'
 import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { useCCAA } from '@/app/hooks/useCCAA'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 const config = {
   bg: '#2563eb',
@@ -390,11 +391,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
       <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(219, 231, 251, 0.9)' }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(145deg, #1d4ed8 0%, #2563eb 58%, #38bdf8 100%)', color: '#fff', boxShadow: '0 16px 34px rgba(37,99,235,0.24)' }}><GraduationCap size={23} /></div>
-            <div>
-              <div className="font-bold text-xl leading-none" style={{ color: config.ink }}>Pausia</div>
-              <div className="text-xs mt-1" style={{ color: config.muted }}>Mi Plan · semana que se puede cumplir</div>
-            </div>
+            <PausiaBrand subtitle="Mi Plan" size="md" />
           </div>
           <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>Exámenes</button>
         </div>

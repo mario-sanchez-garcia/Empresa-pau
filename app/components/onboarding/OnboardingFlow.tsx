@@ -19,6 +19,7 @@ import { todayKey } from '@/app/lib/camino/caminoProgress'
 import type { DailyCaminoTask } from '@/app/lib/camino/caminoData'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Phase =
@@ -204,10 +205,7 @@ export default function OnboardingFlow() {
 
         {/* Logo mark */}
         <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)]">
-            <Route size={20} strokeWidth={2.4} />
-          </div>
-          <span className="text-lg font-black text-slate-900">Pausia</span>
+          <PausiaBrand subtitle={null} size="md" />
         </div>
 
         {/* Step progress dots */}

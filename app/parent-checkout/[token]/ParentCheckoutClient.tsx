@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { CheckCircle2, Lock, Shield, Timer } from 'lucide-react'
+import PausiaBrand from '@/components/shared/PausiaBrand'
 
 interface Props {
   token: string
@@ -132,7 +133,8 @@ export default function ParentCheckoutClient({
           </button>
 
           <div style={styles.securityRow}>
-            <span style={styles.securityText}>🔒 Pago procesado por Stripe · Datos cifrados</span>
+            <Shield size={13} />
+            <span style={styles.securityText}>Pago procesado por Stripe · Datos cifrados</span>
           </div>
         </div>
 
@@ -163,15 +165,7 @@ export default function ParentCheckoutClient({
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{
-        width: 36, height: 36, borderRadius: 10,
-        background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'white', fontWeight: 900, fontSize: 16
-      }}>P</div>
-      <span style={{ fontWeight: 800, fontSize: 18, color: '#111827' }}>Pausia</span>
-    </div>
+    <PausiaBrand subtitle={null} size="sm" />
   )
 }
 
@@ -275,7 +269,7 @@ const styles = {
     boxShadow: '0 14px 32px rgba(37,99,235,0.22)',
     transition: 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)',
   },
-  securityRow: { display: 'flex' as const, justifyContent: 'center' as const },
+  securityRow: { display: 'flex' as const, justifyContent: 'center' as const, alignItems: 'center' as const, gap: 6, color: '#94a3b8' },
   securityText: { fontSize: 12, color: '#94a3b8' },
   expiryRow: {
     display: 'flex' as const,

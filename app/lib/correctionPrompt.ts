@@ -462,7 +462,19 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
 }
 
 export function normalizeCorrectionForOfficialScores(data: any, officialMaxScores: number[]) {
-  const blocks = Array.isArray(data?.desglose_bloques) ? data.desglose_bloques : []
+  const hasBlockShape = data && typeof data === 'object' && (
+    data.correccion_detalle ||
+    data.solucion_orientativa ||
+    data.que_hizo_bien ||
+    data.errores_detectados ||
+    data.porqueEsAsi ||
+    data.whyExplanation
+  )
+  const blocks = Array.isArray(data?.desglose_bloques)
+    ? data.desglose_bloques
+    : hasBlockShape
+      ? [data]
+      : []
   const normalizedBlocks = blocks.map((block: any, index: number) => {
     const officialMax = normalizeScore(officialMaxScores[index]) ?? normalizeScore(block?.puntos_maximos ?? block?.max_puntos) ?? 0
     const score = clampScore(normalizeScore(block?.puntos_conseguidos ?? block?.nota) ?? 0, officialMax)

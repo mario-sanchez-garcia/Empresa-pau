@@ -133,7 +133,8 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
       const visible = normalized
         ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
         : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
-      setCorreccion(visible)
+      const storedCorrection = normalized ? JSON.stringify(normalized) : visible
+      setCorreccion(storedCorrection)
 
       const { data: userData } = await supabase.auth.getUser()
       if (userData.user) {
@@ -149,7 +150,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
           enunciado: enunciado.substring(0, 2000),
           respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
-          correccion: visible,
+          correccion: storedCorrection,
         })
       }
     } finally {

@@ -189,7 +189,8 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
       const visible = normalized
         ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
         : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
-      setCorrection(visible)
+      const storedCorrection = normalized ? JSON.stringify(normalized) : visible
+      setCorrection(storedCorrection)
 
       const { data: userData } = await supabase.auth.getUser()
       if (userData.user) {
@@ -205,7 +206,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
           enunciado: selectedQuestion.enunciado.substring(0, 2000),
           respuesta: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen.' : answer.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
-          correccion: visible
+          correccion: storedCorrection
         })
       }
     } catch (caught) {

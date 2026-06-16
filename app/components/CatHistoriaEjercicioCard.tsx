@@ -182,7 +182,8 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       const visible = normalized
         ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: puntuacion })
         : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: puntuacion }), puntuacion)
-      setCorreccion(visible)
+      const storedCorrection = normalized ? JSON.stringify(normalized) : visible
+      setCorreccion(storedCorrection)
 
       const { data: userData } = await supabase.auth.getUser()
       if (userData.user) {
@@ -199,7 +200,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
           enunciado: enunciadoOficial.substring(0, 2000),
           respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
-          correccion: visible,
+          correccion: storedCorrection,
         })
       }
     } finally {

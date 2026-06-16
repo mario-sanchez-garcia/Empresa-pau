@@ -103,7 +103,8 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
       const correccionVisible = correccionJson
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: pregunta.puntuacion })
         : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: pregunta.puntuacion }), pregunta.puntuacion)
-      setCorreccion(correccionVisible)
+      const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
+      setCorreccion(correccionGuardada)
 
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
       const partes = !correccionJson ? data.respuesta?.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
@@ -127,7 +128,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           enunciado: officialPrompt.substring(0, 2000),
           respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
-          correccion: correccionVisible
+          correccion: correccionGuardada
         })
       }
     } finally {

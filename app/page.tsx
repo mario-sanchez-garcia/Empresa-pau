@@ -1373,7 +1373,8 @@ function cambiarTipo(t: Tipo) {
       const correccionVisible = correccionJson
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
         : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: puntuacionMax }), puntuacionMax)
-      setCorreccion(correccionVisible)
+      const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
+      setCorreccion(correccionGuardada)
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
       const partes = !correccionJson ? (data.respuesta || '').match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
       const rawNota = bloqueJson?.puntos_conseguidos != null
@@ -1388,7 +1389,7 @@ function cambiarTipo(t: Tipo) {
         enunciado: enunciadoActivo?.substring(0, 6000),
         respuesta: respuesta?.substring(0, 4000),
         // Do not truncate full correction: History modal needs complete feedback.
-        correccion: correccionVisible
+        correccion: correccionGuardada
       }).then(() => {})
     } catch {
       setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
@@ -1431,7 +1432,7 @@ function cambiarTipo(t: Tipo) {
       'Ejercicio: ' + item.bloque + ' - ' + item.tipo + ' ' + item.año + '\n' +
       'Nota obtenida: ' + item.nota + '/' + item.nota_maxima + '\n' +
       'Enunciado: ' + (item.enunciado || '') + '\n' +
-      'Corrección: ' + (item.correccion || '') + '\n\n' +
+      'Corrección: ' + correctionPayloadToMarkdown(item.correccion || '') + '\n\n' +
       'El estudiante quiere entender mejor su nota. Ayúdale de forma clara y motivadora.'
     setContextoChat(ctx)
     setMensajes([{ rol: 'pausia', texto: '¡Hola! Veo que tienes dudas sobre tu corrección de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. ¿Qué parte no te queda clara? Pregúntame lo que quieras.' }])

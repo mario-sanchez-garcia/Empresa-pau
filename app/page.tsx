@@ -143,15 +143,15 @@ const mdComponents = {
 }
 
 const darkMdComponents = {
-  h1: ({children}: any) => <h1 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.3rem', color: '#e8e8ff', letterSpacing: '-0.02em' }}>{children}</h1>,
-  h2: ({children}: any) => <h2 style={{ fontSize: '0.95rem', fontWeight: 800, margin: '0.95rem 0 0.45rem', color: '#d8d8f8', letterSpacing: '-0.01em' }}>{children}</h2>,
-  h3: ({children}: any) => <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#c0c0ee', margin: '0.85rem 0 0.35rem' }}>{children}</h3>,
-  strong: ({children}: any) => <strong style={{ fontWeight: 800, color: '#f0f0ff' }}>{children}</strong>,
-  p: ({children}: any) => <p style={{ margin: '0.6rem 0', color: '#b8b8d8', lineHeight: 1.82 }}>{children}</p>,
-  li: ({children}: any) => <li style={{ margin: '0.32rem 0', color: '#b8b8d8', lineHeight: 1.78 }}>{children}</li>,
+  h1: ({children}: any) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #dbe7fb', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
+  h2: ({children}: any) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#1e3a8a', letterSpacing: '-0.01em' }}>{children}</h2>,
+  h3: ({children}: any) => <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#334155', margin: '0.85rem 0 0.35rem' }}>{children}</h3>,
+  strong: ({children}: any) => <strong style={{ fontWeight: 850, color: '#0f172a' }}>{children}</strong>,
+  p: ({children}: any) => <p style={{ margin: '0.6rem 0', color: '#334155', lineHeight: 1.82 }}>{children}</p>,
+  li: ({children}: any) => <li style={{ margin: '0.32rem 0', color: '#334155', lineHeight: 1.78 }}>{children}</li>,
   ul: ({children}: any) => <ul style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ul>,
   ol: ({children}: any) => <ol style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ol>,
-  blockquote: ({children}: any) => <blockquote style={{ border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid #10b981', borderRadius: '0 12px 12px 0', padding: '0.85rem 1rem', margin: '0.85rem 0', color: '#9898cc', background: 'rgba(16,185,129,0.06)' }}>{children}</blockquote>,
+  blockquote: ({children}: any) => <blockquote style={{ border: '1px solid #dbe7fb', borderLeft: '4px solid #60a5fa', borderRadius: '16px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#475569', background: 'linear-gradient(135deg, #ffffff, #f8fbff)', boxShadow: '0 12px 26px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
 }
 
 const planMdComponents = {
@@ -2366,7 +2366,7 @@ function cambiarTipo(t: Tipo) {
           }
         }
 
-        /* ── Chat dark premium ──────────────────────── */
+        /* ── Chat Campus Apple ──────────────────────── */
         @keyframes chat-msg-ai {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -2380,8 +2380,8 @@ function cambiarTipo(t: Tipo) {
           40% { transform: translateY(-8px); opacity: 1; }
         }
         @keyframes chat-avatar-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0), 0 24px 50px rgba(16,185,129,0.22); }
-          50%       { box-shadow: 0 0 0 10px rgba(16,185,129,0.1), 0 24px 50px rgba(16,185,129,0.30); }
+          0%, 100% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(37,99,235,0), 0 24px 58px rgba(37,99,235,0.16); }
+          50%       { transform: translateY(-4px); box-shadow: 0 0 0 11px rgba(96,165,250,0.10), 0 28px 68px rgba(37,99,235,0.22); }
         }
 
         .chat-msg-ai   { animation: chat-msg-ai   380ms cubic-bezier(0.23,1,0.32,1) both; }
@@ -2392,64 +2392,72 @@ function cambiarTipo(t: Tipo) {
         .chat-avatar-pulse { animation: chat-avatar-pulse 3s ease-in-out infinite; }
 
         .chat-input-wrap {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 20px;
+          background: rgba(255,255,255,0.86);
+          border: 1px solid rgba(191,219,254,0.86);
+          border-radius: 24px;
           padding: 12px 10px 12px 20px;
           display: flex;
           gap: 10px;
           align-items: flex-end;
-          transition: border-color 200ms ease, box-shadow 200ms ease;
+          box-shadow: 0 18px 46px rgba(37,99,235,0.10), inset 0 1px 0 rgba(255,255,255,0.88);
+          backdrop-filter: blur(20px) saturate(1.14);
+          -webkit-backdrop-filter: blur(20px) saturate(1.14);
+          transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
         }
         .chat-input-wrap:focus-within {
-          border-color: rgba(16,185,129,0.42);
-          box-shadow: 0 0 0 4px rgba(16,185,129,0.07), 0 20px 40px rgba(0,0,0,0.38);
+          background: rgba(255,255,255,0.96);
+          border-color: rgba(96,165,250,0.92);
+          box-shadow: 0 0 0 4px rgba(96,165,250,0.18), 0 24px 56px rgba(37,99,235,0.16);
         }
 
         .chat-send-btn {
           padding: 11px 18px;
-          border-radius: 14px;
+          border-radius: 16px;
           border: none;
           cursor: pointer;
-          background: linear-gradient(135deg, #059669, #10b981);
+          background: linear-gradient(135deg, #1d4ed8, #2563eb 58%, #60a5fa);
           color: #fff;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 850;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           gap: 7px;
           transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
-          box-shadow: 0 8px 20px rgba(16,185,129,0.28);
+          box-shadow: 0 12px 28px rgba(37,99,235,0.28);
         }
         .chat-send-btn:not(:disabled):hover {
           transform: translateY(-2px);
-          box-shadow: 0 14px 30px rgba(16,185,129,0.40);
+          box-shadow: 0 18px 36px rgba(37,99,235,0.34);
         }
         .chat-send-btn:disabled {
-          opacity: 0.30;
+          opacity: 0.42;
           cursor: not-allowed;
           box-shadow: none;
-          background: rgba(255,255,255,0.08);
+          background: #dbe7fb;
+          color: #64748b;
         }
 
         .chat-chip {
           padding: 10px 18px;
           border-radius: 40px;
-          background: rgba(255,255,255,0.035);
-          border: 1px solid rgba(16,185,129,0.22);
-          color: #6ee7b7;
+          background: rgba(255,255,255,0.76);
+          border: 1px solid rgba(191,219,254,0.92);
+          color: #1e40af;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 800;
           cursor: pointer;
           transition: background 160ms ease, border-color 160ms ease, transform 130ms ease, color 160ms ease;
           white-space: nowrap;
           font-family: inherit;
+          box-shadow: 0 10px 24px rgba(37,99,235,0.07);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
         .chat-chip:hover {
-          background: rgba(16,185,129,0.10);
-          border-color: rgba(16,185,129,0.50);
-          color: #a7f3d0;
+          background: #eff6ff;
+          border-color: rgba(96,165,250,0.92);
+          color: #1d4ed8;
           transform: translateY(-2px);
         }
       `}</style>
@@ -2459,10 +2467,12 @@ function cambiarTipo(t: Tipo) {
         onNavigate={(item) => navegarASeccion(item === 'plan-estudio' ? 'planning' : item as Seccion)}
         onLogout={cerrarSesion}
       />
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? '#08080e' : undefined, transition: 'background 300ms ease' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? 'radial-gradient(circle at 14% 8%, rgba(219,234,254,0.95), transparent 30%), radial-gradient(circle at 86% 18%, rgba(224,231,255,0.72), transparent 32%), linear-gradient(180deg, #fbfdff 0%, #f8fbff 45%, #eff6ff 100%)' : undefined, transition: 'background 300ms ease' }}>
        <header className="pausia-app-header pausia-topbar" style={{
-  borderBottom: seccion === 'chat' ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(219,231,251,0.78)',
-  background: seccion === 'chat' ? '#08080e' : undefined,
+  borderBottom: seccion === 'chat' ? '1px solid rgba(219,231,251,0.88)' : '1px solid rgba(219,231,251,0.78)',
+  background: seccion === 'chat' ? 'rgba(255,255,255,0.76)' : undefined,
+  backdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
+  WebkitBackdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
   padding: '0 32px',
   minHeight: '64px',
   display: 'flex',
@@ -2480,19 +2490,19 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
             {seccion === 'chat' && (
-              <div style={{ width: 30, height: 30, borderRadius: 10, background: 'linear-gradient(135deg, #065f46, #10b981)', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(16,185,129,0.30)' }}>
+              <div style={{ width: 30, height: 30, borderRadius: 10, background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 8px 18px rgba(37,99,235,0.22)' }}>
                 <MessageCircle size={15} color="#fff" />
               </div>
             )}
-            <div style={{ fontSize: 14, fontWeight: 700, color: seccion === 'chat' ? '#e8e8ff' : '#0f172a', letterSpacing: '-0.01em', transition: 'color 300ms ease' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', transition: 'color 300ms ease' }}>
               {seccion === 'examenes' && cfg.label}
               {seccion === 'chat' && 'Chat con Pausia'}
               {seccion === 'historial' && 'Historial de correcciones'}
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
-            <div style={{ fontSize: 12, color: seccion === 'chat' ? 'rgba(255,255,255,0.28)' : '#94a3b8', fontWeight: 500, transition: 'color 300ms ease' }}>
+            <div style={{ fontSize: 12, color: seccion === 'chat' ? '#64748b' : '#94a3b8', fontWeight: 500, transition: 'color 300ms ease' }}>
               {seccion === 'examenes' && `· ${examSystemLabel(ccaa)}`}
-              {seccion === 'chat' && '· IA Premium'}
+              {seccion === 'chat' && '· Tutor inteligente'}
               {seccion === 'historial' && '· Correcciones guardadas'}
               {seccion === 'planning' && '· Tu semana'}
             </div>
@@ -3291,11 +3301,11 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'chat' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-            {/* Aurora background blobs */}
+            {/* Campus light atmosphere */}
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-              <div style={{ position: 'absolute', top: '-5%', left: '15%', width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.065) 0%, transparent 70%)', filter: 'blur(50px)' }} />
-              <div style={{ position: 'absolute', bottom: '8%', right: '5%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(5,150,105,0.045) 0%, transparent 70%)', filter: 'blur(70px)' }} />
-              <div style={{ position: 'absolute', top: '45%', left: '-5%', width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(52,211,153,0.035) 0%, transparent 70%)', filter: 'blur(55px)' }} />
+              <div style={{ position: 'absolute', top: '-8%', left: '10%', width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, rgba(191,219,254,0.50) 0%, transparent 70%)', filter: 'blur(58px)' }} />
+              <div style={{ position: 'absolute', bottom: '6%', right: '3%', width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(221,214,254,0.34) 0%, transparent 70%)', filter: 'blur(74px)' }} />
+              <div style={{ position: 'absolute', top: '44%', left: '-8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(207,250,254,0.32) 0%, transparent 70%)', filter: 'blur(64px)' }} />
             </div>
 
             {/* Messages scroll area */}
@@ -3303,13 +3313,14 @@ function cambiarTipo(t: Tipo) {
 
               {mensajes.length === 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '60px 20px', minHeight: '55vh' }}>
-                  {/* Glowing avatar */}
-                  <PausiaBrand variant="mark" size="lg" className="chat-avatar-pulse" style={{ width: 84, height: 84, borderRadius: '28px', margin: '0 auto 30px', background: 'rgba(255,255,255,0.94)', border: '1px solid rgba(191,219,254,0.9)', boxShadow: '0 22px 54px rgba(37,99,235,0.18)' }} />
-                  <h2 style={{ margin: '0 0 12px', fontSize: 32, fontWeight: 860, color: '#f0f0ff', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+                  <div className="chat-avatar-pulse" style={{ width: 132, height: 148, margin: '0 auto 26px', display: 'grid', placeItems: 'center' }}>
+                    <img src="/brand/pausia-lockup.png" alt="Pausia" width={118} height={132} style={{ width: 118, height: 132, objectFit: 'contain', display: 'block' }} />
+                  </div>
+                  <h2 style={{ margin: '0 0 12px', fontSize: 32, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.045em', lineHeight: 1.08 }}>
                     Hola, soy{' '}
-                    <span style={{ background: 'linear-gradient(90deg, #10b981 0%, #34d399 60%, #6ee7b7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pausia</span>
+                    <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pausia</span>
                   </h2>
-                  <p style={{ margin: '0 0 38px', fontSize: 16, color: '#5a5a7a', maxWidth: 380, lineHeight: 1.75 }}>
+                  <p style={{ margin: '0 0 38px', fontSize: 16, color: '#64748b', maxWidth: 430, lineHeight: 1.75, fontWeight: 520 }}>
                     Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', maxWidth: 600 }}>
@@ -3330,21 +3341,23 @@ function cambiarTipo(t: Tipo) {
               {mensajes.map((msg, i) => (
                 msg.rol === 'pausia' ? (
                   /* Pausia — full-width editorial card */
-                  <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '24px 0', borderBottom: i < mensajes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '16px 0' }}>
+                    <div style={{ borderRadius: 28, padding: '22px 22px 24px', background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(219,231,251,0.92)', boxShadow: '0 20px 52px rgba(37,99,235,0.09)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                         <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 800, color: '#10b981', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Pausia</div>
-                        <div style={{ fontSize: 15, lineHeight: 1.85, color: '#b8b8d8' }}>
+                        <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Pausia</div>
+                        <div style={{ fontSize: 15, lineHeight: 1.85, color: '#334155' }}>
                           <MathMarkdown text={msg.texto} format={false} components={darkMdComponents} />
                         </div>
                       </div>
+                    </div>
                     </div>
                   </div>
                 ) : (
                   /* Usuario — compact bubble right */
                   <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 0' }}>
-                    <div style={{ maxWidth: '70%', padding: '14px 20px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 500, boxShadow: '0 8px 26px rgba(16,185,129,0.22)' }}>
+                    <div style={{ maxWidth: '70%', padding: '14px 20px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #60a5fa 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 650, boxShadow: '0 12px 30px rgba(37,99,235,0.24)' }}>
                       {msg.texto}
                     </div>
                   </div>
@@ -3356,9 +3369,9 @@ function cambiarTipo(t: Tipo) {
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                     <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
-                      <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
-                      <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
-                      <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                      <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                      <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                      <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
                     </div>
                   </div>
                 </div>
@@ -3369,15 +3382,15 @@ function cambiarTipo(t: Tipo) {
 
             {/* Input area */}
             <div style={{ padding: '12px 32px 28px', maxWidth: 820, width: '100%', margin: '0 auto', flexShrink: 0, position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
+              <div style={{ borderTop: '1px solid rgba(219,231,251,0.84)', paddingTop: 16 }}>
                 <div className="chat-input-wrap">
-                  <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#e8e8ff', fontFamily: 'inherit', maxHeight: 120 }} />
+                  <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', maxHeight: 120 }} />
                   <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
                     {cargandoChat ? <PausiaLoadingDot /> : <SendHorizontal size={15} />}
                     {cargandoChat ? 'Pensando...' : 'Enviar'}
                   </button>
                 </div>
-                <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.18)', margin: '10px 0 0', letterSpacing: '0.02em' }}>Enter para enviar · Shift+Enter para nueva línea</p>
+                <p style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', margin: '10px 0 0', letterSpacing: '0.02em' }}>Enter para enviar · Shift+Enter para nueva línea</p>
               </div>
             </div>
           </div>

@@ -168,6 +168,19 @@ function AmbientLayer() {
   )
 }
 
+function HeroCloudCurtain() {
+  return (
+    <div className="lp-hero-cloud-curtain" aria-hidden="true">
+      <div className="lp-hero-cloud lp-hero-cloud-left" />
+      <div className="lp-hero-cloud lp-hero-cloud-right" />
+      <div className="lp-hero-cloud lp-hero-cloud-bottom" />
+      <div className="lp-hero-cloud lp-hero-cloud-top" />
+      <div className="lp-hero-vapor lp-hero-vapor-a" />
+      <div className="lp-hero-vapor lp-hero-vapor-b" />
+    </div>
+  )
+}
+
 function HeroProductCloud() {
   return (
     <div className="lp-mock lp-float" style={{
@@ -431,6 +444,26 @@ export default function LandingPage() {
           from { opacity: 0.70; transform: translateY(38px) scale(0.93); filter: blur(1px); }
           to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
+        @keyframes lp-hero-cloud-open {
+          from {
+            opacity: var(--cloud-alpha, 0.82);
+            transform: translate3d(0,0,0) scale(var(--cloud-scale, 1));
+            filter: blur(var(--cloud-blur, 30px)) saturate(1.08);
+          }
+          to {
+            opacity: 0;
+            transform: translate3d(var(--cloud-open-x, 0), var(--cloud-open-y, -34vh), 0) scale(var(--cloud-end-scale, 0.76));
+            filter: blur(calc(var(--cloud-blur, 30px) + 10px)) saturate(1.05);
+          }
+        }
+        @keyframes lp-hero-vapor-open {
+          from { opacity: 0.48; transform: translate3d(0,0,0) scale(1); }
+          to { opacity: 0; transform: translate3d(var(--vapor-x, 0), -30vh, 0) scale(0.86); }
+        }
+        @keyframes lp-hero-depth {
+          from { transform: translateY(0) scale(1); opacity: 1; }
+          to { transform: translateY(-42px) scale(1.045); opacity: 0.78; }
+        }
         .lp-h1   { animation: lp-up 560ms cubic-bezier(0.22,1,0.36,1) both; }
         .lp-p    { animation: lp-up 560ms cubic-bezier(0.22,1,0.36,1) 80ms both; }
         .lp-ctas { animation: lp-up 560ms cubic-bezier(0.22,1,0.36,1) 160ms both; }
@@ -440,6 +473,107 @@ export default function LandingPage() {
           animation: lp-scroll-reveal 720ms cubic-bezier(0.22,1,0.36,1) both;
           animation-timeline: view();
           animation-range: entry 12% cover 38%;
+        }
+        .lp-hero-section {
+          view-timeline-name: --pausia-hero;
+          view-timeline-axis: block;
+        }
+        .lp-hero-grid {
+          animation: lp-hero-depth 1s linear both;
+          animation-timeline: --pausia-hero;
+          animation-range: exit 0% exit 82%;
+          transform-origin: center top;
+          will-change: transform, opacity;
+        }
+        .lp-hero-cloud-curtain {
+          position: absolute;
+          inset: -18% -8% -12%;
+          z-index: 1;
+          overflow: hidden;
+          pointer-events: none;
+        }
+        .lp-hero-cloud {
+          position: absolute;
+          border-radius: 999px;
+          background:
+            radial-gradient(circle at 35% 38%, rgba(255,255,255,0.96), rgba(255,255,255,0.72) 34%, transparent 66%),
+            radial-gradient(circle at 68% 58%, rgba(219,234,254,0.82), transparent 58%),
+            radial-gradient(circle at 32% 72%, rgba(224,231,255,0.52), transparent 62%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 36px 90px rgba(37,99,235,0.10);
+          animation: lp-hero-cloud-open 1s linear both;
+          animation-timeline: --pausia-hero;
+          animation-range: exit 0% exit 88%;
+          will-change: transform, opacity, filter;
+        }
+        .lp-hero-cloud-left {
+          width: clamp(330px, 36vw, 620px);
+          height: clamp(190px, 21vw, 330px);
+          left: -11vw;
+          top: 16vh;
+          --cloud-open-x: -28vw;
+          --cloud-open-y: -38vh;
+          --cloud-alpha: 0.70;
+          --cloud-blur: 26px;
+        }
+        .lp-hero-cloud-right {
+          width: clamp(360px, 38vw, 660px);
+          height: clamp(210px, 23vw, 360px);
+          right: -14vw;
+          top: 10vh;
+          --cloud-open-x: 30vw;
+          --cloud-open-y: -42vh;
+          --cloud-alpha: 0.64;
+          --cloud-blur: 28px;
+        }
+        .lp-hero-cloud-bottom {
+          width: clamp(520px, 62vw, 980px);
+          height: clamp(230px, 25vw, 420px);
+          left: 50%;
+          bottom: -15vh;
+          margin-left: min(-31vw, -260px);
+          --cloud-open-x: 0;
+          --cloud-open-y: -46vh;
+          --cloud-alpha: 0.78;
+          --cloud-blur: 32px;
+          --cloud-scale: 1.06;
+          --cloud-end-scale: 0.72;
+        }
+        .lp-hero-cloud-top {
+          width: clamp(300px, 34vw, 560px);
+          height: clamp(160px, 18vw, 280px);
+          left: 35vw;
+          top: -10vh;
+          --cloud-open-x: 4vw;
+          --cloud-open-y: -34vh;
+          --cloud-alpha: 0.42;
+          --cloud-blur: 34px;
+          --cloud-end-scale: 0.68;
+        }
+        .lp-hero-vapor {
+          position: absolute;
+          border-radius: 999px;
+          background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,0.72), rgba(219,234,254,0.40), rgba(255,255,255,0));
+          filter: blur(18px);
+          animation: lp-hero-vapor-open 1s linear both;
+          animation-timeline: --pausia-hero;
+          animation-range: exit 6% exit 86%;
+          will-change: transform, opacity;
+        }
+        .lp-hero-vapor-a {
+          width: 62vw;
+          height: 70px;
+          left: 8vw;
+          top: 42vh;
+          transform: rotate(-7deg);
+          --vapor-x: -18vw;
+        }
+        .lp-hero-vapor-b {
+          width: 54vw;
+          height: 62px;
+          right: 2vw;
+          top: 54vh;
+          transform: rotate(5deg);
+          --vapor-x: 20vw;
         }
         .lp-cloud {
           position: absolute;
@@ -557,6 +691,10 @@ export default function LandingPage() {
           .lp-hero-grid, .lp-moment-grid { grid-template-columns: 1fr !important; }
           .lp-hero-visual { order: -1; }
           .lp-scroll-moment { padding: 24px !important; }
+          .lp-hero-cloud-curtain { inset: -16% -34% -10% !important; }
+          .lp-hero-cloud-left { left: -34vw !important; top: 20vh !important; }
+          .lp-hero-cloud-right { right: -40vw !important; top: 8vh !important; }
+          .lp-hero-cloud-bottom { width: 120vw !important; left: 50% !important; margin-left: -60vw !important; }
           .lp-bento { grid-template-columns: 1fr !important; }
           .lp-bento-card { grid-column: auto !important; flex-direction: column !important; }
           .lp-compare-table { font-size: 12px !important; }
@@ -572,7 +710,7 @@ export default function LandingPage() {
         @media (prefers-reduced-motion: reduce) {
           .lp-h1, .lp-p, .lp-ctas, .lp-mock { animation: none !important; }
           .lp-float { animation: none !important; }
-          .lp-scroll-reveal, .lp-cloud, .lp-particle { animation: none !important; }
+          .lp-scroll-reveal, .lp-cloud, .lp-particle, .lp-hero-grid, .lp-hero-cloud, .lp-hero-vapor { animation: none !important; }
         }
       `}</style>
 
@@ -582,11 +720,11 @@ export default function LandingPage() {
         background: 'rgba(255,255,255,0.90)',
         backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${C.border}`,
-        padding: '0 clamp(20px,5vw,48px)', height: '62px',
+        padding: '0 clamp(20px,5vw,48px)', height: '76px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <PausiaBrand subtitle="EBAU Madrid" size="sm" />
+          <PausiaBrand subtitle={null} size="lg" />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Link href="/pricing" className="lp-nav-link" style={{ padding: '8px 14px', fontSize: 13, fontWeight: 600, color: C.muted, textDecoration: 'none' }}>
@@ -614,13 +752,14 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero abstracto ───────────────────────────────────────────────── */}
-      <section style={{
+      <section className="lp-hero-section" style={{
         position: 'relative',
         overflow: 'hidden',
-        minHeight: 'calc(100vh - 62px)',
+        minHeight: 'calc(100vh - 76px)',
         padding: 'clamp(72px,9vw,118px) clamp(20px,5vw,48px) clamp(54px,7vw,86px)',
         background: 'radial-gradient(circle at 14% 12%, rgba(219,234,254,0.92), transparent 32%), radial-gradient(circle at 86% 16%, rgba(221,214,254,0.72), transparent 30%), radial-gradient(circle at 72% 84%, rgba(207,250,254,0.58), transparent 32%), linear-gradient(180deg, #ffffff 0%, #f8fbff 58%, #eff6ff 100%)',
       }}>
+        <HeroCloudCurtain />
         <AmbientLayer />
         <div className="lp-hero-grid" style={{
           position: 'relative',
@@ -1253,7 +1392,7 @@ export default function LandingPage() {
       }}>
         <PausiaBrand subtitle={null} size="sm" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: C.soft }}>EBAU Madrid · 2º Bachillerato</span>
+          <span style={{ fontSize: 12, color: C.soft }}>Preparación PAU · 2º Bachillerato</span>
           <Link href="/legal/privacidad" style={{ fontSize: 12, color: C.soft, textDecoration: 'none' }} className="lp-nav-link">Privacidad</Link>
           <Link href="/legal/terminos" style={{ fontSize: 12, color: C.soft, textDecoration: 'none' }} className="lp-nav-link">Términos</Link>
         </div>

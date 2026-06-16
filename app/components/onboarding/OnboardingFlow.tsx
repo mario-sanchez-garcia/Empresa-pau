@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Check, ChevronRight } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -143,8 +142,8 @@ export default function OnboardingFlow() {
       await delay(350)
       if (!mountedRef.current) return
       await deliverPau([
-        '¡Hola! Soy Pau, tu asistente para la PAU.',
-        'Voy a hacerte unas preguntas para prepararte una ruta de estudio completamente personalizada.',
+        'Bienvenido/a a Pausia.',
+        'Vamos a configurar tu ruta de preparación PAU con unas preguntas rápidas.',
       ])
       if (!mountedRef.current) return
       setShowOptions(true); scrollEnd()
@@ -169,7 +168,7 @@ export default function OnboardingFlow() {
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
   function handleStart() {
-    advance('¡Vamos!', ['¿De qué comunidad autónoma es tu examen?'], 'community')
+    advance('Empezar configuración', ['¿De qué comunidad autónoma es tu examen?'], 'community')
   }
 
   function handleCommunity(id: string, label: string) {
@@ -213,14 +212,14 @@ export default function OnboardingFlow() {
   function handleDailyTime(minutes: OnboardingDailyMinutes, label: string) {
     minutesRef.current = minutes
     saveOnboarding({ dailyMinutes: minutes })
-    advance(label, ['¡Último paso! ¿Desde dónde arrancas con la preparación?'], 'start-mode')
+    advance(label, ['Último paso: ¿desde dónde arrancas con la preparación?'], 'start-mode')
   }
 
   function handleStartMode(mode: OnboardingStartMode, label: string) {
     saveOnboarding({ startMode: mode })
     ;(async () => {
       addUserMsg(label); setShowOptions(false); scrollEnd()
-      await deliverPau(['Perfecto. Déjame preparar tu ruta personalizada...'])
+      await deliverPau(['Perfecto. Estamos preparando tu ruta personalizada...'])
       if (!mountedRef.current) return
       setPhase('generating'); scrollEnd()
 
@@ -306,7 +305,7 @@ export default function OnboardingFlow() {
               className="w-full flex items-center justify-center gap-2 text-white font-bold rounded-2xl py-4 transition-all active:scale-[0.98]"
               style={{ fontSize: 15, background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 8px 28px rgba(37,99,235,0.32)' }}
             >
-              ¡Empezar! <ArrowRight size={17} />
+              Empezar configuración <ArrowRight size={17} />
             </button>
           </motion.div>
         )
@@ -426,8 +425,41 @@ export default function OnboardingFlow() {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
+  const assistantMessages = messages.filter(msg => msg.role === 'pau')
+  const userAnswers = messages.filter(msg => msg.role === 'user')
+  const latestPrompt = assistantMessages.at(-1)?.text ?? 'Configura tu Camino PAU personalizado.'
+  const currentStep = stepMap[phase] ?? 0
+  const phaseTitle: Record<Phase, string> = {
+    welcome: 'Crea tu Camino PAU',
+    community: 'Comunidad autónoma',
+    'pau-date': 'Fecha del examen',
+    goal: 'Objetivo principal',
+    subjects: 'Asignaturas',
+    'subject-level': subjects[subjIdx] ? `Nivel en ${subjects[subjIdx]}` : 'Nivel por asignatura',
+    'daily-time': 'Tiempo de estudio',
+    'start-mode': 'Punto de partida',
+    generating: 'Preparando tu ruta',
+    done: 'Ruta creada'
+  }
+  const questionLabel = phase === 'done'
+    ? 'Completado'
+    : phase === 'generating'
+      ? 'Procesando'
+      : phase === 'welcome'
+        ? 'Inicio'
+        : `Pregunta ${currentStep} de ${totalQ}`
+  const progressSteps = [
+    'Comunidad',
+    'Fecha',
+    'Objetivo',
+    'Asignaturas',
+    ...(subjects.length > 0 ? ['Nivel'] : []),
+    'Ritmo',
+    'Inicio',
+  ]
+
   return (
-    <div className="flex flex-col bg-slate-50"
+    <div className="min-h-[100dvh] bg-[#f8fafc]"
       style={{ minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
 
       <style>{`
@@ -439,13 +471,34 @@ export default function OnboardingFlow() {
       <canvas ref={confettiRef} className="fixed inset-0 pointer-events-none z-50"
         style={{ display: 'none' }} />
 
-      {/* ── Header ── */}
-      <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-lg border-b border-slate-100/80">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+      <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4">
           <img src="/brand/pausia-lockup.png" alt="Pausia"
-            style={{ height: 26, objectFit: 'contain', flexShrink: 0 }} />
-          <div className="flex-1 mx-2">
-            <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+            className="h-7 shrink-0 object-contain" />
+          <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-slate-500 sm:flex">
+            <span>Preparación PAU</span>
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span>Ruta personalizada</span>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-5 py-8 lg:grid-cols-[320px_1fr] lg:py-12">
+        <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-8 lg:self-start">
+          <div className="mb-6">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+              Una configuración breve para ajustar tu plan de estudio a tu examen, ritmo y objetivos.
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+              <span>Progreso</span>
+              <span>{Math.round(progressPct)}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: 'linear-gradient(90deg, #1d4ed8, #3b82f6)' }}
@@ -454,83 +507,91 @@ export default function OnboardingFlow() {
               />
             </div>
           </div>
-          {phase !== 'welcome' && phase !== 'generating' && phase !== 'done' && (
-            <span className="text-xs font-bold text-slate-400 shrink-0 tabular-nums">
-              {stepMap[phase] ?? 0} / {totalQ}
-            </span>
+
+          <div className="space-y-3">
+            {progressSteps.map((item, index) => {
+              const active = currentStep >= index + 1 || phase === 'done'
+              return (
+                <div key={item} className="flex items-center gap-3">
+                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                    {active ? <Check size={13} strokeWidth={3} /> : index + 1}
+                  </span>
+                  <span className={`text-sm font-bold ${active ? 'text-slate-800' : 'text-slate-400'}`}>{item}</span>
+                </div>
+              )
+            })}
+          </div>
+
+          {userAnswers.length > 0 && (
+            <div className="mt-6 rounded-2xl bg-slate-50 p-4">
+              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Tus respuestas</p>
+              <div className="space-y-1.5">
+                {userAnswers.slice(-4).map(answer => (
+                  <p key={answer.id} className="truncate text-xs font-bold text-slate-600">{answer.text}</p>
+                ))}
+              </div>
+            </div>
           )}
-        </div>
-      </div>
+        </aside>
 
-      {/* ── Chat area ── */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-lg mx-auto px-4 pt-6 pb-4 space-y-3">
+        <section className="flex min-h-[640px] items-center">
+          <motion.div
+            key={phase}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+            className="w-full rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(15,23,42,0.10)] sm:p-8"
+          >
+            <div className="mb-7 flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-700">
+                {questionLabel}
+              </span>
+              {phase !== 'welcome' && phase !== 'generating' && phase !== 'done' && (
+                <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                  {currentStep} / {totalQ}
+                </span>
+              )}
+            </div>
 
-          <AnimatePresence>
-            {messages.map(msg => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 10, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-                className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {msg.role === 'pau' && (
-                  <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-2 ring-white shadow-sm">
-                    <Image src="/mascots/pau/pau-guide.png" alt="Pau"
-                      width={36} height={36} className="w-full h-full object-cover" />
-                  </div>
-                )}
-                <div
-                  className="max-w-[78%] rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed"
-                  style={msg.role === 'pau' ? {
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    color: '#1e293b',
-                    borderTopLeftRadius: 6,
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-                  } : {
-                    background: 'linear-gradient(135deg, #1d4ed8, #2563eb)',
-                    color: '#ffffff',
-                    borderTopRightRadius: 6,
-                    boxShadow: '0 4px 16px rgba(37,99,235,0.30)',
-                  }}
-                >
-                  {msg.text}
-                </div>
-              </motion.div>
-            ))}
-
-            {/* Typing indicator */}
-            {isTyping && (
-              <motion.div
-                key="typing"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex gap-2.5 justify-start"
-              >
-                <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-2 ring-white shadow-sm">
-                  <Image src="/mascots/pau/pau-guide.png" alt="Pau"
-                    width={36} height={36} className="w-full h-full object-cover" />
-                </div>
-                <div className="bg-white border border-slate-200 rounded-2xl px-4 py-4 flex items-center gap-1.5 shadow-sm"
-                  style={{ borderTopLeftRadius: 6 }}>
-                  {[0, 1, 2].map(i => (
-                    <motion.div key={i} className="w-2 h-2 rounded-full bg-slate-300"
-                      animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
-                      transition={{ duration: 0.85, repeat: Infinity, delay: i * 0.18, ease: 'easeInOut' }}
-                    />
-                  ))}
-                </div>
-              </motion.div>
+            {phase !== 'generating' && phase !== 'done' && (
+              <div className="mb-7">
+                <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{phaseTitle[phase]}</h2>
+                <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">{latestPrompt}</p>
+              </div>
             )}
-          </AnimatePresence>
 
-          {/* ── Generating ── */}
-          {phase === 'generating' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-3">
-              <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-4">
+            <AnimatePresence mode="wait">
+              {isTyping && phase !== 'generating' && phase !== 'done' && (
+                <motion.div
+                  key="typing"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="mb-7 inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500"
+                >
+                  <span>Preparando la siguiente pregunta</span>
+                  <span className="flex items-center gap-1">
+                    {[0, 1, 2].map(i => (
+                      <motion.span key={i} className="h-1.5 w-1.5 rounded-full bg-blue-500"
+                        animate={{ scale: [1, 1.45, 1], opacity: [0.35, 1, 0.35] }}
+                        transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.16 }}
+                      />
+                    ))}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {phase === 'generating' && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Procesando</p>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Preparando tu ruta personalizada</h2>
+                  <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">
+                    Estamos cruzando tus respuestas para crear un Camino PAU útil, realista y exigente.
+                  </p>
+                </div>
+                <div className="space-y-4 rounded-3xl border border-slate-100 bg-slate-50 p-5">
                 {GEN_ITEMS.map((item, i) => (
                   <motion.div key={item}
                     initial={{ opacity: 0, x: -8 }}
@@ -556,37 +617,26 @@ export default function OnboardingFlow() {
                   </motion.div>
                 ))}
               </div>
-            </motion.div>
-          )}
+              </div>
+            )}
 
-          {/* ── Done ── */}
-          {phase === 'done' && (
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }} className="mt-3">
-              <div className="bg-white rounded-3xl border border-slate-100 p-7 shadow-sm text-center space-y-5">
-
-                <motion.div
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 18, delay: 0.2 }}
-                  className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl ring-4 ring-blue-100"
-                >
-                  <Image src="/mascots/pau/pau-celebrate.png" alt="Pau celebrando"
-                    width={96} height={96} className="w-full h-full object-cover" priority />
+            {phase === 'done' && (
+              <div className="space-y-7 text-center">
+                <motion.div initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_18px_55px_rgba(37,99,235,0.35)]">
+                  <Check size={34} strokeWidth={3} />
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-                  <h2 className="text-2xl font-black text-slate-950 tracking-tight">¡Tu ruta PAU está lista!</h2>
-                  <p className="mt-1.5 text-sm font-semibold text-slate-400">
-                    Pausia ya tiene todo lo que necesita para guiarte.
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Camino creado</p>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Tu ruta PAU está lista</h2>
+                  <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-7 text-slate-500">
+                    Pausia ya tiene lo necesario para organizar tus sesiones, priorizar asignaturas y ajustar el ritmo de preparación.
                   </p>
-                </motion.div>
+                </div>
 
-                {/* Subject pills */}
-                <motion.div
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}
-                  className="flex flex-wrap gap-2 justify-center"
-                >
+                <div className="flex flex-wrap justify-center gap-2">
                   {subjects.map(s => {
                     const opt = SUBJECT_OPTS.find(o => o.id === s)
                     return opt ? (
@@ -596,7 +646,7 @@ export default function OnboardingFlow() {
                       </span>
                     ) : null
                   })}
-                </motion.div>
+                </div>
 
                 <motion.button
                   initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -609,22 +659,16 @@ export default function OnboardingFlow() {
                   Ver mi Camino PAU <ArrowRight size={16} />
                 </motion.button>
               </div>
-            </motion.div>
-          )}
+            )}
 
-          <div ref={chatEndRef} style={{ paddingBottom: 4 }} />
-        </div>
-      </div>
+            {showOptions && phase !== 'generating' && phase !== 'done' && (
+              <div className="mt-2">{renderOptions()}</div>
+            )}
 
-      {/* ── Options panel ── */}
-      <AnimatePresence>
-        {showOptions && (
-          <div className="sticky bottom-0 z-20 bg-slate-50/96 backdrop-blur-md border-t border-slate-100"
-            style={{ maxHeight: '58vh', overflowY: 'auto' }}>
-            {renderOptions()}
-          </div>
-        )}
-      </AnimatePresence>
+            <div ref={chatEndRef} />
+          </motion.div>
+        </section>
+      </main>
     </div>
   )
 }

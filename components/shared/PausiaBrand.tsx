@@ -9,9 +9,9 @@ type PausiaBrandProps = {
 }
 
 const scale = {
-  sm: { mark: 32, radius: 11, title: 15, sub: 9.5, gap: 9 },
-  md: { mark: 42, radius: 14, title: 18, sub: 10.5, gap: 11 },
-  lg: { mark: 52, radius: 17, title: 23, sub: 11, gap: 13 },
+  sm: { mark: 32, radius: 11, logoH: 31, logoW: 104, sub: 9.5 },
+  md: { mark: 42, radius: 14, logoH: 38, logoW: 128, sub: 10.5 },
+  lg: { mark: 54, radius: 17, logoH: 48, logoW: 162, sub: 11 },
 }
 
 export default function PausiaBrand({
@@ -23,7 +23,6 @@ export default function PausiaBrand({
 }: PausiaBrandProps) {
   const s = scale[size]
   const inverse = variant === 'inverse'
-  const titleColor = inverse ? '#ffffff' : '#004aad'
   const subColor = inverse ? 'rgba(255,255,255,0.64)' : '#7c8da5'
 
   const mark = (
@@ -52,7 +51,7 @@ export default function PausiaBrand({
         alt=""
         width={s.mark}
         height={s.mark}
-        style={{ width: '78%', height: '78%', objectFit: 'contain', display: 'block' }}
+        style={{ width: '82%', height: '82%', objectFit: 'contain', display: 'block' }}
       />
     </span>
   )
@@ -63,28 +62,37 @@ export default function PausiaBrand({
     <span
       className={className}
       style={{
-        display: 'inline-flex',
+        display: 'inline-grid',
+        justifyItems: 'start',
         alignItems: 'center',
-        gap: s.gap,
         minWidth: 0,
         ...style,
       }}
     >
-      {mark}
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: s.logoW,
+          height: s.logoH,
+          borderRadius: inverse ? Math.round(s.radius * 1.1) : 0,
+          padding: inverse ? '5px 8px' : 0,
+          background: inverse ? 'rgba(255,255,255,0.92)' : 'transparent',
+          border: inverse ? '1px solid rgba(255,255,255,0.30)' : 'none',
+          boxShadow: inverse ? '0 14px 34px rgba(2,8,23,0.16)' : 'none',
+          overflow: 'hidden',
+        }}
+      >
+        <img
+          src="/brand/pausia-logo.svg"
+          alt="Pausia"
+          width={s.logoW}
+          height={s.logoH}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+        />
+      </span>
       <span style={{ minWidth: 0, display: 'block' }}>
-        <span
-          style={{
-            display: 'block',
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            fontSize: s.title,
-            fontWeight: 800,
-            color: titleColor,
-            letterSpacing: '-0.035em',
-            lineHeight: 0.92,
-          }}
-        >
-          Pausia
-        </span>
         {subtitle !== null && (
           <span
             style={{

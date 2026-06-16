@@ -1,3 +1,5 @@
+import 'server-only'
+
 export function isInternalUser(email?: string | null) {
   const normalizedEmail = normalizeEmail(email)
   if (!normalizedEmail) return false

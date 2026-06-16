@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { createClient } from '@supabase/supabase-js'
 
 type AiUsageStatus = 'success' | 'error'
@@ -59,7 +61,7 @@ export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRa
     const supabase = createUsageClient(args.accessToken)
     if (!supabase) {
       console.error('AI_RATE_LIMIT_ERROR', 'Supabase usage client is not configured')
-      return { allowed: true, count: 0, limit: args.limit }
+      return rateLimitUnavailable(args.limit)
     }
 
     const since = new Date(Date.now() - args.windowSeconds * 1000).toISOString()
@@ -75,7 +77,7 @@ export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRa
 
     if (error) {
       console.error('AI_RATE_LIMIT_ERROR', error)
-      return { allowed: true, count: 0, limit: args.limit }
+      return rateLimitUnavailable(args.limit)
     }
 
     const currentCount = count ?? data?.length ?? 0
@@ -96,7 +98,7 @@ export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRa
     }
   } catch (error) {
     console.error('AI_RATE_LIMIT_ERROR', error)
-    return { allowed: true, count: 0, limit: args.limit }
+    return rateLimitUnavailable(args.limit)
   }
 }
 
@@ -144,4 +146,12 @@ function createUsageClient(accessToken?: string | null) {
 
 function safeTokenCount(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function rateLimitUnavailable(limit: number): AiRateLimitResult {
+  if (process.env.NODE_ENV === 'production') {
+    return { allowed: false, count: limit, limit, retryAfterSeconds: 5 * 60 }
+  }
+
+  return { allowed: true, count: 0, limit }
 }

@@ -3,10 +3,20 @@ import { hashToken } from '@/app/lib/billing/tokens'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getStripe, isStripeConfigured, getAppUrl } from '@/app/lib/billing/stripe'
 import { getLivePriceCents, getPlan } from '@/app/lib/billing/plans'
+import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
+  const ipLimit = checkServerRateLimit({
+    key: `parent-checkout-session:ip:${getClientIp(request.headers)}`,
+    limit: 30,
+    windowSeconds: 60
+  })
+  if (!ipLimit.allowed) {
+    return rateLimitResponse(ipLimit.retryAfterSeconds)
+  }
+
   if (!isStripeConfigured()) {
     return NextResponse.json(
       { error: 'Pagos no configurados todavía. Contacta con soporte.' },
@@ -25,12 +35,21 @@ export async function POST(request: NextRequest) {
   }
 
   const tokenHash = hashToken(rawToken)
+  const tokenLimit = checkServerRateLimit({
+    key: `parent-checkout-session:token:${tokenHash}`,
+    limit: 8,
+    windowSeconds: 15 * 60
+  })
+  if (!tokenLimit.allowed) {
+    return rateLimitResponse(tokenLimit.retryAfterSeconds)
+  }
+
   const db = createServiceClient()
   const now = new Date()
 
   const { data: link } = await db
     .from('parent_checkout_links')
-    .select('id, student_user_id, plan_id, price_cents, currency, student_display_name, status, expires_at, stripe_checkout_session_id')
+    .select('id, student_user_id, plan_id, price_cents, currency, student_display_name, status, expires_at, checkout_started_at, stripe_checkout_session_id')
     .eq('token_hash', tokenHash)
     .maybeSingle()
 
@@ -63,6 +82,24 @@ export async function POST(request: NextRequest) {
   const livePriceCents = getLivePriceCents(link.plan_id) ?? link.price_cents
   const appUrl = getAppUrl()
   const stripe = getStripe()
+
+  if (link.status === 'checkout_started' && link.stripe_checkout_session_id && link.checkout_started_at) {
+    const startedAt = new Date(link.checkout_started_at).getTime()
+    const stillFresh = Number.isFinite(startedAt) && now.getTime() - startedAt < 30 * 60 * 1000
+    if (stillFresh) {
+      try {
+        const existingSession = await stripe.checkout.sessions.retrieve(link.stripe_checkout_session_id)
+        if (existingSession.status === 'open' && existingSession.url) {
+          return NextResponse.json({ checkoutUrl: existingSession.url })
+        }
+      } catch (error) {
+        console.warn('[parent-session] could not reuse existing checkout session', {
+          linkId: link.id,
+          message: error instanceof Error ? error.message : 'unknown error'
+        })
+      }
+    }
+  }
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
@@ -122,4 +159,18 @@ export async function POST(request: NextRequest) {
   })
 
   return NextResponse.json({ checkoutUrl: session.url })
+}
+
+function rateLimitResponse(retryAfterSeconds?: number) {
+  return NextResponse.json(
+    {
+      error: 'Demasiados intentos. Espera un momento y vuelve a probar.',
+      code: 'RATE_LIMIT_EXCEEDED',
+      retryAfterSeconds: retryAfterSeconds ?? null
+    },
+    {
+      status: 429,
+      headers: retryAfterSeconds ? { 'Retry-After': String(retryAfterSeconds) } : undefined
+    }
+  )
 }

@@ -1,4 +1,5 @@
 // Server-only. Never import in client components.
+import 'server-only'
 
 import Stripe from 'stripe'
 

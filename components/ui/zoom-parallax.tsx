@@ -1,7 +1,7 @@
 'use client';
 
-import { useScroll, useTransform, motion } from 'framer-motion';
-import { useRef } from 'react';
+import { useScroll, useTransform, motion, useMotionValueEvent } from 'framer-motion';
+import { useRef, useState } from 'react';
 import { ShaderAnimation } from '@/components/ui/shader-animation';
 
 interface Image {
@@ -34,6 +34,13 @@ export function ZoomParallax({ images, centerReveal }: ZoomParallaxProps) {
     const revealOpacity  = useTransform(scrollYProgress, [0.82, 1], [0, 1]);
     const revealScale    = useTransform(scrollYProgress, [0.82, 1], [0.7, 1]);
 
+    // Only mount the shader when the user is near the reveal so it always starts fresh
+    const [shaderMounted, setShaderMounted] = useState(false);
+    useMotionValueEvent(scrollYProgress, 'change', (v) => {
+        if (v >= 0.68 && !shaderMounted) setShaderMounted(true);
+        if (v < 0.60 && shaderMounted) setShaderMounted(false);
+    });
+
     return (
         <div ref={container} className="relative h-[300vh]">
             <div className="sticky top-0 h-screen overflow-hidden">
@@ -56,8 +63,8 @@ export function ZoomParallax({ images, centerReveal }: ZoomParallaxProps) {
                     );
                 })}
 
-                {/* Shader animation background — fades in before logo */}
-                {centerReveal && (
+                {/* Shader animation — mounted only when near the reveal so it starts from the beginning */}
+                {centerReveal && shaderMounted && (
                     <motion.div
                         style={{ opacity: overlayOpacity }}
                         className="absolute inset-0 pointer-events-none z-10"

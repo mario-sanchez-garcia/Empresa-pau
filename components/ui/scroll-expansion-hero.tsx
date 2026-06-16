@@ -20,6 +20,7 @@ interface ScrollExpandMediaProps {
   date?: string;
   scrollToExpand?: string;
   textBlend?: boolean;
+  overlayClass?: string;
   children?: ReactNode;
 }
 
@@ -32,6 +33,7 @@ const ScrollExpandMedia = ({
   date,
   scrollToExpand,
   textBlend,
+  overlayClass,
   children,
 }: ScrollExpandMediaProps) => {
   const [scrollProgress, setScrollProgress] = useState<number>(0);
@@ -275,7 +277,7 @@ const ScrollExpandMedia = ({
                       className='w-full h-full object-cover rounded-xl'
                     />
                     <motion.div
-                      className='absolute inset-0 bg-black/50 rounded-xl'
+                      className={overlayClass ?? 'absolute inset-0 bg-black/50 rounded-xl'}
                       initial={{ opacity: 0.7 }}
                       animate={{ opacity: 0.7 - scrollProgress * 0.3 }}
                       transition={{ duration: 0.2 }}
@@ -286,7 +288,7 @@ const ScrollExpandMedia = ({
                 <div className='flex flex-col items-center text-center relative z-10 mt-4 transition-none'>
                   {date && (
                     <p
-                      className='text-2xl text-blue-200'
+                      className='text-2xl text-white'
                       style={{ transform: `translateX(-${textTranslateX}vw)` }}
                     >
                       {date}
@@ -294,7 +296,7 @@ const ScrollExpandMedia = ({
                   )}
                   {scrollToExpand && (
                     <p
-                      className='text-blue-200 font-medium text-center'
+                      className='text-white font-medium text-center'
                       style={{ transform: `translateX(${textTranslateX}vw)` }}
                     >
                       {scrollToExpand}
@@ -309,13 +311,13 @@ const ScrollExpandMedia = ({
                 }`}
               >
                 <motion.h2
-                  className='text-4xl md:text-5xl lg:text-6xl font-bold text-blue-200 transition-none'
+                  className='text-4xl md:text-5xl lg:text-6xl font-bold text-white transition-none'
                   style={{ transform: `translateX(-${textTranslateX}vw)` }}
                 >
                   {firstWord}
                 </motion.h2>
                 <motion.h2
-                  className='text-4xl md:text-5xl lg:text-6xl font-bold text-center text-blue-200 transition-none'
+                  className='text-4xl md:text-5xl lg:text-6xl font-bold text-center text-white transition-none'
                   style={{ transform: `translateX(${textTranslateX}vw)` }}
                 >
                   {restOfTitle}

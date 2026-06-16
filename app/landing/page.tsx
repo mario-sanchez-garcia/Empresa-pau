@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero'
+import HeroCardsAnimator from '@/app/landing/HeroCardsAnimator'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -710,23 +711,14 @@ export default function LandingPage() {
         .lp-card-1 { animation: lp-in 600ms cubic-bezier(0.22,1,0.36,1) 300ms both; }
         .lp-card-2 { animation: lp-in 620ms cubic-bezier(0.22,1,0.36,1) 500ms both; }
         .lp-card-3 { animation: lp-in 600ms cubic-bezier(0.22,1,0.36,1) 700ms both; }
-        .lp-hero-card-1 {
+        .lp-hero-card-1, .lp-hero-card-2, .lp-hero-card-3 {
           opacity: 0;
-          animation: lp-in 700ms cubic-bezier(0.22,1,0.36,1) both;
-          animation-timeline: view();
-          animation-range: entry 20% entry 70%;
+          transform: translateY(18px);
+          transition: opacity 700ms cubic-bezier(0.22,1,0.36,1), transform 700ms cubic-bezier(0.22,1,0.36,1);
         }
-        .lp-hero-card-2 {
-          opacity: 0;
-          animation: lp-in 700ms cubic-bezier(0.22,1,0.36,1) both;
-          animation-timeline: view();
-          animation-range: entry 30% entry 80%;
-        }
-        .lp-hero-card-3 {
-          opacity: 0;
-          animation: lp-in 700ms cubic-bezier(0.22,1,0.36,1) both;
-          animation-timeline: view();
-          animation-range: entry 40% entry 90%;
+        .lp-hero-card--visible {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
         }
         /* ── Reduced motion ── */
         @media (prefers-reduced-motion: reduce) {
@@ -734,6 +726,7 @@ export default function LandingPage() {
           .lp-float { animation: none !important; }
           .lp-scroll-reveal, .lp-cloud, .lp-particle, .lp-hero-grid, .lp-hero-cloud, .lp-hero-vapor { animation: none !important; }
           .lp-card-1, .lp-card-2, .lp-card-3 { animation: none !important; }
+          .lp-hero-card-1, .lp-hero-card-2, .lp-hero-card-3 { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
       `}</style>
 
@@ -1435,6 +1428,7 @@ export default function LandingPage() {
           Entrar →
         </Link>
       </footer>
+      <HeroCardsAnimator />
     </div>
   )
 }

@@ -7,6 +7,7 @@ import {
   BrainCircuit,
   Check,
   CheckCircle2,
+  ChevronRight,
   ClipboardList,
   Dna,
   FlaskConical,
@@ -22,7 +23,6 @@ import {
   Zap,
 } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
-import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero'
 import HeroCardsAnimator from '@/app/landing/HeroCardsAnimator'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -179,6 +179,138 @@ function HeroCloudCurtain() {
       <div className="lp-hero-cloud lp-hero-cloud-top" />
       <div className="lp-hero-vapor lp-hero-vapor-a" />
       <div className="lp-hero-vapor lp-hero-vapor-b" />
+    </div>
+  )
+}
+
+function ScreenExam() {
+  return (
+    <div style={{ background: '#fff', minHeight: 330 }}>
+      <div style={{ padding: '10px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>pausia</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {([56, 36] as const).map((w, i) => <div key={i} style={{ height: 22, width: w, borderRadius: 6, background: C.bgMuted }} />)}
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: C.blue, background: C.bgBlue, padding: '2.5px 8px', borderRadius: 5 }}>Matemáticas II</div>
+          <div style={{ fontSize: 10, color: C.soft }}>Junio 2024 · Madrid · Op. A</div>
+        </div>
+        <div style={{ background: C.bgSub, borderRadius: 10, padding: '11px 13px', marginBottom: 10, border: `1px solid ${C.border}` }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: C.ink, marginBottom: 5, display: 'flex', justifyContent: 'space-between' }}>
+            <span>Apartado 1</span><span style={{ color: C.blue }}>2 pts</span>
+          </div>
+          <div style={{ fontSize: 10.5, color: C.ink2, lineHeight: 1.65 }}>
+            Halla las asíntotas de{' '}
+            <span style={{ fontFamily: 'monospace', background: C.bgBlue, color: C.blue, padding: '1px 4px', borderRadius: 3 }}>f(x)=(x²−1)/(x−2)</span>
+            {' '}y represéntala gráficamente.
+          </div>
+        </div>
+        <div style={{ border: `1.5px solid ${C.blue}`, borderRadius: 8, padding: '10px 12px', marginBottom: 12, background: '#fafbff', minHeight: 64 }}>
+          <div style={{ fontSize: 10, color: '#cbd5e1', fontStyle: 'italic' }}>Tu respuesta aquí...</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: C.amber, fontWeight: 700 }}>
+            <TimerReset size={13} /> 47:32
+          </div>
+          <div style={{ background: C.grad, color: '#fff', fontSize: 11, fontWeight: 800, padding: '7px 14px', borderRadius: 7, display: 'flex', alignItems: 'center', gap: 5 }}>
+            Enviar <ArrowRight size={10} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ScreenCorrection() {
+  return (
+    <div style={{ background: '#fff', minHeight: 330 }}>
+      <div style={{ padding: '10px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>pausia</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {([56, 36] as const).map((w, i) => <div key={i} style={{ height: 22, width: w, borderRadius: 6, background: C.bgMuted }} />)}
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+          <div style={{ width: 58, height: 58, borderRadius: 16, background: C.grad, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>8.4</span>
+            <span style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>/10</span>
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 900, color: C.ink, marginBottom: 4 }}>Muy bien — sigue así</div>
+            <div style={{ height: 5, width: 110, background: C.bgBlueMid, borderRadius: 3 }}>
+              <div style={{ width: '84%', height: '100%', background: C.grad, borderRadius: 3 }} />
+            </div>
+          </div>
+        </div>
+        {([
+          { ok: true,  text: 'Asíntota vertical x=2', pts: '2/2' },
+          { ok: true,  text: 'Asíntota horizontal', pts: '2/2' },
+          { ok: false, text: 'Asíntota oblicua — incompleta', pts: '1.4/2' },
+        ] as const).map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderBottom: i < 2 ? `1px solid ${C.border}` : 'none' }}>
+            <div style={{ width: 18, height: 18, borderRadius: '50%', background: item.ok ? C.greenBg : C.amberBg, border: `1.5px solid ${item.ok ? C.greenBd : '#fde68a'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {item.ok ? <Check size={9} style={{ color: C.green }} /> : <span style={{ fontSize: 9, fontWeight: 900, color: C.amber }}>!</span>}
+            </div>
+            <span style={{ flex: 1, fontSize: 10.5, color: C.ink2 }}>{item.text}</span>
+            <span style={{ fontSize: 10, fontWeight: 800, color: item.ok ? C.green : C.amber }}>{item.pts}</span>
+          </div>
+        ))}
+        <div style={{ marginTop: 12, background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', borderRadius: 10, padding: '9px 13px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Zap size={13} color="#a78bfa" />
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#fff' }}>+120 XP</span>
+          <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 2 }}>
+            <div style={{ width: '72%', height: '100%', background: '#7c3aed', borderRadius: 2 }} />
+          </div>
+          <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>Nv. 4</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ScreenPlan() {
+  return (
+    <div style={{ background: '#fff', minHeight: 330 }}>
+      <div style={{ padding: '10px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>pausia</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {([56, 36] as const).map((w, i) => <div key={i} style={{ height: 22, width: w, borderRadius: 6, background: C.bgMuted }} />)}
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 10, fontWeight: 800, color: '#fff', background: C.ink, padding: '2px 8px', borderRadius: 99 }}>Día 47</span>
+          <span style={{ fontSize: 10, color: C.soft }}>Sem. 17 · PAU Madrid 2026</span>
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.ink, marginBottom: 12 }}>Límites y continuidad</div>
+        {([
+          { done: false, bg: '#dbeafe', fg: '#2563eb', label: 'L', text: 'Flashcards Límites', sub: 'Matemáticas II', xp: 40 },
+          { done: false, bg: '#dbeafe', fg: '#2563eb', label: 'E', text: 'Examen Madrid 2023', sub: 'Matemáticas II', xp: 80 },
+          { done: true,  bg: '#fef3c7', fg: '#d97706', label: 'R', text: 'Repaso de Física', sub: 'Física', xp: 60 },
+        ] as const).map((task, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < 2 ? `1px solid ${C.border}` : 'none', opacity: task.done ? 0.55 : 1 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: task.done ? 'linear-gradient(135deg,#16a34a,#22c55e)' : task.bg, color: task.done ? '#fff' : task.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800 }}>
+              {task.done ? <Check size={13} strokeWidth={2.5} /> : task.label}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: task.done ? C.soft : C.ink, textDecoration: task.done ? 'line-through' : 'none', textDecorationColor: '#d1d5db' }}>{task.text}</div>
+              <div style={{ fontSize: 9.5, color: C.soft }}>{task.sub} · {task.xp} XP</div>
+            </div>
+            {!task.done && <ChevronRight size={13} color={C.border} />}
+          </div>
+        ))}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: C.soft, fontWeight: 700, marginBottom: 5 }}>
+            <span>Progreso hoy</span><span style={{ color: C.ink, fontWeight: 800 }}>60%</span>
+          </div>
+          <div style={{ height: 5, background: C.bgMuted, borderRadius: 3 }}>
+            <div style={{ width: '60%', height: '100%', background: C.grad, borderRadius: 3 }} />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -691,6 +823,8 @@ export default function LandingPage() {
         /* ── Responsive ── */
         @media (max-width: 768px) {
           .lp-hero-grid, .lp-moment-grid { grid-template-columns: 1fr !important; }
+          .lp-screens-grid { grid-template-columns: 1fr !important; }
+          .lp-footer-grid { grid-template-columns: 1fr 1fr !important; }
           .lp-hero-visual { order: -1; }
           .lp-scroll-moment { padding: 24px !important; }
           .lp-hero-cloud-curtain { inset: -16% -34% -10% !important; }
@@ -767,24 +901,11 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Hero — ScrollExpandMedia ─────────────────────────────────────── */}
-      <ScrollExpandMedia
-        mediaType="image"
-        mediaSrc="/brand/pausia-hero-3d.png"
-        bgImageSrc="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1920&q=85&auto=format&fit=crop"
-        title="Prepara la PAU"
-        date="EBAU Madrid 2025"
-        scrollToExpand="Scroll para explorar"
-        textBlend
-        overlayClass="absolute inset-0 rounded-xl"
-      />
-
-      {/* ── Hero abstracto ───────────────────────────────────────────────── */}
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="lp-hero-section" style={{
         position: 'relative',
         overflow: 'hidden',
-        minHeight: 'calc(100vh - 76px)',
-        padding: 'clamp(72px,9vw,118px) clamp(20px,5vw,48px) clamp(54px,7vw,86px)',
+        padding: 'clamp(104px,13vw,148px) clamp(20px,5vw,48px) clamp(56px,7vw,88px)',
         background: 'radial-gradient(circle at 14% 12%, rgba(219,234,254,0.92), transparent 32%), radial-gradient(circle at 86% 16%, rgba(221,214,254,0.72), transparent 30%), radial-gradient(circle at 72% 84%, rgba(207,250,254,0.58), transparent 32%), linear-gradient(180deg, #ffffff 0%, #f8fbff 58%, #eff6ff 100%)',
       }}>
         <HeroCloudCurtain />
@@ -896,11 +1017,61 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Trust strip ──────────────────────────────────────────────────── */}
+      <div style={{ background: C.bgSub, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1040, margin: '0 auto', padding: '15px clamp(20px,5vw,48px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '6px 28px' }}>
+          {['Exámenes oficiales EBAU', 'Madrid y Cataluña', 'Corrección con criterios', 'Plan diario PAU', 'Beta privada · 2026'].map(label => (
+            <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: C.muted, whiteSpace: 'nowrap' }}>
+              <Check size={11} style={{ color: C.green, flexShrink: 0 }} /> {label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Product screenshots ───────────────────────────────────────────── */}
+      <section style={{ background: 'linear-gradient(180deg,#0f172a 0%,#1e293b 100%)', padding: 'clamp(48px,7vw,80px) clamp(20px,5vw,48px)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(32px,5vw,52px)' }}>
+            <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 10 }}>La app</p>
+            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 900, color: '#f8fafc', margin: '0 0 12px', letterSpacing: '-0.05em', lineHeight: 1.05, textWrap: 'balance' as never }}>
+              Así se ve Pausia por dentro.
+            </h2>
+            <p style={{ fontSize: 'clamp(0.93rem,1.8vw,1.03rem)', color: '#64748b', lineHeight: 1.8, maxWidth: 420, margin: '0 auto' }}>
+              Del examen real a la nota y el siguiente paso — todo en el mismo sitio.
+            </p>
+          </div>
+          <div className="lp-screens-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+            {([
+              { label: 'Examen oficial', url: 'pausia.es/examenes/mates-ii', screen: <ScreenExam /> },
+              { label: 'Corrección IA',  url: 'pausia.es/examenes/correccion', screen: <ScreenCorrection /> },
+              { label: 'Plan diario',    url: 'pausia.es/camino', screen: <ScreenPlan /> },
+            ] as const).map(({ label, url, screen }) => (
+              <div key={label}>
+                <p style={{ textAlign: 'center', fontSize: 11.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.01em', marginBottom: 10 }}>{label}</p>
+                <div style={{ borderRadius: 12, overflow: 'hidden', boxShadow: '0 28px 70px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div style={{ background: '#1a2744', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 4.5 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff5f57' }} />
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#febc2e' }} />
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#28c840' }} />
+                    </div>
+                    <div style={{ flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: '3px 10px', fontSize: 9.5, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
+                      {url}
+                    </div>
+                  </div>
+                  {screen}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Scroll narrative ─────────────────────────────────────────────── */}
       <section id="como-funciona" style={{
         position: 'relative',
         overflow: 'hidden',
-        padding: 'clamp(72px,9vw,112px) clamp(20px,5vw,48px)',
+        padding: 'clamp(48px,7vw,80px) clamp(20px,5vw,48px)',
         background: 'linear-gradient(180deg, #eff6ff 0%, #ffffff 30%, #f8fafc 100%)',
       }}>
         <div style={{ maxWidth: 1140, margin: '0 auto', position: 'relative', zIndex: 2 }}>
@@ -921,8 +1092,8 @@ export default function LandingPage() {
               const Icon = moment.icon
               return (
                 <article key={moment.n} className="lp-scroll-moment lp-scroll-reveal" style={{
-                  borderRadius: 34,
-                  padding: 'clamp(26px,4vw,42px)',
+                  borderRadius: 28,
+                  padding: 'clamp(20px,3vw,32px)',
                   border: '1px solid rgba(191,219,254,0.76)',
                   background: 'rgba(255,255,255,0.76)',
                   boxShadow: '0 24px 70px rgba(37,99,235,0.08)',
@@ -957,7 +1128,7 @@ export default function LandingPage() {
                       <div style={{ fontSize: 12, fontWeight: 950, letterSpacing: '0.1em', textTransform: 'uppercase', color: moment.color, marginBottom: 10 }}>
                         Momento {moment.n}
                       </div>
-                      <h3 style={{ margin: '0 0 12px', fontSize: 'clamp(1.8rem,4vw,2.7rem)', lineHeight: 1.05, fontWeight: 950, letterSpacing: '-0.05em', color: C.ink, textWrap: 'balance' as never }}>
+                      <h3 style={{ margin: '0 0 12px', fontSize: 'clamp(1.5rem,3.2vw,2.1rem)', lineHeight: 1.08, fontWeight: 950, letterSpacing: '-0.04em', color: C.ink, textWrap: 'balance' as never }}>
                         {moment.title}
                       </h3>
                       <p style={{ margin: 0, fontSize: 'clamp(0.98rem,2vw,1.1rem)', lineHeight: 1.8, color: C.muted, maxWidth: 430, fontWeight: 500 }}>
@@ -1003,7 +1174,7 @@ export default function LandingPage() {
       {/* ── How it works ─────────────────────────────────────────────────── */}
       <section style={{
         maxWidth: 1040, margin: '0 auto',
-        padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,40px)',
+        padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)',
       }}>
         <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
           Proceso de estudio
@@ -1045,7 +1216,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Comparison table ─────────────────────────────────────────────── */}
-      <section style={{ background: C.bgSub, padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,40px)' }}>
+      <section style={{ background: C.bgSub, padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
             Por qué Pausia
@@ -1125,7 +1296,7 @@ export default function LandingPage() {
       {/* ── Features bento ───────────────────────────────────────────────── */}
       <section style={{
         maxWidth: 1040, margin: '0 auto',
-        padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,40px)',
+        padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)',
       }}>
         <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
           Funcionalidades
@@ -1167,7 +1338,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Testimonials ─────────────────────────────────────────────────── */}
-      <section style={{ background: C.bgSub, padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,40px)' }}>
+      <section style={{ background: C.bgSub, padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
             Estudiantes reales
@@ -1233,7 +1404,7 @@ export default function LandingPage() {
       {/* ── Pricing preview ──────────────────────────────────────────────── */}
       <section style={{
         maxWidth: 1040, margin: '0 auto',
-        padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,40px)',
+        padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)',
       }}>
         <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
           Precios
@@ -1356,7 +1527,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ────────────────────────────────────────────────────── */}
-      <section style={{ padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,40px)' }}>
+      <section style={{ padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)' }}>
         <div style={{
           maxWidth: 1040, margin: '0 auto',
           borderRadius: 20,
@@ -1411,22 +1582,53 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer style={{
-        borderTop: `1px solid ${C.border}`,
-        background: C.bgSub,
-        padding: '20px clamp(20px,5vw,48px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 12,
-      }}>
-        <PausiaBrand subtitle={null} size="sm" />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: C.soft }}>Preparación PAU · 2º Bachillerato</span>
-          <Link href="/legal/privacidad" style={{ fontSize: 12, color: C.soft, textDecoration: 'none' }} className="lp-nav-link">Privacidad</Link>
-          <Link href="/legal/terminos" style={{ fontSize: 12, color: C.soft, textDecoration: 'none' }} className="lp-nav-link">Términos</Link>
+      <footer style={{ borderTop: `1px solid ${C.border}`, background: C.bgSub }}>
+        <div className="lp-footer-grid" style={{ maxWidth: 1040, margin: '0 auto', padding: 'clamp(36px,5vw,52px) clamp(20px,5vw,48px) clamp(24px,4vw,36px)', display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 32 }}>
+          {/* Brand */}
+          <div>
+            <PausiaBrand subtitle={null} size="sm" />
+            <p style={{ margin: '12px 0 0', fontSize: 12.5, color: C.soft, lineHeight: 1.7, maxWidth: 210 }}>
+              Prepara la PAU con exámenes reales, corrección IA y un plan diario personalizado.
+            </p>
+          </div>
+          {/* Producto */}
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 800, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 14 }}>Producto</p>
+            {[
+              { label: 'Exámenes EBAU', href: '/examenes' },
+              { label: 'Simulacros',    href: '/simulacros' },
+              { label: 'Camino PAU',    href: '/camino' },
+              { label: 'Zona de repaso', href: '/zona' },
+            ].map(({ label, href }) => (
+              <Link key={label} href={href} style={{ display: 'block', fontSize: 13, color: C.muted, textDecoration: 'none', marginBottom: 8, fontWeight: 500 }} className="lp-nav-link">{label}</Link>
+            ))}
+          </div>
+          {/* Info */}
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 800, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 14 }}>Info</p>
+            {[
+              { label: 'Precios',        href: '/pricing' },
+              { label: 'Cómo funciona',  href: '#como-funciona' },
+              { label: 'Privacidad',     href: '/legal/privacidad' },
+              { label: 'Términos',       href: '/legal/terminos' },
+            ].map(({ label, href }) => (
+              <Link key={label} href={href} style={{ display: 'block', fontSize: 13, color: C.muted, textDecoration: 'none', marginBottom: 8, fontWeight: 500 }} className="lp-nav-link">{label}</Link>
+            ))}
+          </div>
+          {/* CTA */}
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 800, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 14 }}>Acceder</p>
+            <p style={{ fontSize: 12.5, color: C.soft, lineHeight: 1.65, marginBottom: 14 }}>Beta privada para estudiantes de 2º de Bachillerato.</p>
+            <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, background: C.grad, color: '#fff', fontWeight: 800, fontSize: 13, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,0.22)' }}>
+              Empezar gratis <ArrowRight size={12} />
+            </Link>
+          </div>
         </div>
-        <Link href="/login" style={{ fontSize: 13, fontWeight: 700, color: C.blue, textDecoration: 'none' }}>
-          Entrar →
-        </Link>
+        {/* Copyright bar */}
+        <div style={{ borderTop: `1px solid ${C.border}`, padding: '13px clamp(20px,5vw,48px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <span style={{ fontSize: 11, color: C.soft }}>© 2026 Pausia · Preparación PAU · 2º Bachillerato</span>
+          <span style={{ fontSize: 11, color: C.soft }}>Madrid y Cataluña · Beta privada</span>
+        </div>
       </footer>
       <HeroCardsAnimator />
     </div>

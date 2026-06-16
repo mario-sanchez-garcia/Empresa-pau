@@ -11,6 +11,14 @@ import { examenesLenguaCataluna } from '@/app/data/lengua_cataluna'
 import { examenesCataluna } from '@/app/data/examenes_cataluna'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
+type SimulacroYearSelection = 'all' | SimulacroDifficulty
+type SimulacroOptionSelection = 'mixed' | SimulacroOption
+
+interface GenerateSimulacroSettings {
+  yearSelection?: SimulacroYearSelection
+  optionSelection?: SimulacroOptionSelection
+}
+
 export const SUBJECTS = {
   mates: { label: 'Matemáticas II', short: 'Mates', color: '#2563eb', light: '#eff6ff', icon: Sigma, available: true },
   fisica: { label: 'Física', short: 'Física', color: '#CA8A04', light: '#FEFCE8', icon: Atom, available: true },
@@ -37,23 +45,38 @@ const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto', 'fuente']
 }
 
-export function generateSimulacro(subject: SimulacroSubject, difficulty: SimulacroDifficulty, option: SimulacroOption, comunidad: string) {
-  const years = yearsForSubject(subject, difficulty)
+export function generateSimulacro(
+  subject: SimulacroSubject,
+  difficulty: SimulacroDifficulty,
+  option: SimulacroOption,
+  comunidad: string,
+  settings: GenerateSimulacroSettings = {}
+) {
+  const yearSelection = settings.yearSelection ?? difficulty
+  const optionSelection = settings.optionSelection ?? option
+  const years = yearSelection === 'all' ? null : yearsForSubject(subject, yearSelection)
 
   if (subject === 'lengua') {
-    const lenguaYears = difficulty === 'Fácil' ? [2019, 2020] : difficulty === 'Media' ? [2021, 2022] : [2023, 2024]
+    const lenguaYears = yearSelection === 'all'
+      ? null
+      : yearSelection === 'Fácil'
+      ? [2019, 2020]
+      : yearSelection === 'Media'
+      ? [2021, 2022]
+      : [2023, 2024]
+    const selectedOption = optionSelection === 'mixed' ? randomOption() : optionSelection
 
     if (comunidad === 'Cataluña') {
-      const candidates = examenesLenguaCataluna.filter(exam => lenguaYears.includes(exam.anio))
+      const candidates = examenesLenguaCataluna.filter(exam => !lenguaYears || lenguaYears.includes(exam.anio))
       if (!candidates.length) return null
       const selected = shuffle(candidates)[0]
-      const blocks = normalizeLenguaCatalunaExam(selected, option)
+      const blocks = normalizeLenguaCatalunaExam(selected, selectedOption)
       if (!blocks.length) return null
       const dificultadReal = selected.anio >= 2023 ? 'Difícil' : selected.anio >= 2019 ? 'Media' : 'Fácil'
       return { id: crypto.randomUUID(), blocks: withCommunity(blocks, comunidad), dificultadReal }
     }
 
-    const candidates = examenesLengua.filter(exam => lenguaYears.includes(exam.año) && (exam.comunidad ?? 'Madrid') === comunidad)
+    const candidates = examenesLengua.filter(exam => (!lenguaYears || lenguaYears.includes(exam.año)) && (exam.comunidad ?? 'Madrid') === comunidad)
     if (!candidates.length) return null
     const selected = shuffle(candidates)[0]
     const blocks = (selected?.preguntas ?? []).map((p: any, index: number) => ({
@@ -66,7 +89,10 @@ export function generateSimulacro(subject: SimulacroSubject, difficulty: Simulac
     return { id: crypto.randomUUID(), blocks: withCommunity(blocks, comunidad), dificultadReal }
   }
 
-  const questions = normalizeQuestions(subject, comunidad).filter(item => years.includes(item.year) && item.option === option)
+  const questions = normalizeQuestions(subject, comunidad).filter(item => (
+    (!years || years.includes(item.year)) &&
+    (optionSelection === 'mixed' || item.option === optionSelection)
+  ))
   const distinctYears = new Set(questions.map(q => q.year)).size
   const usedYears = new Set<number>()
   const blocks: SimulacroBlock[] = []
@@ -108,6 +134,10 @@ function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficu
     return [2024, 2025]
   }
   return DIFFICULTIES.find(item => item.id === difficulty)?.years ?? DIFFICULTIES[1].years
+}
+
+function randomOption(): SimulacroOption {
+  return Math.random() > 0.5 ? 'B' : 'A'
 }
 
 function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {

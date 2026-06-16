@@ -2,19 +2,37 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, PlayCircle } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, ListChecks, PlayCircle, Settings2, Shuffle } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
-import { DIFFICULTIES, SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
+import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
 import type { SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
+type SimulacroMode = 'normal' | 'personalizado'
+type YearChoice = 'all' | 'recent' | 'middle' | 'classic'
+type OptionChoice = 'mixed' | SimulacroOption
+
+const YEAR_CHOICES: Array<{ id: YearChoice; label: string; description: string }> = [
+  { id: 'all', label: 'Todos los años', description: 'Pausia mezcla ejercicios oficiales disponibles.' },
+  { id: 'recent', label: 'Años recientes', description: 'Entrena con convocatorias más actuales.' },
+  { id: 'middle', label: 'Años intermedios', description: 'Práctica equilibrada con exámenes estándar.' },
+  { id: 'classic', label: 'Años clásicos', description: 'Base sólida con ejercicios más directos.' },
+]
+
+const OPTION_CHOICES: Array<{ id: OptionChoice; label: string; description: string }> = [
+  { id: 'mixed', label: 'A/B automático', description: 'La app mezcla opciones cuando haya ejercicios compatibles.' },
+  { id: 'A', label: 'Opción A', description: 'Solo ejercicios de opción A.' },
+  { id: 'B', label: 'Opción B', description: 'Solo ejercicios de opción B.' },
+]
+
 export default function SimulacrosPage() {
   const [userId, setUserId] = useState('')
   const [subject, setSubject] = useState<SimulacroSubject>('mates')
-  const [difficulty, setDifficulty] = useState<SimulacroDifficulty>('Media')
-  const [option, setOption] = useState<SimulacroOption>('A')
+  const [mode, setMode] = useState<SimulacroMode>('normal')
+  const [yearChoice, setYearChoice] = useState<YearChoice>('all')
+  const [optionChoice, setOptionChoice] = useState<OptionChoice>('mixed')
   const [historyOpen, setHistoryOpen] = useState(false)
   const [history, setHistory] = useState<SimulacroRecord[]>([])
   const [loading, setLoading] = useState(false)
@@ -24,8 +42,9 @@ export default function SimulacrosPage() {
   const stats = useMemo(() => buildStats(history), [history])
 
   useEffect(() => {
-    setDifficulty('Media')
-    setOption('A')
+    setMode('normal')
+    setYearChoice('all')
+    setOptionChoice('mixed')
     setErrorMessage('')
   }, [ccaa])
 
@@ -72,21 +91,30 @@ export default function SimulacrosPage() {
       }
       setUserId(currentUserId)
 
-      const effectiveOption: SimulacroOption = subject === 'lengua' ? 'A' : option
-      const generated = generateSimulacro(subject, difficulty, effectiveOption, ccaa)
+      const effectiveYearChoice = mode === 'normal' ? 'all' : yearChoice
+      const yearSelection = yearChoiceToSelection(effectiveYearChoice)
+      const optionSelection: OptionChoice = mode === 'normal' || subject === 'lengua' ? 'mixed' : optionChoice
+      const technicalDifficulty = technicalDifficultyForYearChoice(effectiveYearChoice)
+      const generatorOption: SimulacroOption = optionSelection === 'B' ? 'B' : 'A'
+      const generated = generateSimulacro(subject, technicalDifficulty, generatorOption, ccaa, {
+        yearSelection,
+        optionSelection,
+      })
       if (!generated) {
         setErrorMessage('No hay suficientes ejercicios disponibles para crear este simulacro.')
         setLoading(false)
         return
       }
+      const storedOption = generated.blocks.find(block => block.option === 'A' || block.option === 'B')?.option ?? generatorOption
+      const configLabel = buildConfigLabel(mode, effectiveYearChoice, optionSelection)
       const now = new Date().toISOString()
       const row = {
         id: generated.id,
         user_id: currentUserId,
         asignatura: subject,
-        opcion: effectiveOption,
-        dificultad: difficulty,
-        dificultad_real: generated.dificultadReal,
+        opcion: storedOption,
+        dificultad: technicalDifficulty,
+        dificultad_real: configLabel,
         bloques: generated.blocks,
         respuestas_parciales: {},
         estado: 'en_progreso',
@@ -193,7 +221,7 @@ export default function SimulacrosPage() {
                   >
                     <div className="min-w-0">
                       <strong className="block truncate text-sm" style={{ color: '#0f172a' }}>
-                        {SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad}
+                        {SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}
                       </strong>
                       <small style={{ color: '#94a3b8' }}>
                         {item.id.slice(0, 8)} · {item.estado === 'completado' ? `Nota ${item.nota_final ?? '-'}/10` : 'En progreso'}
@@ -201,11 +229,13 @@ export default function SimulacrosPage() {
                     </div>
                     <div className="ml-3 flex shrink-0 items-center gap-2">
                       {item.estado === 'completado' ? (
-                        <span className="rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#f0fdf4', color: '#15803d' }}>✓ Completado</span>
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#f0fdf4', color: '#15803d' }}>
+                          <CheckCircle2 size={12} />Completado
+                        </span>
                       ) : (
                         <span className="rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#fffbeb', color: '#b45309' }}>En progreso</span>
                       )}
-                      <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f1f5f9', color: '#475569' }}>{item.opcion}</span>
+                      <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
                     </div>
                   </a>
                 ))}
@@ -290,82 +320,172 @@ export default function SimulacrosPage() {
           </div>
         </section>
 
-        {/* Step 2: Difficulty */}
+        {/* Step 2: Mode */}
         <section className="pau-reveal pau-reveal-delay-2">
           <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
-            Paso 2 · Dificultad
+            Paso 2 · Tipo de simulacro
           </p>
-          <div className="pau-stagger grid grid-cols-3 gap-4 max-md:grid-cols-1">
-            {DIFFICULTIES.map((item, idx) => {
-              const isActive = difficulty === item.id
-              const bars = idx + 1
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setDifficulty(item.id)}
-                  className="rounded-2xl border p-5 text-left transition hover:-translate-y-0.5"
-                  style={{
-                    borderColor: isActive ? '#2563eb' : 'rgba(219,231,251,0.82)',
-                    background: isActive
-                      ? 'linear-gradient(145deg, #eff6ff, #dbeafe)'
-                      : 'rgba(255,255,255,0.82)',
-                    boxShadow: isActive
-                      ? '0 0 0 2.5px rgba(37,99,235,0.18), 0 12px 28px rgba(37,99,235,0.1)'
-                      : '0 2px 8px rgba(37,99,235,0.04)',
-                    cursor: 'pointer',
-                  }}
+          <div className="pau-stagger grid grid-cols-2 gap-4 max-md:grid-cols-1">
+            <button
+              onClick={() => setMode('normal')}
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
+              style={{
+                borderColor: mode === 'normal' ? cfg.color : 'rgba(219,231,251,0.82)',
+                background: mode === 'normal'
+                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
+                  : 'rgba(255,255,255,0.84)',
+                boxShadow: mode === 'normal'
+                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
+                  : '0 2px 8px rgba(37,99,235,0.04)',
+              }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <span
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl text-white transition group-hover:scale-105"
+                  style={{ background: cfg.color, boxShadow: `0 10px 24px ${cfg.color}2b` }}
                 >
-                  <div className="mb-3 flex items-center gap-1.5">
-                    {[1, 2, 3].map(n => (
-                      <div
-                        key={n}
-                        className="h-1.5 rounded-full transition"
-                        style={{
-                          width: 28,
-                          background: n <= bars
-                            ? isActive ? '#2563eb' : '#94a3b8'
-                            : '#e2e8f0',
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <h3 className="font-black" style={{ color: '#0f172a' }}>{item.label}</h3>
-                  <p className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>{item.description}</p>
-                </button>
-              )
-            })}
+                  <Shuffle size={22} />
+                </span>
+                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}24` }}>
+                  Recomendado
+                </span>
+              </div>
+              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Simulacro normal</h3>
+              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
+                Puede salir cualquier año oficial disponible y cualquier opción A/B. Ideal para practicar como examen real.
+              </p>
+            </button>
+
+            <button
+              onClick={() => setMode('personalizado')}
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
+              style={{
+                borderColor: mode === 'personalizado' ? cfg.color : 'rgba(219,231,251,0.82)',
+                background: mode === 'personalizado'
+                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
+                  : 'rgba(255,255,255,0.84)',
+                boxShadow: mode === 'personalizado'
+                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
+                  : '0 2px 8px rgba(37,99,235,0.04)',
+              }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <span
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
+                  style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
+                >
+                  <Settings2 size={22} />
+                </span>
+                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f8fbff', color: '#64748b', border: '1px solid #dbe7fb' }}>
+                  Ajustable
+                </span>
+              </div>
+              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Simulacro personalizado</h3>
+              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
+                Elige el rango de años y, si la asignatura lo permite, la opción concreta que quieres entrenar.
+              </p>
+            </button>
           </div>
         </section>
 
-        {/* Step 3: Option */}
-        {subject !== 'lengua' && (
+        {/* Step 3: Personalization */}
+        {mode === 'personalizado' ? (
           <section className="pau-reveal pau-reveal-delay-3">
             <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
-              Paso 3 · Opción de examen
+              Paso 3 · Ajustes personalizados
             </p>
-            <div className="flex gap-3">
-              {(['A', 'B'] as SimulacroOption[]).map(item => (
-                <button
-                  key={item}
-                  onClick={() => setOption(item)}
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-black transition"
-                  style={{
-                    background: option === item ? '#2563eb' : 'rgba(255,255,255,0.82)',
-                    color: option === item ? '#fff' : '#334155',
-                    border: `1.5px solid ${option === item ? '#2563eb' : 'rgba(219,231,251,0.82)'}`,
-                    boxShadow: option === item
-                      ? '0 0 0 2.5px rgba(37,99,235,0.18), 0 10px 28px rgba(37,99,235,0.22)'
-                      : '0 2px 8px rgba(37,99,235,0.04)',
-                    transform: option === item ? 'translateY(-2px)' : 'none',
-                    transition: 'all 200ms var(--ease-out)',
-                  }}
-                >
-                  {item}
-                </button>
-              ))}
+            <div className="grid gap-5 rounded-[26px] border bg-white/80 p-5 shadow-[0_18px_46px_rgba(37,99,235,0.06)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <ListChecks size={16} style={{ color: cfg.color }} />
+                  <h3 className="text-sm font-black" style={{ color: '#0f172a' }}>Años de convocatoria</h3>
+                </div>
+                <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
+                  {YEAR_CHOICES.map(item => {
+                    const isActive = yearChoice === item.id
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setYearChoice(item.id)}
+                        className="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5"
+                        style={{
+                          borderColor: isActive ? cfg.color : '#dbe7fb',
+                          background: isActive ? `${cfg.color}10` : '#f8fbff',
+                          boxShadow: isActive ? `0 0 0 2px ${cfg.color}18` : 'none',
+                        }}
+                      >
+                        <span className="block text-sm font-black" style={{ color: isActive ? cfg.color : '#0f172a' }}>{item.label}</span>
+                        <span className="mt-1 block text-xs font-semibold leading-5" style={{ color: '#64748b' }}>{item.description}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {subject !== 'lengua' ? (
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <Shuffle size={16} style={{ color: cfg.color }} />
+                    <h3 className="text-sm font-black" style={{ color: '#0f172a' }}>Opciones del examen</h3>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 max-md:grid-cols-1">
+                    {OPTION_CHOICES.map(item => {
+                      const isActive = optionChoice === item.id
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setOptionChoice(item.id)}
+                          className="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5"
+                          style={{
+                            borderColor: isActive ? cfg.color : '#dbe7fb',
+                            background: isActive ? `${cfg.color}10` : '#f8fbff',
+                            boxShadow: isActive ? `0 0 0 2px ${cfg.color}18` : 'none',
+                          }}
+                        >
+                          <span className="block text-sm font-black" style={{ color: isActive ? cfg.color : '#0f172a' }}>{item.label}</span>
+                          <span className="mt-1 block text-xs font-semibold leading-5" style={{ color: '#64748b' }}>{item.description}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border p-4 text-sm font-semibold leading-6" style={{ borderColor: `${cfg.color}24`, background: `${cfg.color}0f`, color: '#475569' }}>
+                  Lengua se genera como examen oficial coherente. Pausia elige automáticamente la versión compatible con el banco de ejercicios.
+                </div>
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="pau-reveal pau-reveal-delay-3">
+            <div className="flex flex-wrap items-center gap-3 rounded-[24px] border p-5" style={{ background: `${cfg.color}0d`, borderColor: `${cfg.color}22` }}>
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: '#fff', color: cfg.color, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
+                <Shuffle size={18} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-black" style={{ color: '#0f172a' }}>Configuración automática</p>
+                <p className="text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
+                  Cualquier año oficial disponible, opciones A/B mezcladas cuando existan y bloques elegidos para parecerse a una PAU real.
+                </p>
+              </div>
             </div>
           </section>
         )}
+
+        {/* Summary */}
+        <section className="pau-reveal pau-reveal-delay-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border bg-white/82 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.06)]" style={{ borderColor: '#dbe7fb' }}>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>Listo para crear</p>
+              <p className="mt-1 text-base font-black" style={{ color: '#0f172a' }}>
+                {cfg.label} · {buildConfigLabel(mode, mode === 'normal' ? 'all' : yearChoice, mode === 'normal' || subject === 'lengua' ? 'mixed' : optionChoice)}
+              </p>
+            </div>
+            <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>
+              {ccaa}
+            </span>
+          </div>
+        </section>
 
         {/* Generate CTA */}
         <button
@@ -380,7 +500,9 @@ export default function SimulacrosPage() {
             : !SUBJECTS[subject].available
             ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
             : userId
-            ? `Generar simulacro de ${cfg.short}`
+            ? mode === 'normal'
+              ? `Empezar simulacro normal de ${cfg.short}`
+              : `Crear simulacro personalizado de ${cfg.short}`
             : 'Cargando sesión...'}
         </button>
       </div>
@@ -426,4 +548,39 @@ function formatScore(value: any) {
 function formatDate(value?: string) {
   if (!value) return '-'
   return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(new Date(value))
+}
+
+function yearChoiceToSelection(choice: YearChoice): 'all' | SimulacroDifficulty {
+  if (choice === 'recent') return 'Difícil'
+  if (choice === 'middle') return 'Media'
+  if (choice === 'classic') return 'Fácil'
+  return 'all'
+}
+
+function technicalDifficultyForYearChoice(choice: YearChoice): SimulacroDifficulty {
+  if (choice === 'recent') return 'Difícil'
+  if (choice === 'classic') return 'Fácil'
+  return 'Media'
+}
+
+function buildConfigLabel(mode: SimulacroMode, yearChoice: YearChoice, optionChoice: OptionChoice) {
+  if (mode === 'normal') return 'Normal · cualquier año · opciones mixtas'
+  return `Personalizado · ${yearChoiceLabel(yearChoice)} · ${optionChoiceLabel(optionChoice)}`
+}
+
+function yearChoiceLabel(choice: YearChoice) {
+  const item = YEAR_CHOICES.find(entry => entry.id === choice)
+  return item?.label.toLowerCase() ?? 'todos los años'
+}
+
+function optionChoiceLabel(choice: OptionChoice) {
+  if (choice === 'mixed') return 'A/B automático'
+  return `opción ${choice}`
+}
+
+function optionSummaryForRecord(record: SimulacroRecord) {
+  const options = Array.from(new Set((record.bloques ?? []).map(block => block.option).filter(Boolean))).sort()
+  if (options.length > 1) return 'Opciones A/B'
+  if (options[0]) return `Opción ${options[0]}`
+  return `Opción ${record.opcion}`
 }

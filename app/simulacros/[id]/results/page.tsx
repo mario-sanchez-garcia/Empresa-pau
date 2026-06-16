@@ -237,7 +237,7 @@ export default function SimulacroResultsPage() {
                 {[
                   `Tiempo: ${record.tiempo_empleado ?? 0} min de 90`,
                   `Años: ${years || 'sin datos'}`,
-                  ...(record.asignatura !== 'lengua' ? [`Opción ${record.opcion}`] : []),
+                  ...(record.asignatura !== 'lengua' ? [optionSummaryForRecord(record)] : []),
                   record.id.slice(0, 8),
                 ].map(text => (
                   <span
@@ -323,7 +323,7 @@ export default function SimulacroResultsPage() {
               <ResultCard icon={<CheckCircle2 size={18} />} title="Qué está bien" text={result.puntos_fuertes || listToText(result.fortalezas) || 'Todavía no hay fortalezas detectadas en esta corrección.'} color="#059669" tone="green" />
               <ResultCard icon={<TriangleAlert size={18} />} title="Errores principales" text={result.puntos_mejora || listToText(result.errores_principales) || 'No hay errores principales disponibles. Mira cada bloque para más detalle.'} color="#d97706" tone="orange" />
               <ResultCard icon={<Lightbulb size={18} />} title="Recomendación de próximo entrenamiento" text={nextTraining} color={cfg.color} />
-              <ResultCard icon={<Clock size={18} />} title="Contexto de dificultad" text={result.contexto_dificultad || `Simulacro de dificultad ${record.dificultad_real ?? record.dificultad}.`} color={cfg.color} />
+              <ResultCard icon={<Clock size={18} />} title="Contexto del simulacro" text={result.contexto_dificultad || `Configuración: ${record.dificultad_real ?? record.dificultad}.`} color={cfg.color} />
             </section>
           )}
 
@@ -708,4 +708,11 @@ function clamp(value: number, min: number, max: number) {
 function format(value: any) {
   const number = Number(value)
   return Number.isFinite(number) ? number.toFixed(2).replace(/\.00$/, '') : '0'
+}
+
+function optionSummaryForRecord(record: SimulacroRecord) {
+  const options = Array.from(new Set((record.bloques ?? []).map(block => block.option).filter(Boolean))).sort()
+  if (options.length > 1) return 'Opciones A/B'
+  if (options[0]) return `Opción ${options[0]}`
+  return `Opción ${record.opcion}`
 }

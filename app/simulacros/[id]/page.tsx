@@ -313,7 +313,7 @@ export default function SimulacroActivoPage() {
                 <div className="rounded-3xl border bg-white/78 p-5 shadow-[0_18px_46px_rgba(37,99,235,0.08)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
                   <div className="mb-4 flex flex-wrap gap-2">
                     <Badge color={cfg.color}>{record.dificultad_real ?? record.dificultad}</Badge>
-                    {record.asignatura !== 'lengua' && <Badge color="#475569">Opción {record.opcion}</Badge>}
+                    {record.asignatura !== 'lengua' && <Badge color="#475569">{optionSummaryForRecord(record)}</Badge>}
                     <Badge color="#2563eb">{totalPoints ? `${formatCompact(totalPoints)} pts` : 'Criterios oficiales'}</Badge>
                   </div>
                   <div className="grid gap-2">
@@ -375,7 +375,7 @@ export default function SimulacroActivoPage() {
               <Badge color={cfg.color}>{cfg.label}</Badge>
               <Badge color="#475569">{record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'}</Badge>
               <Badge color="#2563eb">{record.dificultad_real ?? record.dificultad}</Badge>
-              {record.asignatura !== 'lengua' && <Badge color={cfg.color}>Opción {record.opcion}</Badge>}
+              {record.asignatura !== 'lengua' && <Badge color={cfg.color}>{optionSummaryForRecord(record)}</Badge>}
               <SaveBadge status={saveStatus} />
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-black" style={{ color: '#64748b' }}>
@@ -827,6 +827,13 @@ function formatTime(seconds: number) {
 
 function formatCompact(value: number) {
   return Number.isFinite(value) ? value.toFixed(1).replace(/\.0$/, '') : '0'
+}
+
+function optionSummaryForRecord(record: SimulacroRecord) {
+  const options = Array.from(new Set((record.bloques ?? []).map(block => block.option).filter(Boolean))).sort()
+  if (options.length > 1) return 'Opciones A/B'
+  if (options[0]) return `Opción ${options[0]}`
+  return `Opción ${record.opcion}`
 }
 
 function getDurationSeconds(record: SimulacroRecord) {

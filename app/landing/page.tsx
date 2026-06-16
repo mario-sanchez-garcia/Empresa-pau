@@ -197,7 +197,7 @@ function HeroProductCloud() {
     }}>
       <AmbientLayer />
       <div style={{ position: 'absolute', inset: 26, zIndex: 2 }}>
-        <div className="lp-card-1 lp-scroll-panel" style={{
+        <div className="lp-hero-card-1" style={{
           width: '72%',
           borderRadius: 24,
           padding: 18,
@@ -222,7 +222,7 @@ function HeroProductCloud() {
           </div>
         </div>
 
-        <div className="lp-card-2 lp-scroll-panel" style={{
+        <div className="lp-hero-card-2" style={{
           position: 'absolute',
           right: 0,
           top: 122,
@@ -250,7 +250,7 @@ function HeroProductCloud() {
           </div>
         </div>
 
-        <div className="lp-card-3 lp-scroll-panel" style={{
+        <div className="lp-hero-card-3" style={{
           position: 'absolute',
           left: 38,
           bottom: 18,
@@ -710,6 +710,24 @@ export default function LandingPage() {
         .lp-card-1 { animation: lp-in 600ms cubic-bezier(0.22,1,0.36,1) 300ms both; }
         .lp-card-2 { animation: lp-in 620ms cubic-bezier(0.22,1,0.36,1) 500ms both; }
         .lp-card-3 { animation: lp-in 600ms cubic-bezier(0.22,1,0.36,1) 700ms both; }
+        .lp-hero-card-1 {
+          opacity: 0;
+          animation: lp-in 700ms cubic-bezier(0.22,1,0.36,1) both;
+          animation-timeline: view();
+          animation-range: entry 20% entry 70%;
+        }
+        .lp-hero-card-2 {
+          opacity: 0;
+          animation: lp-in 700ms cubic-bezier(0.22,1,0.36,1) both;
+          animation-timeline: view();
+          animation-range: entry 30% entry 80%;
+        }
+        .lp-hero-card-3 {
+          opacity: 0;
+          animation: lp-in 700ms cubic-bezier(0.22,1,0.36,1) both;
+          animation-timeline: view();
+          animation-range: entry 40% entry 90%;
+        }
         /* ── Reduced motion ── */
         @media (prefers-reduced-motion: reduce) {
           .lp-h1, .lp-p, .lp-ctas, .lp-mock { animation: none !important; }

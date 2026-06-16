@@ -2,17 +2,31 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, Eye, EyeOff, ListChecks, PlayCircle, Settings2, Shuffle } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, ListChecks, PlayCircle, Settings2, Shuffle, Target, TrendingDown } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
-import type { SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
+import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
-type SimulacroMode = 'normal' | 'personalizado'
+type SimulacroMode = 'normal' | 'errores' | 'tipicos' | 'personalizado'
 type YearChoice = 'all' | 'recent' | 'middle' | 'classic'
 type OptionChoice = 'mixed' | SimulacroOption
+
+interface ExamHistoryRow {
+  id: string
+  asignatura?: string | null
+  tipo?: string | null
+  año?: number | null
+  bloque?: string | null
+  opcion?: string | null
+  nota?: number | null
+  nota_maxima?: number | null
+  enunciado?: string | null
+  correccion?: string | null
+  created_at?: string | null
+}
 
 const YEAR_CHOICES: Array<{ id: YearChoice; label: string; description: string }> = [
   { id: 'all', label: 'Todos los años', description: 'Pausia mezcla ejercicios oficiales disponibles.' },
@@ -35,11 +49,16 @@ export default function SimulacrosPage() {
   const [optionChoice, setOptionChoice] = useState<OptionChoice>('mixed')
   const [historyOpen, setHistoryOpen] = useState(false)
   const [history, setHistory] = useState<SimulacroRecord[]>([])
+  const [examHistory, setExamHistory] = useState<ExamHistoryRow[]>([])
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
   const { ccaa } = useCCAA()
   const stats = useMemo(() => buildStats(history), [history])
+  const weakCandidateCount = useMemo(
+    () => buildWeakBlocks(history, examHistory, subject, ccaa).length,
+    [history, examHistory, subject, ccaa]
+  )
 
   useEffect(() => {
     setMode('normal')
@@ -60,13 +79,22 @@ export default function SimulacrosPage() {
 
   async function loadHistory(uid = userId) {
     if (!uid) return
-    const { data } = await supabase
-      .from('historial_simulacros')
-      .select('*')
-      .eq('user_id', uid)
-      .order('created_at', { ascending: false })
-      .limit(100)
-    setHistory((data ?? []) as SimulacroRecord[])
+    const [simulacrosResult, examenesResult] = await Promise.all([
+      supabase
+        .from('historial_simulacros')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase
+        .from('historial_examenes')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+        .limit(120)
+    ])
+    setHistory((simulacrosResult.data ?? []) as SimulacroRecord[])
+    setExamHistory((examenesResult.data ?? []) as ExamHistoryRow[])
   }
 
   async function createSimulacro() {
@@ -91,31 +119,46 @@ export default function SimulacrosPage() {
       }
       setUserId(currentUserId)
 
-      const effectiveYearChoice = mode === 'normal' ? 'all' : yearChoice
+      const effectiveYearChoice = mode === 'personalizado' ? yearChoice : 'all'
       const yearSelection = yearChoiceToSelection(effectiveYearChoice)
-      const optionSelection: OptionChoice = mode === 'normal' || subject === 'lengua' ? 'mixed' : optionChoice
+      const optionSelection = effectiveOptionChoice(mode, subject, optionChoice)
       const technicalDifficulty = technicalDifficultyForYearChoice(effectiveYearChoice)
       const generatorOption: SimulacroOption = optionSelection === 'B' ? 'B' : 'A'
       const generated = generateSimulacro(subject, technicalDifficulty, generatorOption, ccaa, {
         yearSelection,
         optionSelection,
       })
-      if (!generated) {
+
+      const weakBlocks = mode === 'errores'
+        ? buildWeakBlocks(history, examHistory, subject, ccaa)
+        : []
+      if (mode === 'errores' && weakBlocks.length === 0) {
+        setErrorMessage('Para crear un simulacro con tus peores notas necesito al menos una corrección previa de esta asignatura.')
+        setLoading(false)
+        return
+      }
+
+      const finalBlocks = mode === 'errores'
+        ? mergeBlocksForExam(weakBlocks, generated?.blocks ?? [], ccaa)
+        : generated?.blocks ?? []
+
+      if (!generated && finalBlocks.length === 0) {
         setErrorMessage('No hay suficientes ejercicios disponibles para crear este simulacro.')
         setLoading(false)
         return
       }
-      const storedOption = generated.blocks.find(block => block.option === 'A' || block.option === 'B')?.option ?? generatorOption
+      const generatedId = generated?.id ?? crypto.randomUUID()
+      const storedOption = finalBlocks.find(block => block.option === 'A' || block.option === 'B')?.option ?? generatorOption
       const configLabel = buildConfigLabel(mode, effectiveYearChoice, optionSelection)
       const now = new Date().toISOString()
       const row = {
-        id: generated.id,
+        id: generatedId,
         user_id: currentUserId,
         asignatura: subject,
         opcion: storedOption,
         dificultad: technicalDifficulty,
         dificultad_real: configLabel,
-        bloques: generated.blocks,
+        bloques: finalBlocks,
         respuestas_parciales: {},
         estado: 'en_progreso',
         created_at: now,
@@ -128,7 +171,7 @@ export default function SimulacrosPage() {
         setLoading(false)
         return
       }
-      router.push(`/simulacros/${generated.id}`)
+      router.push(`/simulacros/${generatedId}`)
     } catch (error) {
       console.error('SIMULACRO_CREATE_ERROR', error)
       setErrorMessage('No se pudo crear el simulacro ahora mismo. Inténtalo de nuevo en unos segundos.')
@@ -137,6 +180,8 @@ export default function SimulacrosPage() {
   }
 
   const cfg = SUBJECTS[subject]
+  const autoInfo = autoModeInfo(mode, weakCandidateCount)
+  const AutoInfoIcon = mode === 'errores' ? TrendingDown : mode === 'tipicos' ? Target : Shuffle
 
   return (
     <SimulacroShell
@@ -325,7 +370,7 @@ export default function SimulacrosPage() {
           <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
             Paso 2 · Tipo de simulacro
           </p>
-          <div className="pau-stagger grid grid-cols-2 gap-4 max-md:grid-cols-1">
+          <div className="pau-stagger grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
             <button
               onClick={() => setMode('normal')}
               className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
@@ -353,6 +398,66 @@ export default function SimulacrosPage() {
               <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Simulacro normal</h3>
               <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
                 Puede salir cualquier año oficial disponible y cualquier opción A/B. Ideal para practicar como examen real.
+              </p>
+            </button>
+
+            <button
+              onClick={() => setMode('errores')}
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
+              style={{
+                borderColor: mode === 'errores' ? cfg.color : 'rgba(219,231,251,0.82)',
+                background: mode === 'errores'
+                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
+                  : 'rgba(255,255,255,0.84)',
+                boxShadow: mode === 'errores'
+                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
+                  : '0 2px 8px rgba(37,99,235,0.04)',
+              }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <span
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
+                  style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
+                >
+                  <TrendingDown size={22} />
+                </span>
+                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: weakCandidateCount > 0 ? '#f0fdf4' : '#fffbeb', color: weakCandidateCount > 0 ? '#15803d' : '#b45309', border: `1px solid ${weakCandidateCount > 0 ? '#bbf7d0' : '#fde68a'}` }}>
+                  {weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'}
+                </span>
+              </div>
+              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Peores notas</h3>
+              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
+                Crea un examen con ejercicios y bloques donde peor has rendido para remontar puntos concretos.
+              </p>
+            </button>
+
+            <button
+              onClick={() => setMode('tipicos')}
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
+              style={{
+                borderColor: mode === 'tipicos' ? cfg.color : 'rgba(219,231,251,0.82)',
+                background: mode === 'tipicos'
+                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
+                  : 'rgba(255,255,255,0.84)',
+                boxShadow: mode === 'tipicos'
+                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
+                  : '0 2px 8px rgba(37,99,235,0.04)',
+              }}
+            >
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <span
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
+                  style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
+                >
+                  <Target size={22} />
+                </span>
+                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}24` }}>
+                  Recurrente
+                </span>
+              </div>
+              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Típicos PAU</h3>
+              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
+                Prioriza patrones habituales de examen: bloques clave, años mezclados y estructura equilibrada.
               </p>
             </button>
 
@@ -460,12 +565,12 @@ export default function SimulacrosPage() {
           <section className="pau-reveal pau-reveal-delay-3">
             <div className="flex flex-wrap items-center gap-3 rounded-[24px] border p-5" style={{ background: `${cfg.color}0d`, borderColor: `${cfg.color}22` }}>
               <span className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: '#fff', color: cfg.color, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
-                <Shuffle size={18} />
+                <AutoInfoIcon size={18} />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-black" style={{ color: '#0f172a' }}>Configuración automática</p>
+                <p className="text-sm font-black" style={{ color: '#0f172a' }}>{autoInfo.title}</p>
                 <p className="text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
-                  Cualquier año oficial disponible, opciones A/B mezcladas cuando existan y bloques elegidos para parecerse a una PAU real.
+                  {autoInfo.description}
                 </p>
               </div>
             </div>
@@ -478,7 +583,7 @@ export default function SimulacrosPage() {
             <div>
               <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>Listo para crear</p>
               <p className="mt-1 text-base font-black" style={{ color: '#0f172a' }}>
-                {cfg.label} · {buildConfigLabel(mode, mode === 'normal' ? 'all' : yearChoice, mode === 'normal' || subject === 'lengua' ? 'mixed' : optionChoice)}
+                {cfg.label} · {buildConfigLabel(mode, mode === 'personalizado' ? yearChoice : 'all', effectiveOptionChoice(mode, subject, optionChoice))}
               </p>
             </div>
             <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>
@@ -500,9 +605,7 @@ export default function SimulacrosPage() {
             : !SUBJECTS[subject].available
             ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
             : userId
-            ? mode === 'normal'
-              ? `Empezar simulacro normal de ${cfg.short}`
-              : `Crear simulacro personalizado de ${cfg.short}`
+            ? ctaLabel(mode, cfg.short)
             : 'Cargando sesión...'}
         </button>
       </div>
@@ -565,7 +668,42 @@ function technicalDifficultyForYearChoice(choice: YearChoice): SimulacroDifficul
 
 function buildConfigLabel(mode: SimulacroMode, yearChoice: YearChoice, optionChoice: OptionChoice) {
   if (mode === 'normal') return 'Normal · cualquier año · opciones mixtas'
+  if (mode === 'errores') return 'Peores notas · ejercicios a remontar'
+  if (mode === 'tipicos') return 'Típicos PAU · temas recurrentes'
   return `Personalizado · ${yearChoiceLabel(yearChoice)} · ${optionChoiceLabel(optionChoice)}`
+}
+
+function effectiveOptionChoice(mode: SimulacroMode, subject: SimulacroSubject, optionChoice: OptionChoice): OptionChoice {
+  if (mode !== 'personalizado' || subject === 'lengua') return 'mixed'
+  return optionChoice
+}
+
+function autoModeInfo(mode: SimulacroMode, weakCandidateCount: number) {
+  if (mode === 'errores') {
+    return {
+      title: weakCandidateCount > 0 ? 'Repaso dirigido por tus notas' : 'Necesita correcciones previas',
+      description: weakCandidateCount > 0
+        ? `Pausia usará primero ${weakCandidateCount} ejercicio${weakCandidateCount === 1 ? '' : 's'} donde tu porcentaje fue más bajo y completará el examen si hace falta.`
+        : 'Completa alguna corrección o simulacro de esta asignatura para que Pausia pueda detectar tus puntos débiles.'
+    }
+  }
+  if (mode === 'tipicos') {
+    return {
+      title: 'Patrones habituales de PAU',
+      description: 'Monta un examen con bloques recurrentes de la asignatura, años oficiales mezclados y opciones A/B cuando existan.'
+    }
+  }
+  return {
+    title: 'Configuración automática',
+    description: 'Cualquier año oficial disponible, opciones A/B mezcladas cuando existan y bloques elegidos para parecerse a una PAU real.'
+  }
+}
+
+function ctaLabel(mode: SimulacroMode, subjectShort: string) {
+  if (mode === 'errores') return `Crear simulacro de errores de ${subjectShort}`
+  if (mode === 'tipicos') return `Crear simulacro típico de ${subjectShort}`
+  if (mode === 'personalizado') return `Crear simulacro personalizado de ${subjectShort}`
+  return `Empezar simulacro normal de ${subjectShort}`
 }
 
 function yearChoiceLabel(choice: YearChoice) {
@@ -583,4 +721,106 @@ function optionSummaryForRecord(record: SimulacroRecord) {
   if (options.length > 1) return 'Opciones A/B'
   if (options[0]) return `Opción ${options[0]}`
   return `Opción ${record.opcion}`
+}
+
+function buildWeakBlocks(
+  history: SimulacroRecord[],
+  examHistory: ExamHistoryRow[],
+  subject: SimulacroSubject,
+  ccaa: string
+) {
+  const scored = [
+    ...weakBlocksFromSimulacros(history, subject, ccaa),
+    ...weakBlocksFromCorrections(examHistory, subject, ccaa)
+  ].sort((a, b) => a.score - b.score)
+
+  const used = new Set<string>()
+  const blocks: SimulacroBlock[] = []
+  for (const item of scored) {
+    const key = blockIdentity(item.block)
+    if (used.has(key)) continue
+    used.add(key)
+    blocks.push(item.block)
+    if (blocks.length === 4) break
+  }
+  return blocks
+}
+
+function weakBlocksFromSimulacros(history: SimulacroRecord[], subject: SimulacroSubject, ccaa: string) {
+  return history
+    .filter(record => record.estado === 'completado' && record.asignatura === subject && recordMatchesCommunity(record, ccaa))
+    .flatMap(record => {
+      const details = Array.isArray(record.resultado_json?.desglose_bloques) ? record.resultado_json.desglose_bloques : []
+      return (record.bloques ?? []).map((block, index) => ({
+        block: { ...block, numero: 0, comunidad: block.comunidad ?? record.comunidad ?? ccaa },
+        score: scorePercent(details[index], block, record.nota_final)
+      }))
+    })
+    .filter(item => Number.isFinite(item.score))
+}
+
+function weakBlocksFromCorrections(rows: ExamHistoryRow[], subject: SimulacroSubject, ccaa: string) {
+  return rows
+    .filter(row => rowMatchesSubject(row, subject))
+    .map(row => {
+      const max = Number(row.nota_maxima ?? 2.5)
+      const score = Number(row.nota)
+      const percent = Number.isFinite(score) && Number.isFinite(max) && max > 0 ? (score / max) * 100 : 100
+      return {
+        score: percent,
+        block: {
+          id: `historial-${row.id}`,
+          numero: 0,
+          tema: row.bloque || row.tipo || SUBJECTS[subject].label,
+          year: Number(row.año ?? new Date().getFullYear()),
+          convocatoria: row.tipo || 'Corrección previa',
+          option: row.opcion === 'B' ? 'B' as SimulacroOption : 'A' as SimulacroOption,
+          puntuacion: Number.isFinite(max) && max > 0 ? max : 2.5,
+          enunciado: row.enunciado || 'Ejercicio recuperado de tu historial de correcciones.',
+          criterios: undefined,
+          comunidad: ccaa
+        }
+      }
+    })
+    .filter(item => Number.isFinite(item.score))
+}
+
+function mergeBlocksForExam(primary: SimulacroBlock[], fallback: SimulacroBlock[], ccaa: string) {
+  const used = new Set<string>()
+  const selected: SimulacroBlock[] = []
+  for (const block of [...primary, ...fallback]) {
+    const key = blockIdentity(block)
+    if (used.has(key)) continue
+    used.add(key)
+    selected.push({ ...block, numero: selected.length + 1, comunidad: block.comunidad ?? ccaa })
+    if (selected.length === 4) break
+  }
+  return selected
+}
+
+function scorePercent(detail: any, block: SimulacroBlock, fallbackScore?: number | null) {
+  const directPercent = Number(detail?.porcentaje_logrado ?? detail?.porcentaje)
+  if (Number.isFinite(directPercent)) return directPercent
+  const max = Number(detail?.puntos_maximos ?? block.puntuacion)
+  const score = Number(detail?.puntos_conseguidos ?? detail?.nota)
+  if (Number.isFinite(score) && Number.isFinite(max) && max > 0) return (score / max) * 100
+  const fallback = Number(fallbackScore)
+  return Number.isFinite(fallback) ? fallback * 10 : 100
+}
+
+function rowMatchesSubject(row: ExamHistoryRow, subject: SimulacroSubject) {
+  const value = String(row.asignatura ?? '').toLowerCase()
+  if (subject === 'mates') return value === 'mates' || value === 'matematicas' || value === 'matemáticas'
+  return value === subject
+}
+
+function recordMatchesCommunity(record: SimulacroRecord, ccaa: string) {
+  const community = record.comunidad ?? record.bloques?.[0]?.comunidad
+  return !community || community === ccaa
+}
+
+function blockIdentity(block: SimulacroBlock) {
+  const statement = (block.enunciado || '').replace(/\s+/g, ' ').trim().slice(0, 160)
+  if (statement) return `${block.year || ''}:${statement}`
+  return `${block.id || ''}:${block.year || ''}:${block.tema || ''}`
 }

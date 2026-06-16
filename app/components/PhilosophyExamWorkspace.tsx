@@ -11,7 +11,7 @@ import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
-import FormatToolbar from '@/components/shared/FormatToolbar'
+import RichTextArea from '@/components/shared/RichTextArea'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 type Comunidad = 'Madrid' | 'Cataluña'
@@ -50,7 +50,6 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
-  const answerRef = useRef<HTMLTextAreaElement>(null)
 
   const exams = useMemo(() => (
     ccaa === 'Madrid'
@@ -338,10 +337,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
             <ModeButton active={mode === 'image'} onClick={() => setMode('image')} icon={<Camera size={15} />} label="Subir foto" />
           </div>
           {mode === 'text' ? (
-            <div>
-              <FormatToolbar textareaRef={answerRef} value={answer} onChange={setAnswer} accentColor={UI.color} softColor={UI.light} />
-              <textarea ref={answerRef} value={answer} onChange={event => setAnswer(event.target.value)} placeholder="Redacta aquí tu respuesta..." className="h-52 w-full resize-y border bg-slate-50 p-4 text-sm leading-7 outline-none focus:bg-white" style={{ borderColor: UI.border, borderTop: 'none', borderRadius: '0 0 16px 16px' }} />
-            </div>
+            <RichTextArea value={answer} onChange={setAnswer} placeholder="Redacta aquí tu respuesta..." minHeight={208} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} />
           ) : (
             <div>
               <input ref={fileRef} type="file" accept="image/*" onChange={chooseImage} className="hidden" />

@@ -9,7 +9,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
-import FormatToolbar from '@/components/shared/FormatToolbar'
+import RichTextArea from '@/components/shared/RichTextArea'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
@@ -31,7 +31,6 @@ function formatPts(value?: number) {
 export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: ExamenFisicaCataluna; ejercicio: EjercicioFisicaCataluna }) {
   const [opcionIdx, setOpcionIdx] = useState(0)
   const [respuesta, setRespuesta] = useState('')
-  const respuestaRef = useRef<HTMLTextAreaElement>(null)
   const [imagenes, setImagenes] = useState<UploadedImage[]>([])
   const [correccion, setCorreccion] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -252,10 +251,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
             ))}
           </div>
           {modo === 'texto' ? (
-            <div>
-              <FormatToolbar textareaRef={respuestaRef} value={respuesta} onChange={setRespuesta} accentColor={UI.color} softColor={UI.light} />
-              <textarea ref={respuestaRef} value={respuesta} onChange={event => setRespuesta(event.target.value)} className="h-[220px] w-full resize-y border bg-slate-50 p-4 text-sm leading-7 outline-none transition focus:bg-white" style={{ borderColor: UI.border, borderTop: 'none', borderRadius: '0 0 16px 16px' }} placeholder="Escribe tu resolución paso a paso..." />
-            </div>
+            <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe tu resolución paso a paso..." minHeight={220} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} />
           ) : (
             <div>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-5 py-4 text-sm font-black" style={{ borderColor: UI.accent, backgroundColor: UI.light, color: UI.color }}>

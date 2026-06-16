@@ -29,7 +29,7 @@ import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import WhyExplanation from '@/components/shared/WhyExplanation'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 import PausiaBrand from '@/components/shared/PausiaBrand'
-import FormatToolbar from '@/components/shared/FormatToolbar'
+import RichTextArea from '@/components/shared/RichTextArea'
 import {
   ArrowUpRight,
   Atom,
@@ -598,7 +598,6 @@ export default function Home() {
   const [contextoChat, setContextoChat] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const respuestaRef = useRef<HTMLTextAreaElement>(null)
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
@@ -3242,10 +3241,15 @@ function cambiarTipo(t: Tipo) {
                 ))}
               </div>
               {modo === 'texto' ? (
-                <div>
-                  <FormatToolbar textareaRef={respuestaRef} value={respuesta} onChange={setRespuesta} accentColor={cfg.color} softColor={cfg.light} />
-                  <textarea ref={respuestaRef} value={respuesta} onChange={e => setRespuesta(e.target.value)} placeholder="Empieza a resolver el problema aquí..." onFocus={e => { e.currentTarget.style.borderColor = cfg.accent; e.currentTarget.style.boxShadow = '0 0 0 3px ' + cfg.accent + '22' }} onBlur={e => { e.currentTarget.style.borderColor = cfg.soft; e.currentTarget.style.boxShadow = 'none' }} style={{ width: '100%', height: asignatura === 'historia' || asignatura === 'lengua' ? '280px' : '180px', borderRadius: '0 0 16px 16px', padding: '14px', fontSize: '14px', lineHeight: '1.7', border: '1.5px solid ' + cfg.soft, borderTop: 'none', background: '#fafafa', color: '#1f2937', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color 150ms ease, box-shadow 150ms ease' }} />
-                </div>
+                <RichTextArea
+                  value={respuesta}
+                  onChange={setRespuesta}
+                  placeholder="Empieza a resolver el problema aquí..."
+                  minHeight={asignatura === 'historia' || asignatura === 'lengua' ? 280 : 180}
+                  accentColor={cfg.color}
+                  softColor={cfg.light}
+                  borderColor={cfg.soft}
+                />
               ) : (
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />

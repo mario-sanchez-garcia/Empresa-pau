@@ -9,7 +9,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
-import FormatToolbar from '@/components/shared/FormatToolbar'
+import RichTextArea from '@/components/shared/RichTextArea'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
@@ -33,7 +33,6 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const fileRef = useRef<HTMLInputElement>(null)
-  const respuestaRef = useRef<HTMLTextAreaElement>(null)
 
   function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -188,17 +187,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         </div>
 
         {modo === 'texto' ? (
-          <div>
-            <FormatToolbar textareaRef={respuestaRef} value={respuesta} onChange={setRespuesta} accentColor={CAT_UI.color} softColor={CAT_UI.light} />
-            <textarea
-              ref={respuestaRef}
-              value={respuesta}
-              onChange={event => setRespuesta(event.target.value)}
-              placeholder="Escribe tu resolución paso a paso..."
-              className="h-[180px] w-full resize-y border bg-slate-50 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:bg-white"
-              style={{ borderColor: CAT_UI.border, borderTop: 'none', borderRadius: '0 0 16px 16px' }}
-            />
-          </div>
+          <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe tu resolución paso a paso..." minHeight={180} accentColor={CAT_UI.color} softColor={CAT_UI.light} borderColor={CAT_UI.border} />
         ) : (
           <div>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} className="hidden" />

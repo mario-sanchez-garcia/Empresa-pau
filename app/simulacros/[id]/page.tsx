@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { AlertTriangle, Camera, CheckCircle2, Send, Trash2 } from 'lucide-react'
+import { AlertTriangle, BookOpenCheck, Camera, CheckCircle2, ClipboardList, Flag, PenLine, PlayCircle, Send, TimerReset, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -11,7 +11,8 @@ import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages
 import ExamStatement from '@/components/shared/ExamStatement'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
-const TOTAL_SECONDS = 90 * 60
+const DEFAULT_DURATION_MINUTES = 90
+const TOTAL_SECONDS = DEFAULT_DURATION_MINUTES * 60
 const RING_RADIUS = 48
 const RING_CIRC = 2 * Math.PI * RING_RADIUS
 
@@ -22,9 +23,12 @@ export default function SimulacroActivoPage() {
   const [answers, setAnswers] = useState<Record<string, SimulacroAnswer>>({})
   const [active, setActive] = useState(0)
   const [mode, setMode] = useState<Record<string, 'text' | 'image'>>({})
+  const [examStarted, setExamStarted] = useState(false)
+  const [startedAtMs, setStartedAtMs] = useState<number | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [timeUp, setTimeUp] = useState(false)
+  const [reviewMarked, setReviewMarked] = useState<Record<string, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'dirty'>('saved')
@@ -48,25 +52,40 @@ export default function SimulacroActivoPage() {
       if (!row) router.push('/simulacros')
       else {
         const next = row as SimulacroRecord
-        if (next.estado === 'completado') router.push(`/simulacros/${params.id}/results`)
+        if (next.estado === 'completado') {
+          router.push(`/simulacros/${params.id}/results`)
+          return
+        }
         const storedAnswers = next.respuestas_parciales ?? {}
+        const storedReview = readReviewState(next.id)
+        const storedStart = readStartedAt(next.id)
+        const hasAnswers = Object.values(storedAnswers).some(answer => Boolean(answer?.text?.trim() || answer?.image))
+        const fallbackStart = hasAnswers ? new Date(next.started_at ?? next.created_at ?? Date.now()).getTime() : null
+        const effectiveStart = storedStart ?? fallbackStart
+        const durationSeconds = getDurationSeconds(next)
         answersRef.current = storedAnswers
         savedSnapshotRef.current = JSON.stringify(storedAnswers)
         setAnswers(storedAnswers)
+        setReviewMarked(storedReview)
         setRecord(next)
-        const startedAt = new Date(next.started_at ?? next.created_at ?? Date.now()).getTime()
-        const durationSeconds = Number(next.duration_minutes ?? 90) * 60
-        setSecondsLeft(Math.max(0, durationSeconds - Math.floor((Date.now() - startedAt) / 1000)))
+        if (effectiveStart) {
+          setStartedAtMs(effectiveStart)
+          setExamStarted(true)
+          setSecondsLeft(Math.max(0, durationSeconds - Math.floor((Date.now() - effectiveStart) / 1000)))
+        } else {
+          setStartedAtMs(null)
+          setExamStarted(false)
+          setSecondsLeft(durationSeconds)
+        }
       }
     })
   }, [params.id, router])
 
   useEffect(() => {
-    if (!record || submitting) return
-    const startedAt = new Date(record.started_at ?? record.created_at ?? Date.now()).getTime()
-    const durationSeconds = Number(record.duration_minutes ?? 90) * 60
+    if (!record || submitting || !examStarted || !startedAtMs) return
+    const durationSeconds = getDurationSeconds(record)
     const timer = window.setInterval(() => {
-      const next = Math.max(0, durationSeconds - Math.floor((Date.now() - startedAt) / 1000))
+      const next = Math.max(0, durationSeconds - Math.floor((Date.now() - startedAtMs) / 1000))
       setSecondsLeft(next)
       if (next === 0) {
         window.clearInterval(timer)
@@ -74,7 +93,7 @@ export default function SimulacroActivoPage() {
       }
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [record, submitting])
+  }, [record, submitting, examStarted, startedAtMs])
 
   useEffect(() => {
     answersRef.current = answers
@@ -96,9 +115,12 @@ export default function SimulacroActivoPage() {
   }, [])
 
   const answeredCount = useMemo(() => Object.values(answers).filter(answer => answer?.text?.trim() || answer?.image).length, [answers])
-  const elapsedMinutes = Math.ceil((TOTAL_SECONDS - secondsLeft) / 60)
+  const markedCount = useMemo(() => Object.values(reviewMarked).filter(Boolean).length, [reviewMarked])
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
-  const percentLeft = secondsLeft / TOTAL_SECONDS
+  const durationSeconds = record ? getDurationSeconds(record) : TOTAL_SECONDS
+  const durationMinutes = Math.round(durationSeconds / 60)
+  const elapsedMinutes = Math.max(0, Math.ceil((durationSeconds - secondsLeft) / 60))
+  const percentLeft = Math.max(0, Math.min(1, secondsLeft / durationSeconds))
   const isUrgent = secondsLeft <= 15 * 60
   const isWarning = secondsLeft <= 45 * 60 && secondsLeft > 15 * 60
   const timerColor = isUrgent ? '#ef4444' : isWarning ? '#f59e0b' : '#2563eb'
@@ -121,6 +143,26 @@ export default function SimulacroActivoPage() {
   async function changeActive(index: number) {
     if (dirtyRef.current) await autosave(answersRef.current)
     setActive(index)
+  }
+
+  function startExam() {
+    if (!record) return
+    const nextStartedAt = Date.now()
+    writeStartedAt(record.id, nextStartedAt)
+    setStartedAtMs(nextStartedAt)
+    setSecondsLeft(getDurationSeconds(record))
+    setExamStarted(true)
+    setTimeUp(false)
+  }
+
+  function toggleReview(blockId: string) {
+    if (!record) return
+    setReviewMarked(prev => {
+      const next = { ...prev, [blockId]: !prev[blockId] }
+      if (!next[blockId]) delete next[blockId]
+      writeReviewState(record.id, next)
+      return next
+    })
   }
 
   async function handleImage(blockId: string, file?: File) {
@@ -224,10 +266,85 @@ export default function SimulacroActivoPage() {
     )
   }
 
+  if (!examStarted) {
+    const community = record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'
+    const totalPoints = record.bloques.reduce((sum, block) => sum + Number(block.puntuacion || 0), 0)
+    const Icon = cfg.icon
+
+    return (
+      <SimulacroShell title="Simulacro PAU" subtitle="Antes de empezar">
+        <div className="mx-auto grid max-w-6xl gap-6">
+          <section
+            className="pau-reveal overflow-hidden rounded-[28px] border p-8 max-md:p-5"
+            style={{
+              background: `radial-gradient(circle at 84% 8%, ${cfg.color}18, transparent 34%), linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`,
+              borderColor: `${cfg.color}24`,
+              boxShadow: `0 24px 70px ${cfg.color}14, 0 4px 18px rgba(15,23,42,0.06)`,
+            }}
+          >
+            <div className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+              <div>
+                <div
+                  className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl text-white"
+                  style={{ background: `linear-gradient(135deg, ${cfg.color}, #60a5fa)`, boxShadow: `0 16px 34px ${cfg.color}2e` }}
+                >
+                  <Icon size={27} />
+                </div>
+                <p className="mb-3 text-[11px] font-black uppercase tracking-widest" style={{ color: cfg.color }}>Experiencia de examen real</p>
+                <h2 className="text-5xl font-black tracking-tight max-md:text-4xl" style={{ color: '#0f172a', letterSpacing: '-0.055em', lineHeight: 0.98 }}>
+                  Simulacro PAU
+                </h2>
+                <p className="mt-5 max-w-xl text-base font-semibold leading-8" style={{ color: '#64748b' }}>
+                  Trabaja en condiciones de examen. Durante el simulacro verás el tiempo, podrás navegar entre ejercicios y marcar dudas para revisarlas antes de entregar.
+                </p>
+                <div className="mt-6 rounded-2xl border p-4 text-sm font-bold" style={{ background: 'rgba(255,255,255,0.76)', borderColor: '#dbe7fb', color: '#334155' }}>
+                  La corrección se mostrará al entregar.
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <StartStat icon={<BookOpenCheck size={18} />} label="Asignatura" value={cfg.label} color={cfg.color} />
+                  <StartStat icon={<ClipboardList size={18} />} label="Comunidad" value={community} color={cfg.color} />
+                  <StartStat icon={<TimerReset size={18} />} label="Duración" value={`${durationMinutes} min`} color={cfg.color} />
+                  <StartStat icon={<PenLine size={18} />} label="Ejercicios" value={`${record.bloques.length} ejercicios`} color={cfg.color} />
+                </div>
+
+                <div className="rounded-3xl border bg-white/78 p-5 shadow-[0_18px_46px_rgba(37,99,235,0.08)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    <Badge color={cfg.color}>{record.dificultad_real ?? record.dificultad}</Badge>
+                    {record.asignatura !== 'lengua' && <Badge color="#475569">Opción {record.opcion}</Badge>}
+                    <Badge color="#2563eb">{totalPoints ? `${formatCompact(totalPoints)} pts` : 'Criterios oficiales'}</Badge>
+                  </div>
+                  <div className="grid gap-2">
+                    {record.bloques.map((block, index) => (
+                      <div key={block.id} className="flex items-center justify-between gap-3 rounded-2xl border px-4 py-3" style={{ borderColor: '#e2e8f0', background: '#f8fbff' }}>
+                        <span className="text-sm font-black" style={{ color: '#0f172a' }}>Ejercicio {index + 1}</span>
+                        <span className="truncate text-right text-xs font-bold" style={{ color: '#64748b' }}>{block.tema} · {block.puntuacion} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={startExam}
+                  className="campus-primary"
+                  style={{ width: '100%', borderRadius: 18, padding: '16px 24px', fontSize: 16, gap: 10, background: `linear-gradient(135deg, ${cfg.color}, #60a5fa)`, boxShadow: `0 18px 38px ${cfg.color}2f` }}
+                >
+                  <PlayCircle size={20} />Empezar simulacro
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </SimulacroShell>
+    )
+  }
+
   return (
     <SimulacroShell
-      title="Examen activo"
-      subtitle={`${cfg.label} · ${record.dificultad_real ?? record.dificultad} · ${record.bloques.length} bloques`}
+      title="Simulacro PAU"
+      subtitle={`${cfg.label} · ${record.dificultad_real ?? record.dificultad} · ${record.bloques.length} ejercicios`}
       actions={
         <button
           onClick={() => { setSubmitError(''); setConfirmOpen(true) }}
@@ -235,22 +352,36 @@ export default function SimulacroActivoPage() {
           className="campus-primary"
           style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12 }}
         >
-          <Send size={14} />Entregar examen
+          <Send size={14} />Entregar simulacro
         </button>
       }
     >
       <div className="mx-auto grid max-w-6xl gap-5">
 
         {/* Exam header: metadata + ring timer */}
-        <section className="pau-card-section pau-reveal">
+        <section
+          className="pau-card-section pau-reveal sticky z-30"
+          style={{
+            top: 76,
+            background: 'rgba(255,255,255,0.86)',
+            borderColor: 'rgba(219,231,251,0.92)',
+            backdropFilter: 'blur(22px) saturate(1.12)',
+            WebkitBackdropFilter: 'blur(22px) saturate(1.12)',
+          }}
+        >
           <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Left: chips */}
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Badge color={cfg.color}>{cfg.label}</Badge>
-              <Badge color="#475569">{record.id.slice(0, 8)}</Badge>
+              <Badge color="#475569">{record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'}</Badge>
               <Badge color="#2563eb">{record.dificultad_real ?? record.dificultad}</Badge>
               {record.asignatura !== 'lengua' && <Badge color={cfg.color}>Opción {record.opcion}</Badge>}
               <SaveBadge status={saveStatus} />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-black" style={{ color: '#64748b' }}>
+              <span>{answeredCount}/{record.bloques.length} respondidos</span>
+              <span style={{ color: '#cbd5e1' }}>·</span>
+              <span>{markedCount} para revisar</span>
             </div>
 
             {/* Right: circular ring timer */}
@@ -287,7 +418,7 @@ export default function SimulacroActivoPage() {
                   {formatTime(secondsLeft)}
                 </span>
                 <span className="mt-0.5 text-[10px] font-bold" style={{ color: '#94a3b8' }}>
-                  {isUrgent ? '¡Rápido!' : isWarning ? 'Atención' : 'restantes'}
+                  {isUrgent ? 'último tramo' : isWarning ? 'atención' : 'restantes'}
                 </span>
               </div>
             </div>
@@ -309,6 +440,7 @@ export default function SimulacroActivoPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             {record.bloques.map((block, index) => {
               const answered = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)
+              const marked = Boolean(reviewMarked[block.id])
               const isActive = active === index
               return (
                 <button
@@ -318,21 +450,32 @@ export default function SimulacroActivoPage() {
                   style={{
                     background: isActive
                       ? cfg.color
+                      : marked
+                      ? '#fffbeb'
                       : answered
                       ? `${cfg.color}14`
                       : '#f1f5f9',
                     color: isActive
                       ? '#fff'
+                      : marked
+                      ? '#b45309'
                       : answered
                       ? cfg.color
                       : '#94a3b8',
-                    border: `1.5px solid ${isActive ? cfg.color : answered ? `${cfg.color}33` : '#e2e8f0'}`,
-                    boxShadow: isActive ? `0 6px 18px ${cfg.color}30` : 'none',
+                    border: `1.5px solid ${isActive ? cfg.color : marked ? '#fde68a' : answered ? `${cfg.color}33` : '#e2e8f0'}`,
+                    boxShadow: isActive ? `0 6px 18px ${cfg.color}30` : marked ? '0 8px 18px rgba(245,158,11,0.12)' : 'none',
                     transform: isActive ? 'translateY(-1px)' : 'none',
                     transition: 'all 180ms var(--ease-out)',
                   }}
                 >
                   {index + 1}
+                  {marked && (
+                    <Flag
+                      size={10}
+                      className="absolute -right-1 -top-1"
+                      style={{ color: isActive ? '#fff' : '#d97706', fill: isActive ? '#fff' : '#fbbf24' }}
+                    />
+                  )}
                   {answered && !isActive && (
                     <span
                       className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full"
@@ -342,6 +485,11 @@ export default function SimulacroActivoPage() {
                 </button>
               )
             })}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-black" style={{ color: '#64748b' }}>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border" style={{ borderColor: '#cbd5e1' }} />Sin responder</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 size={13} style={{ color: cfg.color }} />Respondido</span>
+            <span className="inline-flex items-center gap-1.5"><Flag size={13} style={{ color: '#d97706', fill: '#fbbf24' }} />Marcado para revisar</span>
           </div>
         </section>
 
@@ -461,13 +609,29 @@ export default function SimulacroActivoPage() {
                     </button>
                   ))}
                 </div>
-                <span className="text-xs font-semibold" style={{ color: '#94a3b8' }}>
-                  {answers[block.id]?.text?.trim()
-                    ? `${answers[block.id].text.length} caracteres`
-                    : answers[block.id]?.image
-                    ? 'Imagen adjunta'
-                    : 'Sin respuesta aún'}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => toggleReview(block.id)}
+                    className="pau-button-secondary"
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 12,
+                      color: reviewMarked[block.id] ? '#b45309' : '#64748b',
+                      background: reviewMarked[block.id] ? '#fffbeb' : '#fff',
+                      borderColor: reviewMarked[block.id] ? '#fde68a' : '#dbe7fb',
+                    }}
+                  >
+                    <Flag size={14} style={{ fill: reviewMarked[block.id] ? '#fbbf24' : 'transparent' }} />
+                    {reviewMarked[block.id] ? 'Marcado para revisar' : 'Marcar para revisar'}
+                  </button>
+                  <span className="text-xs font-semibold" style={{ color: '#94a3b8' }}>
+                    {answers[block.id]?.text?.trim()
+                      ? `${answers[block.id].text.length} caracteres`
+                      : answers[block.id]?.image
+                      ? 'Imagen adjunta'
+                      : 'Sin respuesta aún'}
+                  </span>
+                </div>
               </div>
 
               {mode[block.id] === 'image' ? (
@@ -536,7 +700,7 @@ export default function SimulacroActivoPage() {
       {(confirmOpen || timeUp) && (
         <div
           className="fixed inset-0 flex items-center justify-center p-4"
-          style={{ zIndex: 'var(--z-modal-bg)' as any, background: 'rgba(15,23,42,0.52)', backdropFilter: 'blur(6px)' }}
+          style={{ zIndex: 'var(--z-modal-bg)', background: 'rgba(15,23,42,0.52)', backdropFilter: 'blur(6px)' }}
         >
           <div
             className="pau-reveal-scale w-full max-w-md"
@@ -546,7 +710,7 @@ export default function SimulacroActivoPage() {
               border: '1px solid var(--pau-border)',
               boxShadow: 'var(--shadow-xl)',
               padding: 28,
-              zIndex: 'var(--z-modal)' as any,
+              zIndex: 'var(--z-modal)',
             }}
           >
             <div className="mb-3 flex items-center gap-3">
@@ -554,11 +718,14 @@ export default function SimulacroActivoPage() {
                 ? <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
                 : <CheckCircle2 size={22} style={{ color: cfg.color }} />}
               <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
-                {timeUp ? 'Tiempo agotado' : 'Entregar examen'}
+                {timeUp ? 'Tiempo agotado' : '¿Quieres entregar el simulacro?'}
               </h2>
             </div>
 
             <p className="text-sm font-semibold" style={{ color: '#475569' }}>
+              La corrección se mostrará al entregar. Después podrás revisar la nota estimada y el desglose por ejercicios.
+            </p>
+            <p className="mt-3 text-sm font-semibold" style={{ color: '#475569' }}>
               Has respondido{' '}
               <strong style={{ color: '#0f172a' }}>{answeredCount}</strong> de{' '}
               <strong style={{ color: '#0f172a' }}>{record.bloques.length}</strong> bloques.
@@ -587,29 +754,39 @@ export default function SimulacroActivoPage() {
             {submitError && <div className="pau-info mt-4" role="alert">{submitError}</div>}
 
             <div className="mt-6 flex justify-end gap-3">
-              {!timeUp && (
-                <button
-                  onClick={() => setConfirmOpen(false)}
-                  disabled={submitting}
-                  className="pau-button-secondary"
-                  style={{ padding: '10px 20px' }}
-                >
-                  Volver al examen
-                </button>
-              )}
+              <button
+                onClick={() => { setConfirmOpen(false); setTimeUp(false) }}
+                disabled={submitting}
+                className="pau-button-secondary"
+                style={{ padding: '10px 20px' }}
+              >
+                Seguir revisando
+              </button>
               <button
                 onClick={submitExam}
                 disabled={submitting}
                 className="campus-primary"
                 style={{ padding: '10px 20px', borderRadius: 12 }}
               >
-                Ver corrección
+                Entregar y corregir
               </button>
             </div>
           </div>
         </div>
       )}
     </SimulacroShell>
+  )
+}
+
+function StartStat({ icon, label, value, color }: { icon: ReactNode; label: string; value: string; color: string }) {
+  return (
+    <div className="rounded-3xl border bg-white/80 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.08)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: `${color}12`, color }}>
+        {icon}
+      </div>
+      <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>{label}</p>
+      <p className="mt-1 text-lg font-black" style={{ color: '#0f172a' }}>{value}</p>
+    </div>
   )
 }
 
@@ -646,6 +823,60 @@ function formatTime(seconds: number) {
   const min = Math.floor(seconds / 60).toString().padStart(2, '0')
   const sec = Math.floor(seconds % 60).toString().padStart(2, '0')
   return `${min}:${sec}`
+}
+
+function formatCompact(value: number) {
+  return Number.isFinite(value) ? value.toFixed(1).replace(/\.0$/, '') : '0'
+}
+
+function getDurationSeconds(record: SimulacroRecord) {
+  const minutes = Number(record.duration_minutes ?? DEFAULT_DURATION_MINUTES)
+  return Math.max(1, Number.isFinite(minutes) ? minutes : DEFAULT_DURATION_MINUTES) * 60
+}
+
+function startKey(id: string) {
+  return `pausia:simulacro:${id}:startedAt`
+}
+
+function reviewKey(id: string) {
+  return `pausia:simulacro:${id}:reviewMarked`
+}
+
+function readStartedAt(id: string) {
+  try {
+    const value = window.localStorage.getItem(startKey(id))
+    const number = Number(value)
+    return Number.isFinite(number) && number > 0 ? number : null
+  } catch {
+    return null
+  }
+}
+
+function writeStartedAt(id: string, value: number) {
+  try {
+    window.localStorage.setItem(startKey(id), String(value))
+  } catch {
+    // Local storage is best-effort only.
+  }
+}
+
+function readReviewState(id: string) {
+  try {
+    const raw = window.localStorage.getItem(reviewKey(id))
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed as Record<string, boolean> : {}
+  } catch {
+    return {}
+  }
+}
+
+function writeReviewState(id: string, value: Record<string, boolean>) {
+  try {
+    window.localStorage.setItem(reviewKey(id), JSON.stringify(value))
+  } catch {
+    // Local storage is best-effort only.
+  }
 }
 
 function fileToBase64(file: File) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { CheckCircle2, Clock, Copy, Lightbulb, MessageCircle, RotateCcw, Target, TriangleAlert } from 'lucide-react'
+import { CheckCircle2, Clock, Copy, Lightbulb, MessageCircle, Route, RotateCcw, Target, TriangleAlert } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -150,6 +150,9 @@ export default function SimulacroResultsPage() {
   const detail = normalizeDetail(result, record, correctionFailed)
   const plan = normalizePlan(result, detail, correctionFailed)
   const resumen = normalizeResumen(result, detail)
+  const nextTraining = plan[0]
+    ? `${plan[0].tema}: ${plan[0].accion}`
+    : 'Repite un bloque parecido al que peor haya salido y compara tu desarrollo con el criterio oficial.'
   const years = unique(record.bloques.map(block => block.year)).join(', ')
 
   async function share() {
@@ -319,6 +322,7 @@ export default function SimulacroResultsPage() {
               <ResultCard icon={<Target size={18} />} title="Feedback general" text={result.feedback_general || 'Revisa la corrección detallada para ver el análisis bloque a bloque.'} color={cfg.color} />
               <ResultCard icon={<CheckCircle2 size={18} />} title="Qué está bien" text={result.puntos_fuertes || listToText(result.fortalezas) || 'Todavía no hay fortalezas detectadas en esta corrección.'} color="#059669" tone="green" />
               <ResultCard icon={<TriangleAlert size={18} />} title="Errores principales" text={result.puntos_mejora || listToText(result.errores_principales) || 'No hay errores principales disponibles. Mira cada bloque para más detalle.'} color="#d97706" tone="orange" />
+              <ResultCard icon={<Lightbulb size={18} />} title="Recomendación de próximo entrenamiento" text={nextTraining} color={cfg.color} />
               <ResultCard icon={<Clock size={18} />} title="Contexto de dificultad" text={result.contexto_dificultad || `Simulacro de dificultad ${record.dificultad_real ?? record.dificultad}.`} color={cfg.color} />
             </section>
           )}
@@ -476,6 +480,13 @@ export default function SimulacroResultsPage() {
             >
               <Copy size={15} />Compartir resultado
             </button>
+            <a
+              href="/camino"
+              className="campus-primary no-underline"
+              style={{ padding: '10px 16px', borderRadius: 14, display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            >
+              <Route size={15} />Crear misión de repaso
+            </a>
             <a
               href="/"
               className="pau-button-secondary no-underline"

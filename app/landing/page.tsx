@@ -23,8 +23,8 @@ import {
   Zap,
 } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
-import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero'
 import HeroCardsAnimator from '@/app/landing/HeroCardsAnimator'
+import { ZoomParallax } from '@/components/ui/zoom-parallax'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -904,16 +904,25 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Scroll hero ──────────────────────────────────────────────────── */}
-      <ScrollExpandMedia
-        mediaType="image"
-        mediaSrc="/brand/hero-student.jpg"
-        bgImageSrc="/brand/hero-student.jpg"
-        title="Prepara la PAU"
-        date="EBAU Madrid 2026"
-        scrollToExpand="Scroll para explorar"
-        textBlend
-        overlayClass="absolute inset-0 rounded-xl"
+      {/* ── Zoom parallax hero ───────────────────────────────────────────── */}
+      <ZoomParallax
+        images={[
+          { src: '/brand/hero-student.jpg',         alt: 'Estudiante preparando la PAU' },
+          { src: '/brand/scene-exam.jpg',            alt: 'Examen oficial EBAU' },
+          { src: '/brand/scene-laptop.jpg',          alt: 'Preparando con Pausia' },
+          { src: '/brand/scene-books.jpg',           alt: 'Libros de estudio PAU' },
+          { src: '/brand/fa-barboza-NWoaoMgMiVY-unsplash.jpg', alt: 'Estudiando' },
+          { src: '/brand/scene-exam.jpg',            alt: 'Simulacro PAU' },
+          { src: '/brand/hero-student.jpg',          alt: 'Preparación PAU' },
+        ]}
+        centerReveal={
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <img src="/brand/pausia-lockup.png" alt="Pausia" style={{ width: 'clamp(180px,28vw,360px)', height: 'auto' }} />
+            <p style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', color: '#0f172a', fontWeight: 600, opacity: 0.7, letterSpacing: '-0.02em' }}>
+              Prepara la PAU con claridad.
+            </p>
+          </div>
+        }
       />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}

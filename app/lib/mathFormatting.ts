@@ -173,10 +173,14 @@ function normalizeExistingMath(text: string) {
     const display = token.startsWith('$$')
     const delimiter = display ? '$$' : '$'
     const content = token.slice(delimiter.length, -delimiter.length)
+    // For inline math, skip formatLatexEnvironment — it adds \n which breaks MATH_TOKEN
+    // matching in later pipeline steps, causing wrapLatexEnvironments to double-wrap.
+    const envReplacer = display
+      ? (_: string, env: string, body: string) => formatLatexEnvironment(env, body)
+      : (_: string, env: string, body: string) => `\\begin{${env}}${body}\\end{${env}}`
     const normalized = repairLostLatex(content)
       .replace(/\bGm_1m_2\b/g, 'Gm_{1}m_{2}')
-      .replace(new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'),
-        (_, environment, body) => formatLatexEnvironment(environment, body))
+      .replace(new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'), envReplacer)
     return `${delimiter}${normalized}${delimiter}`
   }))
 }

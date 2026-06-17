@@ -18,7 +18,7 @@ export interface OnboardingData {
 
 const KEY = 'pausia_onboarding_v1'
 
-export const DEFAULT_SUBJECTS = ['Matemáticas II', 'Historia de España', 'Inglés']
+export const DEFAULT_SUBJECTS = ['Matemáticas II', 'Matemáticas CCSS', 'Historia de España', 'Inglés']
 
 export function loadOnboarding(): OnboardingData {
   if (typeof window === 'undefined') return emptyOnboarding()

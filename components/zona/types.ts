@@ -1,4 +1,4 @@
-export type ZonaSubject = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'ingles' | 'lengua' | 'historia' | 'historia_filosofia'
+export type ZonaSubject = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'ingles' | 'lengua' | 'historia' | 'historia_filosofia'
 
 export interface ZonaUser {
   id: string

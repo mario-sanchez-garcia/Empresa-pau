@@ -18,6 +18,7 @@ function examSystemLabel(comunidad: string) {
 
 const SUBJECT_LABELS: Record<string, string> = {
   mates: 'Matemáticas II',
+  matematicas_ccss: 'Matemáticas Aplicadas a las Ciencias Sociales',
   fisica: 'Física',
   quimica: 'Química',
   biologia: 'Biología',

@@ -1,4 +1,4 @@
-import { Atom, BookOpen, Dna, FlaskConical, Globe, Landmark, Sigma } from 'lucide-react'
+import { Atom, BarChart3, BookOpen, Dna, FlaskConical, Globe, Landmark, Sigma } from 'lucide-react'
 import { examenes, examenesHistoria } from '@/app/data/examenes'
 import { examenesFisica } from '@/app/data/fisica'
 import { examenesQuimica } from '@/app/data/quimica'
@@ -9,6 +9,7 @@ import { examenesFisicaCataluna } from '@/app/data/fisica_cataluna'
 import { examenesQuimicaCataluna } from '@/app/data/quimica_cataluna'
 import { examenesLenguaCataluna } from '@/app/data/lengua_cataluna'
 import { examenesCataluna } from '@/app/data/examenes_cataluna'
+import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from '@/app/data/matematicas_ccss_madrid'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 type SimulacroYearSelection = 'all' | SimulacroDifficulty
@@ -21,6 +22,7 @@ interface GenerateSimulacroSettings {
 
 export const SUBJECTS = {
   mates: { label: 'Matemáticas II', short: 'Mates', color: '#2563eb', light: '#eff6ff', icon: Sigma, available: true },
+  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', color: '#7c3aed', light: '#f5f3ff', icon: BarChart3, available: false },
   fisica: { label: 'Física', short: 'Física', color: '#CA8A04', light: '#FEFCE8', icon: Atom, available: true },
   quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
   biologia: { label: 'Biología', short: 'Bio', color: '#4d7c0f', light: '#f7fee7', icon: Dna, available: true },
@@ -37,6 +39,7 @@ export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDiff
 
 const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   mates: ['Algebra', 'Analisis', 'Geometria', 'Probabilidad'],
+  matematicas_ccss: ['Algebra', 'Analisis', 'Probabilidad', 'Estadistica'],
   fisica: ['Gravitacion', 'Ondas', 'Electricidad', 'Optica'],
   quimica: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4'],
   biologia: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5'],
@@ -149,6 +152,7 @@ function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {
   }
   const byComunidad = (exam: any) => (exam.comunidad ?? 'Madrid') === comunidad
   if (subject === 'mates') return examenes.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  if (subject === 'matematicas_ccss') return examenesMatematicasCCSSMadrid.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'fisica') return examenesFisica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'quimica') return examenesQuimica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   if (subject === 'biologia') return examenesBiologia.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))

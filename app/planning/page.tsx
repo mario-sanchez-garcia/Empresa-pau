@@ -27,6 +27,7 @@ const config = {
 
 const SUBJECT_COLORS = {
   mates: { color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', border: '#dbeafe' },
+  matematicas_ccss: { color: '#7c3aed', light: '#f5f3ff', accent: '#a78bfa', border: '#ddd6fe' },
   fisica: { color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', border: '#FEF08A' },
   historia: { color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', border: '#dcfce7' },
   quimica: { color: '#ea580c', light: '#fff7ed', accent: '#fb923c', border: '#ffedd5' },
@@ -50,6 +51,7 @@ function hoverVars(color: string, light: string, accent = color) {
 
 function subjectTheme(name = '') {
   const value = name.toLowerCase()
+  if (value.includes('ccss') || value.includes('ciencias sociales')) return SUBJECT_COLORS.matematicas_ccss
   if (value.includes('mat')) return SUBJECT_COLORS.mates
   if (value.includes('fis')) return SUBJECT_COLORS.fisica
   if (value.includes('historia de espana') || value.includes('historia de españa')) return SUBJECT_COLORS.historia
@@ -63,7 +65,7 @@ function subjectTheme(name = '') {
   return SUBJECT_COLORS.other
 }
 
-const ASIGNATURAS = ['Matematicas II', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biología', 'Geografia', 'Historia del Arte', 'Latin']
+const ASIGNATURAS = ['Matematicas II', 'Matematicas CCSS', 'Fisica', 'Quimica', 'Historia de Espana', 'Lengua', 'Ingles', 'Biología', 'Geografia', 'Historia del Arte', 'Latin']
 type PlanTab = 'general' | 'semana' | 'tareas' | 'ajustes'
 
 export default function Planning() {

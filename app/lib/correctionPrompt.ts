@@ -70,6 +70,14 @@ Matemáticas II:
 - Geometría y análisis: exige justificación explícita de todos los pasos intermedios.
 - Probabilidad: exige identificación del espacio muestral y justificación del modelo usado.
 
+Matemáticas Aplicadas a las Ciencias Sociales:
+- No la trates como Matemáticas II: aplica un enfoque de PAU CCSS, con problemas contextualizados de economía, ciencias sociales, probabilidad, estadística, funciones, derivadas, integrales, matrices, sistemas y programación lineal cuando aparezcan en el enunciado oficial.
+- Resultado correcto sin desarrollo: máximo 0.5 pts por apartado.
+- Planteamiento correcto con resultado erróneo: hasta el 60% de la puntuación máxima.
+- En probabilidad y estadística exige identificar sucesos, distribución o parámetro usado y justificar el modelo.
+- En programación lineal exige definir variables, restricciones, región factible, función objetivo y conclusión contextualizada.
+- Conserva LaTeX para fórmulas, matrices, fracciones, distribuciones y notación matemática.
+
 Física:
 - Sin enunciado explícito de la ley o principio físico aplicado: -0.5 pts por apartado.
 - Ausencia de unidades en resultado numérico: -0.25 pts por apartado.
@@ -232,6 +240,12 @@ const BLOCK_SUBJECT_CRITERIA: Record<string, string> = {
 - Error de cálculo arrastrado desde paso correcto: máx -0.5 pts adicionales sobre el bloque.
 - Planteamiento correcto con resultado erróneo: hasta 60% de la puntuación.
 - Geometría y análisis: exige justificación explícita de todos los pasos intermedios.`,
+  'Matemáticas Aplicadas a las Ciencias Sociales': `- No la trates como Matemáticas II: aplica formato PAU CCSS y el contexto social/económico del enunciado.
+- Resultado sin desarrollo: máx 0.5 pts por apartado.
+- Planteamiento correcto con resultado erróneo: hasta 60% de la puntuación.
+- Probabilidad/estadística: exige identificar sucesos, distribución o parámetro y justificar el modelo.
+- Programación lineal: exige variables, restricciones, región factible, función objetivo y conclusión contextualizada.
+- Conserva LaTeX en fórmulas, matrices, fracciones y notación matemática.`,
   'Física': `- Sin enunciar la ley o principio físico aplicado: -0.5 pts por apartado.
 - Sin unidades en resultado numérico: -0.25 pts por apartado.
 - Orden de magnitud incorrecto en resultado final: máx 0.5 pts en ese apartado.

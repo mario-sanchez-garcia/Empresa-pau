@@ -24,6 +24,7 @@ export type GradePredictionResult = {
 
 const SUBJECTS = [
   ['mates', 'Matemáticas II'],
+  ['matematicas_ccss', 'Matemáticas Aplicadas a las Ciencias Sociales'],
   ['fisica', 'Física'],
   ['quimica', 'Química'],
   ['biologia', 'Biología'],
@@ -169,6 +170,7 @@ function normalizeSubject(value?: string | null) {
   const subject = removeAccents(value).toLowerCase().trim()
   if (!subject) return null
   if (subject.includes('filos')) return 'historia_filosofia'
+  if (subject === 'matematicas_ccss' || subject.includes('ccss') || subject.includes('ciencias sociales')) return 'matematicas_ccss'
   if (subject === 'mates' || subject.includes('mat')) return 'mates'
   if (subject.includes('fis')) return 'fisica'
   if (subject.includes('quim')) return 'quimica'

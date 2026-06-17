@@ -10,6 +10,7 @@ import { examenesQuimica } from './data/quimica'
 import { examenesLengua } from './data/lengua'
 import { examenesIngles } from './data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
+import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from './data/matematicas_ccss_madrid'
 import { supabase } from './lib/supabase'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
@@ -61,6 +62,7 @@ import {
 } from 'lucide-react'
 const ASIGNATURAS = {
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
+  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', icon: BarChart3, color: '#7c3aed', light: '#f5f3ff', accent: '#a78bfa', soft: '#ddd6fe' },
   fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', soft: '#FEF08A' },
   quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
   biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
@@ -90,6 +92,12 @@ const SUBJECT_CARDS = {
     subtitle: 'Problemas, bloques y pasos limpios',
     icon: Sigma,
     kicker: 'Modo precisión'
+  },
+  matematicas_ccss: {
+    title: 'Matemáticas CCSS',
+    subtitle: 'Modelos sociales, probabilidad y análisis aplicado',
+    icon: BarChart3,
+    kicker: 'Modo aplicado'
   },
   fisica: {
     title: 'Física',
@@ -280,13 +288,13 @@ function formatEnunciado(enunciado?: string | null) {
   return formatExamText(enunciado)
 }
 
-type Asignatura = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
+type Asignatura = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
-const HOME_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
+const HOME_SUBJECTS: Asignatura[] = ['mates', 'matematicas_ccss', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
 const PINNED_SUBJECTS_STORAGE_KEY = 'pausia:pinned-subjects'
 const PROFILE_PREFERENCES_STORAGE_KEY = 'pausia_profile_preferences'
@@ -411,7 +419,7 @@ function SubjectIllustration({ subject, color, accent }: { subject: Asignatura; 
     pointerEvents: 'none' as const
   }
 
-  if (subject === 'mates') {
+  if (subject === 'mates' || subject === 'matematicas_ccss') {
     return (
       <svg viewBox="0 0 150 105" style={common} aria-hidden="true">
         <path d="M18 84H132" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.28" />
@@ -515,6 +523,7 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
   const config = ASIGNATURAS[subject]
   const title = SUBJECT_CARDS[subject].title
   const Icon = config.icon
+  const isPendingDataSubject = subject === 'matematicas_ccss'
 
   return (
     <div style={{ background: 'rgba(255, 255, 255, 0.96)', borderRadius: '28px', border: '1px solid rgba(219, 231, 251, 0.95)', padding: '34px', marginBottom: '22px', boxShadow: WARM.shadow, textAlign: 'center' }}>
@@ -522,10 +531,12 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
         <SearchX size={30} />
       </div>
       <div style={{ fontSize: '20px', fontWeight: 850, color: WARM.ink, marginBottom: '8px' }}>
-        No hay preguntas de {title} para este filtro.
+        {isPendingDataSubject ? 'No hay exámenes disponibles todavía para esta asignatura.' : `No hay preguntas de ${title} para este filtro.`}
       </div>
       <p style={{ maxWidth: '620px', margin: '0 auto', color: WARM.muted, fontSize: '15px', lineHeight: 1.7, fontWeight: 650 }}>
-        Prueba con otra convocatoria, año, opción o comunidad.
+        {isPendingDataSubject
+          ? 'Los PDFs de Matemáticas CCSS Madrid están registrados como fuente, pero sus ejercicios aún no están transcritos de forma estructurada.'
+          : 'Prueba con otra convocatoria, año, opción o comunidad.'}
       </p>
       <div style={{ marginTop: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px', padding: '7px 12px', background: config.light, color: config.color, border: '1px solid ' + config.soft, fontSize: '12px', fontWeight: 800 }}>
         <Icon size={14} />{config.label}
@@ -601,6 +612,7 @@ export default function Home() {
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
+  const isMadridMathStyle = asignatura === 'mates' || asignatura === 'matematicas_ccss'
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
   const isCatalunaFisica = asignatura === 'fisica' && ccaa === 'Cataluña'
   const isCatalunaQuimica = asignatura === 'quimica' && ccaa === 'Cataluña'
@@ -749,17 +761,19 @@ const perteneceAComunidadSeleccionada = (examen: any) =>
 const examenesFiltrados =
     asignatura === 'mates'
       ? examenes.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-      : asignatura === 'fisica'
-        ? examenesFisica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-        : asignatura === 'quimica'
-          ? examenesQuimica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-          : asignatura === 'biologia'
-            ? examenesBiologia.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-            : asignatura === 'lengua'
-              ? examenesLengua.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-              : asignatura === 'ingles'
-                ? examenesIngles.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-                : examenesHistoria.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+      : asignatura === 'matematicas_ccss'
+        ? examenesMatematicasCCSSMadrid.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+        : asignatura === 'fisica'
+          ? examenesFisica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+          : asignatura === 'quimica'
+            ? examenesQuimica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+            : asignatura === 'biologia'
+              ? examenesBiologia.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+              : asignatura === 'lengua'
+                ? examenesLengua.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+                : asignatura === 'ingles'
+                  ? examenesIngles.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+                  : examenesHistoria.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
 
 const aniosDisponibles = isCatalunaMates
   ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
@@ -936,16 +950,16 @@ const preguntaIngles = asignatura === 'ingles'
     : null
   : null
 
-const preguntasA = asignatura === 'mates'
+const preguntasA = isMadridMathStyle
   ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'A') ?? []
   : []
 
-const preguntasB = asignatura === 'mates'
+const preguntasB = isMadridMathStyle
   ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'B') ?? []
   : []
 
 const bloquesMates = Array.from(new Set(
-  asignatura === 'mates'
+  isMadridMathStyle
     ? ((examen as any)?.preguntas ?? []).map((p: any) => p.bloque)
     : []
 )) as string[]
@@ -1060,7 +1074,7 @@ const preguntaLengua = asignatura === 'lengua'
 
 const OPCIONES = [0, 1] as const
 
-const opcionesMatesDisponibles = asignatura === 'mates'
+const opcionesMatesDisponibles = isMadridMathStyle
   ? Array.from(new Set(
       ((examen as any)?.preguntas ?? [])
         .filter((p: any) => p.bloque === tipoMatesActivo)
@@ -1097,7 +1111,7 @@ const opcionesHistoriaDisponibles = asignatura === 'historia'
   : []
 
 const opcionesDisponibles: (0 | 1)[] =
-  asignatura === 'mates' && opcionesMatesDisponibles.length
+  isMadridMathStyle && opcionesMatesDisponibles.length
     ? OPCIONES.filter(op => opcionesMatesDisponibles.includes(op === 0 ? 'A' : 'B'))
     : asignatura === 'fisica' && opcionesFisicaDisponibles.length
     ? OPCIONES.filter(op => opcionesFisicaDisponibles.includes(op === 0 ? 'A' : 'B'))
@@ -1135,7 +1149,7 @@ const preguntaHistoria =
   preguntasHistoria[0]
 
 const preguntaActiva =
-  asignatura === 'mates' ? preguntaMates :
+  isMadridMathStyle ? preguntaMates :
   asignatura === 'fisica' ? preguntaFisica :
   asignatura === 'quimica' ? preguntaQuimica :
   asignatura === 'biologia' ? preguntaBiologia :
@@ -1156,11 +1170,11 @@ const examenActivo = asignatura === 'lengua'
 const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
 const puntuacionPreguntaActiva = officialScore(
   (preguntaActiva as any)?.puntuacion ?? (preguntaActiva as any)?.puntos ?? (preguntaActiva as any)?.pts,
-  asignatura === 'mates' ? 2.5 : 2
+  isMadridMathStyle ? 2.5 : 2
 )
 
 const bloqueActivoLabel =
-  asignatura === 'mates' ? (preguntaActiva as any)?.bloque :
+  isMadridMathStyle ? (preguntaActiva as any)?.bloque :
   asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
   asignatura === 'quimica' ? ((preguntaActiva as any)?.label ?? bloquesQuimica[bloqueIdx]?.label ?? '') :
   asignatura === 'biologia' ? ((preguntaActiva as any)?.label ?? bloquesBiologia[bloqueIdx]?.label ?? '') :
@@ -1265,6 +1279,7 @@ function cambiarBloqueBiologia(i: number, tipoBloque: string) {
 
 function nombreAsignatura(a: string) {
   if (a === 'mates') return 'Matemáticas II'
+  if (a === 'matematicas_ccss') return MATEMATICAS_CCSS_LABEL
   if (a === 'fisica') return 'Física'
   if (a === 'quimica') return 'Química'
   if (a === 'biologia') return 'Biología'
@@ -1462,6 +1477,7 @@ function cambiarTipo(t: Tipo) {
   }
 
   const matesH = historial.filter((item: any) => item.asignatura === 'mates')
+  const matematicasCCSSH = historial.filter((item: any) => item.asignatura === 'matematicas_ccss')
   const fisicaH = historial.filter((item: any) => item.asignatura === 'fisica')
   const quimicaH = historial.filter((item: any) => item.asignatura === 'quimica')
   const biologiaH = historial.filter((item: any) => item.asignatura === 'biologia')
@@ -1470,6 +1486,7 @@ function cambiarTipo(t: Tipo) {
   const historiaH = historial.filter((item: any) => item.asignatura === 'historia')
 
   const mediaM = calcMedia(matesH)
+  const mediaMatematicasCCSS = calcMedia(matematicasCCSSH)
   const mediaFisica = calcMedia(fisicaH)
   const mediaQuimica = calcMedia(quimicaH)
   const mediaBiologia = calcMedia(biologiaH)
@@ -1560,7 +1577,7 @@ function cambiarTipo(t: Tipo) {
                 onSelect: () => setCatHistoriaEjercicioIdx(i)
               }
             })
-          : asignatura === 'mates'
+          : isMadridMathStyle
             ? bloquesMates.map((bloque: string, i: number) => ({
                 label: `${i + 1}. ${bloque} · ${puntosBloqueMates(bloque)}pts`,
                 active: bloqueIdx === i,
@@ -1595,6 +1612,7 @@ function cambiarTipo(t: Tipo) {
 
       const normalSource: any[] =
         asignatura === 'mates' ? examenes :
+        asignatura === 'matematicas_ccss' ? examenesMatematicasCCSSMadrid :
         asignatura === 'fisica' ? examenesFisica :
         asignatura === 'quimica' ? examenesQuimica :
         asignatura === 'biologia' ? examenesBiologia :
@@ -2983,7 +3001,7 @@ function cambiarTipo(t: Tipo) {
                 </div>
               )}
               {!isCatalunaExam && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                {asignatura === 'mates' ? bloquesMates.map((bloque: string, i: number) => (
+                {isMadridMathStyle ? bloquesMates.map((bloque: string, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button>
@@ -3493,6 +3511,7 @@ function cambiarTipo(t: Tipo) {
                 {(() => {
                   const statItems: Array<{ label: string; media: string | null; cfg: typeof ASIGNATURAS.mates }> = [
                     { label: 'Matemáticas', media: mediaM, cfg: ASIGNATURAS.mates },
+                    { label: 'Matemáticas CCSS', media: mediaMatematicasCCSS, cfg: ASIGNATURAS.matematicas_ccss },
                     { label: 'Física', media: mediaFisica, cfg: ASIGNATURAS.fisica },
                     { label: 'Química', media: mediaQuimica, cfg: ASIGNATURAS.quimica },
                     { label: 'Biología', media: mediaBiologia, cfg: ASIGNATURAS.biologia },

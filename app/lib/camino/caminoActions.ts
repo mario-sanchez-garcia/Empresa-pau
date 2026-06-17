@@ -10,10 +10,11 @@ export interface CaminoAction {
 }
 
 // Maps canonical subject keys to the ?subject= param values accepted by app/page.tsx.
-// HOME_SUBJECTS = ['mates','fisica','quimica','biologia','ingles','lengua','historia','historia_filosofia']
+// HOME_SUBJECTS = ['mates','matematicas_ccss','fisica','quimica','biologia','ingles','lengua','historia','historia_filosofia']
 const SUBJECT_PARAM: Record<string, string> = {
   mates: 'mates',
   matematicas_ii: 'mates',
+  matematicas_ccss: 'matematicas_ccss',
   ingles: 'ingles',
   historia: 'historia',
   fisica: 'fisica',

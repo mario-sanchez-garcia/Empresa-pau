@@ -1,4 +1,4 @@
-export type SimulacroSubject = 'mates' | 'fisica' | 'quimica' | 'biologia' | 'ingles' | 'lengua' | 'historia'
+export type SimulacroSubject = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'ingles' | 'lengua' | 'historia'
 export type SimulacroDifficulty = 'Fácil' | 'Media' | 'Difícil'
 export type SimulacroOption = 'A' | 'B'
 export type SimulacroStatus = 'en_progreso' | 'completado'

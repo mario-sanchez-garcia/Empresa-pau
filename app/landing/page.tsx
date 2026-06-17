@@ -120,6 +120,7 @@ const FEATURE_SPANS = [2, 1, 1, 2, 1, 2]
 
 const SUBJECTS = [
   { icon: Sigma,        label: 'Matemáticas II',    color: C.blue,    bg: C.bgBlue,   ready: true  },
+  { icon: BarChart3,    label: 'Matemáticas CCSS',  color: '#7c3aed', bg: '#f5f3ff',  ready: false },
   { icon: Atom,         label: 'Física',             color: '#ca8a04', bg: '#fefce8',  ready: true  },
   { icon: Landmark,     label: 'Historia de España', color: '#78350f', bg: '#fff8f1',  ready: true  },
   { icon: FlaskConical, label: 'Química',            color: '#ea580c', bg: '#fff7ed',  ready: true  },

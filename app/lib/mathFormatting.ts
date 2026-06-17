@@ -1,11 +1,13 @@
 const MATH_TOKEN = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/g
-const ENVIRONMENTS = 'pmatrix|bmatrix|vmatrix|matrix|cases|aligned'
+const CODE_FENCE_TOKEN = /(```[\s\S]*?```)/g
+const ENVIRONMENTS = 'pmatrix|bmatrix|vmatrix|matrix|cases|aligned|array|align|equation'
 const UNITS = 'kg|mol|atm|kJ|Pa|Hz|cm|mm|kg|g|m|s|N|J|W|T|C|V|A|L'
 
 export function normalizeExamStatement(input?: string | null) {
   if (!input) return ''
 
   let text = normalizePdfGlyphs(input)
+  text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
   text = mapOutsideMath(text, repairLostLatex)
   text = mapOutsideMath(text, wrapLatexEnvironments)
@@ -39,6 +41,7 @@ export const formatExamText = normalizeExamStatement
 export function normalizeCorrectionText(input?: string | null) {
   if (!input) return ''
   let text = input
+  text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
   text = mapOutsideMath(text, repairLostLatex)
   text = mapOutsideMath(text, wrapLatexEnvironments)
@@ -52,23 +55,49 @@ export function normalizeCorrectionText(input?: string | null) {
 }
 
 function normalizeExistingMath(text: string) {
-  return text.replace(MATH_TOKEN, token => {
+  return mapOutsideCodeFences(text, part => part.replace(MATH_TOKEN, token => {
     const display = token.startsWith('$$')
     const delimiter = display ? '$$' : '$'
     const content = token.slice(delimiter.length, -delimiter.length)
     const normalized = repairLostLatex(content)
       .replace(/\bGm_1m_2\b/g, 'Gm_{1}m_{2}')
       .replace(new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'),
-        (_, environment, body) => `\\begin{${environment}}${body.replace(/\\(?=[xyz](?:\\|$))/g, '\\\\')}\\end{${environment}}`)
+        (_, environment, body) => formatLatexEnvironment(environment, body))
     return `${delimiter}${normalized}${delimiter}`
-  })
+  }))
 }
 
 function mapOutsideMath(text: string, formatter: (value: string) => string) {
-  return text
+  return mapOutsideCodeFences(text, part => part
     .split(MATH_TOKEN)
     .map(part => part.startsWith('$') ? part : formatter(part))
+    .join(''))
+}
+
+function mapOutsideCodeFences(text: string, formatter: (value: string) => string) {
+  return text
+    .split(CODE_FENCE_TOKEN)
+    .map(part => part.startsWith('```') ? part : formatter(part))
     .join('')
+}
+
+function normalizeAiLatexBlocks(text: string) {
+  // Validation cases covered by this normalizer:
+  // 1. $$$\begin{cases} 2x + y = 10 \ x - y = 2 \end{cases}$$$ -> display math cases.
+  // 2. \begin{pmatrix}1 & 2 \ 3 & 4\end{pmatrix} -> display math matrix.
+  // 3. "La solución es (x = 2) y (y = 3)." remains prose.
+  // 4. Existing $$ x^2 + 1 = 0 $$ remains display math.
+  // 5. Fenced code blocks are left untouched.
+  return mapOutsideCodeFences(text, part => part
+    .replace(/\$\$\$([\s\S]*?)\$\$\$/g, (_, body) => formatDisplayMathBlock(body))
+    .replace(/\$\$\$([\s\S]*?)\$\$/g, (_, body) => formatDisplayMathBlock(body))
+    .replace(/\$\$([\s\S]*?)\$\$\$/g, (_, body) => formatDisplayMathBlock(body))
+  )
+}
+
+function formatDisplayMathBlock(body: string) {
+  const normalized = formatLatexBlockContent(repairLostLatex(body.trim()))
+  return `\n\n$$\n${normalized}\n$$\n\n`
 }
 
 function repairLostLatex(text: string) {
@@ -97,14 +126,30 @@ function wrapLatexEnvironments(text: string) {
   return text.replace(
     new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'),
     (_, environment, body) => {
-      const rows = body
-        .trim()
-        .replace(/\s*;\s*/g, ' \\\\ ')
-        .replace(/\s*\|\s*/g, ' & ')
-        .replace(/\\\s+(?=\d|[A-Za-z])/g, ' \\\\ ')
-      return `\n\n$$\\begin{${environment}} ${rows} \\end{${environment}}$$\n\n`
+      return `\n\n$$\n${formatLatexEnvironment(environment, body)}\n$$\n\n`
     }
   )
+}
+
+function formatLatexBlockContent(content: string) {
+  return content.replace(
+    new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'),
+    (_, environment, body) => formatLatexEnvironment(environment, body)
+  )
+}
+
+function formatLatexEnvironment(environment: string, body: string) {
+  const rows = body
+    .trim()
+    .replace(/\s*;\s*/g, ' \\\\ ')
+    .replace(/\s*\|\s*/g, ' & ')
+    .replace(/\\\s+(?=\d|[A-Za-z])/g, ' \\\\ ')
+    .replace(/\s*\\\\\s*/g, ' \\\\\n')
+    .replace(/\s*&\s*/g, ' & ')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim()
+
+  return `\\begin{${environment}}\n${rows}\n\\end{${environment}}`
 }
 
 function wrapExplicitLatex(text: string) {

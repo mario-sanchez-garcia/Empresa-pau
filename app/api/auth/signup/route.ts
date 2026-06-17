@@ -1,18 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const adminSupabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
-
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
 
   if (!email || !password) {
     return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
   }
+
+  const adminSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
 
   // Create user with email already confirmed (bypasses email confirmation requirement)
   const { data: created, error: createError } = await adminSupabase.auth.admin.createUser({

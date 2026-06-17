@@ -760,7 +760,11 @@ b) (1 punto) Probar que $f(x)$ tiene, al menos, un punto con derivada nula en el
 c) (1 punto) Si $g(x) = f(-x)$, calcular el área entre las gráficas de $f(x)$ y $g(x)$ en el intervalo $[0, \\pi]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: "Dados los puntos A(0, 0, 1) y B(1, 1, 0), se pide:\n\na) (1 punto) Hallar una ecuación del plano que pasa por los puntos A y B y es perpendicular al plano z = 0.\n\nb) (1.5 puntos) Hallar ecuaciones de dos rectas paralelas, r1 y r2, que pasen por los puntos A y B respectiva-\nmente, estén en el plano x + z = 1 y tales que la distancia entre ellas sea 1.",
+        enunciado: `Dados los puntos $A(0, 0, 1)$ y $B(1, 1, 0)$, se pide:
+
+a) (1 punto) Hallar una ecuación del plano que pasa por los puntos $A$ y $B$ y es perpendicular al plano $z = 0$.
+
+b) (1.5 puntos) Hallar ecuaciones de dos rectas paralelas, $r_1$ y $r_2$, que pasen por los puntos $A$ y $B$ respectivamente, estén en el plano $x + z = 1$ y tales que la distancia entre ellas sea $1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-A4", bloque: "Probabilidad", opcion: "A",
         enunciado: `Sabiendo que $P(\\overline{A}) = \\dfrac{11}{20}$, $P(A|B) - P(B|A) = \\dfrac{1}{24}$ y $P(A \\cap B) = \\dfrac{3}{10}$, se pide:

@@ -10,6 +10,7 @@ import {
   startModeToRouteId,
   type OnboardingCommunity, type OnboardingDailyMinutes, type OnboardingStartMode,
 } from '@/app/lib/onboarding/onboardingStorage'
+import Particles from './Particles'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -534,13 +535,26 @@ export default function OnboardingFlow() {
           )}
         </aside>
 
-        <section className="flex min-h-[640px] items-center">
+        <section className="relative flex min-h-[640px] items-center overflow-hidden rounded-[28px] bg-[#06091a] p-3 lg:p-4">
+          <div className="absolute inset-0 z-0">
+            <Particles
+              particleColors={['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd']}
+              particleCount={180}
+              particleSpread={8}
+              speed={0.08}
+              particleBaseSize={80}
+              alphaParticles
+              moveParticlesOnHover
+              particleHoverFactor={0.4}
+              sizeRandomness={1.2}
+            />
+          </div>
           <motion.div
             key={phase}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
-            className="w-full rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(15,23,42,0.10)] sm:p-8"
+            className="relative z-10 w-full rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.45)] sm:p-8"
           >
             <div className="mb-7 flex flex-wrap items-center gap-3">
               <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-700">

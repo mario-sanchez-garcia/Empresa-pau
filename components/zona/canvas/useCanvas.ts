@@ -72,23 +72,34 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     if (!canvases.length) void createCanvas('Mi primer espacio')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    const canvas = canvases.find(item => item.id === activeId)
-    if (!canvas) return
+  const markDirty = useCallback(() => {
+    dirtyRef.current = true
+    setSaveStatus('Cambios sin guardar')
+  }, [])
+
+  function activateCanvas(id: string, selectedCanvas?: ZonaCanvas) {
+    const canvas = selectedCanvas ?? canvases.find(item => item.id === id)
+    setActiveId(id)
+    if (!canvas) {
+      setCanvasName('Mi espacio')
+      setElements([])
+      setPan({ x: 120, y: 90 })
+      setZoom(1)
+      setSelectedIds([])
+      setPast([])
+      setFuture([])
+      return
+    }
+    const nextElements = canvas.data.elements ?? []
     setCanvasName(canvas.name)
-    setElements(canvas.data.elements ?? [])
+    setElements(nextElements)
     setPan(canvas.data.viewport?.pan ?? { x: 120, y: 90 })
     setZoom(canvas.data.viewport?.zoom ?? 1)
     setSelectedIds([])
     setPast([])
     setFuture([])
-    void hydrateImageUrls(canvas.data.elements ?? [])
-  }, [activeId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const markDirty = useCallback(() => {
-    dirtyRef.current = true
-    setSaveStatus('Cambios sin guardar')
-  }, [])
+    void hydrateImageUrls(nextElements)
+  }
 
   async function createCanvas(name = 'Nuevo canvas') {
     const data = emptyData()
@@ -100,14 +111,14 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     if (!row) return
     const canvas = normalizeCanvas(row as ZonaCanvas)
     setCanvases(prev => [canvas, ...prev])
-    setActiveId(canvas.id)
+    activateCanvas(canvas.id, canvas)
   }
 
   async function deleteCanvas(canvas: ZonaCanvas) {
     await supabase.from('canvases').delete().eq('id', canvas.id).eq('user_id', userId)
     const next = canvases.filter(item => item.id !== canvas.id)
     setCanvases(next)
-    if (canvas.id === activeId) setActiveId(next[0]?.id ?? '')
+    if (canvas.id === activeId) activateCanvas(next[0]?.id ?? '', next[0])
   }
 
   function renameCanvas(name: string) {
@@ -311,7 +322,7 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
     drawColor, strokeWidth, textColor, fontSize, textBold, textItalic, stickyColor, fillColor, borderColor, connectorCurved, arrowHead,
     pastCount: past.length, futureCount: future.length, viewportRef, fileRef, minimap,
     selectOnly: (id: string) => setSelectedIds([id]),
-    setActiveId, setTool: (next: CanvasTool) => { setTool(next); setConnectorFrom(null) }, createCanvas, deleteCanvas, renameCanvas,
+    setActiveId: activateCanvas, setTool: (next: CanvasTool) => { setTool(next); setConnectorFrom(null) }, createCanvas, deleteCanvas, renameCanvas,
     undo, redo, setZoomValue, fitToScreen, exportPng, selectAll: () => setSelectedIds(elementsRef.current.map(element => element.id)),
     setDrawColor, setStrokeWidth, setTextColor, setFontSize, setTextBold, setTextItalic, setStickyColor, setFillColor, setBorderColor, setConnectorCurved, setArrowHead,
     addQuickElement, onStagePointerDown, onPointerMove, onPointerUp, onElementPointerDown, startResize, updateElement, handleFileInput, onDrop

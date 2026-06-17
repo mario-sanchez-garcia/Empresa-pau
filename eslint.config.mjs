@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local agent tooling and backups are not product source.
+    ".agents/**",
+    ".claude/**",
+    "skills-lock.json",
+    "*.bak",
   ]),
 ]);
 

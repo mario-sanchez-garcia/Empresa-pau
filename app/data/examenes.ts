@@ -807,7 +807,11 @@ a) (1.5 puntos) A partir de la cantidad de material utilizado por la impresora s
 b) (1 punto) Dado el punto $Q(3, 3, 3)$, se quiere imprimir ahora el paralelepípedo que tiene a los segmentos $P_1P_2$, $P_1P_3$ y $P_1Q$ como aristas. ¿Cuáles serían los valores de las coordenadas de los ocho vértices del paralelepípedo que habría que suministrar al ordenador?`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-B4", bloque: "Probabilidad", opcion: "B",
-        enunciado: "Tenemos dos dados no trucados de seis caras, uno azul y uno rojo. Las caras están numeradas del 1 al 6.\nEn un determinado juego, lanzamos los dos dados. Para calcular la puntuación obtenida, se sigue el siguiente\nprocedimiento: si el número obtenido en el dado azul es par, se le suma el doble del número obtenido en el dado\nrojo; si el número obtenido en el dado azul es impar, se le suma el número obtenido en el dado rojo. Se pide:\n\na) (1 punto) Calcular la probabilidad de obtener una puntuación de 10. Calcular la probabilidad de obtener una\npuntuación impar.\n\nb) (1.5 puntos) Calcular la probabilidad de haber obtenido un número par en el dado azul sabiendo que la\npuntuación final ha sido 8. Calcular la probabilidad de haber obtenido un número impar en el dado rojo\nsabiendo que la puntuación final ha sido un número par.",
+        enunciado: `Tenemos dos dados no trucados de seis caras, uno azul y uno rojo. Las caras están numeradas del $1$ al $6$. En un determinado juego, lanzamos los dos dados. Para calcular la puntuación obtenida, se sigue el siguiente procedimiento: si el número obtenido en el dado azul es par, se le suma el doble del número obtenido en el dado rojo; si el número obtenido en el dado azul es impar, se le suma el número obtenido en el dado rojo. Se pide:
+
+a) (1 punto) Calcular la probabilidad de obtener una puntuación de $10$. Calcular la probabilidad de obtener una puntuación impar.
+
+b) (1.5 puntos) Calcular la probabilidad de haber obtenido un número par en el dado azul sabiendo que la puntuación final ha sido $8$. Calcular la probabilidad de haber obtenido un número impar en el dado rojo sabiendo que la puntuación final ha sido un número par.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
   },

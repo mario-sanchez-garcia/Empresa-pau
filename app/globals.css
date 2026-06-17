@@ -712,7 +712,12 @@ button:active:not(:disabled),
 }
 
 .exam-statement-body .math-markdown p {
-  margin: 0.78rem 0;
+  margin: 0.45rem 0;
+}
+
+.exam-statement-body .math-markdown .katex-display {
+  margin: 0.35rem 0;
+  padding: 0.2rem 0.25rem;
 }
 
 .exam-statement-body .math-markdown li {

@@ -654,31 +654,11 @@ export const examenes: Examen[] = [
         enunciado: "En el baloncesto existen canastas que valen un punto, otras que valen dos y otras\nque valen tres puntos. Calcule el número de lanzamientos de uno, de dos y de tres puntos que realizó un equipo\nen un partido sabiendo que:\n• El equipo anotó 80 puntos con un acierto del 80% en tiros de uno, del 50% en tiros de dos y del 40% en tiros\nde tres.\n• La tercera parte del número de lanzamientos de dos fue igual a la quinta parte del resto de lanzamientos.\n• El doble del número de lanzamientos de tres es menor en cinco unidades al resto de lanzamientos.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-12", bloque: "Algebra", opcion: "B",
-        enunciado: `Sean la matriz
-
-$$
-A = \\begin{pmatrix}
-4 & 1 & 0 \\\\
-2 & 3 & 0 \\\\
-3 & 2 & 2
-\\end{pmatrix}
-$$
-
-e $I$ la matriz identidad de orden 3. Se pide:
+        enunciado: `Sean la matriz $A = \\begin{pmatrix} 4 & 1 & 0 \\\\ 2 & 3 & 0 \\\\ 3 & 2 & 2 \\end{pmatrix}$ e $I$ la matriz identidad de orden 3. Se pide:
 
 a) (1.25 puntos) Calcular el polinomio $P(\\lambda) = \\det(A - \\lambda I)$ y hallar las raíces reales del polinomio.
 
-b) (1.25 puntos) Para $\\lambda = 5$, calcular un vector no nulo
-
-$$
-\\vec{v} = \\begin{pmatrix}
-x \\\\
-y \\\\
-z
-\\end{pmatrix}
-$$
-
-que satisfaga que $(A - \\lambda I)\\vec{v} = \\vec{0}$.`,
+b) (1.25 puntos) Para $\\lambda = 5$, calcular un vector no nulo $\\vec{v} = \\begin{pmatrix} x \\\\ y \\\\ z \\end{pmatrix}$ que satisfaga que $(A - \\lambda I)\\vec{v} = \\vec{0}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-2", bloque: "Analisis", opcion: "A",
         enunciado: `Un muro rectangular de la biblioteca pública del barrio se va a pintar con la ayuda de unos grafiteros. La dimensión del muro es de 3 metros de alto y 12 metros de largo. Colocando la esquina inferior izquierda del muro en el origen de coordenadas, se va a utilizar la curva $f(x) = \\cos\!\\left(\\dfrac{\\pi x}{9}\\right) + 2$ para diferenciar dos regiones del muro que serán pintadas con dos colores distintos. Se sabe que con un bote de spray se pueden pintar 3 metros cuadrados de superficie.

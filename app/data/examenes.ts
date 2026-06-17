@@ -770,13 +770,13 @@ a) (1.5 puntos) Calcular $P(\\overline{A} \\cap B)$ y $P(B)$.
 b) (1 punto) Calcular $P(C)$, siendo $C$ otro suceso del espacio muestral, independiente de $A$ y que verifica que $P(A \\cup C) = \\dfrac{14}{25}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-B1", bloque: "Algebra", opcion: "B",
-        enunciado: `Consideremos las matrices reales $A = \\begin{pmatrix}3&-1&1\\\\1&1&1\\\\1&-1&3\\end{pmatrix}$, $B = \\begin{pmatrix}b&2b&b\\\\2b&3b&b\\b&b&b\\end{pmatrix}$ y $C = \\begin{pmatrix}2&0&0\\\\0&2&0\\\\0&0&3\\end{pmatrix}$, con $b \\neq 0$. Se pide:
+        enunciado: `Consideremos las matrices reales $A = \\begin{pmatrix}3&-1&1\\\\1&1&1\\\\1&-1&3\\end{pmatrix}$, $B = \\begin{pmatrix}b&2b&b\\\\2b&3b&b\\\\b&b&b\\end{pmatrix}$ y $C = \\begin{pmatrix}2&0&0\\\\0&2&0\\\\0&0&3\\end{pmatrix}$, con $b \\neq 0$. Se pide:
 
 a) (1.25 puntos) Encontrar todos los valores de $b$ para los que se verifica $BCB^{-1} = A$.
 
 b) (0.75 puntos) Calcular el determinante de la matriz $AA^t$.
 
-c) (0.5 puntos) Resolver el sistema $B\\begin{pmatrix}x\\y\\z\\end{pmatrix} = \\begin{pmatrix}3\\\\-1\\\\1\\end{pmatrix}$ para $b = 1$.`,
+c) (0.5 puntos) Resolver el sistema $B\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix} = \\begin{pmatrix}3\\\\-1\\\\1\\end{pmatrix}$ para $b = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-B2", bloque: "Analisis", opcion: "B",
         enunciado: `Calcule:

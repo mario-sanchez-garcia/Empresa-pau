@@ -702,9 +702,9 @@ c) (1 punto) Calcular los puntos de la recta $r$ cuya distancia al plano $\\pi$ 
         enunciado: "Sean el punto $P(0, 1, 1)$ y el plano $\\pi : x + y = 2$. Se pide:\n\na) (0.5 puntos) Hallar la distancia del punto $P$ al plano $\\pi$.\n\nb) (1 punto) Determinar el punto $Q$ del plano $\\pi$ cuya distancia a $P$ es igual que la distancia de $P$ a $\\pi$.\n\nc) (1 punto) Hallar el área del triángulo formado por $P$ y los puntos de corte del plano $\\pi$ con los ejes coordenados.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-41", bloque: "Probabilidad", opcion: "A",
-        enunciado: `Sea $E = \{2, 3, 5, 7, 11, 13, 17, 19\}$ un espacio muestral y $P$ una medida de probabilidad en $E$ definida por: $P(7) = P(3) = \\dfrac{1}{4}$ y con el resto de sucesos elementales equiprobables.
+        enunciado: `Sea $E = \\{2, 3, 5, 7, 11, 13, 17, 19\\}$ un espacio muestral y $P$ una medida de probabilidad en $E$ definida por: $P(7) = P(3) = \\dfrac{1}{4}$ y con el resto de sucesos elementales equiprobables.
 
-Se consideran los sucesos $A = \{7, 11, 13, 19\}$, $B = \{2, 5, 7, 13, 17\}$ y $C = \{3, 5, 7, 11, 13\}$. Se pide calcular:
+Se consideran los sucesos $A = \\{7, 11, 13, 19\\}$, $B = \\{2, 5, 7, 13, 17\\}$ y $C = \\{3, 5, 7, 11, 13\\}$. Se pide calcular:
 
 a) (1.25 puntos) $P\\bigl(\\overline{(A - C)} \\cap B\\bigr)$.
 

@@ -1954,17 +1954,26 @@ function cambiarTipo(t: Tipo) {
           display: none;
         }
 
+        .exams-subject-section {
+          position: relative;
+          z-index: 1;
+          margin-bottom: 28px !important;
+        }
+
         .exams-subject-strip {
-          padding: 2px 0 10px;
+          align-items: stretch;
+          padding: 2px 0 12px;
+          overflow-y: visible;
         }
 
         .exams-subject-strip > .pau-subject-card {
           flex: 0 0 auto !important;
           min-width: 178px;
           max-width: 245px;
-          min-height: 64px !important;
-          padding: 10px 14px !important;
-          border-radius: 999px !important;
+          min-height: 78px !important;
+          height: auto !important;
+          padding: 12px 16px !important;
+          border-radius: 22px !important;
           background: #f7f7f8 !important;
           border: 1px solid #e5e7eb !important;
           box-shadow: none !important;
@@ -1984,6 +1993,25 @@ function cambiarTipo(t: Tipo) {
 
         .exams-subject-strip .subject-kicker {
           display: none !important;
+        }
+
+        .exams-subject-strip > .pau-subject-card > div:nth-of-type(2) {
+          align-items: flex-start !important;
+          min-width: 0;
+        }
+
+        .exams-subject-strip > .pau-subject-card > div:nth-of-type(2) > div:last-child {
+          min-width: 0;
+          max-width: 100%;
+        }
+
+        .exams-subject-strip > .pau-subject-card > div:nth-of-type(2) > div:last-child > div:first-child {
+          white-space: normal;
+          overflow-wrap: anywhere;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         .exams-hero {
@@ -2557,17 +2585,18 @@ function cambiarTipo(t: Tipo) {
   background: seccion === 'chat' ? 'rgba(255,255,255,0.76)' : undefined,
   backdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
   WebkitBackdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
-  padding: '0 32px',
+  padding: '10px 32px',
   minHeight: '64px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  position: 'sticky',
-  top: 0,
+  gap: '18px',
+  position: seccion === 'examenes' ? 'relative' : 'sticky',
+  top: seccion === 'examenes' ? undefined : 0,
   zIndex: 40,
   transition: 'background 300ms ease, border-color 300ms ease',
 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 auto', flexWrap: 'wrap' }}>
             {seccion === 'examenes' && (
               <div style={{ width: 30, height: 30, borderRadius: 10, background: cfg.light, border: '1px solid ' + cfg.soft, color: cfg.color, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                 <cfg.icon size={16} />
@@ -2578,13 +2607,13 @@ function cambiarTipo(t: Tipo) {
                 <MessageCircle size={15} color="#fff" />
               </div>
             )}
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', transition: 'color 300ms ease' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', transition: 'color 300ms ease', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.25 }}>
               {seccion === 'examenes' && cfg.label}
               {seccion === 'chat' && 'Chat con Pausia'}
               {seccion === 'historial' && 'Historial de correcciones'}
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
-            <div style={{ fontSize: 12, color: seccion === 'chat' ? '#64748b' : '#94a3b8', fontWeight: 500, transition: 'color 300ms ease' }}>
+            <div style={{ fontSize: 12, color: seccion === 'chat' ? '#64748b' : '#94a3b8', fontWeight: 500, transition: 'color 300ms ease', whiteSpace: 'nowrap' }}>
               {seccion === 'examenes' && `· ${examSystemLabel(ccaa)}`}
               {seccion === 'chat' && '· Tutor inteligente'}
               {seccion === 'historial' && '· Correcciones guardadas'}
@@ -2655,7 +2684,7 @@ function cambiarTipo(t: Tipo) {
               </div>
             </div>
 
-            <div style={{ marginBottom: '22px' }}>
+            <div className="exams-subject-section" style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{showAllSubjects ? 'Todas las asignaturas' : 'Selecciona una asignatura'}</div>

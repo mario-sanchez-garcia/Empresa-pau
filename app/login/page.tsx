@@ -45,10 +45,18 @@ export default function Login() {
     setCargando(true)
     setMensaje('')
     if (modo === 'registro') {
-      const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) setMensaje(error.message)
-      else if (data.session) window.location.href = '/'
-      else setMensaje('Revisa tu email para confirmar tu cuenta.')
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setMensaje(result.error ?? 'No se pudo crear la cuenta. Inténtalo de nuevo.')
+      } else {
+        await supabase.auth.setSession(result.session)
+        window.location.href = '/'
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMensaje(error.message)

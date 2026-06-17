@@ -706,9 +706,9 @@ c) (1 punto) Calcular los puntos de la recta $r$ cuya distancia al plano $\\pi$ 
 
 Se consideran los sucesos $A = \{7, 11, 13, 19\}$, $B = \{2, 5, 7, 13, 17\}$ y $C = \{3, 5, 7, 11, 13\}$. Se pide calcular:
 
-a) (1.25 puntos) $P\\bigl((A - C) \\cap B\\bigr)$.
+a) (1.25 puntos) $P\\bigl(\\overline{(A - C)} \\cap B\\bigr)$.
 
-b) (1.25 puntos) $P\\bigl((A \\cap B) \mid C\\bigr)$.`,
+b) (1.25 puntos) $P\\bigl((A \\cap B) \\mid \\overline{C}\\bigr)$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-42", bloque: "Probabilidad", opcion: "B",
         enunciado: "Entre los ciudadanos de 14 años o más de cierto país, el 20% de la población tiene entre 14 y 24\naños, el 50% entre 25 y 64 y el resto más de 64 años. Según datos recogidos por el ministerio de cultura de ese\npaís, el 74% de sus ciudadanos de entre 14 y 24 es lector habitual, mientras que el porcentaje decrece hasta el\n65.8% entre los de 25 a 64 y al 53.7% entre los mayores de 64. Elegido un ciudadano al azar del país en cuestión\nde 14 años o más, se pide:\n\na) (1.25 puntos) Calcular la probabilidad de que sea lector habitual.\n\nb) (1.25 puntos) Si no es lector habitual, calcular la probabilidad de que tenga entre 25 y 64 años.",

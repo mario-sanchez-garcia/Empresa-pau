@@ -7,6 +7,13 @@ import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimi
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
+- Usa Markdown claro con titulos, parrafos cortos y listas separadas por saltos de linea.
+- No juntes listas como "1. ...2. ..." ni titulos con texto como "Definir las variablesAsignamos".
+- No escribas valores visibles como undefined, null o NaN.
+- Usa LaTeX solo para formulas: cortas en $...$; sistemas, matrices, casos y expresiones largas en $$...$$.
+- No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores matematicos.
+- Si el ejercicio o el usuario estan claramente en catalan, responde en catalan; si estan en castellano, responde en castellano.`
 
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -54,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  contenido.push({ type: 'text', text: pregunta })
+  contenido.push({ type: 'text', text: `${CHAT_RESPONSE_FORMAT_RULES}\n\n${pregunta}` })
 
   const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
   const action = imageCount > 0 ? 'image_correction' : 'chat'

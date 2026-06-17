@@ -2,6 +2,27 @@ const MATH_TOKEN = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/g
 const CODE_FENCE_TOKEN = /(```[\s\S]*?```)/g
 const ENVIRONMENTS = 'pmatrix|bmatrix|vmatrix|matrix|cases|aligned|array|align|equation'
 const UNITS = 'kg|mol|atm|kJ|Pa|Hz|cm|mm|kg|g|m|s|N|J|W|T|C|V|A|L'
+const RESPONSE_HEADINGS = [
+  'Definir las variables',
+  'Plantear las ecuaciones',
+  'Resolver el sistema',
+  'Sistema resultante',
+  'Caso 1',
+  'Caso 2',
+  'Caso 3',
+  'Puntos fuertes',
+  'Errores a corregir',
+  'Corrección paso a paso',
+  'Correccion paso a paso',
+  'Teoría aplicada',
+  'Teoria aplicada',
+  'Solución',
+  'Solucion',
+  'Conclusión',
+  'Conclusion',
+  'Criterios de corrección',
+  'Criterios de correccion',
+]
 
 export function normalizeExamStatement(input?: string | null) {
   if (!input) return ''
@@ -42,17 +63,95 @@ export const formatExamText = normalizeExamStatement
 export function normalizeCorrectionText(input?: string | null) {
   if (!input) return ''
   let text = input
+  text = normalizeMathDelimiters(text)
+  text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
+  text = mapOutsideMath(text, normalizeResponseStructure)
+  text = formatOrphanCasesBlocks(text)
   text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
   text = mapOutsideMath(text, repairLostLatex)
   text = mapOutsideMath(text, wrapLatexEnvironments)
+  text = formatOrphanCasesBlocks(text)
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
   text = mapOutsideMath(text, formatScientificNotation)
   text = mapOutsideMath(text, wrapExplicitLatex)
+  text = mapOutsideMath(text, promoteLongLatexToDisplay)
   text = mapOutsideMath(text, formatPhysicsNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
-  return text.replace(/[ \t]{2,}/g, ' ').trim()
+  return text
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+function normalizeMathDelimiters(text: string) {
+  return mapOutsideCodeFences(text, part => part
+    .replace(/\$\\\(([\s\S]*?)\\\)\$/g, (_, body) => `$${body.trim()}$`)
+    .replace(/\$+\s*\\\(([\s\S]*?)\\\)\s*\$+/g, (_, body) => `$${body.trim()}$`)
+    .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, body) => `\n\n$$\n${body.trim()}\n$$\n\n`)
+    .replace(/\\\(([^()\n]*(?:\\[a-zA-Z]+|[=+\-*/^_{}])[^()\n]*)\\\)/g, (_, body) => `$${body.trim()}$`)
+  )
+}
+
+function removeVisibleInvalidValues(text: string) {
+  return text
+    .replace(/(^|\n)[ \t]*(?:undefined|null|NaN)[ \t]*(?=\n|$)/gi, '$1')
+    .replace(/(:|\b(?:resultante|resultado|solución|solucion|respuesta|detalle|teoría|teoria)\b)[ \t]*(?:undefined|null|NaN)\b/gi, '$1')
+    .replace(/\bundefined\b|\bNaN\b/g, '')
+}
+
+function normalizeResponseStructure(text: string) {
+  let output = text
+    .replace(/([A-Za-zÀ-ÿ])([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+(?:las?|los?|del?|de|a|al|y|o)\s+[A-Za-zÀ-ÿ]+){0,3})(?=\s|:)/g, (match, before, after) => {
+      if (!RESPONSE_HEADINGS.some(heading => normalizeHeading(heading) === normalizeHeading(after))) return match
+      return `${before}.\n\n${after}`
+    })
+    .replace(/\b(variables|ecuaciones|sistema)(Asignamos|Traducimos|Organizamos|Resolvemos|Calculamos|Comprobamos)\b/g, '$1.\n\n$2')
+    .replace(/(casos posibles:)\s*(Caso\s+\d+)/gi, '$1\n\n$2')
+    .replace(/(queda:)\s*([A-ZÁÉÍÓÚÑ])/g, '$1\n\n$2')
+    .replace(/(raíces:|raices:)\s*\(/gi, '$1 $(')
+    .replace(/([^\n])\s+((?:Caso|Sistema resultante|Puntos fuertes|Errores a corregir|Correcci[oó]n paso a paso|Teor[ií]a aplicada|Soluci[oó]n|Conclusi[oó]n|Criterios de correcci[oó]n)\b)/g, '$1\n\n$2')
+    .replace(/([^\n])\s+(\d{1,2}[.)]\s+(?=[A-ZÁÉÍÓÚÑ]))/g, '$1\n\n$2')
+    .replace(/(\d{1,2}[.)]\s+[^\n]+?)(?=\s+\d{1,2}[.)]\s+)/g, '$1\n\n')
+    .replace(/([.:;])\s*(\d{1,2}[.)]\s+)/g, '$1\n\n$2')
+
+  for (const heading of RESPONSE_HEADINGS) {
+    const escaped = escapeRegExp(heading)
+    output = output.replace(new RegExp(`(^|\\n)(?!#{1,6}\\s)\\s*(${escaped})(?=\\s*:?\\s*)`, 'gi'), (_, prefix, title) => {
+      const cleanTitle = title.trim()
+      return `${prefix}## ${cleanTitle}`
+    })
+  }
+
+  return output
+    .replace(/(## [^\n:]+):[ \t]*(?=\S)/g, '$1\n\n')
+    .replace(/\n{3,}/g, '\n\n')
+}
+
+function formatOrphanCasesBlocks(text: string) {
+  return mapOutsideCodeFences(text, part => part.replace(
+    /(^|\n)(?!\s*\$\$)([^\n$]*?\\end\{cases\})/g,
+    (match, prefix, body) => {
+      const rows = body
+        .replace(/\\begin\{cases\}/g, '')
+        .replace(/\\end\{cases\}/g, '')
+        .split(/\\{2,}|\\\s+(?=[0-9A-Za-z])/)
+        .map((row: string) => spaceEquation(row))
+        .filter((row: string) => row.includes('='))
+
+      if (rows.length < 2) return match
+      return `${prefix}\n\n$$\n\\begin{cases}\n${rows.join(' \\\\\n')}\n\\end{cases}\n$$\n\n`
+    }
+  ))
+}
+
+function promoteLongLatexToDisplay(text: string) {
+  return text.replace(
+    /(^|[^\$])((?:\\begin\{(?:cases|matrix|pmatrix|bmatrix|aligned|align|array)\}[\s\S]*?\\end\{(?:cases|matrix|pmatrix|bmatrix|aligned|align|array)\})|(?:\\frac\{[^{}\n]+\}\{[^{}\n]+\}[^.\n]*(?:\\implies|\\cdot)[^.\n]{35,}))/g,
+    (_, prefix, body) => `${prefix}\n\n$$\n${body.trim()}\n$$\n\n`
+  )
 }
 
 function normalizeExistingMath(text: string) {
@@ -352,4 +451,25 @@ function subscriptToNumber(value: string) {
 function superscriptToText(value: string) {
   const map: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
   return value.split('').map(character => map[character] ?? character).join('')
+}
+function normalizeHeading(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function spaceEquation(value: string) {
+  return value
+    .trim()
+    .replace(/\s*([=<>])\s*/g, ' $1 ')
+    .replace(/\s*([+\-])\s*/g, ' $1 ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }

@@ -531,6 +531,7 @@ button:active:not(:disabled),
   color: inherit;
   font-size: inherit;
   line-height: inherit;
+  overflow-wrap: anywhere;
 }
 
 .math-markdown .katex {
@@ -540,15 +541,32 @@ button:active:not(:disabled),
 }
 
 .math-markdown .katex-display {
-  margin: 1rem 0;
+  margin: 1.15rem 0;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.45rem 0.2rem;
+  padding: 0.65rem 0.25rem;
+  max-width: 100%;
+  text-align: center;
+  scrollbar-width: thin;
 }
 
 .math-markdown .katex-display > .katex {
   display: inline-block;
   max-width: none;
+  min-width: min-content;
+  text-align: initial;
+}
+
+.math-markdown .katex-error {
+  color: inherit;
+  background: rgba(239, 246, 255, 0.72);
+  border-radius: 6px;
+  padding: 0.05rem 0.2rem;
+}
+
+.math-markdown p,
+.math-markdown li {
+  overflow-wrap: anywhere;
 }
 
 /* ─── ExamStatement ──────────────────────────────────────────────── */

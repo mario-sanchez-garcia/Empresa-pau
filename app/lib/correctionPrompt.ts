@@ -160,6 +160,13 @@ Lengua Castellana y Literatura II:
 20. porqueEsAsi es opcional. Inclúyelo solo si puedes cerrar el JSON correctamente. Debe sonar como una explicación de un profesor PAU: concepto central, por qué se aplica al enunciado concreto, cómo pensarlo, qué ocurrió en la respuesta del alumno, error típico, mini ejemplo original y frase/checklist para sacar puntos. No copies apuntes ni libros. Usa Markdown y LaTeX cuando proceda, preservando $...$ y $$...$$.
 21. Mantén teoria_ejercicio solo como compatibilidad legacy si aparece en datos antiguos; para respuestas nuevas usa porqueEsAsi. Si falta espacio o no hay información suficiente, devuelve porqueEsAsi como null o con status "not_available" y prioriza siempre la corrección principal y un JSON válido.
 
+22. No escribas nunca valores visibles como undefined, null o NaN en campos de texto. Si falta informacion, deja el campo como cadena vacia, array vacio o null JSON real segun corresponda.
+23. No juntes titulos con el texto siguiente: escribe "Definir las variables" y luego un salto de linea antes de "Asignamos...". Lo mismo para "Plantear las ecuaciones", "Resolver el sistema", "Sistema resultante", "Puntos fuertes", "Errores a corregir", "Correccion paso a paso", "Teoria aplicada", "Solucion" y "Conclusion".
+24. Separa listas numeradas con saltos de linea reales. Nunca devuelvas "1. ...2. ...3. ..." en una sola linea.
+25. Usa LaTeX solo para formulas, no para parrafos completos. Formulas cortas en $...$; sistemas, matrices, casos, derivadas/integrales largas y varias ecuaciones en bloque con $$...$$.
+26. Para sistemas y matrices usa entornos KaTeX compatibles: cases, matrix, pmatrix, bmatrix, aligned, align o array. No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases} o \\end{matrix} fuera de delimitadores matematicos.
+27. Manten el idioma del enunciado o de la respuesta del alumno: castellano si esta en castellano, catalan si esta en catalan. No mezcles idiomas salvo citas necesarias.
+
 ### FORMATO DE SALIDA
 
 Responde ÚNICAMENTE con un objeto JSON válido. Cero texto fuera del JSON. Cero markdown. Cero introducciones. Solo JSON puro con esta forma:
@@ -306,7 +313,10 @@ INSTRUCCIONES:
 4. Usa Markdown y LaTeX ($...$, $$...$$) en los campos de texto cuando sea útil.
 5. Feedback directo y específico a la respuesta real, no genérico.
 6. Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. Si falta contexto, usa status "not_available" sin inventar. No copies material externo.
-7. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
+7. Formato obligatorio dentro de los campos de texto: Markdown limpio, listas separadas por saltos de linea, sin parrafos enormes, sin "undefined", "null" o "NaN" visibles, y sin titulos pegados a la frase siguiente.
+8. LaTeX obligatorio para matematicas/fisica/quimica: formulas cortas en $...$; sistemas, matrices, casos, varias ecuaciones y expresiones largas en $$...$$. No dejes \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores.
+9. Manten el idioma del ejercicio o de la respuesta del alumno. Si el enunciado esta en catalan, corrige en catalan; si esta en castellano, corrige en castellano.
+10. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
 
 {
   "nota": 0.00,

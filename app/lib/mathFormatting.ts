@@ -301,7 +301,7 @@ function normalizePdfGlyphs(text: string) {
 function normalizeSoftLineBreaks(text: string) {
   return text
     .replace(/([A-Za-z\u00c0-\u017f])-\s*\n\s*([A-Za-z\u00c0-\u017f])/g, '$1$2')
-    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[.)]|[-\u2022]|\$\$)/gi, '$1 ')
+    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[)]|[-\u2022]|\$\$)/gi, '$1 ')
 }
 
 function formatBulletPoints(text: string) {

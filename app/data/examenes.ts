@@ -664,7 +664,7 @@ A = \\begin{pmatrix}
 \\end{pmatrix}
 $$
 
-e $I$ la matriz identidad de orden 3. Se pide:
+e $I$ la matriz identidad de orden $3$. Se pide:
 
 a) (1.25 puntos) Calcular el polinomio $P(\\lambda) = \\det(A - \\lambda I)$ y hallar las raíces reales del polinomio.
 

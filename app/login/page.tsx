@@ -45,8 +45,9 @@ export default function Login() {
     setCargando(true)
     setMensaje('')
     if (modo === 'registro') {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) setMensaje(error.message)
+      else if (data.session) window.location.href = '/'
       else setMensaje('Revisa tu email para confirmar tu cuenta.')
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })

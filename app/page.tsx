@@ -755,25 +755,32 @@ const LABELS_HISTORIA: Record<string, string> = {
   corta: 'Respuesta corta'
 }
 
+const EXAMENES_BY_ASIGNATURA: Partial<Record<Asignatura, any[]>> = {
+  mates: examenes,
+  matematicas_ccss: examenesMatematicasCCSSMadrid,
+  fisica: examenesFisica,
+  quimica: examenesQuimica,
+  biologia: examenesBiologia,
+  lengua: examenesLengua,
+  ingles: examenesIngles,
+  historia: examenesHistoria,
+}
+
+const SUBJECTS_REQUIRING_STRUCTURED_EXAMS = new Set<Asignatura>(['matematicas_ccss'])
+
+const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas) && examen.preguntas.length > 0
+
 const perteneceAComunidadSeleccionada = (examen: any) =>
   (examen.comunidad ?? examen.ccaa) === ccaa
 
-const examenesFiltrados =
-    asignatura === 'mates'
-      ? examenes.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-      : asignatura === 'matematicas_ccss'
-        ? examenesMatematicasCCSSMadrid.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-        : asignatura === 'fisica'
-          ? examenesFisica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-          : asignatura === 'quimica'
-            ? examenesQuimica.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-            : asignatura === 'biologia'
-              ? examenesBiologia.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-              : asignatura === 'lengua'
-                ? examenesLengua.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-                : asignatura === 'ingles'
-                  ? examenesIngles.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
-                  : examenesHistoria.filter(e => e.tipo === tipo && perteneceAComunidadSeleccionada(e))
+const examenesAsignatura = EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria
+const requiresStructuredExams = SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatura)
+
+const examenesFiltrados = examenesAsignatura.filter(e =>
+  e.tipo === tipo &&
+  perteneceAComunidadSeleccionada(e) &&
+  (!requiresStructuredExams || hasStructuredQuestions(e))
+)
 
 const aniosDisponibles = isCatalunaMates
   ? Array.from(new Set(examenesCatMates.filter(p => p.tipo === tipo).map(p => p.year)))
@@ -1610,15 +1617,8 @@ function cambiarTipo(t: Tipo) {
       const tipoFromCataluna = (convocatoria: string): Tipo =>
         convocatoria === 'extraordinaria' ? 'Extraordinaria' : 'Ordinaria'
 
-      const normalSource: any[] =
-        asignatura === 'mates' ? examenes :
-        asignatura === 'matematicas_ccss' ? examenesMatematicasCCSSMadrid :
-        asignatura === 'fisica' ? examenesFisica :
-        asignatura === 'quimica' ? examenesQuimica :
-        asignatura === 'biologia' ? examenesBiologia :
-        asignatura === 'lengua' ? examenesLengua :
-        asignatura === 'ingles' ? examenesIngles :
-        examenesHistoria
+      const normalSource: any[] = (EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria)
+        .filter(exam => !SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatura) || hasStructuredQuestions(exam))
 
       const selectNormalResult = (exam: any, question: any, questionIndex: number) => {
       const years = Array.from(new Set(

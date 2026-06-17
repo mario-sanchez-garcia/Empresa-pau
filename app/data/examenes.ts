@@ -767,9 +767,9 @@ a) (1 punto) Hallar una ecuación del plano que pasa por los puntos $A$ y $B$ y 
 b) (1.5 puntos) Hallar ecuaciones de dos rectas paralelas, $r_1$ y $r_2$, que pasen por los puntos $A$ y $B$ respectivamente, estén en el plano $x + z = 1$ y tales que la distancia entre ellas sea $1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2024-J-A4", bloque: "Probabilidad", opcion: "A",
-        enunciado: `Sabiendo que $P(\\overline{A}) = \\dfrac{11}{20}$, $P(A|B) - P(B|A) = \\dfrac{1}{24}$ y $P(A \\cap B) = \\dfrac{3}{10}$, se pide:
+        enunciado: `Sabiendo que $P(\\overline{A}) = \\dfrac{11}{20}$, $P(A|B) - P(B|A) = \\dfrac{1}{24}$ y $P(A \\cap \\overline{B}) = \\dfrac{3}{10}$, se pide:
 
-a) (1.5 puntos) Calcular $P(\\overline{A} \\cap B)$ y $P(B)$.
+a) (1.5 puntos) Calcular $P(A \\cap B)$ y $P(B)$.
 
 b) (1 punto) Calcular $P(C)$, siendo $C$ otro suceso del espacio muestral, independiente de $A$ y que verifica que $P(A \\cup C) = \\dfrac{14}{25}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },

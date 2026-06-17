@@ -20,6 +20,7 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatPhysicsNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
+  text = mapOutsideMath(text, formatBulletPoints)
   text = mapOutsideMath(text, formatExamStructure)
 
   return text
@@ -188,6 +189,12 @@ function normalizeSoftLineBreaks(text: string) {
   return text
     .replace(/([A-Za-z\u00c0-\u017f])-\s*\n\s*([A-Za-z\u00c0-\u017f])/g, '$1$2')
     .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[.)]|[-\u2022]|\$\$)/gi, '$1 ')
+}
+
+function formatBulletPoints(text: string) {
+  return text
+    .replace(/(^|\n)\s*\u2022\s+/g, '$1- ')
+    .replace(/:\n(-\s+)/g, ':\n\n$1')
 }
 
 function formatBrokenMathBlocks(text: string) {

@@ -780,7 +780,9 @@ a) (1.25 puntos) Encontrar todos los valores de $b$ para los que se verifica $BC
 
 b) (0.75 puntos) Calcular el determinante de la matriz $AA^t$.
 
-c) (0.5 puntos) Resolver el sistema
+c) (0.5 puntos)
+
+Resolver el sistema
 
 $$B\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix} = \\begin{pmatrix}3\\\\-1\\\\1\\end{pmatrix}$$
 

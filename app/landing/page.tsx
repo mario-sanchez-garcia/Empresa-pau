@@ -135,7 +135,7 @@ const COMPARE_ROWS = [
   { label: 'Disponible 24 horas al día',     pausia: true,   academia: false, solo: true  },
   { label: 'Chat con tutor IA',              pausia: true,   academia: false, solo: false },
   { label: 'Historial de progreso',          pausia: true,   academia: false, solo: false },
-  { label: 'Precio mensual',                 pText: 'Gratis / 14,99€', aText: '100–200€', sText: 'Gratis' },
+  { label: 'Precio mensual',                 pText: 'Gratis / 7,99€', aText: '100–200€', sText: 'Gratis' },
 ]
 
 const TESTIMONIALS = [
@@ -1500,7 +1500,7 @@ export default function LandingPage() {
             <div style={{ fontSize: 38, fontWeight: 900, color: C.ink, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 4 }}>Gratis</div>
             <div style={{ fontSize: 12, color: C.soft, marginBottom: 22 }}>Para empezar</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 24 }}>
-              {['10 exámenes al mes', 'Corrección IA por apartado', 'Historial de 4 semanas', '4 asignaturas disponibles'].map((item) => (
+              {['10 correcciones al mes', 'Sin Camino PAU', 'Sin simulacros', 'Historial básico'].map((item) => (
                 <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.ink2 }}>
                   <Check size={14} style={{ color: C.green, flexShrink: 0 }} /> {item}
                 </div>
@@ -1534,7 +1534,10 @@ export default function LandingPage() {
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Premium</div>
                 <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(255,255,255,0.18)', color: '#fff', padding: '2px 8px', borderRadius: 999 }}>Recomendado</span>
               </div>
-              <div style={{ fontSize: 38, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 4 }}>14,99€</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                <div style={{ fontSize: 38, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>7,99€</div>
+                <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(255,255,255,0.22)', color: '#fff', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>Precio de lanzamiento</span>
+              </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 22 }}>por mes · cancela cuando quieras</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 24 }}>
                 {['Exámenes ilimitados', 'Plan semanal personalizado', 'Chat con tutor IA 24/7', 'Flashcards y zona de repaso', 'Historial completo', 'Acceso anticipado a nuevas materias'].map((item) => (

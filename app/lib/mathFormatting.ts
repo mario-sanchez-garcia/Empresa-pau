@@ -34,7 +34,7 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, wrapLatexEnvironments)
   text = formatBrokenMathBlocks(text)
   text = formatLinearSystems(text)
-  text = normalizeSoftLineBreaks(text)
+  text = mapOutsideMath(text, normalizeSoftLineBreaks)
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
   text = mapOutsideMath(text, formatScientificNotation)
   text = mapOutsideMath(text, wrapExplicitLatex)
@@ -44,10 +44,10 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatBulletPoints)
   text = mapOutsideMath(text, formatExamStructure)
 
-  return text
+  return normalizeDisplayMathBlocks(text
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n(?!\n)/g, '  \n')
-    .trim()
+  ).trim()
 }
 
 // Kept for compatibility with the existing renderer and imports.
@@ -93,6 +93,20 @@ function normalizeMathDelimiters(text: string) {
     .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, body) => `\n\n$$\n${body.trim()}\n$$\n\n`)
     .replace(/\\\(([^()\n]*(?:\\[a-zA-Z]+|[=+\-*/^_{}])[^()\n]*)\\\)/g, (_, body) => `$${body.trim()}$`)
   )
+}
+
+function normalizeDisplayMathBlocks(text: string) {
+  const parts = text.split('$$')
+  if (parts.length < 3) return text
+
+  return parts.map((part, index) => {
+    if (index % 2 === 0) return part
+    const body = part
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n[ \t]+/g, '\n')
+      .trim()
+    return `\n\n$$\n${body}\n$$\n\n`
+  }).join('')
 }
 
 function removeVisibleInvalidValues(text: string) {

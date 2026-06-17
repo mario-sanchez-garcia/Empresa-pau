@@ -355,17 +355,16 @@ export default function OnboardingFlow() {
                   className="w-full flex items-center gap-3 px-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98]"
                   style={{
                     minHeight: 56,
-                    borderColor: sel ? s.color : '#e2e8f0',
-                    background: sel ? s.bg : '#fff',
-                    boxShadow: sel ? `0 0 0 3px ${s.color}1a` : '0 1px 3px rgba(0,0,0,0.04)',
+                    borderColor: sel ? s.color : 'rgba(255,255,255,0.1)',
+                    background: sel ? `${s.color}22` : 'rgba(255,255,255,0.05)',
                   }}
                 >
                   <div className="flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
-                    style={{ borderColor: sel ? s.color : '#cbd5e1', background: sel ? s.color : 'white' }}>
+                    style={{ borderColor: sel ? s.color : 'rgba(255,255,255,0.2)', background: sel ? s.color : 'transparent' }}>
                     {sel && <Check size={11} color="white" strokeWidth={3} />}
                   </div>
                   <span className="font-bold text-sm transition-colors"
-                    style={{ color: sel ? s.color : '#334155' }}>
+                    style={{ color: sel ? s.color : 'rgba(255,255,255,0.8)' }}>
                     {s.label}
                   </span>
                 </motion.button>
@@ -378,9 +377,9 @@ export default function OnboardingFlow() {
               onClick={handleSubjectsConfirm}
               className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] transition-all mt-1 active:scale-[0.98]"
               style={{
-                background: subjects.length > 0 ? 'linear-gradient(135deg, #1d4ed8, #2563eb)' : '#f1f5f9',
-                color: subjects.length > 0 ? 'white' : '#94a3b8',
-                boxShadow: subjects.length > 0 ? '0 8px 24px rgba(37,99,235,0.28)' : 'none',
+                background: subjects.length > 0 ? 'linear-gradient(135deg, #1d4ed8, #2563eb)' : 'rgba(255,255,255,0.05)',
+                color: subjects.length > 0 ? 'white' : 'rgba(255,255,255,0.25)',
+                boxShadow: subjects.length > 0 ? '0 8px 24px rgba(37,99,235,0.35)' : 'none',
               }}
             >
               Confirmar {subjects.length > 0 && `(${subjects.length})`}
@@ -460,7 +459,7 @@ export default function OnboardingFlow() {
   ]
 
   return (
-    <div className="min-h-[100dvh] bg-[#f8fafc]"
+    <div className="min-h-[100dvh] bg-[#06091a]"
       style={{ minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
 
       <style>{`
@@ -468,38 +467,53 @@ export default function OnboardingFlow() {
         * { box-sizing: border-box; }
       `}</style>
 
+      {/* Particles background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Particles
+          particleColors={['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd']}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.08}
+          particleBaseSize={80}
+          alphaParticles
+          moveParticlesOnHover
+          particleHoverFactor={0.3}
+          sizeRandomness={1.2}
+        />
+      </div>
+
       {/* Confetti canvas */}
       <canvas ref={confettiRef} className="fixed inset-0 pointer-events-none z-50"
         style={{ display: 'none' }} />
 
-      <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+      <header className="relative z-10 border-b border-white/10 bg-white/5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4">
           <img src="/brand/pausia-lockup.png" alt="Pausia"
             className="h-7 shrink-0 object-contain" />
-          <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-slate-500 sm:flex">
+          <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-white/50 sm:flex">
             <span>Preparación PAU</span>
-            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span className="h-1 w-1 rounded-full bg-white/20" />
             <span>Ruta personalizada</span>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-5 py-8 lg:grid-cols-[320px_1fr] lg:py-12">
-        <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-8 lg:self-start">
+      <main className="relative z-10 mx-auto grid w-full max-w-6xl flex-1 gap-6 px-5 py-8 lg:grid-cols-[320px_1fr] lg:py-12">
+        <aside className="rounded-[28px] border border-white/10 bg-white/[0.06] backdrop-blur-sm p-6 lg:sticky lg:top-8 lg:self-start">
           <div className="mb-6">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-400">Onboarding</p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-white">Camino PAU</h1>
+            <p className="mt-2 text-sm font-semibold leading-6 text-white/50">
               Una configuración breve para ajustar tu plan de estudio a tu examen, ritmo y objetivos.
             </p>
           </div>
 
           <div className="mb-6">
-            <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+            <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-white/40">
               <span>Progreso</span>
               <span>{Math.round(progressPct)}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: 'linear-gradient(90deg, #1d4ed8, #3b82f6)' }}
@@ -514,54 +528,41 @@ export default function OnboardingFlow() {
               const active = currentStep >= index + 1 || phase === 'done'
               return (
                 <div key={item} className="flex items-center gap-3">
-                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-white/10 text-white/30'}`}>
                     {active ? <Check size={13} strokeWidth={3} /> : index + 1}
                   </span>
-                  <span className={`text-sm font-bold ${active ? 'text-slate-800' : 'text-slate-400'}`}>{item}</span>
+                  <span className={`text-sm font-bold ${active ? 'text-white' : 'text-white/30'}`}>{item}</span>
                 </div>
               )
             })}
           </div>
 
           {userAnswers.length > 0 && (
-            <div className="mt-6 rounded-2xl bg-slate-50 p-4">
-              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Tus respuestas</p>
+            <div className="mt-6 rounded-2xl bg-white/5 p-4">
+              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-white/30">Tus respuestas</p>
               <div className="space-y-1.5">
                 {userAnswers.slice(-4).map(answer => (
-                  <p key={answer.id} className="truncate text-xs font-bold text-slate-600">{answer.text}</p>
+                  <p key={answer.id} className="truncate text-xs font-bold text-white/60">{answer.text}</p>
                 ))}
               </div>
             </div>
           )}
         </aside>
 
-        <section className="relative flex min-h-[640px] items-center overflow-hidden rounded-[28px] bg-[#06091a] p-3 lg:p-4">
-          <div className="absolute inset-0 z-0">
-            <Particles
-              particleColors={['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd']}
-              particleCount={180}
-              particleSpread={8}
-              speed={0.08}
-              particleBaseSize={80}
-              alphaParticles
-              moveParticlesOnHover
-              particleHoverFactor={0.4}
-              sizeRandomness={1.2}
-            />
-          </div>
+        <section className="relative z-10 flex min-h-[640px] items-center">
           <motion.div
             key={phase}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
-            className="relative z-10 w-full rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.45)] sm:p-8"
+            className="w-full rounded-[32px] border border-white/10 bg-white/[0.06] backdrop-blur-sm p-5 shadow-[0_28px_90px_rgba(0,0,0,0.4)] sm:p-8"
           >
             <div className="mb-7 flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-700">
+              <span className="rounded-full bg-blue-500/20 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-300">
                 {questionLabel}
               </span>
               {phase !== 'welcome' && phase !== 'generating' && phase !== 'done' && (
-                <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                <span className="text-xs font-black uppercase tracking-[0.14em] text-white/30">
                   {currentStep} / {totalQ}
                 </span>
               )}
@@ -569,8 +570,8 @@ export default function OnboardingFlow() {
 
             {phase !== 'generating' && phase !== 'done' && (
               <div className="mb-7">
-                <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{phaseTitle[phase]}</h2>
-                <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">{latestPrompt}</p>
+                <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">{phaseTitle[phase]}</h2>
+                <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-white/50">{latestPrompt}</p>
               </div>
             )}
 
@@ -581,12 +582,12 @@ export default function OnboardingFlow() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
-                  className="mb-7 inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500"
+                  className="mb-7 inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/50"
                 >
                   <span>Preparando la siguiente pregunta</span>
                   <span className="flex items-center gap-1">
                     {[0, 1, 2].map(i => (
-                      <motion.span key={i} className="h-1.5 w-1.5 rounded-full bg-blue-500"
+                      <motion.span key={i} className="h-1.5 w-1.5 rounded-full bg-blue-400"
                         animate={{ scale: [1, 1.45, 1], opacity: [0.35, 1, 0.35] }}
                         transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.16 }}
                       />
@@ -599,13 +600,13 @@ export default function OnboardingFlow() {
             {phase === 'generating' && (
               <div className="space-y-6">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Procesando</p>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Preparando tu ruta personalizada</h2>
-                  <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-400">Procesando</p>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Preparando tu ruta personalizada</h2>
+                  <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-white/50">
                     Estamos cruzando tus respuestas para crear un Camino PAU útil, realista y exigente.
                   </p>
                 </div>
-                <div className="space-y-4 rounded-3xl border border-slate-100 bg-slate-50 p-5">
+                <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-5">
                 {GEN_ITEMS.map((item, i) => (
                   <motion.div key={item}
                     initial={{ opacity: 0, x: -8 }}
@@ -615,7 +616,7 @@ export default function OnboardingFlow() {
                   >
                     <motion.div
                       className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                      animate={{ background: genIdx > i ? '#2563eb' : '#e2e8f0' }}
+                      animate={{ background: genIdx > i ? '#2563eb' : 'rgba(255,255,255,0.1)' }}
                       transition={{ duration: 0.3 }}
                     >
                       {genIdx > i && (
@@ -625,7 +626,7 @@ export default function OnboardingFlow() {
                       )}
                     </motion.div>
                     <span className="text-sm font-semibold"
-                      style={{ color: genIdx > i ? '#1e293b' : '#94a3b8' }}>
+                      style={{ color: genIdx > i ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>
                       {item}
                     </span>
                   </motion.div>
@@ -638,14 +639,14 @@ export default function OnboardingFlow() {
               <div className="space-y-7 text-center">
                 <motion.div initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 18 }}
-                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_18px_55px_rgba(37,99,235,0.35)]">
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_18px_55px_rgba(37,99,235,0.5)]">
                   <Check size={34} strokeWidth={3} />
                 </motion.div>
 
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Camino creado</p>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Tu ruta PAU está lista</h2>
-                  <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-7 text-slate-500">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-400">Camino creado</p>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Tu ruta PAU está lista</h2>
+                  <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-7 text-white/50">
                     Pausia ya tiene lo necesario para organizar tus sesiones, priorizar asignaturas y ajustar el ritmo de preparación.
                   </p>
                 </div>
@@ -717,32 +718,27 @@ function OptionBtn({ label, desc, badge, index, onClick }: OptionBtnProps) {
       transition={{ delay: index * 0.048 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 rounded-2xl border border-slate-200 bg-white text-left group transition-all"
-      style={{
-        minHeight: 56,
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      }}
+      className="w-full flex items-center gap-3 px-4 rounded-2xl border border-white/10 bg-white/5 text-left group transition-all"
+      style={{ minHeight: 56 }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = '#93c5fd'
-        e.currentTarget.style.background = '#f0f7ff'
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(37,99,235,0.10)'
+        e.currentTarget.style.borderColor = 'rgba(96,165,250,0.5)'
+        e.currentTarget.style.background = 'rgba(37,99,235,0.15)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#e2e8f0'
-        e.currentTarget.style.background = '#ffffff'
-        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+        e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
       }}
     >
       <div className="flex-1 min-w-0">
-        <span className="block text-sm font-bold text-slate-800">{label}</span>
-        {desc && <span className="block text-xs font-semibold text-slate-400 mt-0.5">{desc}</span>}
+        <span className="block text-sm font-bold text-white">{label}</span>
+        {desc && <span className="block text-xs font-semibold text-white/40 mt-0.5">{desc}</span>}
       </div>
       {badge && (
-        <span className="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-700">
+        <span className="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-500/20 text-blue-300">
           {badge}
         </span>
       )}
-      <ChevronRight size={16} className="shrink-0 text-slate-300 transition-colors" />
+      <ChevronRight size={16} className="shrink-0 text-white/20 transition-colors" />
     </motion.button>
   )
 }

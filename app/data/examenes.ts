@@ -681,7 +681,7 @@ $$
 que satisfaga que $(A - \\lambda I)\\vec{v} = \\vec{0}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2025-J-2", bloque: "Analisis", opcion: "A",
-        enunciado: `Un muro rectangular de la biblioteca pública del barrio se va a pintar con la ayuda de unos grafiteros. La dimensión del muro es de 3 metros de alto y 12 metros de largo. Colocando la esquina inferior izquierda del muro en el origen de coordenadas, se va a utilizar la curva $f(x) = \\cos\!\\left(\\dfrac{\\pi x}{9}\\right) + 2$ para diferenciar dos regiones del muro que serán pintadas con dos colores distintos. Se sabe que con un bote de spray se pueden pintar 3 metros cuadrados de superficie.
+        enunciado: `Un muro rectangular de la biblioteca pública del barrio se va a pintar con la ayuda de unos grafiteros. La dimensión del muro es de 3 metros de alto y 12 metros de largo. Colocando la esquina inferior izquierda del muro en el origen de coordenadas, se va a utilizar la curva $f(x) = \\cos\\left(\\dfrac{\\pi x}{9}\\right) + 2$ para diferenciar dos regiones del muro que serán pintadas con dos colores distintos. Se sabe que con un bote de spray se pueden pintar 3 metros cuadrados de superficie.
 
 a) (0.75 puntos) Halle el valor máximo y el valor mínimo de la función $f(x)$ en el intervalo $[0, 12]$. ¿Está la curva en este intervalo $[0, 12]$ contenida completamente en el muro?
 

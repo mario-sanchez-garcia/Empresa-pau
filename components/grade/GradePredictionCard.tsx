@@ -1,4 +1,5 @@
 import { BarChart3, ChevronRight, Target, TrendingDown, TrendingUp } from 'lucide-react'
+import Link from 'next/link'
 import type { GradePredictionResult } from '@/app/lib/gradePrediction'
 
 type GradePredictionCardProps = {
@@ -101,9 +102,9 @@ function EmptyState({ error }: { error?: string }) {
           </p>
           {error && <p className="mt-2 text-xs font-semibold text-blue-700">{error}</p>}
         </div>
-        <a href="/simulacros" className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white no-underline shadow-[0_14px_28px_rgba(37,99,235,0.2)] transition hover:-translate-y-0.5">
+        <Link href="/simulacros" className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white no-underline shadow-[0_14px_28px_rgba(37,99,235,0.2)] transition hover:-translate-y-0.5">
           Empezar <ChevronRight size={16} />
-        </a>
+        </Link>
       </div>
     </div>
   )

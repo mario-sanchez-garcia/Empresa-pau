@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { CheckCircle2, Clock, Copy, Lightbulb, MessageCircle, Route, RotateCcw, Target, TriangleAlert } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -182,13 +183,13 @@ export default function SimulacroResultsPage() {
         title="Resultados del simulacro"
         subtitle="Corrección completa bloque a bloque"
         actions={
-          <a
+          <Link
             href="/simulacros"
             className="campus-primary"
             style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
           >
             <RotateCcw size={14} />Nuevo simulacro
-          </a>
+          </Link>
         }
       >
         <div className="mx-auto grid max-w-6xl gap-6">
@@ -487,12 +488,12 @@ export default function SimulacroResultsPage() {
             >
               <Route size={15} />Crear misión de repaso
             </a>
-            <a
+            <Link
               href="/"
               className="pau-button-secondary no-underline"
             >
               <MessageCircle size={15} />Preguntar a Pausia
-            </a>
+            </Link>
             {copyMessage && (
               <span
                 className="rounded-full px-3 py-1 text-sm font-black"

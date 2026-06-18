@@ -65,6 +65,7 @@ export const formatExamText = normalizeExamStatement
 export function normalizeCorrectionText(input?: string | null) {
   if (!input) return ''
   let text = input
+  text = fixMismatchedDelimiters(text)
   text = normalizeMathDelimiters(text)
   text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
   text = mapOutsideMath(text, normalizeResponseStructure)
@@ -89,6 +90,17 @@ export function normalizeCorrectionText(input?: string | null) {
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+function fixMismatchedDelimiters(text: string) {
+  return mapOutsideCodeFences(text, part => part
+    // $$content$ → $content$ (opens double, closes single, no newlines)
+    .replace(/\$\$([^$\n]+?)\$(?!\$)/g, (_, body) => `$${body.trim()}$`)
+    // $content$$ → $content$ (opens single, closes double, no newlines)
+    .replace(/(?<!\$)\$([^$\n]+?)\$\$(?!\$)/g, (_, body) => `$${body.trim()}$`)
+    // $\begin{env}...\end{env}$ → strip outer $ so wrapLatexEnvironments wraps in $$
+    .replace(/(?<!\$)\$(\\begin\{[^}]+\}[\s\S]*?\\end\{[^}]+\})\$(?!\$)/g, (_, body) => body)
+  )
 }
 
 function normalizeMathDelimiters(text: string) {

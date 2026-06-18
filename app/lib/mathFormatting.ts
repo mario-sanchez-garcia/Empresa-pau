@@ -1,4 +1,4 @@
-const MATH_TOKEN = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/g
+const MATH_TOKEN = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g
 const CODE_FENCE_TOKEN = /(```[\s\S]*?```)/g
 const ENVIRONMENTS = 'pmatrix|bmatrix|vmatrix|matrix|cases|aligned|array|align|equation'
 const UNITS = 'kg|mol|atm|kJ|Pa|Hz|cm|mm|kg|g|m|s|N|J|W|T|C|V|A|L'

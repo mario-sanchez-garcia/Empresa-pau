@@ -597,6 +597,7 @@ export default function Home() {
   const [imagenTipo, setImagenTipo] = useState('image/jpeg')
   const [imagenPreview, setImagenPreview] = useState<string | null>(null)
   const [correccion, setCorreccion] = useState('')
+  const [streamText, setStreamText] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto'|'imagen'>('texto')
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
@@ -1298,7 +1299,7 @@ function nombreAsignatura(a: string) {
 }
 
 function reset() {
-  setCorreccion('')
+  setCorreccion(''); setStreamText('')
   setRespuesta('')
   setImagen(null)
   setImagenPreview(null)
@@ -1349,7 +1350,7 @@ function cambiarTipo(t: Tipo) {
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
-    setCargando(true); setCorreccion('')
+    setCargando(true); setCorreccion(''); setStreamText('')
     try {
       const accessToken = await getChatAccessToken()
       if (!accessToken) {
@@ -1381,24 +1382,38 @@ function cambiarTipo(t: Tipo) {
             : respuesta
         }]
       })
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/chat?stream=1', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
       })
-      const data = await res.json()
       if (!res.ok) {
+        const data = await res.json()
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsedCorrection = parseCorrectionPayload(data.respuesta)
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      let accumulated = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        accumulated += decoder.decode(value, { stream: true })
+        setStreamText(accumulated)
+      }
+      setStreamText('')
+      if (!accumulated) {
+        setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
+        return
+      }
+      const parsedCorrection = parseCorrectionPayload(accumulated)
       const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
       const correccionVisible = correccionJson
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
-        : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: puntuacionMax }), puntuacionMax)
+        : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(accumulated, { officialMaxScore: puntuacionMax }), puntuacionMax)
       const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
       setCorreccion(correccionGuardada)
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
-      const partes = !correccionJson ? (data.respuesta || '').match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
+      const partes = !correccionJson ? accumulated.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
       const rawNota = bloqueJson?.puntos_conseguidos != null
         ? Number(bloqueJson.puntos_conseguidos)
         : partes ? parseFloat(partes[1].replace(',', '.')) : null
@@ -1414,6 +1429,7 @@ function cambiarTipo(t: Tipo) {
         correccion: correccionGuardada
       }).then(() => {})
     } catch {
+      setStreamText('')
       setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
       setCargando(false)
@@ -3340,14 +3356,17 @@ function cambiarTipo(t: Tipo) {
               </button>
             </div>}
 
-            {!isCatalunaExam && correccion && (
+            {!isCatalunaExam && (correccion || streamText) && (
               <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
                 <div style={{ padding: '14px 22px', background: 'linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Pausia</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  <CorrectionResultCard correction={correccion} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
+                  {streamText
+                    ? <CorrectionResultCard correction={streamText} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
+                    : <CorrectionResultCard correction={correccion} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
+                  }
                 </div>
               </div>
             )}

@@ -32,23 +32,25 @@ export const examenesF: PreguntaFisica[] = [
     id: "f-2025-jun-1",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "1",
-    enunciado: `Eris es un planeta enano del sistema solar descubierto en enero de 2005 por un equipo
-del observatorio del Monte Palomar dirigido por Michael E. Brown. Es el objeto transneptuniano más
-masivo, el segundo más grande después de Plutón, y el cuerpo más grande del sistema solar que no ha
-sido visitado por una sonda espacial. Tiene un diámetro de 2330 km, ligeramente inferior al de Plutón, y
-su densidad es de $2{,}5\ \\text{g cm}^{-3}$. La órbita de Eris es muy excéntrica; actualmente el planeta se encuentra
-a su máxima distancia del Sol (afelio), a $1{,}45 \\cdot 10^{13}$ m, llegando a situarse a $5{,}24 \\cdot 10^{12}$ m del Sol durante
-su perihelio.
+    enunciado: `**1** Eris es un planeta enano del sistema solar descubierto en enero de 2005 por un equipo del observatorio del Monte Palomar dirigido por Michael E. Brown. Es el objeto transneptuniano más masivo, el segundo más grande después de Plutón, y el cuerpo más grande del sistema solar que no ha sido visitado por una sonda espacial. La órbita de Eris es muy excéntrica; actualmente el planeta se encuentra a su máxima distancia del Sol (afelio), llegando a situarse durante su perihelio mucho más cerca del Sol.
 
-a) (1 punto) Calcule la masa del planeta y el valor de la aceleración de la gravedad en su superficie.
+**Datos:**
+- Diámetro de Eris: \\(2330\\,\\text{km}\\)
+- Densidad de Eris: \\(2{,}5\\,\\text{g}\\,\\text{cm}^{-3}\\)
+- Distancia al Sol en el afelio: \\(1{,}45 \\cdot 10^{13}\\,\\text{m}\\)
+- Distancia al Sol en el perihelio: \\(5{,}24 \\cdot 10^{12}\\,\\text{m}\\)
+- Constante de gravitación universal: \\(G = 6{,}67 \\cdot 10^{-11}\\,\\text{N}\\,\\text{m}^2\\,\\text{kg}^{-2}\\)
+- Masa del Sol: \\(M_{\\text{Sol}} = 1{,}99 \\cdot 10^{30}\\,\\text{kg}\\)
 
-b) (1,5 puntos) Sabiendo que la energía mecánica de un objeto de masa $m_1$ que orbita alrededor de
-un objeto de masa $m_2$ con una órbita elíptica de semieje mayor $a$ es
-$$E_{mec} = -\\dfrac{Gm_1m_2}{2a},$$
-donde $G$ es la constante de la gravitación universal, halle la energía mecánica de Eris y calcule la
-velocidad orbital que tendrá en el perihelio.
+**a)** (1 punto) Calcule la masa del planeta y el valor de la aceleración de la gravedad en su superficie.
 
-Datos: Constante de gravitación universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N m}^2\ \\text{kg}^{-2}$; Masa del Sol, $M_{\\text{Sol}} = 1{,}99 \\cdot 10^{30}\ \\text{kg}$.`,
+**b)** (1,5 puntos) Sabiendo que la energía mecánica de un objeto de masa \\(m_1\\) que orbita alrededor de un objeto de masa \\(m_2\\) con una órbita elíptica de semieje mayor \\(a\\) es
+
+\\[
+E_{\\text{mec}} = -\\frac{Gm_1m_2}{2a},
+\\]
+
+donde \\(G\\) es la constante de la gravitación universal, halle la energía mecánica de Eris y calcule la velocidad orbital que tendrá en el perihelio.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -56,16 +58,20 @@ Datos: Constante de gravitación universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{
     id: "f-2025-jun-2A",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "2.A",
-    enunciado: `Un electrón de carga $-e$ y un positrón de carga $+e$ se encuentran inicialmente fijos en
-el plano $xy$ en las posiciones $(0, 6)$ nm y $(0, -6)$ nm, respectivamente.
+    enunciado: `**2.A** Un electrón de carga \\(-e\\) y un positrón de carga \\(+e\\) se encuentran inicialmente fijos en el plano \\(xy\\).
 
-a) (1,25 puntos) Obtenga el campo eléctrico en el punto $(8, 0)$ nm debido a ambas partículas.
+**Datos:**
+- Posición inicial del electrón: \\((0, 6)\\,\\text{nm}\\)
+- Posición inicial del positrón: \\((0, -6)\\,\\text{nm}\\)
+- Punto de cálculo del campo eléctrico: \\((8, 0)\\,\\text{nm}\\)
+- Velocidad inicial impresa al positrón: \\(\\vec{v} = -1{,}5 \\cdot 10^5\\,\\text{m}\\,\\text{s}^{-1}\\,\\hat{j}\\)
+- Constante de la ley de Coulomb: \\(K = 9 \\cdot 10^9\\,\\text{N}\\,\\text{m}^2\\,\\text{C}^{-2}\\)
+- Valor absoluto de la carga del electrón y del positrón: \\(e = 1{,}6 \\cdot 10^{-19}\\,\\text{C}\\)
+- Masa del electrón y del positrón: \\(m_e = 9{,}1 \\cdot 10^{-31}\\,\\text{kg}\\)
 
-b) (1,25 puntos) Si al positrón se le imprime una velocidad de $-1{,}5 \\cdot 10^5\ \\text{m s}^{-1}\ \\hat{j}$, permaneciendo fijo
-el electrón, determine la máxima distancia de alejamiento entre ambas partículas.
+**a)** (1,25 puntos) Obtenga el campo eléctrico en el punto \\((8, 0)\\,\\text{nm}\\) debido a ambas partículas.
 
-Datos: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{C}^{-2}$; Valor absoluto de la carga del electrón y del positrón,
-$e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Masa del electrón y del positrón, $m_e = 9{,}1 \\cdot 10^{-31}\ \\text{kg}$.`,
+**b)** (1,25 puntos) Si al positrón se le imprime la velocidad indicada, permaneciendo fijo el electrón, determine la máxima distancia de alejamiento entre ambas partículas.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -73,18 +79,20 @@ $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Masa del electrón y del positrón, $m_e
     id: "f-2025-jun-2B",
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "2.B",
-    enunciado: `Una espira conductora circular de radio 20 cm se en-
-cuentra en el seno de un campo magnético homogéneo perpendicular
-al plano de la espira (ver figura). Si la espira tiene una resistencia de
-40 Ω, calcule la máxima intensidad de corriente que circulará por la
-espira en los siguientes casos:
+    enunciado: `**2.B** Una espira conductora circular se encuentra en el seno de un campo magnético homogéneo perpendicular al plano de la espira (ver figura). Calcule la máxima intensidad de corriente que circulará por la espira en los siguientes casos.
 
-a) (1,25 puntos) El módulo del campo magnético es constante de
-valor $B = 150$ mT, y la espira gira en torno a uno de sus diáme-
-tros con una velocidad angular de 50 rad s$^{-1}$.
+**Datos:**
+- Radio de la espira: \\(r = 20\\,\\text{cm}\\)
+- Resistencia de la espira: \\(R = 40\\,\\Omega\\)
+- Caso a): \\(B = 150\\,\\text{mT}\\)
+- Caso a): \\(\\omega = 50\\,\\text{rad}\\,\\text{s}^{-1}\\)
+- Caso b): \\(B(t) = B_0\\sin(\\omega t)\\)
+- Caso b): \\(B_0 = 200\\,\\text{mT}\\)
+- Caso b): \\(\\omega = 75\\,\\text{rad}\\,\\text{s}^{-1}\\)
 
-b) (1,25 puntos) La espira se encuentra fija, y el módulo del campo
-magnético varía con el tiempo conforme a $B = B_0\\sin(\\omega t)$, con $B_0 = 200$ mT y $\\omega = 75$ rad s$^{-1}$.`,
+**a)** (1,25 puntos) El módulo del campo magnético es constante y la espira gira en torno a uno de sus diámetros con la velocidad angular indicada.
+
+**b)** (1,25 puntos) La espira se encuentra fija, y el módulo del campo magnético varía con el tiempo conforme a la expresión indicada.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -92,17 +100,19 @@ magnético varía con el tiempo conforme a $B = B_0\\sin(\\omega t)$, con $B_0 =
     id: "f-2025-jun-3A",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "3.A",
-    enunciado: `Una ballena sumergida en el mar a una cierta profundidad emite un potente sonido
-grave de 60 Hz y 25 m de longitud de onda. Un barco A, situado sobre su vertical, detecta dicho sonido
-con su sónar 80 ms después de ser emitido, y poco tiempo después es detectado por otro barco B
-situado a 300 m del barco A.
+    enunciado: `**3.A** Una ballena sumergida en el mar a una cierta profundidad emite un potente sonido grave. Un barco A, situado sobre su vertical, detecta dicho sonido con su sónar después de ser emitido, y poco tiempo después es detectado por otro barco B.
 
-a) (1 punto) Halle la profundidad a la que se encuentra la ballena.
+**Datos:**
+- Frecuencia del sonido: \\(f = 60\\,\\text{Hz}\\)
+- Longitud de onda: \\(\\lambda = 25\\,\\text{m}\\)
+- Tiempo de detección en el barco A: \\(\\Delta t = 80\\,\\text{ms}\\)
+- Distancia entre el barco A y el barco B: \\(d = 300\\,\\text{m}\\)
+- Intensidad recibida por el barco A: \\(I_A = 3\\,\\mu\\text{W}\\,\\text{m}^{-2}\\)
+- Intensidad umbral: \\(I_0 = 1 \\cdot 10^{-12}\\,\\text{W}\\,\\text{m}^{-2}\\)
 
-b) (1,5 puntos) Si el barco A recibe el sonido con una intensidad de 3 μW m$^{-2}$, calcule la potencia
-del sonido emitido por la ballena y el nivel de intensidad sonora que detectará el barco B.
+**a)** (1 punto) Halle la profundidad a la que se encuentra la ballena.
 
-Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\ \\text{W m}^{-2}$.`,
+**b)** (1,5 puntos) Si el barco A recibe el sonido con la intensidad indicada, calcule la potencia del sonido emitido por la ballena y el nivel de intensidad sonora que detectará el barco B.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -110,18 +120,17 @@ Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\ \\text{W m}^{-2}$.`,
     id: "f-2025-jun-3B",
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "3.B",
-    enunciado: `Considere la imagen formada por una lente delgada de distancia focal $f'$ de un objeto
-situado a una distancia $s$ a la izquierda de la lente.
+    enunciado: `**3.B** Considere la imagen formada por una lente delgada de distancia focal \\(f'\\) de un objeto situado a una distancia \\(s\\) a la izquierda de la lente.
 
-a) (1 punto) Demuestre que el aumento lateral $M$ tiene la siguiente expresión en función de la dis-
-tancia focal $f'$ y la posición del objeto $s$:
-$$M = \\dfrac{f'}{f'+s}$$
+**a)** (1 punto) Demuestre que el aumento lateral \\(M\\) tiene la siguiente expresión en función de la distancia focal \\(f'\\) y la posición del objeto \\(s\\):
 
-b) (0,5 puntos) Considerando la expresión obtenida en el apartado anterior, razone si una lente
-divergente puede formar una imagen invertida.
+\\[
+M = \\frac{f'}{f' + s}
+\\]
 
-c) (1 punto) Dibuje el trazado de rayos a través del sistema óptico de la imagen formada por una
-lente divergente si el objeto se sitúa a una distancia dos veces su distancia focal.`,
+**b)** (0,5 puntos) Considerando la expresión obtenida en el apartado anterior, razone si una lente divergente puede formar una imagen invertida.
+
+**c)** (1 punto) Dibuje el trazado de rayos a través del sistema óptico de la imagen formada por una lente divergente si el objeto se sitúa a una distancia dos veces su distancia focal.`,
     apartados: [],
     puntos: 2.5,
   },
@@ -129,18 +138,19 @@ lente divergente si el objeto se sitúa a una distancia dos veces su distancia f
     id: "f-2025-jun-4A",
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "4.A",
-    enunciado: `Las moléculas de ozono absorben luz ultravioleta (UV) de alta energía, lo que evita que
-llegue a la superficie de la Tierra demasiada radiación dañina para los seres vivos.
+    enunciado: `**4.A** Las moléculas de ozono absorben luz ultravioleta (UV) de alta energía, lo que evita que llegue a la superficie de la Tierra demasiada radiación dañina para los seres vivos.
 
-a) (1 punto) Halle la diferencia de energía, expresada en electrón-voltios, entre los niveles electróni-
-cos de la molécula de ozono que inducen la absorción de radiación de 260 nm.
+**Datos:**
+- Longitud de onda de la radiación absorbida: \\(\\lambda = 260\\,\\text{nm}\\)
+- Flujo de fotones: \\(\\Phi = 2{,}6 \\cdot 10^{14}\\,\\text{fotones}\\,\\text{s}^{-1}\\)
+- Tiempo de exposición: \\(t = 30\\,\\text{min}\\)
+- Valor absoluto de la carga del electrón: \\(e = 1{,}6 \\cdot 10^{-19}\\,\\text{C}\\)
+- Constante de Planck: \\(h = 6{,}63 \\cdot 10^{-34}\\,\\text{J}\\,\\text{s}\\)
+- Velocidad de la luz en el vacío: \\(c = 3 \\cdot 10^8\\,\\text{m}\\,\\text{s}^{-1}\\)
 
-b) (1,5 puntos) Si el flujo de fotones de 260 nm que le llega a una persona con su cuerpo expuesto
-al sol es de $2{,}6 \\cdot 10^{14}$ fotones s$^{-1}$, calcule la potencia que le incide debida a esos fotones UV y la
-energía recibida en 30 minutos.
+**a)** (1 punto) Halle la diferencia de energía, expresada en electrón-voltios, entre los niveles electrónicos de la molécula de ozono que inducen la absorción de radiación de \\(260\\,\\text{nm}\\).
 
-Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Constante de Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$; Velocidad de la
-luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
+**b)** (1,5 puntos) Si el flujo de fotones de \\(260\\,\\text{nm}\\) que le llega a una persona con su cuerpo expuesto al sol es el indicado, calcule la potencia que le incide debida a esos fotones UV y la energía recibida en \\(30\\,\\text{min}\\).`,
     apartados: [],
     puntos: 2.5,
   },
@@ -148,17 +158,17 @@ luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
     id: "f-2025-jun-4B",
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "4.B",
-    enunciado: `El mineral de cuarzo (SiO$_2$) sobre la superficie de la Tierra contiene impurezas de
-aluminio, con una cantidad de 0,1 % de átomos de $^{26}$Al en relación a los átomos de silicio. Cuando el
-mineral se entierra debido a diversos procesos geológicos (sedimentación, glaciares, etc.) los átomos
-de $^{26}$Al se desintegran con un tiempo de semidesintegración de 0,72 millones de años.
+    enunciado: `**4.B** El mineral de cuarzo (\\(\\text{SiO}_2\\)) sobre la superficie de la Tierra contiene impurezas de aluminio. Cuando el mineral se entierra debido a diversos procesos geológicos (sedimentación, glaciares, etc.), los átomos de \\(^{26}\\text{Al}\\) se desintegran.
 
-a) (1,25 puntos) Calcule la actividad de una muestra de mineral de cuarzo, debida a la presencia de
-isótopos de $^{26}$Al, situada en superficie si contiene $8{,}3 \\cdot 10^{22}$ átomos de silicio.
+**Datos:**
+- Proporción inicial en superficie: \\(0{,}1\\,\\%\\) de átomos de \\(^{26}\\text{Al}\\) respecto a los átomos de silicio
+- Tiempo de semidesintegración del \\(^{26}\\text{Al}\\): \\(T_{1/2} = 0{,}72\\) millones de años
+- Átomos de silicio en la muestra superficial: \\(8{,}3 \\cdot 10^{22}\\)
+- Proporción medida en la muestra enterrada: \\(0{,}08\\,\\%\\) de átomos de \\(^{26}\\text{Al}\\) respecto a los átomos de silicio
 
-b) (1,25 puntos) Se recoge una muestra de cuarzo de unos sedimentos, obteniéndose una relación
-de 0,08 % de átomos de $^{26}$Al respecto a los átomos de silicio. Obtenga la edad correspondiente a
-la formación de dichos sedimentos.`,
+**a)** (1,25 puntos) Calcule la actividad de una muestra de mineral de cuarzo, debida a la presencia de isótopos de \\(^{26}\\text{Al}\\), situada en superficie si contiene \\(8{,}3 \\cdot 10^{22}\\) átomos de silicio.
+
+**b)** (1,25 puntos) Se recoge una muestra de cuarzo de unos sedimentos, obteniéndose la relación indicada de átomos de \\(^{26}\\text{Al}\\) respecto a los átomos de silicio. Obtenga la edad correspondiente a la formación de dichos sedimentos.`,
     apartados: [],
     puntos: 2.5,
   },

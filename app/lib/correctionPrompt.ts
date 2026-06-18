@@ -138,12 +138,40 @@ Lengua Castellana y Literatura II:
 
 ### INSTRUCCIONES DE EVALUACIÓN
 
-REGLAS DE FORMATO LATEX OBLIGATORIAS:
-- Usa $...$ para fórmulas inline: $\\vec{v}$, $\\frac{a}{b}$, $x = 2$.
-- Para sistemas y matrices: \\begin{cases}...\\end{cases} SIN $ externos — el renderizador los envuelve.
-- NUNCA pongas \\begin{...}...\\end{...} dentro de $...$: causa errores de visualización.
-- NUNCA mezcles delimitadores: si abres $ cierra con $; si abres $$ cierra con $$.
-- Nunca dejes un delimitador LaTeX sin cerrar.
+REGLAS DE FORMATO LATEX — OBLIGATORIAS:
+
+1. Para fórmulas inline usa SIEMPRE $...$ con contenido en una sola línea.
+   CORRECTO: $f(x) = x^2$
+   INCORRECTO: $$f(x) = x^2$$
+
+2. Para bloques de ecuación usa $$...$$ con el contenido en líneas separadas:
+   CORRECTO:
+   $$
+   \\int_a^b f(x)\\,dx
+   $$
+   INCORRECTO: $$\\int_a^b f(x)\\,dx$$ (todo en una línea mezclado con texto)
+
+3. NUNCA uses \\begin{cases} dentro de $...$:
+   INCORRECTO: $\\begin{cases} x=1 \\\\ y=2 \\end{cases}$
+   CORRECTO — escribe sistemas como lista de ecuaciones separadas:
+   - $x = 1$
+   - $y = 2$
+   O usa bloque $$ separado:
+   $$
+   \\begin{cases} x=1 \\\\ y=2 \\end{cases}
+   $$
+
+4. NUNCA mezcles $$ y $:
+   INCORRECTO: $$\\vec{v}$
+   CORRECTO: $\\vec{v}$
+
+5. NUNCA dejes un delimitador $ sin cerrar.
+
+6. NUNCA escribas LaTeX dentro de bloques de código.
+
+7. Si una fórmula es larga, divídela en partes más cortas.
+
+8. Mantén las respuestas compactas — no expliques más de lo necesario.
 
 1. Corrige cada bloque de forma independiente.
 2. Si la respuesta está en blanco, dilo claramente y puntúa solo lo justificable. No inventes trabajo del alumno.
@@ -315,12 +343,40 @@ RESPUESTA DEL ALUMNO:
 ${studentAnswer}
 ${criteria ? `\nCRITERIOS DE CORRECCIÓN:\n${criteria}` : ''}
 INSTRUCCIONES:
-REGLAS DE FORMATO LATEX OBLIGATORIAS:
-- Usa $...$ para fórmulas inline: $\\vec{v}$, $\\frac{a}{b}$, $x = 2$.
-- Para sistemas y matrices: \\begin{cases}...\\end{cases} SIN $ externos — el renderizador los envuelve.
-- NUNCA pongas \\begin{...}...\\end{...} dentro de $...$: causa errores de visualización.
-- NUNCA mezcles delimitadores: si abres $ cierra con $; si abres $$ cierra con $$.
-- Nunca dejes un delimitador LaTeX sin cerrar.
+REGLAS DE FORMATO LATEX — OBLIGATORIAS:
+
+1. Para fórmulas inline usa SIEMPRE $...$ con contenido en una sola línea.
+   CORRECTO: $f(x) = x^2$
+   INCORRECTO: $$f(x) = x^2$$
+
+2. Para bloques de ecuación usa $$...$$ con el contenido en líneas separadas:
+   CORRECTO:
+   $$
+   \\int_a^b f(x)\\,dx
+   $$
+   INCORRECTO: $$\\int_a^b f(x)\\,dx$$ (todo en una línea mezclado con texto)
+
+3. NUNCA uses \\begin{cases} dentro de $...$:
+   INCORRECTO: $\\begin{cases} x=1 \\\\ y=2 \\end{cases}$
+   CORRECTO — escribe sistemas como lista de ecuaciones separadas:
+   - $x = 1$
+   - $y = 2$
+   O usa bloque $$ separado:
+   $$
+   \\begin{cases} x=1 \\\\ y=2 \\end{cases}
+   $$
+
+4. NUNCA mezcles $$ y $:
+   INCORRECTO: $$\\vec{v}$
+   CORRECTO: $\\vec{v}$
+
+5. NUNCA dejes un delimitador $ sin cerrar.
+
+6. NUNCA escribas LaTeX dentro de bloques de código.
+
+7. Si una fórmula es larga, divídela en partes más cortas.
+
+8. Mantén las respuestas compactas — no expliques más de lo necesario.
 
 1. Aplica el criterio oficial exacto de ${block.year}. La nota no puede superar ${block.maxScore}.
 2. Si la respuesta está en blanco, puntúa 0 y justifícalo brevemente.

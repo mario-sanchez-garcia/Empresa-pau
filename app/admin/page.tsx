@@ -26,6 +26,11 @@ function fmtCurrency(n: number | null | undefined): string {
   return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+function fmtPreciseCurrency(n: number | null | undefined): string {
+  if (n == null || isNaN(n)) return '0,0000 €'
+  return `${n.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} €`
+}
+
 function fmtNumber(n: number | null | undefined): string {
   if (n == null || isNaN(n)) return '0'
   return Math.round(n).toLocaleString('es-ES')
@@ -36,6 +41,13 @@ function fmtTokens(n: number | null | undefined): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
   return Math.round(n).toLocaleString('es-ES')
+}
+
+function fmtChars(n: number | null | undefined): string {
+  if (n == null || isNaN(n) || n === 0) return '—'
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M chars`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K chars`
+  return `${Math.round(n).toLocaleString('es-ES')} chars`
 }
 
 function fmtPercent(n: number | null | undefined): string {
@@ -362,6 +374,92 @@ function Dashboard({ m }: { m: AdminMetrics }) {
       {/* Insights */}
       <SectionHeader>Insights rápidos</SectionHeader>
       <InsightsPanel insights={insights} />
+
+      {/* AI costs */}
+      <SectionHeader>Costes IA</SectionHeader>
+      {m.aiCosts.last30Days.calls === 0 ? (
+        <Panel>
+          <div style={{ padding: '28px 18px', color: C.muted, textAlign: 'center', fontSize: 13, fontStyle: 'italic' }}>
+            Todavía no hay eventos de uso IA registrados.
+          </div>
+        </Panel>
+      ) : (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gap: 10 }}>
+            <StatCard label="Coste IA 7 días" value={fmtPreciseCurrency(m.aiCosts.last7Days.totalCostEur)} accent />
+            <StatCard label="Coste IA 30 días" value={fmtPreciseCurrency(m.aiCosts.last30Days.totalCostEur)} />
+            <StatCard label="Llamadas IA 7 días" value={fmtNumber(m.aiCosts.last7Days.calls)} />
+            <StatCard label="Coste medio / llamada" value={fmtPreciseCurrency(m.aiCosts.last7Days.avgCostEur)} sub="últimos 7 días" />
+            <StatCard label="Input medio" value={fmtTokens(m.aiCosts.last7Days.avgInputTokens)} sub="tokens / llamada" />
+            <StatCard label="Output medio" value={fmtTokens(m.aiCosts.last7Days.avgOutputTokens)} sub="tokens / llamada" />
+            <StatCard label="Total medio" value={fmtTokens(m.aiCosts.last7Days.avgTotalTokens)} sub="tokens / llamada" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 14, marginTop: 14 }}>
+            <Panel>
+              <div style={{ padding: '14px 16px 8px' }}>
+                <p style={{ fontSize: 11, color: C.muted, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+                  Coste por tipo — últimos 7 días
+                </p>
+              </div>
+              <Table
+                cols={['Ruta/acción', 'Llamadas', 'Coste total', 'Coste medio', 'Input prom.', 'Output prom.']}
+                rows={m.aiCosts.byRoute.map(row => [
+                  row.label,
+                  fmtNumber(row.calls),
+                  fmtPreciseCurrency(row.totalCostEur),
+                  fmtPreciseCurrency(row.avgCostEur),
+                  fmtTokens(row.avgInputTokens),
+                  fmtTokens(row.avgOutputTokens)
+                ])}
+                emptyMsg="Sin eventos IA en los últimos 7 días"
+              />
+            </Panel>
+
+            <Panel>
+              <div style={{ padding: '14px 16px 8px' }}>
+                <p style={{ fontSize: 11, color: C.muted, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+                  Imagen vs texto — últimos 7 días
+                </p>
+              </div>
+              <Table
+                cols={['Tipo', 'Llamadas', 'Input promedio', 'Output promedio', 'Coste medio', 'Tamaño imagen prom.']}
+                rows={m.aiCosts.imageVsText.map(row => [
+                  row.label,
+                  fmtNumber(row.calls),
+                  fmtTokens(row.avgInputTokens),
+                  fmtTokens(row.avgOutputTokens),
+                  fmtPreciseCurrency(row.avgCostEur),
+                  row.hasImage ? fmtChars(row.avgImagePayloadChars) : '—'
+                ])}
+                emptyMsg="Sin eventos comparables"
+              />
+            </Panel>
+
+            <Panel>
+              <div style={{ padding: '14px 16px 8px' }}>
+                <p style={{ fontSize: 11, color: C.muted, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+                  Top llamadas más caras — últimos 7 días
+                </p>
+              </div>
+              <Table
+                cols={['Fecha', 'Ruta', 'Acción', 'Modelo', 'Input', 'Output', 'Coste', 'Imágenes']}
+                rows={m.aiCosts.mostExpensiveCalls.map(row => [
+                  fmtDate(row.createdAt),
+                  row.route,
+                  row.action,
+                  row.model ?? '—',
+                  row.inputTokens != null ? fmtTokens(row.inputTokens) : null,
+                  row.outputTokens != null ? fmtTokens(row.outputTokens) : null,
+                  fmtPreciseCurrency(row.estimatedCostEur),
+                  row.imageCount != null ? fmtNumber(row.imageCount) : '—'
+                ])}
+                emptyMsg="Sin llamadas IA en los últimos 7 días"
+              />
+            </Panel>
+          </div>
+        </>
+      )}
 
       {/* Simulacros breakdown */}
       <SectionHeader>Simulacros — desglose completo</SectionHeader>

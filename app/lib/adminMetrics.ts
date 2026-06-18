@@ -67,10 +67,61 @@ export type RangeSummary = {
   plans: number
 }
 
+export type AiCostSummary = {
+  calls: number
+  totalCostEur: number
+  avgCostEur: number
+  avgInputTokens: number
+  avgOutputTokens: number
+  avgTotalTokens: number
+}
+
+export type AiCostByRoute = {
+  route: string
+  action: string
+  label: string
+  calls: number
+  totalCostEur: number
+  avgCostEur: number
+  avgInputTokens: number
+  avgOutputTokens: number
+  avgTotalTokens: number
+}
+
+export type AiImageCostComparison = {
+  hasImage: boolean
+  label: string
+  calls: number
+  avgInputTokens: number
+  avgOutputTokens: number
+  avgCostEur: number
+  avgImagePayloadChars: number
+}
+
+export type AiExpensiveCall = {
+  createdAt: string
+  route: string
+  action: string
+  label: string
+  model: string | null
+  inputTokens: number | null
+  outputTokens: number | null
+  totalTokens: number | null
+  estimatedCostEur: number
+  imageCount: number | null
+}
+
 export type AdminMetrics = {
   summaryToday: RangeSummary
   summary7d: RangeSummary
   summary30d: RangeSummary
+  aiCosts: {
+    last7Days: AiCostSummary
+    last30Days: AiCostSummary
+    byRoute: AiCostByRoute[]
+    imageVsText: AiImageCostComparison[]
+    mostExpensiveCalls: AiExpensiveCall[]
+  }
   byRouteAction: Array<{
     route: string
     action: string
@@ -160,6 +211,15 @@ const EMPTY_RANGE: RangeSummary = {
   activeUsers: 0, corrections: 0, simulacros: 0, plans: 0
 }
 
+const EMPTY_AI_COST_SUMMARY: AiCostSummary = {
+  calls: 0,
+  totalCostEur: 0,
+  avgCostEur: 0,
+  avgInputTokens: 0,
+  avgOutputTokens: 0,
+  avgTotalTokens: 0
+}
+
 const EMPTY_BILLING = {
   linksCreated7d: 0,
   linksPaid7d: 0,
@@ -185,6 +245,13 @@ const EMPTY: AdminMetrics = {
   summaryToday: { ...EMPTY_RANGE },
   summary7d: { ...EMPTY_RANGE },
   summary30d: { ...EMPTY_RANGE },
+  aiCosts: {
+    last7Days: { ...EMPTY_AI_COST_SUMMARY },
+    last30Days: { ...EMPTY_AI_COST_SUMMARY },
+    byRoute: [],
+    imageVsText: [],
+    mostExpensiveCalls: []
+  },
   byRouteAction: [],
   topUsers: [],
   simulacrosStats: { total: 0, completados: 0, enProgreso: 0, abandoned: 0, completionRate: 0 },
@@ -204,7 +271,20 @@ type UsageRow = {
   total_tokens: number | null
   input_tokens: number | null
   output_tokens: number | null
+  estimated_cost_eur: number | null
+  model: string | null
+  metadata: Record<string, unknown> | null
   created_at: string
+}
+
+type AiCostBucket = {
+  route: string
+  action: string
+  calls: number
+  cost: number
+  input: number
+  output: number
+  total: number
 }
 
 function buildRangeSummary(
@@ -227,6 +307,121 @@ function buildRangeSummary(
   }
 }
 
+function rowCostEur(row: UsageRow) {
+  return Number(row.estimated_cost_eur ?? estimateCostEur(row.input_tokens, row.output_tokens, row.total_tokens) ?? 0)
+}
+
+function buildAiCostSummary(rows: UsageRow[]): AiCostSummary {
+  const calls = rows.length
+  if (calls === 0) return { ...EMPTY_AI_COST_SUMMARY }
+  const totalCostEur = rows.reduce((sum, row) => sum + rowCostEur(row), 0)
+  return {
+    calls,
+    totalCostEur,
+    avgCostEur: totalCostEur / calls,
+    avgInputTokens: rows.reduce((sum, row) => sum + (row.input_tokens ?? 0), 0) / calls,
+    avgOutputTokens: rows.reduce((sum, row) => sum + (row.output_tokens ?? 0), 0) / calls,
+    avgTotalTokens: rows.reduce((sum, row) => sum + (row.total_tokens ?? 0), 0) / calls
+  }
+}
+
+function metadataNumber(metadata: Record<string, unknown> | null, key: string) {
+  const value = metadata?.[key]
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
+function metadataBoolean(metadata: Record<string, unknown> | null, key: string) {
+  const value = metadata?.[key]
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') return value === 'true'
+  return false
+}
+
+function buildAiCosts(rows: UsageRow[], ago7d: string, ago30d: string): AdminMetrics['aiCosts'] {
+  const rows30d = rows.filter(row => row.created_at >= ago30d)
+  const rows7d = rows30d.filter(row => row.created_at >= ago7d)
+
+  const byRouteMap = new Map<string, AiCostBucket>()
+  for (const row of rows7d) {
+    const key = `${row.route}|${row.action}`
+    const current = byRouteMap.get(key) ?? { route: row.route, action: row.action, calls: 0, cost: 0, input: 0, output: 0, total: 0 }
+    current.calls++
+    current.cost += rowCostEur(row)
+    current.input += row.input_tokens ?? 0
+    current.output += row.output_tokens ?? 0
+    current.total += row.total_tokens ?? 0
+    byRouteMap.set(key, current)
+  }
+
+  const byRoute = Array.from(byRouteMap.values())
+    .map(item => ({
+      route: item.route,
+      action: item.action,
+      label: routeActionLabel(item.route, item.action),
+      calls: item.calls,
+      totalCostEur: item.cost,
+      avgCostEur: item.calls > 0 ? item.cost / item.calls : 0,
+      avgInputTokens: item.calls > 0 ? item.input / item.calls : 0,
+      avgOutputTokens: item.calls > 0 ? item.output / item.calls : 0,
+      avgTotalTokens: item.calls > 0 ? item.total / item.calls : 0
+    }))
+    .sort((a, b) => b.totalCostEur - a.totalCostEur)
+
+  const imageGroups = new Map<string, { hasImage: boolean; calls: number; input: number; output: number; cost: number; imagePayload: number }>()
+  for (const row of rows7d) {
+    const hasImage = metadataBoolean(row.metadata, 'hasImage') || metadataBoolean(row.metadata, 'blockHasImage')
+    const key = hasImage ? 'image' : 'text'
+    const current = imageGroups.get(key) ?? { hasImage, calls: 0, input: 0, output: 0, cost: 0, imagePayload: 0 }
+    current.calls++
+    current.input += row.input_tokens ?? 0
+    current.output += row.output_tokens ?? 0
+    current.cost += rowCostEur(row)
+    current.imagePayload += metadataNumber(row.metadata, 'imagePayloadChars') ?? metadataNumber(row.metadata, 'blockImagePayloadChars') ?? 0
+    imageGroups.set(key, current)
+  }
+
+  const imageVsText = Array.from(imageGroups.values())
+    .map(item => ({
+      hasImage: item.hasImage,
+      label: item.hasImage ? 'Imagen' : 'Texto / sin imagen',
+      calls: item.calls,
+      avgInputTokens: item.calls > 0 ? item.input / item.calls : 0,
+      avgOutputTokens: item.calls > 0 ? item.output / item.calls : 0,
+      avgCostEur: item.calls > 0 ? item.cost / item.calls : 0,
+      avgImagePayloadChars: item.calls > 0 ? item.imagePayload / item.calls : 0
+    }))
+    .sort((a, b) => Number(b.hasImage) - Number(a.hasImage))
+
+  const mostExpensiveCalls = rows7d
+    .map(row => ({
+      createdAt: row.created_at,
+      route: row.route,
+      action: row.action,
+      label: routeActionLabel(row.route, row.action),
+      model: row.model ?? null,
+      inputTokens: row.input_tokens ?? null,
+      outputTokens: row.output_tokens ?? null,
+      totalTokens: row.total_tokens ?? null,
+      estimatedCostEur: rowCostEur(row),
+      imageCount: metadataNumber(row.metadata, 'imageCount') ?? metadataNumber(row.metadata, 'blockImageCount')
+    }))
+    .sort((a, b) => b.estimatedCostEur - a.estimatedCostEur)
+    .slice(0, 5)
+
+  return {
+    last7Days: buildAiCostSummary(rows7d),
+    last30Days: buildAiCostSummary(rows30d),
+    byRoute,
+    imageVsText,
+    mostExpensiveCalls
+  }
+}
+
 export async function fetchAdminMetrics(): Promise<AdminMetrics> {
   const db = adminClient()
   if (!db) return { ...EMPTY, calculatedAt: new Date().toISOString() }
@@ -242,7 +437,7 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       // 30d of all usage events for range computations
       db
         .from('ai_usage_events')
-        .select('user_id, route, action, status, total_tokens, input_tokens, output_tokens, created_at')
+        .select('user_id, route, action, status, total_tokens, input_tokens, output_tokens, estimated_cost_eur, model, metadata, created_at')
         .gte('created_at', ago30d)
         .order('created_at', { ascending: false }),
       db
@@ -298,6 +493,7 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
     const summaryToday = buildRangeSummary(allUsage, todayStart, correctionsToday, simulacrosToday)
     const summary7d = buildRangeSummary(allUsage, ago7d, corrections7d, simulacros7d)
     const summary30d = buildRangeSummary(allUsage, ago30d, 0, 0)
+    const aiCosts = buildAiCosts(allUsage, ago7d, ago30d)
 
     // By route+action (7d window)
     const raMap = new Map<string, { route: string; action: string; calls: number; tokens: number; cost: number; errors: number }>()
@@ -486,6 +682,7 @@ export async function fetchAdminMetrics(): Promise<AdminMetrics> {
       summaryToday,
       summary7d,
       summary30d,
+      aiCosts,
       byRouteAction,
       topUsers,
       simulacrosStats,

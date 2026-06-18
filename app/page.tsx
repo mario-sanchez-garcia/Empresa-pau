@@ -1433,19 +1433,41 @@ function cambiarTipo(t: Tipo) {
       setCargandoChat(false)
       return
     }
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify({
-        pregunta: `Eres Pausia, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
-          'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Pausia. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n' +
-          (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
-          hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
-          '\nResponde solo como Pausia.'
+    setMensajes(prev => [...prev, { rol: 'pausia', texto: '' }])
+    try {
+      const res = await fetch('/api/chat?stream=1', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          pregunta: `Eres Pausia, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
+            'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Pausia. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n' +
+            (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
+            hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
+            '\nResponde solo como Pausia.'
+        })
       })
-    })
-    const data = await res.json()
-    setMensajes(prev => [...prev, { rol: 'pausia', texto: res.ok ? data.respuesta : getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.') }])
-    setCargandoChat(false)
+      if (!res.ok) {
+        const data = await res.json()
+        setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.') }])
+      } else {
+        const reader = res.body!.getReader()
+        const decoder = new TextDecoder()
+        let accumulated = ''
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          accumulated += decoder.decode(value, { stream: true })
+          const snap = accumulated
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: snap }])
+        }
+        if (!accumulated) {
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
+        }
+      }
+    } catch {
+      setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
+    } finally {
+      setCargandoChat(false)
+    }
   }
 
   function abrirChatConContexto(item: any) {
@@ -3488,7 +3510,7 @@ function cambiarTipo(t: Tipo) {
                 )
               ))}
 
-              {cargandoChat && (
+              {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
                 <div className="chat-msg-ai" style={{ padding: '24px 0' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                     <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />

@@ -27,6 +27,9 @@ export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
 
+  const { searchParams } = new URL(request.url)
+  const wantsStream = searchParams.get('stream') === '1'
+
   const { pregunta, imagen, imagenTipo, imagenes } = await request.json()
 
   const imagePayloadSize =
@@ -104,13 +107,70 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const systemPrompt = `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Pausia. Usa $...$ para LaTeX inline y entornos \\begin{...}...\\end{...} sin $ externos para sistemas y matrices. NUNCA pongas \\begin{...} dentro de $...$. NUNCA mezcles delimitadores: si abres $ cierra con $, si abres $$ cierra con $$.${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
+  const systemContent = [{ type: 'text' as const, text: systemPrompt, cache_control: { type: 'ephemeral' as const } }]
+
+  if (wantsStream) {
+    const anthropicStream = client.messages.stream({
+      model,
+      max_tokens: maxTokens,
+      system: systemContent,
+      messages: [{ role: 'user', content: contenido }]
+    })
+
+    anthropicStream.finalMessage().then(msg => {
+      const usage = extractAnthropicTokenUsage(msg)
+      if (msg.stop_reason === 'max_tokens') console.warn('[chat] truncated: true (stream)', { action, maxTokens, outputTokens: usage.outputTokens })
+      logAiUsageEvent({
+        userId: authContext.user.id,
+        route: '/api/chat',
+        action,
+        model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        totalTokens: usage.totalTokens,
+        status: 'success',
+        metadata,
+        accessToken: authContext.accessToken
+      }).catch(() => {})
+    }).catch(() => {
+      logAiUsageEvent({
+        userId: authContext.user.id,
+        route: '/api/chat',
+        action,
+        model,
+        status: 'error',
+        metadata,
+        accessToken: authContext.accessToken
+      }).catch(() => {})
+    })
+
+    const encoder = new TextEncoder()
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const event of anthropicStream) {
+            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+              controller.enqueue(encoder.encode(event.delta.text))
+            }
+          }
+        } catch {
+          // stream error; usage logged via finalMessage().catch
+        } finally {
+          controller.close()
+        }
+      }
+    })
+
+    return new Response(readable, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+  }
+
   let message
   try {
-    const systemPrompt = `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Pausia. Usa $...$ para LaTeX inline y entornos \\begin{...}...\\end{...} sin $ externos para sistemas y matrices. NUNCA pongas \\begin{...} dentro de $...$. NUNCA mezcles delimitadores: si abres $ cierra con $, si abres $$ cierra con $$.${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
     message = await client.messages.create({
       model,
       max_tokens: maxTokens,
-      system: systemPrompt,
+      system: systemContent,
       messages: [{ role: 'user', content: contenido }]
     })
   } catch (error) {

@@ -9,6 +9,7 @@ import { calculateGradePredictions, type GradeEvidenceItem, type GradePrediction
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { useCCAA } from '@/app/hooks/useCCAA'
 import PausiaBrand from '@/components/shared/PausiaBrand'
+import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
 const config = {
   bg: '#2563eb',
@@ -343,21 +344,15 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
     (dia.tareas ?? []).map((tarea: any, tareaIdx: number) => ({ ...tarea, dia: dia.dia, diaIdx, tareaIdx }))
   )
   const tareasPendientes = tareasPlano.filter((tarea: any) => !tarea.completada)
+  const tareaDeHoy = tareasPendientes[0] ?? tareasPlano[0]
+  const duracionTareaHoy = tareaDeHoy?.duracion ?? ((perfil?.horas_dia ?? 1) * 60)
+  const progresoSemanal = `${completadasHoy} de ${totalTareas} tareas completadas`
   const tabs: Array<{ id: PlanTab; label: string; icon: any }> = [
     { id: 'general', label: 'Vista general', icon: Target },
     { id: 'semana', label: 'Plan semanal', icon: CalendarDays },
     { id: 'tareas', label: 'Tareas', icon: ListChecks },
     { id: 'ajustes', label: 'Ajustes', icon: Settings }
   ]
-
-  if (cargando) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)' }}>
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: 'linear-gradient(145deg, #1d4ed8, #2563eb 55%, #38bdf8)', color: '#fff', boxShadow: '0 18px 38px rgba(37,99,235,0.24)' }}><Rocket size={28} /></div>
-        <p style={{ color: config.muted, fontWeight: 700 }}>Cargando tu planning...</p>
-      </div>
-    </div>
-  )
 
   return (
     <div className="flex min-h-screen max-lg:block" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
@@ -401,7 +396,9 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
 
       <main className="max-w-4xl mx-auto px-6 py-8">
 
-        {paso === 'onboarding' && (
+        {cargando && <PlanLoadingCard />}
+
+        {!cargando && paso === 'onboarding' && (
           <div className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow, backdropFilter: 'blur(18px)' }}>
             <div className="text-center mb-8">
               <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', boxShadow: '0 18px 42px rgba(37, 99, 235, 0.22)' }}><CalendarDays size={30} /></div>
@@ -461,14 +458,14 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
           </div>
         )}
 
-        {paso === 'planning' && (
+        {!cargando && paso === 'planning' && (
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Mi Plan</h1>
-                <p className="text-sm mt-1" style={{ color: config.muted }}>
-                  Objetivo: {perfil?.nota_objetivo}/14 · {perfil?.horas_dia}h/día · Examen: {perfil?.fecha_examen ? new Date(perfil.fecha_examen).toLocaleDateString('es-ES') : ''}
-                </p>
+                <p className="text-sm font-bold mt-1" style={{ color: config.muted }}>Tu semana organizada</p>
+                <p className="text-sm mt-1 max-w-2xl" style={{ color: config.muted }}>Consulta qué hacer hoy y avanza paso a paso en tu Camino PAU.</p>
+                <p className="text-xs mt-2" style={{ color: config.softText }}>Planning semanal · Objetivo {perfil?.nota_objetivo}/14 · {perfil?.horas_dia}h/día · Examen: {perfil?.fecha_examen ? new Date(perfil.fecha_examen).toLocaleDateString('es-ES') : ''}</p>
               </div>
               <button onClick={() => setPaso('onboarding')}
                 className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2"
@@ -499,6 +496,36 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
 
             {activeTab === 'general' && (
               <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-3xl p-5 md:col-span-2" style={{ background: 'rgba(255, 255, 255, 0.94)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
+                  <p className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: config.softText }}>Qué hacer hoy</p>
+                  {tareaDeHoy ? (
+                    <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: subjectTheme(tareaDeHoy.asignatura).light, color: subjectTheme(tareaDeHoy.asignatura).color }}>{tareaDeHoy.asignatura}</span>
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[#dbe7fb] bg-[#f8fbff] px-3 py-1 text-xs font-bold" style={{ color: config.muted }}><Clock3 size={13} /> {duracionTareaHoy} min</span>
+                          <span className="rounded-full border border-[#dbe7fb] bg-white px-3 py-1 text-xs font-bold" style={{ color: config.muted }}>{tareaDeHoy.dia}</span>
+                        </div>
+                        <h2 className="text-lg font-black leading-tight" style={{ color: config.ink }}>{tareaDeHoy.descripcion}</h2>
+                        <p className="mt-2 text-sm" style={{ color: config.muted }}>Empieza por esta tarea y marca el avance para que el planning semanal se mantenga al día.</p>
+                      </div>
+                      <button onClick={() => router.push('/')} className="campus-primary shrink-0 rounded-2xl px-5 py-3 text-sm font-black text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', boxShadow: '0 16px 34px rgba(37,99,235,0.18)' }}>
+                        Ver ejercicio
+                      </button>
+                    </div>
+                  ) : (
+                    <PlanEmptyState onCreate={() => setPaso('onboarding')} />
+                  )}
+                </div>
+                <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.94)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
+                  <p className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: config.softText }}>Esta semana</p>
+                  <p className="mt-3 text-2xl font-black" style={{ color: config.ink }}>{porcentaje}%</p>
+                  <p className="mt-1 text-sm font-bold" style={{ color: config.muted }}>{progresoSemanal}</p>
+                  <div className="mt-4 h-3 w-full rounded-full" style={{ background: '#edf4ff' }}>
+                    <div className="h-3 rounded-full transition-all" style={{ width: `${porcentaje}%`, background: 'linear-gradient(90deg, #1d4ed8, #2563eb, #38bdf8)' }} />
+                  </div>
+                  <p className="mt-4 text-sm" style={{ color: config.muted }}>Mi Plan convierte tu Camino PAU en pasos manejables.</p>
+                </div>
                 <PlanMetric label="Progreso" value={`${porcentaje}%`} detail={`${completadasHoy}/${totalTareas} tareas`} />
                 <PlanMetric label="Pendientes" value={String(tareasPendientes.length)} detail="por completar" />
                 <PlanMetric label="Ritmo" value={`${perfil?.horas_dia ?? 0}h/día`} detail={`objetivo ${perfil?.nota_objetivo ?? '-'} / 14`} />
@@ -619,14 +646,11 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   </div>
                 </div>
               ) : null
+            ) : planningError ? (
+              <PlanErrorState onRetry={() => generarPlanning(perfil, usuario?.id, [])} />
             ) : (
-              <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
-                <p style={{ color: config.muted }}>{planningError || 'No se pudo generar el plan. Intenta de nuevo.'}</p>
-                {!planningError && (
-                  <button onClick={() => generarPlanning(perfil, usuario?.id, [])} className="campus-primary mt-4 px-6 py-2 rounded-xl font-semibold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}>
-                    Intentar de nuevo
-                  </button>
-                )}
+              <div className="rounded-3xl p-6" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
+                <PlanEmptyState onCreate={() => setPaso('onboarding')} />
               </div>
             )}
           </div>
@@ -637,6 +661,45 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   )
 }
 
+function PlanLoadingCard() {
+  return (
+    <section className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
+      <div className="flex items-center gap-3 rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] px-4 py-4" style={{ color: config.bg }}>
+        <PausiaLoadingDot className="h-5 w-5" />
+        <div>
+          <p className="text-sm font-black" style={{ color: config.ink }}>Cargando tu plan...</p>
+          <p className="text-xs font-semibold" style={{ color: config.muted }}>Preparando tu planning semanal sin bloquear el resto de Pausia.</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PlanEmptyState({ onCreate }: { onCreate: () => void }) {
+  return (
+    <div className="text-center">
+      <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 54, height: 54, borderRadius: 20, background: config.light, color: config.bg, border: '1px solid #dbeafe' }}><CalendarDays size={26} /></div>
+      <h2 className="text-xl font-black" style={{ color: config.ink }}>Todavía no tienes planning</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm" style={{ color: config.muted }}>Crea tu plan para saber qué estudiar cada día esta semana.</p>
+      <button onClick={onCreate} className="campus-primary mt-5 rounded-2xl px-5 py-3 text-sm font-black text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', boxShadow: '0 16px 34px rgba(37,99,235,0.18)' }}>
+        Crear mi plan
+      </button>
+    </div>
+  )
+}
+
+function PlanErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section className="rounded-3xl p-8 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
+      <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 54, height: 54, borderRadius: 20, background: '#eff6ff', color: config.bg, border: '1px solid #dbeafe' }}><RefreshCw size={24} /></div>
+      <h2 className="text-xl font-black" style={{ color: config.ink }}>No hemos podido cargar tu plan</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm" style={{ color: config.muted }}>Prueba de nuevo en unos segundos.</p>
+      <button onClick={onRetry} className="campus-primary mt-5 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', boxShadow: '0 16px 34px rgba(37,99,235,0.18)' }}>
+        <RefreshCw size={15} /> Reintentar
+      </button>
+    </section>
+  )
+}
 function PlanMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
     <div className="rounded-3xl p-5" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>

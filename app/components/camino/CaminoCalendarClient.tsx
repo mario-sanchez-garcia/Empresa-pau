@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BarChart3, Check, ChevronDown, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
+import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 
 type MissionKind = 'exam' | 'flashcards' | 'chat' | 'simulacro' | 'historial' | 'manual'
@@ -16,11 +17,17 @@ type DayPlan = { date: string; label: string; isToday: boolean; missions: Missio
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 type StudentExam = { id: string; subject: string; date: string; topic: string; name: string; priority: ExamPriority }
 type XpEvent = { id: string; missionId: string; date: string; subject: string; xp: number; bonus: boolean }
+type RankingEntry = { id: string; name: string; community: string; xp: number; rank: number; isCurrentUser: boolean; isMock?: boolean }
+type LeaderboardPayload = {
+  global: { top: RankingEntry[]; current: RankingEntry | null }
+  community: { name: string; top: RankingEntry[]; current: RankingEntry | null }
+  currentXp: number
+  realUserCount: number
+}
 
 const CALENDAR_KEY = 'pausia_camino_calendar_v2'
 const EXAMS_KEY = 'pausia_camino_student_exams_v1'
 const XP_KEY = 'pausia_camino_xp_events_v1'
-const USER_KEY = 'pausia_camino_student_seed_v1'
 
 const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
@@ -40,9 +47,12 @@ const DIVISIONS = [
   { name: 'Diamante', min: 7000, max: 12999, bg: '#eff6ff', text: '#1d4ed8', bar: '#2563eb' },
   { name: 'Élite PAU', min: 13000, max: Infinity, bg: '#f5f3ff', text: '#6d28d9', bar: '#7c3aed' },
 ]
-const MOCK_RANKING = [
-  { name: 'A. García', community: 'Madrid', xp: 8420 }, { name: 'N. Soler', community: 'Cataluña', xp: 7310 },
-  { name: 'M. Ruiz', community: 'Madrid', xp: 6040 }, { name: 'L. Ferrer', community: 'Cataluña', xp: 4860 }, { name: 'D. Martín', community: 'Madrid', xp: 3920 },
+const MOCK_RANKING: RankingEntry[] = [
+  { id: 'mock-a-garcia', name: 'A. García', community: 'Madrid', xp: 8420, rank: 1, isCurrentUser: false, isMock: true },
+  { id: 'mock-n-soler', name: 'N. Soler', community: 'Cataluña', xp: 7310, rank: 2, isCurrentUser: false, isMock: true },
+  { id: 'mock-m-ruiz', name: 'M. Ruiz', community: 'Madrid', xp: 6040, rank: 3, isCurrentUser: false, isMock: true },
+  { id: 'mock-l-ferrer', name: 'L. Ferrer', community: 'Cataluña', xp: 4860, rank: 4, isCurrentUser: false, isMock: true },
+  { id: 'mock-d-martin', name: 'D. Martín', community: 'Madrid', xp: 3920, rank: 5, isCurrentUser: false, isMock: true },
 ]
 
 function toISO(date: Date) { return date.toISOString().slice(0, 10) }
@@ -71,9 +81,30 @@ function divisionFor(xp: number) { return DIVISIONS.find(d => xp >= d.min && xp 
 function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') return 4; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
 function priorityLabel(priority: ExamPriority) { return priority === 'muy_alta' ? 'Muy alta' : priority.charAt(0).toUpperCase() + priority.slice(1) }
 function priorityLookahead(priority: ExamPriority) { if (priority === 'muy_alta') return 5; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
-function getStudentName() { const existing = window.localStorage.getItem(USER_KEY); if (existing) return existing; const generated = `Alumno ${Math.floor(Math.random() * 900 + 100)}`; window.localStorage.setItem(USER_KEY, generated); return generated }
 function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) }
 function missionXP(mission: Mission, qualityScore?: number) { const completionXP = mission.role === 'main' ? 20 : 0; const score = qualityScore ?? (mission.kind === 'exam' ? 7 : null); const qualityXP = score == null ? 0 : score < 4 ? 5 : score < 6 ? 10 : score < 8 ? 20 : 30; const bonusXP = mission.role === 'bonus' ? mission.baseXP : 0; return mission.baseXP + completionXP + qualityXP + bonusXP }
+function localCurrentEntry(community: string, xp: number): RankingEntry { return { id: 'local-current-user', name: 'Tú', community, xp, rank: 1, isCurrentUser: true } }
+function fillWithMockRows(rows: RankingEntry[], tab: 'global' | 'community', community: string) {
+  const used = new Set(rows.map(row => row.id))
+  const bots = MOCK_RANKING
+    .filter(row => tab === 'global' || row.community === community)
+    .filter(row => !used.has(row.id))
+    .slice(0, Math.max(0, 5 - rows.length))
+    .map((row, index) => ({ ...row, rank: rows.length + index + 1 }))
+  return [...rows, ...bots].slice(0, 5)
+}
+
+async function fetchLeaderboard(token: string, community: string) {
+  try {
+    const res = await fetch(`/api/camino/leaderboard?community=${encodeURIComponent(community)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) return null
+    return await res.json() as LeaderboardPayload
+  } catch {
+    return null
+  }
+}
 
 function generateCalendar(onboarding: OnboardingData, exams: StudentExam[]) {
   const start = mondayOf(new Date())
@@ -133,6 +164,8 @@ export default function CaminoCalendarClient() {
   const [showExamForm, setShowExamForm] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), topic: '', name: '', priority: 'normal' as ExamPriority })
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
@@ -147,6 +180,21 @@ export default function CaminoCalendarClient() {
     setCalendar(loadedCalendar.length ? syncStatuses(loadedCalendar, loadedXp) : syncStatuses(generateCalendar(loadedOnboarding, loadedExams), loadedXp))
   }, [])
 
+  useEffect(() => {
+    if (!onboarding?.community) return
+    const community = onboarding.community
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      if (cancelled) return
+      setAccessToken(token)
+      if (!token) return
+      const next = await fetchLeaderboard(token, community)
+      if (!cancelled && next) setLeaderboard(next)
+    }).catch(() => setAccessToken(null))
+    return () => { cancelled = true }
+  }, [onboarding?.community])
+
   const hasProfile = Boolean(onboarding?.completedAt && onboarding.community && onboarding.subjects.length)
   const today = calendar.find(day => day.isToday) ?? calendar[0]
   const allMissions = calendar.flatMap(day => day.missions)
@@ -156,15 +204,19 @@ export default function CaminoCalendarClient() {
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
   const totalXP = xpEvents.reduce((sum, event) => sum + event.xp, 0)
-  const division = divisionFor(totalXP)
+  const displayedXP = leaderboard?.currentXp ?? totalXP
+  const division = divisionFor(displayedXP)
   const nextDivision = DIVISIONS[DIVISIONS.indexOf(division) + 1]
-  const divisionPct = nextDivision ? Math.min(100, Math.round(((totalXP - division.min) / (nextDivision.min - division.min)) * 100)) : 100
-  const leaderboard = useMemo(() => {
-    if (!onboarding) return MOCK_RANKING
-    const me = { name: getStudentName(), community: onboarding.community ?? 'Sin comunidad', xp: totalXP }
-    return [...MOCK_RANKING, me].sort((a, b) => b.xp - a.xp)
-  }, [onboarding, totalXP])
-  const visibleRanking = rankingTab === 'global' ? leaderboard : leaderboard.filter(entry => entry.community === (onboarding?.community ?? 'Sin comunidad'))
+  const divisionPct = nextDivision ? Math.min(100, Math.round(((displayedXP - division.min) / (nextDivision.min - division.min)) * 100)) : 100
+  const rankingCommunity = leaderboard?.community.name ?? onboarding?.community ?? 'Sin comunidad'
+  const fallbackCurrent = localCurrentEntry(rankingCommunity, displayedXP)
+  const rankingSource = rankingTab === 'global'
+    ? leaderboard?.global
+    : leaderboard?.community
+  const currentRankingRow = rankingSource?.current ?? fallbackCurrent
+  const rankingTopRows = fillWithMockRows(rankingSource?.top ?? [fallbackCurrent], rankingTab, rankingCommunity)
+  const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
+  const fixedCurrentRow = currentInTop ? null : currentRankingRow
 
   function persist(nextCalendar: DayPlan[], nextXp = xpEvents, nextExams = exams) {
     setCalendar(nextCalendar); setXpEvents(nextXp); setExams(nextExams)
@@ -180,7 +232,21 @@ export default function CaminoCalendarClient() {
     }))
     const xp = missionXP(completed)
     persist(nextCalendar, [...xpEvents, { id: `${missionId}-${Date.now()}`, missionId, date: todayISO(), subject: completed.subject, xp, bonus: completed.role === 'bonus' }])
+    if (accessToken && onboarding?.community) void syncOnlineXp(accessToken, onboarding.community, missionId, xp)
     setToast(`+${xp} XP · ${completed.role === 'bonus' ? 'bonus completado' : 'misión completada'}`)
+  }
+  async function syncOnlineXp(token: string, community: string, missionId: string, xp: number) {
+    try {
+      await fetch('/api/camino/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ sourceId: missionId, xpDelta: xp }),
+      })
+      const next = await fetchLeaderboard(token, community)
+      if (next) setLeaderboard(next)
+    } catch {
+      // El progreso local ya queda guardado; el ranking online se reintentará al volver a entrar.
+    }
   }
   function postponeMission(missionId: string) {
     const dayIndex = calendar.findIndex(day => day.missions.some(mission => mission.id === missionId))
@@ -215,12 +281,12 @@ export default function CaminoCalendarClient() {
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today?.label ?? 'Hoy'}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onComplete={completeMission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Hoy toca poco, pero bien hecho. Puedes añadir un parcial para ajustar la semana.</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onComplete={completeMission} onPostpone={postponeMission} compact />)}</div></div>}</div>
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-2 text-3xl font-black text-slate-950">{totalXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-2xl px-4 py-2 text-sm font-black" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-xs font-bold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - totalXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-2 text-3xl font-black text-slate-950">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-2xl px-4 py-2 text-sm font-black" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-xs font-bold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
         </section>
 
         <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p></div><div className="grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div></section>
 
-        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={visibleRanking} community={onboarding?.community ?? 'Sin comunidad'} totalXP={totalXP} division={division.name} /></section>
+        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} /></section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboarding?.subjects ?? []} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
@@ -247,8 +313,13 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
 
-function RankingCard({ open, setOpen, tab, setTab, rows, community, totalXP, division }: { open: boolean; setOpen: (open: boolean) => void; tab: 'global' | 'community'; setTab: (tab: 'global' | 'community') => void; rows: Array<{ name: string; community: string; xp: number }>; community: string; totalXP: number; division: string }) {
+function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, totalXP, division, realUserCount }: { open: boolean; setOpen: (open: boolean) => void; tab: 'global' | 'community'; setTab: (tab: 'global' | 'community') => void; rows: RankingEntry[]; currentRow: RankingEntry | null; community: string; totalXP: number; division: string; realUserCount: number }) {
   const title = tab === 'community' ? `Ranking Comunidad · ${community}` : 'Ranking Global'
-  return <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left"><span><span className="block text-lg font-black text-slate-950">Ranking y divisiones</span><span className="mt-1 block text-sm font-semibold text-slate-500">Compara tu progreso cuando quieras.</span></span><ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} /></button><AnimatePresence>{open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="mt-5 rounded-3xl bg-slate-50 p-4"><div className="grid gap-3 sm:grid-cols-3"><MiniStat icon={<Trophy size={15} />} label="División" value={division} /><MiniStat icon={<Zap size={15} />} label="XP total" value={totalXP.toLocaleString('es-ES')} /><MiniStat icon={<BarChart3 size={15} />} label="Comunidad" value={community} /></div><p className="mt-3 text-sm font-semibold text-slate-500">Tu división refleja tu constancia y precisión.</p><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-black text-slate-900">{title}</h3><div className="flex gap-2"><button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Global</button><button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Comunidad</button></div></div><div className="mt-3 grid gap-2">{rows.slice(0, 5).map((row, index) => { const rowDivision = divisionFor(row.xp); const podium = index < 3; return <div key={`${row.name}-${index}`} className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2 ${podium ? 'bg-white shadow-sm' : 'bg-white/70'}`}><span className="min-w-0 text-sm font-black text-slate-800"><span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black" style={{ background: podium ? rowDivision.bg : '#f1f5f9', color: podium ? rowDivision.text : '#64748b' }}>{podium ? <Medal size={14} /> : `#${index + 1}`}</span>{row.name}</span><span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: rowDivision.bg, color: rowDivision.text }}>{rowDivision.name}</span><span className="shrink-0 text-xs font-black text-blue-700">{row.xp.toLocaleString('es-ES')} XP</span></div> })}</div>{rows.length < 3 && <p className="mt-3 text-sm font-bold text-slate-500">El ranking se activará cuando haya más alumnos usando Pausia.</p>}</div></motion.div>}</AnimatePresence></div>
+  return <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left"><span><span className="block text-lg font-black text-slate-950">Ranking y divisiones</span><span className="mt-1 block text-sm font-semibold text-slate-500">Consulta tu posición cuando quieras.</span></span><ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} /></button><AnimatePresence>{open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="mt-5 rounded-3xl bg-slate-50 p-4"><div className="grid gap-3 sm:grid-cols-3"><MiniStat icon={<Trophy size={15} />} label="División" value={division} /><MiniStat icon={<Zap size={15} />} label="XP total" value={totalXP.toLocaleString('es-ES')} /><MiniStat icon={<BarChart3 size={15} />} label="Comunidad" value={community} /></div><p className="mt-3 text-sm font-semibold text-slate-500">Tu división refleja tu constancia y precisión. Los alumnos de relleno solo aparecen si faltan usuarios reales.</p><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-black text-slate-900">{community === 'Sin comunidad' && tab === 'community' ? 'Completa tu comunidad para ver tu ranking local.' : title}</h3><div className="flex gap-2"><button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Global</button><button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Comunidad</button></div></div><div className="mt-3 grid gap-2">{rows.map(row => <RankingRow key={row.id} row={row} />)}</div>{currentRow && <><div className="my-3 h-px bg-blue-100" /><RankingRow row={currentRow} fixed /></>}{realUserCount < 3 && <p className="mt-3 text-sm font-bold text-slate-500">El ranking se activará cuando haya más alumnos usando Pausia.</p>}</div></motion.div>}</AnimatePresence></div>
+}
+function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean }) {
+  const rowDivision = divisionFor(row.xp)
+  const podium = row.rank <= 3
+  return <div className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2 ${row.isCurrentUser ? 'border border-blue-200 bg-blue-50 shadow-sm' : podium ? 'bg-white shadow-sm' : 'bg-white/70'} ${fixed ? 'ring-1 ring-blue-100' : ''}`}><span className="min-w-0 text-sm font-black text-slate-800"><span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black" style={{ background: podium ? rowDivision.bg : '#f1f5f9', color: podium ? rowDivision.text : '#64748b' }}>{podium ? <Medal size={14} /> : `#${row.rank}`}</span>{row.name}{row.isMock && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-400">demo</span>}</span><span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: rowDivision.bg, color: rowDivision.text }}>{rowDivision.name}</span><span className="shrink-0 text-xs font-black text-blue-700">{row.xp.toLocaleString('es-ES')} XP</span></div>
 }
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }

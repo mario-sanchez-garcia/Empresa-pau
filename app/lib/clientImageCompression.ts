@@ -4,7 +4,8 @@ export async function compressImage(file: File): Promise<string> {
     const url = URL.createObjectURL(file)
 
     img.onload = () => {
-      const MAX = 1024
+      const MAX = 800
+      const QUALITY = 0.7
       let { width, height } = img
 
       if (width > MAX || height > MAX) {
@@ -30,7 +31,7 @@ export async function compressImage(file: File): Promise<string> {
 
       ctx.drawImage(img, 0, 0, width, height)
       URL.revokeObjectURL(url)
-      resolve(canvas.toDataURL('image/jpeg', 0.8))
+      resolve(canvas.toDataURL('image/jpeg', QUALITY))
     }
 
     img.onerror = () => {

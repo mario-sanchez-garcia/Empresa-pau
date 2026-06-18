@@ -166,6 +166,7 @@ Lengua Castellana y Literatura II:
 25. Usa LaTeX solo para formulas, no para parrafos completos. Formulas cortas en $...$; sistemas, matrices, casos, derivadas/integrales largas y varias ecuaciones en bloque con $$...$$.
 26. Para sistemas y matrices usa entornos KaTeX compatibles: cases, matrix, pmatrix, bmatrix, aligned, align o array. No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases} o \\end{matrix} fuera de delimitadores matematicos.
 27. Manten el idioma del enunciado o de la respuesta del alumno: castellano si esta en castellano, catalan si esta en catalan. No mezcles idiomas salvo citas necesarias.
+28. Control de longitud: se especifico pero breve. No repitas el enunciado ni la respuesta del alumno. Maximo 3 puntos fuertes, 3 errores principales y 3 pasos de mejora. La teoria relacionada debe ocupar como maximo 2 lineas. Prioriza correccion accionable y JSON valido sobre explicaciones largas.
 
 ### FORMATO DE SALIDA
 
@@ -316,7 +317,8 @@ INSTRUCCIONES:
 7. Formato obligatorio dentro de los campos de texto: Markdown limpio, listas separadas por saltos de linea, sin parrafos enormes, sin "undefined", "null" o "NaN" visibles, y sin titulos pegados a la frase siguiente.
 8. LaTeX obligatorio para matematicas/fisica/quimica: formulas cortas en $...$; sistemas, matrices, casos, varias ecuaciones y expresiones largas en $$...$$. No dejes \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores.
 9. Manten el idioma del ejercicio o de la respuesta del alumno. Si el enunciado esta en catalan, corrige en catalan; si esta en castellano, corrige en castellano.
-10. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
+10. Control de longitud: se especifico pero breve. Maximo 3 aciertos, 3 errores y 3 mejoras; teoria en 2 lineas; no repitas enunciado ni respuesta del alumno.
+11. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:
 
 {
   "nota": 0.00,

@@ -14,6 +14,13 @@ const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - Usa LaTeX solo para formulas: cortas en $...$; sistemas, matrices, casos y expresiones largas en $$...$$.
 - No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores matematicos.
 - Si el ejercicio o el usuario estan claramente en catalan, responde en catalan; si estan en castellano, responde en castellano.`
+const IMAGE_CORRECTION_COMPACT_RULES = `Reglas de longitud para correcciones con imagen:
+- Se especifico pero breve. Prioriza feedback accionable.
+- No repitas el enunciado ni transcribas la respuesta del alumno.
+- Maximo 3 puntos fuertes, 3 errores y 3 pasos de mejora.
+- La teoria relacionada debe ocupar como maximo 2 lineas.
+- Objetivo 350-500 palabras. No hagas explicaciones largas salvo que sea imprescindible.
+- Si el usuario pide JSON estricto, conserva JSON valido y mantén cada campo textual compacto.`
 
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -61,11 +68,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  contenido.push({ type: 'text', text: `${CHAT_RESPONSE_FORMAT_RULES}\n\n${pregunta}` })
-
   const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
   const action = imageCount > 0 ? 'image_correction' : 'chat'
   const model = 'claude-sonnet-4-6'
+  const maxTokens = action === 'image_correction' ? 1400 : 2200
+  const responseFormatRules = action === 'image_correction'
+    ? `${CHAT_RESPONSE_FORMAT_RULES}\n\n${IMAGE_CORRECTION_COMPACT_RULES}`
+    : CHAT_RESPONSE_FORMAT_RULES
   const metadata = {
     hasImage: imageCount > 0,
     imageCount,
@@ -73,6 +82,8 @@ export async function POST(request: NextRequest) {
     promptChars: typeof pregunta === 'string' ? pregunta.length : null
   }
   const internalUser = isInternalUser(authContext.user.email)
+
+  contenido.push({ type: 'text', text: `${responseFormatRules}\n\n${pregunta}` })
 
   if (!internalUser) {
     const rateLimit = await checkAiRateLimit({
@@ -94,10 +105,11 @@ export async function POST(request: NextRequest) {
 
   let message
   try {
+    const systemPrompt = `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Pausia. Preserva LaTeX con $...$ y $$...$$.${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
     message = await client.messages.create({
       model,
-      max_tokens: 4000,
-      system: `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Pausia. Preserva LaTeX con $...$ y $$...$$.`,
+      max_tokens: maxTokens,
+      system: systemPrompt,
       messages: [{ role: 'user', content: contenido }]
     })
   } catch (error) {

@@ -13,6 +13,7 @@ const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - No escribas valores visibles como undefined, null o NaN.
 - Usa LaTeX solo para formulas: cortas en $...$; sistemas, matrices, casos y expresiones largas en $$...$$.
 - No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores matematicos.
+- Nunca metas matrices, sistemas ni entornos \\begin{...} dentro de $...$: deben ir siempre en bloque $$...$$, sin backticks.
 - Si el ejercicio o el usuario estan claramente en catalan, responde en catalan; si estan en castellano, responde en castellano.`
 const IMAGE_CORRECTION_COMPACT_RULES = `Reglas de longitud para correcciones con imagen:
 - Se especifico pero breve. Prioriza feedback accionable.

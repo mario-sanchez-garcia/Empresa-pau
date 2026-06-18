@@ -69,11 +69,13 @@ export function normalizeCorrectionText(input?: string | null) {
   text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
   text = mapOutsideMath(text, normalizeResponseStructure)
   text = formatOrphanCasesBlocks(text)
+  text = formatOrphanMatrixBlocks(text)
   text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
   text = mapOutsideMath(text, repairLostLatex)
   text = mapOutsideMath(text, wrapLatexEnvironments)
   text = formatOrphanCasesBlocks(text)
+  text = formatOrphanMatrixBlocks(text)
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
   text = mapOutsideMath(text, formatScientificNotation)
   text = mapOutsideMath(text, wrapExplicitLatex)
@@ -164,6 +166,25 @@ function formatOrphanCasesBlocks(text: string) {
   ))
 }
 
+function formatOrphanMatrixBlocks(text: string) {
+  return mapOutsideCodeFences(text, part => part.replace(
+    /(^|\n)(?!\s*\$\$)([^\n$]*?\\end\{(pmatrix|bmatrix|vmatrix|matrix)\})/g,
+    (match, prefix, body, environment) => {
+      if (body.includes(`\\begin{${environment}}`)) return match
+      const beforeEnd = body.replace(new RegExp(`\\\\end\\{${environment}\\}`), '').trim()
+      if (!beforeEnd.includes('&')) return match
+
+      const rows = beforeEnd
+        .split(/\\{2,}|\\\s+(?=[0-9A-Za-z])/)
+        .map((row: string) => row.trim())
+        .filter((row: string) => row.includes('&'))
+
+      if (!rows.length) return match
+      return `${prefix}\n\n$$\n\\begin{${environment}}\n${rows.join(' \\\\\n')}\n\\end{${environment}}\n$$\n\n`
+    }
+  ))
+}
+
 function promoteLongLatexToDisplay(text: string) {
   return text.replace(
     /(^|[^\$])((?:\\begin\{(?:cases|matrix|pmatrix|bmatrix|aligned|align|array)\}[\s\S]*?\\end\{(?:cases|matrix|pmatrix|bmatrix|aligned|align|array)\})|(?:\\frac\{[^{}\n]+\}\{[^{}\n]+\}[^.\n]*(?:\\implies|\\cdot)[^.\n]{35,}))/g,
@@ -173,18 +194,17 @@ function promoteLongLatexToDisplay(text: string) {
 
 function normalizeExistingMath(text: string) {
   return mapOutsideCodeFences(text, part => part.replace(MATH_TOKEN, token => {
-    const display = token.startsWith('$$')
-    const delimiter = display ? '$$' : '$'
+    const originalDisplay = token.startsWith('$$')
+    const delimiter = originalDisplay ? '$$' : '$'
     const content = token.slice(delimiter.length, -delimiter.length)
-    // For inline math, skip formatLatexEnvironment — it adds \n which breaks MATH_TOKEN
-    // matching in later pipeline steps, causing wrapLatexEnvironments to double-wrap.
+    const display = originalDisplay || new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}`).test(content)
     const envReplacer = display
       ? (_: string, env: string, body: string) => formatLatexEnvironment(env, body)
       : (_: string, env: string, body: string) => `\\begin{${env}}${body}\\end{${env}}`
     const normalized = repairLostLatex(content)
       .replace(/\bGm_1m_2\b/g, 'Gm_{1}m_{2}')
       .replace(new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'), envReplacer)
-    return `${delimiter}${normalized}${delimiter}`
+    return display ? `\n\n$$\n${normalized.trim()}\n$$\n\n` : `$${normalized}$`
   }))
 }
 

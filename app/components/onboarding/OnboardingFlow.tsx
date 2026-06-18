@@ -1,480 +1,224 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Check, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { CENTROS_MADRID } from '@/app/data/centros_madrid'
+import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import {
-  saveOnboarding, markOnboardingComplete,
-  startModeToRouteId,
-  type OnboardingCommunity, type OnboardingDailyMinutes, type OnboardingStartMode,
+  loadOnboarding,
+  markOnboardingComplete,
+  saveOnboarding,
+  type OnboardingCommunity,
+  type OnboardingData,
+  type OnboardingSchoolSource,
 } from '@/app/lib/onboarding/onboardingStorage'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+type Step = 'welcome' | 'community' | 'school' | 'subjects' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
 
-const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+const STEPS: Step[] = ['community', 'school', 'subjects', 'feeling', 'daily-time', 'weekly-days', 'confirm']
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const COMMUNITY_OPTS = [
-  { id: 'Madrid',   label: 'Madrid',           desc: 'Examen EBAU Madrid' },
-  { id: 'Cataluña', label: 'Cataluña',          desc: 'Examen PAU Cataluña' },
-  { id: 'Otra',     label: 'Otra comunidad',    desc: 'Ruta troncal común' },
-]
-
-const DATE_OPTS = [
-  { id: 'jun-25',  label: 'Junio 2025'              },
-  { id: 'sep-25',  label: 'Septiembre 2025'         },
-  { id: 'jun-26',  label: 'Junio 2026'              },
-  { id: 'jun-27+', label: 'Junio 2027 o posterior'  },
-  { id: 'no-se',   label: 'Todavía no lo sé'        },
-]
-
-const GOAL_OPTS = [
-  { id: 'nota-corte', label: 'Llegar a mi nota de corte', desc: 'Tengo universidad en mente' },
-  { id: 'subir',      label: 'Subir mi nota',              desc: 'Quiero mejorar lo que tengo' },
-  { id: 'aprobar',    label: 'Aprobar todas',               desc: 'Lo primero es superarlas' },
-  { id: 'la-mejor',   label: 'La mejor nota posible',       desc: 'Sin límites' },
+const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: string }> = [
+  { id: 'Madrid', label: 'Madrid', desc: 'EBAU Madrid' },
+  { id: 'Cataluña', label: 'Cataluña', desc: 'PAU Cataluña' },
+  { id: 'Otra', label: 'Otra comunidad', desc: 'Ruta troncal común' },
 ]
 
 const SUBJECT_OPTS = [
-  { id: 'Matemáticas II',      label: 'Matemáticas II',      color: '#2563eb', bg: '#eff6ff' },
-  { id: 'Física',              label: 'Física',              color: '#ca8a04', bg: '#fefce8' },
-  { id: 'Historia de España',  label: 'Historia de España',  color: '#78350f', bg: '#fff8f1' },
-  { id: 'Química',             label: 'Química',             color: '#ea580c', bg: '#fff7ed' },
-  { id: 'Biología',            label: 'Biología',            color: '#047857', bg: '#d1fae5' },
-  { id: 'Lengua y Literatura', label: 'Lengua y Literatura', color: '#7c3aed', bg: '#f5f3ff' },
+  { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff' },
+  { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
+  { id: 'Física', label: 'Física', color: '#ca8a04', bg: '#fefce8' },
+  { id: 'Química', label: 'Química', color: '#ea580c', bg: '#fff7ed' },
+  { id: 'Historia de España', label: 'Historia de España', color: '#78350f', bg: '#fff8f1' },
+  { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#4f46e5', bg: '#eef2ff' },
+  { id: 'Lengua Castellana', label: 'Lengua Castellana', color: '#0284c7', bg: '#e0f2fe' },
+  { id: 'Inglés', label: 'Inglés', color: '#0891b2', bg: '#ecfeff' },
+  { id: 'Biología', label: 'Biología', color: '#047857', bg: '#d1fae5' },
 ]
 
-const LEVEL_OPTS = [
-  { id: 'perdido',  label: 'Muy perdido/a', desc: 'Necesito empezar desde cero' },
-  { id: 'regular',  label: 'Regular',       desc: 'Sé algo pero me cuesta' },
-  { id: 'bien',     label: 'Bastante bien', desc: 'Entiendo la mayor parte' },
-  { id: 'muy-bien', label: 'Muy bien',      desc: 'Me siento muy seguro/a' },
+const FEELING_OPTS = [
+  'Voy bastante bien',
+  'Voy bien, pero quiero mejorar',
+  'Me cuesta organizarme',
+  'Voy un poco perdido/a',
+  'Prefiero empezar desde lo básico',
 ]
 
-const TIME_OPTS: { id: OnboardingDailyMinutes; label: string; desc: string; recommended?: boolean }[] = [
-  { id: 15, label: '15 min al día', desc: 'Sesiones cortas y constantes' },
-  { id: 25, label: '25 min al día', desc: 'Ritmo ideal',  recommended: true },
-  { id: 40, label: '40 min al día', desc: 'Modo intensivo' },
+const TIME_OPTS = [
+  { label: '15-30 min', minutes: 30 },
+  { label: '30-45 min', minutes: 45 },
+  { label: '45-60 min', minutes: 60 },
+  { label: '1-2 horas', minutes: 90 },
+  { label: '2-3 horas', minutes: 150 },
+  { label: 'Más de 3 horas', minutes: 180 },
+  { label: 'Depende del día', minutes: null },
 ]
 
-const START_OPTS: { id: OnboardingStartMode; label: string; desc: string }[] = [
-  { id: 'septiembre', label: 'Desde septiembre',  desc: 'Empiezo con margen, ruta completa' },
-  { id: 'empezado',   label: 'Ya he empezado',    desc: 'Llevo algo de base, ajustamos ritmo' },
-  { id: 'retraso',    label: 'Voy con retraso',   desc: 'Priorizamos lo que más impacta' },
-  { id: 'intensivo',  label: 'Modo intensivo',    desc: 'Poco tiempo, foco máximo' },
+const WEEKLY_DAY_OPTS = [
+  { label: '2-3 días', value: 3 },
+  { label: '3-4 días', value: 4 },
+  { label: '4-5 días', value: 5 },
+  { label: '5-6 días', value: 6 },
+  { label: 'Todos los días', value: 7 },
+  { label: 'Depende de la semana', value: null },
 ]
 
-const GEN_ITEMS = [
-  'Adaptando a tu comunidad autónoma...',
-  'Construyendo tu ruta PAU...',
-  'Calibrando tu ritmo de estudio...',
-  'Preparando tu primera misión...',
-]
-
-const CONFETTI_COLORS = ['#2563eb','#16a34a','#dc2626','#ca8a04','#7c3aed','#0891b2','#f59e0b','#ec4899']
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ChatMsg { id: string; role: 'pau' | 'user'; text: string }
-
-type Phase =
-  | 'welcome' | 'community' | 'pau-date' | 'goal'
-  | 'subjects' | 'subject-level' | 'daily-time'
-  | 'start-mode' | 'generating' | 'done'
-
-// ─── Component ────────────────────────────────────────────────────────────────
+const STEP_LABELS: Record<Step, { title: string; help: string }> = {
+  welcome: {
+    title: 'Crea tu Camino PAU',
+    help: 'Te haremos unas preguntas rápidas para adaptar Pausia a tu comunidad, centro y ritmo real.',
+  },
+  community: {
+    title: '¿Dónde haces la PAU?',
+    help: 'Así ajustamos la experiencia a tu comunidad autónoma.',
+  },
+  school: {
+    title: '¿Cuál es tu centro educativo?',
+    help: 'Así podremos adaptar mejor tu experiencia y entender desde dónde vienen los primeros alumnos.',
+  },
+  subjects: {
+    title: '¿Qué asignaturas quieres preparar?',
+    help: 'Elige todas las que entran en tu PAU. Puedes cambiarlo más adelante.',
+  },
+  feeling: {
+    title: '¿Cómo llevas la preparación?',
+    help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.',
+  },
+  'daily-time': {
+    title: '¿Cuánto tiempo podrías estudiar al día con Pausia?',
+    help: 'Lo ajustaremos mejor más adelante según tu ritmo.',
+  },
+  'weekly-days': {
+    title: '¿Cuántos días a la semana te gustaría estudiar?',
+    help: 'En el futuro, Pausia adaptará el plan a tu ritmo y preferencias.',
+  },
+  confirm: {
+    title: 'Perfecto. Con esto Pausia puede empezar a construir tu Camino PAU.',
+    help: 'Revisa el resumen y empieza cuando lo tengas claro.',
+  },
+  saving: {
+    title: 'Guardando tu Camino PAU',
+    help: 'Estamos preparando tu experiencia inicial.',
+  },
+  done: {
+    title: 'Tu Camino PAU está listo',
+    help: 'Pausia ya tiene lo necesario para empezar a ayudarte.',
+  },
+}
 
 export default function OnboardingFlow() {
-  const router      = useRouter()
-  const tokenRef    = useRef<string | null>(null)
-  const commRef     = useRef<OnboardingCommunity | null>(null)
-  const minutesRef  = useRef<OnboardingDailyMinutes | null>(null)
-  const chatEndRef  = useRef<HTMLDivElement>(null)
-  const confettiRef = useRef<HTMLCanvasElement>(null)
-  const mountedRef  = useRef(true)
-
-  const [messages,    setMessages]    = useState<ChatMsg[]>([])
-  const [phase,       setPhase]       = useState<Phase>('welcome')
-  const [isTyping,    setIsTyping]    = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
-  const [subjects,    setSubjects]    = useState<string[]>([])
-  const [subjIdx,     setSubjIdx]     = useState(0)
-  const [genIdx,      setGenIdx]      = useState(0)
-
-  // ─── Messaging helpers ───────────────────────────────────────────────────────
-
-  const addPauMsg  = (text: string) => setMessages(p => [...p, { id: `${Date.now()}-${Math.random()}`, role: 'pau',  text }])
-  const addUserMsg = (text: string) => setMessages(p => [...p, { id: `${Date.now()}-${Math.random()}`, role: 'user', text }])
-  const scrollEnd  = ()             => setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 60)
-
-  async function deliverPau(texts: string[]) {
-    for (let i = 0; i < texts.length; i++) {
-      if (!mountedRef.current) return
-      setIsTyping(true); scrollEnd()
-      await delay(i === 0 ? 780 : 900)
-      if (!mountedRef.current) return
-      setIsTyping(false)
-      addPauMsg(texts[i]); scrollEnd()
-      if (i < texts.length - 1) await delay(260)
-    }
-  }
-
-  async function advance(userText: string, pauTexts: string[], next: Phase) {
-    addUserMsg(userText); setShowOptions(false); scrollEnd()
-    await deliverPau(pauTexts)
-    if (!mountedRef.current) return
-    setPhase(next)
-    if (next !== 'generating' && next !== 'done') {
-      await delay(120); setShowOptions(true)
-    }
-    scrollEnd()
-  }
-
-  // ─── Mount ───────────────────────────────────────────────────────────────────
+  const router = useRouter()
+  const [step, setStep] = useState<Step>('welcome')
+  const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
+  const [schoolQuery, setSchoolQuery] = useState('')
+  const [manualSchool, setManualSchool] = useState('')
+  const [savingError, setSavingError] = useState('')
 
   useEffect(() => {
-    mountedRef.current = true
-    supabase.auth.getSession().then(({ data: { session } }) => { tokenRef.current = session?.access_token ?? null })
-    ;(async () => {
-      await delay(350)
-      if (!mountedRef.current) return
-      await deliverPau([
-        'Bienvenido/a a Pausia.',
-        'Vamos a configurar tu ruta de preparación PAU con unas preguntas rápidas.',
-      ])
-      if (!mountedRef.current) return
-      setShowOptions(true); scrollEnd()
-    })()
-    return () => { mountedRef.current = false }
-  }, []) // eslint-disable-line
+    if (data.schoolSource === 'manual' && data.schoolName) setManualSchool(data.schoolName)
+  }, [data.schoolName, data.schoolSource])
 
-  // ─── Progress ────────────────────────────────────────────────────────────────
+  const stepIndex = STEPS.indexOf(step)
+  const currentStep = stepIndex >= 0 ? stepIndex + 1 : 0
+  const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
+  const centers = data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : []
+  const normalizedQuery = normalizeSearch(schoolQuery)
+  const filteredCenters = useMemo(() => {
+    if (!centers.length) return []
+    if (!normalizedQuery) return [...centers].slice(0, 10)
+    return centers.filter(center => normalizeSearch(center).includes(normalizedQuery)).slice(0, 10)
+  }, [centers, normalizedQuery])
 
-  const totalQ = 6 + subjects.length
-  const stepMap: Partial<Record<Phase, number>> = {
-    community: 1, 'pau-date': 2, goal: 3, subjects: 4,
-    'subject-level': 4 + subjIdx + 1,
-    'daily-time': 4 + subjects.length + 1,
-    'start-mode': 4 + subjects.length + 2,
-    generating: totalQ, done: totalQ,
-  }
-  const progressPct = phase === 'done' ? 100
-    : phase === 'welcome' ? 0
-    : Math.min(((stepMap[phase] ?? 0) / totalQ) * 100, 98)
+  const canContinue = (() => {
+    if (step === 'community') return Boolean(data.community)
+    if (step === 'school') return Boolean(data.schoolName?.trim())
+    if (step === 'subjects') return data.subjects.length > 0
+    if (step === 'feeling') return Boolean(data.preparationFeeling)
+    if (step === 'daily-time') return Boolean(data.dailyStudyTime)
+    if (step === 'weekly-days') return Boolean(data.weeklyStudyDays)
+    return true
+  })()
 
-  // ─── Handlers ────────────────────────────────────────────────────────────────
-
-  function handleStart() {
-    advance('Empezar configuración', ['¿De qué comunidad autónoma es tu examen?'], 'community')
+  function update(partial: Partial<OnboardingData>) {
+    setData(current => {
+      const next = { ...current, ...partial }
+      saveOnboarding(next)
+      return next
+    })
   }
 
-  function handleCommunity(id: string, label: string) {
-    const c = id as OnboardingCommunity
-    commRef.current = c
-    saveOnboarding({ community: c })
-    advance(label, ['¿Cuándo tienes la PAU?'], 'pau-date')
+  function goNext() {
+    if (step === 'welcome') { setStep('community'); return }
+    if (stepIndex >= 0 && stepIndex < STEPS.length - 1 && canContinue) setStep(STEPS[stepIndex + 1])
   }
 
-  function handleDate(label: string) {
-    advance(label, ['¿Qué quieres conseguir con tu nota PAU?'], 'goal')
+  function goBack() {
+    if (stepIndex > 0) setStep(STEPS[stepIndex - 1])
+    else if (step === 'community') setStep('welcome')
   }
 
-  function handleGoal(label: string) {
-    advance(label, [
-      '¿Qué asignaturas quieres preparar?',
-      'Elige todas las que necesitas para tu examen.',
-    ], 'subjects')
+  function selectCommunity(community: OnboardingCommunity) {
+    update({ community, schoolName: null, schoolSource: null })
+    setSchoolQuery('')
+    setManualSchool('')
   }
 
-  function handleSubjectsConfirm() {
-    if (subjects.length === 0) return
-    saveOnboarding({ subjects })
-    const s = subjects
-    const label = s.length === 1 ? s[0]
-      : `${s.slice(0, -1).join(', ')} y ${s[s.length - 1]}`
-    setSubjIdx(0)
-    advance(label, [`¿Cómo te sientes ahora mismo con ${s[0]}?`], 'subject-level')
+  function selectSchool(name: string, source: OnboardingSchoolSource) {
+    update({ schoolName: name, schoolSource: source })
+    if (source === 'dataset') setSchoolQuery(name)
   }
 
-  function handleSubjectLevel(label: string) {
-    const next = subjIdx + 1
-    if (next < subjects.length) {
-      setSubjIdx(next)
-      advance(label, [`¿Y con ${subjects[next]}?`], 'subject-level')
-    } else {
-      advance(label, ['¿Cuánto tiempo puedes dedicar cada día a estudiar?'], 'daily-time')
-    }
+  function toggleSubject(subject: string) {
+    update({ subjects: data.subjects.includes(subject) ? data.subjects.filter(item => item !== subject) : [...data.subjects, subject] })
   }
 
-  function handleDailyTime(minutes: OnboardingDailyMinutes, label: string) {
-    minutesRef.current = minutes
-    saveOnboarding({ dailyMinutes: minutes })
-    advance(label, ['Último paso: ¿desde dónde arrancas con la preparación?'], 'start-mode')
-  }
-
-  function handleStartMode(mode: OnboardingStartMode, label: string) {
-    saveOnboarding({ startMode: mode })
-    ;(async () => {
-      addUserMsg(label); setShowOptions(false); scrollEnd()
-      await deliverPau(['Perfecto. Estamos preparando tu ruta personalizada...'])
-      if (!mountedRef.current) return
-      setPhase('generating'); scrollEnd()
-
-      // API call (non-blocking)
-      const token    = tokenRef.current
-      const comm     = commRef.current
-      const mins     = minutesRef.current
-      const routeId  = startModeToRouteId(mode)
-      if (token && comm && mins) {
-        fetch('/api/onboarding/setup', {
+  async function finish() {
+    setSavingError('')
+    setStep('saving')
+    const completedAt = new Date().toISOString()
+    saveOnboarding({ ...data, completedAt })
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      if (token) {
+        await fetch('/api/onboarding/setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ routeId, community: comm, dailyMinutes: mins, startMode: mode }),
-        }).catch(() => {})
+          body: JSON.stringify({
+            routeId: 'completa',
+            community: data.community,
+            schoolName: data.schoolName,
+            schoolSource: data.schoolSource,
+            subjects: data.subjects,
+            preparationFeeling: data.preparationFeeling,
+            dailyStudyTime: data.dailyStudyTime,
+            dailyMinutes: data.dailyMinutes,
+            weeklyStudyDays: data.weeklyStudyDays,
+            weeklyStudyDaysValue: data.weeklyStudyDaysValue,
+            onboardingCompleted: true,
+          }),
+        })
       }
-
-      for (let i = 0; i < GEN_ITEMS.length; i++) {
-        await delay(780)
-        if (!mountedRef.current) return
-        setGenIdx(i + 1)
-      }
-      await delay(600)
-      if (!mountedRef.current) return
       markOnboardingComplete()
-      setPhase('done'); scrollEnd()
-      triggerConfetti()
-    })()
-  }
-
-  // ─── Confetti ─────────────────────────────────────────────────────────────────
-
-  function triggerConfetti() {
-    const canvas = confettiRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    if (!ctx) return
-    const W = window.innerWidth, H = window.innerHeight
-    canvas.width = W; canvas.height = H
-    const ps = Array.from({ length: 130 }, () => ({
-      x: W * 0.5 + (Math.random() - 0.5) * W * 0.7,
-      y: H * 0.25,
-      vx: (Math.random() - 0.5) * 18,
-      vy: -(Math.random() * 14 + 4),
-      w: Math.random() * 11 + 5, h: Math.random() * 5 + 3,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 11, alpha: 1,
-    }))
-    let raf: number
-    function animate() {
-      ctx.clearRect(0, 0, W, H)
-      let alive = false
-      for (const p of ps) {
-        if (p.alpha <= 0) continue
-        alive = true
-        p.vy += 0.38; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.rotV
-        if (p.y > H * 0.8) p.alpha -= 0.035
-        ctx.save()
-        ctx.globalAlpha = Math.max(0, p.alpha)
-        ctx.translate(p.x, p.y)
-        ctx.rotate((p.rot * Math.PI) / 180)
-        ctx.fillStyle = p.color
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
-        ctx.restore()
-      }
-      if (alive) raf = requestAnimationFrame(animate)
-      else { ctx.clearRect(0, 0, W, H); if (canvas) canvas.style.display = 'none' }
-    }
-    canvas.style.display = 'block'
-    raf = requestAnimationFrame(animate)
-    // eslint-disable-next-line consistent-return
-    return () => cancelAnimationFrame(raf)
-  }
-
-  // ─── Options renderer ─────────────────────────────────────────────────────────
-
-  function renderOptions() {
-    switch (phase) {
-      case 'welcome':
-        return (
-          <motion.div key="welcome-opt" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="px-4 py-5">
-            <button
-              onClick={handleStart}
-              className="w-full flex items-center justify-center gap-2 text-white font-bold rounded-2xl py-4 transition-all active:scale-[0.98]"
-              style={{ fontSize: 15, background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 8px 28px rgba(37,99,235,0.32)' }}
-            >
-              Empezar configuración <ArrowRight size={17} />
-            </button>
-          </motion.div>
-        )
-
-      case 'community':
-        return (
-          <OptionList key="community-opts">
-            {COMMUNITY_OPTS.map((o, i) => (
-              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
-                onClick={() => handleCommunity(o.id, o.label)} />
-            ))}
-          </OptionList>
-        )
-
-      case 'pau-date':
-        return (
-          <OptionList key="date-opts">
-            {DATE_OPTS.map((o, i) => (
-              <OptionBtn key={o.id} index={i} label={o.label}
-                onClick={() => handleDate(o.label)} />
-            ))}
-          </OptionList>
-        )
-
-      case 'goal':
-        return (
-          <OptionList key="goal-opts">
-            {GOAL_OPTS.map((o, i) => (
-              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
-                onClick={() => handleGoal(o.label)} />
-            ))}
-          </OptionList>
-        )
-
-      case 'subjects':
-        return (
-          <motion.div key="subject-opts" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="px-4 py-4 space-y-2">
-            {SUBJECT_OPTS.map((s, i) => {
-              const sel = subjects.includes(s.id)
-              return (
-                <motion.button
-                  key={s.id}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.045 }}
-                  onClick={() => setSubjects(p => sel ? p.filter(x => x !== s.id) : [...p, s.id])}
-                  className="w-full flex items-center gap-3 px-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98]"
-                  style={{
-                    minHeight: 56,
-                    borderColor: sel ? s.color : '#e2e8f0',
-                    background: sel ? s.bg : '#fff',
-                    boxShadow: sel ? `0 0 0 3px ${s.color}1a` : '0 1px 3px rgba(0,0,0,0.04)',
-                  }}
-                >
-                  <div className="flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
-                    style={{ borderColor: sel ? s.color : '#cbd5e1', background: sel ? s.color : 'white' }}>
-                    {sel && <Check size={11} color="white" strokeWidth={3} />}
-                  </div>
-                  <span className="font-bold text-sm transition-colors"
-                    style={{ color: sel ? s.color : '#334155' }}>
-                    {s.label}
-                  </span>
-                </motion.button>
-              )
-            })}
-            <motion.button
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: SUBJECT_OPTS.length * 0.045 }}
-              disabled={subjects.length === 0}
-              onClick={handleSubjectsConfirm}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] transition-all mt-1 active:scale-[0.98]"
-              style={{
-                background: subjects.length > 0 ? 'linear-gradient(135deg, #1d4ed8, #2563eb)' : '#f1f5f9',
-                color: subjects.length > 0 ? 'white' : '#94a3b8',
-                boxShadow: subjects.length > 0 ? '0 8px 24px rgba(37,99,235,0.28)' : 'none',
-              }}
-            >
-              Confirmar {subjects.length > 0 && `(${subjects.length})`}
-              <ArrowRight size={16} />
-            </motion.button>
-          </motion.div>
-        )
-
-      case 'subject-level':
-        return (
-          <OptionList key={`level-opts-${subjIdx}`}>
-            {LEVEL_OPTS.map((o, i) => (
-              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
-                onClick={() => handleSubjectLevel(o.label)} />
-            ))}
-          </OptionList>
-        )
-
-      case 'daily-time':
-        return (
-          <OptionList key="time-opts">
-            {TIME_OPTS.map((o, i) => (
-              <OptionBtn key={String(o.id)} index={i} label={o.label} desc={o.desc}
-                badge={o.recommended ? 'Recomendado' : undefined}
-                onClick={() => handleDailyTime(o.id, o.label)} />
-            ))}
-          </OptionList>
-        )
-
-      case 'start-mode':
-        return (
-          <OptionList key="start-opts">
-            {START_OPTS.map((o, i) => (
-              <OptionBtn key={o.id} index={i} label={o.label} desc={o.desc}
-                onClick={() => handleStartMode(o.id, o.label)} />
-            ))}
-          </OptionList>
-        )
-
-      default: return null
+      setStep('done')
+    } catch {
+      setSavingError('No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
+      setStep('confirm')
     }
   }
-
-  // ─── Render ──────────────────────────────────────────────────────────────────
-
-  const assistantMessages = messages.filter(msg => msg.role === 'pau')
-  const userAnswers = messages.filter(msg => msg.role === 'user')
-  const latestPrompt = assistantMessages.at(-1)?.text ?? 'Configura tu Camino PAU personalizado.'
-  const currentStep = stepMap[phase] ?? 0
-  const phaseTitle: Record<Phase, string> = {
-    welcome: 'Crea tu Camino PAU',
-    community: 'Comunidad autónoma',
-    'pau-date': 'Fecha del examen',
-    goal: 'Objetivo principal',
-    subjects: 'Asignaturas',
-    'subject-level': subjects[subjIdx] ? `Nivel en ${subjects[subjIdx]}` : 'Nivel por asignatura',
-    'daily-time': 'Tiempo de estudio',
-    'start-mode': 'Punto de partida',
-    generating: 'Preparando tu ruta',
-    done: 'Ruta creada'
-  }
-  const questionLabel = phase === 'done'
-    ? 'Completado'
-    : phase === 'generating'
-      ? 'Procesando'
-      : phase === 'welcome'
-        ? 'Inicio'
-        : `Pregunta ${currentStep} de ${totalQ}`
-  const progressSteps = [
-    'Comunidad',
-    'Fecha',
-    'Objetivo',
-    'Asignaturas',
-    ...(subjects.length > 0 ? ['Nivel'] : []),
-    'Ritmo',
-    'Inicio',
-  ]
 
   return (
-    <div className="min-h-[100dvh] bg-[#f8fafc]"
-      style={{ minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-
+    <div className="min-h-[100dvh] bg-[#f8fafc]" style={{ minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { box-sizing: border-box; }
       `}</style>
 
-      {/* Confetti canvas */}
-      <canvas ref={confettiRef} className="fixed inset-0 pointer-events-none z-50"
-        style={{ display: 'none' }} />
-
       <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4">
-          <img src="/brand/pausia-lockup.png" alt="Pausia"
-            className="h-7 shrink-0 object-contain" />
+          <img src="/brand/pausia-lockup.png" alt="Pausia" className="h-7 shrink-0 object-contain" />
           <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-slate-500 sm:flex">
             <span>Preparación PAU</span>
             <span className="h-1 w-1 rounded-full bg-slate-300" />
@@ -483,34 +227,25 @@ export default function OnboardingFlow() {
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-5 py-8 lg:grid-cols-[320px_1fr] lg:py-12">
+      <main className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[320px_1fr] lg:py-12">
         <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-8 lg:self-start">
-          <div className="mb-6">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-              Una configuración breve para ajustar tu plan de estudio a tu examen, ritmo y objetivos.
-            </p>
-          </div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
+          <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Una configuración breve, amable y útil para empezar sin burocracia.</p>
 
-          <div className="mb-6">
+          <div className="my-6">
             <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-slate-400">
               <span>Progreso</span>
-              <span>{Math.round(progressPct)}%</span>
+              <span>{progressPct}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: 'linear-gradient(90deg, #1d4ed8, #3b82f6)' }}
-                animate={{ width: `${progressPct}%` }}
-                transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
-              />
+              <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #1d4ed8, #7c3aed)' }} animate={{ width: `${progressPct}%` }} transition={{ duration: 0.45 }} />
             </div>
           </div>
 
           <div className="space-y-3">
-            {progressSteps.map((item, index) => {
-              const active = currentStep >= index + 1 || phase === 'done'
+            {['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar'].map((item, index) => {
+              const active = currentStep >= index + 1 || step === 'done'
               return (
                 <div key={item} className="flex items-center gap-3">
                   <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
@@ -521,214 +256,178 @@ export default function OnboardingFlow() {
               )
             })}
           </div>
-
-          {userAnswers.length > 0 && (
-            <div className="mt-6 rounded-2xl bg-slate-50 p-4">
-              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Tus respuestas</p>
-              <div className="space-y-1.5">
-                {userAnswers.slice(-4).map(answer => (
-                  <p key={answer.id} className="truncate text-xs font-bold text-slate-600">{answer.text}</p>
-                ))}
-              </div>
-            </div>
-          )}
         </aside>
 
-        <section className="flex min-h-[640px] items-center">
-          <motion.div
-            key={phase}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
-            className="w-full rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(15,23,42,0.10)] sm:p-8"
-          >
+        <section className="flex min-h-[620px] items-center">
+          <motion.div key={step} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="w-full rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(15,23,42,0.10)] sm:p-8">
             <div className="mb-7 flex flex-wrap items-center gap-3">
               <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-700">
-                {questionLabel}
+                {step === 'welcome' ? 'Inicio' : step === 'saving' ? 'Guardando' : step === 'done' ? 'Completado' : `Paso ${currentStep} de ${STEPS.length}`}
               </span>
-              {phase !== 'welcome' && phase !== 'generating' && phase !== 'done' && (
-                <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-                  {currentStep} / {totalQ}
-                </span>
+              {stepIndex > 0 && step !== 'saving' && step !== 'done' && (
+                <button onClick={goBack} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                  <ArrowLeft size={14} /> Atrás
+                </button>
               )}
             </div>
 
-            {phase !== 'generating' && phase !== 'done' && (
-              <div className="mb-7">
-                <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{phaseTitle[phase]}</h2>
-                <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">{latestPrompt}</p>
-              </div>
-            )}
+            <div className="mb-7">
+              <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{STEP_LABELS[step].title}</h2>
+              <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">{STEP_LABELS[step].help}</p>
+            </div>
 
             <AnimatePresence mode="wait">
-              {isTyping && phase !== 'generating' && phase !== 'done' && (
-                <motion.div
-                  key="typing"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="mb-7 inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500"
-                >
-                  <span>Preparando la siguiente pregunta</span>
-                  <span className="flex items-center gap-1">
-                    {[0, 1, 2].map(i => (
-                      <motion.span key={i} className="h-1.5 w-1.5 rounded-full bg-blue-500"
-                        animate={{ scale: [1, 1.45, 1], opacity: [0.35, 1, 0.35] }}
-                        transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.16 }}
-                      />
-                    ))}
-                  </span>
-                </motion.div>
-              )}
+              <motion.div key={`${step}-content`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
+                {renderStep()}
+              </motion.div>
             </AnimatePresence>
 
-            {phase === 'generating' && (
-              <div className="space-y-6">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Procesando</p>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Preparando tu ruta personalizada</h2>
-                  <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">
-                    Estamos cruzando tus respuestas para crear un Camino PAU útil, realista y exigente.
-                  </p>
-                </div>
-                <div className="space-y-4 rounded-3xl border border-slate-100 bg-slate-50 p-5">
-                {GEN_ITEMS.map((item, i) => (
-                  <motion.div key={item}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: genIdx > i ? 1 : 0.22, x: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="flex items-center gap-3"
-                  >
-                    <motion.div
-                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                      animate={{ background: genIdx > i ? '#2563eb' : '#e2e8f0' }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {genIdx > i && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400 }}>
-                          <Check size={11} color="white" strokeWidth={3} />
-                        </motion.div>
-                      )}
-                    </motion.div>
-                    <span className="text-sm font-semibold"
-                      style={{ color: genIdx > i ? '#1e293b' : '#94a3b8' }}>
-                      {item}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
+            {stepIndex >= 0 && step !== 'confirm' && step !== 'saving' && step !== 'done' && (
+              <div className="mt-7">
+                <PrimaryButton onClick={goNext}>Continuar <ArrowRight size={16} /></PrimaryButton>
               </div>
             )}
-
-            {phase === 'done' && (
-              <div className="space-y-7 text-center">
-                <motion.div initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 18 }}
-                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_18px_55px_rgba(37,99,235,0.35)]">
-                  <Check size={34} strokeWidth={3} />
-                </motion.div>
-
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Camino creado</p>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Tu ruta PAU está lista</h2>
-                  <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-7 text-slate-500">
-                    Pausia ya tiene lo necesario para organizar tus sesiones, priorizar asignaturas y ajustar el ritmo de preparación.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-2">
-                  {subjects.map(s => {
-                    const opt = SUBJECT_OPTS.find(o => o.id === s)
-                    return opt ? (
-                      <span key={s} className="px-3 py-1 rounded-full text-xs font-bold"
-                        style={{ background: opt.bg, color: opt.color }}>
-                        {s}
-                      </span>
-                    ) : null
-                  })}
-                </div>
-
-                <motion.button
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  onClick={() => router.push('/camino')}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] text-white"
-                  style={{ background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 10px 28px rgba(37,99,235,0.30)' }}
-                >
-                  Ver mi Camino PAU <ArrowRight size={16} />
-                </motion.button>
-              </div>
-            )}
-
-            {showOptions && phase !== 'generating' && phase !== 'done' && (
-              <div className="mt-2">{renderOptions()}</div>
-            )}
-
-            <div ref={chatEndRef} />
           </motion.div>
         </section>
       </main>
     </div>
   )
+
+  function renderStep() {
+    if (step === 'welcome') {
+      return <PrimaryButton onClick={goNext}>Empezar con Pausia <ArrowRight size={16} /></PrimaryButton>
+    }
+
+    if (step === 'community') {
+      return <OptionGrid>{COMMUNITY_OPTS.map(option => <ChoiceCard key={option.id} title={option.label} desc={option.desc} selected={data.community === option.id} onClick={() => selectCommunity(option.id)} />)}</OptionGrid>
+    }
+
+    if (step === 'school') {
+      const manualSelected = data.schoolSource === 'manual'
+      return (
+        <div className="space-y-4">
+          {centers.length > 0 ? (
+            <>
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-blue-300 focus-within:bg-white">
+                <Search size={18} className="text-slate-400" />
+                <input value={schoolQuery} onChange={event => setSchoolQuery(event.target.value)} placeholder="Busca tu centro por nombre" className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400" />
+              </label>
+              <div className="grid gap-2">
+                {filteredCenters.map(center => <ChoiceCard key={center} title={center} selected={data.schoolName === center && data.schoolSource === 'dataset'} onClick={() => selectSchool(center, 'dataset')} compact />)}
+              </div>
+            </>
+          ) : (
+            <p className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Para esta comunidad puedes escribir tu centro manualmente.</p>
+          )}
+
+          <button onClick={() => selectSchool(manualSchool || 'Mi centro no aparece', 'manual')} className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${manualSelected ? 'border-blue-500 bg-blue-50 text-blue-800' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50'}`}>Mi centro no aparece</button>
+          {manualSelected && (
+            <input value={manualSchool} onChange={event => { setManualSchool(event.target.value); update({ schoolName: event.target.value, schoolSource: 'manual' }) }} placeholder="Escribe el nombre de tu centro" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-300" />
+          )}
+        </div>
+      )
+    }
+
+    if (step === 'subjects') {
+      return (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {SUBJECT_OPTS.map(subject => {
+            const selected = data.subjects.includes(subject.id)
+            return (
+              <button key={subject.id} onClick={() => toggleSubject(subject.id)} className="flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left transition active:scale-[0.98]" style={{ borderColor: selected ? subject.color : '#e2e8f0', background: selected ? subject.bg : '#ffffff', boxShadow: selected ? `0 0 0 3px ${subject.color}1a` : '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2" style={{ borderColor: selected ? subject.color : '#cbd5e1', background: selected ? subject.color : 'white' }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
+                <span className="text-sm font-black" style={{ color: selected ? subject.color : '#334155' }}>{subject.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      )
+    }
+
+    if (step === 'feeling') {
+      return <OptionGrid>{FEELING_OPTS.map(label => <ChoiceCard key={label} title={label} selected={data.preparationFeeling === label} onClick={() => update({ preparationFeeling: label })} />)}</OptionGrid>
+    }
+
+    if (step === 'daily-time') {
+      return <OptionGrid>{TIME_OPTS.map(option => <ChoiceCard key={option.label} title={option.label} selected={data.dailyStudyTime === option.label} onClick={() => update({ dailyStudyTime: option.label, dailyMinutes: option.minutes })} />)}</OptionGrid>
+    }
+
+    if (step === 'weekly-days') {
+      return <OptionGrid>{WEEKLY_DAY_OPTS.map(option => <ChoiceCard key={option.label} title={option.label} selected={data.weeklyStudyDays === option.label} onClick={() => update({ weeklyStudyDays: option.label, weeklyStudyDaysValue: option.value })} />)}</OptionGrid>
+    }
+
+    if (step === 'confirm') {
+      return (
+        <div className="space-y-5">
+          {savingError && <p className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{savingError}</p>}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <SummaryItem label="Comunidad" value={data.community || '-'} />
+            <SummaryItem label="Centro educativo" value={data.schoolName || '-'} />
+            <SummaryItem label="Asignaturas" value={data.subjects.join(', ') || '-'} />
+            <SummaryItem label="Preparación" value={data.preparationFeeling || '-'} />
+            <SummaryItem label="Tiempo diario" value={data.dailyStudyTime || '-'} />
+            <SummaryItem label="Días por semana" value={data.weeklyStudyDays || '-'} />
+          </div>
+          <PrimaryButton onClick={finish}>Empezar con Pausia <ArrowRight size={16} /></PrimaryButton>
+        </div>
+      )
+    }
+
+    if (step === 'saving') {
+      return <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 text-sm font-bold text-blue-800">Guardando tu configuración y preparando Camino PAU...</div>
+    }
+
+    if (step === 'done') {
+      return (
+        <div className="space-y-6 text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_18px_55px_rgba(37,99,235,0.35)]"><Check size={34} strokeWidth={3} /></div>
+          <PrimaryButton onClick={() => router.push('/camino')}>Ver mi Camino PAU <ArrowRight size={16} /></PrimaryButton>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  function PrimaryButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+    return (
+      <button onClick={onClick} disabled={!canContinue && step !== 'welcome'} className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-black text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400" style={canContinue || step === 'welcome' ? { background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)', boxShadow: '0 10px 28px rgba(37,99,235,0.30)' } : undefined}>
+        {children}
+      </button>
+    )
+  }
 }
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
+function normalizeSearch(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+}
 
-function OptionList({ children }: { children: React.ReactNode }) {
+function OptionGrid({ children }: { children: ReactNode }) {
+  return <div className="grid gap-2">{children}</div>
+}
+
+function ChoiceCard({ title, desc, selected, compact, onClick }: { title: string; desc?: string; selected: boolean; compact?: boolean; onClick: () => void }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-4 space-y-2"
-    >
-      {children}
-    </motion.div>
+    <button onClick={onClick} className={`flex w-full items-center gap-3 rounded-2xl border text-left transition active:scale-[0.98] ${compact ? 'px-4 py-3' : 'px-4 py-4'} ${selected ? 'border-blue-500 bg-blue-50 shadow-[0_0_0_3px_rgba(37,99,235,0.10)]' : 'border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50'}`}>
+      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${selected ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white'}`}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
+      <span className="min-w-0">
+        <span className={`block text-sm font-black ${selected ? 'text-blue-800' : 'text-slate-800'}`}>{title}</span>
+        {desc && <span className="mt-0.5 block text-xs font-semibold text-slate-400">{desc}</span>}
+      </span>
+    </button>
   )
 }
 
-interface OptionBtnProps {
-  label: string
-  desc?: string
-  badge?: string
-  index: number
-  onClick: () => void
-}
-
-function OptionBtn({ label, desc, badge, index, onClick }: OptionBtnProps) {
+function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <motion.button
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.048 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 rounded-2xl border border-slate-200 bg-white text-left group transition-all"
-      style={{
-        minHeight: 56,
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = '#93c5fd'
-        e.currentTarget.style.background = '#f0f7ff'
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(37,99,235,0.10)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#e2e8f0'
-        e.currentTarget.style.background = '#ffffff'
-        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'
-      }}
-    >
-      <div className="flex-1 min-w-0">
-        <span className="block text-sm font-bold text-slate-800">{label}</span>
-        {desc && <span className="block text-xs font-semibold text-slate-400 mt-0.5">{desc}</span>}
-      </div>
-      {badge && (
-        <span className="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-700">
-          {badge}
-        </span>
-      )}
-      <ChevronRight size={16} className="shrink-0 text-slate-300 transition-colors" />
-    </motion.button>
+    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-black text-slate-800">{value}</p>
+    </div>
   )
 }

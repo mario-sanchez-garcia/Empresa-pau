@@ -5,8 +5,19 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 export const dynamic = 'force-dynamic'
 
 const VALID_COMMUNITIES = ['Madrid', 'Cataluña', 'Andalucía', 'Otra'] as const
-const VALID_DAILY_MINUTES = [15, 25, 40] as const
-const VALID_START_MODES = ['septiembre', 'empezado', 'retraso', 'intensivo'] as const
+const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
+const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
+const VALID_SCHOOL_SOURCES = ['dataset', 'manual'] as const
+
+function cleanString(value: unknown, fallback = '') {
+  return typeof value === 'string' ? value.trim().slice(0, 160) : fallback
+}
+
+function cleanStringArray(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string').map(item => item.trim()).filter(Boolean).slice(0, 12)
+    : []
+}
 
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -20,14 +31,20 @@ export async function POST(request: NextRequest) {
   const community = VALID_COMMUNITIES.includes(body.community as typeof VALID_COMMUNITIES[number])
     ? (body.community as string) : 'Otra'
   const dailyMinutes = VALID_DAILY_MINUTES.includes(body.dailyMinutes as typeof VALID_DAILY_MINUTES[number])
-    ? (body.dailyMinutes as number) : 25
-  const startMode = VALID_START_MODES.includes(body.startMode as typeof VALID_START_MODES[number])
-    ? (body.startMode as string) : 'septiembre'
+    ? (body.dailyMinutes as number) : null
+  const weeklyStudyDaysValue = VALID_WEEKLY_DAYS.includes(body.weeklyStudyDaysValue as typeof VALID_WEEKLY_DAYS[number])
+    ? (body.weeklyStudyDaysValue as number) : null
+  const schoolSource = VALID_SCHOOL_SOURCES.includes(body.schoolSource as typeof VALID_SCHOOL_SOURCES[number])
+    ? (body.schoolSource as string) : null
+  const schoolName = cleanString(body.schoolName)
+  const subjects = cleanStringArray(body.subjects)
+  const preparationFeeling = cleanString(body.preparationFeeling)
+  const dailyStudyTime = cleanString(body.dailyStudyTime)
+  const weeklyStudyDays = cleanString(body.weeklyStudyDays)
 
   const entryDate = new Date().toISOString().slice(0, 10)
   const userSupabase = createUserSupabase(accessToken)
 
-  // Upsert route settings with entry date
   await userSupabase.from('camino_route_settings').upsert(
     {
       user_id: user.id,
@@ -38,13 +55,24 @@ export async function POST(request: NextRequest) {
     { onConflict: 'user_id' }
   )
 
-  // Log onboarding event (reuse billing_events as generic event log)
   try {
     const serviceDb = createServiceClient()
     await serviceDb.from('billing_events').insert({
       user_id: user.id,
       event_type: 'onboarding_completed',
-      payload: { community, daily_minutes: dailyMinutes, start_mode: startMode, route_id: routeId }
+      payload: {
+        community,
+        school_name: schoolName,
+        school_source: schoolSource,
+        subjects,
+        preparation_feeling: preparationFeeling,
+        daily_study_time: dailyStudyTime,
+        daily_minutes: dailyMinutes,
+        weekly_study_days: weeklyStudyDays,
+        weekly_study_days_value: weeklyStudyDaysValue,
+        route_id: routeId,
+        onboarding_completed: true,
+      }
     })
   } catch { /* non-critical */ }
 

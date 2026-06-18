@@ -1,18 +1,21 @@
 'use client'
 
 // Onboarding state persisted in localStorage.
-// No new DB migration needed: route selection is saved via /api/camino/route
-// and this metadata stays local (suitable for MVP).
+// No DB migration needed for beta: /api/onboarding/setup logs the same data in Supabase.
 
 export type OnboardingCommunity = 'Madrid' | 'Cataluña' | 'Andalucía' | 'Otra'
-export type OnboardingDailyMinutes = 15 | 25 | 40
-export type OnboardingStartMode = 'septiembre' | 'empezado' | 'retraso' | 'intensivo'
+export type OnboardingSchoolSource = 'dataset' | 'manual' | null
 
 export interface OnboardingData {
   community: OnboardingCommunity | null
+  schoolName: string | null
+  schoolSource: OnboardingSchoolSource
   subjects: string[]
-  dailyMinutes: OnboardingDailyMinutes | null
-  startMode: OnboardingStartMode | null
+  preparationFeeling: string | null
+  dailyStudyTime: string | null
+  dailyMinutes: number | null
+  weeklyStudyDays: string | null
+  weeklyStudyDaysValue: number | null
   completedAt: string | null
 }
 
@@ -46,16 +49,16 @@ export function isOnboardingComplete(): boolean {
 }
 
 function emptyOnboarding(): OnboardingData {
-  return { community: null, subjects: DEFAULT_SUBJECTS, dailyMinutes: null, startMode: null, completedAt: null }
-}
-
-// Map startMode → CaminoRouteId
-export function startModeToRouteId(mode: OnboardingStartMode | null): string {
-  switch (mode) {
-    case 'septiembre': return 'completa'
-    case 'empezado':   return 'ajustada'
-    case 'retraso':    return 'acelerada'
-    case 'intensivo':  return 'intensiva'
-    default:           return 'completa'
+  return {
+    community: null,
+    schoolName: null,
+    schoolSource: null,
+    subjects: DEFAULT_SUBJECTS,
+    preparationFeeling: null,
+    dailyStudyTime: null,
+    dailyMinutes: null,
+    weeklyStudyDays: null,
+    weeklyStudyDaysValue: null,
+    completedAt: null,
   }
 }

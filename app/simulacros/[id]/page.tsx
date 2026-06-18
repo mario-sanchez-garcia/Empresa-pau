@@ -8,6 +8,7 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
 import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import ExamStatement from '@/components/shared/ExamStatement'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
@@ -167,8 +168,8 @@ export default function SimulacroActivoPage() {
 
   async function handleImage(blockId: string, file?: File) {
     if (!file) return
-    const base64 = await fileToBase64(file)
-    setAnswers(prev => ({ ...prev, [blockId]: { ...(prev[blockId] ?? { text: '' }), image: base64, imageType: file.type } }))
+    const base64 = await compressImageToBase64(file)
+    setAnswers(prev => ({ ...prev, [blockId]: { ...(prev[blockId] ?? { text: '' }), image: base64, imageType: 'image/jpeg' } }))
   }
 
   async function submitExam() {
@@ -884,14 +885,6 @@ function writeReviewState(id: string, value: Record<string, boolean>) {
   } catch {
     // Local storage is best-effort only.
   }
-}
-
-function fileToBase64(file: File) {
-  return new Promise<string>((resolve) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
-    reader.readAsDataURL(file)
-  })
 }
 
 async function safeJson(response: Response) {

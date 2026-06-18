@@ -7,6 +7,7 @@ import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -125,15 +126,13 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
       ].filter(Boolean).join('\n\n')
     : 'Valora la precisión conceptual, la comprensión del texto o problema filosófico, la argumentación, la comparación razonada y la claridad expresiva. Respeta el límite de palabras cuando se indique.'
 
-  function chooseImage(event: React.ChangeEvent<HTMLInputElement>) {
+  async function chooseImage(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
     if (imagePreview) URL.revokeObjectURL(imagePreview)
-    setImageType(file.type || 'image/jpeg')
     setImagePreview(URL.createObjectURL(file))
-    const reader = new FileReader()
-    reader.onload = () => setImage((reader.result as string).split(',')[1])
-    reader.readAsDataURL(file)
+    setImageType('image/jpeg')
+    setImage(await compressImageToBase64(file))
   }
 
   function clearImage() {

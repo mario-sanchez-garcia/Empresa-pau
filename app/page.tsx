@@ -17,6 +17,7 @@ import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/corre
 import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
+import { compressImageToBase64 } from './lib/clientImageCompression'
 import Sidebar, { type SidebarItemId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
@@ -1337,14 +1338,12 @@ function cambiarTipo(t: Tipo) {
     return data.session.access_token
   }
 
-  function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setImagenTipo(file.type)
     setImagenPreview(URL.createObjectURL(file))
-    const reader = new FileReader()
-    reader.onload = () => setImagen((reader.result as string).split(',')[1])
-    reader.readAsDataURL(file)
+    setImagenTipo('image/jpeg')
+    setImagen(await compressImageToBase64(file))
   }
 
   async function corregir() {

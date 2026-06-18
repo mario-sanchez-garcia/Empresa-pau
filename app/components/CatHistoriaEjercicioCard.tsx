@@ -5,6 +5,7 @@ import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -114,14 +115,12 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
   const puntuacion = puntuacionEjercicio(ejercicio)
   const enunciadoOficial = [ejercicio.instrucciones, ...preguntas].filter(Boolean).join('\n\n')
 
-  function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    setImagenTipo(file.type)
     setImagenPreview(URL.createObjectURL(file))
-    const reader = new FileReader()
-    reader.onload = () => setImagen((reader.result as string).split(',')[1])
-    reader.readAsDataURL(file)
+    setImagenTipo('image/jpeg')
+    setImagen(await compressImageToBase64(file))
   }
 
   function eliminarImagen() {

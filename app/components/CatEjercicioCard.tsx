@@ -5,6 +5,7 @@ import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -102,17 +103,16 @@ export default function CatEjercicioCard({
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
-    const next = await Promise.all(files.map(file => new Promise<UploadedImage>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve({
+    const next = await Promise.all(files.map(async file => {
+      const preview = URL.createObjectURL(file)
+      const data = await compressImageToBase64(file)
+      return {
         name: file.name,
-        type: file.type,
-        data: String(reader.result).split(',')[1],
-        preview: URL.createObjectURL(file),
-      })
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })))
+        type: 'image/jpeg',
+        data,
+        preview,
+      }
+    }))
     setImagenes(current => [...current, ...next])
     event.target.value = ''
   }

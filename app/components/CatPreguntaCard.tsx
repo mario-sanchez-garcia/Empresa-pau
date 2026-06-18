@@ -6,6 +6,7 @@ import type { PreguntaCat } from '@/app/data/examenes'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -34,14 +35,12 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    setImagenTipo(file.type)
     setImagenPreview(URL.createObjectURL(file))
-    const reader = new FileReader()
-    reader.onload = () => setImagen((reader.result as string).split(',')[1])
-    reader.readAsDataURL(file)
+    setImagenTipo('image/jpeg')
+    setImagen(await compressImageToBase64(file))
   }
 
   function eliminarImagen() {

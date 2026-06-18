@@ -6,6 +6,7 @@ import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/f
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -47,11 +48,11 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
-    const next = await Promise.all(files.map(file => new Promise<UploadedImage>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve({ name: file.name, type: file.type, data: String(reader.result).split(',')[1], preview: URL.createObjectURL(file) })
-      reader.onerror = reject
-      reader.readAsDataURL(file)
+    const next = await Promise.all(files.map(async file => ({
+      name: file.name,
+      type: 'image/jpeg',
+      data: await compressImageToBase64(file),
+      preview: URL.createObjectURL(file),
     })))
     setImagenes(current => [...current, ...next])
     event.target.value = ''

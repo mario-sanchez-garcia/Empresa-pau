@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
+import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -242,7 +243,7 @@ export default function Login() {
           display: 'flex', gap: 28,
         }}>
           {[
-            { v: '2.400+', l: 'Exámenes' },
+            { v: PLATFORM_STRUCTURED_EXERCISES_LABEL, l: PLATFORM_STRUCTURED_EXERCISES_TEXT },
             { v: '38',     l: 'Semanas' },
             { v: '<30s',   l: 'Corrección' },
           ].map(s => (

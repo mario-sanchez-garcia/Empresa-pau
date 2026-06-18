@@ -25,6 +25,7 @@ import {
 import PausiaBrand from '@/components/shared/PausiaBrand'
 import HeroCardsAnimator from '@/app/landing/HeroCardsAnimator'
 import { ZoomParallax } from '@/components/ui/zoom-parallax'
+import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT } from '@/app/lib/platformStats'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -53,7 +54,7 @@ const C = {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const STATS = [
-  { value: '2.400+',  label: 'Exámenes oficiales EBAU' },
+  { value: PLATFORM_STRUCTURED_EXERCISES_LABEL,  label: PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT },
   { value: '38',      label: 'Semanas de currículum PAU' },
   { value: '< 30s',   label: 'Para recibir tu corrección' },
 ]

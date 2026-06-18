@@ -100,6 +100,8 @@ function fixMismatchedDelimiters(text: string) {
     .replace(/(?<!\$)\$([^$\n]+?)\$\$(?!\$)/g, (_, body) => `$${body.trim()}$`)
     // $\begin{env}...\end{env}$ → strip outer $ so wrapLatexEnvironments wraps in $$
     .replace(/(?<!\$)\$(\\begin\{[^}]+\}[\s\S]*?\\end\{[^}]+\})\$(?!\$)/g, (_, body) => body)
+    // Trailing orphaned $: $content at end-of-text with no closing $ (e.g. truncated AI output)
+    .replace(/(?<!\$)\$([^$\n]+)\s*$/, (_, body) => body.trim())
   )
 }
 

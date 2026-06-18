@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         try {
           const msg = await client.messages.create({
             model,
-            max_tokens: 1300,
+            max_tokens: 1800,
             system: `Eres Pausia, corrector experto de ${examSystemLabel(correctionCommunity)}. Devuelve exclusivamente JSON válido. Sin texto fuera del JSON. Mantén la corrección compacta: nota, errores principales, feedback accionable y plan breve. No repitas el enunciado ni la respuesta del alumno. Máximo 3 aciertos, 3 errores y 3 mejoras por bloque.`,
             messages: [{ role: 'user', content: blockContent }]
           })
@@ -213,6 +213,9 @@ export async function POST(request: NextRequest) {
           const parsed = parseCorrectionJson(raw)
 
           const usage = extractAnthropicTokenUsage(msg)
+          if (msg.stop_reason === 'max_tokens') {
+            console.warn('[simulacro] truncated: true', { blockIndex: index, outputTokens: usage.outputTokens })
+          }
           logAiUsageEvent({
             userId: authContext.user.id,
             route: '/api/simulacro',

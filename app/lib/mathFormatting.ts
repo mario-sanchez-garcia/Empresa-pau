@@ -42,6 +42,7 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
   text = mapOutsideMath(text, formatBulletPoints)
+  text = mapOutsideMath(text, separateDataHeadingLines)
   text = mapOutsideMath(text, formatExamStructure)
 
   return normalizeDisplayMathBlocks(text
@@ -79,6 +80,7 @@ export function normalizeCorrectionText(input?: string | null) {
   text = mapOutsideMath(text, formatPhysicsNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
+  text = mapOutsideMath(text, separateDataHeadingLines)
   return text
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/[ \t]+\n/g, '\n')
@@ -312,6 +314,16 @@ function formatBulletPoints(text: string) {
   return text
     .replace(/(^|\n)\s*\u2022\s+/g, '$1- ')
     .replace(/:\n(-\s+)/g, ':\n\n$1')
+}
+
+function separateDataHeadingLines(text: string) {
+  return text.replace(
+    /([^\n])([ \t]+)(\*\*)?((?:Datos|Dato):)(\*\*)?/g,
+    (_, before, _space, boldStart, label, boldEnd) => {
+      const heading = boldStart || boldEnd ? `${boldStart ?? ''}${label}${boldEnd ?? ''}` : `**${label}**`
+      return `${before}\n\n${heading}`
+    }
+  )
 }
 
 function formatBrokenMathBlocks(text: string) {

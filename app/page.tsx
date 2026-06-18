@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { examenes, examenesCatMates, examenesHistoria } from './data/examenes'
 import { examenesCataluna } from './data/examenes_cataluna'
@@ -3421,7 +3421,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'chat' && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ flex: 1, minHeight: 0, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
             {/* Campus light atmosphere */}
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
               <div style={{ position: 'absolute', top: '-8%', left: '10%', width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, rgba(191,219,254,0.50) 0%, transparent 70%)', filter: 'blur(58px)' }} />
@@ -3430,28 +3430,24 @@ function cambiarTipo(t: Tipo) {
             </div>
 
             {/* Messages scroll area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px 12px', display: 'flex', flexDirection: 'column', maxWidth: 820, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '18px 32px 10px', display: 'flex', flexDirection: 'column', maxWidth: 820, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
 
               {mensajes.length === 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '60px 20px', minHeight: '55vh' }}>
-                  <div className="chat-avatar-pulse" style={{ width: 132, height: 148, margin: '0 auto 26px', display: 'grid', placeItems: 'center' }}>
-                    <img src="/brand/pausia-lockup.png" alt="Pausia" width={118} height={132} style={{ width: 118, height: 132, objectFit: 'contain', display: 'block' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
+                  <div className="chat-avatar-pulse" style={{ width: 92, height: 104, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
+                    <img src="/brand/pausia-lockup.png" alt="Pausia" width={82} height={92} style={{ width: 82, height: 92, objectFit: 'contain', display: 'block' }} />
                   </div>
-                  <h2 style={{ margin: '0 0 12px', fontSize: 32, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.045em', lineHeight: 1.08 }}>
+                  <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
                     Hola, soy{' '}
                     <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pausia</span>
                   </h2>
-                  <p style={{ margin: '0 0 38px', fontSize: 16, color: '#64748b', maxWidth: 430, lineHeight: 1.75, fontWeight: 520 }}>
+                  <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 430, lineHeight: 1.6, fontWeight: 520 }}>
                     Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', maxWidth: 600 }}>
                     {[
                       '¿Cómo es el examen de mates?',
-                      '¿Qué temas caen en física?',
                       'Explícame la Segunda República',
-                      '¿Cuántos puntos vale cada pregunta?',
-                      'Resúmeme termodinámica',
-                      '¿Cuál es la nota de corte en Medicina?',
                     ].map((s, idx) => (
                       <button key={s} className="chat-chip" onClick={() => setInputChat(s)} style={{ animationDelay: `${idx * 65}ms` }}>{s}</button>
                     ))}
@@ -3510,7 +3506,7 @@ function cambiarTipo(t: Tipo) {
             </div>
 
             {/* Input area */}
-            <div style={{ padding: '12px 32px 28px', maxWidth: 820, width: '100%', margin: '0 auto', flexShrink: 0, position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
+            <div style={{ padding: '10px 32px 18px', maxWidth: 820, width: '100%', margin: '0 auto', flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, boxSizing: 'border-box', background: 'linear-gradient(180deg, rgba(248,251,255,0), rgba(248,251,255,0.94) 22%, rgba(248,251,255,0.98))' }}>
               <div style={{ borderTop: '1px solid rgba(219,231,251,0.84)', paddingTop: 16 }}>
                 <div className="chat-input-wrap">
                   <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', maxHeight: 120 }} />

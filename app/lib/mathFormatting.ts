@@ -44,6 +44,7 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatBulletPoints)
   text = mapOutsideMath(text, separateDataHeadingLines)
   text = mapOutsideMath(text, formatExamStructure)
+  text = mapOutsideMath(text, separateDataHeadingLines)
 
   return normalizeDisplayMathBlocks(text
     .replace(/[ \t]{2,}/g, ' ')
@@ -318,8 +319,8 @@ function formatBulletPoints(text: string) {
 
 function separateDataHeadingLines(text: string) {
   return text.replace(
-    /([^\n])([ \t]+)(\*\*)?((?:Datos|Dato):)(\*\*)?/g,
-    (_, before, _space, boldStart, label, boldEnd) => {
+    /([^\n])(?:[ \t]+|\n+)(\*\*)?((?:Datos|Dato):)(\*\*)?/g,
+    (_, before, boldStart, label, boldEnd) => {
       const heading = boldStart || boldEnd ? `${boldStart ?? ''}${label}${boldEnd ?? ''}` : `**${label}**`
       return `${before}\n\n${heading}`
     }

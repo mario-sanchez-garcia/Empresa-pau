@@ -66,7 +66,12 @@ export async function POST(request: NextRequest) {
   const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
   const action = imageCount > 0 ? 'image_correction' : 'chat'
   const model = 'claude-sonnet-4-6'
-  const metadata = { hasImage: imageCount > 0, imageCount }
+  const metadata = {
+    hasImage: imageCount > 0,
+    imageCount,
+    imagePayloadChars: imagePayloadSize,
+    promptChars: typeof pregunta === 'string' ? pregunta.length : null
+  }
   const internalUser = isInternalUser(authContext.user.email)
 
   if (!internalUser) {

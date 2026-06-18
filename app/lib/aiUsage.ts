@@ -36,6 +36,11 @@ export type AiRateLimitResult = {
   retryAfterSeconds?: number
 }
 
+// Approximate internal estimates for Claude Sonnet-class pricing.
+// Keep in sync with adminMetrics.ts until pricing config is centralized.
+const APPROX_INPUT_EUR_PER_TOKEN = 0.0000028
+const APPROX_OUTPUT_EUR_PER_TOKEN = 0.000014
+
 export function extractAnthropicTokenUsage(message: any) {
   const inputTokens = safeTokenCount(message?.usage?.input_tokens)
   const outputTokens = safeTokenCount(message?.usage?.output_tokens)
@@ -119,7 +124,7 @@ export async function logAiUsageEvent(args: LogAiUsageArgs) {
       input_tokens: args.inputTokens ?? null,
       output_tokens: args.outputTokens ?? null,
       total_tokens: args.totalTokens ?? null,
-      estimated_cost_eur: args.estimatedCostEur ?? null,
+      estimated_cost_eur: args.estimatedCostEur ?? estimateAnthropicCostEur(args.inputTokens, args.outputTokens),
       status: args.status ?? 'success',
       error_code: args.errorCode ?? null,
       metadata: args.metadata ?? {}
@@ -146,6 +151,11 @@ function createUsageClient(accessToken?: string | null) {
 
 function safeTokenCount(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function estimateAnthropicCostEur(inputTokens?: number | null, outputTokens?: number | null) {
+  if (inputTokens == null || outputTokens == null) return null
+  return inputTokens * APPROX_INPUT_EUR_PER_TOKEN + outputTokens * APPROX_OUTPUT_EUR_PER_TOKEN
 }
 
 function rateLimitUnavailable(limit: number): AiRateLimitResult {

@@ -130,12 +130,23 @@ export async function POST(request: NextRequest) {
 
     const t0 = Date.now()
     const model = 'claude-sonnet-4-6'
+    const imagePayloadChars = blocks.reduce((total: number, block: any) => {
+      const image = storedAnswers?.[block.id]?.image
+      return total + (typeof image === 'string' ? image.length : 0)
+    }, 0)
+    const imageCount = blocks.reduce((total: number, block: any) => {
+      const image = storedAnswers?.[block.id]?.image
+      return total + (typeof image === 'string' && image.length > 0 ? 1 : 0)
+    }, 0)
     const usageMetadata = {
       asignatura: subject,
       comunidad: correctionCommunity,
       opcion: storedOption || opcion || null,
       bloquesCount: blocks.length,
-      tiempoEmpleado: elapsed
+      tiempoEmpleado: elapsed,
+      hasImage: imageCount > 0,
+      imageCount,
+      imagePayloadChars
     }
 
     console.info('[simulacro] start', { simulacroId: simulacro_id, subject, blocksCount: blocks.length })
@@ -148,6 +159,16 @@ export async function POST(request: NextRequest) {
         console.info('[simulacro] correcting_block', { blockIndex: index })
 
         const blockContent: any[] = []
+        const blockImagePayloadChars = typeof answer?.image === 'string' ? answer.image.length : 0
+        const blockMetadata = {
+          ...usageMetadata,
+          blockIndex: index,
+          blockHasImage: blockImagePayloadChars > 0,
+          blockImageCount: blockImagePayloadChars > 0 ? 1 : 0,
+          blockImagePayloadChars,
+          answerTextChars: typeof answer?.text === 'string' ? answer.text.length : 0,
+          officialPromptChars: typeof block.enunciado === 'string' ? block.enunciado.length : null
+        }
         if (answer?.image) {
           blockContent.push({
             type: 'image',
@@ -201,7 +222,7 @@ export async function POST(request: NextRequest) {
             outputTokens: usage.outputTokens,
             totalTokens: usage.totalTokens,
             status: parsed ? 'success' : 'error',
-            metadata: { ...usageMetadata, blockIndex: index },
+            metadata: blockMetadata,
             accessToken: authContext.accessToken
           }).catch(() => {})
 
@@ -230,7 +251,7 @@ export async function POST(request: NextRequest) {
             model,
             status: 'error',
             errorCode: getAiErrorCode(error),
-            metadata: { ...usageMetadata, blockIndex: index },
+            metadata: blockMetadata,
             accessToken: authContext.accessToken
           }).catch(() => {})
           return null

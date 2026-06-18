@@ -138,6 +138,15 @@ Lengua Castellana y Literatura II:
 
 ### INSTRUCCIONES DE EVALUACIÓN
 
+REGLAS DE FORMATO LATEX OBLIGATORIAS:
+- Usa SIEMPRE $...$ para fórmulas inline. NUNCA $$...$$.
+- Si abres $ debes cerrar con exactamente un $.
+- Si abres $$ debes cerrar con exactamente $$ — pero evita $$ completamente.
+- Para vectores: $\\vec{v}$ no $$\\vec{v}$$
+- Para fracciones inline: $\\frac{a}{b}$ no $$\\frac{a}{b}$$
+- Nunca mezcles $ y $$ en la misma expresión.
+- Nunca dejes un delimitador LaTeX sin cerrar.
+
 1. Corrige cada bloque de forma independiente.
 2. Si la respuesta está en blanco, dilo claramente y puntúa solo lo justificable. No inventes trabajo del alumno.
 3. Si la respuesta es absurda, irrelevante o no responde al enunciado, dilo con respeto y explica por qué no puntúa.
@@ -154,17 +163,17 @@ Lengua Castellana y Literatura II:
 14. Resume cada bloque temático con nivel: Domina / En progreso / Necesita refuerzo urgente.
 15. Contextualiza la nota según la dificultad.
 16. En todos los campos de texto usa Markdown claro: títulos cortos, listas y pasos numerados cuando ayuden a entender la corrección.
-17. Escribe las fórmulas matemáticas, físicas y químicas con LaTeX: inline con $...$ y en bloque con $$...$$.
+17. Escribe las fórmulas matemáticas, físicas y químicas con LaTeX: usa siempre $...$ inline. Nunca uses $$...$$ en ningún caso.
 18. No uses HTML ni párrafos largos y apelmazados. Separa claramente aciertos, errores, corrección paso a paso, respuesta modelo y consejo final.
 19. Aunque la salida completa sea JSON puro, los valores de texto dentro del JSON pueden y deben contener Markdown y LaTeX válidos.
-20. porqueEsAsi es opcional. Inclúyelo solo si puedes cerrar el JSON correctamente. Debe sonar como una explicación de un profesor PAU: concepto central, por qué se aplica al enunciado concreto, cómo pensarlo, qué ocurrió en la respuesta del alumno, error típico, mini ejemplo original y frase/checklist para sacar puntos. No copies apuntes ni libros. Usa Markdown y LaTeX cuando proceda, preservando $...$ y $$...$$.
+20. porqueEsAsi es opcional. Inclúyelo solo si puedes cerrar el JSON correctamente. Debe sonar como una explicación de un profesor PAU: concepto central, por qué se aplica al enunciado concreto, cómo pensarlo, qué ocurrió en la respuesta del alumno, error típico, mini ejemplo original y frase/checklist para sacar puntos. No copies apuntes ni libros. Usa Markdown y LaTeX cuando proceda, preservando $...$ inline. Nunca uses $$...$$.
 21. Mantén teoria_ejercicio solo como compatibilidad legacy si aparece en datos antiguos; para respuestas nuevas usa porqueEsAsi. Si falta espacio o no hay información suficiente, devuelve porqueEsAsi como null o con status "not_available" y prioriza siempre la corrección principal y un JSON válido.
 
 22. No escribas nunca valores visibles como undefined, null o NaN en campos de texto. Si falta informacion, deja el campo como cadena vacia, array vacio o null JSON real segun corresponda.
 23. No juntes titulos con el texto siguiente: escribe "Definir las variables" y luego un salto de linea antes de "Asignamos...". Lo mismo para "Plantear las ecuaciones", "Resolver el sistema", "Sistema resultante", "Puntos fuertes", "Errores a corregir", "Correccion paso a paso", "Teoria aplicada", "Solucion" y "Conclusion".
 24. Separa listas numeradas con saltos de linea reales. Nunca devuelvas "1. ...2. ...3. ..." en una sola linea.
-25. Usa LaTeX solo para formulas, no para parrafos completos. Formulas cortas en $...$; sistemas, matrices, casos, derivadas/integrales largas y varias ecuaciones en bloque con $$...$$.
-26. Para sistemas y matrices usa entornos KaTeX compatibles: cases, matrix, pmatrix, bmatrix, aligned, align o array. No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases} o \\end{matrix} fuera de delimitadores matematicos. Nunca metas matrices, sistemas ni entornos \\begin{...} dentro de $...$: deben ir siempre en bloque $$...$$, sin backticks.
+25. Usa LaTeX solo para formulas, no para parrafos completos. Usa siempre $...$ para todas las fórmulas, incluidos sistemas, matrices, casos, derivadas e integrales. Nunca uses $$...$$.
+26. Para sistemas y matrices usa entornos KaTeX dentro de $...$: $\\begin{cases}...\\end{cases}$, $\\begin{pmatrix}...\\end{pmatrix}$, etc. No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases} o \\end{matrix} fuera de delimitadores matematicos. Nunca uses $$...$$, ni siquiera para entornos grandes.
 27. Manten el idioma del enunciado o de la respuesta del alumno: castellano si esta en castellano, catalan si esta en catalan. No mezcles idiomas salvo citas necesarias.
 28. Control de longitud: se especifico pero breve. No repitas el enunciado ni la respuesta del alumno. Maximo 3 puntos fuertes, 3 errores principales y 3 pasos de mejora. La teoria relacionada debe ocupar como maximo 2 lineas. Prioriza correccion accionable y JSON valido sobre explicaciones largas.
 
@@ -308,14 +317,23 @@ RESPUESTA DEL ALUMNO:
 ${studentAnswer}
 ${criteria ? `\nCRITERIOS DE CORRECCIÓN:\n${criteria}` : ''}
 INSTRUCCIONES:
+REGLAS DE FORMATO LATEX OBLIGATORIAS:
+- Usa SIEMPRE $...$ para fórmulas inline. NUNCA $$...$$.
+- Si abres $ debes cerrar con exactamente un $.
+- Si abres $$ debes cerrar con exactamente $$ — pero evita $$ completamente.
+- Para vectores: $\\vec{v}$ no $$\\vec{v}$$
+- Para fracciones inline: $\\frac{a}{b}$ no $$\\frac{a}{b}$$
+- Nunca mezcles $ y $$ en la misma expresión.
+- Nunca dejes un delimitador LaTeX sin cerrar.
+
 1. Aplica el criterio oficial exacto de ${block.year}. La nota no puede superar ${block.maxScore}.
 2. Si la respuesta está en blanco, puntúa 0 y justifícalo brevemente.
 3. Cada punto descontado en penalizaciones_aplicadas debe tener motivo concreto.
-4. Usa Markdown y LaTeX ($...$, $$...$$) en los campos de texto cuando sea útil.
+4. Usa Markdown y LaTeX ($...$) en los campos de texto cuando sea útil. Nunca uses $$...$$.
 5. Feedback directo y específico a la respuesta real, no genérico.
 6. Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. Si falta contexto, usa status "not_available" sin inventar. No copies material externo.
 7. Formato obligatorio dentro de los campos de texto: Markdown limpio, listas separadas por saltos de linea, sin parrafos enormes, sin "undefined", "null" o "NaN" visibles, y sin titulos pegados a la frase siguiente.
-8. LaTeX obligatorio para matematicas/fisica/quimica: formulas cortas en $...$; sistemas, matrices, casos, varias ecuaciones y expresiones largas en $$...$$. No dejes \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores. Nunca metas matrices, sistemas ni entornos \\begin{...} dentro de $...$: deben ir siempre en bloque $$...$$, sin backticks.
+8. LaTeX obligatorio para matematicas/fisica/quimica: usa siempre $...$ para todas las expresiones, incluidos sistemas y matrices ($\\begin{cases}...\\end{cases}$). No dejes \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores. Nunca uses $$...$$, ni para entornos grandes.
 9. Manten el idioma del ejercicio o de la respuesta del alumno. Si el enunciado esta en catalan, corrige en catalan; si esta en castellano, corrige en castellano.
 10. Control de longitud: se especifico pero breve. Maximo 3 aciertos, 3 errores y 3 mejoras; teoria en 2 lineas; no repitas enunciado ni respuesta del alumno.
 11. Responde ÚNICAMENTE con el JSON siguiente, sin texto adicional ni markdown envolvente:

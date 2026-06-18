@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent, ReactNode } from 'react'
 import Link from 'next/link'
 import {
@@ -8,7 +8,6 @@ import {
   BookOpenCheck,
   CheckCircle2,
   CopyPlus,
-  ExternalLink,
   Layers3,
   PencilLine,
   Plus,
@@ -52,16 +51,14 @@ interface FlashcardsProps {
   initialCards: Flashcard[]
 }
 
-function cardWeight(card: Flashcard, answers: Record<string, 'know' | 'dont'>) {
-  return answers[card.id] === 'dont' ? 3 : answers[card.id] === 'know' ? 1 : 2
-}
 
 export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const [cards, setCards] = useState<Flashcard[]>(initialCards)
-  const [mode, setMode] = useState<ZonaMode>('study')
+  const [mode, setMode] = useState<ZonaMode | null>(null)
   const [subject, setSubject] = useState<ZonaSubject | 'all'>('all')
   const [topic, setTopic] = useState('all')
-  const [currentIdx, setCurrentIdx] = useState(0)
+  const [reviewQueue, setReviewQueue] = useState<string[]>([])
+  const [seenCards, setSeenCards] = useState<Record<string, true>>({})
   const [flipped, setFlipped] = useState(false)
   const [answers, setAnswers] = useState<Record<string, 'know' | 'dont'>>({})
   const [dragStart, setDragStart] = useState<number | null>(null)
@@ -83,18 +80,24 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     (topic === 'all' || card.topic === topic)
   ), [subject, topic])
   const studyCards = filtered.length ? filtered : recommendedFiltered
-  const queue = useMemo(() => {
-    return studyCards.flatMap(card => Array.from({ length: cardWeight(card, answers) }, () => card))
-  }, [studyCards, answers])
-
-  const current = queue.length ? queue[currentIdx % queue.length] : null
-  const reviewed = Object.keys(answers).filter(id => studyCards.some(card => card.id === id)).length
+  const studySignature = studyCards.map(card => card.id).join('|')
+  const current = useMemo(() => studyCards.find(card => card.id === reviewQueue[0]) ?? null, [reviewQueue, studyCards])
+  const reviewed = Object.keys(seenCards).filter(id => studyCards.some(card => card.id === id)).length
   const progress = studyCards.length ? Math.round((reviewed / studyCards.length) * 100) : 0
   const topics = Array.from(new Set([...cards, ...RECOMMENDED_FLASHCARDS].filter(card => subject === 'all' || card.subject === subject).map(card => card.topic))).filter(Boolean)
   const selectedSubject = subject === 'all' ? null : SUBJECTS.find(item => item.id === subject)
 
+  useEffect(() => {
+    setReviewQueue(studyCards.map(card => card.id))
+    setSeenCards({})
+    setAnswers({})
+    setFlipped(false)
+    setDragX(0)
+  }, [studySignature])
+
   function resetDeck() {
-    setCurrentIdx(0)
+    setReviewQueue(studyCards.map(card => card.id))
+    setSeenCards({})
     setFlipped(false)
     setAnswers({})
     setDragX(0)
@@ -109,10 +112,20 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   function answerCard(value: 'know' | 'dont') {
     if (!current) return
     setAnswers(prev => ({ ...prev, [current.id]: value }))
+    setSeenCards(prev => ({ ...prev, [current.id]: true }))
     setFlipped(false)
     setDragX(value === 'know' ? 120 : -120)
     window.setTimeout(() => {
-      setCurrentIdx(prev => prev + 1)
+      setReviewQueue(prev => {
+        const remaining = prev.slice(1).filter(id => id !== current.id)
+        if (value === 'know') return remaining
+        if (remaining.length <= 2) return [...remaining, current.id]
+        const lateStart = Math.floor(remaining.length * 0.6)
+        const insertAt = lateStart + Math.floor(Math.random() * (remaining.length - lateStart + 1))
+        const next = [...remaining]
+        next.splice(insertAt, 0, current.id)
+        return next
+      })
       setDragX(0)
     }, 180)
   }
@@ -154,7 +167,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
       delete next[card.id]
       return next
     })
-    setCurrentIdx(0)
+    setReviewQueue(prev => prev.filter(id => id !== card.id))
   }
 
   async function copyRecommendedDeck(deckSubject: ZonaSubject) {
@@ -164,7 +177,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     setFormError('')
     const payload = deck.map(card => ({ user_id: userId, subject: card.subject, topic: card.topic, front: card.front, back: card.back }))
     const { data, error } = await supabase.from('flashcards').insert(payload).select('*')
-    if (error) setFormError('No hemos podido copiar el mazo recomendado. Inténtalo otra vez.')
+    if (error) setFormError('No hemos podido copiar las tarjetas recomendadas. Inténtalo otra vez.')
     else if (data) {
       setCards(prev => [...data as Flashcard[], ...prev])
       resetDeck()
@@ -185,18 +198,15 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
         <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Empieza aquí</div>
-            <h2 className="mt-1 text-2xl font-black text-slate-900 max-md:text-xl">Tu zona de estudio libre</h2>
-            <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-500">Elige una asignatura, repasa tarjetas o crea tus propios apuntes rápidos.</p>
+            <h2 className="mt-1 text-2xl font-black text-slate-900 max-md:text-xl">Elige qué quieres hacer</h2>
+            <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-500">Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
           </div>
-          <Link href="/zona/canvas" className="inline-flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-white px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">
-            Abrir Mi Espacio <ExternalLink size={15} />
-          </Link>
         </div>
 
         <div className="grid grid-cols-3 gap-3 max-lg:grid-cols-1">
-          <ModeCard active={mode === 'study'} icon={<BookOpenCheck size={20} />} title="Repasar flashcards" text="Practica conceptos rápidos por asignatura." onClick={() => setMode('study')} />
-          <ModeCard active={mode === 'create'} icon={<PencilLine size={20} />} title="Crear tarjeta" text="Guarda tus errores y respuestas clave." onClick={() => setMode('create')} />
-          <ModeCard active={mode === 'space'} icon={<Layers3 size={20} />} title="Mi espacio" text="Organiza tus recursos y tarjetas propias." onClick={() => setMode('space')} />
+          <ModeCard active={mode === 'study'} icon={<BookOpenCheck size={20} />} title="Repasar tarjetas" text="Practica conceptos rápidos por asignatura." onClick={() => setMode('study')} />
+          <ModeCard active={mode === 'create'} icon={<PencilLine size={20} />} title="Crear tus propias tarjetas" text="Guarda preguntas, fórmulas o errores para repasarlos después." onClick={() => setMode('create')} />
+          <ModeCard active={mode === 'space'} icon={<Layers3 size={20} />} title="Mi espacio" text="Consulta tus tarjetas y recursos guardados." onClick={() => setMode('space')} />
         </div>
       </section>
 
@@ -216,21 +226,19 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
             <aside className="grid content-start gap-4 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
               <div>
                 <div className="mb-2 text-xs font-black uppercase tracking-[0.08em] text-slate-400">Asignatura</div>
-                <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
-                  <button onClick={() => selectSubject('all')} className={subjectButtonClass(subject === 'all')}>Todas</button>
-                  {SUBJECTS.map(item => (
-                    <button key={item.id} onClick={() => selectSubject(item.id)} className={subjectButtonClass(subject === item.id)} style={subject === item.id ? { borderColor: item.color, color: item.color, background: item.soft } : undefined}>{item.label}</button>
-                  ))}
-                </div>
+                <select value={subject} onChange={event => selectSubject(event.target.value as ZonaSubject | 'all')} style={inputStyle}>
+                  <option value="all">Todas</option>
+                  {SUBJECTS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+                </select>
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-slate-400" htmlFor="zona-topic">2 · Tema</label>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-slate-400" htmlFor="zona-topic">2 · Qué quieres practicar</label>
                 <select id="zona-topic" value={topic} onChange={event => { setTopic(event.target.value); resetDeck() }} style={inputStyle}>
-                  <option value="all">Todos los temas</option>
+                  <option value="all">Todo</option>
                   {topics.map(item => <option key={item} value={item}>{item}</option>)}
                 </select>
-                <p className="mt-2 text-xs font-semibold leading-5 text-slate-400">Empieza amplio y afina por tema cuando quieras practicar algo concreto.</p>
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-400">Empieza por Todo si no sabes por dónde empezar.</p>
               </div>
 
               <div className="rounded-2xl border border-blue-100 bg-white p-4">
@@ -239,7 +247,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                   <div className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-[width]" style={{ width: progress + '%' }} />
                 </div>
                 <div className="mt-2 text-sm font-black text-slate-600">{reviewed}/{studyCards.length} tarjetas repasadas</div>
-                <div className="text-xs font-semibold text-slate-400">{filtered.length ? 'Tus flashcards' : 'Mazo recomendado para empezar'}</div>
+                <div className="text-xs font-semibold text-slate-400">{filtered.length ? 'Tus tarjetas' : 'Tarjetas recomendadas para empezar'}</div>
               </div>
             </aside>
 
@@ -287,7 +295,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
           <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5">
             <div className="text-[11px] font-black uppercase tracking-[0.1em] text-blue-500">Crear tarjeta</div>
             <h3 className="mt-2 text-2xl font-black text-slate-900">Hazlo rápido y vuelve luego</h3>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Crea tarjetas con tus errores más frecuentes. Puedes usar Markdown y LaTeX como en el resto de Pausia.</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Guarda aquí fórmulas, errores o ideas que quieras recordar.</p>
             <div className="mt-5 rounded-2xl border border-[#dbe7fb] bg-white p-4 text-sm font-bold leading-6 text-slate-500">Ejemplo: escribe `$P(A\\mid B)$` o una fórmula en bloque y se verá con el mismo renderizador.</div>
           </div>
 
@@ -300,7 +308,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Tema</label>
+                <label style={labelStyle}>Tipo de repaso / tema breve</label>
                 <input value={form.topic} onChange={e => setForm(prev => ({ ...prev, topic: e.target.value }))} placeholder="Matrices, ondas, Restauración..." style={inputStyle} />
               </div>
             </div>
@@ -314,7 +322,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
             {formError && <div className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black leading-6 text-blue-900">{formError}</div>}
 
             <button disabled={saving} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3 font-black text-white shadow-[0_16px_34px_rgba(37,99,235,.24)] transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70">
-              <Plus size={18} />{saving ? 'Guardando...' : 'Crear flashcard'}
+              <Plus size={18} />{saving ? 'Guardando...' : 'Crear tarjeta'}
             </button>
           </form>
         </section>
@@ -340,7 +348,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                 <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
                   <Sparkles className="mx-auto text-blue-600" size={34} />
                   <h4 className="mt-3 text-lg font-black text-slate-900">Todavía no tienes tarjetas propias</h4>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">Crea una tarjeta rápida o copia un mazo recomendado para empezar.</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Aún no tienes tarjetas propias. Crea una con un error o fórmula que quieras repasar.</p>
                   <button onClick={() => setMode('create')} className="mt-4 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white">Crear primera tarjeta</button>
                 </div>
               )}
@@ -348,18 +356,18 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
 
             <aside className="grid content-start gap-3 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
               <div>
-                <div className="text-xs font-black uppercase tracking-[0.08em] text-slate-400">Mazos recomendados</div>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Copia solo los mazos que quieras tener en tu cuenta.</p>
+                <div className="text-xs font-black uppercase tracking-[0.08em] text-slate-400">Tarjetas recomendadas</div>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Copia solo las tarjetas que quieras tener en tu cuenta.</p>
               </div>
               {SUBJECTS.filter(item => !selectedSubject || item.id === selectedSubject.id).map(item => {
                 const deckSize = RECOMMENDED_FLASHCARDS.filter(card => card.subject === item.id).length
                 return (
                   <article key={item.id} className="rounded-2xl border border-[#dbe7fb] bg-white p-4">
-                    <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: item.color }}>Mazo recomendado</div>
+                    <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: item.color }}>Tarjetas recomendadas</div>
                     <h4 className="mt-1 font-black text-slate-900">{item.label}</h4>
                     <p className="text-sm font-semibold text-slate-500">{deckSize} tarjetas esenciales</p>
                     <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-black disabled:cursor-wait disabled:opacity-60" style={{ borderColor: item.color + '33', background: item.soft, color: item.color }}>
-                      <CopyPlus size={15} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar mazo'}
+                      <CopyPlus size={15} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar tarjetas'}
                     </button>
                   </article>
                 )

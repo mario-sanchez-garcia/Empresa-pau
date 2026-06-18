@@ -60,7 +60,7 @@ export default function ZonaPage() {
             <div>
               <h1 className="m-0 text-xl font-black">La Zona</h1>
               <p className="m-0 text-sm text-slate-500">Estudia a tu manera</p>
-              <p className="m-0 mt-1 max-w-xl text-xs font-semibold text-slate-400">Elige una asignatura, repasa tarjetas o crea tus propios apuntes rápidos.</p>
+              <p className="m-0 mt-1 max-w-xl text-xs font-semibold text-slate-400">Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -11,9 +11,9 @@ const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - Usa Markdown claro con titulos, parrafos cortos y listas separadas por saltos de linea.
 - No juntes listas como "1. ...2. ..." ni titulos con texto como "Definir las variablesAsignamos".
 - No escribas valores visibles como undefined, null o NaN.
-- Usa LaTeX solo para formulas: cortas en $...$; sistemas, matrices, casos y expresiones largas en $$...$$.
+- Usa LaTeX solo para formulas. Escribe siempre en $...$ inline. Nunca uses $$...$$ en ningun caso.
 - No dejes comandos como \\frac, \\implies, \\cdot, \\begin{cases}, \\end{cases}, \\begin{matrix} o \\end{matrix} como texto plano fuera de delimitadores matematicos.
-- Nunca metas matrices, sistemas ni entornos \\begin{...} dentro de $...$: deben ir siempre en bloque $$...$$, sin backticks.
+- Nunca uses bloques $$...$$: todas las expresiones matematicas, incluidos sistemas y matrices, deben ir en $...$, sin backticks.
 - Si el ejercicio o el usuario estan claramente en catalan, responde en catalan; si estan en castellano, responde en castellano.`
 const IMAGE_CORRECTION_COMPACT_RULES = `Reglas de longitud para correcciones con imagen:
 - Se especifico pero breve. Prioriza feedback accionable.
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
   const action = imageCount > 0 ? 'image_correction' : 'chat'
   const model = 'claude-sonnet-4-6'
-  const maxTokens = action === 'image_correction' ? 1400 : 2200
+  const maxTokens = action === 'image_correction' ? 2200 : 2200
   const responseFormatRules = action === 'image_correction'
     ? `${CHAT_RESPONSE_FORMAT_RULES}\n\n${IMAGE_CORRECTION_COMPACT_RULES}`
     : CHAT_RESPONSE_FORMAT_RULES
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
   let message
   try {
-    const systemPrompt = `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Pausia. Preserva LaTeX con $...$ y $$...$$.${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
+    const systemPrompt = `Eres Pausia, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Pausia. Usa siempre $...$ para cualquier expresion LaTeX inline. Nunca uses $$...$$ en ningun caso.${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
     message = await client.messages.create({
       model,
       max_tokens: maxTokens,
@@ -141,6 +141,9 @@ export async function POST(request: NextRequest) {
     accessToken: authContext.accessToken
   })
 
+  if (message.stop_reason === 'max_tokens') {
+    console.warn('[chat] truncated: true', { action, maxTokens, outputTokens: usage.outputTokens })
+  }
   const respuesta = message.content[0].type === 'text' ? message.content[0].text : ''
   return NextResponse.json({ respuesta })
 }

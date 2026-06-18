@@ -23,6 +23,35 @@ export interface PreguntaFisica {
   puntos: number;
 }
 
+function numeroPreguntaFisica(pregunta: PreguntaFisica) {
+  const numero = pregunta.numero.trim()
+  const yaNormalizado = numero.match(/^([AB])\.(\d+)$/)
+  if (yaNormalizado) return numero
+
+  const conOpcionAlFinal = numero.match(/^(\d+)\.([AB])$/)
+  if (conOpcionAlFinal) return `${conOpcionAlFinal[2]}.${conOpcionAlFinal[1]}`
+
+  const soloNumero = numero.match(/^(\d+)$/)
+  if (soloNumero) return `${pregunta.opcion}.${soloNumero[1]}`
+
+  return `${pregunta.opcion}.${numero}`
+}
+
+function enunciadoFisica(pregunta: PreguntaFisica) {
+  const encabezado = `**Pregunta ${numeroPreguntaFisica(pregunta)}:**`
+  const enunciado = pregunta.enunciado
+    .trim()
+    .replace(/[ \t]*(?:\n[ \t]*)*((?:Datos|Dato):)/g, "\n\n$1")
+
+  const apartados = pregunta.apartados
+    .map((apartado, i) => `${String.fromCharCode(97 + i)}) ${apartado}`)
+    .join("\n\n")
+
+  const datos = pregunta.datos?.length ? `Datos: ${pregunta.datos.join("; ")}` : ""
+
+  return [encabezado, enunciado, apartados, datos].filter(Boolean).join("\n\n")
+}
+
 export const examenesF: PreguntaFisica[] = [
   // ══════════════════════════════════════════════
   // JUNIO 2025-2019 — Ordinaria oficial desde PDFs
@@ -1608,10 +1637,7 @@ export const examenesFisica: ExamenFisica[] = Object.values(
       id: p.id,
       bloque: p.tipo,
       opcion: p.opcion,
-      enunciado:
-        `${p.numero}. ${p.enunciado}\n\n` +
-        p.apartados.map((apartado, i) => `${String.fromCharCode(97 + i)}) ${apartado}`).join("\n\n") +
-        (p.datos?.length ? `\n\nDatos: ${p.datos.join("; ")}` : ""),
+      enunciado: enunciadoFisica(p),
       puntuacion: p.puntos,
       criterios: "Se valorará el planteamiento físico, el uso correcto de fórmulas, unidades, sustitución numérica, resultado final y justificación razonada.",
     })

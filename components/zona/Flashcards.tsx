@@ -1,8 +1,22 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState } from 'react'
-import type { CSSProperties, FormEvent } from 'react'
-import { CopyPlus, Plus, RotateCcw, Sparkles, Trash2 } from 'lucide-react'
+import type { CSSProperties, FormEvent, ReactNode } from 'react'
+import Link from 'next/link'
+import {
+  ArrowRight,
+  BookOpenCheck,
+  CheckCircle2,
+  CopyPlus,
+  ExternalLink,
+  Layers3,
+  PencilLine,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  Trash2,
+  XCircle
+} from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import { RECOMMENDED_FLASHCARDS } from './recommendedFlashcards'
@@ -13,11 +27,11 @@ const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[
   { id: 'matematicas_ccss', label: 'Matemáticas CCSS', color: '#7c3aed', soft: '#f5f3ff' },
   { id: 'fisica', label: 'Física', color: '#CA8A04', soft: '#FEFCE8' },
   { id: 'quimica', label: 'Química', color: '#ea580c', soft: '#fff7ed' },
-  { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' },
-  { id: 'ingles', label: 'Inglés', color: '#0891B2', soft: '#CFFAFE' },
   { id: 'lengua', label: 'Lengua', color: '#0284C7', soft: '#E0F2FE' },
   { id: 'historia', label: 'Historia', color: '#2f6f4e', soft: '#f0fdf4' },
-  { id: 'historia_filosofia', label: 'Filosofía', color: '#64748B', soft: '#F8FAFC' }
+  { id: 'historia_filosofia', label: 'Filosofía', color: '#64748B', soft: '#F8FAFC' },
+  { id: 'ingles', label: 'Inglés', color: '#0891B2', soft: '#CFFAFE' },
+  { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' }
 ]
 
 const WARM = {
@@ -31,6 +45,8 @@ const WARM = {
   blue: '#2563eb'
 }
 
+type ZonaMode = 'study' | 'create' | 'space'
+
 interface FlashcardsProps {
   userId: string
   initialCards: Flashcard[]
@@ -42,6 +58,7 @@ function cardWeight(card: Flashcard, answers: Record<string, 'know' | 'dont'>) {
 
 export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const [cards, setCards] = useState<Flashcard[]>(initialCards)
+  const [mode, setMode] = useState<ZonaMode>('study')
   const [subject, setSubject] = useState<ZonaSubject | 'all'>('all')
   const [topic, setTopic] = useState('all')
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -74,12 +91,19 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const reviewed = Object.keys(answers).filter(id => studyCards.some(card => card.id === id)).length
   const progress = studyCards.length ? Math.round((reviewed / studyCards.length) * 100) : 0
   const topics = Array.from(new Set([...cards, ...RECOMMENDED_FLASHCARDS].filter(card => subject === 'all' || card.subject === subject).map(card => card.topic))).filter(Boolean)
+  const selectedSubject = subject === 'all' ? null : SUBJECTS.find(item => item.id === subject)
 
   function resetDeck() {
     setCurrentIdx(0)
     setFlipped(false)
     setAnswers({})
     setDragX(0)
+  }
+
+  function selectSubject(next: ZonaSubject | 'all') {
+    setSubject(next)
+    setTopic('all')
+    resetDeck()
   }
 
   function answerCard(value: 'know' | 'dont') {
@@ -107,13 +131,16 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     }
     const { data, error } = await supabase.from('flashcards').insert(payload).select('*').single()
     if (error) {
-      setFormError('No hemos podido guardar la flashcard. Revisa la conexion e intentalo otra vez.')
+      setFormError('No hemos podido guardar la flashcard. Revisa la conexión e inténtalo otra vez.')
       setSaving(false)
       return
     }
     if (!error && data) {
       setCards(prev => [data as Flashcard, ...prev])
       setForm({ subject: form.subject, topic: '', front: '', back: '' })
+      setMode('study')
+      setSubject(form.subject)
+      setTopic('all')
       resetDeck()
     }
     setSaving(false)
@@ -153,146 +180,209 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 18 }}>
-      <section style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(280px, 0.75fr)', gap: 18 }}>
-        <div style={{ background: 'rgba(255,255,255,0.94)', border: '1px solid ' + WARM.border, borderRadius: 28, boxShadow: '0 24px 70px rgba(37,99,235,0.10)', overflow: 'hidden' }}>
-          <div style={{ padding: 22, borderBottom: '1px solid ' + WARM.border, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+    <div className="grid gap-5">
+      <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.10)] max-md:p-4">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Empieza aquí</div>
+            <h2 className="mt-1 text-2xl font-black text-slate-900 max-md:text-xl">Tu zona de estudio libre</h2>
+            <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-500">Elige una asignatura, repasa tarjetas o crea tus propios apuntes rápidos.</p>
+          </div>
+          <Link href="/zona/canvas" className="inline-flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-white px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">
+            Abrir Mi Espacio <ExternalLink size={15} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 max-lg:grid-cols-1">
+          <ModeCard active={mode === 'study'} icon={<BookOpenCheck size={20} />} title="Repasar flashcards" text="Practica conceptos rápidos por asignatura." onClick={() => setMode('study')} />
+          <ModeCard active={mode === 'create'} icon={<PencilLine size={20} />} title="Crear tarjeta" text="Guarda tus errores y respuestas clave." onClick={() => setMode('create')} />
+          <ModeCard active={mode === 'space'} icon={<Layers3 size={20} />} title="Mi espacio" text="Organiza tus recursos y tarjetas propias." onClick={() => setMode('space')} />
+        </div>
+      </section>
+
+      {mode === 'study' && (
+        <section className="grid gap-4 rounded-[28px] border border-[#dbe7fb] bg-white/95 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.08)] max-md:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dbe7fb] pb-4">
             <div>
-              <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Flashcards</div>
-              <h2 style={{ margin: '5px 0 0', color: WARM.ink, fontSize: 23 }}>Repasa en modo rápido</h2>
+              <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">1 · Selecciona asignatura</div>
+              <h3 className="mt-1 text-xl font-black text-slate-900">Repasa antes de hacer ejercicios</h3>
             </div>
-            <button onClick={resetDeck} style={{ border: '1px solid ' + WARM.border, background: WARM.field, color: WARM.muted, borderRadius: 999, padding: '9px 13px', display: 'inline-flex', alignItems: 'center', gap: 7, fontWeight: 800, cursor: 'pointer' }}>
+            <button onClick={resetDeck} className="inline-flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-[#f8fbff] px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:text-blue-700">
               <RotateCcw size={15} /> Reiniciar
             </button>
           </div>
 
-          <div style={{ padding: 22 }}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-              <button onClick={() => { setSubject('all'); setTopic('all'); resetDeck() }} style={chipStyle(subject === 'all', WARM.blue)}>Todas</button>
-              {SUBJECTS.map(item => (
-                <button key={item.id} onClick={() => { setSubject(item.id); setTopic('all'); resetDeck() }} style={chipStyle(subject === item.id, item.color)}>{item.label}</button>
-              ))}
-            </div>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+            <aside className="grid content-start gap-4 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
+              <div>
+                <div className="mb-2 text-xs font-black uppercase tracking-[0.08em] text-slate-400">Asignatura</div>
+                <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                  <button onClick={() => selectSubject('all')} className={subjectButtonClass(subject === 'all')}>Todas</button>
+                  {SUBJECTS.map(item => (
+                    <button key={item.id} onClick={() => selectSubject(item.id)} className={subjectButtonClass(subject === item.id)} style={subject === item.id ? { borderColor: item.color, color: item.color, background: item.soft } : undefined}>{item.label}</button>
+                  ))}
+                </div>
+              </div>
 
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-              <button onClick={() => { setTopic('all'); resetDeck() }} style={topicStyle(topic === 'all')}>Todos los temas</button>
-              {topics.map(item => (
-                <button key={item} onClick={() => { setTopic(item); resetDeck() }} style={topicStyle(topic === item)}>{item}</button>
-              ))}
-            </div>
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-slate-400" htmlFor="zona-topic">2 · Tema</label>
+                <select id="zona-topic" value={topic} onChange={event => { setTopic(event.target.value); resetDeck() }} style={inputStyle}>
+                  <option value="all">Todos los temas</option>
+                  {topics.map(item => <option key={item} value={item}>{item}</option>)}
+                </select>
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-400">Empieza amplio y afina por tema cuando quieras practicar algo concreto.</p>
+              </div>
 
-            <div style={{ height: 8, borderRadius: 999, background: '#eaf1ff', overflow: 'hidden', marginBottom: 16 }}>
-              <div style={{ width: progress + '%', height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #2563eb, #38bdf8)', transition: 'width .25s ease' }} />
-            </div>
-            <div style={{ color: WARM.muted, fontSize: 13, fontWeight: 750, marginBottom: 18 }}>{reviewed}/{studyCards.length} tarjetas repasadas · {filtered.length ? 'Tus flashcards' : 'Mazo recomendado para empezar'}</div>
+              <div className="rounded-2xl border border-blue-100 bg-white p-4">
+                <div className="text-xs font-black uppercase tracking-[0.08em] text-blue-500">Progreso</div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-50">
+                  <div className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-[width]" style={{ width: progress + '%' }} />
+                </div>
+                <div className="mt-2 text-sm font-black text-slate-600">{reviewed}/{studyCards.length} tarjetas repasadas</div>
+                <div className="text-xs font-semibold text-slate-400">{filtered.length ? 'Tus flashcards' : 'Mazo recomendado para empezar'}</div>
+              </div>
+            </aside>
 
-            {current ? (
-              <div
-                onPointerDown={event => setDragStart(event.clientX)}
-                onPointerMove={event => {
-                  if (dragStart !== null) setDragX(Math.max(-140, Math.min(140, event.clientX - dragStart)))
-                }}
-                onPointerUp={onPointerUp}
-                onPointerCancel={() => { setDragStart(null); setDragX(0) }}
-                style={{ perspective: 1200, touchAction: 'pan-y' }}
-              >
+            <div className="grid gap-4">
+              {current ? (
                 <div
-                  onClick={() => setFlipped(prev => !prev)}
-                  style={{
-                    position: 'relative',
-                    minHeight: 280,
-                    transformStyle: 'preserve-3d',
-                    transform: 'translateX(' + dragX + 'px) rotate(' + dragX / 16 + 'deg) rotateY(' + (flipped ? 180 : 0) + 'deg)',
-                    transition: dragStart === null ? 'transform .28s ease' : 'none',
-                    cursor: 'grab'
+                  onPointerDown={event => setDragStart(event.clientX)}
+                  onPointerMove={event => {
+                    if (dragStart !== null) setDragX(Math.max(-140, Math.min(140, event.clientX - dragStart)))
                   }}
+                  onPointerUp={onPointerUp}
+                  onPointerCancel={() => { setDragStart(null); setDragX(0) }}
+                  style={{ perspective: 1200, touchAction: 'pan-y' }}
                 >
-                  <CardFace subject={current.subject} topic={current.topic} label="Concepto" text={current.front} />
-                  <CardFace subject={current.subject} topic={current.topic} label="Explicación" text={current.back} back />
+                  <div
+                    onClick={() => setFlipped(prev => !prev)}
+                    style={{
+                      position: 'relative',
+                      minHeight: 320,
+                      transformStyle: 'preserve-3d',
+                      transform: 'translateX(' + dragX + 'px) rotate(' + dragX / 16 + 'deg) rotateY(' + (flipped ? 180 : 0) + 'deg)',
+                      transition: dragStart === null ? 'transform .28s ease' : 'none',
+                      cursor: 'grab'
+                    }}
+                  >
+                    <CardFace subject={current.subject} topic={current.topic} label="Concepto" text={current.front} />
+                    <CardFace subject={current.subject} topic={current.topic} label="Explicación" text={current.back} back />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{ minHeight: 280, borderRadius: 24, border: '1.5px dashed #bcd7ff', background: WARM.field, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
-                <div>
-                  <Sparkles size={34} color={WARM.blue} />
-                  <h3 style={{ color: WARM.ink, margin: '12px 0 6px' }}>Tu zona está vacía... por ahora</h3>
-                  <p style={{ color: WARM.muted, margin: 0, lineHeight: 1.6 }}>Prueba otro filtro o crea tu primera tarjeta.</p>
-                </div>
-              </div>
-            )}
+              ) : (
+                <EmptyStudyState />
+              )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
-              <button onClick={() => answerCard('dont')} disabled={!current} style={answerStyle('#475569', '#f8fafc')}>No me la sé</button>
-              <button onClick={() => answerCard('know')} disabled={!current} style={answerStyle(WARM.blue, '#eff6ff')}>Me la sé</button>
+              <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+                <button onClick={() => answerCard('dont')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-black text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"><XCircle size={18} /> No me la sé</button>
+                <button onClick={() => answerCard('know')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 font-black text-blue-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"><CheckCircle2 size={18} /> Me la sé</button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <form onSubmit={createCard} style={{ background: 'rgba(255,255,255,0.94)', border: '1px solid ' + WARM.border, borderRadius: 28, boxShadow: '0 24px 70px rgba(37,99,235,0.08)', padding: 22, alignSelf: 'start' }}>
-          <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Crear tarjeta</div>
-          <h3 style={{ color: WARM.ink, fontSize: 20, margin: '5px 0 16px' }}>Tu propio mazo</h3>
-
-          <label style={labelStyle}>Asignatura</label>
-          <select value={form.subject} onChange={e => setForm(prev => ({ ...prev, subject: e.target.value as ZonaSubject }))} style={inputStyle}>
-            {SUBJECTS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
-          </select>
-
-          <label style={labelStyle}>Tema</label>
-          <input value={form.topic} onChange={e => setForm(prev => ({ ...prev, topic: e.target.value }))} placeholder="Matrices, Ondas, Restauración..." style={inputStyle} />
-
-          <label style={labelStyle}>Frontal</label>
-          <textarea value={form.front} onChange={e => setForm(prev => ({ ...prev, front: e.target.value }))} placeholder="Concepto o pregunta" style={{ ...inputStyle, minHeight: 82, resize: 'vertical' }} />
-
-          <label style={labelStyle}>Trasera</label>
-          <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 108, resize: 'vertical' }} />
-
-          {formError && <div style={{ marginTop: 12, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1e3a8a', borderRadius: 14, padding: '10px 12px', fontSize: 13, fontWeight: 800, lineHeight: 1.5 }}>{formError}</div>}
-
-          <button disabled={saving} style={{ width: '100%', marginTop: 12, border: 'none', borderRadius: 16, padding: '13px 16px', background: 'linear-gradient(135deg, #1d4ed8, #2563eb, #38bdf8)', color: '#fff', fontWeight: 850, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: saving ? 'wait' : 'pointer', boxShadow: '0 16px 34px rgba(37,99,235,.24)', transition: 'transform .18s ease, box-shadow .18s ease' }}>
-            <Plus size={17} />{saving ? 'Guardando...' : 'Crear flashcard'}
-          </button>
-        </form>
-      </section>
-
-      {filtered.length > 0 && (
-        <section style={{ display: 'grid', gap: 10 }}>
-          {filtered.map(card => (
-            <div key={card.id} style={{ background: WARM.surface, border: '1px solid ' + WARM.border, borderRadius: 18, padding: 14, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', boxShadow: '0 10px 26px rgba(37,99,235,0.06)' }}>
-              <div>
-                <div style={{ color: WARM.ink, fontWeight: 800 }}>{card.front}</div>
-                <div style={{ color: WARM.softText, fontSize: 12, marginTop: 4 }}>{subjectLabel(card.subject)} · {card.topic}</div>
-              </div>
-              <button onClick={() => deleteCard(card)} aria-label="Eliminar flashcard" style={{ border: '1px solid #dbe7fb', color: '#2563eb', background: '#eff6ff', borderRadius: 12, width: 36, height: 36, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 }}>
-                <Trash2 size={15} />
-              </button>
-            </div>
-          ))}
         </section>
       )}
 
-      <section style={{ display: 'grid', gap: 12 }}>
-        <div>
-          <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Para empezar</div>
-          <h2 style={{ margin: '5px 0 0', color: WARM.ink, fontSize: 22 }}>Mazos recomendados</h2>
-          <p style={{ color: WARM.muted, margin: '5px 0 0', fontSize: 13 }}>Puedes repasarlos sin guardarlos. Solo se añaden a tu cuenta cuando pulsas copiar.</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
-          {SUBJECTS.filter(item => subject === 'all' || item.id === subject).map(item => {
-            const deckSize = RECOMMENDED_FLASHCARDS.filter(card => card.subject === item.id).length
-            return (
-              <article key={item.id} style={{ border: '1px solid ' + WARM.border, background: WARM.surface, borderRadius: 18, padding: 16, boxShadow: '0 10px 26px rgba(37,99,235,0.06)' }}>
-                <div style={{ color: item.color, fontSize: 12, fontWeight: 850, textTransform: 'uppercase' }}>Mazo recomendado</div>
-                <h3 style={{ color: WARM.ink, margin: '7px 0 4px' }}>{item.label}</h3>
-                <p style={{ color: WARM.muted, margin: 0, fontSize: 13 }}>{deckSize} tarjetas esenciales</p>
-                <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} style={{ marginTop: 14, width: '100%', border: '1px solid ' + item.color + '33', background: item.soft, color: item.color, borderRadius: 13, padding: '10px 12px', fontWeight: 850, display: 'flex', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
-                  <CopyPlus size={15} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar mazo'}
-                </button>
-              </article>
-            )
-          })}
-        </div>
-      </section>
+      {mode === 'create' && (
+        <section className="grid gap-4 rounded-[28px] border border-[#dbe7fb] bg-white/95 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.08)] max-md:p-4 lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5">
+            <div className="text-[11px] font-black uppercase tracking-[0.1em] text-blue-500">Crear tarjeta</div>
+            <h3 className="mt-2 text-2xl font-black text-slate-900">Hazlo rápido y vuelve luego</h3>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Crea tarjetas con tus errores más frecuentes. Puedes usar Markdown y LaTeX como en el resto de Pausia.</p>
+            <div className="mt-5 rounded-2xl border border-[#dbe7fb] bg-white p-4 text-sm font-bold leading-6 text-slate-500">Ejemplo: escribe `$P(A\\mid B)$` o una fórmula en bloque y se verá con el mismo renderizador.</div>
+          </div>
+
+          <form onSubmit={createCard} className="rounded-3xl border border-[#dbe7fb] bg-white p-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label style={labelStyle}>Asignatura</label>
+                <select value={form.subject} onChange={e => setForm(prev => ({ ...prev, subject: e.target.value as ZonaSubject }))} style={inputStyle}>
+                  {SUBJECTS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Tema</label>
+                <input value={form.topic} onChange={e => setForm(prev => ({ ...prev, topic: e.target.value }))} placeholder="Matrices, ondas, Restauración..." style={inputStyle} />
+              </div>
+            </div>
+
+            <label style={labelStyle}>Pregunta / concepto</label>
+            <textarea value={form.front} onChange={e => setForm(prev => ({ ...prev, front: e.target.value }))} placeholder="Concepto o pregunta" style={{ ...inputStyle, minHeight: 96, resize: 'vertical' }} />
+
+            <label style={labelStyle}>Respuesta / explicación</label>
+            <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 132, resize: 'vertical' }} />
+
+            {formError && <div className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black leading-6 text-blue-900">{formError}</div>}
+
+            <button disabled={saving} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3 font-black text-white shadow-[0_16px_34px_rgba(37,99,235,.24)] transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70">
+              <Plus size={18} />{saving ? 'Guardando...' : 'Crear flashcard'}
+            </button>
+          </form>
+        </section>
+      )}
+
+      {mode === 'space' && (
+        <section className="grid gap-4 rounded-[28px] border border-[#dbe7fb] bg-white/95 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.08)] max-md:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dbe7fb] pb-4">
+            <div>
+              <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Mi espacio</div>
+              <h3 className="mt-1 text-xl font-black text-slate-900">Guarda aquí lo que quieras volver a repasar</h3>
+            </div>
+            <Link href="/zona/canvas" className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)]">
+              Abrir canvas <ArrowRight size={15} />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid gap-3">
+              {cards.length > 0 ? cards.map(card => (
+                <SavedCard key={card.id} card={card} onDelete={() => void deleteCard(card)} />
+              )) : (
+                <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
+                  <Sparkles className="mx-auto text-blue-600" size={34} />
+                  <h4 className="mt-3 text-lg font-black text-slate-900">Todavía no tienes tarjetas propias</h4>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Crea una tarjeta rápida o copia un mazo recomendado para empezar.</p>
+                  <button onClick={() => setMode('create')} className="mt-4 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white">Crear primera tarjeta</button>
+                </div>
+              )}
+            </div>
+
+            <aside className="grid content-start gap-3 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.08em] text-slate-400">Mazos recomendados</div>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Copia solo los mazos que quieras tener en tu cuenta.</p>
+              </div>
+              {SUBJECTS.filter(item => !selectedSubject || item.id === selectedSubject.id).map(item => {
+                const deckSize = RECOMMENDED_FLASHCARDS.filter(card => card.subject === item.id).length
+                return (
+                  <article key={item.id} className="rounded-2xl border border-[#dbe7fb] bg-white p-4">
+                    <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: item.color }}>Mazo recomendado</div>
+                    <h4 className="mt-1 font-black text-slate-900">{item.label}</h4>
+                    <p className="text-sm font-semibold text-slate-500">{deckSize} tarjetas esenciales</p>
+                    <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-black disabled:cursor-wait disabled:opacity-60" style={{ borderColor: item.color + '33', background: item.soft, color: item.color }}>
+                      <CopyPlus size={15} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar mazo'}
+                    </button>
+                  </article>
+                )
+              })}
+            </aside>
+          </div>
+        </section>
+      )}
     </div>
+  )
+}
+
+function ModeCard({ active, icon, title, text, onClick }: { active: boolean; icon: ReactNode; title: string; text: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className={`group rounded-3xl border p-4 text-left transition ${active ? 'border-blue-300 bg-blue-50 shadow-[0_16px_34px_rgba(37,99,235,0.12)]' : 'border-[#dbe7fb] bg-white hover:border-blue-200 hover:bg-[#f8fbff]'}`}>
+      <div className="flex items-start gap-3">
+        <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${active ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700'}`}>{icon}</div>
+        <div>
+          <div className="font-black text-slate-900">{title}</div>
+          <div className="mt-1 text-sm font-semibold leading-5 text-slate-500">{text}</div>
+        </div>
+      </div>
+    </button>
   )
 }
 
@@ -303,7 +393,7 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
     <div style={{
       position: 'absolute',
       inset: 0,
-      minHeight: 280,
+      minHeight: 320,
       borderRadius: 26,
       padding: 26,
       background: back ? 'linear-gradient(145deg, #f8fbff, #eef6ff)' : 'linear-gradient(145deg, #ffffff, #f8fbff)',
@@ -313,14 +403,44 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
       transform: back ? 'rotateY(180deg)' : 'rotateY(0deg)',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      overflowX: 'auto'
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span style={{ color, fontWeight: 850, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
         <span style={{ color: WARM.muted, background: WARM.field, border: '1px solid ' + WARM.border, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 750 }}>{subjectLabel(subject)} · {topic}</span>
       </div>
-      <MathMarkdown text={text} className={back ? 'text-lg font-semibold' : 'text-xl font-black'} />
+      <MathMarkdown text={text} className={back ? 'text-lg font-semibold overflow-x-auto' : 'text-xl font-black overflow-x-auto'} />
       <div style={{ color: WARM.softText, fontSize: 12, fontWeight: 750 }}>Toca para girar · Arrastra derecha/izquierda</div>
+    </div>
+  )
+}
+
+function SavedCard({ card, onDelete }: { card: Flashcard; onDelete: () => void }) {
+  return (
+    <article className="rounded-3xl border border-[#dbe7fb] bg-white p-4 shadow-[0_10px_26px_rgba(37,99,235,0.06)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-xs font-black uppercase tracking-[0.08em] text-slate-400">{subjectLabel(card.subject)} · {card.topic}</div>
+          <div className="mt-2 font-black text-slate-900"><MathMarkdown text={card.front} /></div>
+          <div className="mt-2 rounded-2xl bg-[#f8fbff] p-3 text-sm font-semibold text-slate-600"><MathMarkdown text={card.back} /></div>
+        </div>
+        <button onClick={onDelete} aria-label="Eliminar flashcard" className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700 transition hover:bg-white">
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </article>
+  )
+}
+
+function EmptyStudyState() {
+  return (
+    <div className="grid min-h-[320px] place-items-center rounded-[26px] border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
+      <div>
+        <Sparkles className="mx-auto text-blue-600" size={36} />
+        <h3 className="mt-3 text-lg font-black text-slate-900">No hay tarjetas con este filtro</h3>
+        <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Prueba otra asignatura o crea una flashcard propia.</p>
+      </div>
     </div>
   )
 }
@@ -329,29 +449,8 @@ function subjectLabel(subject: ZonaSubject) {
   return SUBJECTS.find(item => item.id === subject)?.label ?? subject
 }
 
-function chipStyle(active: boolean, color: string): CSSProperties {
-  return {
-    border: active ? '1px solid transparent' : '1px solid ' + WARM.border,
-    background: active ? color : WARM.field,
-    color: active ? '#fff' : WARM.muted,
-    borderRadius: 999,
-    padding: '8px 13px',
-    fontWeight: 820,
-    cursor: 'pointer'
-  }
-}
-
-function topicStyle(active: boolean): CSSProperties {
-  return {
-    border: active ? '1px solid #bfdbfe' : '1px solid ' + WARM.border,
-    background: active ? '#eff6ff' : WARM.surface,
-    color: active ? WARM.blue : WARM.muted,
-    borderRadius: 999,
-    padding: '7px 12px',
-    fontSize: 12,
-    fontWeight: 800,
-    cursor: 'pointer'
-  }
+function subjectButtonClass(active: boolean) {
+  return `rounded-2xl border px-3 py-3 text-left text-sm font-black transition ${active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-[#dbe7fb] bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50'}`
 }
 
 const labelStyle: CSSProperties = {
@@ -359,7 +458,7 @@ const labelStyle: CSSProperties = {
   color: WARM.muted,
   fontSize: 12,
   fontWeight: 800,
-  margin: '12px 0 7px'
+  margin: '0 0 7px'
 }
 
 const inputStyle: CSSProperties = {
@@ -372,16 +471,4 @@ const inputStyle: CSSProperties = {
   padding: '11px 12px',
   font: 'inherit',
   outline: 'none'
-}
-
-function answerStyle(color: string, bg: string): CSSProperties {
-  return {
-    border: '1px solid ' + color + '22',
-    background: bg,
-    color,
-    borderRadius: 16,
-    padding: '13px 14px',
-    fontWeight: 850,
-    cursor: 'pointer'
-  }
 }

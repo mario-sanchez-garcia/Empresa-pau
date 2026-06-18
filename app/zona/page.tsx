@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -60,10 +60,11 @@ export default function ZonaPage() {
             <div>
               <h1 className="m-0 text-xl font-black">La Zona</h1>
               <p className="m-0 text-sm text-slate-500">Estudia a tu manera</p>
+              <p className="m-0 mt-1 max-w-xl text-xs font-semibold text-slate-400">Elige una asignatura, repasa tarjetas o crea tus propios apuntes rápidos.</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)]"><Sparkles size={15} /> Flashcards</div>
+            <div className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)]"><Sparkles size={15} /> Zona de estudio</div>
             <a className="flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-white/80 px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700" href="/zona/canvas"><Zap size={15} /> Mi Espacio</a>
           </div>
         </header>

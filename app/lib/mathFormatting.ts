@@ -129,7 +129,7 @@ function normalizeResponseStructure(text: string) {
     .replace(/([^\n])\s+((?:Caso|Sistema resultante|Puntos fuertes|Errores a corregir|Correcci[oó]n paso a paso|Teor[ií]a aplicada|Soluci[oó]n|Conclusi[oó]n|Criterios de correcci[oó]n)\b)/g, '$1\n\n$2')
     .replace(/([^\n])\s+(\d{1,2}[.)]\s+(?=[A-ZÁÉÍÓÚÑ]))/g, '$1\n\n$2')
     .replace(/(\d{1,2}[.)]\s+[^\n]+?)(?=\s+\d{1,2}[.)]\s+)/g, '$1\n\n')
-    .replace(/([.:;])\s*(\d{1,2}[.)]\s+)/g, '$1\n\n$2')
+    .replace(/(?<!\d)([.:;])\s*(\d{1,2}[.)]\s+)/g, '$1\n\n$2')
 
   for (const heading of RESPONSE_HEADINGS) {
     const escaped = escapeRegExp(heading)

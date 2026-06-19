@@ -9,7 +9,7 @@ type ExamStatementProps = {
   className?: string
   bodyClassName?: string
   components?: Record<string, any>
-  format?: boolean
+  format?: boolean | 'raw'
   storageKey?: string
   accentColor?: string
   softColor?: string

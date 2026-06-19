@@ -29,9 +29,17 @@ export default function MathMarkdown({
 }: {
   text?: string | null
   className?: string
-  format?: boolean
+  // true → normalizeExamStatement (raw exam text)
+  // false → normalizeCorrectionText (raw AI correction text)
+  // 'raw' → pass through as-is (already normalized)
+  format?: boolean | 'raw'
   components?: Record<string, any>
 }) {
+  const normalized =
+    format === 'raw' ? (text ?? '') :
+    format ? normalizeExamStatement(text) :
+    normalizeCorrectionText(text)
+
   return (
     <div className={`math-markdown max-w-none ${className}`}>
       <ReactMarkdown
@@ -39,7 +47,7 @@ export default function MathMarkdown({
         rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
         components={{ ...defaultComponents, ...(components ?? {}) }}
       >
-        {format ? normalizeExamStatement(text) : normalizeCorrectionText(text)}
+        {normalized}
       </ReactMarkdown>
     </div>
   )

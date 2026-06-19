@@ -3224,7 +3224,7 @@ function cambiarTipo(t: Tipo) {
                       <ExamStatement
                         key={`${preguntaActivaKey}-enunciado`}
                         text={enunciadoActivo}
-                        format={false}
+                        format="raw"
                         components={mdComponents}
                         storageKey={enunciadoStorageKey}
                         accentColor={cfg.color}
@@ -3295,7 +3295,7 @@ function cambiarTipo(t: Tipo) {
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado</div>
                       <ExamStatement
                         text={enunciadoActivo}
-                        format={false}
+                        format="raw"
                         components={mdComponents}
                         storageKey={enunciadoStorageKey}
                         accentColor={cfg.color}

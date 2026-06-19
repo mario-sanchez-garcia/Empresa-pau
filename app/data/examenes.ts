@@ -260,7 +260,7 @@ b) (0.5 puntos) Calcule el área de la zona de cultivo de hortalizas.`),
       preguntaModelo("M2023-3B", "Geometria", "B", `Se consideran las siguientes rectas:
 
 - $r$, la recta que pasa por el punto $P(1,1,2)$ y tiene como vector director $\\vec{u}=(0,1,2)$.
-- $s$, la recta de ecuaciones $s\\equiv\\begin{cases}x+y-4=0\\\\x-2z+2=0\\end{cases}$.
+- $s$, la recta de ecuaciones $$s\\equiv\\begin{cases}x+y-4=0\\\\x-2z+2=0\\end{cases}$$.
 - $t$, la recta paralela a $s$ que contiene al punto $P$.
 
 a) (0.75 puntos) Estudie la posición relativa de $r$ y $s$.
@@ -952,7 +952,7 @@ b) (0.5 puntos) Estudie si $f(x)$ presenta algún tipo de simetría par o impar.
 c) (1 punto) Calcule la siguiente integral: $\\displaystyle\\int_1^2 \\dfrac{f(x)}{x^6}\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Con un dispositivo láser situado en el punto $P(1, 1, 1)$ se ha podido seguir la trayectoria de una partícula que se desplaza sobre la recta de ecuaciones $r \\equiv \\begin{cases} 2x - y = 10 \\\\ x - z = -90 \\end{cases}$.
+        enunciado: `Con un dispositivo láser situado en el punto $P(1, 1, 1)$ se ha podido seguir la trayectoria de una partícula que se desplaza sobre la recta de ecuaciones $$r \\equiv \\begin{cases} 2x - y = 10 \\\\ x - z = -90 \\end{cases}$$.
 
 a) (0.5 puntos) Calcule un vector director de $r$ y la posición de la partícula cuando su trayectoria incide con el plano $z = 0$.
 
@@ -976,7 +976,7 @@ b) (1 punto) Calcule y clasifique los extremos relativos de $f(x)$ en $\\mathbb{
 c) (1 punto) Determine el área comprendida entre la gráfica de la función $f(x)$ y el eje $OX$ en el intervalo $[-1, 1]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-B3", bloque: "Geometria", opcion: "B",
-        enunciado: `Sean el plano $\\pi \\equiv x + y + z = 1$, la recta $r_1 \\equiv \\begin{cases} x = 1 + \\lambda \\\\ y = 1 - \\lambda \\\\ z = -1 \\end{cases}$, $\\lambda \\in \\mathbb{R}$, y el punto $P(0, 1, 0)$.
+        enunciado: `Sean el plano $\\pi \\equiv x + y + z = 1$, la recta $$r_1 \\equiv \\begin{cases} x = 1 + \\lambda \\\\ y = 1 - \\lambda \\\\ z = -1 \\end{cases}$$, $\\lambda \\in \\mathbb{R}$, y el punto $P(0, 1, 0)$.
 
 a) (0.5 puntos) Verifique que la recta $r_1$ está contenida en el plano $\\pi$ y que el punto $P$ pertenece al mismo plano.
 
@@ -1028,7 +1028,7 @@ c) (1.25 puntos) Calcule una ecuación de la recta $r_2$ que pase por $P$ y sea 
         enunciado: "Calcule el área de la región delimitada por las gráficas de las funciones\nf (x) = 2 + x − x2, g(x) = 2x2 − 4x.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Sean la recta $r \\equiv \\begin{cases} -x - y + z = 0 \\\\ 2x + 3y - z + 1 = 0 \\end{cases}$ y el plano $\\pi \\equiv 2x + y - z + 3 = 0$. Se pide:
+        enunciado: `Sean la recta $$r \\equiv \\begin{cases} -x - y + z = 0 \\\\ 2x + 3y - z + 1 = 0 \\end{cases}$$ y el plano $\\pi \\equiv 2x + y - z + 3 = 0$. Se pide:
 
 a) (0.75 puntos) Calcular el ángulo que forman $r$ y $\\pi$.
 
@@ -1088,7 +1088,7 @@ b) (1 punto) Calcular la ecuación de la recta tangente a la curva $y = f(x)$ co
 c) (1 punto) Calcular $\\displaystyle\\int_1^2 \\dfrac{f(x)}{g(x)}\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2020-J-A3", bloque: "Geometria", opcion: "A",
-        enunciado: `Dadas las rectas $r \\equiv \\begin{cases} x - y = 2 \\\\ 3x - z = -1 \\end{cases}$ y $s \\equiv \\begin{cases} x = -1 + 2\\lambda \\\\ y = -4 - \\lambda \\\\ z = \\lambda \\end{cases}$, se pide:
+        enunciado: `Dadas las rectas $$r \\equiv \\begin{cases} x - y = 2 \\\\ 3x - z = -1 \\end{cases}, \\qquad s \\equiv \\begin{cases} x = -1 + 2\\lambda \\\\ y = -4 - \\lambda \\\\ z = \\lambda \\end{cases}$$, se pide:
 
 a) (1 punto) Calcular la posición relativa de las rectas $r$ y $s$.
 

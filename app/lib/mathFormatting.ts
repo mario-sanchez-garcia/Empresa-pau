@@ -1,4 +1,4 @@
-const MATH_TOKEN = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g
+const MATH_TOKEN = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/g
 const CODE_FENCE_TOKEN = /(```[\s\S]*?```)/g
 const ENVIRONMENTS = 'pmatrix|bmatrix|vmatrix|matrix|cases|aligned|array|align|equation'
 const UNITS = 'kg|mol|atm|kJ|Pa|Hz|cm|mm|kg|g|m|s|N|J|W|T|C|V|A|L'
@@ -42,15 +42,12 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
   text = mapOutsideMath(text, formatBulletPoints)
-  text = mapOutsideMath(text, separateDataHeadingLines)
   text = mapOutsideMath(text, formatExamStructure)
-  text = mapOutsideMath(text, separateDataHeadingLines)
 
-  const result = normalizeDisplayMathBlocks(text
+  return normalizeDisplayMathBlocks(text
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n(?!\n)/g, '  \n')
   ).trim()
-  return repairOrphanedLatexCommands(result)
 }
 
 // Kept for compatibility with the existing renderer and imports.
@@ -66,18 +63,15 @@ export const formatExamText = normalizeExamStatement
 export function normalizeCorrectionText(input?: string | null) {
   if (!input) return ''
   let text = input
-  text = fixMismatchedDelimiters(text)
   text = normalizeMathDelimiters(text)
   text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
   text = mapOutsideMath(text, normalizeResponseStructure)
   text = formatOrphanCasesBlocks(text)
-  text = formatOrphanMatrixBlocks(text)
   text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
   text = mapOutsideMath(text, repairLostLatex)
   text = mapOutsideMath(text, wrapLatexEnvironments)
   text = formatOrphanCasesBlocks(text)
-  text = formatOrphanMatrixBlocks(text)
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
   text = mapOutsideMath(text, formatScientificNotation)
   text = mapOutsideMath(text, wrapExplicitLatex)
@@ -85,25 +79,11 @@ export function normalizeCorrectionText(input?: string | null) {
   text = mapOutsideMath(text, formatPhysicsNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
   text = mapOutsideMath(text, formatChemicalNotation)
-  text = mapOutsideMath(text, separateDataHeadingLines)
   return text
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
-}
-
-function fixMismatchedDelimiters(text: string) {
-  return mapOutsideCodeFences(text, part => part
-    // $$content$ → $content$ (opens double, closes single, no newlines)
-    .replace(/\$\$([^$\n]+?)\$(?!\$)/g, (_, body) => `$${body.trim()}$`)
-    // $content$$ → $content$ (opens single, closes double, no newlines)
-    .replace(/(?<!\$)\$([^$\n]+?)\$\$(?!\$)/g, (_, body) => `$${body.trim()}$`)
-    // $\begin{env}...\end{env}$ → strip outer $ so wrapLatexEnvironments wraps in $$
-    .replace(/(?<!\$)\$(\\begin\{[^}]+\}[\s\S]*?\\end\{[^}]+\})\$(?!\$)/g, (_, body) => body)
-    // Trailing orphaned $: $content at end-of-text with no closing $ (e.g. truncated AI output)
-    .replace(/(?<!\$)\$([^$\n]+)\s*$/, (_, body) => body.trim())
-  )
 }
 
 function normalizeMathDelimiters(text: string) {
@@ -181,25 +161,6 @@ function formatOrphanCasesBlocks(text: string) {
   ))
 }
 
-function formatOrphanMatrixBlocks(text: string) {
-  return mapOutsideCodeFences(text, part => part.replace(
-    /(^|\n)(?!\s*\$\$)([^\n$]*?\\end\{(pmatrix|bmatrix|vmatrix|matrix)\})/g,
-    (match, prefix, body, environment) => {
-      if (body.includes(`\\begin{${environment}}`)) return match
-      const beforeEnd = body.replace(new RegExp(`\\\\end\\{${environment}\\}`), '').trim()
-      if (!beforeEnd.includes('&')) return match
-
-      const rows = beforeEnd
-        .split(/\\{2,}|\\\s+(?=[0-9A-Za-z])/)
-        .map((row: string) => row.trim())
-        .filter((row: string) => row.includes('&'))
-
-      if (!rows.length) return match
-      return `${prefix}\n\n$$\n\\begin{${environment}}\n${rows.join(' \\\\\n')}\n\\end{${environment}}\n$$\n\n`
-    }
-  ))
-}
-
 function promoteLongLatexToDisplay(text: string) {
   return text.replace(
     /(^|[^\$])((?:\\begin\{(?:cases|matrix|pmatrix|bmatrix|aligned|align|array)\}[\s\S]*?\\end\{(?:cases|matrix|pmatrix|bmatrix|aligned|align|array)\})|(?:\\frac\{[^{}\n]+\}\{[^{}\n]+\}[^.\n]*(?:\\implies|\\cdot)[^.\n]{35,}))/g,
@@ -209,17 +170,18 @@ function promoteLongLatexToDisplay(text: string) {
 
 function normalizeExistingMath(text: string) {
   return mapOutsideCodeFences(text, part => part.replace(MATH_TOKEN, token => {
-    const originalDisplay = token.startsWith('$$')
-    const delimiter = originalDisplay ? '$$' : '$'
+    const display = token.startsWith('$$')
+    const delimiter = display ? '$$' : '$'
     const content = token.slice(delimiter.length, -delimiter.length)
-    const display = originalDisplay || new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}`).test(content)
+    // For inline math, skip formatLatexEnvironment — it adds \n which breaks MATH_TOKEN
+    // matching in later pipeline steps, causing wrapLatexEnvironments to double-wrap.
     const envReplacer = display
       ? (_: string, env: string, body: string) => formatLatexEnvironment(env, body)
       : (_: string, env: string, body: string) => `\\begin{${env}}${body}\\end{${env}}`
     const normalized = repairLostLatex(content)
       .replace(/\bGm_1m_2\b/g, 'Gm_{1}m_{2}')
       .replace(new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}([\\s\\S]*?)\\\\end\\{\\1\\}`, 'g'), envReplacer)
-    return display ? `\n\n$$\n${normalized.trim()}\n$$\n\n` : `$${normalized}$`
+    return `${delimiter}${normalized}${delimiter}`
   }))
 }
 
@@ -350,16 +312,6 @@ function formatBulletPoints(text: string) {
   return text
     .replace(/(^|\n)\s*\u2022\s+/g, '$1- ')
     .replace(/:\n(-\s+)/g, ':\n\n$1')
-}
-
-function separateDataHeadingLines(text: string) {
-  return text.replace(
-    /([^\n])(?:[ \t]+|\n+)(\*\*)?((?:Datos|Dato):)(\*\*)?/g,
-    (_, before, boldStart, label, boldEnd) => {
-      const heading = boldStart || boldEnd ? `${boldStart ?? ''}${label}${boldEnd ?? ''}` : `**${label}**`
-      return `${before}\n\n${heading}`
-    }
-  )
 }
 
 function formatBrokenMathBlocks(text: string) {
@@ -538,13 +490,4 @@ function spaceEquation(value: string) {
     .replace(/\s*([+\-])\s*/g, ' $1 ')
     .replace(/\s+/g, ' ')
     .trim()
-}
-
-// Wraps LaTeX commands that survived the pipeline outside any $...$ delimiter.
-// Uses mapOutsideMath (not dollar-counting) so $$ display blocks are correctly excluded.
-function repairOrphanedLatexCommands(text: string): string {
-  return mapOutsideMath(text, part => part.replace(
-    /(\\(?:lambda|mu|pi|alpha|beta|gamma|delta|theta|sigma|omega|phi|psi|epsilon|eta|kappa|nu|xi|rho|tau|upsilon|chi|zeta)(?![a-zA-Z])|\\(?:vec|frac|sqrt|hat|bar|dot|ddot|tilde|overline|underline|overbrace|underbrace)\{[^}]*\}(?:\{[^}]*\})?)/g,
-    match => `$${match}$`
-  ))
 }

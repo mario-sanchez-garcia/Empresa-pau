@@ -46,10 +46,11 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatExamStructure)
   text = mapOutsideMath(text, separateDataHeadingLines)
 
-  return normalizeDisplayMathBlocks(text
+  const result = normalizeDisplayMathBlocks(text
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n(?!\n)/g, '  \n')
   ).trim()
+  return repairOrphanedLatexCommands(result)
 }
 
 // Kept for compatibility with the existing renderer and imports.
@@ -537,4 +538,13 @@ function spaceEquation(value: string) {
     .replace(/\s*([+\-])\s*/g, ' $1 ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+// Wraps LaTeX commands that survived the pipeline outside any $...$ delimiter.
+// Uses mapOutsideMath (not dollar-counting) so $$ display blocks are correctly excluded.
+function repairOrphanedLatexCommands(text: string): string {
+  return mapOutsideMath(text, part => part.replace(
+    /(\\(?:lambda|mu|pi|alpha|beta|gamma|delta|theta|sigma|omega|phi|psi|epsilon|eta|kappa|nu|xi|rho|tau|upsilon|chi|zeta)(?![a-zA-Z])|\\(?:vec|frac|sqrt|hat|bar|dot|ddot|tilde|overline|underline|overbrace|underbrace)\{[^}]*\}(?:\{[^}]*\})?)/g,
+    match => `$${match}$`
+  ))
 }

@@ -108,7 +108,7 @@ a) (0.5 puntos) Estudiar si existe algún valor de $\\lambda$ para el cual la ma
 
 b) (1 punto) Estudiar el rango de la matriz $BA$ en función del parámetro $\\lambda$.
 
-c) (1 punto) Para $\\lambda=1$, discutir el sistema $(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a^2\\\\a^2\\\\2a\\end{pmatrix}$ según los valores de $a$.`),
+c) (1 punto) Para $\\lambda=1$, discutir el sistema $$(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a^2\\\\a^2\\\\2a\\end{pmatrix}$$ según los valores de $a$.`),
       preguntaModelo("M2025-1B", "Algebra", "B", `Se tienen garrafas de tres tamaños diferentes para llenar un aljibe. Con seis garrafas pequeñas y 2 L se llenan exactamente una garrafa mediana y una grande. Con dos garrafas grandes llenamos dos medianas, una pequeña y sobra 1 L. El aljibe se llena al completo bien con catorce garrafas pequeñas más seis medianas, bien con cinco medianas junto con cinco grandes. Se pide calcular la capacidad de cada tipo de garrafa y, una vez conocidas estas, la del aljibe.`),
       preguntaModelo("M2025-2A", "Analisis", "A", `Sea la función
 
@@ -187,7 +187,7 @@ a) (0.75 puntos) Estudiar si existe algún valor de $m$ para el cual la matriz $
 
 b) (0.75 puntos) Estudiar el rango de la matriz $AB$ en función del parámetro $m$.
 
-c) (1 punto) Para $m=1$, discutir el sistema $(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a\\\\a\\\\a^2\\end{pmatrix}$ según los valores de $a$.`),
+c) (1 punto) Para $m=1$, discutir el sistema $$(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a\\\\a\\\\a^2\\end{pmatrix}$$ según los valores de $a$.`),
       preguntaModelo("M2024-2B", "Analisis", "B", `Dada la función real de variable real $f(x)=x-\\dfrac{4}{(x-1)^2}$, se pide:
 
 a) (0.75 puntos) Hallar el dominio de definición de $f(x)$ y determinar, en el caso de que existan, las ecuaciones de las asíntotas de su gráfica.

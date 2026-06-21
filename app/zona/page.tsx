@@ -1,5 +1,6 @@
 ﻿'use client'
 
+import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -65,7 +66,9 @@ export default function ZonaPage() {
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)]"><Sparkles size={15} /> Zona de estudio</div>
-            <a className="flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-white/80 px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700" href="/zona/canvas"><Zap size={15} /> Mi Espacio</a>
+            {CANVAS_ENABLED && (
+              <a className="flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-white/80 px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700" href="/zona/canvas"><Zap size={15} /> Mi Espacio</a>
+            )}
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl p-8 max-md:p-4">

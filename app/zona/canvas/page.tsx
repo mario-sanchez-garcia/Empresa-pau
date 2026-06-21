@@ -1,5 +1,6 @@
 'use client'
 
+import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -24,6 +25,7 @@ export default function ZonaCanvasPage() {
   const router = useRouter()
 
   useEffect(() => {
+    if (!CANVAS_ENABLED) return
     async function load() {
       const { data } = await supabase.auth.getUser()
       if (!data.user) {
@@ -42,6 +44,21 @@ export default function ZonaCanvasPage() {
 
     load()
   }, [router])
+
+  if (!CANVAS_ENABLED) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_16%_12%,rgba(219,234,254,0.9),transparent_30%),radial-gradient(circle_at_86%_8%,rgba(224,231,255,0.72),transparent_28%),linear-gradient(135deg,#fbfdff_0%,#f8fafc_48%,#eff6ff_100%)]">
+        <div className="text-center" style={{ maxWidth: 380, padding: '0 24px' }}>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_18px_38px_rgba(37,99,235,0.24)]"><BrainCircuit size={28} /></div>
+          <p className="font-black text-slate-700" style={{ fontSize: 18, marginBottom: 8 }}>Mi Espacio — próximamente</p>
+          <p className="text-slate-500" style={{ fontSize: 14, marginBottom: 20, lineHeight: 1.5 }}>Esta sección está temporalmente desactivada. Vuelve pronto.</p>
+          <a href="/zona" className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-black text-white shadow-[0_8px_20px_rgba(37,99,235,0.22)] hover:bg-blue-700 transition" style={{ textDecoration: 'none' }}>
+            ← Volver a La Zona
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   if (loading || !user) {
     return (

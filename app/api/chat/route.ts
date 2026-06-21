@@ -7,6 +7,7 @@ import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimi
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+const STREAM_TRUNCATION_SENTINEL = '[[PAUSIA_TRUNCATED_7f3a9b2c]]'
 const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - Usa Markdown claro con titulos, parrafos cortos y listas separadas por saltos de linea.
 - No juntes listas como "1. ...2. ..." ni titulos con texto como "Definir las variablesAsignamos".
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
           const usage = extractAnthropicTokenUsage(finalMsg)
           if (finalMsg.stop_reason === 'max_tokens') {
             console.warn('[chat] truncated: true (stream)', { action, maxTokens, outputTokens: usage.outputTokens })
-            controller.enqueue(encoder.encode('\x00{"__pausia_stream_end__":{"truncated":true}}\x00'))
+            controller.enqueue(encoder.encode(STREAM_TRUNCATION_SENTINEL))
           }
           logAiUsageEvent({
             userId: authContext.user.id,

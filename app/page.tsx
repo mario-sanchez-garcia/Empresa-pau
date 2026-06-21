@@ -87,6 +87,24 @@ const WARM = {
   shadow: '0 24px 70px rgba(37, 99, 235, 0.09)'
 }
 
+const STREAM_TRUNCATION_SENTINEL = '[[PAUSIA_TRUNCATED_7f3a9b2c]]'
+
+function readSafeStreamText(rawText: string) {
+  const sentinelIndex = rawText.indexOf(STREAM_TRUNCATION_SENTINEL)
+  if (sentinelIndex >= 0) {
+    return { visibleText: rawText.slice(0, sentinelIndex), truncated: true }
+  }
+
+  const maxPrefixLength = Math.min(rawText.length, STREAM_TRUNCATION_SENTINEL.length - 1)
+  for (let length = maxPrefixLength; length > 0; length -= 1) {
+    if (rawText.endsWith(STREAM_TRUNCATION_SENTINEL.slice(0, length))) {
+      return { visibleText: rawText.slice(0, -length), truncated: false }
+    }
+  }
+
+  return { visibleText: rawText, truncated: false }
+}
+
 const SUBJECT_CARDS = {
   mates: {
     title: 'Matemáticas',
@@ -1399,12 +1417,12 @@ function cambiarTipo(t: Tipo) {
         const { done, value } = await reader.read()
         if (done) break
         accumulated += decoder.decode(value, { stream: true })
-        const sentinelIdx = accumulated.indexOf('\x00')
-        setStreamText(sentinelIdx === -1 ? accumulated : accumulated.slice(0, sentinelIdx))
+        setStreamText(readSafeStreamText(accumulated).visibleText)
       }
-      const STREAM_SENTINEL = '\x00{"__pausia_stream_end__":{"truncated":true}}\x00'
-      const isTruncated = accumulated.includes(STREAM_SENTINEL)
-      if (isTruncated) accumulated = accumulated.replace(STREAM_SENTINEL, '')
+      accumulated += decoder.decode()
+      const completedStream = readSafeStreamText(accumulated)
+      const isTruncated = completedStream.truncated
+      accumulated = isTruncated ? completedStream.visibleText : accumulated
       if (!accumulated) {
         setStreamText('')
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
@@ -1428,15 +1446,17 @@ function cambiarTipo(t: Tipo) {
         : partes ? parseFloat(partes[1].replace(',', '.')) : null
       const nota = rawNota === null ? null : clampScore(rawNota, puntuacionMax)
       const notaMax = puntuacionMax
-      supabase.from('historial_examenes').insert({
-        user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
-        bloque: bloqueActivoLabel || '',
-        opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
-        enunciado: enunciadoActivo?.substring(0, 6000),
-        respuesta: respuesta?.substring(0, 4000),
-        // Do not truncate full correction: History modal needs complete feedback.
-        correccion: correccionGuardada
-      }).then(() => {})
+      if (!isTruncated) {
+        supabase.from('historial_examenes').insert({
+          user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
+          bloque: bloqueActivoLabel || '',
+          opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
+          enunciado: enunciadoActivo?.substring(0, 6000),
+          respuesta: respuesta?.substring(0, 4000),
+          // Do not truncate full correction: History modal needs complete feedback.
+          correccion: correccionGuardada
+        }).then(() => {})
+      }
     } catch {
       setStreamText('')
       setTruncated(false)
@@ -1482,11 +1502,18 @@ function cambiarTipo(t: Tipo) {
           const { done, value } = await reader.read()
           if (done) break
           accumulated += decoder.decode(value, { stream: true })
-          const snap = accumulated
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: snap }])
+          const safeStream = readSafeStreamText(accumulated)
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: safeStream.visibleText }])
         }
-        if (!accumulated) {
+        accumulated += decoder.decode()
+        const completedStream = readSafeStreamText(accumulated)
+        const finalText = completedStream.truncated
+          ? `${completedStream.visibleText}\n\n> Respuesta incompleta: se ha alcanzado el límite de longitud. Puedes pedirme que continúe.`
+          : accumulated
+        if (!finalText) {
           setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
+        } else {
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: finalText }])
         }
       }
     } catch {

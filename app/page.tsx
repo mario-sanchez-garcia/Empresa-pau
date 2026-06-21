@@ -3313,13 +3313,6 @@ function cambiarTipo(t: Tipo) {
                       ))}
                     </div>
                   )}
-                  {(preguntaActiva as any).requiereImagen && (!Array.isArray((preguntaActiva as any).imagenes) || (preguntaActiva as any).imagenes.length === 0) && (
-                    <div style={{ marginBottom: '18px', padding: '16px 18px', borderRadius: '18px', background: cfg.light, color: cfg.color, border: '1px dashed ' + cfg.accent, fontSize: '13px', fontWeight: 800 }}>
-                      {asignatura === 'biologia'
-                        ? 'Este ejercicio requiere una imagen o esquema pendiente de revisión.'
-                        : 'Esta pregunta incluye una imagen que se añadirá próximamente.'}
-                    </div>
-                  )}
                   {asignatura === 'historia' && (preguntaActiva as any).conceptos && (
                     <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {(preguntaActiva as any).conceptos.map((c: string, i: number) => (
@@ -3330,15 +3323,23 @@ function cambiarTipo(t: Tipo) {
                   {asignatura !== 'ingles' && (
                     <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado</div>
-                      <ExamStatement
-                        text={enunciadoActivo}
-                        format="raw"
-                        components={mdComponents}
-                        storageKey={enunciadoStorageKey}
-                        accentColor={cfg.color}
-                        softColor={cfg.light}
-                        readingMode={asignatura === 'lengua'}
-                      />
+                      {(preguntaActiva as any).requiereImagen && (!Array.isArray((preguntaActiva as any).imagenes) || (preguntaActiva as any).imagenes.length === 0) ? (
+                        <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
+                          <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
+                          <div style={{ fontSize: '15px', lineHeight: 1.6, fontWeight: 650 }}>Estamos terminando de adaptar este contenido.</div>
+                          <div style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.5, color: '#64748b', fontWeight: 650 }}>Prueba otro ejercicio mientras tanto.</div>
+                        </div>
+                      ) : (
+                        <ExamStatement
+                          text={enunciadoActivo}
+                          format="raw"
+                          components={mdComponents}
+                          storageKey={enunciadoStorageKey}
+                          accentColor={cfg.color}
+                          softColor={cfg.light}
+                          readingMode={asignatura === 'lengua'}
+                        />
+                      )}
                     </div>
                   )}
                 </div>

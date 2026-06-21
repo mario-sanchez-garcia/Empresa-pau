@@ -1,6 +1,7 @@
 import type { CaminoRouteId, CaminoTaskTypeId, DailyCaminoTask } from './caminoData'
 import { buildCaminoAction } from './caminoActions'
 import { CAMINO_CURRICULUM, MISSION_TASK_XP, ROUTE_WEEK_OFFSET, getPhaseLabel, type CaminoWeekData } from './caminoCurriculum'
+import { extractBlockKey } from './curriculumFlashcards'
 
 export interface WeekContext {
   semana: number
@@ -96,6 +97,9 @@ export function buildDailyTasksFromWeek(
     const { subjectKey, subjectLabel, blockDetail } = resolveTaskSubject(type, week)
     const id = `w${week.semana}-${type}-${index}`
     const action = buildCaminoAction(type, subjectKey)
+    const block = (type === 'flashcard' && subjectKey === 'mates')
+      ? (extractBlockKey(blockDetail) ?? undefined)
+      : undefined
     return {
       id,
       title: buildTaskTitle(type, blockDetail),
@@ -106,6 +110,7 @@ export function buildDailyTasksFromWeek(
       detail: buildTaskDetail(type, blockDetail),
       actionLabel: action.label,
       actionHref: action.href,
+      block,
     }
   })
 

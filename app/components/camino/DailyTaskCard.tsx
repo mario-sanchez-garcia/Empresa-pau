@@ -4,10 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  BookMarked, BookOpen, Check, ChevronRight,
+  BookMarked, BookOpen, Check, ChevronRight, ChevronUp,
   FileText, Layers, PenLine, Play, Headphones, Pencil, Zap,
 } from 'lucide-react'
 import { caminoTaskTypes, type DailyCaminoTask } from '@/app/lib/camino/caminoData'
+import CurriculumFlashcardPanel from '@/app/components/camino/CurriculumFlashcardPanel'
+import type { CurriculumBlockKey } from '@/app/lib/camino/curriculumFlashcards'
 
 interface DailyTaskCardProps {
   task: DailyCaminoTask
@@ -47,6 +49,9 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
   const type     = caminoTaskTypes[task.type]
   const sc       = SUBJECT_COLORS[task.subject] ?? DEFAULT_SC
   const [showXp, setShowXp] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
+  const isExpandable = task.type === 'flashcard' && !!task.block
 
   function handleComplete() {
     if (completed) return
@@ -56,6 +61,7 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
   }
 
   return (
+    <>
     <div
       style={{
         display: 'flex', alignItems: 'center', gap: 13,
@@ -140,7 +146,20 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
       </div>
 
       {/* Right action */}
-      {completed ? (
+      {isExpandable ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(e => !e)}
+          aria-label={expanded ? 'Ocultar flashcards' : 'Ver flashcards'}
+          style={{
+            color: expanded ? '#2563eb' : '#d1d5db', flexShrink: 0,
+            display: 'flex', alignItems: 'center', lineHeight: 1,
+            background: 'none', border: 'none', cursor: 'pointer', padding: 2,
+          }}
+        >
+          {expanded ? <ChevronUp size={18} /> : <ChevronRight size={18} />}
+        </button>
+      ) : completed ? (
         <motion.span
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -163,5 +182,9 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
         </Link>
       )}
     </div>
+    {isExpandable && expanded && (
+      <CurriculumFlashcardPanel blockKey={task.block as CurriculumBlockKey} />
+    )}
+    </>
   )
 }

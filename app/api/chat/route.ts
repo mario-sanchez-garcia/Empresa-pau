@@ -118,33 +118,6 @@ export async function POST(request: NextRequest) {
       messages: [{ role: 'user', content: contenido }]
     })
 
-    anthropicStream.finalMessage().then(msg => {
-      const usage = extractAnthropicTokenUsage(msg)
-      if (msg.stop_reason === 'max_tokens') console.warn('[chat] truncated: true (stream)', { action, maxTokens, outputTokens: usage.outputTokens })
-      logAiUsageEvent({
-        userId: authContext.user.id,
-        route: '/api/chat',
-        action,
-        model,
-        inputTokens: usage.inputTokens,
-        outputTokens: usage.outputTokens,
-        totalTokens: usage.totalTokens,
-        status: 'success',
-        metadata,
-        accessToken: authContext.accessToken
-      }).catch(() => {})
-    }).catch(() => {
-      logAiUsageEvent({
-        userId: authContext.user.id,
-        route: '/api/chat',
-        action,
-        model,
-        status: 'error',
-        metadata,
-        accessToken: authContext.accessToken
-      }).catch(() => {})
-    })
-
     const encoder = new TextEncoder()
     const readable = new ReadableStream({
       async start(controller) {
@@ -154,8 +127,35 @@ export async function POST(request: NextRequest) {
               controller.enqueue(encoder.encode(event.delta.text))
             }
           }
+          // All events consumed — finalMessage resolves immediately here
+          const finalMsg = await anthropicStream.finalMessage()
+          const usage = extractAnthropicTokenUsage(finalMsg)
+          if (finalMsg.stop_reason === 'max_tokens') {
+            console.warn('[chat] truncated: true (stream)', { action, maxTokens, outputTokens: usage.outputTokens })
+            controller.enqueue(encoder.encode('\x00{"__pausia_stream_end__":{"truncated":true}}\x00'))
+          }
+          logAiUsageEvent({
+            userId: authContext.user.id,
+            route: '/api/chat',
+            action,
+            model,
+            inputTokens: usage.inputTokens,
+            outputTokens: usage.outputTokens,
+            totalTokens: usage.totalTokens,
+            status: 'success',
+            metadata,
+            accessToken: authContext.accessToken
+          }).catch(() => {})
         } catch {
-          // stream error; usage logged via finalMessage().catch
+          logAiUsageEvent({
+            userId: authContext.user.id,
+            route: '/api/chat',
+            action,
+            model,
+            status: 'error',
+            metadata,
+            accessToken: authContext.accessToken
+          }).catch(() => {})
         } finally {
           controller.close()
         }

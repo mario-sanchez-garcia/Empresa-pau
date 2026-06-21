@@ -598,6 +598,7 @@ export default function Home() {
   const [imagenPreview, setImagenPreview] = useState<string | null>(null)
   const [correccion, setCorreccion] = useState('')
   const [streamText, setStreamText] = useState('')
+  const [truncated, setTruncated] = useState(false)
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto'|'imagen'>('texto')
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
@@ -1299,7 +1300,7 @@ function nombreAsignatura(a: string) {
 }
 
 function reset() {
-  setCorreccion(''); setStreamText('')
+  setCorreccion(''); setStreamText(''); setTruncated(false)
   setRespuesta('')
   setImagen(null)
   setImagenPreview(null)
@@ -1350,7 +1351,7 @@ function cambiarTipo(t: Tipo) {
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
-    setCargando(true); setCorreccion(''); setStreamText('')
+    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false)
     try {
       const accessToken = await getChatAccessToken()
       if (!accessToken) {
@@ -1398,10 +1399,14 @@ function cambiarTipo(t: Tipo) {
         const { done, value } = await reader.read()
         if (done) break
         accumulated += decoder.decode(value, { stream: true })
-        setStreamText(accumulated)
+        const sentinelIdx = accumulated.indexOf('\x00')
+        setStreamText(sentinelIdx === -1 ? accumulated : accumulated.slice(0, sentinelIdx))
       }
-      setStreamText('')
+      const STREAM_SENTINEL = '\x00{"__pausia_stream_end__":{"truncated":true}}\x00'
+      const isTruncated = accumulated.includes(STREAM_SENTINEL)
+      if (isTruncated) accumulated = accumulated.replace(STREAM_SENTINEL, '')
       if (!accumulated) {
+        setStreamText('')
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
         return
       }
@@ -1411,7 +1416,11 @@ function cambiarTipo(t: Tipo) {
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
         : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(accumulated, { officialMaxScore: puntuacionMax }), puntuacionMax)
       const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
+      // Batch all three updates — no empty-frame gap between streaming and final render.
+      // isTruncated is not persisted to historial_examenes (no column yet).
       setCorreccion(correccionGuardada)
+      setTruncated(isTruncated)
+      setStreamText('')
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
       const partes = !correccionJson ? accumulated.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
       const rawNota = bloqueJson?.puntos_conseguidos != null
@@ -1430,6 +1439,7 @@ function cambiarTipo(t: Tipo) {
       }).then(() => {})
     } catch {
       setStreamText('')
+      setTruncated(false)
       setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
       setCargando(false)
@@ -3363,10 +3373,27 @@ function cambiarTipo(t: Tipo) {
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Pausia</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  {streamText
-                    ? <CorrectionResultCard correction={streamText} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
-                    : <CorrectionResultCard correction={correccion} officialMaxScore={puntuacionPreguntaActiva} components={mdComponents} />
-                  }
+                  <CorrectionResultCard
+                    correction={correccion || streamText}
+                    officialMaxScore={puntuacionPreguntaActiva}
+                    components={mdComponents}
+                    isStreaming={!correccion && !!streamText}
+                  />
+                  {truncated && (
+                    <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fef3c7', border: '1.5px solid #fcd34d', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+                      <div>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#92400e' }}>Respuesta incompleta</p>
+                        <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>La corrección se ha cortado porque era demasiado larga. Puedes volver a intentarlo.</p>
+                        <button
+                          onClick={corregir}
+                          style={{ fontSize: 12.5, fontWeight: 700, color: '#92400e', background: '#fde68a', border: '1px solid #fcd34d', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
+                        >
+                          Reintentar
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

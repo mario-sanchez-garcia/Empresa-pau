@@ -10,19 +10,21 @@ export default function CorrectionResultCard({
   officialMaxScore,
   className = '',
   components,
+  isStreaming = false,
 }: {
   correction: unknown
   officialMaxScore?: number
   className?: string
   components?: Record<string, any>
+  isStreaming?: boolean
 }) {
   const markdown = correctionPayloadToMarkdown(correction, { officialMaxScore })
   const { main, why } = splitWhyExplanationMarkdown(markdown)
 
   return (
     <div className={className}>
-      <MathMarkdown text={main} format={false} components={components} />
-      <WhyExplanation markdown={why} components={components} />
+      <MathMarkdown text={main} format={false} components={components} isStreaming={isStreaming} />
+      {!isStreaming && <WhyExplanation markdown={why} components={components} />}
     </div>
   )
 }

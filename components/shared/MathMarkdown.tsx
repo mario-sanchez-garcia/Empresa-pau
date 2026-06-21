@@ -26,6 +26,7 @@ export default function MathMarkdown({
   className = '',
   format = true,
   components,
+  isStreaming = false,
 }: {
   text?: string | null
   className?: string
@@ -34,7 +35,18 @@ export default function MathMarkdown({
   // 'raw' → pass through as-is (already normalized)
   format?: boolean | 'raw'
   components?: Record<string, any>
+  isStreaming?: boolean
 }) {
+  if (isStreaming) {
+    return (
+      <div className={`math-markdown max-w-none ${className}`}>
+        <ReactMarkdown components={{ ...defaultComponents, ...(components ?? {}) }}>
+          {text ?? ''}
+        </ReactMarkdown>
+      </div>
+    )
+  }
+
   const normalized =
     format === 'raw' ? (text ?? '') :
     format ? normalizeExamStatement(text) :

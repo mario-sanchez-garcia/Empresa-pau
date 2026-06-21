@@ -43,7 +43,7 @@ const plans: Plan[] = [
     period: '/mes · cancela cuando quieras',
     description: 'Todo incluido. La forma más flexible de preparar la PAU mes a mes.',
     features: [
-      { text: 'Correcciones ilimitadas con IA', included: true },
+      { text: 'Correcciones amplias con IA', included: true },
       { text: 'Todos los exámenes oficiales', included: true },
       { text: 'Camino PAU y misiones diarias', included: true },
       { text: 'Simulacros con tiempo real', included: true },
@@ -62,10 +62,10 @@ const plans: Plan[] = [
     period: 'sep–jun · pago único',
     description: 'Acceso para todo el curso académico. La opción más completa y económica.',
     features: [
-      { text: 'Correcciones ilimitadas con IA', included: true },
+      { text: 'Correcciones amplias con IA', included: true },
       { text: 'Todos los exámenes oficiales', included: true },
       { text: 'Camino PAU completo sep–jun', included: true },
-      { text: 'Simulacros ilimitados', included: true },
+      { text: 'Simulacros incluidos para preparar la PAU', included: true },
       { text: 'Chat con tutor IA 24/7', included: true },
       { text: 'Sin renovación mensual', included: true },
     ],
@@ -81,7 +81,7 @@ const plans: Plan[] = [
     period: 'mayo–jul · pago único',
     description: 'Para la recta final de la PAU. Acceso completo mayo–julio sin renovación.',
     features: [
-      { text: 'Correcciones ilimitadas con IA', included: true },
+      { text: 'Correcciones amplias con IA', included: true },
       { text: 'Todos los exámenes oficiales', included: true },
       { text: 'Camino PAU mayo–julio', included: true },
       { text: 'Simulacros intensivos', included: true },

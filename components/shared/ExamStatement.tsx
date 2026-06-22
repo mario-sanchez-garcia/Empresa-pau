@@ -55,10 +55,7 @@ export default function ExamStatement({
   const safeStorageKey = useMemo(() => storageKey ? `pausia:statement-highlights:${storageKey}` : '', [storageKey])
 
   useEffect(() => {
-    if (!safeStorageKey || typeof window === 'undefined') {
-      setHighlights([])
-      return
-    }
+    if (!safeStorageKey || typeof window === 'undefined') return
     try {
       const stored = window.localStorage.getItem(safeStorageKey)
       setHighlights(stored ? sanitizeHighlights(JSON.parse(stored)) : [])

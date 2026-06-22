@@ -254,10 +254,25 @@ export default function CaminoCalendarClient() {
     const loadedOnboarding = loadOnboarding()
     const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
     const loadedXp = loadJson<XpEvent[]>(XP_KEY, [])
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // Seguro: efecto de montaje único que lee localStorage (client-only).
+    // Lazy initializers causarían error de hidratación SSR.
     setOnboarding(loadedOnboarding)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // Seguro: efecto de montaje único que lee localStorage (client-only).
+    // Lazy initializers causarían error de hidratación SSR.
     setExams(loadedExams)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // Seguro: efecto de montaje único que lee localStorage (client-only).
+    // Lazy initializers causarían error de hidratación SSR.
     setXpEvents(loadedXp)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // Seguro: efecto de montaje único que lee localStorage (client-only).
+    // Lazy initializers causarían error de hidratación SSR.
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // Seguro: efecto de montaje único que lee localStorage (client-only).
+    // Lazy initializers causarían error de hidratación SSR.
     setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM), loadedXp))
     fetchCurriculumItems(loadedOnboarding.subjects)
       .then(items => {

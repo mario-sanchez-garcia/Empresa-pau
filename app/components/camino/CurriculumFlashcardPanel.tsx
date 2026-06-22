@@ -17,22 +17,21 @@ const COMPACT: Record<string, any> = {
 
 export default function CurriculumFlashcardPanel({ blockKey }: { blockKey: CurriculumBlockKey }) {
   const [cards, setCards] = useState<CurriculumFlashcardRow[]>([])
-  const [idx, setIdx]     = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [showCase, setShowCase] = useState(false)
+  const [phase, setPhase] = useState({ loading: true, idx: 0, showCase: false })
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
-    setIdx(0)
-    setShowCase(false)
+    setPhase({ loading: true, idx: 0, showCase: false })
     fetchCurriculumFlashcards(supabase, blockKey).then(rows => {
-      if (!cancelled) { setCards(rows); setLoading(false) }
+      if (!cancelled) {
+        setCards(rows)
+        setPhase(p => ({ ...p, loading: false }))
+      }
     })
     return () => { cancelled = true }
   }, [blockKey])
 
-  if (loading) {
+  if (phase.loading) {
     return (
       <div style={{ padding: '12px 18px 16px', borderTop: '1px solid rgba(219,231,248,0.55)', background: '#f8fbff' }}>
         <div style={{ height: 12, width: '45%', borderRadius: 6, background: '#e2e8f0', marginBottom: 10 }} />
@@ -43,9 +42,9 @@ export default function CurriculumFlashcardPanel({ blockKey }: { blockKey: Curri
 
   if (cards.length === 0) return null
 
-  const card    = cards[idx]
-  const isFirst = idx === 0
-  const isLast  = idx === cards.length - 1
+  const card    = cards[phase.idx]
+  const isFirst = phase.idx === 0
+  const isLast  = phase.idx === cards.length - 1
 
   return (
     <div style={{ padding: '14px 18px 16px', borderTop: '1px solid rgba(219,231,248,0.55)', background: '#f8fbff' }}>
@@ -58,13 +57,13 @@ export default function CurriculumFlashcardPanel({ blockKey }: { blockKey: Curri
 
         {cards.length > 1 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <NavBtn disabled={isFirst} onClick={() => { setIdx(i => i - 1); setShowCase(false) }} label="Anterior">
+            <NavBtn disabled={isFirst} onClick={() => setPhase(p => ({ ...p, idx: p.idx - 1, showCase: false }))} label="Anterior">
               <ChevronLeft size={13} />
             </NavBtn>
             <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', minWidth: 30, textAlign: 'center' }}>
-              {idx + 1}/{cards.length}
+              {phase.idx + 1}/{cards.length}
             </span>
-            <NavBtn disabled={isLast} onClick={() => { setIdx(i => i + 1); setShowCase(false) }} label="Siguiente">
+            <NavBtn disabled={isLast} onClick={() => setPhase(p => ({ ...p, idx: p.idx + 1, showCase: false }))} label="Siguiente">
               <ChevronRight size={13} />
             </NavBtn>
           </div>
@@ -96,12 +95,12 @@ export default function CurriculumFlashcardPanel({ blockKey }: { blockKey: Curri
         <div style={{ marginTop: 8 }}>
           <button
             type="button"
-            onClick={() => setShowCase(s => !s)}
+            onClick={() => setPhase(p => ({ ...p, showCase: !p.showCase }))}
             style={{ fontSize: 11, fontWeight: 700, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}
           >
-            {showCase ? '▲' : '▶'} {card.worked_case_title}
+            {phase.showCase ? '▲' : '▶'} {card.worked_case_title}
           </button>
-          {showCase && (
+          {phase.showCase && (
             <div style={{ marginTop: 6, borderRadius: 10, background: 'rgba(245,240,255,0.8)', border: '1.5px solid rgba(196,181,253,0.6)', padding: '8px 12px' }}>
               <MathMarkdown text={card.worked_case_latex} format="raw" components={COMPACT} />
             </div>

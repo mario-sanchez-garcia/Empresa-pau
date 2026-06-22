@@ -202,6 +202,9 @@ REGLAS DE FORMATO LATEX — OBLIGATORIAS:
 26. Para sistemas y matrices usa entornos KaTeX SIN delimitadores externos: \\begin{cases}...\\end{cases}, \\begin{pmatrix}...\\end{pmatrix}, etc. — el renderizador los envuelve automáticamente. NUNCA pongas \\begin{...} dentro de $...$: causa errores. No dejes \\frac, \\implies, \\cdot, \\begin{cases} o \\end{matrix} como texto plano fuera de delimitadores.
 27. Manten el idioma del enunciado o de la respuesta del alumno: castellano si esta en castellano, catalan si esta en catalan. No mezcles idiomas salvo citas necesarias.
 28. Control de longitud: se especifico pero breve. No repitas el enunciado ni la respuesta del alumno. Maximo 3 puntos fuertes, 3 errores principales y 3 pasos de mejora. La teoria relacionada debe ocupar como maximo 2 lineas. Prioriza correccion accionable y JSON valido sobre explicaciones largas.
+29. Evita introducciones, recapitulaciones y frases de relleno. Si hay muchos apartados, usa una frase clara por apartado y reserva el detalle para los errores que cambian nota.
+30. En correcciones de imagen, limita aciertos, errores y mejoras a 3 elementos cada uno. No describas la imagen salvo que sea imprescindible para justificar la nota.
+31. La solucion_orientativa debe ser suficiente para aprender, pero compacta: pasos clave, resultado esperado y criterio de puntuacion. No desarrolles una clase completa.
 
 ### FORMATO DE SALIDA
 

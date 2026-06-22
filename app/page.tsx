@@ -121,8 +121,39 @@ function SafeStreamingText({ text }: { text: string }) {
   )
 }
 
-function CorrectionLoadingState() {
-  const steps = ['Leyendo tu respuesta', 'Aplicando la rúbrica', 'Preparando la explicación']
+const CORRECTION_PROGRESS_STEPS = [
+  'Leyendo tu respuesta',
+  'Aplicando la rúbrica',
+  'Detectando aciertos y errores',
+  'Preparando la explicación final'
+]
+
+function hasUnsafeStreamingLatex(text: string) {
+  const mathDelimiters = (text.match(/\$/g) ?? []).length
+  const hasOpenEnvironment = /\\begin\{[^}]*$|\\begin\{[^}]+\}(?![\s\S]*\\end\{[^}]+\})/.test(text)
+  const hasLatexCommand = /\\(?:frac|tfrac|dfrac|cdot|implies|begin|end)\b|[_^]\{|\{[0-9A-Za-z.+\-]+\}\{[0-9A-Za-z.+\-]*$/.test(text)
+  return hasOpenEnvironment || (hasLatexCommand && mathDelimiters % 2 !== 0)
+}
+
+function safeProgressiveCorrectionSnapshot(text: string) {
+  const length = text.trim().length
+  const progress = Math.min(0.96, length / 2200)
+  const completedCount = Math.min(
+    CORRECTION_PROGRESS_STEPS.length - 1,
+    Math.max(0, Math.floor(progress * CORRECTION_PROGRESS_STEPS.length))
+  )
+  const safePreviewAvailable = length > 260 && !hasUnsafeStreamingLatex(text)
+  return {
+    progress,
+    completedSteps: CORRECTION_PROGRESS_STEPS.slice(0, completedCount),
+    currentStep: CORRECTION_PROGRESS_STEPS[completedCount] ?? CORRECTION_PROGRESS_STEPS.at(-1)!,
+    safePreviewAvailable
+  }
+}
+
+function SafeProgressiveCorrectionStream({ text, isContinuing }: { text: string; isContinuing: boolean }) {
+  const snapshot = safeProgressiveCorrectionSnapshot(text)
+  const progressPct = Math.round(snapshot.progress * 100)
 
   return (
     <div style={{ display: 'grid', gap: 18 }}>
@@ -131,14 +162,37 @@ function CorrectionLoadingState() {
           <PausiaLoadingDot />
         </div>
         <div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>Pausia está corrigiendo tu ejercicio</p>
-          <p style={{ margin: '5px 0 0', fontSize: 13.5, color: '#64748b', lineHeight: 1.5 }}>Te mostramos el resultado cuando esté listo para evitar fórmulas incompletas o texto cortado.</p>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>
+            {isContinuing ? 'Pausia está completando la corrección' : 'Pausia está corrigiendo tu ejercicio'}
+          </p>
+          <p style={{ margin: '5px 0 0', fontSize: 13.5, color: '#64748b', lineHeight: 1.5 }}>
+            {isContinuing
+              ? 'La primera respuesta se quedó corta; estamos terminándola antes de mostrarla.'
+              : 'Mostramos el avance sin enseñar fórmulas incompletas ni texto técnico.'}
+          </p>
         </div>
       </div>
+      <div style={{ height: 8, borderRadius: 999, overflow: 'hidden', background: '#ede9fe' }}>
+        <div style={{ width: `${progressPct}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #6d28d9, #8b5cf6)', transition: 'width 220ms ease' }} />
+      </div>
       <div style={{ display: 'grid', gap: 9 }}>
-        {steps.map((step, index) => (
+        {snapshot.completedSteps.map(step => (
+          <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#475569', fontSize: 13.5, fontWeight: 750 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 999, background: '#7c3aed' }} />
+            {step}
+          </div>
+        ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 999, background: '#c4b5fd', boxShadow: '0 0 0 6px rgba(124,58,237,0.1)' }} />
+          {snapshot.currentStep}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13, fontWeight: 700 }}>
+          <PausiaLoadingDot />
+          {snapshot.safePreviewAvailable ? 'Redactando explicación segura...' : 'Pausia está preparando esta parte...'}
+        </div>
+        {CORRECTION_PROGRESS_STEPS.slice(snapshot.completedSteps.length + 1).map((step) => (
           <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: index === 0 ? '#7c3aed' : '#c4b5fd', boxShadow: index === 0 ? '0 0 0 6px rgba(124,58,237,0.1)' : 'none' }} />
+            <span style={{ width: 8, height: 8, borderRadius: 999, background: '#ddd6fe' }} />
             {step}
           </div>
         ))}
@@ -659,6 +713,7 @@ export default function Home() {
   const [correccion, setCorreccion] = useState('')
   const [streamText, setStreamText] = useState('')
   const [truncated, setTruncated] = useState(false)
+  const [continuingCorrection, setContinuingCorrection] = useState(false)
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto'|'imagen'>('texto')
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
@@ -1408,10 +1463,66 @@ function cambiarTipo(t: Tipo) {
     setImagen(await compressImageToBase64(file))
   }
 
+  async function streamCorrectionRequest(
+    accessToken: string,
+    prompt: string,
+    options: { includeImage: boolean; appendTo?: string }
+  ) {
+    const res = await fetch('/api/chat?stream=1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({
+        pregunta: prompt,
+        imagen: options.includeImage && modo === 'imagen' ? imagen : null,
+        imagenTipo: options.includeImage && modo === 'imagen' ? imagenTipo : null
+      })
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+    }
+
+    const reader = res.body!.getReader()
+    const decoder = new TextDecoder()
+    let accumulated = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      accumulated += decoder.decode(value, { stream: true })
+      const safeStream = readSafeStreamText(accumulated)
+      setStreamText(`${options.appendTo ?? ''}${safeStream.visibleText}`)
+    }
+    accumulated += decoder.decode()
+    const completedStream = readSafeStreamText(accumulated)
+    return {
+      text: completedStream.truncated ? completedStream.visibleText : accumulated,
+      truncated: completedStream.truncated
+    }
+  }
+
+  function buildCorrectionContinuationPrompt(originalPrompt: string, partialCorrection: string) {
+    return `${originalPrompt}
+
+### CONTINUACIÓN AUTOMÁTICA
+
+La respuesta anterior se cortó por longitud. Continúa la corrección exactamente desde el punto donde se quedó.
+
+Reglas:
+- No repitas lo ya dicho.
+- Mantén el mismo formato y termina la explicación de forma completa.
+- Si estabas escribiendo JSON, continúa el JSON para que al unirlo con la parte anterior quede un único objeto JSON válido.
+- No añadas texto fuera del formato pedido.
+
+### CORRECCIÓN YA RECIBIDA, NO REPETIR
+
+${partialCorrection}`
+  }
+
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
-    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false)
+    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false)
     try {
       const accessToken = await getChatAccessToken()
       if (!accessToken) {
@@ -1443,36 +1554,35 @@ function cambiarTipo(t: Tipo) {
             : respuesta
         }]
       })
-      const res = await fetch('/api/chat?stream=1', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
-        return
+      const firstStream = await streamCorrectionRequest(accessToken, prompt, { includeImage: true })
+      let accumulated = firstStream.text
+      let isTruncated = firstStream.truncated
+      let attemptedContinuation = false
+      if (isTruncated && accumulated.trim()) {
+        attemptedContinuation = true
+        setContinuingCorrection(true)
+        const continuationPrompt = buildCorrectionContinuationPrompt(prompt, accumulated)
+        const continuationStream = await streamCorrectionRequest(accessToken, continuationPrompt, {
+          includeImage: true,
+          appendTo: accumulated
+        })
+        accumulated = `${accumulated}${continuationStream.text}`
+        isTruncated = continuationStream.truncated
+        setContinuingCorrection(false)
       }
-      const reader = res.body!.getReader()
-      const decoder = new TextDecoder()
-      let accumulated = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        accumulated += decoder.decode(value, { stream: true })
-        setStreamText(readSafeStreamText(accumulated).visibleText)
-      }
-      accumulated += decoder.decode()
-      const completedStream = readSafeStreamText(accumulated)
-      const isTruncated = completedStream.truncated
-      accumulated = isTruncated ? completedStream.visibleText : accumulated
       if (!accumulated) {
         setStreamText('')
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
         return
       }
       const parsedCorrection = parseCorrectionPayload(accumulated)
+      if (attemptedContinuation && !parsedCorrection) {
+        isTruncated = true
+      }
       const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
-      const correccionVisible = correccionJson
+      const correccionVisible = isTruncated
+        ? 'La corrección se ha cortado antes de terminar. Puedes reintentar para obtener una versión completa.'
+        : correccionJson
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
         : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(accumulated, { officialMaxScore: puntuacionMax }), puntuacionMax)
       const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
@@ -1499,11 +1609,13 @@ function cambiarTipo(t: Tipo) {
           correccion: correccionGuardada
         }).then(() => {})
       }
-    } catch {
+    } catch (error) {
       setStreamText('')
       setTruncated(false)
-      setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
+      setContinuingCorrection(false)
+      setCorreccion(error instanceof Error ? error.message : 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
+      setContinuingCorrection(false)
       setCargando(false)
     }
   }
@@ -3444,7 +3556,7 @@ function cambiarTipo(t: Tipo) {
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
                   {!correccion && (streamText || cargando) ? (
-                    <CorrectionLoadingState />
+                    <SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} />
                   ) : (
                     <CorrectionResultCard
                       correction={correccion}

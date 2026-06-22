@@ -298,6 +298,7 @@ function wrapOrphanLatexFragments(text: string) {
   return text
     .replace(orphanFragment, match => `$${match.trim()}$`)
     .replace(/\b([A-Z]\s*=\s*[A-Z]\^\{-?1\}\s*[A-Za-z])(?=\s|[.,;:]|$)/g, match => `$${match.replace(/\s+/g, ' ')}$`)
+    .replace(/\b([A-Z]\^\{-?1\}\s*[A-Za-z])(?=\s|[.,;:]|$)/g, match => `$${match.replace(/\s+/g, ' ')}$`)
 }
 
 function normalizePdfGlyphs(text: string) {

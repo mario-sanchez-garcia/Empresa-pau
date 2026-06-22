@@ -22,9 +22,11 @@ const pricing = read('app/pricing/page.tsx')
 const landing = read('app/landing/page.tsx')
 
 assert(
-  'streaming correction hides raw partial text before final renderer',
-  page.includes('<CorrectionLoadingState />') &&
+  'streaming correction uses safe progressive stream before final renderer',
+  page.includes('function SafeProgressiveCorrectionStream') &&
+    page.includes('safeProgressiveCorrectionSnapshot') &&
     page.includes('{!correccion && (streamText || cargando) ? (') &&
+    page.includes('<SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} />') &&
     !page.includes('<SafeStreamingText text={streamText} />') &&
     page.includes('correction={correccion}')
 )
@@ -57,9 +59,20 @@ assert(
 )
 
 assert(
+  'correction continuation retries once before final truncation state',
+  page.includes('buildCorrectionContinuationPrompt') &&
+    page.includes('CONTINUACIÓN AUTOMÁTICA') &&
+    page.includes('const firstStream = await streamCorrectionRequest') &&
+    page.includes('if (isTruncated && accumulated.trim())') &&
+    page.includes('const continuationStream = await streamCorrectionRequest') &&
+    page.includes('isTruncated = continuationStream.truncated')
+)
+
+assert(
   'correction LaTeX normalizer covers orphan tfrac fragments',
   mathFormatting.includes('wrapOrphanLatexFragments') &&
     mathFormatting.includes('tfrac') &&
+    mathFormatting.includes(String.raw`[A-Z]\^\{-?1\}\s*[A-Za-z]`) &&
     mathFormatting.includes(String.raw`[A-Z]\^\{-?1\}`)
 )
 

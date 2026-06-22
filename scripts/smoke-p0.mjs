@@ -26,7 +26,7 @@ assert(
   page.includes('function SafeProgressiveCorrectionStream') &&
     page.includes('safeProgressiveCorrectionSnapshot') &&
     page.includes('{!correccion && (streamText || cargando) ? (') &&
-    page.includes('<SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} />') &&
+    page.includes('<SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} stage={correctionStage} />') &&
     !page.includes('<SafeStreamingText text={streamText} />') &&
     page.includes('correction={correccion}')
 )
@@ -59,13 +59,24 @@ assert(
 )
 
 assert(
-  'correction continuation retries once before final truncation state',
-  page.includes('buildCorrectionContinuationPrompt') &&
-    page.includes('CONTINUACIÓN AUTOMÁTICA') &&
-    page.includes('const firstStream = await streamCorrectionRequest') &&
-    page.includes('if (isTruncated && accumulated.trim())') &&
-    page.includes('const continuationStream = await streamCorrectionRequest') &&
-    page.includes('isTruncated = continuationStream.truncated')
+  'correction flow uses chunked correction before final truncation state',
+  page.includes('buildChunkedCorrectionPrompts') &&
+    page.includes('runChunkedCorrection') &&
+    page.includes("id: 'nota-resumen'") &&
+    page.includes("id: 'aciertos-errores'") &&
+    page.includes("id: 'paso-a-paso'") &&
+    page.includes("id: 'teoria-final'") &&
+    page.includes('buildCompactRetryPrompt') &&
+    page.includes("correctionMode: 'chunked_correction'") &&
+    chatRoute.includes('correctionMode')
+)
+
+assert(
+  'complete chunked correction is saved and incomplete one is not',
+  page.includes('const chunkedCorrection = await runChunkedCorrection') &&
+    page.includes('const isTruncated = chunkedCorrection.truncated') &&
+    page.includes('if (!isTruncated)') &&
+    page.includes('Guardando en Historial')
 )
 
 assert(

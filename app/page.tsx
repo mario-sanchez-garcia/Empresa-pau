@@ -12,7 +12,7 @@ import { examenesIngles } from './data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from './data/matematicas_ccss_madrid'
 import { supabase } from './lib/supabase'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
+import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
 import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
 import { formatExamText } from './lib/mathFormatting'
@@ -151,7 +151,7 @@ function safeProgressiveCorrectionSnapshot(text: string) {
   }
 }
 
-function SafeProgressiveCorrectionStream({ text, isContinuing }: { text: string; isContinuing: boolean }) {
+function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: string; isContinuing: boolean; stage?: string }) {
   const snapshot = safeProgressiveCorrectionSnapshot(text)
   const progressPct = Math.round(snapshot.progress * 100)
 
@@ -170,6 +170,7 @@ function SafeProgressiveCorrectionStream({ text, isContinuing }: { text: string;
               ? 'La primera respuesta se quedó corta; estamos terminándola antes de mostrarla.'
               : 'Mostramos el avance sin enseñar fórmulas incompletas ni texto técnico.'}
           </p>
+          {stage && <p style={{ margin: '8px 0 0', fontSize: 12.5, color: '#7c3aed', fontWeight: 800 }}>{stage}</p>}
         </div>
       </div>
       <div style={{ height: 8, borderRadius: 999, overflow: 'hidden', background: '#ede9fe' }}>
@@ -714,6 +715,7 @@ export default function Home() {
   const [streamText, setStreamText] = useState('')
   const [truncated, setTruncated] = useState(false)
   const [continuingCorrection, setContinuingCorrection] = useState(false)
+  const [correctionStage, setCorrectionStage] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto'|'imagen'>('texto')
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
@@ -1466,7 +1468,7 @@ function cambiarTipo(t: Tipo) {
   async function streamCorrectionRequest(
     accessToken: string,
     prompt: string,
-    options: { includeImage: boolean; appendTo?: string }
+    options: { includeImage: boolean; appendTo?: string; blockId?: string; sessionId?: string }
   ) {
     const res = await fetch('/api/chat?stream=1', {
       method: 'POST',
@@ -1474,7 +1476,10 @@ function cambiarTipo(t: Tipo) {
       body: JSON.stringify({
         pregunta: prompt,
         imagen: options.includeImage && modo === 'imagen' ? imagen : null,
-        imagenTipo: options.includeImage && modo === 'imagen' ? imagenTipo : null
+        imagenTipo: options.includeImage && modo === 'imagen' ? imagenTipo : null,
+        correctionMode: 'chunked_correction',
+        correctionBlock: options.blockId ?? null,
+        correctionSessionId: options.sessionId ?? null
       })
     })
 
@@ -1501,28 +1506,173 @@ function cambiarTipo(t: Tipo) {
     }
   }
 
-  function buildCorrectionContinuationPrompt(originalPrompt: string, partialCorrection: string) {
-    return `${originalPrompt}
+  function buildChunkedCorrectionPrompts(input: {
+    subject: string
+    community: string
+    examLabel: string
+    option: string
+    maxScore: number
+    officialPrompt: string
+    criteria?: string
+    sourceText?: string
+    concepts?: string[]
+    studentAnswer: string
+  }) {
+    const sharedContext = `Contexto de corrección PAU:
+- Asignatura: ${input.subject}
+- Comunidad: ${input.community}
+- Ejercicio: ${input.examLabel}
+- Opción: ${input.option}
+- Puntuación máxima oficial: ${formatPts(input.maxScore)}
+- Criterios oficiales disponibles: ${input.criteria || 'No especificados'}
+- Conceptos: ${input.concepts?.join(', ') || 'No especificados'}
+- Texto fuente, si existe: ${input.sourceText || 'No hay texto fuente adicional'}
+- Enunciado oficial: ${input.officialPrompt}
+- Respuesta del alumno: ${input.studentAnswer}
 
-### CONTINUACIÓN AUTOMÁTICA
+Reglas comunes:
+- Devuelve solo Markdown, sin JSON y sin bloques de código.
+- No repitas el enunciado ni transcribas la respuesta completa del alumno.
+- Usa LaTeX solo para fórmulas: $...$ inline; matrices/sistemas como \\begin{cases}...\\end{cases} o \\begin{pmatrix}...\\end{pmatrix} sin $ externos.
+- No dejes comandos sueltos como \\frac, \\tfrac, \\cdot, \\begin o \\end fuera de delimitadores matemáticos.
+- Sé claro, concreto y breve.`
 
-La respuesta anterior se cortó por longitud. Continúa la corrección exactamente desde el punto donde se quedó.
+    return [
+      {
+        id: 'nota-resumen',
+        label: 'Leyendo tu respuesta y estimando la nota...',
+        essential: true,
+        title: 'Resumen y nota estimada',
+        prompt: `${sharedContext}
 
-Reglas:
-- No repitas lo ya dicho.
-- Mantén el mismo formato y termina la explicación de forma completa.
-- Si estabas escribiendo JSON, continúa el JSON para que al unirlo con la parte anterior quede un único objeto JSON válido.
-- No añadas texto fuera del formato pedido.
+Bloque 1/4. Evalúa la respuesta con la rúbrica.
+Devuelve exactamente estas secciones:
 
-### CORRECCIÓN YA RECIBIDA, NO REPETIR
+## Resumen y nota estimada
 
-${partialCorrection}`
+Nota: X/${formatPts(input.maxScore)}
+
+- Resumen breve de la corrección.
+- Justificación de la nota en 2-3 frases.`
+      },
+      {
+        id: 'aciertos-errores',
+        label: 'Detectando aciertos y errores principales...',
+        essential: true,
+        title: 'Aciertos y errores',
+        prompt: `${sharedContext}
+
+Bloque 2/4. Identifica máximo 3 aciertos y máximo 3 errores importantes.
+Devuelve exactamente estas secciones:
+
+## Puntos fuertes
+
+- ...
+
+## Errores a corregir
+
+- Error: ...
+  Corrección: ...`
+      },
+      {
+        id: 'paso-a-paso',
+        label: 'Corrigiendo paso a paso...',
+        essential: true,
+        title: 'Corrección paso a paso',
+        prompt: `${sharedContext}
+
+Bloque 3/4. Corrige paso a paso el ejercicio o sus apartados.
+Si hay apartados, usa subtítulos "### Apartado a)", "### Apartado b)", etc.
+Incluye solo los pasos necesarios para aprender y puntuar.
+Devuelve exactamente esta sección:
+
+## Corrección paso a paso`
+      },
+      {
+        id: 'teoria-final',
+        label: 'Preparando teoría aplicada y recomendación final...',
+        essential: false,
+        title: 'Teoría aplicada y recomendación final',
+        prompt: `${sharedContext}
+
+Bloque 4/4. Explica brevemente la idea teórica detrás del ejercicio y cierra con una recomendación accionable.
+Devuelve exactamente estas secciones:
+
+## ¿Por qué es así?
+
+## Recomendación final`
+      }
+    ]
+  }
+
+  function buildCompactRetryPrompt(prompt: string) {
+    return `${prompt}
+
+Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown limpio, LaTeX correcto y cierra la respuesta.`
+  }
+
+  async function runChunkedCorrection(
+    accessToken: string,
+    chunks: ReturnType<typeof buildChunkedCorrectionPrompts>,
+    sessionId: string
+  ) {
+    const completed: string[] = []
+    const failedOptional: string[] = []
+
+    for (const chunk of chunks) {
+      setCorrectionStage(chunk.label)
+      setStreamText(completed.join('\n\n'))
+      let result = await streamCorrectionRequest(accessToken, chunk.prompt, {
+        includeImage: true,
+        appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
+        blockId: chunk.id,
+        sessionId
+      })
+
+      if (result.truncated || !result.text.trim()) {
+        setContinuingCorrection(true)
+        setCorrectionStage(`${chunk.label} Reintentando este bloque en versión breve...`)
+        result = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunk.prompt), {
+          includeImage: true,
+          appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
+          blockId: `${chunk.id}:retry`,
+          sessionId
+        })
+        setContinuingCorrection(false)
+      }
+
+      if (result.truncated || !result.text.trim()) {
+        if (chunk.essential) {
+          return {
+            markdown: completed.join('\n\n'),
+            truncated: true,
+            blocksCompleted: completed.length,
+            failedBlock: chunk.id
+          }
+        }
+        failedOptional.push(chunk.title)
+        continue
+      }
+
+      completed.push(result.text.trim())
+      setStreamText(completed.join('\n\n'))
+    }
+
+    const optionalNote = failedOptional.length
+      ? `\n\n> Nota: No se pudo completar ${failedOptional.join(', ')}. La corrección principal sí está completa.`
+      : ''
+    return {
+      markdown: `# Corrección de Pausia\n\n${completed.join('\n\n')}${optionalNote}`.trim(),
+      truncated: false,
+      blocksCompleted: completed.length,
+      failedBlock: ''
+    }
   }
 
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
-    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false)
+    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false); setCorrectionStage('Leyendo tu respuesta...')
     try {
       const accessToken = await getChatAccessToken()
       if (!accessToken) {
@@ -1531,54 +1681,30 @@ ${partialCorrection}`
       }
       const p = preguntaActiva as any
       const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
-      const prompt = buildCorrectionPrompt({
+      const correctionSessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const chunks = buildChunkedCorrectionPrompts({
         subject: nombreAsignatura(asignatura),
         community: ccaa,
-        simulacroId: `Práctica ${nombreAsignatura(asignatura)} ${examenActivo?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
+        examLabel: `Práctica ${nombreAsignatura(asignatura)} ${examenActivo?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
         option: opcionMostrada,
-        elapsedMinutes: 0,
-        difficulty: 'Media',
-        blocks: [{
-          numeroBloque: 'Bloque 1',
-          tema: bloqueActivoLabel || p?.bloque || p?.tipo || 'Pregunta',
-          year: p?.año ?? examenActivo?.año ?? 'No especificado',
-          convocatoria: p?.convocatoria ?? examenActivo?.tipo ?? tipo,
-          option: p?.opcion ?? opcionMostrada,
-          maxScore: puntuacionMax,
-          officialPrompt: enunciadoActivo,
-          criteria: p?.criterios,
-          sourceText: p?.texto_fuente,
-          concepts: p?.conceptos,
-          studentAnswer: modo === 'imagen'
-            ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
-            : respuesta
-        }]
+        maxScore: puntuacionMax,
+        officialPrompt: enunciadoActivo,
+        criteria: p?.criterios,
+        sourceText: p?.texto_fuente,
+        concepts: p?.conceptos,
+        studentAnswer: modo === 'imagen'
+          ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+          : respuesta
       })
-      const firstStream = await streamCorrectionRequest(accessToken, prompt, { includeImage: true })
-      let accumulated = firstStream.text
-      let isTruncated = firstStream.truncated
-      let attemptedContinuation = false
-      if (isTruncated && accumulated.trim()) {
-        attemptedContinuation = true
-        setContinuingCorrection(true)
-        const continuationPrompt = buildCorrectionContinuationPrompt(prompt, accumulated)
-        const continuationStream = await streamCorrectionRequest(accessToken, continuationPrompt, {
-          includeImage: true,
-          appendTo: accumulated
-        })
-        accumulated = `${accumulated}${continuationStream.text}`
-        isTruncated = continuationStream.truncated
-        setContinuingCorrection(false)
-      }
+      const chunkedCorrection = await runChunkedCorrection(accessToken, chunks, correctionSessionId)
+      const accumulated = chunkedCorrection.markdown
+      const isTruncated = chunkedCorrection.truncated
       if (!accumulated) {
         setStreamText('')
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
         return
       }
       const parsedCorrection = parseCorrectionPayload(accumulated)
-      if (attemptedContinuation && !parsedCorrection) {
-        isTruncated = true
-      }
       const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
       const correccionVisible = isTruncated
         ? 'La corrección se ha cortado antes de terminar. Puedes reintentar para obtener una versión completa.'
@@ -1599,6 +1725,7 @@ ${partialCorrection}`
       const nota = rawNota === null ? null : clampScore(rawNota, puntuacionMax)
       const notaMax = puntuacionMax
       if (!isTruncated) {
+        setCorrectionStage('Guardando en Historial...')
         supabase.from('historial_examenes').insert({
           user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
           bloque: bloqueActivoLabel || '',
@@ -1613,9 +1740,11 @@ ${partialCorrection}`
       setStreamText('')
       setTruncated(false)
       setContinuingCorrection(false)
+      setCorrectionStage('')
       setCorreccion(error instanceof Error ? error.message : 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
       setContinuingCorrection(false)
+      setCorrectionStage('')
       setCargando(false)
     }
   }
@@ -3556,7 +3685,7 @@ ${partialCorrection}`
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
                   {!correccion && (streamText || cargando) ? (
-                    <SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} />
+                    <SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} stage={correctionStage} />
                   ) : (
                     <CorrectionResultCard
                       correction={correccion}

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const wantsStream = searchParams.get('stream') === '1'
 
-  const { pregunta, imagen, imagenTipo, imagenes } = await request.json()
+  const { pregunta, imagen, imagenTipo, imagenes, correctionMode, correctionBlock, correctionSessionId } = await request.json()
 
   const imagePayloadSize =
     (typeof imagen === 'string' ? imagen.length : 0) +
@@ -84,7 +84,10 @@ export async function POST(request: NextRequest) {
     hasImage: imageCount > 0,
     imageCount,
     imagePayloadChars: imagePayloadSize,
-    promptChars: typeof pregunta === 'string' ? pregunta.length : null
+    promptChars: typeof pregunta === 'string' ? pregunta.length : null,
+    correctionMode: typeof correctionMode === 'string' ? correctionMode : null,
+    correctionBlock: typeof correctionBlock === 'string' ? correctionBlock : null,
+    correctionSessionId: typeof correctionSessionId === 'string' ? correctionSessionId : null
   }
   const internalUser = isInternalUser(authContext.user.email)
 

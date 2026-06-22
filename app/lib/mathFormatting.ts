@@ -191,7 +191,7 @@ function normalizeResponseStructure(text: string) {
 
 function unwrapLatexCodeFences(text: string) {
   return text.replace(
-    /```(?:latex|math|tex|plain)?\s*\n([\s\S]*?)\n```/gi,
+    /```(?:latex|math|tex|plain)?[ \t]*\n?([\s\S]*?)\n?[ \t]*```/gi,
     (match, content) => {
       if (new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}|\\\\frac|\\\\tfrac|\\\\dfrac|\\\\sqrt`).test(content)) {
         const clean = content
@@ -206,17 +206,17 @@ function unwrapLatexCodeFences(text: string) {
 }
 
 function formatOrphanCasesBlocks(text: string) {
-  return mapOutsideCodeFences(text, part => part.replace(
-    /(^|\n)(?!\s*\$\$)([^\n$]*?\\end\{cases\})/g,
+  return mapOutsideMath(text, part => part.replace(
+    /(^|\n)(\\begin\{cases\}[\s\S]*?\\end\{cases\})/g,
     (match, prefix, body) => {
       const rows = body
-        .replace(/\\begin\{cases\}/g, '')
-        .replace(/\\end\{cases\}/g, '')
-        .split(/\\{2,}|\\\s+(?=[0-9A-Za-z])/)
+        .replace(/\\begin\{cases\}\s*/g, '')
+        .replace(/\s*\\end\{cases\}/g, '')
+        .split(/\\{2,}|\\\s+(?=[0-9A-Za-z])|\n/)
         .map((row: string) => spaceEquation(row))
-        .filter((row: string) => row.includes('='))
+        .filter((row: string) => row.trim().length > 0 && row.includes('='))
 
-      if (rows.length < 2) return match
+      if (rows.length < 1) return match
       return `${prefix}\n\n$$\n\\begin{cases}\n${rows.join(' \\\\\n')}\n\\end{cases}\n$$\n\n`
     }
   ))

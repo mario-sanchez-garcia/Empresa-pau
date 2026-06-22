@@ -15,15 +15,17 @@ function assert(name, condition) {
 
 const page = read('app/page.tsx')
 const chatRoute = read('app/api/chat/route.ts')
+const mathFormatting = read('app/lib/mathFormatting.ts')
 const signupRoute = read('app/api/auth/signup/route.ts')
 const signupMigration = read('supabase/migrations/20260621130000_create_signup_attempts.sql')
 const pricing = read('app/pricing/page.tsx')
 const landing = read('app/landing/page.tsx')
 
 assert(
-  'streaming correction uses safe text before final renderer',
-  page.includes('<SafeStreamingText text={streamText} />') &&
-    page.includes('{!correccion && streamText ? (') &&
+  'streaming correction hides raw partial text before final renderer',
+  page.includes('<CorrectionLoadingState />') &&
+    page.includes('{!correccion && (streamText || cargando) ? (') &&
+    !page.includes('<SafeStreamingText text={streamText} />') &&
     page.includes('correction={correccion}')
 )
 
@@ -49,7 +51,16 @@ assert(
 assert(
   'truncated corrections are not saved as final history',
   page.includes('if (!isTruncated)') &&
-    page.includes("supabase.from('historial_examenes').insert")
+    page.includes("supabase.from('historial_examenes').insert") &&
+    page.includes('No la hemos guardado en Historial') &&
+    page.includes('Reintentar corrección')
+)
+
+assert(
+  'correction LaTeX normalizer covers orphan tfrac fragments',
+  mathFormatting.includes('wrapOrphanLatexFragments') &&
+    mathFormatting.includes('tfrac') &&
+    mathFormatting.includes(String.raw`[A-Z]\^\{-?1\}`)
 )
 
 assert(

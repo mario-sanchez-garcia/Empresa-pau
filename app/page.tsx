@@ -121,6 +121,32 @@ function SafeStreamingText({ text }: { text: string }) {
   )
 }
 
+function CorrectionLoadingState() {
+  const steps = ['Leyendo tu respuesta', 'Aplicando la rúbrica', 'Preparando la explicación']
+
+  return (
+    <div style={{ display: 'grid', gap: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '18px', borderRadius: 18, background: 'rgba(255,255,255,0.74)', border: '1px solid rgba(124,58,237,0.16)' }}>
+        <div style={{ width: 38, height: 38, borderRadius: 14, background: 'linear-gradient(135deg, #6d28d9, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+          <PausiaLoadingDot />
+        </div>
+        <div>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>Pausia está corrigiendo tu ejercicio</p>
+          <p style={{ margin: '5px 0 0', fontSize: 13.5, color: '#64748b', lineHeight: 1.5 }}>Te mostramos el resultado cuando esté listo para evitar fórmulas incompletas o texto cortado.</p>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gap: 9 }}>
+        {steps.map((step, index) => (
+          <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 999, background: index === 0 ? '#7c3aed' : '#c4b5fd', boxShadow: index === 0 ? '0 0 0 6px rgba(124,58,237,0.1)' : 'none' }} />
+            {step}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const SUBJECT_CARDS = {
   mates: {
     title: 'Matemáticas',
@@ -3410,15 +3436,15 @@ function cambiarTipo(t: Tipo) {
               </button>
             </div>}
 
-            {!isCatalunaExam && (correccion || streamText) && (
+            {!isCatalunaExam && (correccion || streamText || cargando) && (
               <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
                 <div style={{ padding: '14px 22px', background: 'linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Pausia</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  {!correccion && streamText ? (
-                    <SafeStreamingText text={streamText} />
+                  {!correccion && (streamText || cargando) ? (
+                    <CorrectionLoadingState />
                   ) : (
                     <CorrectionResultCard
                       correction={correccion}
@@ -3431,12 +3457,13 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
                       <div>
                         <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#92400e' }}>Respuesta incompleta</p>
-                        <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>La corrección se ha cortado porque era demasiado larga. Puedes volver a intentarlo.</p>
+                        <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>La corrección se ha cortado antes de terminar. No la hemos guardado en Historial para evitar guardar una explicación incompleta.</p>
+                        <p style={{ margin: '0 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>Puedes reintentar con la misma respuesta o imagen; si vuelve a pasar, prueba con una foto más concreta.</p>
                         <button
                           onClick={corregir}
                           style={{ fontSize: 12.5, fontWeight: 700, color: '#92400e', background: '#fde68a', border: '1px solid #fcd34d', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
                         >
-                          Reintentar
+                          Reintentar corrección
                         </button>
                       </div>
                     </div>

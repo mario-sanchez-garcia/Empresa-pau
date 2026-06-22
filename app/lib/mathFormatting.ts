@@ -75,6 +75,7 @@ export function normalizeCorrectionText(input?: string | null) {
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
   text = mapOutsideMath(text, formatScientificNotation)
   text = mapOutsideMath(text, wrapExplicitLatex)
+  text = mapOutsideMath(text, wrapOrphanLatexFragments)
   text = mapOutsideMath(text, promoteLongLatexToDisplay)
   text = mapOutsideMath(text, formatPhysicsNotation)
   text = mapOutsideMath(text, formatCommonMathExpressions)
@@ -222,7 +223,7 @@ function repairLostLatex(text: string) {
   return text
     .replace(new RegExp(`(^|[^\\\\\\w])(egin|end)\\{(${ENVIRONMENTS})\\}`, 'g'),
       (_, prefix, command, environment) => `${prefix}\\${command === 'egin' ? 'begin' : 'end'}{${environment}}`)
-    .replace(/(^|[^\\\w])(dfrac|frac|sqrt)\s*(?=\{)/g, '$1\\$2')
+    .replace(/(^|[^\\\w])(dfrac|tfrac|frac|sqrt)\s*(?=\{)/g, '$1\\$2')
     .replace(/(^|[^\\\w])(int|sum|prod|cdot|times|leq|geq|neq|approx|rightarrow|text)\b/g, '$1\\$2')
     .replace(/(^|[^\\\w])(leftrightarrow|rightleftharpoons)\b/g, '$1\\rightleftharpoons')
     .replace(/\bdisplaystylelim\b/g, '\\displaystyle\\lim')
@@ -278,7 +279,7 @@ function wrapExplicitLatex(text: string) {
   output = mapOutsideMath(output, part => part
     .replace(/(\\int(?:_\{?[^}\s]+\}?)?(?:\^\{?[^}\s]+\}?)?\s+[^,.;\n]+?\s+d[a-z]\b)/g, '$$$1$')
     .replace(/(\\begin\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|aligned)\}[\s\S]*?\\end\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|aligned)\})/g, '$$$1$')
-    .replace(/(\\(?:d?frac)\{(?:[^{}]|\{[^{}]*\})+\}\{(?:[^{}]|\{[^{}]*\})+\}(?:[A-Za-z](?:[_^]\{?[^}\s]+\}?)?)*)/g, '$$$1$')
+    .replace(/(\\(?:d?frac|tfrac)\{(?:[^{}]|\{[^{}]*\})+\}\{(?:[^{}]|\{[^{}]*\})+\}(?:[A-Za-z](?:[_^]\{?[^}\s]+\}?)?)*)/g, '$$$1$')
     .replace(/(\\sqrt(?:\[[^\]\n]+\])?\{(?:[^{}]|\{[^{}]*\})+\})/g, '$$$1$')
     .replace(/(\d+(?:[,.]\d+)?\s*\\\s*\\text\{[^{}\n]+\}(?:\s*\^\{?[-+]?\d+\}?)?)/g, '$$$1$')
     .replace(/(\\(?:vec|hat|mathbb)\{[^{}\n]+\})/g, '$$$1$')
@@ -286,6 +287,17 @@ function wrapExplicitLatex(text: string) {
     .replace(/(\\(?:Delta|lambda|alpha|beta|gamma|mu|omega|theta|rho|sigma)(?:\s*[_^=+\-]\s*[A-Za-z0-9_{}^+\-]+)?)/g, '$$$1$')
   )
   return output
+}
+
+function wrapOrphanLatexFragments(text: string) {
+  const fraction = String.raw`\\(?:tfrac|dfrac|frac)\{(?:[^{}]|\{[^{}]*\})+\}\{(?:[^{}]|\{[^{}]*\})+\}`
+  const operator = String.raw`\\(?:cdot|times|implies|rightarrow|leq|geq|neq|approx)`
+  const value = String.raw`(?:${fraction}|[A-Za-z0-9_{}^()+\-.,]+)`
+  const orphanFragment = new RegExp(`${operator}(?:\\s*${value})+|${fraction}(?:\\s*${operator}\\s*${value})*`, 'g')
+
+  return text
+    .replace(orphanFragment, match => `$${match.trim()}$`)
+    .replace(/\b([A-Z]\s*=\s*[A-Z]\^\{-?1\}\s*[A-Za-z])(?=\s|[.,;:]|$)/g, match => `$${match.replace(/\s+/g, ' ')}$`)
 }
 
 function normalizePdfGlyphs(text: string) {

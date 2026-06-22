@@ -1564,8 +1564,10 @@ function cambiarTipo(t: Tipo) {
 Reglas comunes:
 - Devuelve solo Markdown, sin JSON y sin bloques de código.
 - No repitas el enunciado ni transcribas la respuesta completa del alumno.
-- Usa LaTeX solo para fórmulas: $...$ inline; matrices/sistemas como \\begin{cases}...\\end{cases} o \\begin{pmatrix}...\\end{pmatrix} sin $ externos.
+- Usa LaTeX solo dentro de $...$ o bloques $$...$$. No mezcles $ y $$ en la misma línea.
+- Matrices, determinantes y sistemas deben ir en bloque $$...$$: \\begin{pmatrix}...\\end{pmatrix}, \\begin{vmatrix}...\\end{vmatrix}, \\begin{cases}...\\end{cases}.
 - No dejes comandos sueltos como \\frac, \\tfrac, \\cdot, \\begin o \\end fuera de delimitadores matemáticos.
+- Si haces puntuación por apartados, usa lista Markdown en vez de tabla cuando haya fórmulas.
 - Sé claro, concreto y breve.`
 
     return [

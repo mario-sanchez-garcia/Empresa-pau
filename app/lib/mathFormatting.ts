@@ -65,11 +65,14 @@ export function normalizeCorrectionText(input?: string | null) {
   let text = input
   text = normalizeMathDelimiters(text)
   text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
+  text = mapOutsideCodeFences(text, normalizeMixedDollarBlocks)
+  text = mapOutsideCodeFences(text, normalizeRiskyMarkdownTables)
   text = mapOutsideMath(text, normalizeResponseStructure)
   text = formatOrphanCasesBlocks(text)
   text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
   text = mapOutsideMath(text, repairLostLatex)
+  text = mapOutsideMath(text, wrapDanglingLatexEnvironmentFragments)
   text = mapOutsideMath(text, wrapLatexEnvironments)
   text = formatOrphanCasesBlocks(text)
   text = mapOutsideMath(text, formatLimitsAndIntegrals)
@@ -87,6 +90,8 @@ export function normalizeCorrectionText(input?: string | null) {
     .trim()
 }
 
+export const normalizeCorrectionMarkdownForRender = normalizeCorrectionText
+
 function normalizeMathDelimiters(text: string) {
   return mapOutsideCodeFences(text, part => part
     .replace(/\$\\\(([\s\S]*?)\\\)\$/g, (_, body) => `$${body.trim()}$`)
@@ -94,6 +99,44 @@ function normalizeMathDelimiters(text: string) {
     .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, body) => `\n\n$$\n${body.trim()}\n$$\n\n`)
     .replace(/\\\(([^()\n]*(?:\\[a-zA-Z]+|[=+\-*/^_{}])[^()\n]*)\\\)/g, (_, body) => `$${body.trim()}$`)
   )
+}
+
+function normalizeMixedDollarBlocks(text: string) {
+  return text.replace(/\$\$([\s\S]*?)\$\$/g, (match, body) => {
+    if (!body.includes('$')) return match
+    const expressions: string[] = []
+    for (const matchItem of body.matchAll(/([+\-]?\s*)\$([^$]+)\$/g)) {
+      const cleanPrefix = (matchItem[1] ?? '').trim()
+      const cleanExpression = (matchItem[2] ?? '').trim()
+      const signedExpression = cleanPrefix === '-' && cleanExpression.startsWith('-')
+        ? cleanExpression
+        : `${cleanPrefix}${cleanExpression}`.trim()
+      const expression = signedExpression.replace(/^\+\s*/, '')
+      if (expression) expressions.push(expression)
+    }
+
+    if (!expressions.length) return match
+    return expressions.map(expression => `\n\n$$\n${repairLostLatex(expression)}\n$$\n\n`).join('')
+  })
+}
+
+function normalizeRiskyMarkdownTables(text: string) {
+  return text.replace(/(?:^|\n)((?:\|[^\n]*\|\s*\n?){2,})/g, (match, table) => {
+    if (!/[\\$]|\\begin\{|\\frac|\\tfrac|\\cdot/.test(table)) return match
+    const rows = table
+      .trim()
+      .split('\n')
+      .map((row: string) => row.trim())
+      .filter((row: string) => row && !/^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(row))
+      .map((row: string) => row.replace(/^\||\|$/g, '').split('|').map(cell => cell.trim()).filter(Boolean))
+      .filter((cells: string[]) => cells.length)
+
+    if (rows.length < 2) return match
+    const [, ...bodyRows] = rows
+    const items = bodyRows.map((cells: string[]) => `- ${cells.join(': ')}`)
+    if (!items.length) return match
+    return `\n\n### Puntuación estimada\n\n${items.join('\n')}\n\n`
+  })
 }
 
 function normalizeDisplayMathBlocks(text: string) {
@@ -287,6 +330,19 @@ function wrapExplicitLatex(text: string) {
     .replace(/(\\(?:Delta|lambda|alpha|beta|gamma|mu|omega|theta|rho|sigma)(?:\s*[_^=+\-]\s*[A-Za-z0-9_{}^+\-]+)?)/g, '$$$1$')
   )
   return output
+}
+
+function wrapDanglingLatexEnvironmentFragments(text: string) {
+  return text.replace(
+    new RegExp(`(^|\\n)(?!\\s*\\$\\$)([^\\n]*?(?:&|\\\\\\\\)[^\\n]*?\\\\end\\{(${ENVIRONMENTS})\\})`, 'g'),
+    (match, prefix, body, environment) => {
+      if (body.includes(`\\begin{${environment}}`)) return match
+      if (!['pmatrix', 'bmatrix', 'vmatrix', 'matrix', 'cases', 'aligned'].includes(environment)) return match
+      const cleanBody = body.replace(new RegExp(`\\\\end\\{${environment}\\}\\s*$`), '').trim()
+      if (!cleanBody) return match
+      return `${prefix}\n\n$$\n${formatLatexEnvironment(environment, cleanBody)}\n$$\n\n`
+    }
+  )
 }
 
 function wrapOrphanLatexFragments(text: string) {

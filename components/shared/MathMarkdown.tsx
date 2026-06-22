@@ -3,7 +3,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import { normalizeExamStatement, normalizeCorrectionText } from '@/app/lib/mathFormatting'
+import { normalizeExamStatement, normalizeCorrectionMarkdownForRender } from '@/app/lib/mathFormatting'
 
 const defaultComponents = {
   h1: ({ children }: any) => <h1 className="mb-4 mt-7 text-2xl font-black text-slate-950">{children}</h1>,
@@ -31,7 +31,7 @@ export default function MathMarkdown({
   text?: string | null
   className?: string
   // true → normalizeExamStatement (raw exam text)
-  // false → normalizeCorrectionText (raw AI correction text)
+  // false → normalizeCorrectionMarkdownForRender (raw AI correction text)
   // 'raw' → pass through as-is (already normalized)
   format?: boolean | 'raw'
   components?: Record<string, any>
@@ -50,13 +50,13 @@ export default function MathMarkdown({
   const normalized =
     format === 'raw' ? (text ?? '') :
     format ? normalizeExamStatement(text) :
-    normalizeCorrectionText(text)
+    normalizeCorrectionMarkdownForRender(text)
 
   return (
     <div className={`math-markdown max-w-none ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
-        rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
+        rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b' }]]}
         components={{ ...defaultComponents, ...(components ?? {}) }}
       >
         {normalized}

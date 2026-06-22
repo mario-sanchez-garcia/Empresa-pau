@@ -16,6 +16,7 @@ function assert(name, condition) {
 const page = read('app/page.tsx')
 const chatRoute = read('app/api/chat/route.ts')
 const mathFormatting = read('app/lib/mathFormatting.ts')
+const mathMarkdown = read('components/shared/MathMarkdown.tsx')
 const signupRoute = read('app/api/auth/signup/route.ts')
 const signupMigration = read('supabase/migrations/20260621130000_create_signup_attempts.sql')
 const pricing = read('app/pricing/page.tsx')
@@ -95,6 +96,24 @@ assert(
     mathFormatting.includes('tfrac') &&
     mathFormatting.includes(String.raw`[A-Z]\^\{-?1\}\s*[A-Za-z]`) &&
     mathFormatting.includes(String.raw`[A-Z]\^\{-?1\}`)
+)
+
+assert(
+  'correction render normalizer hardens broken LaTeX and markdown tables',
+  mathFormatting.includes('normalizeCorrectionMarkdownForRender') &&
+    mathFormatting.includes('normalizeMixedDollarBlocks') &&
+    mathFormatting.includes('wrapDanglingLatexEnvironmentFragments') &&
+    mathFormatting.includes('normalizeRiskyMarkdownTables') &&
+    mathFormatting.includes('pmatrix|bmatrix|vmatrix|matrix|cases|aligned') &&
+    mathFormatting.includes('Puntuación estimada')
+)
+
+assert(
+  'KaTeX fallback is neutral and image mismatch remains allowed',
+  mathMarkdown.includes("errorColor: '#64748b'") &&
+    page.includes('No repitas el enunciado') &&
+    !page.includes('No digas que la imagen no corresponde') &&
+    page.includes('Respuesta manuscrita adjunta como imagen')
 )
 
 assert(

@@ -1529,6 +1529,45 @@ function cambiarTipo(t: Tipo) {
     }
   }
 
+  async function streamCorrectionRequestSilent(
+    accessToken: string,
+    prompt: string,
+    options: { includeImage: boolean; blockId?: string; sessionId?: string }
+  ) {
+    const res = await fetch('/api/chat?stream=1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({
+        pregunta: prompt,
+        imagen: options.includeImage && modo === 'imagen' ? imagen : null,
+        imagenTipo: options.includeImage && modo === 'imagen' ? imagenTipo : null,
+        correctionMode: 'chunked_correction',
+        correctionBlock: options.blockId ?? null,
+        correctionSessionId: options.sessionId ?? null
+      })
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+    }
+
+    const reader = res.body!.getReader()
+    const decoder = new TextDecoder()
+    let accumulated = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      accumulated += decoder.decode(value, { stream: true })
+    }
+    accumulated += decoder.decode()
+    const completedStream = readSafeStreamText(accumulated)
+    return {
+      text: completedStream.truncated ? completedStream.visibleText : accumulated,
+      truncated: completedStream.truncated
+    }
+  }
+
   function buildChunkedCorrectionPrompts(input: {
     subject: string
     community: string
@@ -1641,31 +1680,68 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
     chunks: ReturnType<typeof buildChunkedCorrectionPrompts>,
     sessionId: string
   ) {
-    const completed: string[] = []
+    const chunk1 = chunks[0]
+    const parallelChunks = chunks.slice(1)
     const failedOptional: string[] = []
 
-    for (const chunk of chunks) {
-      setCorrectionStage(chunk.label)
-      setStreamText(completed.join('\n\n'))
-      let result = await streamCorrectionRequest(accessToken, chunk.prompt, {
+    // --- Chunk 1: visible streaming ---
+    setCorrectionStage(chunk1.label)
+    setStreamText('')
+    let result1 = await streamCorrectionRequest(accessToken, chunk1.prompt, {
+      includeImage: true,
+      appendTo: '',
+      blockId: chunk1.id,
+      sessionId
+    })
+
+    if (result1.truncated || !result1.text.trim()) {
+      setContinuingCorrection(true)
+      setCorrectionStage(`${chunk1.label} Reintentando este bloque en versión breve...`)
+      result1 = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunk1.prompt), {
         includeImage: true,
-        appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
-        blockId: chunk.id,
+        appendTo: '',
+        blockId: `${chunk1.id}:retry`,
         sessionId
       })
+      setContinuingCorrection(false)
+    }
 
-      if (result.truncated || !result.text.trim()) {
-        setContinuingCorrection(true)
-        setCorrectionStage(`${chunk.label} Reintentando este bloque en versión breve...`)
-        result = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunk.prompt), {
+    if (result1.truncated || !result1.text.trim()) {
+      return {
+        markdown: '',
+        truncated: true,
+        blocksCompleted: 0,
+        failedBlock: chunk1.id
+      }
+    }
+
+    const chunk1Text = result1.text.trim()
+    setStreamText(chunk1Text)
+
+    // --- Chunks 2, 3, 4: parallel silent ---
+    const parallelResults = await Promise.all(
+      parallelChunks.map(async chunk => {
+        let result = await streamCorrectionRequestSilent(accessToken, chunk.prompt, {
           includeImage: true,
-          appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
-          blockId: `${chunk.id}:retry`,
+          blockId: chunk.id,
           sessionId
         })
-        setContinuingCorrection(false)
-      }
+        if (result.truncated || !result.text.trim()) {
+          result = await streamCorrectionRequestSilent(accessToken, buildCompactRetryPrompt(chunk.prompt), {
+            includeImage: true,
+            blockId: `${chunk.id}:retry`,
+            sessionId
+          })
+        }
+        return result
+      })
+    )
 
+    const completed = [chunk1Text]
+
+    for (let i = 0; i < parallelChunks.length; i++) {
+      const chunk = parallelChunks[i]
+      const result = parallelResults[i]
       if (result.truncated || !result.text.trim()) {
         if (chunk.essential) {
           return {
@@ -1678,10 +1754,10 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
         failedOptional.push(chunk.title)
         continue
       }
-
       completed.push(result.text.trim())
-      setStreamText(completed.join('\n\n'))
     }
+
+    setStreamText(completed.join('\n\n'))
 
     const optionalNote = failedOptional.length
       ? `\n\n> Nota: No se pudo completar ${failedOptional.join(', ')}. La corrección principal sí está completa.`

@@ -26,7 +26,7 @@ export default function ReembolsosPage() {
 
         <Section title="2. Cómo solicitar el reembolso">
           <p style={p}>
-            Envía un email a <a href="mailto:hola@pausia.es" style={aStyle}>hola@pausia.es</a> con el asunto <em>"Solicitud de reembolso"</em> e indica:
+            Envía un email a <a href="mailto:hola@pausia.es" style={aStyle}>hola@pausia.es</a> con el asunto <em>&quot;Solicitud de reembolso&quot;</em> e indica:
           </p>
           <ul style={ul}>
             <li style={li}>El email con el que compraste (o el email del alumno si eres padre/madre).</li>

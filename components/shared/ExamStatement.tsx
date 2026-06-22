@@ -171,7 +171,7 @@ export default function ExamStatement({
             <Eraser size={15} />
             Borrar todos
           </button>
-          <span className="exam-statement-help">Para quitar uno, haz click sobre el subrayado y pulsa "Quitar subrayado".</span>
+          <span className="exam-statement-help">Para quitar uno, haz click sobre el subrayado y pulsa &quot;Quitar subrayado&quot;.</span>
         </div>
       )}
       {confirmClear && (

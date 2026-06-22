@@ -9,6 +9,7 @@ import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
 import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
+import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
@@ -495,7 +496,9 @@ export default function SimulacroActivoPage() {
         </section>
 
         {/* Block panels */}
-        {record.bloques.map((block, index) => (
+        {record.bloques.map((block, index) => {
+          const bloqueIncompleto = isIncompleteOfficialExercise(block)
+          return (
           <section key={block.id} className={active === index ? 'grid gap-4 pau-reveal' : 'hidden'}>
 
             {/* Statement panel */}
@@ -537,7 +540,8 @@ export default function SimulacroActivoPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3" style={{ borderRadius: 12, border: '1px solid #dde8f8', background: '#f8fbff', padding: 14 }}>
+              {bloqueIncompleto && <IncompleteExerciseNotice color={cfg.color} light={cfg.light} />}
+              {!bloqueIncompleto && <div className="grid gap-3" style={{ borderRadius: 12, border: '1px solid #dde8f8', background: '#f8fbff', padding: 14 }}>
                 {(record.asignatura === 'lengua' || record.asignatura === 'ingles') && block.textoFuente && (
                   <div style={{ borderRadius: 10, border: '1px solid #e5edf9', background: '#fff', padding: '16px 18px', boxShadow: 'var(--shadow-xs)' }}>
                     <div
@@ -586,11 +590,11 @@ export default function SimulacroActivoPage() {
                     />
                   </div>
                 )}
-              </div>
+              </div>}
             </div>
 
             {/* Answer panel */}
-            <div className="pau-card-section">
+            {!bloqueIncompleto && <div className="pau-card-section">
               <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex gap-2">
                   {(['text', 'image'] as const).map(m => (
@@ -692,9 +696,10 @@ export default function SimulacroActivoPage() {
                   }}
                 />
               )}
-            </div>
+            </div>}
           </section>
-        ))}
+          )
+        })}
       </div>
 
       {/* Confirm / Time Up modal */}
@@ -817,6 +822,16 @@ function SaveBadge({ status }: { status: 'saved' | 'saving' | 'error' | 'dirty' 
     >
       {c.label}
     </span>
+  )
+}
+
+function IncompleteExerciseNotice({ color, light }: { color: string; light: string }) {
+  return (
+    <div className="rounded-xl px-5 py-5" style={{ background: light, border: `1px solid ${color}22`, color: '#334155' }}>
+      <div className="mb-2 text-lg font-black" style={{ color }}>Ejercicio en preparación</div>
+      <p className="text-sm font-bold leading-6">Estamos terminando de adaptar este contenido.</p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Prueba otro ejercicio mientras tanto.</p>
+    </div>
   )
 }
 

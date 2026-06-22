@@ -6,6 +6,7 @@ import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCo
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
+import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -102,6 +103,16 @@ export function RespuestaIA({ contenido, officialMaxScore }: { contenido: string
   )
 }
 
+function IncompleteExerciseNotice() {
+  return (
+    <div className="rounded-2xl px-5 py-5" style={{ background: UI.light, border: `1px solid ${UI.border}`, color: '#334155' }}>
+      <div className="mb-2 text-lg font-black" style={{ color: UI.color }}>Ejercicio en preparación</div>
+      <p className="text-sm font-bold leading-6">Estamos terminando de adaptar este contenido.</p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Prueba otro ejercicio mientras tanto.</p>
+    </div>
+  )
+}
+
 export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejercicio: any; contexto: string }) {
   const [respuesta, setRespuesta] = useState('')
   const [imagen, setImagen] = useState<string | null>(null)
@@ -114,6 +125,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
   const preguntas = obtenerPreguntas(ejercicio)
   const puntuacion = puntuacionEjercicio(ejercicio)
   const enunciadoOficial = [ejercicio.instrucciones, ...preguntas].filter(Boolean).join('\n\n')
+  const contenidoIncompleto = isIncompleteOfficialExercise(ejercicio)
 
   async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -220,16 +232,17 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
         <div className="text-right"><span className="text-2xl font-black" style={{ color: UI.color }}>{puntuacion}</span><span className="ml-1 text-sm font-bold" style={{ color: UI.accent }}>pts</span></div>
       </header>
       <div className="grid gap-5 p-6">
-        <RenderFuente fuente={ejercicio.fuente} storageKeyPrefix={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:fuente`} />
-        <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor="#e5edf9">
+        {contenidoIncompleto && <IncompleteExerciseNotice />}
+        {!contenidoIncompleto && <RenderFuente fuente={ejercicio.fuente} storageKeyPrefix={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:fuente`} />}
+        {!contenidoIncompleto && <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor="#e5edf9">
           <ExamStatement
             text={enunciadoOficial}
             storageKey={`cat-historia:${contexto}:ejercicio:${ejercicio.numero}:enunciado`}
             accentColor={UI.color}
             softColor={UI.light}
           />
-        </ExamContentCard>
-        <div className="border-t pt-5" style={{ borderColor: UI.border }}>
+        </ExamContentCard>}
+        {!contenidoIncompleto && <div className="border-t pt-5" style={{ borderColor: UI.border }}>
           <label className="mb-3 block text-xs font-black uppercase tracking-[0.08em] text-slate-500">Tu respuesta</label>
           <div className="mb-4 flex gap-2">
             {(['texto', 'imagen'] as const).map(nextMode => (
@@ -274,8 +287,8 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
           <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>
             {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />} {cargando ? 'Corrigiendo con Pausia...' : 'Corregir con Pausia'}
           </button>
-        </div>
-        <RespuestaIA contenido={correccion} officialMaxScore={puntuacion} />
+        </div>}
+        {!contenidoIncompleto && <RespuestaIA contenido={correccion} officialMaxScore={puntuacion} />}
       </div>
     </article>
   )

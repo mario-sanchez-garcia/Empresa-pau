@@ -18,6 +18,7 @@ import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
+import { isIncompleteOfficialExercise } from './lib/contentQuality'
 import Sidebar, { type SidebarItemId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
@@ -919,7 +920,9 @@ const EXAMENES_BY_ASIGNATURA: Partial<Record<Asignatura, any[]>> = {
 
 const SUBJECTS_REQUIRING_STRUCTURED_EXAMS = new Set<Asignatura>(['matematicas_ccss'])
 
-const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas) && examen.preguntas.length > 0
+const isAvailableOfficialExercise = (exercise: unknown) => !isIncompleteOfficialExercise(exercise)
+const availableQuestionsForExam = (examen: any) => ((examen?.preguntas ?? []) as any[]).filter(isAvailableOfficialExercise)
+const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas) && availableQuestionsForExam(examen).length > 0
 
 const perteneceAComunidadSeleccionada = (examen: any) =>
   (examen.comunidad ?? examen.ccaa) === ccaa
@@ -930,6 +933,7 @@ const requiresStructuredExams = SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatu
 const examenesFiltrados = examenesAsignatura.filter(e =>
   e.tipo === tipo &&
   perteneceAComunidadSeleccionada(e) &&
+  (!Array.isArray((e as any).preguntas) || availableQuestionsForExam(e).length > 0) &&
   (!requiresStructuredExams || hasStructuredQuestions(e))
 )
 
@@ -966,21 +970,21 @@ const examenesCatalunaDelAnio = isCatalunaHistoria
   : []
 
 const examenCatalunaActivo = examenesCatalunaDelAnio[0] ?? null
-const ejerciciosCatalunaHistoria = examenCatalunaActivo?.ejercicios ?? []
+const ejerciciosCatalunaHistoria = (examenCatalunaActivo?.ejercicios ?? []).filter(isAvailableOfficialExercise)
 const ejercicioCatalunaHistoriaActivo =
   ejerciciosCatalunaHistoria[catHistoriaEjercicioIdx] ?? ejerciciosCatalunaHistoria[0] ?? null
 
 const examenFisicaCatalunaActivo = isCatalunaFisica
   ? examenesFisicaCataluna.find(examen => examen.anio === anioSeleccionado && examen.convocatoria === tipo.toLowerCase()) ?? null
   : null
-const ejerciciosFisicaCataluna = examenFisicaCatalunaActivo?.ejercicios ?? []
+const ejerciciosFisicaCataluna = (examenFisicaCatalunaActivo?.ejercicios ?? []).filter(isAvailableOfficialExercise)
 const ejercicioFisicaCatalunaActivo =
   ejerciciosFisicaCataluna[catFisicaEjercicioIdx] ?? ejerciciosFisicaCataluna[0] ?? null
 
 const examenQuimicaCatalunaActivo = isCatalunaQuimica
   ? examenesQuimicaCataluna.find(examen => examen.anio === anioSeleccionado && examen.convocatoria === tipo.toLowerCase()) ?? null
   : null
-const ejerciciosQuimicaCataluna: CatEjercicioView[] = examenQuimicaCatalunaActivo?.ejercicios.map(ejercicio => ({
+const ejerciciosQuimicaCataluna: CatEjercicioView[] = examenQuimicaCatalunaActivo?.ejercicios.filter(isAvailableOfficialExercise).map(ejercicio => ({
   id: String(ejercicio.numero),
   titulo: ejercicio.titulo,
   instrucciones: ejercicio.instrucciones,
@@ -994,7 +998,7 @@ const ejerciciosQuimicaCataluna: CatEjercicioView[] = examenQuimicaCatalunaActiv
 const examenLenguaCatalunaActivo = isCatalunaLengua
   ? examenesLenguaCataluna.find(examen => examen.anio === anioSeleccionado && examen.convocatoria === tipo.toLowerCase()) ?? null
   : null
-const ejerciciosLenguaCataluna: CatEjercicioView[] = examenLenguaCatalunaActivo
+const ejerciciosLenguaCataluna: CatEjercicioView[] = (examenLenguaCatalunaActivo
   ? [
       ...(examenLenguaCatalunaActivo.opciones ?? []).flatMap(opcion => opcion.bloques.map(bloque => ({
         id: `${opcion.opcion}-${bloque.id}`,
@@ -1023,7 +1027,7 @@ const ejerciciosLenguaCataluna: CatEjercicioView[] = examenLenguaCatalunaActivo
         apartados: bloque.apartados,
       })),
     ]
-  : []
+  : []).filter(isAvailableOfficialExercise)
 const ejerciciosAsignaturaCataluna = isCatalunaQuimica ? ejerciciosQuimicaCataluna : ejerciciosLenguaCataluna
 const ejercicioAsignaturaCatalunaActivo =
   ejerciciosAsignaturaCataluna[catAsignaturaEjercicioIdx] ?? ejerciciosAsignaturaCataluna[0] ?? null
@@ -1096,7 +1100,7 @@ const examenIngles = asignatura === 'ingles'
      examenesInglesDia[0]) ?? null
   : null
 
-const preguntasIngles = asignatura === 'ingles' ? (examenIngles as any)?.preguntas ?? [] : []
+const preguntasIngles = asignatura === 'ingles' ? availableQuestionsForExam(examenIngles) : []
 
 const bloquesIngles = preguntasIngles.map((p: any) => ({ tipo: p.bloque, label: p.label, pts: p.puntuacion }))
 
@@ -1109,45 +1113,45 @@ const preguntaIngles = asignatura === 'ingles'
   : null
 
 const preguntasA = isMadridMathStyle
-  ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'A') ?? []
+  ? availableQuestionsForExam(examen).filter((p: any) => p.opcion === 'A') ?? []
   : []
 
 const preguntasB = isMadridMathStyle
-  ? (examen as any)?.preguntas?.filter((p: any) => p.opcion === 'B') ?? []
+  ? availableQuestionsForExam(examen).filter((p: any) => p.opcion === 'B') ?? []
   : []
 
 const bloquesMates = Array.from(new Set(
   isMadridMathStyle
-    ? ((examen as any)?.preguntas ?? []).map((p: any) => p.bloque)
+    ? availableQuestionsForExam(examen).map((p: any) => p.bloque)
     : []
 )) as string[]
 
 const tipoMatesActivo = bloquesMates[bloqueIdx]
 
 const preguntaMates =
-  (examen as any)?.preguntas?.find(
+  availableQuestionsForExam(examen).find(
     (p: any) =>
       p.opcion === (opcion === 0 ? 'A' : 'B') &&
       p.bloque === tipoMatesActivo
   ) ??
-  (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoMatesActivo) ??
-  (examen as any)?.preguntas?.[0]
+  availableQuestionsForExam(examen).find((p: any) => p.bloque === tipoMatesActivo) ??
+  availableQuestionsForExam(examen)[0]
 
 const tipoFisicaActivo = TIPOS_FISICA[bloqueIdx]?.tipo
 
 const preguntaFisica = asignatura === 'fisica'
-  ? (examen as any)?.preguntas?.find(
+  ? availableQuestionsForExam(examen).find(
       (p: any) =>
         p.opcion === (opcion === 0 ? 'A' : 'B') &&
         p.bloque === tipoFisicaActivo
     ) ??
-    (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoFisicaActivo) ??
-    (examen as any)?.preguntas?.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
-    (examen as any)?.preguntas?.[0]
+    availableQuestionsForExam(examen).find((p: any) => p.bloque === tipoFisicaActivo) ??
+    availableQuestionsForExam(examen).find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
+    availableQuestionsForExam(examen)[0]
   : null
 
 const preguntasQuimica = asignatura === 'quimica'
-  ? (examen as any)?.preguntas ?? []
+  ? availableQuestionsForExam(examen)
   : []
 
 const bloquesQuimica = Array.from(
@@ -1185,7 +1189,7 @@ const examenBiologia = asignatura === 'biologia'
   : null
 
 const preguntasBiologia = asignatura === 'biologia'
-  ? (examenBiologia as any)?.preguntas ?? []
+  ? availableQuestionsForExam(examenBiologia)
   : []
 
 const bloquesBiologia = preguntasBiologia.length
@@ -1213,7 +1217,7 @@ const preguntaBiologia = asignatura === 'biologia'
   : null
 
 const preguntasLengua = asignatura === 'lengua'
-  ? (examenLengua as any)?.preguntas ?? []
+  ? availableQuestionsForExam(examenLengua)
   : []
 
 const bloquesLengua = preguntasLengua.length
@@ -1235,7 +1239,7 @@ const OPCIONES = [0, 1] as const
 const opcionesMatesDisponibles = isMadridMathStyle
   ? Array.from(new Set(
       ((examen as any)?.preguntas ?? [])
-        .filter((p: any) => p.bloque === tipoMatesActivo)
+        .filter((p: any) => isAvailableOfficialExercise(p) && p.bloque === tipoMatesActivo)
         .map((p: any) => p.opcion)
     ))
   : []
@@ -1243,7 +1247,7 @@ const opcionesMatesDisponibles = isMadridMathStyle
 const opcionesFisicaDisponibles = asignatura === 'fisica'
   ? Array.from(new Set(
       ((examen as any)?.preguntas ?? [])
-        .filter((p: any) => p.bloque === tipoFisicaActivo)
+        .filter((p: any) => isAvailableOfficialExercise(p) && p.bloque === tipoFisicaActivo)
         .map((p: any) => p.opcion)
     ))
   : []
@@ -1292,7 +1296,7 @@ const examenHistoria = asignatura === 'historia'
     ) ?? examenesHistoriaDelDia[0]
   : null
 
-const preguntasHistoria = examenHistoria?.preguntas ?? []
+const preguntasHistoria = availableQuestionsForExam(examenHistoria)
 
 const bloquesHistoria = preguntasHistoria.map(p => ({
   tipo: p.tipo,
@@ -1326,6 +1330,7 @@ const examenActivo = asignatura === 'lengua'
       : examen
 
 const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
+const preguntaActivaIncompleta = Boolean(preguntaActiva && isIncompleteOfficialExercise(preguntaActiva))
 const puntuacionPreguntaActiva = officialScore(
   (preguntaActiva as any)?.puntuacion ?? (preguntaActiva as any)?.puntos ?? (preguntaActiva as any)?.pts,
   isMadridMathStyle ? 2.5 : 2
@@ -2067,7 +2072,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
     if (!isCatalunaExam) {
       return normalSource
         .filter(exam => perteneceAComunidadSeleccionada(exam))
-        .flatMap((exam: any) => ((exam.preguntas ?? []) as any[]).map((question, questionIndex) => {
+        .flatMap((exam: any) => ((exam.preguntas ?? []) as any[]).filter(isAvailableOfficialExercise).map((question, questionIndex) => {
           const points = question.puntuacion ?? question.puntos ?? question.pts
           const questionName = question.numero ?? question.id ?? question.bloque ?? question.tipo ?? `Pregunta ${questionIndex + 1}`
           const title = `${questionName}${question.opcion ? ` · Opción ${question.opcion}` : exam.opcion ? ` · Opción ${exam.opcion}` : ''}`
@@ -2096,9 +2101,9 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
     }
 
     if (isCatalunaMates) {
-      return examenesCatMates.map((question: any, index: number) => {
+      return examenesCatMates.filter(isAvailableOfficialExercise).map((question: any, index: number) => {
         const years = Array.from(new Set(examenesCatMates.filter(p => p.tipo === question.tipo).map(p => p.year))).sort((a, b) => b - a)
-        const preguntasDelAnio = examenesCatMates.filter(p => p.tipo === question.tipo && p.year === question.year)
+        const preguntasDelAnio = examenesCatMates.filter(p => p.tipo === question.tipo && p.year === question.year).filter(isAvailableOfficialExercise)
         const ejerciciosUnicos = preguntasDelAnio.filter((pregunta, i, preguntas) =>
           preguntas.findIndex(candidate => candidate.ejercicio === pregunta.ejercicio && candidate.opcion === pregunta.opcion) === i
         )
@@ -2129,7 +2134,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
     }
 
     if (isCatalunaFisica) {
-      return examenesFisicaCataluna.flatMap(exam => exam.ejercicios.map((exercise, exerciseIndex) => {
+      return examenesFisicaCataluna.flatMap(exam => exam.ejercicios.filter(isAvailableOfficialExercise).map((exercise, exerciseIndex) => {
         const selectedTipo = tipoFromCataluna(exam.convocatoria)
         const years = Array.from(new Set(examenesFisicaCataluna.filter(candidate => candidate.convocatoria === exam.convocatoria).map(candidate => candidate.anio))).sort((a, b) => b - a)
         const points = exercise.apartados?.reduce((total, apartado) => total + Number(apartado.puntos ?? 0), 0) || 2.5
@@ -2192,7 +2197,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
         const selectedTipo = tipoFromCataluna(exam.convocatoria)
         const years = Array.from(new Set(catExams.filter((candidate: any) => candidate.convocatoria === exam.convocatoria).map((candidate: any) => candidate.anio))).sort((a: any, b: any) => Number(b) - Number(a))
         const exercises: any[] = isCatalunaQuimica
-          ? (exam.ejercicios ?? []).map((exercise: any) => ({
+          ? (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any) => ({
               id: String(exercise.numero),
               titulo: exercise.titulo,
               instrucciones: exercise.instrucciones,
@@ -2202,7 +2207,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
               imagenes: exercise.imagenes,
               requiereRevision: exercise.requiereRevision,
             }))
-          : flattenLengua(exam)
+          : flattenLengua(exam).filter(isAvailableOfficialExercise)
         return exercises.map((exercise, exerciseIndex) => {
           const points = (exercise.apartados ?? []).reduce((total: number, apartado: any) => total + Number(apartado.puntos ?? 0), 0) || 2.5
           return withSearchText({
@@ -2234,7 +2239,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
     if (isCatalunaHistoria) {
       return Object.values(examenesCataluna).flatMap((exam: any) => {
         const years = Object.values(examenesCataluna).map((e: any) => e.anio).filter((value, index, values) => values.indexOf(value) === index).sort((a: any, b: any) => Number(b) - Number(a))
-        return (exam.ejercicios ?? []).map((exercise: any, exerciseIndex: number) => withSearchText({
+        return (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any, exerciseIndex: number) => withSearchText({
           id: `cat-historia-${exam.id}-${exercise.numero}`,
           year: String(exam.anio),
           convocatoria: exam.serie ?? 'Ordinaria',
@@ -3556,7 +3561,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                   </div>
                 </div>
                 <div style={{ padding: '24px', overflowY: 'auto' }}>
-                  {asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
+                  {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Text</div>
                       <ExamStatement
@@ -3586,7 +3591,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                       />
                     </div>
                   )}
-                  {(asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && (
+                  {!preguntaActivaIncompleta && (asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && (
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
                       <ExamStatement
@@ -3599,7 +3604,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                       />
                     </div>
                   )}
-                  {asignatura === 'historia' && (preguntaActiva as any).imagen_url && (
+                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagen_url && (
                     <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Documento visual</div>
                       <img
@@ -3609,27 +3614,27 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                       />
                     </div>
                   )}
-                  {asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
+                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
                     <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Fuente histórica oficial</div>
                       <img src={(preguntaActiva as any).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
                     </div>
                   )}
-                  {asignatura === 'quimica' && (preguntaActiva as any).pdfFuente && (
+                  {!preguntaActivaIncompleta && asignatura === 'quimica' && (preguntaActiva as any).pdfFuente && (
                     <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
                       <a href={(preguntaActiva as any).pdfFuente} target="_blank" rel="noreferrer" style={{ padding: '8px 12px', borderRadius: '999px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.soft, fontSize: '12px', fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                         <FileText size={14} />Ver PDF oficial
                       </a>
                     </div>
                   )}
-                  {Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && (
+                  {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && (
                     <div style={{ marginBottom: '18px', display: 'grid', gap: '12px' }}>
                       {(preguntaActiva as any).imagenes.map((src: string, i: number) => (
                         <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '18px', border: '1px solid #e5edf9', background: '#fff' }} />
                       ))}
                     </div>
                   )}
-                  {asignatura === 'historia' && (preguntaActiva as any).conceptos && (
+                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).conceptos && (
                     <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {(preguntaActiva as any).conceptos.map((c: string, i: number) => (
                         <span key={i} style={{ padding: '4px 12px', borderRadius: '20px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.accent, fontSize: '12px', fontWeight: 600 }}>{c}</span>
@@ -3639,7 +3644,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                   {asignatura !== 'ingles' && (
                     <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado</div>
-                      {(preguntaActiva as any).requiereImagen && (!Array.isArray((preguntaActiva as any).imagenes) || (preguntaActiva as any).imagenes.length === 0) ? (
+                      {preguntaActivaIncompleta ? (
                         <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
                           <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
                           <div style={{ fontSize: '15px', lineHeight: 1.6, fontWeight: 650 }}>Estamos terminando de adaptar este contenido.</div>

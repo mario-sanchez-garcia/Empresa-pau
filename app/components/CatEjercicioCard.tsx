@@ -6,6 +6,7 @@ import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCo
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
+import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -51,6 +52,16 @@ function formatPts(value?: number) {
   return Number.isInteger(value) ? String(value) : String(value).replace('.', ',')
 }
 
+function IncompleteExerciseNotice({ color, light, border }: { color: string; light: string; border: string }) {
+  return (
+    <div className="rounded-2xl px-5 py-5" style={{ background: light, border: `1px solid ${border}`, color: '#334155' }}>
+      <div className="mb-2 text-lg font-black" style={{ color }}>Ejercicio en preparación</div>
+      <p className="text-sm font-bold leading-6">Estamos terminando de adaptar este contenido.</p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Prueba otro ejercicio mientras tanto.</p>
+    </div>
+  )
+}
+
 export default function CatEjercicioCard({
   asignatura,
   asignaturaLabel,
@@ -92,6 +103,7 @@ export default function CatEjercicioCard({
     apartadoTexto,
     ...(ejercicio.datos ?? []),
   ].filter(Boolean).join('\n\n')
+  const contenidoIncompleto = isIncompleteOfficialExercise(ejercicio)
 
   function cambiarApartado(index: number) {
     imagenes.forEach(imagen => URL.revokeObjectURL(imagen.preview))
@@ -245,8 +257,8 @@ export default function CatEjercicioCard({
             </div>
           </div>
         )}
-        {ejercicio.requiereRevision && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">Este ejercicio está pendiente de revisión editorial. Puede contener algún detalle incompleto o pendiente de validar.</div>}
-        {textoFuente && (
+        {contenidoIncompleto && <IncompleteExerciseNotice color={UI.color} light={UI.light} border={UI.border} />}
+        {!contenidoIncompleto && textoFuente && (
           <ExamContentCard title={asignatura === 'lengua' ? 'Texto fuente oficial' : 'Datos / fuente oficial'} color={UI.color} borderColor={UI.border} soft>
             <ExamStatement
               text={textoFuente}
@@ -257,7 +269,7 @@ export default function CatEjercicioCard({
             />
           </ExamContentCard>
         )}
-        {enunciadoVisible && (
+        {!contenidoIncompleto && enunciadoVisible && (
           <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor="#e5edf9">
             <ExamStatement
               text={enunciadoVisible}
@@ -268,9 +280,9 @@ export default function CatEjercicioCard({
             />
           </ExamContentCard>
         )}
-        {ejercicio.imagenes?.map((imagen, index) => <div key={index} className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">{imagen}</div>)}
+        {!contenidoIncompleto && ejercicio.imagenes?.map((imagen, index) => <div key={index} className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600">{imagen}</div>)}
 
-        <section className="mt-2 border-t pt-5" style={{ borderColor: UI.border }}>
+        {!contenidoIncompleto && <section className="mt-2 border-t pt-5" style={{ borderColor: UI.border }}>
           <div className="mb-3 text-[13px] font-bold uppercase tracking-[0.06em] text-slate-500">Tu respuesta</div>
           <div className="mb-4 flex gap-2">
             {(['texto', 'imagen'] as const).map(nextMode => (
@@ -319,8 +331,8 @@ export default function CatEjercicioCard({
           <button type="button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>
             {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Pausia...' : 'Corregir con Pausia'}
           </button>
-        </section>
-        {correccion && (
+        </section>}
+        {!contenidoIncompleto && correccion && (
           <section className="overflow-hidden rounded-[22px] border-2" style={{ borderColor: UI.color }}>
             <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: UI.color }}>
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>

@@ -63,6 +63,7 @@ export const formatExamText = normalizeExamStatement
 export function normalizeCorrectionText(input?: string | null) {
   if (!input) return ''
   let text = input
+  text = unwrapLatexCodeFences(text)
   text = normalizeMathDelimiters(text)
   text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
   text = mapOutsideCodeFences(text, normalizeMixedDollarBlocks)
@@ -186,6 +187,22 @@ function normalizeResponseStructure(text: string) {
   return output
     .replace(/(## [^\n:]+):[ \t]*(?=\S)/g, '$1\n\n')
     .replace(/\n{3,}/g, '\n\n')
+}
+
+function unwrapLatexCodeFences(text: string) {
+  return text.replace(
+    /```(?:latex|math|tex|plain)?\s*\n([\s\S]*?)\n```/gi,
+    (match, content) => {
+      if (new RegExp(`\\\\begin\\{(${ENVIRONMENTS})\\}|\\\\frac|\\\\tfrac|\\\\dfrac|\\\\sqrt`).test(content)) {
+        const clean = content
+          .replace(/%[^\n]*/g, '')
+          .replace(/\bundefined\b|\bNaN\b/g, '')
+          .trim()
+        return `\n\n$$\n${clean}\n$$\n\n`
+      }
+      return match
+    }
+  )
 }
 
 function formatOrphanCasesBlocks(text: string) {

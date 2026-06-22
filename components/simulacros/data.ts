@@ -10,6 +10,7 @@ import { examenesQuimicaCataluna } from '@/app/data/quimica_cataluna'
 import { examenesLenguaCataluna } from '@/app/data/lengua_cataluna'
 import { examenesCataluna } from '@/app/data/examenes_cataluna'
 import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from '@/app/data/matematicas_ccss_madrid'
+import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 type SimulacroYearSelection = 'all' | SimulacroDifficulty
@@ -82,7 +83,7 @@ export function generateSimulacro(
     const candidates = examenesLengua.filter(exam => (!lenguaYears || lenguaYears.includes(exam.año)) && (exam.comunidad ?? 'Madrid') === comunidad)
     if (!candidates.length) return null
     const selected = shuffle(candidates)[0]
-    const blocks = (selected?.preguntas ?? []).map((p: any, index: number) => ({
+    const blocks = (selected?.preguntas ?? []).filter((p: any) => !isIncompleteOfficialExercise(p)).map((p: any, index: number) => ({
       ...toItem('lengua', selected, p, p.bloque).block,
       numero: index + 1,
       option: 'A' as SimulacroOption
@@ -94,7 +95,8 @@ export function generateSimulacro(
 
   const questions = normalizeQuestions(subject, comunidad).filter(item => (
     (!years || years.includes(item.year)) &&
-    (optionSelection === 'mixed' || item.option === optionSelection)
+    (optionSelection === 'mixed' || item.option === optionSelection) &&
+    !isIncompleteOfficialExercise(item.block)
   ))
   const distinctYears = new Set(questions.map(q => q.year)).size
   const usedYears = new Set<number>()
@@ -233,7 +235,7 @@ function normalizeFisicaCatalunaItems() {
       }
     }
   }
-  return items
+  return items.filter(item => !isIncompleteOfficialExercise(item.block))
 }
 
 // ─── Cataluña: Química ───────────────────────────────────────────────────────
@@ -265,7 +267,7 @@ function normalizeQuimicaCatalunaItems() {
       }
     }
   }
-  return items
+  return items.filter(item => !isIncompleteOfficialExercise(item.block))
 }
 
 // ─── Cataluña: Historia ──────────────────────────────────────────────────────
@@ -309,7 +311,7 @@ function normalizeHistoriaCatalunaItems() {
       }
     }
   }
-  return items
+  return items.filter(item => !isIncompleteOfficialExercise(item.block))
 }
 
 // ─── Cataluña: Lengua ────────────────────────────────────────────────────────
@@ -363,7 +365,7 @@ function normalizeLenguaCatalunaExam(exam: any, option: SimulacroOption): Simula
     }
   }
 
-  return blocks.map((block, idx) => ({ ...block, numero: idx + 1 }))
+  return blocks.filter(block => !isIncompleteOfficialExercise(block)).map((block, idx) => ({ ...block, numero: idx + 1 }))
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────

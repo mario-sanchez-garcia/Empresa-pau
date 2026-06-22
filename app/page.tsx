@@ -1846,7 +1846,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
   }
 
   async function generarPlan() {
-    window.location.href = '/planning'
+    window.location.href = '/camino'
   }
 
   const HeaderIcon =
@@ -2956,9 +2956,9 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
         }
       `}</style>
       <Sidebar
-        activeItem={seccion === 'planning' ? 'plan-estudio' : seccion as SidebarItemId}
+        activeItem={seccion === 'planning' ? 'camino' : seccion as SidebarItemId}
         email={usuario?.email}
-        onNavigate={(item) => navegarASeccion(item === 'plan-estudio' ? 'planning' : item as Seccion)}
+        onNavigate={(item) => navegarASeccion(item as Seccion)}
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? 'radial-gradient(circle at 14% 8%, rgba(219,234,254,0.95), transparent 30%), radial-gradient(circle at 86% 18%, rgba(224,231,255,0.72), transparent 32%), linear-gradient(180deg, #fbfdff 0%, #f8fbff 45%, #eff6ff 100%)' : undefined, transition: 'background 300ms ease' }}>
@@ -3788,7 +3788,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                       <p className="exams-side-text">
                         {!isCatalunaExam && preguntaActiva ? bloqueActivoLabel : 'Selecciona un ejercicio para ver el bloque asociado.'}
                       </p>
-                      <a href="/planning" style={{ marginTop: 12, border: '1px solid #ddd6fe', background: '#ffffff', color: '#6d28d9', borderRadius: 999, padding: '8px 11px', fontSize: 12, fontWeight: 850, display: 'inline-flex', textDecoration: 'none' }}>
+                      <a href="/camino" style={{ marginTop: 12, border: '1px solid #ddd6fe', background: '#ffffff', color: '#6d28d9', borderRadius: 999, padding: '8px 11px', fontSize: 12, fontWeight: 850, display: 'inline-flex', textDecoration: 'none' }}>
                         Ver material de repaso
                       </a>
                     </div>

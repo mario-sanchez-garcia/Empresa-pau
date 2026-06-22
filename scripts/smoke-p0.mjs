@@ -21,11 +21,17 @@ const signupRoute = read('app/api/auth/signup/route.ts')
 const signupMigration = read('supabase/migrations/20260621130000_create_signup_attempts.sql')
 const pricing = read('app/pricing/page.tsx')
 const landing = read('app/landing/page.tsx')
+const sidebar = read('app/components/Sidebar.tsx')
+const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
+const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
+const packageJson = read('package.json')
+const nextConfig = read('next.config.ts')
 
 assert(
   'streaming correction uses safe progressive stream before final renderer',
   page.includes('function SafeProgressiveCorrectionStream') &&
-    page.includes('safeProgressiveCorrectionSnapshot') &&
+    page.includes('function hasUnsafeStreamingLatex') &&
+    page.includes('safePreviewAvailable') &&
     page.includes('Comparando con la rúbrica oficial') &&
     page.includes('Revisando el LaTeX de la corrección') &&
     page.includes('Últimos detalles') &&
@@ -128,6 +134,33 @@ assert(
   'pricing and landing do not advertise unlimited AI usage',
   !/ilimitad/i.test(pricing) &&
     !/ilimitad/i.test(landing)
+)
+
+assert(
+  'math curriculum seed wires CCSS without geometry',
+  mathCcssSeed.includes("'matematicas_ccss'") &&
+    mathCcssSeed.includes("block_key <> 'Geometría'") &&
+    packageJson.includes('seed:math-curriculum')
+)
+
+assert(
+  'Camino PAU generates editable curriculum missions with targets and XP',
+  caminoCalendar.includes("from('curriculum_flashcards')") &&
+    caminoCalendar.includes('FALLBACK_CURRICULUM') &&
+    caminoCalendar.includes("subject: 'Matemáticas CCSS', block: 'Probabilidad'") &&
+    !caminoCalendar.includes("subject: 'Matemáticas CCSS', block: 'Geometría'") &&
+    caminoCalendar.includes('CalendarEditorOverlay') &&
+    caminoCalendar.includes('Editar calendario') &&
+    caminoCalendar.includes('Marcar hecha') &&
+    caminoCalendar.includes('actionHref(newMission.kind')
+)
+
+assert(
+  'Planning is removed from sidebar and old routes redirect to Camino PAU',
+  !sidebar.includes("label: 'Mi Plan'") &&
+    !sidebar.includes("id: 'plan-estudio'") &&
+    nextConfig.includes("source: '/planning', destination: '/camino'") &&
+    nextConfig.includes("source: '/mi-plan', destination: '/camino'")
 )
 
 if (process.exitCode) {

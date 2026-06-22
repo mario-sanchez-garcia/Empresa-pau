@@ -356,7 +356,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
 
   return (
     <div className="flex min-h-screen max-lg:block" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
-      <Sidebar activeItem="plan-estudio" email={usuario?.email} />
+      <Sidebar activeItem="camino" email={usuario?.email} />
       <div className="min-w-0 flex-1">
       <style>{`
         .campus-hover,

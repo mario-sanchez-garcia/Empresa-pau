@@ -19,6 +19,12 @@ const cspReportOnly = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: '/planning', destination: '/camino', permanent: false },
+      { source: '/mi-plan', destination: '/camino', permanent: false },
+    ]
+  },
   async headers() {
     return [
       {

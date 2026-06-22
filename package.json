@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "smoke": "node scripts/smoke-p0.mjs"
+    "smoke": "node scripts/smoke-p0.mjs",
+    "seed:math-curriculum": "node scripts/seed-math-curriculum.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",

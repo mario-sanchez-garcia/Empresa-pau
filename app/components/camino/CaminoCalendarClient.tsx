@@ -3,20 +3,34 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, Check, ChevronDown, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, CalendarDays, Check, ChevronDown, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 
-type MissionKind = 'exam' | 'flashcards' | 'chat' | 'simulacro' | 'historial' | 'manual'
+type MissionKind = 'exam' | 'flashcards' | 'case' | 'chat' | 'simulacro' | 'historial' | 'manual'
 type MissionRole = 'main' | 'bonus'
 type MissionStatus = 'pending' | 'done'
 
-type Mission = { id: string; role: MissionRole; kind: MissionKind; subject: string; title: string; reason: string; href: string; estimatedMinutes: number; baseXP: number; status: MissionStatus }
+type Mission = {
+  id: string
+  role: MissionRole
+  kind: MissionKind
+  subject: string
+  block?: string
+  topic?: string
+  title: string
+  reason: string
+  href: string
+  estimatedMinutes: number
+  baseXP: number
+  status: MissionStatus
+}
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 type StudentExam = { id: string; subject: string; date: string; topic: string; name: string; priority: ExamPriority }
 type XpEvent = { id: string; missionId: string; date: string; subject: string; xp: number; bonus: boolean }
+type CurriculumItem = { subject: string; block: string; topic: string; title: string; sortOrder: number; source: 'supabase' | 'fallback' }
 type RankingEntry = { id: string; name: string; community: string; xp: number; rank: number; isCurrentUser: boolean; isMock?: boolean }
 type LeaderboardPayload = {
   global: { top: RankingEntry[]; current: RankingEntry | null }
@@ -33,6 +47,31 @@ const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
   'Historia de España': 'historia', 'Historia de la Filosofía': 'historia_filosofia', 'Lengua Castellana': 'lengua', 'Inglés': 'ingles', 'Biología': 'biologia'
 }
+const DB_SUBJECTS: Record<string, string> = {
+  'Matemáticas II': 'mates',
+  'Matemáticas CCSS': 'matematicas_ccss',
+}
+const MATH_SUBJECTS = ['Matemáticas II', 'Matemáticas CCSS']
+const FALLBACK_CURRICULUM: CurriculumItem[] = [
+  { subject: 'Matemáticas II', block: 'Álgebra', topic: 'Matrices', title: 'Dimensión, operaciones y producto de matrices', sortOrder: 1, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Álgebra', topic: 'Determinantes', title: 'Determinantes de orden 2 y 3', sortOrder: 10, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Álgebra', topic: 'Sistemas', title: 'Rouché-Frobenius y Gauss', sortOrder: 15, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Análisis', topic: 'Límites y continuidad', title: 'Límites, asíntotas y continuidad', sortOrder: 35, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Análisis', topic: 'Derivadas', title: 'Derivadas y aplicaciones', sortOrder: 42, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Análisis', topic: 'Integrales', title: 'Primitivas, integrales y áreas', sortOrder: 48, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Geometría', topic: 'Vectores en el espacio', title: 'Vectores, producto escalar y vectorial', sortOrder: 60, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Geometría', topic: 'Rectas y planos', title: 'Rectas, planos, ángulos y distancias', sortOrder: 67, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Probabilidad', topic: 'Probabilidad y combinatoria', title: 'Combinatoria, Bayes y probabilidad condicionada', sortOrder: 75, source: 'fallback' },
+  { subject: 'Matemáticas II', block: 'Probabilidad', topic: 'Normal y binomial', title: 'Binomial, normal y tipificación', sortOrder: 85, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Álgebra', topic: 'Matrices', title: 'Dimensión, operaciones y producto de matrices', sortOrder: 1, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Álgebra', topic: 'Determinantes', title: 'Determinantes de orden 2 y 3', sortOrder: 10, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Álgebra', topic: 'Sistemas', title: 'Rouché-Frobenius y Gauss', sortOrder: 15, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Análisis', topic: 'Límites y continuidad', title: 'Límites, continuidad y representación', sortOrder: 35, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Análisis', topic: 'Derivadas', title: 'Derivadas y optimización', sortOrder: 42, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Análisis', topic: 'Integrales', title: 'Integrales y áreas', sortOrder: 48, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Probabilidad', topic: 'Probabilidad y combinatoria', title: 'Combinatoria, Bayes y probabilidad condicionada', sortOrder: 75, source: 'fallback' },
+  { subject: 'Matemáticas CCSS', block: 'Probabilidad', topic: 'Normal y binomial', title: 'Binomial, normal y tipificación', sortOrder: 85, source: 'fallback' },
+]
 const SUBJECT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   'Matemáticas II': { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }, 'Matemáticas CCSS': { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' },
   'Física': { bg: '#fefce8', text: '#a16207', border: '#fef08a' }, 'Química': { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
@@ -62,19 +101,21 @@ function mondayOf(date: Date) { const d = new Date(date); const day = d.getDay()
 function daysUntil(dateISO: string) { return Math.ceil((new Date(dateISO).getTime() - new Date(todayISO()).getTime()) / 86400000) }
 function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
 function subjectSlug(subject: string) { return SUBJECT_SLUGS[subject] ?? subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_') }
-function getMissionTarget(kind: MissionKind, subject: string) {
+function textSlug(value: string) { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }
+function getMissionTarget(kind: MissionKind, subject: string, topic?: string) {
   const s = subjectSlug(subject)
-  if (kind === 'exam') return { href: `/?subject=${s}&source=camino`, fallback: '', autoCompletable: false }
-  if (kind === 'flashcards') return { href: `/zona?mode=flashcards&subject=${s}&source=camino`, fallback: '', autoCompletable: false }
+  const topicParam = topic ? `&topic=${encodeURIComponent(textSlug(topic))}` : ''
+  if (kind === 'exam') return { href: `/?subject=${s}${topicParam}&source=camino`, fallback: '', autoCompletable: false }
+  if (kind === 'flashcards' || kind === 'case') return { href: `/zona?mode=curriculum&subject=${s}${topicParam}&source=camino`, fallback: '', autoCompletable: false }
   if (kind === 'chat') return { href: `/?view=chat&subject=${s}&source=camino`, fallback: '', autoCompletable: false }
   if (kind === 'simulacro') return { href: `/simulacros?subject=${s}&source=camino`, fallback: '', autoCompletable: false }
-  if (kind === 'historial') return { href: `/?view=historial&subject=${s}&source=camino`, fallback: '', autoCompletable: false }
+  if (kind === 'historial') return { href: `/?view=historial&subject=${s}${topicParam}&source=camino`, fallback: '', autoCompletable: false }
   return { href: '', fallback: 'Esta misión todavía no tiene pantalla propia. Puedes marcarla como hecha cuando la termines fuera de Pausia.', autoCompletable: true }
 }
-function actionHref(kind: MissionKind, subject: string) { return getMissionTarget(kind, subject).href }
+function actionHref(kind: MissionKind, subject: string, topic?: string) { return getMissionTarget(kind, subject, topic).href }
 function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count === 4) return [0, 1, 3, 5]; if (count === 5) return [0, 1, 2, 4, 5]; if (count === 6) return [0, 1, 2, 3, 4, 5]; return [0, 1, 2, 3, 4, 5, 6] }
-function kindFor(index: number): MissionKind { return (['exam', 'flashcards', 'historial', 'simulacro', 'chat'] as MissionKind[])[index % 5] }
-function titleFor(kind: MissionKind, subject: string) { if (kind === 'exam') return `Haz 1 ejercicio de ${subject}`; if (kind === 'flashcards') return `Repasa 10 flashcards de ${subject}`; if (kind === 'chat') return `Pregunta una duda de ${subject}`; if (kind === 'simulacro') return `Haz un mini simulacro de ${subject}`; if (kind === 'historial') return `Revisa errores anteriores de ${subject}`; return `Tarea personalizada de ${subject}` }
+function kindFor(index: number): MissionKind { return (['exam', 'flashcards', 'historial', 'case', 'chat'] as MissionKind[])[index % 5] }
+function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'exam') return `Haz 1 ejercicio de ${item?.topic ?? subject}`; if (kind === 'flashcards') return `Repasa ${item?.topic ?? subject}`; if (kind === 'case') return `Mira un caso resuelto de ${item?.topic ?? subject}`; if (kind === 'chat') return `Pregunta una duda de ${item?.topic ?? subject}`; if (kind === 'simulacro') return `Haz un mini simulacro de ${subject}`; if (kind === 'historial') return `Revisa errores de ${item?.topic ?? subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
 function divisionFor(xp: number) { return DIVISIONS.find(d => xp >= d.min && xp <= d.max) ?? DIVISIONS[0] }
@@ -106,7 +147,44 @@ async function fetchLeaderboard(token: string, community: string) {
   }
 }
 
-function generateCalendar(onboarding: OnboardingData, exams: StudentExam[]) {
+async function fetchCurriculumItems(subjects: string[]): Promise<CurriculumItem[]> {
+  const dbSubjects = subjects.map(subject => DB_SUBJECTS[subject]).filter(Boolean)
+  if (dbSubjects.length === 0) return []
+  const { data, error } = await supabase
+    .from('curriculum_flashcards')
+    .select('subject, chapter_title, block_key, title, sort_order')
+    .in('subject', dbSubjects)
+    .eq('region', 'ambas')
+    .order('sort_order', { ascending: true })
+
+  if (error || !data) return []
+
+  return data.map(row => {
+    const subject = row.subject === 'matematicas_ccss' ? 'Matemáticas CCSS' : 'Matemáticas II'
+    return {
+      subject,
+      block: row.block_key,
+      topic: row.chapter_title,
+      title: row.title,
+      sortOrder: row.sort_order,
+      source: 'supabase' as const,
+    }
+  }).filter(item => item.subject !== 'Matemáticas CCSS' || item.block !== 'Geometría')
+}
+
+function curriculumForSubject(subject: string, curriculum: CurriculumItem[]) {
+  const rows = curriculum.filter(item => item.subject === subject)
+  if (rows.length > 0) return rows
+  return FALLBACK_CURRICULUM.filter(item => item.subject === subject)
+}
+
+function pickCurriculumItem(subject: string, rotation: number, curriculum: CurriculumItem[]) {
+  const rows = curriculumForSubject(subject, curriculum)
+  if (rows.length === 0) return null
+  return rows[rotation % rows.length]
+}
+
+function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = []) {
   const start = mondayOf(new Date())
   const subjects = onboarding.subjects.length ? onboarding.subjects : ['Matemáticas II', 'Historia de España', 'Inglés']
   const weeklyDays = onboarding.weeklyStudyDaysValue ?? 4
@@ -129,19 +207,21 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[]) {
     if (studyDay) {
       const prioritySubject = sameDay?.subject ?? (strongExamNearby || index <= 2 ? upcoming?.subject : null)
       const subject = prioritySubject ?? subjects[rotation % subjects.length]
+      const curriculumItem = pickCurriculumItem(subject, rotation + index, curriculum)
       if (!prioritySubject) rotation += 1
       const kind = sameDay ? 'flashcards' : kindFor(index)
-      const reason = sameDay ? `Parcial hoy: ${sameDay.topic || sameDay.name || sameDay.subject}. Repaso ligero.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
-      missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, title: sameDay ? `Repaso ligero de ${subject}` : titleFor(kind, subject), reason, href: actionHref(kind, subject), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: 20, status: 'pending' })
+      const reason = sameDay ? `Parcial hoy: ${sameDay.topic || sameDay.name || sameDay.subject}. Repaso ligero.` : curriculumItem ? `${curriculumItem.block} · misión desde curriculum_flashcards.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
+      missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: sameDay ? `Repaso ligero de ${subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, href: actionHref(kind, subject, curriculumItem?.topic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'exam' ? 25 : kind === 'case' ? 20 : 15, status: 'pending' })
 
       if (minutes >= 60 && !sameDay && !strongExamNearby) {
         const secondSubject = prioritySubject ?? subjects[rotation % subjects.length]
+        const secondItem = pickCurriculumItem(secondSubject, rotation + index + 2, curriculum)
         if (!prioritySubject) rotation += 1
-        missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'historial', subject: secondSubject, title: `Corrige un error de ${secondSubject}`, reason: 'Refuerzo de precisión sin agobio.', href: actionHref('historial', secondSubject), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 20, status: 'pending' })
+        missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'historial', subject: secondSubject, block: secondItem?.block, topic: secondItem?.topic, title: `Corrige un error de ${secondItem?.topic ?? secondSubject}`, reason: 'Refuerzo de precisión sin agobio.', href: actionHref('historial', secondSubject, secondItem?.topic), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 20, status: 'pending' })
       }
 
-      missions.push({ id: `${dateISO}-bonus-1`, role: 'bonus', kind: 'flashcards', subject, title: `Bonus: 5 flashcards de ${subject}`, reason: 'Opcional para sumar XP sin presión.', href: actionHref('flashcards', subject), estimatedMinutes: 10, baseXP: 12, status: 'pending' })
-      missions.push({ id: `${dateISO}-bonus-2`, role: 'bonus', kind: 'chat', subject, title: `Bonus: pregunta una duda de ${subject}`, reason: 'Cierra el día resolviendo una duda concreta.', href: actionHref('chat', subject), estimatedMinutes: 8, baseXP: 10, status: 'pending' })
+      missions.push({ id: `${dateISO}-bonus-1`, role: 'bonus', kind: 'flashcards', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: 5 flashcards de ${curriculumItem?.topic ?? subject}`, reason: 'Opcional para sumar XP sin presión.', href: actionHref('flashcards', subject, curriculumItem?.topic), estimatedMinutes: 10, baseXP: 12, status: 'pending' })
+      missions.push({ id: `${dateISO}-bonus-2`, role: 'bonus', kind: 'chat', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: pregunta una duda de ${curriculumItem?.topic ?? subject}`, reason: 'Cierra el día resolviendo una duda concreta.', href: actionHref('chat', subject, curriculumItem?.topic), estimatedMinutes: 8, baseXP: 10, status: 'pending' })
     }
 
     return { date: dateISO, label: date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }), isToday: dateISO === todayISO(), missions }
@@ -167,17 +247,25 @@ export default function CaminoCalendarClient() {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
+  const [calendarEditorOpen, setCalendarEditorOpen] = useState(false)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
     const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
     const loadedXp = loadJson<XpEvent[]>(XP_KEY, [])
-    const loadedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
     setOnboarding(loadedOnboarding)
     setExams(loadedExams)
     setXpEvents(loadedXp)
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
-    setCalendar(loadedCalendar.length ? syncStatuses(loadedCalendar, loadedXp) : syncStatuses(generateCalendar(loadedOnboarding, loadedExams), loadedXp))
+    setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM), loadedXp))
+    fetchCurriculumItems(loadedOnboarding.subjects)
+      .then(items => {
+        const nextItems = items.length ? items : FALLBACK_CURRICULUM
+        setCurriculumItems(nextItems)
+        setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, nextItems), loadedXp))
+      })
+      .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
   }, [])
 
   useEffect(() => {
@@ -222,7 +310,7 @@ export default function CaminoCalendarClient() {
     setCalendar(nextCalendar); setXpEvents(nextXp); setExams(nextExams)
     saveJson(CALENDAR_KEY, nextCalendar); saveJson(XP_KEY, nextXp); saveJson(EXAMS_KEY, nextExams)
   }
-  function regenerate(nextExams = exams) { if (!onboarding) return; persist(syncStatuses(generateCalendar(onboarding, nextExams), xpEvents), xpEvents, nextExams); setToast('Planning actualizado con tus parciales') }
+  function regenerate(nextExams = exams) { if (!onboarding) return; persist(syncStatuses(generateCalendar(onboarding, nextExams, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM), xpEvents), xpEvents, nextExams); setToast('Camino PAU actualizado') }
   function completeMission(missionId: string) {
     const completed = calendar.flatMap(day => day.missions).find(mission => mission.id === missionId && mission.status !== 'done')
     if (!completed) return
@@ -277,18 +365,19 @@ export default function CaminoCalendarClient() {
 
   return (
     <Shell>
-      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></header>
+      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Editar calendario</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today?.label ?? 'Hoy'}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onComplete={completeMission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Hoy toca poco, pero bien hecho. Puedes añadir un parcial para ajustar la semana.</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onComplete={completeMission} onPostpone={postponeMission} compact />)}</div></div>}</div>
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-2 text-3xl font-black text-slate-950">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-2xl px-4 py-2 text-sm font-black" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-xs font-bold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
         </section>
 
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p></div><div className="grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div></section>
+        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><div className="grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div></section>
 
         <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} /></section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboarding?.subjects ?? []} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
+      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={calendar} subjects={onboarding.subjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(syncStatuses(next, xpEvents)); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
     </Shell>
   )
@@ -296,16 +385,81 @@ export default function CaminoCalendarClient() {
 
 function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
 
+function CalendarEditorOverlay({ calendar, subjects, curriculum, onClose, onAddExam, onSave }: { calendar: DayPlan[]; subjects: string[]; curriculum: CurriculumItem[]; onClose: () => void; onAddExam: () => void; onSave: (calendar: DayPlan[]) => void }) {
+  const safeSubjects = subjects.length ? subjects : MATH_SUBJECTS
+  const [draft, setDraft] = useState<DayPlan[]>(() => calendar.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
+  const [newMission, setNewMission] = useState({ day: calendar[0]?.date ?? todayISO(), subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'flashcards' as MissionKind, topic: '', minutes: 15, bonus: false })
+  const topics = curriculumForSubject(newMission.subject, curriculum)
+
+  function moveMission(missionId: string, nextDate: string) {
+    const sourceDay = draft.find(day => day.missions.some(mission => mission.id === missionId))
+    const mission = sourceDay?.missions.find(item => item.id === missionId)
+    if (!sourceDay || !mission) return
+    setDraft(current => current.map(day => {
+      if (day.date === sourceDay.date) return { ...day, missions: day.missions.filter(item => item.id !== missionId) }
+      if (day.date === nextDate) return { ...day, missions: [...day.missions, { ...mission, id: `${nextDate}-${mission.role}-moved-${Date.now()}` }] }
+      return day
+    }))
+  }
+
+  function updateMission(missionId: string, patch: Partial<Mission>) {
+    setDraft(current => current.map(day => ({ ...day, missions: day.missions.map(mission => mission.id === missionId ? { ...mission, ...patch, href: actionHref(patch.kind ?? mission.kind, patch.subject ?? mission.subject, patch.topic ?? mission.topic) } : mission) })))
+  }
+
+  function deleteMission(missionId: string) {
+    setDraft(current => current.map(day => ({ ...day, missions: day.missions.filter(mission => mission.id !== missionId) })))
+  }
+
+  function addMission() {
+    const item = topics.find(topic => topic.topic === newMission.topic) ?? topics[0]
+    const subject = newMission.subject
+    const topic = item?.topic ?? newMission.topic
+    const mission: Mission = {
+      id: `${newMission.day}-${newMission.bonus ? 'bonus' : 'main'}-manual-${Date.now()}`,
+      role: newMission.bonus ? 'bonus' : 'main',
+      kind: newMission.kind,
+      subject,
+      block: item?.block,
+      topic,
+      title: titleFor(newMission.kind, subject, item ?? undefined),
+      reason: item ? `${item.block} · añadida por el alumno.` : 'Añadida manualmente por el alumno.',
+      href: actionHref(newMission.kind, subject, topic),
+      estimatedMinutes: newMission.minutes,
+      baseXP: newMission.bonus ? 12 : newMission.kind === 'exam' ? 25 : 15,
+      status: 'pending',
+    }
+    setDraft(current => current.map(day => day.date === newMission.day ? { ...day, missions: [...day.missions, mission] } : day))
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-4 backdrop-blur-sm max-lg:left-0 lg:left-[248px]">
+      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 px-5 py-4">
+          <div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Editar calendario</p><h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2></div>
+          <div className="flex flex-wrap gap-2"><button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button><button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button><button onClick={() => onSave(draft)} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">Guardar cambios</button></div>
+        </header>
+        <div className="grid flex-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
+          <div className="grid gap-3 lg:grid-cols-2">
+            {draft.map(day => <article key={day.date} className="rounded-3xl border border-blue-100 bg-slate-50 p-4"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3><div className="mt-3 grid gap-2">{day.missions.length ? day.missions.map(mission => <div key={mission.id} className="rounded-2xl border border-white bg-white p-3 shadow-sm"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-xs font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p><input value={mission.title} onChange={event => updateMission(mission.id, { title: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-100 bg-slate-50 px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-blue-200 focus:bg-white" /></div><button onClick={() => deleteMission(mission.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar misión"><Trash2 size={15} /></button></div><div className="mt-2 grid gap-2 sm:grid-cols-3"><select value={mission.subject} onChange={event => updateMission(mission.id, { subject: event.target.value })} className="mini-input">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select><select value={mission.kind} onChange={event => updateMission(mission.id, { kind: event.target.value as MissionKind })} className="mini-input"><option value="flashcards">Flashcard</option><option value="case">Caso</option><option value="exam">Ejercicio</option><option value="historial">Errores</option><option value="chat">Chat</option></select><select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mini-input">{draft.map(option => <option key={option.date} value={option.date}>{option.label}</option>)}</select></div><label className="mt-2 inline-flex items-center gap-2 text-xs font-black text-slate-500"><input type="checkbox" checked={mission.role === 'bonus'} onChange={event => updateMission(mission.id, { role: event.target.checked ? 'bonus' : 'main' })} /> Bonus/opcional</label></div>) : <p className="text-xs font-bold text-slate-400">Sin misiones.</p>}</div></article>)}
+          </div>
+          <aside className="rounded-3xl border border-blue-100 bg-blue-50/60 p-4"><h3 className="text-sm font-black text-slate-950">Añadir misión</h3><div className="mt-4 grid gap-3"><Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{draft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field><Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field><Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field><Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish"><option value="flashcards">Teoría / flashcards</option><option value="case">Caso resuelto</option><option value="exam">Ejercicio real</option><option value="historial">Repaso de errores</option><option value="chat">Chat</option></select></Field><Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field><label className="inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label><button onClick={addMission} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white"><Plus size={16} /> Añadir misión</button></div></aside>
+        </div>
+        <style>{`.mini-input{min-width:0;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;padding:7px 8px;font-size:11px;font-weight:800;color:#475569;outline:none}.mini-input:focus{border-color:#93c5fd;background:#fff}`}</style>
+      </motion.section>
+    </motion.div>
+  )
+}
+
 function MissionRow({ mission, onComplete, onPostpone, compact = false }: { mission: Mission; onComplete: (id: string) => void; onPostpone: (id: string) => void; compact?: boolean }) {
   const theme = themeFor(mission.subject)
-  const target = getMissionTarget(mission.kind, mission.subject)
-  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">{target.fallback}</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && <button onClick={() => onComplete(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Marcar hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
+  const target = mission.href ? { href: mission.href, fallback: '' } : getMissionTarget(mission.kind, mission.subject, mission.topic)
+  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">{target.fallback}</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && <button onClick={() => onComplete(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Marcar hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   const main = day.missions.filter(mission => mission.role === 'main')
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = getMissionTarget(mission.kind, mission.subject); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}</p><p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Sin pantalla · marca desde la misión'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = mission.href ? { href: mission.href } : getMissionTarget(mission.kind, mission.subject, mission.topic); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p><p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Sin pantalla · marca desde la misión'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { subjects: string[]; draft: { subject: string; date: string; topic: string; name: string; priority: ExamPriority }; setDraft: (draft: { subject: string; date: string; topic: string; name: string; priority: ExamPriority }) => void; onClose: () => void; onSave: () => void; editing: boolean }) {

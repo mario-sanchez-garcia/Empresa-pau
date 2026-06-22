@@ -76,10 +76,10 @@ export const CAMINO_ACTION_DEFAULTS: Record<CaminoTaskTypeId, CaminoAction> = {
   },
   estrategia_examen: {
     label: 'Ver mi plan',
-    href: '/planning',
+    href: '/camino',
     isDeepLink: false,
     isFallback: true,
-    note: 'Mi Plan es la sección más cercana disponible. Fase 2C: página de estrategia dedicada.',
+    note: 'Camino PAU concentra planificación, calendario y estrategia.',
   },
   repaso_ligero: {
     label: 'Practicar',

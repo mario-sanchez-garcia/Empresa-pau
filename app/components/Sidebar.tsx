@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
-  Rocket,
   Route,
   Settings,
   TimerReset
@@ -19,7 +18,7 @@ import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 
-export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'plan-estudio' | 'settings'
+export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'settings'
 
 interface SidebarProps {
   activeItem?: SidebarItemId
@@ -35,14 +34,13 @@ const NAV_ITEMS = [
   { id: 'zona',         label: 'La Zona',         desc: 'Estudia a tu manera',href: '/zona',           icon: BrainCircuit },
   { id: 'chat',         label: 'Chat con Pausia', desc: 'Resuelve dudas',     href: '/?view=chat',     icon: MessageCircle },
   { id: 'historial',    label: 'Historial',       desc: 'Tus correcciones',   href: '/?view=historial',icon: BarChart3 },
-  { id: 'plan-estudio', label: 'Mi Plan',         desc: 'Semana organizada',  href: '/planning',       icon: Rocket },
 ] as const
 
 function routeItem(pathname: string): SidebarItemId {
   if (pathname.startsWith('/camino'))    return 'camino'
   if (pathname.startsWith('/simulacros'))return 'simulacros'
   if (pathname.startsWith('/zona'))      return 'zona'
-  if (pathname.startsWith('/planning'))  return 'plan-estudio'
+  if (pathname.startsWith('/planning'))  return 'camino'
   if (pathname.startsWith('/settings'))  return 'settings'
   return 'examenes'
 }

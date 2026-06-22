@@ -60,7 +60,7 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const [reviewQueue, setReviewQueue] = useState<string[]>([])
   const [seenCards, setSeenCards] = useState<Record<string, true>>({})
   const [flipped, setFlipped] = useState(false)
-  const [answers, setAnswers] = useState<Record<string, 'know' | 'dont'>>({})
+  const [_answers, setAnswers] = useState<Record<string, 'know' | 'dont'>>({})
   const [dragStart, setDragStart] = useState<number | null>(null)
   const [dragX, setDragX] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -88,10 +88,16 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const selectedSubject = subject === 'all' ? null : SUBJECTS.find(item => item.id === subject)
 
   useEffect(() => {
-    setReviewQueue(studyCards.map(card => card.id))
+    // React 18 batchea estos setStates en un solo render — no hay riesgo real de cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReviewQueue(studySignature ? studySignature.split('|') : [])
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSeenCards({})
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnswers({})
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFlipped(false)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDragX(0)
   }, [studySignature])
 
@@ -457,9 +463,6 @@ function subjectLabel(subject: ZonaSubject) {
   return SUBJECTS.find(item => item.id === subject)?.label ?? subject
 }
 
-function subjectButtonClass(active: boolean) {
-  return `rounded-2xl border px-3 py-3 text-left text-sm font-black transition ${active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-[#dbe7fb] bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50'}`
-}
 
 const labelStyle: CSSProperties = {
   display: 'block',

@@ -123,7 +123,10 @@ export default function OnboardingFlow() {
   const stepIndex = STEPS.indexOf(step)
   const currentStep = stepIndex >= 0 ? stepIndex + 1 : 0
   const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
-  const centers = data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : []
+  const centers = useMemo(
+    () => data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : [],
+    [data.community]
+  )
   const normalizedQuery = normalizeSearch(schoolQuery)
   const filteredCenters = useMemo(() => {
     if (!centers.length) return []

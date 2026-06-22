@@ -25,10 +25,20 @@ assert(
   'streaming correction uses safe progressive stream before final renderer',
   page.includes('function SafeProgressiveCorrectionStream') &&
     page.includes('safeProgressiveCorrectionSnapshot') &&
+    page.includes('Comparando con la rúbrica oficial') &&
+    page.includes('Revisando el LaTeX de la corrección') &&
+    page.includes('Últimos detalles') &&
     page.includes('{!correccion && (streamText || cargando) ? (') &&
     page.includes('<SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} stage={correctionStage} />') &&
     !page.includes('<SafeStreamingText text={streamText} />') &&
     page.includes('correction={correccion}')
+)
+
+assert(
+  'loading side panel shows non-final progress placeholders',
+  page.includes('Calculando con la rúbrica oficial') &&
+    page.includes('Analizando lo que sí suma puntos') &&
+    page.includes('Revisando errores y pasos omitidos')
 )
 
 assert(

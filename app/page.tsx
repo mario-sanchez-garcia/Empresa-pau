@@ -123,9 +123,12 @@ function SafeStreamingText({ text }: { text: string }) {
 
 const CORRECTION_PROGRESS_STEPS = [
   'Leyendo tu respuesta',
-  'Aplicando la rúbrica',
-  'Detectando aciertos y errores',
-  'Preparando la explicación final'
+  'Comparando con la rúbrica oficial',
+  'Detectando aciertos principales',
+  'Localizando errores importantes',
+  'Preparando la explicación paso a paso',
+  'Revisando el LaTeX de la corrección',
+  'Guardando en Historial'
 ]
 
 function hasUnsafeStreamingLatex(text: string) {
@@ -135,25 +138,53 @@ function hasUnsafeStreamingLatex(text: string) {
   return hasOpenEnvironment || (hasLatexCommand && mathDelimiters % 2 !== 0)
 }
 
-function safeProgressiveCorrectionSnapshot(text: string) {
+function correctionStepFromStage(stage?: string, isContinuing = false) {
+  const current = (stage ?? '').toLowerCase()
+  if (current.includes('guardando')) return 6
+  if (current.includes('reintentando') || isContinuing) return 5
+  if (current.includes('teoría') || current.includes('teoria') || current.includes('recomendación')) return 5
+  if (current.includes('paso')) return 4
+  if (current.includes('errores')) return 3
+  if (current.includes('aciertos')) return 2
+  if (current.includes('rúbrica') || current.includes('rubrica') || current.includes('nota')) return 1
+  return 0
+}
+
+function safeProgressiveCorrectionSnapshot(text: string, stage?: string, isContinuing = false) {
   const length = text.trim().length
-  const progress = Math.min(0.96, length / 2200)
+  const activeStep = correctionStepFromStage(stage, isContinuing)
+  const baseProgress = Math.min(0.82, activeStep * 0.13 + Math.min(0.08, length / 14000))
+  const progress = activeStep >= CORRECTION_PROGRESS_STEPS.length - 1 ? 0.94 : Math.min(0.88, baseProgress + 0.14)
   const completedCount = Math.min(
     CORRECTION_PROGRESS_STEPS.length - 1,
-    Math.max(0, Math.floor(progress * CORRECTION_PROGRESS_STEPS.length))
+    Math.max(0, activeStep)
   )
   const safePreviewAvailable = length > 260 && !hasUnsafeStreamingLatex(text)
   return {
     progress,
     completedSteps: CORRECTION_PROGRESS_STEPS.slice(0, completedCount),
-    currentStep: CORRECTION_PROGRESS_STEPS[completedCount] ?? CORRECTION_PROGRESS_STEPS.at(-1)!,
+    currentStep: CORRECTION_PROGRESS_STEPS[activeStep] ?? CORRECTION_PROGRESS_STEPS.at(-1)!,
+    pendingSteps: CORRECTION_PROGRESS_STEPS.slice(activeStep + 1),
     safePreviewAvailable
   }
 }
 
 function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: string; isContinuing: boolean; stage?: string }) {
-  const snapshot = safeProgressiveCorrectionSnapshot(text)
-  const progressPct = Math.round(snapshot.progress * 100)
+  const snapshot = safeProgressiveCorrectionSnapshot(text, stage, isContinuing)
+  const [visualProgress, setVisualProgress] = useState(8)
+
+  useEffect(() => {
+    const target = Math.max(8, Math.round(snapshot.progress * 100))
+    const timer = window.setInterval(() => {
+      setVisualProgress(current => {
+        if (current >= target) return Math.min(target, current + 0.2)
+        return Math.min(target, current + Math.max(0.8, (target - current) * 0.18))
+      })
+    }, 360)
+    return () => window.clearInterval(timer)
+  }, [snapshot.progress])
+
+  const progressPct = Math.min(96, Math.round(visualProgress))
 
   return (
     <div style={{ display: 'grid', gap: 18 }}>
@@ -174,26 +205,26 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
         </div>
       </div>
       <div style={{ height: 8, borderRadius: 999, overflow: 'hidden', background: '#ede9fe' }}>
-        <div style={{ width: `${progressPct}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #6d28d9, #8b5cf6)', transition: 'width 220ms ease' }} />
+        <div style={{ width: `${progressPct}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #2563eb, #7c3aed, #8b5cf6)', transition: 'width 420ms ease' }} />
       </div>
       <div style={{ display: 'grid', gap: 9 }}>
         {snapshot.completedSteps.map(step => (
           <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#475569', fontSize: 13.5, fontWeight: 750 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: '#7c3aed' }} />
+            <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 12, fontWeight: 900 }}>✓</span>
             {step}
           </div>
         ))}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
-          <span style={{ width: 8, height: 8, borderRadius: 999, background: '#c4b5fd', boxShadow: '0 0 0 6px rgba(124,58,237,0.1)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#312e81', fontSize: 13.5, fontWeight: 850 }}>
+          <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#ede9fe', color: '#7c3aed', boxShadow: '0 0 0 6px rgba(124,58,237,0.1)' }}><PausiaLoadingDot /></span>
           {snapshot.currentStep}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13, fontWeight: 700 }}>
           <PausiaLoadingDot />
-          {snapshot.safePreviewAvailable ? 'Redactando explicación segura...' : 'Pausia está preparando esta parte...'}
+          {progressPct >= 86 ? 'Últimos detalles...' : snapshot.safePreviewAvailable ? 'Redactando explicación segura...' : 'Pausia está preparando esta parte...'}
         </div>
-        {CORRECTION_PROGRESS_STEPS.slice(snapshot.completedSteps.length + 1).map((step) => (
+        {snapshot.pendingSteps.map((step) => (
           <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: '#ddd6fe' }} />
+            <span style={{ width: 10, height: 10, borderRadius: 999, background: '#ddd6fe', marginLeft: 4 }} />
             {step}
           </div>
         ))}
@@ -3725,13 +3756,13 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                         const scoreColor = ratio !== null ? colorNota(ratio) : '#111827'
                         return (
                           <div style={{ marginTop: 6, color: correccion ? scoreColor : '#94a3b8', fontSize: 40, lineHeight: 1, fontWeight: 920, transition: 'color 400ms ease', letterSpacing: '-0.02em' }}>
-                            {correccion ? correctionScoreLabel : '--'}
+                            {correccion ? correctionScoreLabel : cargando ? '...' : '--'}
                             <span style={{ marginLeft: 5, color: '#94a3b8', fontSize: 13, fontWeight: 700 }}>{correctionScoreLabel === '--' ? '' : 'pts'}</span>
                           </div>
                         )
                       })()}
                       <p className="exams-side-text" style={{ marginTop: 8 }}>
-                        {correccion ? `Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts` : 'Resuelve el ejercicio y Pausia te dará feedback.'}
+                        {correccion ? `Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts` : cargando ? 'Calculando con la rúbrica oficial...' : 'Resuelve el ejercicio y Pausia te dará feedback.'}
                       </p>
                     </div>
                     <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }}>
@@ -3746,7 +3777,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                         <div className="exams-side-label" style={{ color: '#15803d' }}>Puntos fuertes</div>
                       </div>
                       <p className="exams-side-text">
-                        {correccion ? 'Disponibles en la corrección detallada generada por Pausia.' : 'Aquí aparecerán tus puntos fuertes.'}
+                        {correccion ? 'Disponibles en la corrección detallada generada por Pausia.' : cargando ? 'Analizando lo que sí suma puntos...' : 'Aquí aparecerán tus puntos fuertes.'}
                       </p>
                     </div>
                     <div className="exams-side-section">
@@ -3755,7 +3786,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
                         <div className="exams-side-label" style={{ color: '#c2410c' }}>Errores a corregir</div>
                       </div>
                       <p className="exams-side-text">
-                        {correccion ? 'Consulta el detalle para ver fallos concretos, pasos omitidos y mejoras.' : 'Aquí verás qué debes corregir.'}
+                        {correccion ? 'Consulta el detalle para ver fallos concretos, pasos omitidos y mejoras.' : cargando ? 'Revisando errores y pasos omitidos...' : 'Aquí verás qué debes corregir.'}
                       </p>
                     </div>
                     <div className="exams-side-section" style={{ background: '#f5f3ff', borderColor: '#ddd6fe' }}>

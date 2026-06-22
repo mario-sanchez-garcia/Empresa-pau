@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const SIGNUP_RATE_LIMIT = 10
+const SIGNUP_IP_RATE_LIMIT = 10
+const SIGNUP_EMAIL_RATE_LIMIT = 5
 const SIGNUP_WINDOW_SECONDS = 3600
 
 // x-real-ip is set by Vercel's edge to the actual connecting client IP and cannot
@@ -17,8 +18,9 @@ function getSignupIp(headers: Headers): string {
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
 
-  if (!email || !password) {
+  if (!normalizedEmail || !password) {
     return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
   }
 
@@ -28,19 +30,29 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  // IP-based rate limit: 10 successful signups per IP per hour
+  // Durable signup rate limit: 10 attempts per IP/hour and 5 per email/hour.
   const ip = getSignupIp(req.headers)
   const since = new Date(Date.now() - SIGNUP_WINDOW_SECONDS * 1000).toISOString()
 
-  const { count, error: countError } = await adminSupabase
-    .from('signup_attempts')
-    .select('id', { count: 'exact', head: true })
-    .eq('ip', ip)
-    .gte('created_at', since)
+  const [ipLimit, emailLimit] = await Promise.all([
+    adminSupabase
+      .from('signup_attempts')
+      .select('id', { count: 'exact', head: true })
+      .eq('ip', ip)
+      .gte('created_at', since),
+    adminSupabase
+      .from('signup_attempts')
+      .select('id', { count: 'exact', head: true })
+      .eq('email', normalizedEmail)
+      .gte('created_at', since)
+  ])
 
-  if (!countError && (count ?? 0) >= SIGNUP_RATE_LIMIT) {
+  if (
+    (!ipLimit.error && (ipLimit.count ?? 0) >= SIGNUP_IP_RATE_LIMIT) ||
+    (!emailLimit.error && (emailLimit.count ?? 0) >= SIGNUP_EMAIL_RATE_LIMIT)
+  ) {
     return NextResponse.json(
-      { error: 'Demasiados registros desde esta IP. Inténtalo más tarde.' },
+      { error: 'Demasiados intentos. Prueba de nuevo más tarde.' },
       {
         status: 429,
         headers: { 'Retry-After': String(SIGNUP_WINDOW_SECONDS) },
@@ -50,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   // Create user with email already confirmed (bypasses email confirmation requirement)
   const { error: createError } = await adminSupabase.auth.admin.createUser({
-    email,
+    email: normalizedEmail,
     password,
     email_confirm: true,
   })
@@ -61,7 +73,7 @@ export async function POST(req: NextRequest) {
 
   // Sign in immediately to get a session
   const { data: signInData, error: signInError } = await adminSupabase.auth.signInWithPassword({
-    email,
+    email: normalizedEmail,
     password,
   })
 
@@ -69,8 +81,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Cuenta creada pero no se pudo iniciar sesión. Inténtalo manualmente.' }, { status: 500 })
   }
 
-  // Record successful signup — inserted after success so errors don't consume quota
-  await adminSupabase.from('signup_attempts').insert({ ip })
+  await adminSupabase.from('signup_attempts').insert({ ip, email: normalizedEmail })
 
   return NextResponse.json({ session: signInData.session })
 }

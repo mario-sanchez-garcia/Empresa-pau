@@ -1542,7 +1542,7 @@ export default function LandingPage() {
               </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 22 }}>por mes · cancela cuando quieras</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 24 }}>
-                {['Exámenes ilimitados', 'Plan semanal personalizado', 'Chat con tutor IA 24/7', 'Flashcards y zona de repaso', 'Historial completo', 'Acceso anticipado a nuevas materias'].map((item) => (
+                {['Exámenes oficiales disponibles', 'Plan semanal personalizado', 'Chat tutor IA con límite diario', 'Flashcards y zona de repaso', 'Historial completo', 'Acceso anticipado a nuevas materias'].map((item) => (
                   <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>
                     <Check size={14} style={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0 }} /> {item}
                   </div>

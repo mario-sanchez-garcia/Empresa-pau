@@ -206,7 +206,11 @@ export async function POST(request: NextRequest) {
     console.warn('[chat] truncated: true', { action, maxTokens, outputTokens: usage.outputTokens })
   }
   const respuesta = message.content[0].type === 'text' ? message.content[0].text : ''
-  return NextResponse.json({ respuesta })
+  return NextResponse.json({
+    respuesta,
+    truncated: message.stop_reason === 'max_tokens',
+    finishReason: message.stop_reason ?? 'unknown'
+  })
 }
 
 async function getAuthContext(request: NextRequest) {

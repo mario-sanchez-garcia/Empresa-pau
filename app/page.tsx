@@ -105,6 +105,22 @@ function readSafeStreamText(rawText: string) {
   return { visibleText: rawText, truncated: false }
 }
 
+function SafeStreamingText({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        whiteSpace: 'pre-wrap',
+        overflowWrap: 'anywhere',
+        fontSize: 15,
+        lineHeight: 1.75,
+        color: '#334155'
+      }}
+    >
+      {text}
+    </div>
+  )
+}
+
 const SUBJECT_CARDS = {
   mates: {
     title: 'Matemáticas',
@@ -3401,12 +3417,15 @@ function cambiarTipo(t: Tipo) {
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Pausia</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  <CorrectionResultCard
-                    correction={correccion || streamText}
-                    officialMaxScore={puntuacionPreguntaActiva}
-                    components={mdComponents}
-                    isStreaming={!correccion && !!streamText}
-                  />
+                  {!correccion && streamText ? (
+                    <SafeStreamingText text={streamText} />
+                  ) : (
+                    <CorrectionResultCard
+                      correction={correccion}
+                      officialMaxScore={puntuacionPreguntaActiva}
+                      components={mdComponents}
+                    />
+                  )}
                   {truncated && (
                     <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fef3c7', border: '1.5px solid #fcd34d', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
@@ -3560,6 +3579,8 @@ function cambiarTipo(t: Tipo) {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Pausia</div>
                         {(() => {
+                          const isStreamingMessage = cargandoChat && i === mensajes.length - 1
+                          if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
                           const { main, why } = splitWhyExplanationMarkdown(msg.texto)
                           return (
                             <>

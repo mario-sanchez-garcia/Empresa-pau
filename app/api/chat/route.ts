@@ -76,7 +76,9 @@ export async function POST(request: NextRequest) {
   const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
   const action = imageCount > 0 ? 'image_correction' : 'chat'
   const model = 'claude-sonnet-4-6'
-  const maxTokens = action === 'image_correction' ? 2200 : 2200
+  const maxTokens = correctionMode === 'chunked_correction' ? 3500
+    : action === 'image_correction' ? 2200
+    : 2200
   const responseFormatRules = action === 'image_correction'
     ? `${CHAT_RESPONSE_FORMAT_RULES}\n\n${IMAGE_CORRECTION_COMPACT_RULES}`
     : CHAT_RESPONSE_FORMAT_RULES

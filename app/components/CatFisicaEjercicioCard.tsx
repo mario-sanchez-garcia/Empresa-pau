@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/fisica_cataluna'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'

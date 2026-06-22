@@ -50,7 +50,7 @@ interface SupabaseStateResponse {
   weakAreas?: WeakAreaResponse[]
 }
 
-function mapToProgress(data: SupabaseStateResponse, dayKey: string): CaminoProgress {
+function mapToProgress(data: SupabaseStateResponse, _dayKey: string): CaminoProgress {
   const completedByDate: Record<string, string[]> = {}
   if (data.todayMission.completedTaskIds.length > 0) {
     completedByDate[data.todayMission.missionDate] = data.todayMission.completedTaskIds

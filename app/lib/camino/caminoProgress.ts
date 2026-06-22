@@ -20,7 +20,7 @@ export function todayKey(date = new Date()) {
   return `${y}-${m}-${d}`
 }
 
-export function createInitialProgress(dayKey = todayKey()): CaminoProgress {
+export function createInitialProgress(_dayKey = todayKey()): CaminoProgress {
   return {
     xpTotal: 0,
     streakDays: 0,

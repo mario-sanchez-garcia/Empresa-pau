@@ -1,4 +1,4 @@
-import type { CaminoRouteId, CaminoTaskTypeId, DailyCaminoTask } from './caminoData'
+import type { CaminoTaskTypeId, DailyCaminoTask } from './caminoData'
 import { buildCaminoAction } from './caminoActions'
 import { CAMINO_CURRICULUM, MISSION_TASK_XP, ROUTE_WEEK_OFFSET, getPhaseLabel, type CaminoWeekData } from './caminoCurriculum'
 import { extractBlockKey } from './curriculumFlashcards'
@@ -117,7 +117,6 @@ export function buildDailyTasksFromWeek(
   // Si hay bloques débiles y la misión no incluye repaso de error, añadir uno
   const hasRepaso = tasks.some(t => t.type === 'repaso_error')
   if (!hasRepaso && weakBlocks.length > 0) {
-    const action = buildCaminoAction('repaso_error')
     tasks.push({
       id: `w${week.semana}-repaso_error-weak`,
       title: `Repaso de errores: ${weakBlocks[0]}`,

@@ -61,7 +61,7 @@ async function getCommunityMap(db: any, userIds: string[]): Promise<Map<string, 
 
 function buildPayload(entries: LeaderboardEntry[], currentUserId: string, community: string) {
   const currentGlobal = entries.find(entry => entry.id === currentUserId) ?? null
-  const communityEntries = sortEntries(entries.filter(entry => entry.community === community).map(({ rank, ...entry }) => entry))
+  const communityEntries = sortEntries(entries.filter(entry => entry.community === community).map(({ rank: _rank, ...entry }) => entry))
   const currentCommunity = communityEntries.find(entry => entry.id === currentUserId) ?? null
 
   return {

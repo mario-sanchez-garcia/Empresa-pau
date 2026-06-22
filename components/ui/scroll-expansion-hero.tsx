@@ -35,7 +35,7 @@ const ScrollExpandMedia = ({
   scrollToExpand,
   textBlend,
   overlayClass,
-  objectFit = 'cover',
+  objectFit: _objectFit = 'cover',
   children,
 }: ScrollExpandMediaProps) => {
   const [scrollProgress, setScrollProgress] = useState<number>(0);

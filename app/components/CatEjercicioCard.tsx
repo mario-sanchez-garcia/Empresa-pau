@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'

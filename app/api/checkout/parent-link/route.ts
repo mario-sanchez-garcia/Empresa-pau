@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_PLAN_ID, getLivePriceCents, getPlan } from '@/app/lib/billing/plans'
 import { generateRawToken, hashToken, linkExpiresAt, CHECKOUT_STARTED_STALE_SECONDS } from '@/app/lib/billing/tokens'
 import { createServiceClient, getAuthUser } from '@/app/lib/billing/supabase'

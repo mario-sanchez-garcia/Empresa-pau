@@ -20,6 +20,7 @@ import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from './lib/contentQuality'
+import { getRandomEvauExerciseForMission, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
 import Sidebar, { type SidebarItemId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
@@ -747,10 +748,12 @@ export default function Home() {
   const [planIA, setPlanIA] = useState('')
   const [cargandoPlan, setCargandoPlan] = useState(false)
   const [contextoChat, setContextoChat] = useState('')
+  const [caminoExerciseNotice, setCaminoExerciseNotice] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const randomEvauResolutionKeyRef = useRef('')
   const cfg = ASIGNATURAS[asignatura]
-  const { ccaa } = useCCAA()
+  const { ccaa, setCCAA } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
   const isMadridMathStyle = asignatura === 'mates' || asignatura === 'matematicas_ccss'
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
@@ -1378,6 +1381,72 @@ const correctionScoreLabel = correctionScoreMatch
   ? `${correctionScoreMatch[1].replace(',', '.')}/${correctionScoreMatch[2].replace(',', '.')}`
   : '--'
 
+useEffect(() => {
+  if (typeof window === 'undefined' || window.location.pathname !== '/') return
+
+  const params = new URLSearchParams(window.location.search)
+  const mode = params.get('mode')
+  const source = params.get('source') ?? ''
+  if (!source.startsWith('camino')) return
+
+  const resolutionKey = params.toString()
+  if (randomEvauResolutionKeyRef.current === resolutionKey) return
+  randomEvauResolutionKeyRef.current = resolutionKey
+
+  const subject = normalizeCaminoExamSubject(params.get('subject'))
+  if (!subject) return
+
+  const selectedExerciseId = params.get('exerciseId')
+  if (mode === 'selected' && selectedExerciseId) {
+    setSeccion('examenes')
+    setCCAA('Madrid')
+    setAsignatura(subject)
+    selectMadridMathExerciseById(subject, selectedExerciseId)
+    return
+  }
+
+  if (mode !== 'random') return
+
+  const recentStorageKey = 'pausia_recent_evau_exercises_v1'
+  let recentExerciseIds: string[] = []
+  try {
+    const stored = window.localStorage.getItem(recentStorageKey)
+    const parsed = stored ? JSON.parse(stored) : []
+    if (Array.isArray(parsed)) recentExerciseIds = parsed.filter(item => typeof item === 'string')
+  } catch {}
+
+  const resolved = getRandomEvauExerciseForMission({
+    subject,
+    block: params.get('block'),
+    topic: params.get('topic'),
+    missionId: params.get('missionId'),
+    recentExerciseIds,
+  })
+
+  if (!resolved) {
+    setCaminoExerciseNotice('No he encontrado todavía un ejercicio PAU estructurado para esta misión. Puedes elegir uno manualmente en Exámenes.')
+    return
+  }
+
+  setSeccion('examenes')
+  setCCAA('Madrid')
+  setAsignatura(resolved.subject)
+  selectMadridMathExerciseById(resolved.subject, resolved.exerciseId)
+  window.setTimeout(() => {
+    selectMadridMathExerciseById(resolved.subject, resolved.exerciseId)
+  }, 0)
+  setCaminoExerciseNotice(resolved.warning ?? '')
+
+  try {
+    window.localStorage.setItem(
+      recentStorageKey,
+      JSON.stringify(rememberRecentEvauExerciseIds(recentExerciseIds, resolved.exerciseId))
+    )
+  } catch {}
+
+  window.history.replaceState(null, '', resolved.targetUrl)
+}, []) // eslint-disable-line react-hooks/exhaustive-deps
+
 function puntosBloqueFisica(tipoBloque: string) {
   return (
     (examen as any)?.preguntas?.find(
@@ -1419,6 +1488,35 @@ function cambiarBloqueMates(i: number, bloque: string) {
   const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)?.opcion
   if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
   reset()
+}
+
+function selectMadridMathExerciseById(subject: 'mates' | 'matematicas_ccss', exerciseId: string) {
+  const source = EXAMENES_BY_ASIGNATURA[subject] ?? []
+  const exam = source.find(candidate =>
+    (candidate.comunidad ?? candidate.ccaa) === 'Madrid' &&
+    availableQuestionsForExam(candidate).some((question: any) => String(question.id) === exerciseId)
+  )
+  if (!exam) return false
+
+  const question = availableQuestionsForExam(exam).find((candidate: any) => String(candidate.id) === exerciseId)
+  const blocks = Array.from(new Set(availableQuestionsForExam(exam).map((candidate: any) => candidate.bloque)))
+  const years = Array.from(new Set(
+    source
+      .filter(candidate => candidate.tipo === exam.tipo && (candidate.comunidad ?? candidate.ccaa) === 'Madrid')
+      .map(candidate => candidate.año)
+  )).sort((a: any, b: any) => Number(b) - Number(a))
+
+  setTipo(exam.tipo as Tipo)
+  setExamenIdx(Math.max(0, years.findIndex(year => year === exam.año)))
+  setCatEjercicioIdx(0)
+  setCatHistoriaEjercicioIdx(0)
+  setCatFisicaEjercicioIdx(0)
+  setCatAsignaturaEjercicioIdx(0)
+  setDiaHistoriaIdx(0)
+  setOpcion(question?.opcion === 'B' ? 1 : 0)
+  setBloqueIdx(Math.max(0, blocks.findIndex(block => block === question?.bloque)))
+  reset()
+  return true
 }
 
 function cambiarBloqueFisica(i: number, tipoBloque: string) {
@@ -1463,6 +1561,7 @@ function reset() {
 
 function cambiarAsignatura(a: Asignatura) {
   setAsignatura(a)
+  setCaminoExerciseNotice('')
   setExamenIdx(0)
   setCatEjercicioIdx(0)
   setCatHistoriaEjercicioIdx(0)
@@ -3277,6 +3376,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
                 <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Filtros del examen · {cfg.short}</div>
               </div>
+              {caminoExerciseNotice && (
+                <div style={{ marginBottom: '14px', borderRadius: '14px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', padding: '10px 12px', fontSize: '12px', fontWeight: 760, lineHeight: 1.45 }}>
+                  {caminoExerciseNotice}
+                </div>
+              )}
               <div className="exams-filter-bar">
                 <FilterDropdown
                   label="Año"

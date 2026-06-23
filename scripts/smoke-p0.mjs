@@ -28,6 +28,7 @@ const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
 const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const caminoCourseTopic = read('app/camino-pau/curso/[subject]/[block]/[topic]/page.tsx')
+const randomEvauExercise = read('app/lib/camino/randomEvauExercise.ts')
 const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
 const caminoCurriculumMigration = read('supabase/migrations/20260623110000_create_camino_curriculum_tables.sql')
 const whyTheory = read('app/lib/whyItWorksTheory.ts')
@@ -263,6 +264,26 @@ assert(
     caminoSeed.includes('"subject": "matematicas_ii"') &&
     caminoSeed.includes('"blockSlug": "geometria-3d"') &&
     !/"subject": "matematicas_ccss"[\s\S]{0,240}"blockSlug": "geometria-3d"/.test(caminoSeed)
+)
+
+assert(
+  'Camino EVAU missions resolve to random real Madrid exercises by topic',
+  randomEvauExercise.includes("from '../../data/examenes'") &&
+    randomEvauExercise.includes("from '../../data/matematicas_ccss_madrid'") &&
+    randomEvauExercise.includes('getRandomEvauExerciseForMission') &&
+    randomEvauExercise.includes('Math.random') &&
+    randomEvauExercise.includes("matchLevel: 'subject_fallback'") &&
+    randomEvauExercise.includes('exerciseId') &&
+    randomEvauExercise.includes("subject === 'matematicas_ccss'") &&
+    randomEvauExercise.includes("return 'matematicas_ccss'") &&
+    page.includes("params.get('mode')") &&
+    page.includes("source.startsWith('camino')") &&
+    page.includes("mode === 'selected' && selectedExerciseId") &&
+    page.includes('getRandomEvauExerciseForMission') &&
+    page.includes('selectMadridMathExerciseById') &&
+    page.includes('rememberRecentEvauExerciseIds') &&
+    page.includes("window.history.replaceState(null, '', resolved.targetUrl)") &&
+    caminoPlan.includes('mode=random&source=camino')
 )
 
 assert(

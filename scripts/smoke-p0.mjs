@@ -23,7 +23,11 @@ const pricing = read('app/pricing/page.tsx')
 const landing = read('app/landing/page.tsx')
 const sidebar = read('app/components/Sidebar.tsx')
 const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
+const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
+const caminoSeed = read('app/data/camino/curriculum_seed.json')
+const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
+const caminoCurriculumMigration = read('supabase/migrations/20260623110000_create_camino_curriculum_tables.sql')
 const packageJson = read('package.json')
 const nextConfig = read('next.config.ts')
 
@@ -145,14 +149,43 @@ assert(
 
 assert(
   'Camino PAU generates editable curriculum missions with targets and XP',
-  caminoCalendar.includes("from('curriculum_flashcards')") &&
-    caminoCalendar.includes('FALLBACK_CURRICULUM') &&
-    caminoCalendar.includes("subject: 'Matemáticas CCSS', block: 'Probabilidad'") &&
-    !caminoCalendar.includes("subject: 'Matemáticas CCSS', block: 'Geometría'") &&
+  caminoCalendar.includes('concept_explanation') &&
+    caminoCalendar.includes('guided_practice') &&
+    caminoCalendar.includes('evau_practice') &&
+    caminoCalendar.includes('exam_focus') &&
+    caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
     caminoCalendar.includes('Marcar hecha') &&
     caminoCalendar.includes('actionHref(newMission.kind')
+)
+
+assert(
+  'Camino curriculum seed has topic lessons and keeps CCSS free of 3D geometry',
+  caminoPlan.includes('CAMINO_CURRICULUM_TOPICS') &&
+    caminoPlan.includes('buildEvauHref') &&
+    caminoSeed.includes('"subject": "matematicas_ccss"') &&
+    caminoSeed.includes('"subject": "matematicas_ii"') &&
+    caminoSeed.includes('"blockSlug": "geometria-3d"') &&
+    !/"subject": "matematicas_ccss"[\s\S]{0,240}"blockSlug": "geometria-3d"/.test(caminoSeed)
+)
+
+assert(
+  'Camino topic page shows explanation, guided practice, EVAU link, local chat and not-seen feedback',
+  caminoTopic.includes('No lo he dado en clase') &&
+    caminoTopic.includes('Preguntar a Pausia') &&
+    caminoTopic.includes('Ejercicio PAU relacionado') &&
+    caminoTopic.includes('SCHOOL_FEEDBACK_KEY') &&
+    caminoTopic.includes("award('evau')") &&
+    caminoTopic.includes('MathMarkdown text=')
+)
+
+assert(
+  'Camino curriculum migrations and seed command exist',
+  caminoCurriculumMigration.includes('create table if not exists public.curriculum_topics') &&
+    caminoCurriculumMigration.includes('school_topic_feedback') &&
+    caminoCurriculumMigration.includes('school_topic_status') &&
+    packageJson.includes('seed:camino-curriculum')
 )
 
 assert(

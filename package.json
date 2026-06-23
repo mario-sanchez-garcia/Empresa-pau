@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "smoke": "node scripts/smoke-p0.mjs",
-    "seed:math-curriculum": "node scripts/seed-math-curriculum.mjs"
+    "seed:math-curriculum": "node scripts/seed-math-curriculum.mjs",
+    "seed:camino-curriculum": "node scripts/seed-camino-curriculum.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",

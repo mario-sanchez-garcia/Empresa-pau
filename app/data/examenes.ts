@@ -863,7 +863,7 @@ c) (1.5 puntos) Estudiar sus extremos relativos y absolutos.`,
         enunciado: "Sean los puntos $A(1, -2, 3)$, $B(0, 2, -1)$ y $C(2, 1, 0)$. Se pide:\n\na) (1.25 puntos) Comprobar que forman un triángulo $T$ y hallar una ecuación del plano que los contiene.\n\nb) (0.75 puntos) Calcular el corte de la recta que pasa por los puntos $A$ y $B$ con el plano $z = 1$.\n\nc) (0.5 puntos) Determinar el perímetro del triángulo $T$.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2023-J-A4", bloque: "Probabilidad", opcion: "A",
-        enunciado: "Se tiene un suceso A de probabilidad P (A) = 0.3.\n\na) (0.75 puntos) Un suceso B de probabilidad P (B) = 0.5 es independiente de A. Calcule P (A ∪ B).\n\nb) (0.75 puntos) Otro suceso C cumple P (C | A) = 0.5. Determine P (A ∩ C).\n\nc) (1 punto) Si se tiene un suceso D tal que P (A | D) = 0.2 y P (D | A) = 0.5, calcule P (D).",
+        enunciado: `Se tiene un suceso $A$ de probabilidad $P(A) = 0.3$.\n\na) (0.75 puntos) Un suceso $B$ de probabilidad $P(B) = 0.5$ es independiente de $A$. Calcule $P(A \\cup B)$.\n\nb) (0.75 puntos) Otro suceso $C$ cumple $P(C \\mid A) = 0.5$. Determine $P(A \\cap C)$.\n\nc) (1 punto) Si se tiene un suceso $D$ tal que $P(A \\mid D) = 0.2$ y $P(D \\mid A) = 0.5$, calcule $P(D)$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2023-J-B1", bloque: "Algebra", opcion: "B",
         enunciado: `Dado el sistema

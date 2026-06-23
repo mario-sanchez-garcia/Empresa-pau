@@ -1254,7 +1254,7 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
         enunciado:`$A(0,0,0)$, $B(1,1,0)$, $C(1,0,1)$, $D(0,1,1)$.\n\na) Plano $BCD$.\n\nb) Distancia $A$ a $BCD$.\n\nc) Volumen tetraedro.`,
         puntuacion:2.5, criterios:"Plano BCD (1 pt), distancia A (0.75 pts), volumen (0.75 pts)." },
       { id:"2017-J-4A", bloque:"Probabilidad", opcion:"A",
-        enunciado:`Caja $A$: 5 blancas, 3 negras. Caja $B$: 2 blancas, 6 negras. P(A)=0.4.\n\na) P(blanca)\n\nb) P($A$ | blanca)`,
+        enunciado:`Caja $A$: 5 blancas, 3 negras. Caja $B$: 2 blancas, 6 negras. $P(A)=0.4$.\n\na) $P(\\text{blanca})$\n\nb) $P(A \\mid \\text{blanca})$`,
         puntuacion:2.5, criterios:"Prob. total (1 pt), Bayes (1.5 pts)." },
       { id:"2017-J-4B", bloque:"Probabilidad", opcion:"B",
         enunciado:`$X\\sim N(500,50)$.\n\na) $P(450<X<600)$\n\nb) $P(X>550)$\n\nc) $k$: $P(X>k)=0{,}1$`,

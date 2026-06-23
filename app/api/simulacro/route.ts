@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { buildBlockPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
@@ -11,6 +11,22 @@ import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimi
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000 })
 
 export const maxDuration = 60
+
+type SimulacroBlock = {
+  id: string
+  tema: string
+  comunidad?: string
+  year: number | string
+  convocatoria: string
+  option: string
+  puntuacion: number
+  enunciado: string
+  criterios?: string
+  textoFuente?: string
+  conceptos?: string[]
+  puntos?: number
+  pts?: number
+}
 
 function examSystemLabel(comunidad: string) {
   return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
@@ -130,11 +146,11 @@ export async function POST(request: NextRequest) {
 
     const t0 = Date.now()
     const model = 'claude-sonnet-4-6'
-    const imagePayloadChars = blocks.reduce((total: number, block: any) => {
+    const imagePayloadChars = blocks.reduce((total: number, block: SimulacroBlock) => {
       const image = storedAnswers?.[block.id]?.image
       return total + (typeof image === 'string' ? image.length : 0)
     }, 0)
-    const imageCount = blocks.reduce((total: number, block: any) => {
+    const imageCount = blocks.reduce((total: number, block: SimulacroBlock) => {
       const image = storedAnswers?.[block.id]?.image
       return total + (typeof image === 'string' && image.length > 0 ? 1 : 0)
     }, 0)
@@ -153,12 +169,13 @@ export async function POST(request: NextRequest) {
 
     // Correct each block with its own focused AI call; run all in parallel.
     // A single call for all blocks exceeded Vercel's 60 s function limit.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blockResults: (any | null)[] = await Promise.all(
-      blocks.map(async (block: any, index: number) => {
+      blocks.map(async (block: SimulacroBlock, index: number) => {
         const answer = storedAnswers?.[block.id]
         console.info('[simulacro] correcting_block', { blockIndex: index })
 
-        const blockContent: any[] = []
+        const blockContent: Extract<Anthropic.MessageParam['content'], unknown[]> = []
         const blockImagePayloadChars = typeof answer?.image === 'string' ? answer.image.length : 0
         const blockMetadata = {
           ...usageMetadata,
@@ -240,12 +257,12 @@ export async function POST(request: NextRequest) {
           }
           console.info('[simulacro] block_done', { blockIndex: index, ms: Date.now() - t0 })
           return parsed
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('[simulacro] failed', {
             phase: 'block_correction',
             blockIndex: index,
             ms: Date.now() - t0,
-            message: error?.message?.slice(0, 120)
+            message: (error as Error)?.message?.slice(0, 120)
           })
           logAiUsageEvent({
             userId: authContext.user.id,
@@ -291,7 +308,7 @@ export async function POST(request: NextRequest) {
           que_hizo_bien: 'No disponible: este bloque no pudo corregirse.',
           errores_detectados: ['La corrección de este bloque no se completó. Vuelve a intentarlo.'],
           que_faltaba: '',
-          penalizaciones_aplicadas: [] as any[],
+          penalizaciones_aplicadas: [] as { motivo: string; puntos_descontados: number }[],
           correccion_detalle: 'Este bloque no se pudo corregir. Pulsa "Reintentar corrección" para volver a intentarlo.',
           solucion_orientativa: '',
           consejo_para_mejorar: 'Vuelve a entregar el simulacro para corregir este bloque.',
@@ -325,9 +342,9 @@ export async function POST(request: NextRequest) {
         .flatMap(b => Array.isArray(b.errores_detectados) ? (b.errores_detectados as string[]) : [])
         .filter(e => e && !e.startsWith('La corrección de este bloque'))
         .slice(0, 4),
-      plan_repaso: [] as any[],
+      plan_repaso: [] as { prioridad: number; tema: string; accion: string; tiempo_recomendado: string; recurso_sugerido: string }[],
       desglose_bloques,
-      resumen_por_bloque_tematico: [] as any[]
+      resumen_por_bloque_tematico: [] as { bloque: string; puntos_conseguidos: number; puntos_maximos: number; porcentaje: number; nivel: string; aparece_en_plan_repaso: boolean }[]
     }
 
     const result = normalizeCorrectionResult(merged, {
@@ -350,8 +367,11 @@ export async function POST(request: NextRequest) {
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })
     return NextResponse.json(result)
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorName = (error as any)?.name ?? (error as any)?.constructor?.name ?? 'Error'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     console.error('SIMULACRO_CORRECTION_ERROR', { errorCode, errorName, message: (error as any)?.message?.slice(0, 120) })
     const errorResult = createCorrectionError({
       message: 'No hemos podido corregir este simulacro ahora mismo. Tus respuestas siguen guardadas.'
@@ -411,14 +431,14 @@ function rateLimitResponse(action: RateLimitAction, result: { limit: number; cou
   )
 }
 
-async function updateSimulacro(supabase: any, id: string, userId: string, result: any, tiempo: number) {
+async function updateSimulacro(supabase: SupabaseClient, id: string, userId: string, result: unknown, tiempo: number) {
   // No .select().maybeSingle(): Boolean(data) would return false on 0 rows even on success
   // (e.g. when service role is absent and RLS SELECT returns empty after UPDATE).
   // Trust the error check instead.
   const { error } = await supabase
     .from('historial_simulacros')
     .update({
-      nota_final: result?.nota_final ?? null,
+      nota_final: (result as Record<string, unknown>)?.nota_final ?? null,
       resultado_json: result,
       estado: 'completado',
       tiempo_empleado: tiempo,
@@ -433,7 +453,7 @@ async function updateSimulacro(supabase: any, id: string, userId: string, result
   return true
 }
 
-async function updateSimulacroError(supabase: any, id: string, userId: string, result: any, tiempo: number) {
+async function updateSimulacroError(supabase: SupabaseClient, id: string, userId: string, result: unknown, tiempo: number) {
   if (!id) return false
   const { error } = await supabase
     .from('historial_simulacros')
@@ -465,7 +485,8 @@ function createCorrectionError({ simulacroId, subject, message, raw }: { simulac
   }
 }
 
-function normalizeCorrectionResult(result: any, context: { simulacroId: string; subject: string; elapsed: number; blocks: any[] }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeCorrectionResult(result: any, context: { simulacroId: string; subject: string; elapsed: number; blocks: SimulacroBlock[] }) {
   const normalizedBlocks = context.blocks.map((source, index) => {
     const block = Array.isArray(result?.desglose_bloques) ? result.desglose_bloques[index] ?? {} : {}
     const max = safeNumber(source.puntuacion ?? source.puntos ?? source.pts ?? block.max_puntos ?? block.puntos_maximos, 0)
@@ -530,21 +551,21 @@ function normalizeCorrectionResult(result: any, context: { simulacroId: string; 
   }
 }
 
-function normalizeList(value: any) {
+function normalizeList(value: unknown) {
   if (Array.isArray(value)) return value.filter(Boolean).map(String)
   if (typeof value === 'string' && value.trim()) return [value.trim()]
   return []
 }
 
-function listToText(value: any) {
+function listToText(value: unknown) {
   return normalizeList(value).join(' ')
 }
 
-function textOrFallback(value: any, fallback: string) {
+function textOrFallback(value: unknown, fallback: string) {
   return typeof value === 'string' && value.trim() ? value.trim() : fallback
 }
 
-function safeNumber(value: any, fallback: number) {
+function safeNumber(value: unknown, fallback: number) {
   const number = Number(value)
   return Number.isFinite(number) ? number : fallback
 }
@@ -553,11 +574,12 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
-function isPlainRecord(value: any): value is Record<string, any> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isPlainRecord(value: unknown): value is Record<string, any> {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value))
 }
 
-function getCorrectionCommunity(value: any, blocks: any[]) {
+function getCorrectionCommunity(value: unknown, blocks: SimulacroBlock[]) {
   if (typeof value === 'string' && value.trim()) return value.trim()
   const blockCommunity = blocks.find(block => typeof block?.comunidad === 'string' && block.comunidad.trim())?.comunidad
   return typeof blockCommunity === 'string' && blockCommunity.trim() ? blockCommunity.trim() : 'Madrid'

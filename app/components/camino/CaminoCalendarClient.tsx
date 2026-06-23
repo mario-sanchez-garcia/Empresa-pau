@@ -11,7 +11,7 @@ import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 
-type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'error_review' | 'exam_focus' | 'mock_exam' | 'chat' | 'manual'
+type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
 type MissionStatus = 'pending' | 'done'
 
@@ -111,8 +111,6 @@ function getMissionTarget(kind: MissionKind, subject: string, topic?: string, bl
   if (kind === 'evau_practice' || kind === 'exam_focus' || kind === 'mock_exam') return { href: `/?subject=${s}${blockParam}${topicParam}&mode=random&source=camino`, fallback: '', autoCompletable: false }
   if ((kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') && block && topic) return { href: `/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}`, fallback: '', autoCompletable: false }
   if (kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') return { href: '', fallback: 'Este tema necesita bloque y tema para abrir una página de curso.', autoCompletable: true }
-  if (kind === 'chat') return { href: `/?view=chat&subject=${s}&source=camino`, fallback: '', autoCompletable: false }
-  if (kind === 'error_review') return { href: `/?view=historial&subject=${s}${topicParam}&source=camino`, fallback: '', autoCompletable: false }
   return { href: '', fallback: 'Esta misión todavía no tiene pantalla propia. Puedes marcarla como hecha cuando la termines fuera de Pausia.', autoCompletable: true }
 }
 function actionHref(kind: MissionKind, subject: string, topic?: string, block?: string, planTopic?: CaminoCurriculumTopic) {
@@ -120,8 +118,8 @@ function actionHref(kind: MissionKind, subject: string, topic?: string, block?: 
   return getMissionTarget(kind, subject, topic, block, planTopic).href
 }
 function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count === 4) return [0, 1, 3, 5]; if (count === 5) return [0, 1, 2, 4, 5]; if (count === 6) return [0, 1, 2, 3, 4, 5]; return [0, 1, 2, 3, 4, 5, 6] }
-function kindFor(index: number): MissionKind { return (['concept_explanation', 'guided_practice', 'evau_practice', 'error_review', 'exam_focus'] as MissionKind[])[index % 5] }
-function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU/EVAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; if (kind === 'error_review') return `Revisa errores de ${item?.topic ?? subject}`; if (kind === 'chat') return `Pregunta una duda de ${item?.topic ?? subject}`; return `Tarea personalizada de ${subject}` }
+function kindFor(index: number): MissionKind { return (['concept_explanation', 'guided_practice', 'evau_practice', 'guided_practice', 'evau_practice'] as MissionKind[])[index % 5] }
+function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU/EVAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
 function divisionFor(xp: number) { return DIVISIONS.find(d => xp >= d.min && xp <= d.max) ?? DIVISIONS[0] }
@@ -217,13 +215,32 @@ function pickCurriculumItem(subject: string, rotation: number, curriculum: Curri
   return rows[rotation % rows.length]
 }
 
+function findExamCurriculumItem(exam: StudentExam | undefined, subject: string, curriculum: CurriculumItem[]) {
+  if (!exam) return null
+  const blockNeedle = textSlug(exam.block || '')
+  const topicNeedle = textSlug(exam.topic || '')
+  if (!blockNeedle && !topicNeedle) return null
+  return curriculumForSubject(subject, curriculum).find(item => {
+    const block = textSlug(item.block)
+    const topic = textSlug(item.topic)
+    return Boolean((blockNeedle && block.includes(blockNeedle)) || (topicNeedle && topic.includes(topicNeedle)))
+  }) ?? null
+}
+
 function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = []) {
   const start = mondayOf(new Date())
   const subjects = onboarding.subjects.length ? onboarding.subjects : ['Matemáticas II', 'Historia de España', 'Inglés']
   const weeklyDays = onboarding.weeklyStudyDaysValue ?? 4
   const minutes = onboarding.dailyMinutes ?? 60
   const indexes = indexesFor(weeklyDays)
-  let rotation = 0
+  let subjectRotation = 0
+  const topicRotationBySubject = new Map<string, number>()
+  const nextCurriculumItem = (subject: string) => {
+    const nextRotation = topicRotationBySubject.get(subject) ?? 0
+    const item = pickCurriculumItem(subject, nextRotation, curriculum)
+    topicRotationBySubject.set(subject, nextRotation + 1)
+    return item
+  }
 
   return Array.from({ length: 7 }, (_, index): DayPlan => {
     const date = addDays(start, index)
@@ -239,22 +256,23 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
 
     if (studyDay) {
       const prioritySubject = sameDay?.subject ?? (strongExamNearby || index <= 2 ? upcoming?.subject : null)
-      const subject = prioritySubject ?? subjects[rotation % subjects.length]
-      const curriculumItem = pickCurriculumItem(subject, rotation + index, curriculum)
-      if (!prioritySubject) rotation += 1
+      const subject = prioritySubject ?? subjects[subjectRotation % subjects.length]
+      const examContext = sameDay ?? (strongExamNearby ? upcoming : undefined)
+      const curriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? nextCurriculumItem(subject)
+      if (!prioritySubject) subjectRotation += 1
       const kind = sameDay || strongExamNearby ? 'exam_focus' : kindFor(index)
-      const reason = sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios reales y repaso de errores.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
+      const reason = sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU/EVAU del bloque.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
       missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, href: actionHref(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'evau_practice' || kind === 'exam_focus' ? 25 : 15, status: 'pending' })
 
       if (minutes >= 60 && !sameDay && !strongExamNearby) {
-        const secondSubject = prioritySubject ?? subjects[rotation % subjects.length]
-        const secondItem = pickCurriculumItem(secondSubject, rotation + index + 2, curriculum)
-        if (!prioritySubject) rotation += 1
-        missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'error_review', subject: secondSubject, block: secondItem?.block, topic: secondItem?.topic, title: `Corrige un error de ${secondItem?.topic ?? secondSubject}`, reason: 'Refuerzo de precisión sin agobio.', href: actionHref('error_review', secondSubject, secondItem?.topic, secondItem?.block, secondItem?.planTopic), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 20, status: 'pending' })
+        const secondSubject = prioritySubject ?? subjects[subjectRotation % subjects.length]
+        const secondItem = nextCurriculumItem(secondSubject)
+        if (!prioritySubject) subjectRotation += 1
+        missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'evau_practice', subject: secondSubject, block: secondItem?.block, topic: secondItem?.topic, title: `Ejercicio PAU/EVAU de ${secondItem?.topic ?? secondSubject}`, reason: 'Refuerzo con ejercicio real del bloque, sin enviar al historial.', href: actionHref('evau_practice', secondSubject, secondItem?.topic, secondItem?.block, secondItem?.planTopic), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 25, status: 'pending' })
       }
 
       missions.push({ id: `${dateISO}-bonus-1`, role: 'bonus', kind: 'guided_example', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: ejemplo guiado de ${curriculumItem?.topic ?? subject}`, reason: 'Opcional para practicar con calma.', href: actionHref('guided_example', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 10, baseXP: 12, status: 'pending' })
-      missions.push({ id: `${dateISO}-bonus-2`, role: 'bonus', kind: 'chat', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: pregunta una duda de ${curriculumItem?.topic ?? subject}`, reason: 'Cierra el día resolviendo una duda concreta.', href: actionHref('chat', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 8, baseXP: 10, status: 'pending' })
+      missions.push({ id: `${dateISO}-bonus-2`, role: 'bonus', kind: 'evau_practice', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: ejercicio PAU de ${curriculumItem?.topic ?? subject}`, reason: 'Cierra el día con práctica real si te queda energía.', href: actionHref('evau_practice', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 12, baseXP: 12, status: 'pending' })
     }
 
     return { date: dateISO, label: date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }), isToday: dateISO === todayISO(), missions }
@@ -432,27 +450,38 @@ export default function CaminoCalendarClient() {
 function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
 
 function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: Array<{ block: string; items: CurriculumItem[] }> }> }) {
+  const [open, setOpen] = useState(false)
+  const [selectedSubject, setSelectedSubject] = useState(groups[0]?.subject ?? '')
+  const activeGroup = groups.find(group => group.subject === selectedSubject) ?? groups[0]
   return (
     <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Temario guiado</p>
           <h2 className="text-xl font-black text-slate-950">Cursos de tu Camino</h2>
-          <p className="mt-1 text-sm font-semibold text-slate-500">Entra manualmente a una subpágina de tema: primero entiendes, luego practicas y después vas a PAU.</p>
+          <p className="mt-1 text-sm font-semibold text-slate-500">Elige asignatura, bloque y tema cuando quieras entrar manualmente a una ruta de aprendizaje.</p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-2xl bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> Academia PAU</div>
+        <button onClick={() => setOpen(value => !value)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> {open ? 'Cerrar cursos' : 'Ver cursos'}</button>
       </div>
       {groups.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {groups.map(group => (
-            <article key={group.subject} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+        <div>
+          <div className="flex flex-wrap gap-2">
+            {groups.map(group => (
+              <button key={group.subject} onClick={() => { setSelectedSubject(group.subject); setOpen(true) }} className="rounded-full border px-3 py-1.5 text-xs font-black transition hover:-translate-y-0.5" style={{ borderColor: selectedSubject === group.subject ? themeFor(group.subject).text : themeFor(group.subject).border, background: selectedSubject === group.subject ? themeFor(group.subject).bg : '#ffffff', color: themeFor(group.subject).text }}>
+                {group.subject}
+              </button>
+            ))}
+          </div>
+          {!open && <p className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Tu calendario ya te lleva al tema que toca. Abre cursos sólo cuando quieras buscar manualmente un bloque concreto.</p>}
+          {open && activeGroup && (
+            <article className="mt-4 rounded-3xl border border-slate-100 bg-slate-50 p-4">
               <div className="mb-3 flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: themeFor(group.subject).text }} />
-                <h3 className="text-base font-black text-slate-900">{group.subject}</h3>
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: themeFor(activeGroup.subject).text }} />
+                <h3 className="text-base font-black text-slate-900">{activeGroup.subject}</h3>
               </div>
               <div className="grid gap-3">
-                {group.blocks.map(block => (
-                  <div key={`${group.subject}-${block.block}`} className="rounded-2xl border border-white bg-white p-3">
+                {activeGroup.blocks.map(block => (
+                  <div key={`${activeGroup.subject}-${block.block}`} className="rounded-2xl border border-white bg-white p-3">
                     <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{block.block}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {block.items.map(item => (
@@ -466,7 +495,7 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
                 ))}
               </div>
             </article>
-          ))}
+          )}
         </div>
       ) : (
         <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Completa tus asignaturas para ver el temario guiado.</p>
@@ -521,6 +550,13 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, onClose, onAddE
     setDraft(current => current.map(day => day.date === newMission.day ? { ...day, missions: [...day.missions, mission] } : day))
   }
 
+  const kindOptions: Array<{ value: MissionKind; label: string }> = [
+    { value: 'concept_explanation', label: 'Explicación' },
+    { value: 'guided_practice', label: 'Ejercicio guiado' },
+    { value: 'evau_practice', label: 'Ejercicio PAU' },
+    { value: 'mock_exam', label: 'Simulacro' },
+  ]
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-4 backdrop-blur-sm max-lg:left-0 lg:left-[248px]">
       <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
@@ -530,9 +566,43 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, onClose, onAddE
         </header>
         <div className="grid flex-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
           <div className="grid gap-3 lg:grid-cols-2">
-            {draft.map(day => <article key={day.date} className="rounded-3xl border border-blue-100 bg-slate-50 p-4"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3><div className="mt-3 grid gap-2">{day.missions.length ? day.missions.map(mission => <div key={mission.id} className="rounded-2xl border border-white bg-white p-3 shadow-sm"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-xs font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p><input value={mission.title} onChange={event => updateMission(mission.id, { title: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-100 bg-slate-50 px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-blue-200 focus:bg-white" /></div><button onClick={() => deleteMission(mission.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar misión"><Trash2 size={15} /></button></div><div className="mt-2 grid gap-2 sm:grid-cols-3"><select value={mission.subject} onChange={event => updateMission(mission.id, { subject: event.target.value })} className="mini-input">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select><select value={mission.kind} onChange={event => updateMission(mission.id, { kind: event.target.value as MissionKind })} className="mini-input"><option value="concept_explanation">Explicación</option><option value="guided_practice">Ejercicio guiado</option><option value="evau_practice">Ejercicio PAU</option><option value="error_review">Errores</option><option value="mock_exam">Simulacro</option><option value="chat">Chat</option></select><select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mini-input">{draft.map(option => <option key={option.date} value={option.date}>{option.label}</option>)}</select></div><label className="mt-2 inline-flex items-center gap-2 text-xs font-black text-slate-500"><input type="checkbox" checked={mission.role === 'bonus'} onChange={event => updateMission(mission.id, { role: event.target.checked ? 'bonus' : 'main' })} /> Bonus/opcional</label></div>) : <p className="text-xs font-bold text-slate-400">Sin misiones.</p>}</div></article>)}
+            {draft.map(day => (
+              <article key={day.date} className="rounded-3xl border border-blue-100 bg-slate-50 p-4">
+                <h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>
+                <div className="mt-3 grid gap-2">
+                  {day.missions.length ? day.missions.map(mission => (
+                    <div key={mission.id} className="rounded-2xl border border-white bg-white p-3 shadow-sm">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>
+                          <input value={mission.title} onChange={event => updateMission(mission.id, { title: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-100 bg-slate-50 px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-blue-200 focus:bg-white" />
+                        </div>
+                        <button onClick={() => deleteMission(mission.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar misión"><Trash2 size={15} /></button>
+                      </div>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                        <select value={mission.subject} onChange={event => updateMission(mission.id, { subject: event.target.value })} className="mini-input">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select>
+                        <select value={mission.kind} onChange={event => updateMission(mission.id, { kind: event.target.value as MissionKind })} className="mini-input">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
+                        <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mini-input">{draft.map(option => <option key={option.date} value={option.date}>{option.label}</option>)}</select>
+                      </div>
+                      <label className="mt-2 inline-flex items-center gap-2 text-xs font-black text-slate-500"><input type="checkbox" checked={mission.role === 'bonus'} onChange={event => updateMission(mission.id, { role: event.target.checked ? 'bonus' : 'main' })} /> Bonus/opcional</label>
+                    </div>
+                  )) : <p className="text-xs font-bold text-slate-400">Sin misiones.</p>}
+                </div>
+              </article>
+            ))}
           </div>
-          <aside className="rounded-3xl border border-blue-100 bg-blue-50/60 p-4"><h3 className="text-sm font-black text-slate-950">Añadir misión</h3><div className="mt-4 grid gap-3"><Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{draft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field><Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field><Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field><Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish"><option value="concept_explanation">Explicación</option><option value="guided_practice">Ejercicio guiado</option><option value="evau_practice">Ejercicio PAU</option><option value="error_review">Repaso de errores</option><option value="mock_exam">Simulacro</option><option value="chat">Chat</option></select></Field><Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field><label className="inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label><button onClick={addMission} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white"><Plus size={16} /> Añadir misión</button></div></aside>
+          <aside className="rounded-3xl border border-blue-100 bg-blue-50/60 p-4">
+            <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
+            <div className="mt-4 grid gap-3">
+              <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{draft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
+              <Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field>
+              <Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field>
+              <Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
+              <Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
+              <label className="inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
+              <button onClick={addMission} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white"><Plus size={16} /> Añadir misión</button>
+            </div>
+          </aside>
         </div>
         <style>{`.mini-input{min-width:0;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;padding:7px 8px;font-size:11px;font-weight:800;color:#475569;outline:none}.mini-input:focus{border-color:#93c5fd;background:#fff}`}</style>
       </motion.section>

@@ -36,8 +36,6 @@ function progressKey(topic: CaminoCurriculumTopic) {
 export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTopic | null }) {
   const onboarding = useMemo(() => loadOnboarding(), [])
   const [toast, setToast] = useState('')
-  const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('')
   const [progress, setProgress] = useState<TopicProgress>(() => loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {}))
 
   if (!topic) {
@@ -76,10 +74,16 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     setToast('Perfecto, lo dejamos para más adelante y ajustamos tu plan.')
   }
 
-  function askLocalTutor(prompt: string) {
-    setQuestion(prompt)
-    const base = currentTopic.explanation || `Este tema está en itinerario, pero todavía no tiene apuntes LaTeX cargados.`
-    setAnswer(`Contexto del tema: ${subjectLabelFromSlug(currentTopic.subject)} · ${currentTopic.blockTitle} · ${currentTopic.title}\n\n${base}\n\nEjemplo actual: ${currentTopic.guidedExample || 'Aún no hay ejemplo LaTeX específico cargado.'}\n\nPista para estudiar: intenta explicar el concepto con tus palabras, resuelve el ejercicio guiado y después abre el ejercicio PAU relacionado.`)
+  function chatHref(prompt?: string) {
+    const params = new URLSearchParams({
+      view: 'chat',
+      from: 'camino_course',
+      subject: currentTopic.subject,
+      block: currentTopic.blockSlug,
+      topic: currentTopic.topicSlug,
+    })
+    if (prompt) params.set('question', prompt)
+    return `/?${params.toString()}`
   }
 
   return (
@@ -118,12 +122,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Práctica PAU/EVAU</p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
                 <Link onClick={() => award('evau')} href={buildEvauHref(currentTopic)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Hacer ejercicio PAU de este tema <ArrowRight size={16} /></Link>
+                <Link onClick={() => award('evau')} href={buildEvauHref(currentTopic)} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-700">Corregir con Pausia <Check size={16} /></Link>
               </div>
               <div className="rounded-3xl border border-violet-100 bg-white p-4">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Pausia sobre este tema</p>
-                <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => <button key={item} onClick={() => askLocalTutor(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</button>)}</div>
-                <div className="mt-3 flex gap-2"><input value={question} onChange={event => setQuestion(event.target.value)} placeholder="Pregunta sobre este tema" className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold outline-none focus:border-violet-200 focus:bg-white" /><button onClick={() => askLocalTutor(question || 'Explícamelo más fácil')} className="rounded-2xl bg-violet-600 px-3 text-white"><MessageCircle size={16} /></button></div>
-                {answer && <pre className="mt-3 whitespace-pre-wrap rounded-2xl bg-slate-50 p-3 text-xs font-semibold leading-5 text-slate-600">{answer}</pre>}
+                <p className="mt-2 text-sm font-semibold text-slate-600">Abre el Chat con Pausia con esta asignatura, bloque y tema como contexto.</p>
+                <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => <Link key={item} href={chatHref(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</Link>)}</div>
+                <Link href={chatHref()} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Abrir Chat con Pausia <MessageCircle size={16} /></Link>
               </div>
               <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4">
                 <p className="text-sm font-black text-emerald-900">{current.xp ?? 0} XP en este tema</p>

@@ -56,12 +56,12 @@ export default function Login() {
         setMensaje(result.error ?? 'No se pudo crear la cuenta. Inténtalo de nuevo.')
       } else {
         await supabase.auth.setSession(result.session)
-        window.location.href = '/'
+        window.location.href = '/camino'
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMensaje(error.message)
-      else window.location.href = '/'
+      else window.location.href = '/camino'
     }
     setCargando(false)
   }

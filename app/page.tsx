@@ -771,15 +771,29 @@ export default function Home() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) window.location.href = '/login'
-      else setUsuario(data.user)
+      else {
+        setUsuario(data.user)
+        if (window.location.pathname === '/' && !window.location.search) window.location.replace('/camino')
+      }
     })
   }, [])
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
     const urlSection = readHomeSectionFromUrl()
     const initialSubject = readSubjectFromUrl() ?? readDefaultSubject()
     if (initialSubject) cambiarAsignatura(initialSubject)
     if (urlSection) setSeccion(urlSection)
+    if (urlSection === 'chat' && params.get('from') === 'camino_course') {
+      const subject = params.get('subject') ?? ''
+      const block = params.get('block') ?? ''
+      const topic = params.get('topic') ?? ''
+      const question = params.get('question')
+      const label = [subject, block, topic].filter(Boolean).join(' · ')
+      setContextoChat(`Camino PAU curso: ${label}. Ayuda al alumno con este tema sin inventar datos ni copiar apuntes.`)
+      if (question) setInputChat(question)
+      setMensajes(current => current.length ? current : [{ rol: 'pausia', texto: `Estoy contigo en este tema de Camino PAU${label ? `: ${label}` : ''}. Pregúntame la duda concreta y la trabajamos paso a paso.` }])
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

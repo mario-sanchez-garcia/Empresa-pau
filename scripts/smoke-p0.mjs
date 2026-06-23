@@ -21,6 +21,7 @@ const signupRoute = read('app/api/auth/signup/route.ts')
 const signupMigration = read('supabase/migrations/20260621130000_create_signup_attempts.sql')
 const pricing = read('app/pricing/page.tsx')
 const landing = read('app/landing/page.tsx')
+const loginPage = read('app/login/page.tsx')
 const sidebar = read('app/components/Sidebar.tsx')
 const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
 const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
@@ -189,11 +190,16 @@ assert(
     caminoCalendar.includes('guided_practice') &&
     caminoCalendar.includes('evau_practice') &&
     caminoCalendar.includes('exam_focus') &&
+    caminoCalendar.includes('topicRotationBySubject') &&
+    caminoCalendar.includes('nextCurriculumItem') &&
     caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
     caminoCalendar.includes('Marcar hecha') &&
-    caminoCalendar.includes('actionHref(newMission.kind')
+    caminoCalendar.includes('actionHref(newMission.kind') &&
+    !caminoCalendar.includes('error_review') &&
+    !caminoCalendar.includes('view=historial') &&
+    !caminoCalendar.includes('value="chat"')
 )
 
 assert(
@@ -204,9 +210,18 @@ assert(
     caminoCalendar.includes('CourseDirectory') &&
     caminoCalendar.includes('Temario guiado') &&
     caminoCalendar.includes('Cursos de tu Camino') &&
+    caminoCalendar.includes('Ver cursos') &&
+    caminoCalendar.includes('setSelectedSubject') &&
     caminoCalendar.includes('courseHrefForItem') &&
     caminoCalendar.includes('/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}') &&
     !caminoCalendar.includes('href: `/camino?subject=${s}${blockParam}${topicParam}`')
+)
+
+assert(
+  'Camino PAU is the default app landing after login',
+  loginPage.includes("window.location.href = '/camino'") &&
+    page.includes("window.location.replace('/camino')") &&
+    page.includes("params.get('from') === 'camino_course'")
 )
 
 assert(
@@ -220,15 +235,19 @@ assert(
 )
 
 assert(
-  'Camino topic page shows explanation, guided practice, EVAU link, local chat and not-seen feedback',
+  'Camino topic page shows explanation, guided practice, EVAU/correction links, central chat and not-seen feedback',
   caminoTopic.includes('No lo he dado en clase') &&
     caminoTopic.includes('Preguntar a Pausia sobre este tema') &&
     caminoTopic.includes('Hacer ejercicio PAU de este tema') &&
+    caminoTopic.includes('Corregir con Pausia') &&
+    caminoTopic.includes('from: \'camino_course\'') &&
+    caminoTopic.includes('Abrir Chat con Pausia') &&
     caminoTopic.includes('Ahora inténtalo tú') &&
     caminoTopic.includes('Subpágina de aprendizaje') &&
     caminoTopic.includes('SCHOOL_FEEDBACK_KEY') &&
     caminoTopic.includes("award('evau')") &&
     caminoTopic.includes('MathMarkdown text=') &&
+    !caminoTopic.includes('askLocalTutor') &&
     !caminoTopic.includes('Fragmento LaTeX fuente')
 )
 

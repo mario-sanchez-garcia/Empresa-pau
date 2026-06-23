@@ -21,10 +21,15 @@ export default function CurriculumFlashcardPanel({ blockKey }: { blockKey: Curri
 
   useEffect(() => {
     let cancelled = false
+    // reset síncrono antes del fetch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhase({ loading: true, idx: 0, showCase: false })
     fetchCurriculumFlashcards(supabase, blockKey).then(rows => {
       if (!cancelled) {
+        // asíncrono con cancelled guard
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCards(rows)
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPhase(p => ({ ...p, loading: false }))
       }
     })

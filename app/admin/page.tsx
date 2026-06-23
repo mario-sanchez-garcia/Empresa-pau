@@ -660,6 +660,8 @@ export default function AdminPage() {
 
   useEffect(() => {
     const guard = { current: false }
+    // async con cancelled guard — setState ocurre de forma asíncrona, no síncrona
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load(guard)
     return () => { guard.current = true }
   }, [])

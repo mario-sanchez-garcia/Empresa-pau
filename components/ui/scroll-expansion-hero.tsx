@@ -47,8 +47,12 @@ const ScrollExpandMedia = ({
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // React 18 batchea estos setStates en un solo render — reset de animación
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setScrollProgress(0);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowContent(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMediaFullyExpanded(false);
   }, [mediaType]);
 

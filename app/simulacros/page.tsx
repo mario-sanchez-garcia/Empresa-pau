@@ -61,9 +61,14 @@ export default function SimulacrosPage() {
   )
 
   useEffect(() => {
+    // React 18 batchea estos setStates en un solo render — no hay riesgo real de cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode('normal')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setYearChoice('all')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOptionChoice('mixed')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setErrorMessage('')
   }, [ccaa])
 

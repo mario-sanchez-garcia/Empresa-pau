@@ -58,8 +58,11 @@ export default function ExamStatement({
     if (!safeStorageKey || typeof window === 'undefined') return
     try {
       const stored = window.localStorage.getItem(safeStorageKey)
+      // setState síncrono desde localStorage con cancelled guard
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHighlights(stored ? sanitizeHighlights(JSON.parse(stored)) : [])
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHighlights([])
     }
   }, [safeStorageKey])

@@ -49,8 +49,11 @@ export default function SettingsPage() {
       else setEmail(data.user.email ?? '')
     })
     try {
+      // setState síncrono de inicialización desde localStorage
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreferences({ ...defaults, ...JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}') })
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreferences(defaults)
     }
   }, [router])

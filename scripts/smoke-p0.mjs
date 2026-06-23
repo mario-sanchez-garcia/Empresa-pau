@@ -26,6 +26,7 @@ const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
 const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
 const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
+const caminoCourseTopic = read('app/camino-pau/curso/[subject]/[block]/[topic]/page.tsx')
 const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
 const caminoCurriculumMigration = read('supabase/migrations/20260623110000_create_camino_curriculum_tables.sql')
 const whyTheory = read('app/lib/whyItWorksTheory.ts')
@@ -196,6 +197,19 @@ assert(
 )
 
 assert(
+  'Camino PAU course topics use stable real pages and manual course navigation',
+  caminoPlan.includes('return `/camino-pau/curso/${topic.subject}/${topic.blockSlug}/${topic.topicSlug}`') &&
+    caminoCourseTopic.includes('getTopic(subject, block, topic)') &&
+    caminoCourseTopic.includes('CaminoTopicClient') &&
+    caminoCalendar.includes('CourseDirectory') &&
+    caminoCalendar.includes('Temario guiado') &&
+    caminoCalendar.includes('Cursos de tu Camino') &&
+    caminoCalendar.includes('courseHrefForItem') &&
+    caminoCalendar.includes('/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}') &&
+    !caminoCalendar.includes('href: `/camino?subject=${s}${blockParam}${topicParam}`')
+)
+
+assert(
   'Camino curriculum seed has topic lessons and keeps CCSS free of 3D geometry',
   caminoPlan.includes('CAMINO_CURRICULUM_TOPICS') &&
     caminoPlan.includes('buildEvauHref') &&
@@ -208,11 +222,14 @@ assert(
 assert(
   'Camino topic page shows explanation, guided practice, EVAU link, local chat and not-seen feedback',
   caminoTopic.includes('No lo he dado en clase') &&
-    caminoTopic.includes('Preguntar a Pausia') &&
-    caminoTopic.includes('Ejercicio PAU relacionado') &&
+    caminoTopic.includes('Preguntar a Pausia sobre este tema') &&
+    caminoTopic.includes('Hacer ejercicio PAU de este tema') &&
+    caminoTopic.includes('Ahora inténtalo tú') &&
+    caminoTopic.includes('Subpágina de aprendizaje') &&
     caminoTopic.includes('SCHOOL_FEEDBACK_KEY') &&
     caminoTopic.includes("award('evau')") &&
-    caminoTopic.includes('MathMarkdown text=')
+    caminoTopic.includes('MathMarkdown text=') &&
+    !caminoTopic.includes('Fragmento LaTeX fuente')
 )
 
 assert(

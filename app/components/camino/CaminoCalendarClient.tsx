@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, CalendarDays, Check, ChevronDown, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, BookOpen, CalendarDays, Check, ChevronDown, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
@@ -99,13 +99,18 @@ function daysUntil(dateISO: string) { return Math.ceil((new Date(dateISO).getTim
 function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
 function subjectSlug(subject: string) { return SUBJECT_SLUGS[subject] ?? subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_') }
 function textSlug(value: string) { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }
+function courseHrefForItem(item: CurriculumItem) {
+  if (item.planTopic) return buildTopicHref(item.planTopic)
+  return `/camino-pau/curso/${item.subjectSlug || subjectSlug(item.subject)}/${item.blockSlug || textSlug(item.block)}/${item.topicSlug || textSlug(item.topic)}`
+}
 function getMissionTarget(kind: MissionKind, subject: string, topic?: string, block?: string, planTopic?: CaminoCurriculumTopic) {
   const s = subjectSlug(subject)
   if (planTopic && (kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice')) return { href: buildTopicHref(planTopic), fallback: '', autoCompletable: false }
   const topicParam = topic ? `&topic=${encodeURIComponent(textSlug(topic))}` : ''
   const blockParam = block ? `&block=${encodeURIComponent(textSlug(block))}` : ''
   if (kind === 'evau_practice' || kind === 'exam_focus' || kind === 'mock_exam') return { href: `/?subject=${s}${blockParam}${topicParam}&mode=random&source=camino`, fallback: '', autoCompletable: false }
-  if (kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') return { href: `/camino?subject=${s}${blockParam}${topicParam}`, fallback: '', autoCompletable: false }
+  if ((kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') && block && topic) return { href: `/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}`, fallback: '', autoCompletable: false }
+  if (kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') return { href: '', fallback: 'Este tema necesita bloque y tema para abrir una página de curso.', autoCompletable: true }
   if (kind === 'chat') return { href: `/?view=chat&subject=${s}&source=camino`, fallback: '', autoCompletable: false }
   if (kind === 'error_review') return { href: `/?view=historial&subject=${s}${topicParam}&source=camino`, fallback: '', autoCompletable: false }
   return { href: '', fallback: 'Esta misión todavía no tiene pantalla propia. Puedes marcarla como hecha cuando la termines fuera de Pausia.', autoCompletable: true }
@@ -183,6 +188,27 @@ function curriculumForSubject(subject: string, curriculum: CurriculumItem[]) {
   const rows = curriculum.filter(item => item.subject === subject)
   if (rows.length > 0) return rows
   return FALLBACK_CURRICULUM.filter(item => item.subject === subject)
+}
+
+function courseTopicsForSubjects(subjects: string[], curriculum: CurriculumItem[]) {
+  const source = (curriculum.length ? curriculum : FALLBACK_CURRICULUM).filter(item => item.planTopic)
+  const allowedSubjects = new Set(subjects.length ? subjects : MATH_SUBJECTS)
+  const grouped = new Map<string, Map<string, CurriculumItem[]>>()
+  for (const item of source) {
+    if (!allowedSubjects.has(item.subject)) continue
+    if (item.subject === 'Matemáticas CCSS' && item.blockSlug === 'geometria-3d') continue
+    if (!grouped.has(item.subject)) grouped.set(item.subject, new Map())
+    const blocks = grouped.get(item.subject)!
+    if (!blocks.has(item.block)) blocks.set(item.block, [])
+    blocks.get(item.block)!.push(item)
+  }
+  return Array.from(grouped.entries()).map(([subject, blocks]) => ({
+    subject,
+    blocks: Array.from(blocks.entries()).map(([block, items]) => ({
+      block,
+      items: items.sort((a, b) => a.sortOrder - b.sortOrder)
+    }))
+  }))
 }
 
 function pickCurriculumItem(subject: string, rotation: number, curriculum: CurriculumItem[]) {
@@ -322,6 +348,7 @@ export default function CaminoCalendarClient() {
   const rankingTopRows = fillWithMockRows(rankingSource?.top ?? [fallbackCurrent], rankingTab, rankingCommunity)
   const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
   const fixedCurrentRow = currentInTop ? null : currentRankingRow
+  const courseGroups = courseTopicsForSubjects(onboarding?.subjects ?? [], curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
 
   function persist(nextCalendar: DayPlan[], nextXp = xpEvents, nextExams = exams) {
     setCalendar(nextCalendar); setXpEvents(nextXp); setExams(nextExams)
@@ -391,6 +418,8 @@ export default function CaminoCalendarClient() {
 
         <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><div className="grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div></section>
 
+        <CourseDirectory groups={courseGroups} />
+
         <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} /></section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboarding?.subjects ?? []} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
@@ -401,6 +430,50 @@ export default function CaminoCalendarClient() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
+
+function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: Array<{ block: string; items: CurriculumItem[] }> }> }) {
+  return (
+    <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Temario guiado</p>
+          <h2 className="text-xl font-black text-slate-950">Cursos de tu Camino</h2>
+          <p className="mt-1 text-sm font-semibold text-slate-500">Entra manualmente a una subpágina de tema: primero entiendes, luego practicas y después vas a PAU.</p>
+        </div>
+        <div className="inline-flex items-center gap-2 rounded-2xl bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> Academia PAU</div>
+      </div>
+      {groups.length ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {groups.map(group => (
+            <article key={group.subject} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: themeFor(group.subject).text }} />
+                <h3 className="text-base font-black text-slate-900">{group.subject}</h3>
+              </div>
+              <div className="grid gap-3">
+                {group.blocks.map(block => (
+                  <div key={`${group.subject}-${block.block}`} className="rounded-2xl border border-white bg-white p-3">
+                    <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{block.block}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {block.items.map(item => (
+                        <a key={`${item.subjectSlug}-${item.blockSlug}-${item.topicSlug}`} href={courseHrefForItem(item)} className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-black transition hover:-translate-y-0.5" style={{ borderColor: themeFor(item.subject).border, background: themeFor(item.subject).bg, color: themeFor(item.subject).text }}>
+                          {item.topic}
+                          <ArrowRight size={12} />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Completa tus asignaturas para ver el temario guiado.</p>
+      )}
+    </section>
+  )
+}
 
 function CalendarEditorOverlay({ calendar, subjects, curriculum, onClose, onAddExam, onSave }: { calendar: DayPlan[]; subjects: string[]; curriculum: CurriculumItem[]; onClose: () => void; onAddExam: () => void; onSave: (calendar: DayPlan[]) => void }) {
   const safeSubjects = subjects.length ? subjects : MATH_SUBJECTS

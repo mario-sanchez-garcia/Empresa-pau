@@ -91,7 +91,7 @@ export function getTopic(subject: string, blockSlug: string, topicSlug: string) 
 }
 
 export function buildTopicHref(topic: Pick<CaminoCurriculumTopic, 'subject' | 'blockSlug' | 'topicSlug'>) {
-  return `/camino/tema/${topic.subject}/${topic.blockSlug}/${topic.topicSlug}`
+  return `/camino-pau/curso/${topic.subject}/${topic.blockSlug}/${topic.topicSlug}`
 }
 
 export function buildEvauHref(topic: CaminoCurriculumTopic) {

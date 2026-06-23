@@ -49,6 +49,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const current = progress[key] ?? { xp: 0 }
   const topicCompleted = current.explanation && current.guided && current.evau
   const hasContent = hasLatexContent(currentTopic)
+  const statusLabel = topicCompleted ? 'Completado' : current.explanation || current.guided || current.evau ? 'En curso' : 'Pendiente'
 
   function award(part: 'explanation' | 'guided' | 'evau') {
     const xpByPart = { explanation: 15, guided: 15, evau: 20 }
@@ -78,7 +79,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   function askLocalTutor(prompt: string) {
     setQuestion(prompt)
     const base = currentTopic.explanation || `Este tema está en itinerario, pero todavía no tiene apuntes LaTeX cargados.`
-    setAnswer(`Contexto: ${subjectLabelFromSlug(currentTopic.subject)} · ${currentTopic.blockTitle} · ${currentTopic.title}\n\n${base}\n\nPista para estudiar: intenta explicar el concepto con tus palabras y luego resuelve el ejercicio guiado antes de ir al ejercicio PAU.`)
+    setAnswer(`Contexto del tema: ${subjectLabelFromSlug(currentTopic.subject)} · ${currentTopic.blockTitle} · ${currentTopic.title}\n\n${base}\n\nEjemplo actual: ${currentTopic.guidedExample || 'Aún no hay ejemplo LaTeX específico cargado.'}\n\nPista para estudiar: intenta explicar el concepto con tus palabras, resuelve el ejercicio guiado y después abre el ejercicio PAU relacionado.`)
   }
 
   return (
@@ -88,34 +89,39 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         <section className="rounded-[30px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">{subjectLabelFromSlug(currentTopic.subject)} · {currentTopic.blockTitle}</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU → {subjectLabelFromSlug(currentTopic.subject)} → {currentTopic.blockTitle}</p>
               <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{currentTopic.title}</h1>
-              <p className="mt-2 text-sm font-semibold text-slate-500">{hasContent ? 'Explicación + ejemplo guiado + práctica antes del ejercicio PAU.' : 'Itinerario preparado. Falta cargar apunte LaTeX específico para este tema.'}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">25 min</span>
+                <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : statusLabel === 'En curso' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
+                <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">Subpágina de aprendizaje</span>
+              </div>
+              <p className="mt-3 text-sm font-semibold text-slate-500">{hasContent ? 'Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.' : 'Itinerario preparado. Falta cargar apunte LaTeX específico para este tema.'}</p>
             </div>
             <button onClick={markNotSeen} className="inline-flex items-center gap-2 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700"><School size={16} /> No lo he dado en clase</button>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4">
               <LearningCard title="1. Explicación comprensible" done={Boolean(current.explanation)} onDone={() => award('explanation')}>
+                <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
                 {currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <EmptyContent />}
               </LearningCard>
               <LearningCard title="2. Ejemplo guiado" done={Boolean(current.guided)} onDone={() => award('guided')}>
                 {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
               </LearningCard>
-              <LearningCard title="3. Ejercicio guiado" done={Boolean(current.guided)} onDone={() => award('guided')}>
+              <LearningCard title="3. Ahora inténtalo tú" done={Boolean(current.guided)} onDone={() => award('guided')}>
                 {currentTopic.practicePrompt ? <MathMarkdown text={currentTopic.practicePrompt} /> : <EmptyContent />}
               </LearningCard>
-              {currentTopic.rawLatex && <LearningCard title="Fragmento LaTeX fuente"><MathMarkdown text={currentTopic.rawLatex} format="raw" /></LearningCard>}
             </div>
             <aside className="grid content-start gap-4">
               <div className="rounded-3xl border border-blue-100 bg-blue-50 p-4">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Práctica PAU/EVAU</p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
-                <Link onClick={() => award('evau')} href={buildEvauHref(currentTopic)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Ejercicio PAU relacionado <ArrowRight size={16} /></Link>
+                <Link onClick={() => award('evau')} href={buildEvauHref(currentTopic)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Hacer ejercicio PAU de este tema <ArrowRight size={16} /></Link>
               </div>
               <div className="rounded-3xl border border-violet-100 bg-white p-4">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Pausia</p>
-                <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso'].map(item => <button key={item} onClick={() => askLocalTutor(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</button>)}</div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Pausia sobre este tema</p>
+                <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => <button key={item} onClick={() => askLocalTutor(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</button>)}</div>
                 <div className="mt-3 flex gap-2"><input value={question} onChange={event => setQuestion(event.target.value)} placeholder="Pregunta sobre este tema" className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold outline-none focus:border-violet-200 focus:bg-white" /><button onClick={() => askLocalTutor(question || 'Explícamelo más fácil')} className="rounded-2xl bg-violet-600 px-3 text-white"><MessageCircle size={16} /></button></div>
                 {answer && <pre className="mt-3 whitespace-pre-wrap rounded-2xl bg-slate-50 p-3 text-xs font-semibold leading-5 text-slate-600">{answer}</pre>}
               </div>

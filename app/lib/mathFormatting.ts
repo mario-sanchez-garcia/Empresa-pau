@@ -504,7 +504,7 @@ function formatExamStructure(text: string) {
 }
 
 function formatSectionBreak(prefix: string, marker: string, score?: string) {
-  const intro = !prefix ? '' : prefix === '\n' ? '\n\n' : `${prefix}\n\n`
+  const intro = prefix && prefix !== '\n' ? `${prefix}\n\n` : '\n\n'
   const cleanScore = score?.trim()
   return `${intro}**${marker.trim()}**${cleanScore ? ` **${cleanScore}**` : ''}\n`
 }

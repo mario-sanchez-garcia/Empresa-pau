@@ -195,11 +195,28 @@ assert(
     caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
-    caminoCalendar.includes('Marcar hecha') &&
+    caminoCalendar.includes('Marcar sin XP') &&
     caminoCalendar.includes('actionHref(newMission.kind') &&
+    caminoCalendar.includes('hrefForMission') &&
+    caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
+    caminoCalendar.includes('source=camino_pau') &&
     !caminoCalendar.includes('error_review') &&
     !caminoCalendar.includes('view=historial') &&
     !caminoCalendar.includes('value="chat"')
+)
+
+assert(
+  'Camino PAU awards XP only after corrected exercises and adapts to weak areas',
+  caminoTopic.includes('function xpFromScore') &&
+    caminoTopic.includes('const baseXP = 15') &&
+    caminoTopic.includes('score < 4 ? 5 : score < 6 ? 12 : score < 8 ? 22 : score < 9 ? 32 : 45') &&
+    caminoTopic.includes('correctCourseExercise') &&
+    caminoTopic.includes("supabase.from('historial_examenes').insert") &&
+    caminoTopic.includes('WEAK_AREAS_KEY') &&
+    caminoTopic.includes('missionId') &&
+    caminoTopic.includes("status: 'done' as const") &&
+    caminoCalendar.includes('Misión marcada como hecha sin XP') &&
+    !caminoCalendar.includes('missionXP(')
 )
 
 assert(
@@ -212,9 +229,23 @@ assert(
     caminoCalendar.includes('Cursos de tu Camino') &&
     caminoCalendar.includes('Ver cursos') &&
     caminoCalendar.includes('setSelectedSubject') &&
+    caminoCalendar.includes('selectedBlock') &&
+    caminoCalendar.includes('activeBlock') &&
     caminoCalendar.includes('courseHrefForItem') &&
     caminoCalendar.includes('/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}') &&
     !caminoCalendar.includes('href: `/camino?subject=${s}${blockParam}${topicParam}`')
+)
+
+assert(
+  'Camino calendar editor shows full week and supports drag and drop without changing mission ids',
+  caminoCalendar.includes('grid flex-1 gap-4 overflow-y-auto p-5') &&
+    caminoCalendar.includes('lg:grid-cols-2') &&
+    caminoCalendar.includes('draggable') &&
+    caminoCalendar.includes('onDragStart') &&
+    caminoCalendar.includes('onDrop') &&
+    caminoCalendar.includes('moveMission(draggedMissionId, day.date)') &&
+    caminoCalendar.includes('missions: [...day.missions, mission]') &&
+    !caminoCalendar.includes('moved-${day.missions.length + 1}')
 )
 
 assert(
@@ -240,6 +271,11 @@ assert(
     caminoTopic.includes('Preguntar a Pausia sobre este tema') &&
     caminoTopic.includes('Hacer ejercicio PAU de este tema') &&
     caminoTopic.includes('Corregir con Pausia') &&
+    caminoTopic.includes('Escribir respuesta') &&
+    caminoTopic.includes('Subir foto') &&
+    caminoTopic.includes('compressImageToBase64') &&
+    caminoTopic.includes('buildCorrectionPrompt') &&
+    caminoTopic.includes('CorrectionResultCard') &&
     caminoTopic.includes('from: \'camino_course\'') &&
     caminoTopic.includes('Abrir Chat con Pausia') &&
     caminoTopic.includes('Ahora inténtalo tú') &&

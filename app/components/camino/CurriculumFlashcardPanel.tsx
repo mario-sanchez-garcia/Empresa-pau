@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import type { Components } from 'react-markdown'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import { supabase } from '@/app/lib/supabase'
 import {
@@ -10,9 +11,9 @@ import {
   type CurriculumBlockKey,
 } from '@/app/lib/camino/curriculumFlashcards'
 
-const COMPACT: Record<string, any> = {
-  p:  ({ children }: any) => <p  style={{ margin: '2px 0', fontSize: 12.5, lineHeight: 1.7, color: '#334155' }}>{children}</p>,
-  li: ({ children }: any) => <li style={{ margin: '2px 0', fontSize: 12.5, lineHeight: 1.7, color: '#334155' }}>{children}</li>,
+const COMPACT: Partial<Components> = {
+  p:  ({ children }: { children?: ReactNode }) => <p  style={{ margin: '2px 0', fontSize: 12.5, lineHeight: 1.7, color: '#334155' }}>{children}</p>,
+  li: ({ children }: { children?: ReactNode }) => <li style={{ margin: '2px 0', fontSize: 12.5, lineHeight: 1.7, color: '#334155' }}>{children}</li>,
 }
 
 export default function CurriculumFlashcardPanel({ blockKey }: { blockKey: CurriculumBlockKey }) {

@@ -36,6 +36,7 @@ export interface SimulacroRecord {
   dificultad_real?: string | null
   bloques: SimulacroBlock[]
   respuestas_parciales?: Record<string, SimulacroAnswer>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resultado_json?: any
   nota_final?: number | null
   estado: SimulacroStatus

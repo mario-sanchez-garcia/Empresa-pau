@@ -385,7 +385,7 @@ export default function SimulacroResultsPage() {
                       style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#854d0e' }}
                     >
                       <strong className="mb-2 block">Penalizaciones aplicadas</strong>
-                      {block.penalizaciones_aplicadas.map((penalty: any, i: number) => (
+                      {block.penalizaciones_aplicadas.map((penalty: { motivo?: string; puntos_descontados?: number }, i: number) => (
                         <Markdown key={i} text={`- ${penalty.motivo ?? 'Penalización'}: ${penalty.puntos_descontados ?? ''}`} />
                       ))}
                     </div>
@@ -413,7 +413,7 @@ export default function SimulacroResultsPage() {
 
           {tab === 'plan' && (
             <section className="pau-stagger grid gap-4 md:grid-cols-3">
-              {plan.map((item: any) => (
+              {plan.map((item: { prioridad: number; tema: string; accion: string; tiempo_recomendado: string; recurso_sugerido: string }) => (
                 <article
                   key={item.prioridad}
                   className="pau-card-section"
@@ -443,7 +443,7 @@ export default function SimulacroResultsPage() {
 
           {tab === 'bloques' && (
             <section className="pau-stagger grid gap-4 md:grid-cols-4 max-sm:grid-cols-2">
-              {resumen.map((item: any, index: number) => (
+              {resumen.map((item: { bloque: string; puntos_conseguidos: number; puntos_maximos: number; porcentaje: number; nivel: string }, index: number) => (
                 <article key={`${item.bloque}-${index}`} className="pau-card-section">
                   <h3 className="mb-1 text-sm font-black" style={{ color: '#0f172a' }}>{item.bloque}</h3>
                   <p className="text-xs font-bold" style={{ color: '#94a3b8' }}>
@@ -550,6 +550,7 @@ function Markdown({ text }: { text?: string }) {
 
 // ─── Data normalizers (unchanged from original) ──────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeDetail(result: any, record: SimulacroRecord, correctionFailed: boolean) {
   const raw = Array.isArray(result?.desglose_bloques) ? result.desglose_bloques : []
   return record.bloques.map((source, index) => {
@@ -581,8 +582,10 @@ function normalizeDetail(result: any, record: SimulacroRecord, correctionFailed:
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizePlan(result: any, detail: ReturnType<typeof normalizeDetail>, correctionFailed: boolean) {
   if (Array.isArray(result?.plan_repaso) && result.plan_repaso.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result.plan_repaso.slice(0, 3).map((item: any, index: number) => ({
       prioridad: item.prioridad ?? index + 1,
       tema: item.tema || `Prioridad ${index + 1}`,
@@ -608,8 +611,10 @@ function normalizePlan(result: any, detail: ReturnType<typeof normalizeDetail>, 
     }))
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeResumen(result: any, detail: ReturnType<typeof normalizeDetail>) {
   if (Array.isArray(result?.resumen_por_bloque_tematico) && result.resumen_por_bloque_tematico.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result.resumen_por_bloque_tematico.map((item: any) => ({
       bloque: item.bloque || item.tema || 'Bloque',
       puntos_conseguidos: safeNumber(item.puntos_conseguidos, 0),
@@ -675,17 +680,17 @@ function normalizeLevel(level?: string) {
 
 // ─── Utility helpers (unchanged) ─────────────────────────────────
 
-function normalizeList(value: any, fallback: string[] = []) {
+function normalizeList(value: unknown, fallback: string[] = []) {
   if (Array.isArray(value)) return value.filter(Boolean).map(String)
   if (typeof value === 'string' && value.trim()) return [value.trim()]
   return fallback
 }
 
-function listToText(value: any) {
+function listToText(value: unknown) {
   return normalizeList(value).join(' ')
 }
 
-function textOrFallback(value: any, fallback: string) {
+function textOrFallback(value: unknown, fallback: string) {
   return typeof value === 'string' && value.trim() ? value.trim() : fallback
 }
 
@@ -693,11 +698,11 @@ function unique<T>(items: T[]) {
   return Array.from(new Set(items.filter(Boolean)))
 }
 
-function isFiniteNumber(value: any) {
+function isFiniteNumber(value: unknown) {
   return Number.isFinite(Number(value))
 }
 
-function safeNumber(value: any, fallback: number) {
+function safeNumber(value: unknown, fallback: number) {
   const number = Number(value)
   return Number.isFinite(number) ? number : fallback
 }
@@ -706,7 +711,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
-function format(value: any) {
+function format(value: unknown) {
   const number = Number(value)
   return Number.isFinite(number) ? number.toFixed(2).replace(/\.00$/, '') : '0'
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import type { Components } from 'react-markdown'
 import { correctionPayloadToMarkdown } from '@/app/lib/correctionParsing'
 import { splitWhyExplanationMarkdown } from '@/app/lib/whyExplanation'
 import MathMarkdown from './MathMarkdown'
@@ -15,7 +16,7 @@ export default function CorrectionResultCard({
   correction: unknown
   officialMaxScore?: number
   className?: string
-  components?: Record<string, any>
+  components?: Partial<Components>
   isStreaming?: boolean
 }) {
   const markdown = correctionPayloadToMarkdown(correction, { officialMaxScore })

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const examenesCataluna: Record<string, any> = {
   "cat_2023_s1": {
     id: "cat_2023_s1",

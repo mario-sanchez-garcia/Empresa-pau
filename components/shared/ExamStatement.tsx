@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
 import { Eraser, Highlighter, Trash2, X } from 'lucide-react'
+import type { Components } from 'react-markdown'
 import MathMarkdown from './MathMarkdown'
 
 type ExamStatementProps = {
   text?: string | null
   className?: string
   bodyClassName?: string
-  components?: Record<string, any>
+  components?: Partial<Components>
   format?: boolean | 'raw'
   storageKey?: string
   accentColor?: string

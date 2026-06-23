@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, Lightbulb } from 'lucide-react'
+import type { Components } from 'react-markdown'
 import MathMarkdown from './MathMarkdown'
 import { type WhyExplanation, whyExplanationToMarkdown } from '@/app/lib/whyExplanation'
 
@@ -12,7 +13,7 @@ export default function WhyExplanation({
 }: {
   explanation?: WhyExplanation | string | null
   markdown?: string | null
-  components?: Record<string, any>
+  components?: Partial<Components>
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const structuredContent = whyExplanationToMarkdown(explanation)

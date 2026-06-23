@@ -648,7 +648,7 @@ function average(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
-function formatScore(value: any) {
+function formatScore(value: unknown) {
   const number = Number(value)
   return Number.isFinite(number) ? number.toFixed(2).replace(/\.00$/, '') : '-'
 }
@@ -803,6 +803,7 @@ function mergeBlocksForExam(primary: SimulacroBlock[], fallback: SimulacroBlock[
   return selected
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function scorePercent(detail: any, block: SimulacroBlock, fallbackScore?: number | null) {
   const directPercent = Number(detail?.porcentaje_logrado ?? detail?.porcentaje)
   if (Number.isFinite(directPercent)) return directPercent

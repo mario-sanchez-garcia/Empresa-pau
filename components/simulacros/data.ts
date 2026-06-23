@@ -83,6 +83,7 @@ export function generateSimulacro(
     const candidates = examenesLengua.filter(exam => (!lenguaYears || lenguaYears.includes(exam.año)) && (exam.comunidad ?? 'Madrid') === comunidad)
     if (!candidates.length) return null
     const selected = shuffle(candidates)[0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blocks = (selected?.preguntas ?? []).filter((p: any) => !isIncompleteOfficialExercise(p)).map((p: any, index: number) => ({
       ...toItem('lengua', selected, p, p.bloque).block,
       numero: index + 1,
@@ -152,19 +153,29 @@ function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {
     if (subject === 'historia') return normalizeHistoriaCatalunaItems()
     return []
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const byComunidad = (exam: any) => (exam.comunidad ?? 'Madrid') === comunidad
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'mates') return examenes.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'matematicas_ccss') return examenesMatematicasCCSSMadrid.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'fisica') return examenesFisica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'quimica') return examenesQuimica.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'biologia') return examenesBiologia.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'ingles') return examenesIngles.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (subject === 'lengua') return examenesLengua.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (examenesHistoria as any[]).filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
 }
 
 // ─── Cataluña: Física ────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildCatalunaEjercicioEnunciado(ej: any, opcion?: any): string {
   const parts: string[] = []
   if (opcion) {
@@ -275,12 +286,14 @@ function normalizeQuimicaCatalunaItems() {
 function normalizeHistoriaCatalunaItems() {
   type Item = { rawTheme: string; year: number; option: SimulacroOption; block: SimulacroBlock }
   const items: Item[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const exam of Object.values(examenesCataluna) as any[]) {
     for (const ej of (exam.ejercicios ?? [])) {
       const fuente = ej.fuente
       const textoFuente: string | undefined = fuente?.texto ?? fuente?.descripcion ?? undefined
       const imagenes: string[] | undefined = fuente?.imagen_url ? [fuente.imagen_url] : undefined
       const p1Parts: string[] = (ej.pregunta1 ?? []).map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (p: any) => `**${p.letra})** ${p.enunciado}${p.puntos ? ` *(${p.puntos} pts)*` : ''}`
       )
       for (const p2 of (ej.pregunta2?.opciones ?? [])) {
@@ -316,6 +329,7 @@ function normalizeHistoriaCatalunaItems() {
 
 // ─── Cataluña: Lengua ────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildLenguaCatalunaParteEnunciado(parte: any): string {
   const parts: string[] = [parte.titulo]
   if (parte.instrucciones) parts.push(parte.instrucciones)
@@ -329,6 +343,7 @@ function buildLenguaCatalunaParteEnunciado(parte: any): string {
   return parts.filter(Boolean).join('\n\n')
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeLenguaCatalunaExam(exam: any, option: SimulacroOption): SimulacroBlock[] {
   const blocks: SimulacroBlock[] = []
 
@@ -348,6 +363,7 @@ function normalizeLenguaCatalunaExam(exam: any, option: SimulacroOption): Simula
     }
   } else {
     // opciones_mas_parte_comun
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const opcionData = (exam.opciones ?? []).find((o: any) => o.opcion === option) ?? (exam.opciones ?? [])[0]
     const allBloques = [...(opcionData?.bloques ?? []), ...(exam.partesComunes ?? [])]
     for (const bloque of allBloques) {
@@ -370,6 +386,7 @@ function normalizeLenguaCatalunaExam(exam: any, option: SimulacroOption): Simula
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) {
   const option = (p.opcion ?? exam.opcion ?? 'A') as SimulacroOption
   const label = p.label ?? labelFor(subject, rawTheme)

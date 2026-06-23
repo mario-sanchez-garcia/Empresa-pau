@@ -41,7 +41,7 @@ export type AiRateLimitResult = {
 const APPROX_INPUT_EUR_PER_TOKEN = 0.0000028
 const APPROX_OUTPUT_EUR_PER_TOKEN = 0.000014
 
-export function extractAnthropicTokenUsage(message: any) {
+export function extractAnthropicTokenUsage(message: { usage?: { input_tokens?: number; output_tokens?: number } }) {
   const inputTokens = safeTokenCount(message?.usage?.input_tokens)
   const outputTokens = safeTokenCount(message?.usage?.output_tokens)
   return {

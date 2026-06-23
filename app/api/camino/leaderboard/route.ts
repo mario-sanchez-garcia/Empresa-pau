@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServiceSupabase, createUserSupabase, getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 
 export const dynamic = 'force-dynamic'
@@ -35,13 +36,13 @@ function sortEntries(entries: Array<Omit<LeaderboardEntry, 'rank'>>) {
     .map((entry, index) => ({ ...entry, rank: index + 1 }))
 }
 
-async function getProfileMap(db: any, userIds: string[]): Promise<Map<string, Record<string, unknown>>> {
+async function getProfileMap(db: SupabaseClient, userIds: string[]): Promise<Map<string, Record<string, unknown>>> {
   if (!userIds.length) return new Map<string, Record<string, unknown>>()
   const { data } = await db.from('perfiles').select('*').in('id', userIds)
   return new Map<string, Record<string, unknown>>((data ?? []).map((row: Record<string, unknown>) => [String(row.id), row]))
 }
 
-async function getCommunityMap(db: any, userIds: string[]): Promise<Map<string, string>> {
+async function getCommunityMap(db: SupabaseClient, userIds: string[]): Promise<Map<string, string>> {
   if (!userIds.length) return new Map<string, string>()
   const { data } = await db
     .from('billing_events')
@@ -112,18 +113,19 @@ export async function GET(request: NextRequest) {
     .order('xp_total', { ascending: false })
     .limit(500)
 
-  const rows = progressRows ?? []
-  const userIds = Array.from(new Set([...rows.map((row: any) => String(row.user_id)), user.id]))
+  type ProgressRow = { user_id: unknown; xp_total: unknown }
+  const rows = (progressRows ?? []) as ProgressRow[]
+  const userIds = Array.from(new Set([...rows.map(row => String(row.user_id)), user.id]))
   const [profiles, communities]: [Map<string, Record<string, unknown>>, Map<string, string>] = await Promise.all([
     getProfileMap(serviceDb, userIds).catch(() => new Map<string, Record<string, unknown>>()),
     getCommunityMap(serviceDb, userIds).catch(() => new Map<string, string>()),
   ])
 
   const currentProfile = profiles.get(user.id)
-  const currentProgress = rows.find((row: any) => row.user_id === user.id)
-  const baseRows = currentProgress ? rows : [...rows, { user_id: user.id, xp_total: 0 }]
+  const currentProgress = rows.find(row => row.user_id === user.id)
+  const baseRows = currentProgress ? rows : [...rows, { user_id: user.id, xp_total: 0 } as ProgressRow]
 
-  const entries = sortEntries(baseRows.map((row: any) => {
+  const entries = sortEntries(baseRows.map(row => {
     const userId = String(row.user_id)
     const isCurrentUser = userId === user.id
     return {

@@ -1,5 +1,6 @@
 'use client'
 
+import type { Components } from 'react-markdown'
 import WhyExplanation from './WhyExplanation'
 
 export default function TheoryToggle({
@@ -7,7 +8,7 @@ export default function TheoryToggle({
   components,
 }: {
   theory?: string | null
-  components?: Record<string, any>
+  components?: Partial<Components>
 }) {
   return <WhyExplanation markdown={theory} components={components} />
 }

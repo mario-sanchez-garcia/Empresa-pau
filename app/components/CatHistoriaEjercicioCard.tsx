@@ -71,22 +71,32 @@ export function RenderFuente({ fuente, storageKeyPrefix = 'cat-historia:fuente' 
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function obtenerPreguntas(ejercicio: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (ejercicio.preguntas) return ejercicio.preguntas.map((pregunta: any) => `${pregunta.numero}. ${pregunta.enunciado} (${pregunta.puntos} puntos)`)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (ejercicio.contextos) return ejercicio.contextos.flatMap((contexto: any) => [
     contexto.descripcion,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...contexto.preguntas.map((pregunta: any) => `${pregunta.numero}. ${pregunta.enunciado}\n${pregunta.opciones.map((opcion: any) => `${opcion.letra}) ${opcion.texto}`).join('\n')}`)
   ])
   return [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(ejercicio.pregunta1 ?? []).map((pregunta: any) => `${pregunta.letra}) ${pregunta.enunciado} (${pregunta.puntos} puntos)`),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(ejercicio.pregunta2?.opciones ?? []).map((opcion: any) => `Opción ${opcion.letra}: ${opcion.enunciado} (${opcion.puntos} puntos)`),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(ejercicio.opciones ?? []).map((opcion: any) => `Opción ${opcion.letra}: ${opcion.enunciado}${opcion.terminos ? `\nTérminos: ${opcion.terminos.join(', ')}` : ''} (${opcion.puntos} puntos)`),
   ]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function puntuacionEjercicio(ejercicio: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (ejercicio.preguntas) return ejercicio.preguntas.reduce((total: number, pregunta: any) => total + Number(pregunta.puntos ?? 0), 0)
   if (ejercicio.tipo === 'test') return 2.5
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (ejercicio.pregunta1) return ejercicio.pregunta1.reduce((total: number, pregunta: any) => total + Number(pregunta.puntos ?? 0), 0) + 2.5
   return Number(ejercicio.opciones?.[0]?.puntos ?? 2.5)
 }
@@ -113,6 +123,7 @@ function IncompleteExerciseNotice() {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejercicio: any; contexto: string }) {
   const [respuesta, setRespuesta] = useState('')
   const [imagen, setImagen] = useState<string | null>(null)

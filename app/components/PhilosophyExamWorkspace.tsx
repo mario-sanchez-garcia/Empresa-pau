@@ -29,6 +29,7 @@ function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function scoreFromCorrection(data: any, maxScore: number) {
   const raw = data?.desglose_bloques?.[0]?.puntos_conseguidos
   return raw == null ? null : Math.min(maxScore, Math.max(0, Number(raw)))

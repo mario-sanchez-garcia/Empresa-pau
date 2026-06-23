@@ -1,8 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target } from 'lucide-react'
+import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target, type LucideIcon } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import GradePredictionCard from '@/components/grade/GradePredictionCard'
 import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
@@ -10,6 +10,19 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { useCCAA } from '@/app/hooks/useCCAA'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+
+type PlanningTask = {
+  id?: string
+  asignatura: string
+  bloque: string
+  descripcion: string
+  duracion: number
+  completada?: boolean
+  diaIdx?: number
+  tareaIdx?: number
+}
+type PlanningDay = { dia: string; tareas: PlanningTask[] }
+type PlanningProfile = { fecha_examen: string; horas_dia: number; nota_objetivo: number; asignaturas_flojas?: string[] }
 
 const config = {
   bg: '#2563eb',
@@ -47,7 +60,7 @@ function hoverVars(color: string, light: string, accent = color) {
     '--hover-bg': light,
     '--hover-border': accent,
     '--hover-shadow': `${accent}33`
-  } as any
+  } as CSSProperties
 }
 
 function subjectTheme(name = '') {
@@ -70,9 +83,9 @@ const ASIGNATURAS = ['Matematicas II', 'Matematicas CCSS', 'Fisica', 'Quimica', 
 type PlanTab = 'general' | 'semana' | 'tareas' | 'ajustes'
 
 export default function Planning() {
-  const [usuario, setUsuario] = useState<any>(null)
-  const [perfil, setPerfil] = useState<any>(null)
-  const [planning, setPlanning] = useState<any[]>([])
+  const [usuario, setUsuario] = useState<{ id: string; email?: string } | null>(null)
+  const [perfil, setPerfil] = useState<PlanningProfile | null>(null)
+  const [planning, setPlanning] = useState<PlanningDay[]>([])
   const [tareasCompletadas, setTareasCompletadas] = useState<string[]>([])
   const [cargando, setCargando] = useState(true)
   const [generando, setGenerando] = useState(false)
@@ -127,6 +140,7 @@ export default function Planning() {
       if (simulacrosResult.error) console.error('GRADE_PREDICTION_SIMULACROS_ERROR', simulacrosResult.error)
       if (correctionsResult.error) console.error('GRADE_PREDICTION_CORRECTIONS_ERROR', correctionsResult.error)
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const simulacros: GradeEvidenceItem[] = (simulacrosResult.data ?? []).map((item: any) => {
         const score = firstNumber(item.nota_final, item.resultado_json?.nota_final)
         const blockScore = score == null ? scoreFromBlocks(item.resultado_json?.desglose_bloques) : null
@@ -139,6 +153,7 @@ export default function Planning() {
         }
       })
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const corrections: GradeEvidenceItem[] = (correctionsResult.data ?? []).map((item: any) => ({
         source: 'correction',
         subject: item.asignatura,
@@ -160,7 +175,7 @@ export default function Planning() {
     }
   }
 
-  async function cargarTareasYPlanning(p: any, userId: string) {
+  async function cargarTareasYPlanning(p: PlanningProfile, userId: string) {
     const { data: tareas } = await supabase
       .from('tareas_completadas')
       .select('*')
@@ -180,7 +195,7 @@ export default function Planning() {
       hoy.setHours(0,0,0,0)
       const partes = diaStr.split(' ')
       if (partes.length < 2) return false
-      const meses: any = { 'Ene':0,'Feb':1,'Mar':2,'Abr':3,'May':4,'Jun':5,'Jul':6,'Ago':7,'Sep':8,'Oct':9,'Nov':10,'Dic':11 }
+      const meses: Record<string, number> = { 'Ene':0,'Feb':1,'Mar':2,'Abr':3,'May':4,'Jun':5,'Jul':6,'Ago':7,'Sep':8,'Oct':9,'Nov':10,'Dic':11 }
       const mes = meses[partes[2]] ?? new Date().getMonth()
       const dia = parseInt(partes[1])
       const fecha = new Date(new Date().getFullYear(), mes, dia)
@@ -188,7 +203,7 @@ export default function Planning() {
     } catch { return false }
   }
 
-  async function generarPlanning(p: any, userId: string, tareasAtrasadas: any[] = []) {
+  async function generarPlanning(p: PlanningProfile, userId: string, tareasAtrasadas: PlanningTask[] = []) {
     setGenerando(true)
     const { data: prog } = await supabase.from('progreso').select('*').eq('user_id', userId)
     const hoy = new Date()
@@ -196,7 +211,7 @@ export default function Planning() {
     const diasRestantes = Math.ceil((examen.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
 
     const atrasadasTexto = tareasAtrasadas.length > 0
-      ? `IMPORTANTE: El estudiante no completó estas tareas del día anterior y hay que redistribuirlas: ${tareasAtrasadas.map((t: any) => `${t.asignatura} - ${t.descripcion}`).join(', ')}. Incluye estas tareas pendientes en los próximos días.`
+      ? `IMPORTANTE: El estudiante no completó estas tareas del día anterior y hay que redistribuirlas: ${tareasAtrasadas.map(t => `${t.asignatura} - ${t.descripcion}`).join(', ')}. Incluye estas tareas pendientes en los próximos días.`
       : ''
 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
@@ -208,6 +223,8 @@ export default function Planning() {
     }
 
     const examLabel = ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const progTexto = prog?.length ? prog.slice(-10).map((x: any) => `${x.asignatura} ${x.bloque}: ${x.nota}/10`).join(', ') : 'sin datos aún'
 
     const res = await fetch('/api/planning', {
       method: 'POST',
@@ -218,7 +235,7 @@ El estudiante tiene ${diasRestantes} días hasta el examen.
 Puede estudiar ${p.horas_dia} horas al día.
 Su nota objetivo es ${p.nota_objetivo} sobre 14.
 Asignaturas que lleva peor: ${p.asignaturas_flojas?.join(', ') || 'ninguna indicada'}.
-Progreso reciente: ${prog?.length ? prog.slice(-10).map((x: any) => `${x.asignatura} ${x.bloque}: ${x.nota}/10`).join(', ') : 'sin datos aún'}.
+Progreso reciente: ${progTexto}.
 ${atrasadasTexto}
 
 Genera un plan de estudio para los próximos 7 días en formato JSON.
@@ -260,10 +277,10 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
     setGenerando(false)
   }
 
-  async function guardarTareasEnSupabase(plan: any[], userId: string) {
+  async function guardarTareasEnSupabase(plan: PlanningDay[], userId: string) {
     await supabase.from('tareas_completadas').delete().eq('user_id', userId).eq('completada', false)
-    const tareas = plan.flatMap((dia: any) =>
-      dia.tareas.map((t: any) => ({
+    const tareas = plan.flatMap(dia =>
+      dia.tareas.map(t => ({
         user_id: userId,
         dia: dia.dia,
         asignatura: t.asignatura,
@@ -276,6 +293,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   }
 
   async function marcarCompletada(diaIdx: number, tareaIdx: number) {
+    if (!usuario) return
     const tarea = planning[diaIdx].tareas[tareaIdx]
     const { data: rows } = await supabase
       .from('tareas_completadas')
@@ -314,7 +332,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
     setCargando(false)
   }
 
-  function firstNumber(...values: any[]) {
+  function firstNumber(...values: unknown[]) {
     for (const value of values) {
       const number = Number(value)
       if (Number.isFinite(number)) return number
@@ -322,7 +340,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
     return null
   }
 
-  function scoreFromBlocks(blocks: any) {
+  function scoreFromBlocks(blocks: unknown) {
     if (!Array.isArray(blocks)) return null
     const totals = blocks.reduce((acc, block) => {
       const score = firstNumber(block?.puntos_conseguidos, block?.nota)
@@ -338,16 +356,16 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
   }
 
   const totalTareas = planning.reduce((acc, dia) => acc + (dia.tareas?.length ?? 0), 0)
-  const completadasHoy = planning.reduce((acc, dia) => acc + (dia.tareas?.filter((t: any) => t.completada)?.length ?? 0), 0)
+  const completadasHoy = planning.reduce((acc, dia) => acc + (dia.tareas?.filter(t => t.completada)?.length ?? 0), 0)
   const porcentaje = totalTareas > 0 ? Math.round((completadasHoy / totalTareas) * 100) : 0
-  const tareasPlano = planning.flatMap((dia: any, diaIdx: number) =>
-    (dia.tareas ?? []).map((tarea: any, tareaIdx: number) => ({ ...tarea, dia: dia.dia, diaIdx, tareaIdx }))
+  const tareasPlano = planning.flatMap((dia, diaIdx) =>
+    (dia.tareas ?? []).map((tarea, tareaIdx) => ({ ...tarea, dia: dia.dia, diaIdx, tareaIdx }))
   )
-  const tareasPendientes = tareasPlano.filter((tarea: any) => !tarea.completada)
+  const tareasPendientes = tareasPlano.filter(tarea => !tarea.completada)
   const tareaDeHoy = tareasPendientes[0] ?? tareasPlano[0]
   const duracionTareaHoy = tareaDeHoy?.duracion ?? ((perfil?.horas_dia ?? 1) * 60)
   const progresoSemanal = `${completadasHoy} de ${totalTareas} tareas completadas`
-  const tabs: Array<{ id: PlanTab; label: string; icon: any }> = [
+  const tabs: Array<{ id: PlanTab; label: string; icon: LucideIcon }> = [
     { id: 'general', label: 'Vista general', icon: Target },
     { id: 'semana', label: 'Plan semanal', icon: CalendarDays },
     { id: 'tareas', label: 'Tareas', icon: ListChecks },
@@ -532,7 +550,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                 <div className="rounded-3xl p-5 md:col-span-3" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
                   <h2 className="mb-3 text-sm font-bold" style={{ color: config.ink }}>Próximos objetivos</h2>
                   <div className="grid gap-2">
-                    {tareasPendientes.slice(0, 4).map((tarea: any, index: number) => (
+                    {tareasPendientes.slice(0, 4).map((tarea, index) => (
                       <div key={`${tarea.dia}-${index}`} className="rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] p-3 text-sm">
                         <strong style={{ color: config.ink }}>{tarea.dia}</strong>
                         <span style={{ color: config.muted }}> · {tarea.asignatura} · {tarea.descripcion}</span>
@@ -564,8 +582,8 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
               </div>
             ) : planning.length > 0 ? (
               activeTab === 'semana' ? <div className="grid gap-4">
-                {planning.map((dia: any, i: number) => {
-                  const completadasDia = dia.tareas?.filter((t: any) => t.completada)?.length ?? 0
+                {planning.map((dia, i) => {
+                  const completadasDia = dia.tareas?.filter(t => t.completada)?.length ?? 0
                   const totalDia = dia.tareas?.length ?? 0
                   return (
                     <div key={i} className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: '0 18px 45px rgba(37,99,235,0.07)' }}>
@@ -574,7 +592,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                         <span className="text-xs" style={{ color: config.muted }}>{completadasDia}/{totalDia} completadas</span>
                       </div>
                       <div className="p-4 flex flex-col gap-3">
-                        {dia.tareas?.map((tarea: any, j: number) => {
+                        {dia.tareas?.map((tarea, j) => {
                           const theme = subjectTheme(tarea.asignatura)
                           return (
                           <div key={j} className="campus-task flex items-start gap-3 p-3 rounded-xl"
@@ -607,14 +625,14 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                     </div>
                   )
                 })}
-                <button onClick={() => cargarTareasYPlanning(perfil, usuario?.id)}
+                <button onClick={() => perfil && usuario && cargarTareasYPlanning(perfil, usuario.id)}
                   className="campus-hover w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
                   style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
                   <RefreshCw size={15} /> Recalcular plan
                 </button>
               </div> : activeTab === 'tareas' ? (
                 <div className="grid gap-3">
-                  {tareasPlano.map((tarea: any, index: number) => {
+                  {tareasPlano.map((tarea, index) => {
                     const theme = subjectTheme(tarea.asignatura)
                     return (
                       <div key={`${tarea.dia}-${index}`} className="campus-task flex items-start gap-3 rounded-2xl p-4"
@@ -642,12 +660,12 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
                   <p className="mb-5 text-sm" style={{ color: config.muted }}>Cambia tu objetivo, disponibilidad o asignaturas flojas y Pausia recalcula la semana.</p>
                   <div className="flex flex-wrap gap-3">
                     <button onClick={() => setPaso('onboarding')} className="campus-hover rounded-2xl px-4 py-2 text-sm font-bold" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb' }}><PenLine size={14} /> Editar datos</button>
-                    <button onClick={() => cargarTareasYPlanning(perfil, usuario?.id)} className="campus-primary rounded-2xl px-4 py-2 text-sm font-bold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}><RefreshCw size={14} /> Regenerar plan</button>
+                    <button onClick={() => perfil && usuario && cargarTareasYPlanning(perfil, usuario.id)} className="campus-primary rounded-2xl px-4 py-2 text-sm font-bold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}><RefreshCw size={14} /> Regenerar plan</button>
                   </div>
                 </div>
               ) : null
             ) : planningError ? (
-              <PlanErrorState onRetry={() => generarPlanning(perfil, usuario?.id, [])} />
+              <PlanErrorState onRetry={() => { if (perfil && usuario) generarPlanning(perfil, usuario.id, []) }} />
             ) : (
               <div className="rounded-3xl p-6" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
                 <PlanEmptyState onCreate={() => setPaso('onboarding')} />

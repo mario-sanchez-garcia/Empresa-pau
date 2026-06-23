@@ -15,6 +15,7 @@ import { supabase } from './lib/supabase'
 import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
 import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
+import { getTheoryContextForExercise, theoryContextToPrompt } from './lib/whyItWorksTheory'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
@@ -1531,16 +1532,34 @@ function cambiarTipo(t: Tipo) {
 
   function buildChunkedCorrectionPrompts(input: {
     subject: string
+    subjectId: string
     community: string
     examLabel: string
     option: string
     maxScore: number
+    year?: number | string | null
+    examCall?: string
+    exerciseId?: string
+    exerciseLabel?: string
     officialPrompt: string
     criteria?: string
     sourceText?: string
     concepts?: string[]
     studentAnswer: string
   }) {
+    const theoryContext = getTheoryContextForExercise({
+      subject: input.subjectId || input.subject,
+      community: input.community,
+      year: input.year,
+      examCall: input.examCall,
+      exerciseId: input.exerciseId,
+      exerciseLabel: input.exerciseLabel,
+      exerciseText: input.officialPrompt,
+      officialSolution: input.criteria,
+      rubric: input.criteria,
+      concepts: input.concepts
+    })
+    const theoryContextPrompt = theoryContextToPrompt(theoryContext)
     const sharedContext = `Contexto de corrección PAU:
 - Asignatura: ${input.subject}
 - Comunidad: ${input.community}
@@ -1568,6 +1587,8 @@ Reglas comunes:
         label: 'Leyendo tu respuesta y estimando la nota...',
         essential: true,
         title: 'Resumen y nota estimada',
+        theoryContext: null,
+        includePreviousCorrection: false,
         prompt: `${sharedContext}
 
 Bloque 1/4. Evalúa la respuesta con la rúbrica.
@@ -1585,6 +1606,8 @@ Nota: X/${formatPts(input.maxScore)}
         label: 'Detectando aciertos y errores principales...',
         essential: true,
         title: 'Aciertos y errores',
+        theoryContext: null,
+        includePreviousCorrection: false,
         prompt: `${sharedContext}
 
 Bloque 2/4. Identifica máximo 3 aciertos y máximo 3 errores importantes.
@@ -1604,6 +1627,8 @@ Devuelve exactamente estas secciones:
         label: 'Corrigiendo paso a paso...',
         essential: true,
         title: 'Corrección paso a paso',
+        theoryContext: null,
+        includePreviousCorrection: false,
         prompt: `${sharedContext}
 
 Bloque 3/4. Corrige paso a paso el ejercicio o sus apartados.
@@ -1618,12 +1643,29 @@ Devuelve exactamente esta sección:
         label: 'Preparando teoría aplicada y recomendación final...',
         essential: false,
         title: 'Teoría aplicada y recomendación final',
+        theoryContext,
+        includePreviousCorrection: true,
         prompt: `${sharedContext}
 
-Bloque 4/4. Explica brevemente la idea teórica detrás del ejercicio y cierra con una recomendación accionable.
+${theoryContextPrompt}
+
+Bloque 4/4. Explica la teoría aplicada al ejercicio concreto y cierra con una recomendación accionable.
+No des teoría genérica. Relaciona cada idea con un paso real del ejercicio, la rúbrica, la solución orientativa o la corrección previa.
+Si no hay teoría curricular suficiente, usa la solución/criterios y escribe una explicación mínima segura sin inventar una clase larga.
+Mantén el idioma del ejercicio o de la corrección.
 Devuelve exactamente estas secciones:
 
 ## ¿Por qué es así?
+
+**Idea clave**
+
+**Por qué se aplica en este ejercicio**
+
+**Dónde se ve en la solución**
+
+**Error típico que debes evitar**
+
+**Qué recordar para el examen**
 
 ## Recomendación final`
       }
@@ -1647,7 +1689,15 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
     for (const chunk of chunks) {
       setCorrectionStage(chunk.label)
       setStreamText(completed.join('\n\n'))
-      let result = await streamCorrectionRequest(accessToken, chunk.prompt, {
+      const chunkPrompt = chunk.includePreviousCorrection
+        ? `${chunk.prompt}
+
+CORRECCIÓN YA GENERADA:
+${completed.join('\n\n')}
+
+Usa la corrección anterior solo como contexto para conectar la teoría con pasos, aciertos y errores concretos.`
+        : chunk.prompt
+      let result = await streamCorrectionRequest(accessToken, chunkPrompt, {
         includeImage: true,
         appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
         blockId: chunk.id,
@@ -1657,7 +1707,7 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
       if (result.truncated || !result.text.trim()) {
         setContinuingCorrection(true)
         setCorrectionStage(`${chunk.label} Reintentando este bloque en versión breve...`)
-        result = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunk.prompt), {
+        result = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunkPrompt), {
           includeImage: true,
           appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
           blockId: `${chunk.id}:retry`,
@@ -1709,10 +1759,15 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
       const correctionSessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       const chunks = buildChunkedCorrectionPrompts({
         subject: nombreAsignatura(asignatura),
+        subjectId: asignatura,
         community: ccaa,
         examLabel: `Práctica ${nombreAsignatura(asignatura)} ${examenActivo?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
         option: opcionMostrada,
         maxScore: puntuacionMax,
+        year: examenActivo?.año ?? anioSeleccionado,
+        examCall: tipo,
+        exerciseId: p?.id ?? preguntaActivaStorageId,
+        exerciseLabel: bloqueActivoLabel || p?.label || p?.bloque || p?.tipo,
         officialPrompt: enunciadoActivo,
         criteria: p?.criterios,
         sourceText: p?.texto_fuente,
@@ -1737,6 +1792,9 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
         : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(accumulated, { officialMaxScore: puntuacionMax }), puntuacionMax)
       const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
+      const markdownForWhy = correctionPayloadToMarkdown(correccionGuardada, { officialMaxScore: puntuacionMax })
+      const whyItWorks = splitWhyExplanationMarkdown(markdownForWhy).why
+      const whyContext = chunks.find(chunk => chunk.id === 'teoria-final')?.theoryContext
       // Batch all three updates — no empty-frame gap between streaming and final render.
       // isTruncated is not persisted to historial_examenes (no column yet).
       setCorreccion(correccionGuardada)
@@ -1751,15 +1809,42 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
       const notaMax = puntuacionMax
       if (!isTruncated) {
         setCorrectionStage('Guardando en Historial...')
-        supabase.from('historial_examenes').insert({
+        const historyPayload = {
           user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
           bloque: bloqueActivoLabel || '',
           opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
           enunciado: enunciadoActivo?.substring(0, 6000),
           respuesta: respuesta?.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
-          correccion: correccionGuardada
-        }).then(() => {})
+          correccion: correccionGuardada,
+          why_it_works: whyItWorks || null,
+          why_it_works_context: whyContext ? {
+            blockSlug: whyContext.blockSlug,
+            topicSlug: whyContext.topicSlug,
+            blockTitle: whyContext.blockTitle,
+            topicTitle: whyContext.topicTitle,
+            fallbackReason: whyContext.fallbackReason ?? null
+          } : null,
+          detected_concepts: whyContext?.detectedConcepts ?? [],
+          curriculum_source_ids: whyContext?.sourceIds ?? []
+        }
+        supabase.from('historial_examenes').insert(historyPayload).then(async ({ error }) => {
+          if (!error) return
+          const legacyPayload = {
+            user_id: historyPayload.user_id,
+            asignatura: historyPayload.asignatura,
+            tipo: historyPayload.tipo,
+            año: historyPayload.año,
+            bloque: historyPayload.bloque,
+            opcion: historyPayload.opcion,
+            nota: historyPayload.nota,
+            nota_maxima: historyPayload.nota_maxima,
+            enunciado: historyPayload.enunciado,
+            respuesta: historyPayload.respuesta,
+            correccion: historyPayload.correccion
+          }
+          await supabase.from('historial_examenes').insert(legacyPayload)
+        })
       }
     } catch (error) {
       setStreamText('')

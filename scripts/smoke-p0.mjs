@@ -28,6 +28,9 @@ const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
 const caminoCurriculumMigration = read('supabase/migrations/20260623110000_create_camino_curriculum_tables.sql')
+const whyTheory = read('app/lib/whyItWorksTheory.ts')
+const whyHistoryMigration = read('supabase/migrations/20260623113000_add_why_it_works_to_historial_examenes.sql')
+const whyExplanationComponent = read('components/shared/WhyExplanation.tsx')
 const packageJson = read('package.json')
 const nextConfig = read('next.config.ts')
 
@@ -98,6 +101,38 @@ assert(
     page.includes('const isTruncated = chunkedCorrection.truncated') &&
     page.includes('if (!isTruncated)') &&
     page.includes('Guardando en Historial')
+)
+
+assert(
+  'why-it-works is grounded in curriculum context after complete corrections',
+  page.includes('getTheoryContextForExercise') &&
+    page.includes('theoryContextToPrompt') &&
+    page.includes('CORRECCIÓN YA GENERADA') &&
+    page.includes('No des teoría genérica') &&
+    page.includes('why_it_works: whyItWorks || null') &&
+    page.includes('if (!isTruncated)') &&
+    whyTheory.includes('export function getTheoryContextForExercise') &&
+    whyTheory.includes('CAMINO_CURRICULUM_TOPICS') &&
+    whyTheory.includes('detectedConcepts') &&
+    whyTheory.includes('SAFE_FALLBACK_MESSAGE')
+)
+
+assert(
+  'why-it-works persists history metadata without breaking legacy history inserts',
+  whyHistoryMigration.includes('add column if not exists why_it_works text') &&
+    whyHistoryMigration.includes('why_it_works_context jsonb') &&
+    whyHistoryMigration.includes('detected_concepts jsonb') &&
+    whyHistoryMigration.includes('curriculum_source_ids jsonb') &&
+    page.includes('legacyPayload') &&
+    page.includes("supabase.from('historial_examenes').insert(legacyPayload)")
+)
+
+assert(
+  'why-it-works stays at the end and renders LaTeX through existing MathMarkdown',
+  page.includes('## ¿Por qué es así?') &&
+    page.includes('**Dónde se ve en la solución**') &&
+    whyExplanationComponent.includes('MathMarkdown text={content} format={false}') &&
+    whyExplanationComponent.includes('¿Por qué es así?')
 )
 
 assert(

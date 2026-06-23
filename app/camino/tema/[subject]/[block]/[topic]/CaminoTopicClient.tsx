@@ -1,7 +1,5 @@
 'use client'
 
-'use client'
-
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -25,7 +23,7 @@ const CALENDAR_KEY = 'pausia_camino_calendar_v2'
 const XP_KEY = 'pausia_camino_xp_events_v1'
 const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
 
-type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number }>
+type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 type SchoolFeedback = Array<{ schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }>
 type CaminoXpEvent = { id: string; missionId: string; date: string; subject: string; xp: number; bonus: boolean; score?: number }
 type CalendarMission = { id: string; status: 'pending' | 'done'; subject: string; role?: 'main' | 'bonus' }
@@ -50,7 +48,7 @@ function progressKey(topic: CaminoCurriculumTopic) {
 }
 
 function xpFromScore(score: number) {
-  const baseXP = 15
+  const baseXP = 10
   const bonusXP = score < 4 ? 5 : score < 6 ? 12 : score < 8 ? 22 : score < 9 ? 32 : 45
   return baseXP + bonusXP
 }
@@ -90,27 +88,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const currentTopic = topic
   const key = progressKey(currentTopic)
   const current = progress[key] ?? { xp: 0 }
-  const topicCompleted = current.explanation && current.guided && current.evau
+  const topicCompleted = Boolean(current.evau)
   const hasContent = hasLatexContent(currentTopic)
-  const statusLabel = topicCompleted ? 'Completado' : current.explanation || current.guided || current.evau ? 'En curso' : 'Pendiente'
-
-  function award(part: 'explanation' | 'guided' | 'evau') {
-    const xpByPart = { explanation: 15, guided: 15, evau: 20 }
-    setProgress(previous => {
-      const item = previous[key] ?? { xp: 0 }
-      if (item[part]) return previous
-      const allDoneAfter = part === 'evau'
-        ? Boolean(item.explanation && item.guided)
-        : part === 'guided'
-          ? Boolean(item.explanation && item.evau)
-          : Boolean(item.guided && item.evau)
-      const extra = allDoneAfter ? 30 : 0
-      const next = { ...previous, [key]: { ...item, [part]: true, xp: item.xp + xpByPart[part] + extra } }
-      saveJson(TOPIC_PROGRESS_KEY, next)
-      setToast(extra ? `+${xpByPart[part] + extra} XP · tema completado` : `+${xpByPart[part]} XP`)
-      return next
-    })
-  }
+  const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
 
   function markNotSeen() {
     const feedback = loadJson<SchoolFeedback>(SCHOOL_FEEDBACK_KEY, [])
@@ -159,13 +139,28 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     if (missionId) {
       saveJson(CALENDAR_KEY, calendar.map(day => ({ ...day, missions: day.missions.map(mission => mission.id === missionId ? { ...mission, status: 'done' as const } : mission) })))
     }
+    setProgress(previous => {
+      const item = previous[key] ?? { xp: 0 }
+      const storedXp = xpChanged ? xp : item.xp || xp
+      const storedScore = xpChanged ? scoreOnTen : item.score ?? scoreOnTen
+      const next = {
+        ...previous,
+        [key]: {
+          ...item,
+          evau: true,
+          xp: storedXp,
+          score: storedScore,
+        }
+      }
+      saveJson(TOPIC_PROGRESS_KEY, next)
+      return next
+    })
     if (scoreOnTen < 6) {
       const weakAreas = loadJson<Array<{ subject: string; block: string; topic: string; score: number; date: string }>>(WEAK_AREAS_KEY, [])
       const nextWeakAreas = [{ subject: subjectLabelFromSlug(currentTopic.subject), block: currentTopic.blockTitle, topic: currentTopic.title, score: scoreOnTen, date: new Date().toISOString() }, ...weakAreas.filter(item => !(item.subject === subjectLabelFromSlug(currentTopic.subject) && item.topic === currentTopic.title))].slice(0, 12)
       saveJson(WEAK_AREAS_KEY, nextWeakAreas)
     }
     setXpAwarded(xpChanged ? xp : previous?.xp ?? xp)
-    award('evau')
     return { xp, xpChanged }
   }
 
@@ -262,7 +257,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{currentTopic.title}</h1>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">25 min</span>
-                <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : statusLabel === 'En curso' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
+                <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
                 <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">Subpágina de aprendizaje</span>
               </div>
               <p className="mt-3 text-sm font-semibold text-slate-500">{hasContent ? 'Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.' : 'Itinerario preparado. Falta cargar apunte LaTeX específico para este tema.'}</p>
@@ -271,14 +266,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4">
-              <LearningCard title="1. Explicación comprensible" done={Boolean(current.explanation)} onDone={() => award('explanation')}>
+              <LearningCard title="1. Explicación comprensible">
                 <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
                 {currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <EmptyContent />}
               </LearningCard>
-              <LearningCard title="2. Ejemplo guiado" done={Boolean(current.guided)} onDone={() => award('guided')}>
+              <LearningCard title="2. Ejemplo guiado">
                 {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
               </LearningCard>
-              <LearningCard title="3. Ahora inténtalo tú" done={Boolean(current.guided)} onDone={() => award('guided')}>
+              <LearningCard title="3. Ahora inténtalo tú">
                 {currentTopic.practicePrompt ? <MathMarkdown text={currentTopic.practicePrompt} /> : <EmptyContent />}
               </LearningCard>
               <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
@@ -330,7 +325,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               </div>
               <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4">
                 <p className="text-sm font-black text-emerald-900">{current.xp ?? 0} XP en este tema</p>
-                <p className="mt-1 text-xs font-bold text-emerald-700">{topicCompleted ? 'Tema completado.' : 'Completa explicación, práctica y ejercicio PAU para el bonus.'}</p>
+                <p className="mt-1 text-xs font-bold text-emerald-700">{topicCompleted ? 'Tema completado con corrección.' : 'El XP se asigna solo después de corregir el ejercicio final.'}</p>
               </div>
             </aside>
           </div>
@@ -349,6 +344,6 @@ function EmptyContent() {
   return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Todavía no hay apunte LaTeX estructurado para este tema. Camino PAU mantiene el tema en itinerario sin inventar contenido.</p>
 }
 
-function LearningCard({ title, children, done, onDone }: { title: string; children: React.ReactNode; done?: boolean; onDone?: () => void }) {
-  return <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-black text-slate-950">{title}</h2>{onDone && <button onClick={onDone} disabled={done} className={`inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black ${done ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-600 text-white'}`}><Check size={14} /> {done ? 'Hecho' : 'He trabajado esto'}</button>}</div><div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div></article>
+function LearningCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-black text-slate-950">{title}</h2><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">Paso de lectura</span></div><div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div></article>
 }

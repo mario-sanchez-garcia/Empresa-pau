@@ -196,11 +196,11 @@ assert(
     caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
-    caminoCalendar.includes('Marcar sin XP') &&
     caminoCalendar.includes('actionHref(newMission.kind') &&
     caminoCalendar.includes('hrefForMission') &&
     caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
     caminoCalendar.includes('source=camino_pau') &&
+    !caminoCalendar.includes('Marcar sin XP') &&
     !caminoCalendar.includes('error_review') &&
     !caminoCalendar.includes('view=historial') &&
     !caminoCalendar.includes('value="chat"')
@@ -209,15 +209,24 @@ assert(
 assert(
   'Camino PAU awards XP only after corrected exercises and adapts to weak areas',
   caminoTopic.includes('function xpFromScore') &&
-    caminoTopic.includes('const baseXP = 15') &&
+    caminoTopic.includes('const baseXP = 10') &&
     caminoTopic.includes('score < 4 ? 5 : score < 6 ? 12 : score < 8 ? 22 : score < 9 ? 32 : 45') &&
     caminoTopic.includes('correctCourseExercise') &&
     caminoTopic.includes("supabase.from('historial_examenes').insert") &&
     caminoTopic.includes('WEAK_AREAS_KEY') &&
     caminoTopic.includes('missionId') &&
     caminoTopic.includes("status: 'done' as const") &&
-    caminoCalendar.includes('Misión marcada como hecha sin XP') &&
-    !caminoCalendar.includes('missionXP(')
+    caminoTopic.includes('setProgress(previous =>') &&
+    caminoTopic.includes('xpChanged') &&
+    !caminoTopic.includes("award('explanation')") &&
+    !caminoTopic.includes("award('guided')") &&
+    !caminoTopic.includes("award('evau')") &&
+    !caminoTopic.includes('He trabajado esto') &&
+    !caminoTopic.includes('Marcar como trabajado') &&
+    !caminoCalendar.includes('Misión marcada como hecha sin XP') &&
+    !caminoCalendar.includes('Marcar sin XP') &&
+    !caminoCalendar.includes('function completeMission') &&
+    !caminoCalendar.includes('onComplete={completeMission')
 )
 
 assert(
@@ -302,7 +311,7 @@ assert(
     caminoTopic.includes('Ahora inténtalo tú') &&
     caminoTopic.includes('Subpágina de aprendizaje') &&
     caminoTopic.includes('SCHOOL_FEEDBACK_KEY') &&
-    caminoTopic.includes("award('evau')") &&
+    caminoTopic.includes('El XP se asigna solo después de corregir el ejercicio final.') &&
     caminoTopic.includes('MathMarkdown text=') &&
     !caminoTopic.includes('askLocalTutor') &&
     !caminoTopic.includes('Fragmento LaTeX fuente')

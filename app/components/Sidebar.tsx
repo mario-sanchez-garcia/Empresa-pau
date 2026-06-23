@@ -29,7 +29,7 @@ interface SidebarProps {
 
 const NAV_ITEMS = [
   { id: 'camino',       label: 'Camino PAU',     desc: 'Tu misión diaria',   href: '/camino',         icon: Route },
-  { id: 'examenes',     label: 'Exámenes',        desc: 'Practica y corrige', href: '/',               icon: ClipboardList },
+  { id: 'examenes',     label: 'Exámenes',        desc: 'Practica y corrige', href: '/?view=examenes', icon: ClipboardList },
   { id: 'simulacros',   label: 'Simulacros',      desc: 'Condiciones reales', href: '/simulacros',     icon: TimerReset },
   { id: 'zona',         label: 'La Zona',         desc: 'Estudia a tu manera',href: '/zona',           icon: BrainCircuit },
   { id: 'chat',         label: 'Chat con Pausia', desc: 'Resuelve dudas',     href: '/?view=chat',     icon: MessageCircle },

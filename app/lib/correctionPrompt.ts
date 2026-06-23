@@ -439,7 +439,8 @@ export function parseCorrectionJson(text: string) {
 
     for (const attempt of attempts) {
       try {
-        return restoreLatexEscapes(JSON.parse(attempt))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return restoreLatexEscapes(JSON.parse(attempt)) as any // JSON de corrección sin interfaz completa — any intencional
       } catch {
         // Try the next progressively more tolerant representation.
       }
@@ -495,7 +496,7 @@ function closeTruncatedJson(jsonText: string) {
 // \f (form-feed U+000C) and \b (backspace U+0008) are valid JSON escapes, so the AI's
 // \frac / \forall (→ form-feed + rac/orall) and \beta / \begin (→ backspace + eta/egin)
 // survive JSON.parse but arrive as wrong characters. Restore them here.
-function restoreLatexEscapes(obj: any): any {
+function restoreLatexEscapes(obj: unknown): unknown {
   if (typeof obj === 'string') {
     return obj
       .replace(/([a-zA-Z])/g, '\\f$1')  // form-feed + letter → \f... (was \frac, \forall…)
@@ -504,20 +505,25 @@ function restoreLatexEscapes(obj: any): any {
   if (Array.isArray(obj)) return obj.map(restoreLatexEscapes)
   if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
-      Object.entries(obj as Record<string, any>).map(([k, v]) => [k, restoreLatexEscapes(v)])
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [k, restoreLatexEscapes(v)])
     )
   }
   return obj
 }
 
-export function correctionJsonToMarkdown(data: any) {
+export function correctionJsonToMarkdown(data: unknown) {
   return correctionJsonToMarkdownWithOptions(data)
 }
 
-export function correctionJsonToMarkdownWithOptions(data: any, options: { officialMaxScore?: number } = {}) {
-  const bloques = Array.isArray(data?.desglose_bloques) ? data.desglose_bloques : []
-  const plan = Array.isArray(data?.plan_repaso) ? data.plan_repaso : []
-  const resumen = Array.isArray(data?.resumen_por_bloque_tematico) ? data.resumen_por_bloque_tematico : []
+export function correctionJsonToMarkdownWithOptions(rawData: unknown, options: { officialMaxScore?: number } = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = rawData as any // JSON de corrección sin interfaz completa — any intencional
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bloques: any[] = Array.isArray(data?.desglose_bloques) ? data.desglose_bloques : []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const plan: any[] = Array.isArray(data?.plan_repaso) ? data.plan_repaso : []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resumen: any[] = Array.isArray(data?.resumen_por_bloque_tematico) ? data.resumen_por_bloque_tematico : []
   const firstBlock = bloques[0] ?? null
   const officialMax = normalizeScore(options.officialMaxScore)
   const firstMax = officialMax ?? normalizeScore(firstBlock?.puntos_maximos ?? firstBlock?.max_puntos)
@@ -534,7 +540,7 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
     data?.feedback_general ?? '',
     `## Lo que está bien\n${listOrText(data?.fortalezas, data?.puntos_fuertes)}`,
     `## Errores o mejoras\n${listOrText(data?.errores_principales, data?.puntos_mejora)}`,
-    ...bloques.map((block: any) => [
+    ...bloques.map((block) => [
       `## Corrección paso a paso`,
       `### ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}`,
       `**Puntuación:** ${formatNumber(block.puntos_conseguidos)}/${formatNumber(block.puntos_maximos)} (${block.porcentaje_logrado ?? 0}%)`,
@@ -546,12 +552,12 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
       `## Respuesta modelo\n${block.solucion_orientativa ?? block.solucion_correcta_corta ?? ''}`,
       `## Consejo final\n${block.consejo_especifico ?? block.consejo_para_mejorar ?? ''}`
     ].filter(Boolean).join('\n\n')),
-    plan.length ? `### Plan de repaso\n${plan.map((item: any) => `${item.prioridad}. **${item.tema}**: ${item.accion} (${item.tiempo_recomendado}). ${item.recurso_sugerido}`).join('\n')}` : '',
-    resumen.length ? `### Resumen por bloque\n${resumen.map((item: any) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : '',
-    bloques.some((block: any) => whyBlockMarkdown(block))
+    plan.length ? `### Plan de repaso\n${plan.map((item) => `${item.prioridad}. **${item.tema}**: ${item.accion} (${item.tiempo_recomendado}). ${item.recurso_sugerido}`).join('\n')}` : '',
+    resumen.length ? `### Resumen por bloque\n${resumen.map((item) => `- **${item.bloque}**: ${formatNumber(item.puntos_conseguidos)}/${formatNumber(item.puntos_maximos)} · ${item.nivel}`).join('\n')}` : '',
+    bloques.some((block) => whyBlockMarkdown(block))
       ? `## ¿Por qué es así?\n${bloques
-        .filter((block: any) => whyBlockMarkdown(block))
-        .map((block: any) => [
+        .filter((block) => whyBlockMarkdown(block))
+        .map((block) => [
           `### ${block.numero_bloque ?? 'Bloque'} · ${block.tema ?? ''}`,
           whyBlockMarkdown(block)
         ].filter(Boolean).join('\n\n'))
@@ -560,7 +566,9 @@ export function correctionJsonToMarkdownWithOptions(data: any, options: { offici
   ].filter(Boolean).join('\n\n')
 }
 
-export function normalizeCorrectionForOfficialScores(data: any, officialMaxScores: number[]) {
+export function normalizeCorrectionForOfficialScores(rawData: unknown, officialMaxScores: number[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = rawData as any // JSON de corrección sin interfaz completa — any intencional
   const hasBlockShape = data && typeof data === 'object' && (
     data.correccion_detalle ||
     data.solucion_orientativa ||
@@ -569,12 +577,13 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
     data.porqueEsAsi ||
     data.whyExplanation
   )
-  const blocks = Array.isArray(data?.desglose_bloques)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const blocks: any[] = Array.isArray(data?.desglose_bloques)
     ? data.desglose_bloques
     : hasBlockShape
       ? [data]
       : []
-  const normalizedBlocks = blocks.map((block: any, index: number) => {
+  const normalizedBlocks = blocks.map((block, index: number) => {
     const officialMax = normalizeScore(officialMaxScores[index]) ?? normalizeScore(block?.puntos_maximos ?? block?.max_puntos) ?? 0
     const score = clampScore(normalizeScore(block?.puntos_conseguidos ?? block?.nota) ?? 0, officialMax)
     const percentage = officialMax > 0 ? Math.round((score / officialMax) * 100) : 0
@@ -587,8 +596,8 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
       porcentaje_logrado: percentage
     }
   })
-  const totalMax = normalizedBlocks.reduce((sum: number, block: any) => sum + (normalizeScore(block.puntos_maximos) ?? 0), 0)
-  const totalScore = normalizedBlocks.reduce((sum: number, block: any) => sum + (normalizeScore(block.puntos_conseguidos) ?? 0), 0)
+  const totalMax = normalizedBlocks.reduce((sum: number, block) => sum + (normalizeScore(block.puntos_maximos) ?? 0), 0)
+  const totalScore = normalizedBlocks.reduce((sum: number, block) => sum + (normalizeScore(block.puntos_conseguidos) ?? 0), 0)
   const notaFinal = totalMax > 0 ? Number(((totalScore / totalMax) * 10).toFixed(2)) : normalizeScore(data?.nota_final) ?? 0
 
   return {
@@ -597,7 +606,8 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
     nota_sobre_14: undefined,
     desglose_bloques: normalizedBlocks,
     resumen_por_bloque_tematico: Array.isArray(data?.resumen_por_bloque_tematico) && data.resumen_por_bloque_tematico.length
-      ? data.resumen_por_bloque_tematico.map((item: any, index: number) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (data.resumen_por_bloque_tematico as any[]).map((item, index: number) => {
         const block = normalizedBlocks[index]
         if (!block) return item
         return {
@@ -607,7 +617,8 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
           porcentaje: block.porcentaje_logrado
         }
       })
-      : normalizedBlocks.map((block: any) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      : (normalizedBlocks as any[]).map((block) => ({
         bloque: block.tema ?? block.numero_bloque ?? 'Bloque',
         puntos_conseguidos: block.puntos_conseguidos,
         puntos_maximos: block.puntos_maximos,
@@ -618,27 +629,31 @@ export function normalizeCorrectionForOfficialScores(data: any, officialMaxScore
   }
 }
 
-function penaltiesToMarkdown(items: any) {
+function penaltiesToMarkdown(items: unknown) {
   if (!Array.isArray(items) || !items.length) return ''
-  return `**Penalizaciones aplicadas:**\n${items.map((item: any) => `- ${item.motivo}: ${item.puntos_descontados}`).join('\n')}`
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows = items as Array<Record<string, any>> // JSON de corrección sin interfaz completa — any intencional
+  return `**Penalizaciones aplicadas:**\n${rows.map(item => `- ${item.motivo}: ${item.puntos_descontados}`).join('\n')}`
 }
 
-function whyBlockMarkdown(block: any) {
-  return whyExplanationToMarkdown(block?.porqueEsAsi ?? block?.whyExplanation) || block?.teoria_ejercicio || ''
+function whyBlockMarkdown(block: unknown) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const b = block as any // JSON de corrección sin interfaz completa — any intencional
+  return whyExplanationToMarkdown(b?.porqueEsAsi ?? b?.whyExplanation) || b?.teoria_ejercicio || ''
 }
 
-function listOrText(items: any, fallback = '') {
+function listOrText(items: unknown, fallback = '') {
   if (Array.isArray(items) && items.filter(Boolean).length) {
-    return items.filter(Boolean).map((item: any) => `- ${String(item)}`).join('\n')
+    return items.filter(Boolean).map(item => `- ${String(item)}`).join('\n')
   }
   return fallback || 'Sin observaciones adicionales.'
 }
 
-function formatNumber(value: any) {
+function formatNumber(value: unknown) {
   return typeof value === 'number' ? value.toFixed(2).replace(/\.00$/, '') : '0'
 }
 
-function normalizeScore(value: any) {
+function normalizeScore(value: unknown) {
   const number = Number(value)
   return Number.isFinite(number) ? number : null
 }

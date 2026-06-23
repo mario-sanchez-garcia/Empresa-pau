@@ -28,11 +28,12 @@ export function createRateLimitPayload(action: RateLimitAction, result: { limit:
   }
 }
 
-export function getApiErrorMessage(body: any, fallback = 'No hemos podido completar la acción. Inténtalo de nuevo.') {
-  if (body?.code === RATE_LIMIT_CODE) {
-    return [body.message || body.error || RATE_LIMIT_BETA_NOTICE, body.betaNotice || RATE_LIMIT_BETA_NOTICE]
+export function getApiErrorMessage(body: unknown, fallback = 'No hemos podido completar la acción. Inténtalo de nuevo.') {
+  const b = body as Record<string, string | null | undefined>
+  if (b?.code === RATE_LIMIT_CODE) {
+    return [b.message || b.error || RATE_LIMIT_BETA_NOTICE, b.betaNotice || RATE_LIMIT_BETA_NOTICE]
       .filter(Boolean)
       .join('\n\n')
   }
-  return body?.message || body?.error || fallback
+  return b?.message || b?.error || fallback
 }

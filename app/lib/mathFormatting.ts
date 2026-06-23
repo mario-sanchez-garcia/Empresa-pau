@@ -287,7 +287,7 @@ function repairLostLatex(text: string) {
     .replace(/(^|[^\\\w])(int|sum|prod|cdot|times|leq|geq|neq|approx|rightarrow|text)\b/g, '$1\\$2')
     .replace(/(^|[^\\\w])(leftrightarrow|rightleftharpoons)\b/g, '$1\\rightleftharpoons')
     .replace(/\bdisplaystylelim\b/g, '\\displaystyle\\lim')
-    .replace(/\bmathbbR\b|\bmathbb\{R\}/g, '\\mathbb{R}')
+    .replace(/(?<!\\)mathbbR\b|(?<!\\)mathbb\{R\}/g, '\\mathbb{R}')
     .replace(/(^|[^\\\w])(?:ec|vec)\{([A-Za-z])\}/g, '$1\\vec{$2}')
     .replace(/(^|[^\\\w])hat\{([ijk])\}/g, '$1\\hat{$2}')
     .replace(new RegExp(`\\btext(${UNITS}|Sol)\\b`, 'g'), '\\text{$1}')

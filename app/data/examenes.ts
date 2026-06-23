@@ -976,7 +976,7 @@ b) (1 punto) Calcule y clasifique los extremos relativos de $f(x)$ en $\\mathbb{
 c) (1 punto) Determine el área comprendida entre la gráfica de la función $f(x)$ y el eje $OX$ en el intervalo $[-1, 1]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2022-J-B3", bloque: "Geometria", opcion: "B",
-        enunciado: `Sean el plano $\\pi \\equiv x + y + z = 1$, la recta $$r_1 \\equiv \\begin{cases} x = 1 + \\lambda \\\\ y = 1 - \\lambda \\\\ z = -1 \\end{cases}$$, $\\lambda \\in \\mathbb{R}$, y el punto $P(0, 1, 0)$.
+        enunciado: `Sean el plano $\\pi \\equiv x + y + z = 1$, la recta\n$$r_1 \\equiv \\begin{cases} x = 1 + \\lambda \\\\ y = 1 - \\lambda \\\\ z = -1 \\end{cases}, \\quad \\lambda \\in \\mathbb{R}$$\ny el punto $P(0, 1, 0)$.
 
 a) (0.5 puntos) Verifique que la recta $r_1$ está contenida en el plano $\\pi$ y que el punto $P$ pertenece al mismo plano.
 

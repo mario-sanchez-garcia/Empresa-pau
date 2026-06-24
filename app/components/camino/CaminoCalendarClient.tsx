@@ -309,6 +309,8 @@ export default function CaminoCalendarClient() {
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
   const [calendarEditorOpen, setCalendarEditorOpen] = useState(false)
+  const [calendarExpanded, setCalendarExpanded] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -329,6 +331,7 @@ export default function CaminoCalendarClient() {
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
     setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM), loadedXp))
+    if (!window.localStorage.getItem('pausia_camino_onboarding_done')) setShowOnboarding(true)
     fetchCurriculumItems(loadedOnboarding.subjects)
       .then(items => {
         const nextItems = items.length ? items : FALLBACK_CURRICULUM
@@ -414,10 +417,10 @@ export default function CaminoCalendarClient() {
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today?.label ?? 'Hoy'}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Hoy toca poco, pero bien hecho. Puedes añadir un parcial para ajustar la semana.</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} compact />)}</div></div>}</div>
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-2 text-3xl font-black text-slate-950">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-2xl px-4 py-2 text-sm font-black" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-xs font-bold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-xl font-black text-slate-700">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-2xl px-4 py-2 text-sm font-black" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-xs font-bold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
         </section>
 
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><div className="grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div></section>
+        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><button onClick={() => setCalendarExpanded(v => !v)} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
 
         <CourseDirectory groups={courseGroups} />
 
@@ -426,6 +429,7 @@ export default function CaminoCalendarClient() {
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboarding?.subjects ?? []} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
       <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={calendar} subjects={onboarding.subjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(syncStatuses(next, xpEvents)); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
+      <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
     </Shell>
   )
 }
@@ -626,3 +630,35 @@ function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean
   return <div className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2 ${row.isCurrentUser ? 'border border-blue-200 bg-blue-50 shadow-sm' : podium ? 'bg-white shadow-sm' : 'bg-white/70'} ${fixed ? 'ring-1 ring-blue-100' : ''}`}><span className="min-w-0 text-sm font-black text-slate-800"><span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black" style={{ background: podium ? rowDivision.bg : '#f1f5f9', color: podium ? rowDivision.text : '#64748b' }}>{podium ? <Medal size={14} /> : `#${row.rank}`}</span>{row.name}{row.isMock && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-400">demo</span>}</span><span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: rowDivision.bg, color: rowDivision.text }}>{rowDivision.name}</span><span className="shrink-0 text-xs font-black text-blue-700">{row.xp.toLocaleString('es-ES')} XP</span></div>
 }
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
+
+function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
+  const steps = [
+    { icon: <Target size={26} />, title: 'Bienvenido a Camino PAU', desc: 'Tu coach de estudio diario para la PAU' },
+    { icon: <CalendarDays size={26} />, title: 'Cada día tienes una misión', desc: 'Empieza siempre por ella. Todo lo demás puede esperar.' },
+    { icon: <Trophy size={26} />, title: 'Completa misiones, gana XP', desc: 'Cuanto más practicas, más subes de división.' },
+  ]
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm">
+      <motion.div initial={{ scale: 0.96, y: 16, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.96, y: 16, opacity: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 28 }} className="w-full max-w-[480px] rounded-[28px] bg-white p-8 shadow-2xl">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p>
+        <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">Tu ruta hacia la PAU</h2>
+        <div className="mt-6 grid gap-4">
+          {steps.map((step, i) => (
+            <div key={i} className="flex items-start gap-4 rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)]">
+                {step.icon}
+              </div>
+              <div className="min-w-0 pt-0.5">
+                <h3 className="text-sm font-black text-slate-950">{step.title}</h3>
+                <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={onClose} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-6 py-4 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:shadow-[0_16px_36px_rgba(37,99,235,0.32)]">
+          Empezar
+        </button>
+      </motion.div>
+    </motion.div>
+  )
+}

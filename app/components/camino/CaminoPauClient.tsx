@@ -56,11 +56,6 @@ export default function CaminoPauClient() {
   const confettiRef   = useRef<HTMLCanvasElement>(null)
   const prevCompleted = useRef(false)
 
-  useEffect(() => {
-    if (missionCompleted && !prevCompleted.current) fireConfetti()
-    prevCompleted.current = missionCompleted
-  }, [missionCompleted])
-
   function fireConfetti() {
     const canvas = confettiRef.current
     if (!canvas) return
@@ -93,6 +88,11 @@ export default function CaminoPauClient() {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }
+
+  useEffect(() => {
+    if (missionCompleted && !prevCompleted.current) fireConfetti()
+    prevCompleted.current = missionCompleted
+  }, [missionCompleted])
 
   return (
     <div

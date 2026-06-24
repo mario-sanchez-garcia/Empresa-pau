@@ -799,6 +799,7 @@ export default function Home() {
     const urlSection = readHomeSectionFromUrl()
     const initialSubject = readSubjectFromUrl() ?? readDefaultSubject()
     if (initialSubject) cambiarAsignatura(initialSubject)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Inicialización desde URL en mount único — sin bucle posible
     if (urlSection) setSeccion(urlSection)
     if (urlSection === 'chat' && params.get('from') === 'camino_course') {
       const subject = params.get('subject') ?? ''
@@ -823,6 +824,7 @@ export default function Home() {
       if (stored) {
         const parsed = JSON.parse(stored)
         const normalized = normalizePinnedSubjects(parsed)
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Hidratación desde localStorage en mount único
         setPinnedSubjects(normalized)
         // Re-save if localStorage had more than MAX_PINNED entries
         if (Array.isArray(parsed) && parsed.length !== normalized.length) {
@@ -835,6 +837,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- React 18 batchea estos setState — reset controlado al cambiar ccaa
     setTipo('Ordinaria')
     setExamenIdx(0)
     setCatEjercicioIdx(0)
@@ -848,6 +851,7 @@ export default function Home() {
 
   useEffect(() => {
     if (seccion === 'historial') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Loading-state síncrono antes de llamada async — patrón estándar
       setCargandoHistorial(true)
       supabase.from('historial_examenes').select('*').order('created_at', { ascending: false }).limit(50)
         .then(({ data }) => { setHistorial(data || []); setCargandoHistorial(false) })
@@ -1411,6 +1415,7 @@ useEffect(() => {
 
   const selectedExerciseId = params.get('exerciseId')
   if (mode === 'selected' && selectedExerciseId) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Inicialización desde URL de Camino PAU en mount único
     setSeccion('examenes')
     setCCAA('Madrid')
     setAsignatura(subject)

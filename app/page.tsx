@@ -1,5 +1,7 @@
 ﻿'use client'
 import { useState, useRef, useEffect, useMemo } from 'react'
+import type { CSSProperties } from 'react'
+import type { Components } from 'react-markdown'
 import { examenes, examenesCatMates, examenesHistoria } from './data/examenes'
 import { examenesCataluna } from './data/examenes_cataluna'
 import { examenesFisica } from './data/fisica'
@@ -280,52 +282,52 @@ const SUBJECT_CARDS = {
   }
 }
 
-const mdComponents = {
-  h1: ({children}: any) => <h1 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '1.2rem 0 0.65rem', borderBottom: '2px solid #e5edf9', paddingBottom: '0.35rem', color: '#111827' }}>{children}</h1>,
-  h2: ({children}: any) => <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: '1.05rem 0 0.5rem', color: '#111827' }}>{children}</h2>,
-  h3: ({children}: any) => <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1f2937', margin: '0.95rem 0 0.4rem' }}>{children}</h3>,
-  strong: ({children}: any) => <strong style={{ fontWeight: 850, color: '#111827' }}>{children}</strong>,
-  p: ({children}: any) => <p style={{ margin: '0.72rem 0', color: '#374151', lineHeight: 1.85 }}>{children}</p>,
-  li: ({children}: any) => <li style={{ margin: '0.38rem 0', color: '#374151', lineHeight: 1.8 }}>{children}</li>,
-  blockquote: ({children}: any) => <blockquote style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #93c5fd', borderRadius: '16px', padding: '1rem', margin: '1rem 0', color: '#475569', background: '#ffffff', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
+const mdComponents: Partial<Components> = {
+  h1: ({children}) => <h1 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '1.2rem 0 0.65rem', borderBottom: '2px solid #e5edf9', paddingBottom: '0.35rem', color: '#111827' }}>{children}</h1>,
+  h2: ({children}) => <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: '1.05rem 0 0.5rem', color: '#111827' }}>{children}</h2>,
+  h3: ({children}) => <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1f2937', margin: '0.95rem 0 0.4rem' }}>{children}</h3>,
+  strong: ({children}) => <strong style={{ fontWeight: 850, color: '#111827' }}>{children}</strong>,
+  p: ({children}) => <p style={{ margin: '0.72rem 0', color: '#374151', lineHeight: 1.85 }}>{children}</p>,
+  li: ({children}) => <li style={{ margin: '0.38rem 0', color: '#374151', lineHeight: 1.8 }}>{children}</li>,
+  blockquote: ({children}) => <blockquote style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #93c5fd', borderRadius: '16px', padding: '1rem', margin: '1rem 0', color: '#475569', background: '#ffffff', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
 }
 
-const darkMdComponents = {
-  h1: ({children}: any) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #dbe7fb', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
-  h2: ({children}: any) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#1e3a8a', letterSpacing: '-0.01em' }}>{children}</h2>,
-  h3: ({children}: any) => <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#334155', margin: '0.85rem 0 0.35rem' }}>{children}</h3>,
-  strong: ({children}: any) => <strong style={{ fontWeight: 850, color: '#0f172a' }}>{children}</strong>,
-  p: ({children}: any) => <p style={{ margin: '0.6rem 0', color: '#334155', lineHeight: 1.82 }}>{children}</p>,
-  li: ({children}: any) => <li style={{ margin: '0.32rem 0', color: '#334155', lineHeight: 1.78 }}>{children}</li>,
-  ul: ({children}: any) => <ul style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ul>,
-  ol: ({children}: any) => <ol style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ol>,
-  blockquote: ({children}: any) => <blockquote style={{ border: '1px solid #dbe7fb', borderLeft: '4px solid #60a5fa', borderRadius: '16px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#475569', background: 'linear-gradient(135deg, #ffffff, #f8fbff)', boxShadow: '0 12px 26px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
+const darkMdComponents: Partial<Components> = {
+  h1: ({children}) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #dbe7fb', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
+  h2: ({children}) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#1e3a8a', letterSpacing: '-0.01em' }}>{children}</h2>,
+  h3: ({children}) => <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#334155', margin: '0.85rem 0 0.35rem' }}>{children}</h3>,
+  strong: ({children}) => <strong style={{ fontWeight: 850, color: '#0f172a' }}>{children}</strong>,
+  p: ({children}) => <p style={{ margin: '0.6rem 0', color: '#334155', lineHeight: 1.82 }}>{children}</p>,
+  li: ({children}) => <li style={{ margin: '0.32rem 0', color: '#334155', lineHeight: 1.78 }}>{children}</li>,
+  ul: ({children}) => <ul style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ul>,
+  ol: ({children}) => <ol style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ol>,
+  blockquote: ({children}) => <blockquote style={{ border: '1px solid #dbe7fb', borderLeft: '4px solid #60a5fa', borderRadius: '16px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#475569', background: 'linear-gradient(135deg, #ffffff, #f8fbff)', boxShadow: '0 12px 26px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
 }
 
-const planMdComponents = {
-  h1: ({children}: any) => (
+const planMdComponents: Partial<Components> = {
+  h1: ({children}) => (
     <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: WARM.ink, margin: '0 0 18px', lineHeight: 1.2 }}>{children}</h1>
   ),
-  h2: ({children}: any) => (
+  h2: ({children}) => (
     <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #eff6ff, #eef2ff)', border: '1px solid #dbe7fb', color: WARM.blue, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 28px rgba(37,99,235,0.08)' }}>
       <Target size={17} />{children}
     </h2>
   ),
-  h3: ({children}: any) => (
+  h3: ({children}) => (
     <h3 style={{ margin: '16px 0 10px', color: WARM.ink, fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
       <Flame size={15} color={WARM.amber} />{children}
     </h3>
   ),
-  strong: ({children}: any) => <strong style={{ fontWeight: 800, color: WARM.ink }}>{children}</strong>,
-  p: ({children}: any) => <p style={{ margin: '0.55rem 0', color: WARM.muted, lineHeight: 1.75 }}>{children}</p>,
-  ul: ({children}: any) => <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ul>,
-  ol: ({children}: any) => <ol style={{ paddingLeft: '1.2rem', margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ol>,
-  li: ({children}: any) => (
+  strong: ({children}) => <strong style={{ fontWeight: 800, color: WARM.ink }}>{children}</strong>,
+  p: ({children}) => <p style={{ margin: '0.55rem 0', color: WARM.muted, lineHeight: 1.75 }}>{children}</p>,
+  ul: ({children}) => <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ul>,
+  ol: ({children}) => <ol style={{ paddingLeft: '1.2rem', margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ol>,
+  li: ({children}) => (
     <li style={{ background: WARM.surface, border: '1px solid #dbe7fb', borderRadius: '14px', padding: '10px 12px', color: WARM.ink, lineHeight: 1.6, boxShadow: '0 8px 20px rgba(37, 99, 235, 0.045)' }}>
       {children}
     </li>
   ),
-  blockquote: ({children}: any) => (
+  blockquote: ({children}) => (
     <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: WARM.wash, border: '1px solid #dbeafe', color: WARM.blue, fontWeight: 700 }}>
       {children}
     </blockquote>
@@ -471,7 +473,7 @@ function hoverVars(color: string, light: string, accent = color) {
     '--hover-bg': light,
     '--hover-border': accent,
     '--hover-shadow': `${accent}33`
-  } as any
+  } as CSSProperties
 }
 
 function colorNota(n: number) {
@@ -682,18 +684,18 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
   )
 }
 
-function officialScore(value: any, fallback = 0) {
+function officialScore(value: unknown, fallback = 0) {
   const number = Number(value)
   return Number.isFinite(number) && number > 0 ? number : fallback
 }
 
-function clampScore(value: any, max: number) {
+function clampScore(value: unknown, max: number) {
   const number = Number(value)
   if (!Number.isFinite(number)) return null
   return Math.min(max, Math.max(0, number))
 }
 
-function formatPts(value: any) {
+function formatPts(value: unknown) {
   const number = Number(value)
   return Number.isFinite(number) ? number.toFixed(2).replace(/\.00$/, '') : '0'
 }
@@ -705,9 +707,20 @@ function sanitizeCorrectionScaleText(text: string, maxScore: number) {
     .replace(/sobre\s+14\b/gi, `sobre ${formatPts(maxScore)} puntos`)
 }
 
-function calcMedia(items: any[]) {
+type HistorialItem = {
+  asignatura: string
+  bloque: string
+  tipo: string
+  año: number | string
+  nota: number | null
+  nota_maxima: number
+  enunciado?: string | null
+  correccion?: string | null
+}
+
+function calcMedia(items: HistorialItem[]) {
   if (!items.length) return null
-  return (items.reduce((a: number, h: any) => a + (h.nota / h.nota_maxima * 10), 0) / items.length).toFixed(1)
+  return (items.reduce((a: number, h) => a + (Number(h.nota) / h.nota_maxima * 10), 0) / items.length).toFixed(1)
 }
 
 export default function Home() {
@@ -2029,7 +2042,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     }
   }
 
-  function abrirChatConContexto(item: any) {
+  function abrirChatConContexto(item: HistorialItem) {
     const ctx = 'El estudiante acaba de revisar esta corrección:\n' +
       'Asignatura: ' + nombreAsignatura(item.asignatura) + '\n' +
       'Ejercicio: ' + item.bloque + ' - ' + item.tipo + ' ' + item.año + '\n' +
@@ -2053,10 +2066,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     seccion === 'historial' ? BarChart3 :
     Rocket
 
-  const calcMedia = (items: any[]) => {
+  const calcMedia = (items: HistorialItem[]) => {
     const notas = items
       .filter((item) => item.nota !== null && item.nota_maxima)
-      .map((item) => (item.nota / item.nota_maxima) * 10)
+      .map((item) => (Number(item.nota) / item.nota_maxima) * 10)
 
     if (notas.length === 0) return null
 
@@ -3272,7 +3285,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <button
                   className="campus-hover"
                   onClick={() => setShowAllSubjects(value => !value)}
-                  style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), border: '1px solid #dbe7fb', borderRadius: '999px', background: '#ffffff', color: WARM.blue, padding: '9px 14px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 850, cursor: 'pointer', boxShadow: '0 12px 24px rgba(37,99,235,0.06)' } as any}
+                  style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), border: '1px solid #dbe7fb', borderRadius: '999px', background: '#ffffff', color: WARM.blue, padding: '9px 14px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 850, cursor: 'pointer', boxShadow: '0 12px 24px rgba(37,99,235,0.06)' } as CSSProperties}
                   type="button"
                 >
                   {showAllSubjects ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -3340,7 +3353,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         event.stopPropagation()
                         togglePinnedSubject(key)
                       }}
-                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '14px', top: '14px', width: '34px', height: '34px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as any}
+                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '14px', top: '14px', width: '34px', height: '34px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as CSSProperties}
                       type="button"
                     >
                       <Pin size={16} fill={pinned ? 'currentColor' : 'none'} />
@@ -3434,7 +3447,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
-                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as any}>
+                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as CSSProperties}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                       {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
                       {t}
@@ -3468,7 +3481,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       background: examenIdx === i ? cfg.color : WARM.field,
       color: examenIdx === i ? '#fff' : WARM.ink,
       border: examenIdx === i ? 'none' : '1px solid #dbe7fb'
-    } as any}
+    } as CSSProperties}
   >
     {anio}
   </button>
@@ -3495,7 +3508,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                           background: catEjercicioIdx === i ? cfg.color : WARM.field,
                           color: catEjercicioIdx === i ? '#fff' : WARM.muted,
                           border: catEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
-                        } as any}
+                        } as CSSProperties}
                       >
                         {label}
                       </button>
@@ -3520,7 +3533,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         background: catFisicaEjercicioIdx === i ? cfg.color : WARM.field,
                         color: catFisicaEjercicioIdx === i ? '#fff' : WARM.muted,
                         border: catFisicaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
-                      } as any}
+                      } as CSSProperties}
                     >
                       Ejercicio {ejercicio.numero} · {ejercicio.bloque ?? ejercicio.titulo}
                     </button>
@@ -3544,7 +3557,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         background: catAsignaturaEjercicioIdx === i ? cfg.color : WARM.field,
                         color: catAsignaturaEjercicioIdx === i ? '#fff' : WARM.muted,
                         border: catAsignaturaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
-                      } as any}
+                      } as CSSProperties}
                     >
                       {ejercicio.titulo}
                     </button>
@@ -3576,7 +3589,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                           background: catHistoriaEjercicioIdx === i ? cfg.color : WARM.field,
                           color: catHistoriaEjercicioIdx === i ? '#fff' : WARM.muted,
                           border: catHistoriaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
-                        } as any}
+                        } as CSSProperties}
                       >
                         Ejercicio {ejercicio.numero}{label ? ` · ${label}` : ''}
                       </button>
@@ -3607,7 +3620,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         background: diaHistoriaIdx === i ? cfg.color : WARM.field,
                         color: diaHistoriaIdx === i ? '#fff' : WARM.muted,
                         border: diaHistoriaIdx === i ? 'none' : '1px solid #dbe7fb'
-                      } as any}
+                      } as CSSProperties}
                     >
                       {version}
                     </button>
@@ -3616,16 +3629,16 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               )}
               {!isCatalunaExam && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {isMadridMathStyle ? bloquesMates.map((bloque: string, i: number) => (
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => (
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as any}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button>
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button>
                 ))}
               </div>}
               {!isCatalunaExam && opcionesDisponibles.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '13px', color: WARM.muted, fontWeight: 700 }}>Opción:</span>
                   {opcionesDisponibles.map(op => (
-                    <button className={opcion === op ? 'campus-primary' : 'campus-hover'} key={op} onClick={() => { setOpcion(op); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #dbe7fb' } as any}>{op === 0 ? 'A' : 'B'}</button>
+                    <button className={opcion === op ? 'campus-primary' : 'campus-hover'} key={op} onClick={() => { setOpcion(op); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #dbe7fb' } as CSSProperties}>{op === 0 ? 'A' : 'B'}</button>
                   ))}
                 </div>
               )}
@@ -3892,7 +3905,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
                     </div>
                   ) : (
-                    <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: '180px', borderRadius: '18px', border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as any}>
+                    <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: '180px', borderRadius: '18px', border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
                       <UploadCloud size={34} color={cfg.color} />
                       <p style={{ fontSize: '14px', fontWeight: 600, color: cfg.color, margin: '8px 0 4px' }}>Haz clic para subir una foto</p>
                       <p style={{ fontSize: '12px', color: cfg.accent, margin: '0' }}>Fotografía tu respuesta manuscrita</p>

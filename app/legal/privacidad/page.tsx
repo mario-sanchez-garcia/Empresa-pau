@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad · Pausia',
-  description: 'Cómo Pausia recoge, usa y protege tus datos durante la beta privada.',
+  description: 'Política de Privacidad de Pausia.',
 }
 
 export default function PrivacidadPage() {
@@ -13,63 +13,84 @@ export default function PrivacidadPage() {
         <Link href="/contacto" style={backLink}>← Volver</Link>
 
         <h1 style={h1}>Política de Privacidad</h1>
-        <p style={meta}>Última actualización: junio 2026 · Versión beta privada</p>
+        <p style={meta}>Última actualización: junio de 2026</p>
 
-        <Section title="1. Qué es Pausia">
+        <Section title="1. Responsable del tratamiento">
           <p style={p}>
-            Pausia es una herramienta de apoyo al estudio para la preparación de la PAU (Prueba de Acceso a la Universidad) actualmente en <strong>beta privada</strong>. Durante esta fase el acceso está limitado a un grupo reducido de usuarios invitados.
+            Mario Sánchez García, Alejandro Amigo Granja, Marco Martínez Mira y Diego García Verdugo.
           </p>
+          <p style={p}>Contacto: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a></p>
         </Section>
 
-        <Section title="2. Datos que podemos recoger">
+        <Section title="2. Datos que recogemos">
           <ul style={ul}>
-            <li style={li}><strong>Cuenta:</strong> dirección de email y datos de autenticación gestionados por Supabase.</li>
-            <li style={li}><strong>Progreso de estudio:</strong> misiones completadas, XP, racha, nivel por asignatura.</li>
-            <li style={li}><strong>Respuestas y ejercicios:</strong> texto que escribes en correcciones, simulacros y respuestas abiertas.</li>
-            <li style={li}><strong>Historial de simulacros:</strong> preguntas respondidas, notas estimadas, correcciones.</li>
-            <li style={li}><strong>Eventos de uso:</strong> páginas visitadas, funciones usadas, errores técnicos.</li>
-            <li style={li}><strong>Datos de pago:</strong> gestionados íntegramente por Stripe. Pausia no almacena números completos de tarjeta ni datos de pago sensibles.</li>
-            <li style={li}><strong>Onboarding:</strong> comunidad autónoma, asignaturas y preferencias de estudio guardadas localmente en tu dispositivo.</li>
+            <li style={li}><strong>Datos de registro:</strong> correo electrónico, contraseña cifrada, centro escolar, comunidad autónoma y asignaturas.</li>
+            <li style={li}><strong>Datos de uso:</strong> respuestas a ejercicios, correcciones IA, historial de progreso, XP y misiones completadas.</li>
+            <li style={li}><strong>Datos de pago:</strong> correo del padre/madre/tutor que paga. Los datos de tarjeta son procesados por Stripe y nunca son accesibles para Pausia.</li>
+            <li style={li}><strong>Datos técnicos:</strong> dirección IP para prevención de abuso.</li>
           </ul>
         </Section>
 
-        <Section title="3. Para qué usamos los datos">
+        <Section title="3. Finalidad del tratamiento">
           <ul style={ul}>
-            <li style={li}>Personalizar tu ruta de estudio (Camino PAU).</li>
-            <li style={li}>Generar correcciones y simulacros con IA.</li>
-            <li style={li}>Mantener tu progreso entre sesiones.</li>
-            <li style={li}>Mejorar el producto durante la beta.</li>
-            <li style={li}>Gestionar pagos y entitlements de Pack Curso PAU.</li>
+            <li style={li}>Prestación del Servicio.</li>
+            <li style={li}>Mejora de la plataforma.</li>
+            <li style={li}>Comunicaciones relacionadas con el Servicio.</li>
+            <li style={li}>Seguridad y facturación.</li>
           </ul>
         </Section>
 
-        <Section title="4. Proveedores externos">
+        <Section title="4. Base legal">
           <ul style={ul}>
-            <li style={li}><strong>Supabase</strong> — base de datos y autenticación. Datos almacenados en la UE.</li>
-            <li style={li}><strong>Vercel</strong> — infraestructura de la aplicación web.</li>
-            <li style={li}><strong>Stripe</strong> — procesamiento de pagos. Pausia no ve ni guarda datos completos de tarjeta.</li>
-            <li style={li}><strong>Proveedores de IA</strong> — las respuestas que envías a las correcciones pueden procesarse por modelos de IA. No envíes datos personales sensibles en tus respuestas.</li>
+            <li style={li}>Ejecución del contrato (Art. 6.1.b RGPD).</li>
+            <li style={li}>Interés legítimo para seguridad (Art. 6.1.f RGPD).</li>
+            <li style={li}>Consentimiento para comunicaciones de marketing (Art. 6.1.a RGPD).</li>
           </ul>
         </Section>
 
-        <Section title="5. Tus derechos">
+        <Section title="5. Protección de datos de menores">
           <p style={p}>
-            Puedes solicitar en cualquier momento el acceso, rectificación o eliminación de tus datos enviando un email a <a href="mailto:hola@pausia.es" style={aStyle}>hola@pausia.es</a>. Durante la beta privada gestionamos estas solicitudes de forma manual y nos comprometemos a responder en un plazo razonable.
+            Pausia está dirigido a usuarios de 14 a 18 años. No compartimos datos de menores con terceros con fines publicitarios. Los padres o tutores pueden solicitar acceso, rectificación o eliminación de datos de sus hijos en <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>.
           </p>
         </Section>
 
-        <Section title="6. Recomendación sobre datos personales">
+        <Section title="6. Destinatarios">
+          <ul style={ul}>
+            <li style={li}><strong>Supabase</strong> — base de datos, UE.</li>
+            <li style={li}><strong>Anthropic</strong> — API de IA, procesamiento puntual sin almacenamiento.</li>
+            <li style={li}><strong>Stripe</strong> — pagos.</li>
+            <li style={li}><strong>Vercel</strong> — hosting.</li>
+          </ul>
+          <p style={p}>Todos cumplen el RGPD.</p>
+        </Section>
+
+        <Section title="7. Conservación">
           <p style={p}>
-            Los alumnos no deben incluir datos personales innecesarios (nombre completo, DNI, dirección, datos médicos, etc.) en sus respuestas a ejercicios o simulacros. Las respuestas son texto libre y pueden procesarse por sistemas de IA.
+            Datos activos mientras la cuenta esté activa. Tras eliminar la cuenta, los datos de registro se eliminan en 30 días. Los datos fiscales se conservan 5 años por obligación legal.
           </p>
         </Section>
 
-        <Section title="7. Contacto">
+        <Section title="8. Sus derechos">
           <p style={p}>
-            Para cualquier consulta sobre privacidad: <a href="mailto:hola@pausia.es" style={aStyle}>hola@pausia.es</a>
+            Acceso, rectificación, supresión, limitación, portabilidad y oposición. Contacto: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>. Respuesta en máximo 30 días. Puede reclamar ante la AEPD en <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" style={aStyle}>www.aepd.es</a>.
           </p>
+        </Section>
+
+        <Section title="9. Seguridad">
           <p style={p}>
-            También puedes usar nuestro <Link href="/contacto" style={aStyle}>formulario de contacto</Link>.
+            Contraseñas con hash seguro, HTTPS/TLS, Row Level Security en base de datos, rate limiting y datos de pago nunca accesibles para Pausia.
+          </p>
+        </Section>
+
+        <Section title="10. Cookies">
+          <p style={p}>
+            Solo cookies técnicas necesarias para la sesión. Sin cookies de seguimiento ni publicidad.
+          </p>
+        </Section>
+
+        <Section title="11. Contacto">
+          <p style={p}>
+            <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
           </p>
         </Section>
 
@@ -96,18 +117,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-const page: React.CSSProperties = {
-  minHeight: '100vh',
-  padding: '48px 16px 80px',
-}
-const container: React.CSSProperties = {
-  maxWidth: 680,
-  margin: '0 auto',
-  background: 'white',
-  borderRadius: 24,
-  padding: '40px 36px',
-  boxShadow: '0 16px 48px rgba(37,99,235,0.08)',
-}
+const page: React.CSSProperties = { minHeight: '100vh', padding: '48px 16px 80px' }
+const container: React.CSSProperties = { maxWidth: 680, margin: '0 auto', background: 'white', borderRadius: 24, padding: '40px 36px', boxShadow: '0 16px 48px rgba(37,99,235,0.08)' }
 const backLink: React.CSSProperties = { fontSize: 13, color: '#6b7280', textDecoration: 'none', display: 'inline-block', marginBottom: 24 }
 const h1: React.CSSProperties = { fontSize: 28, fontWeight: 900, color: '#111827', margin: '0 0 4px' }
 const h2: React.CSSProperties = { fontSize: 16, fontWeight: 800, color: '#1e3a8a', margin: '0 0 10px' }

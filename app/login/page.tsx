@@ -35,14 +35,19 @@ export default function Login() {
   const [cargando, setCargando] = useState(false)
 
   // ── UI-only state ────────────────────────────────────────────────────────────
-  const [showPwd, setShowPwd]     = useState(false)
-  const [googleMsg, setGoogleMsg] = useState(false)
+  const [showPwd, setShowPwd]         = useState(false)
+  const [googleMsg, setGoogleMsg]     = useState(false)
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const isError   = !!mensaje && !mensaje.includes('confirmar')
   const isSuccess = !!mensaje && mensaje.includes('confirmar')
 
   // ── Auth handler (preserved exactly) ────────────────────────────────────────
   async function handleSubmit() {
     if (!email || !password) return
+    if (modo === 'registro' && !aceptaTerminos) {
+      setMensaje('Debes aceptar los Términos y la Política de Privacidad para crear una cuenta.')
+      return
+    }
     setCargando(true)
     setMensaje('')
     if (modo === 'registro') {
@@ -73,6 +78,7 @@ export default function Login() {
   function switchModo() {
     setModo(m => m === 'login' ? 'registro' : 'login')
     setMensaje('')
+    setAceptaTerminos(false)
   }
 
   return (
@@ -395,13 +401,36 @@ export default function Login() {
             </div>
           )}
 
+          {/* Legal acceptance checkbox — registro only */}
+          {modo === 'registro' && (
+            <label style={{
+              display: 'flex', alignItems: 'flex-start', gap: 10,
+              marginTop: 16, cursor: 'pointer',
+            }}>
+              <input
+                type="checkbox"
+                checked={aceptaTerminos}
+                onChange={e => setAceptaTerminos(e.target.checked)}
+                style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16, accentColor: C.blue, cursor: 'pointer' }}
+                aria-required="true"
+              />
+              <span style={{ fontSize: 13, color: C.ink2, lineHeight: 1.6, fontWeight: 500 }}>
+                He leído y acepto los{' '}
+                <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, fontWeight: 700, textDecoration: 'none' }}>Términos y Condiciones</a>
+                {' '}y la{' '}
+                <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, fontWeight: 700, textDecoration: 'none' }}>Política de Privacidad</a>
+                {' '}de Pausia. Si tengo entre 14 y 17 años, mis padres o tutores conocen y aceptan el uso del Servicio.
+              </span>
+            </label>
+          )}
+
           {/* Submit */}
           <div className="lg-up" style={{ marginTop: 20, animationDelay: '180ms' }}>
             <button
               type="button"
               className="lg-btn-primary"
               onClick={handleSubmit}
-              disabled={cargando}
+              disabled={cargando || (modo === 'registro' && !aceptaTerminos)}
               aria-busy={cargando}
             >
               {cargando

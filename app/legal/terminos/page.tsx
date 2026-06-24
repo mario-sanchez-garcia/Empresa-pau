@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Términos de Uso · Pausia',
-  description: 'Condiciones de uso de Pausia durante la beta privada.',
+  title: 'Términos y Condiciones · Pausia',
+  description: 'Términos y Condiciones de Uso de Pausia.',
 }
 
 export default function TerminosPage() {
@@ -12,64 +12,89 @@ export default function TerminosPage() {
       <div style={container}>
         <Link href="/contacto" style={backLink}>← Volver</Link>
 
-        <h1 style={h1}>Términos de Uso</h1>
-        <p style={meta}>Última actualización: junio 2026 · Versión beta privada</p>
+        <h1 style={h1}>Términos y Condiciones de Uso</h1>
+        <p style={meta}>Última actualización: junio de 2026</p>
 
-        <Section title="1. Qué es Pausia">
+        <Section title="1. Información del responsable">
           <p style={p}>
-            Pausia es una herramienta digital de apoyo al estudio para la preparación de la PAU. Está en <strong>fase beta privada</strong>: las funcionalidades pueden cambiar, mejorar o eliminarse sin previo aviso mientras seguimos desarrollando el producto.
+            El presente servicio es ofrecido por los responsables del proyecto Pausia:
           </p>
-        </Section>
-
-        <Section title="2. Qué no sustituye Pausia">
-          <p style={p}>
-            Pausia es un complemento al estudio personal. <strong>No sustituye</strong> a un profesor, academia, centro educativo ni a los criterios de corrección oficiales de las pruebas PAU. Los contenidos y correcciones generados por IA son orientativos y pueden contener errores.
-          </p>
-        </Section>
-
-        <Section title="3. Sin garantía de resultados académicos">
-          <p style={p}>
-            Pausia no garantiza ninguna nota concreta ni la superación de ningún examen. El rendimiento académico depende del esfuerzo, la dedicación y muchos otros factores fuera del control de la herramienta. Pausia te ayuda a estudiar con más estructura, práctica y feedback, pero el resultado final es tuyo.
-          </p>
-        </Section>
-
-        <Section title="4. Uso responsable">
           <ul style={ul}>
-            <li style={li}>Usa Pausia como herramienta de apoyo, no como sustituto del estudio real.</li>
-            <li style={li}>No compartas tu cuenta con otras personas.</li>
-            <li style={li}>No uses la plataforma de forma automatizada, mediante bots o scripts.</li>
-            <li style={li}>No intentes extraer contenido masivamente (scraping).</li>
-            <li style={li}>No uses la plataforma de forma fraudulenta o para fines distintos al estudio personal.</li>
+            <li style={li}>Mario Sánchez García</li>
+            <li style={li}>Alejandro Amigo Granja</li>
+            <li style={li}>Marco Martínez Mira</li>
+            <li style={li}>Diego García Verdugo</li>
+          </ul>
+          <p style={p}>Contacto: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a></p>
+        </Section>
+
+        <Section title="2. Descripción del servicio">
+          <p style={p}>
+            Pausia es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado (Camino PAU), chat educativo con asistente IA e historial de correcciones y progreso.
+          </p>
+        </Section>
+
+        <Section title="3. Edad mínima y consentimiento parental">
+          <p style={p}>
+            El Servicio está dirigido a estudiantes de entre 14 y 18 años. Los usuarios de 14 a 17 años deben contar con el conocimiento y consentimiento de sus padres o tutores legales. Al registrarse, el usuario declara que sus padres o tutores conocen y aceptan el uso del Servicio.
+          </p>
+        </Section>
+
+        <Section title="4. Registro y cuenta de usuario">
+          <p style={p}>
+            Para usar el Servicio es necesario proporcionar correo electrónico, contraseña, centro escolar, comunidad autónoma y asignaturas de preparación. El usuario es responsable de mantener la confidencialidad de sus credenciales.
+          </p>
+        </Section>
+
+        <Section title="5. Uso del Servicio">
+          <p style={p}>El usuario se compromete a:</p>
+          <ul style={ul}>
+            <li style={li}>Usar el Servicio únicamente con fines educativos personales.</li>
+            <li style={li}>No compartir ni distribuir los contenidos sin autorización.</li>
+            <li style={li}>No intentar acceder a cuentas de otros usuarios.</li>
+            <li style={li}>Proporcionar información veraz en el registro.</li>
           </ul>
         </Section>
 
-        <Section title="5. Acceso y limitaciones">
+        <Section title="6. Contenido educativo">
           <p style={p}>
-            Pausia puede limitar o suspender el acceso a usuarios que realicen un uso abusivo, automático o que vulnere estos términos. Durante la beta privada el equipo gestiona estos casos de forma manual.
+            Los exámenes están basados en pruebas oficiales de la PAU/EVAU de acceso público. Las correcciones son generadas por inteligencia artificial y tienen carácter orientativo. Las correcciones de Pausia no garantizan ninguna nota en la PAU/EVAU real.
           </p>
         </Section>
 
-        <Section title="6. Correcciones e IA">
+        <Section title="7. Planes y precios">
           <p style={p}>
-            Las correcciones generadas por inteligencia artificial son orientativas. Pueden equivocarse, omitir matices o no reflejar los criterios exactos de corrección de tu comunidad autónoma. Consulta siempre fuentes oficiales para preparación formal. Consulta también nuestra <Link href="/legal/ia" style={aStyle}>política de uso de IA</Link>.
+            Los pagos son procesados por Stripe. Pausia no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
           </p>
         </Section>
 
-        <Section title="7. Cambios en el servicio">
+        <Section title="8. Propiedad intelectual">
           <p style={p}>
-            Al estar en beta, el servicio puede cambiar sustancialmente. Nos comprometemos a comunicar cambios relevantes a los usuarios activos con la mayor antelación posible.
+            Todos los contenidos originales de Pausia son propiedad de los responsables del proyecto y están protegidos por la legislación española e internacional sobre propiedad intelectual.
           </p>
         </Section>
 
-        <Section title="8. Pagos y reembolsos">
+        <Section title="9. Limitación de responsabilidad">
           <p style={p}>
-            La información sobre pagos y reembolsos está disponible en nuestra <Link href="/legal/reembolsos" style={aStyle}>política de reembolsos</Link>. Los pagos son procesados por Stripe.
+            Pausia no garantiza la disponibilidad ininterrumpida del Servicio, que las correcciones IA sean equivalentes a las de un docente, ni resultados académicos específicos.
           </p>
         </Section>
 
-        <Section title="9. Contacto">
+        <Section title="10. Modificación de los términos">
           <p style={p}>
-            Dudas sobre estos términos: <a href="mailto:hola@pausia.es" style={aStyle}>hola@pausia.es</a>
+            Pausia se reserva el derecho a modificar estos Términos. Los cambios serán notificados por correo electrónico con al menos 15 días de antelación.
+          </p>
+        </Section>
+
+        <Section title="11. Legislación aplicable">
+          <p style={p}>
+            Estos Términos se rigen por la legislación española. Las partes se someten a los Juzgados y Tribunales de Madrid.
+          </p>
+        </Section>
+
+        <Section title="12. Contacto">
+          <p style={p}>
+            <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
           </p>
         </Section>
 

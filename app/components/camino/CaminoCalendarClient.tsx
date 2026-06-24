@@ -41,6 +41,8 @@ type LeaderboardPayload = {
   currentXp: number
   realUserCount: number
 }
+type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
+type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
 
 const CALENDAR_KEY = 'pausia_camino_calendar_v2'
 const EXAMS_KEY = 'pausia_camino_student_exams_v1'
@@ -311,6 +313,8 @@ export default function CaminoCalendarClient() {
   const [calendarEditorOpen, setCalendarEditorOpen] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [liga, setLiga] = useState<LigaInfo | null>(null)
+  const [ligaLoading, setLigaLoading] = useState(true)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -355,6 +359,18 @@ export default function CaminoCalendarClient() {
     return () => { cancelled = true }
   }, [onboarding?.community])
 
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      if (!token || cancelled) { if (!cancelled) setLigaLoading(false); return }
+      const res = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${token}` } })
+      if (!cancelled && res.ok) { const d = await res.json(); setLiga(d.liga ?? null) }
+      if (!cancelled) setLigaLoading(false)
+    }).catch(() => { if (!cancelled) setLigaLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
   const hasProfile = Boolean(onboarding?.completedAt && onboarding.community && onboarding.subjects.length)
   const today = calendar.find(day => day.isToday) ?? calendar[0]
   const allMissions = calendar.flatMap(day => day.missions)
@@ -378,6 +394,35 @@ export default function CaminoCalendarClient() {
   const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
   const fixedCurrentRow = currentInTop ? null : currentRankingRow
   const courseGroups = courseTopicsForSubjects(onboarding?.subjects ?? [], curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
+
+  async function createLiga(nombre: string): Promise<{ error?: string }> {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return { error: 'No hay sesión activa' }
+    const res = await fetch('/api/ligas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ nombre }),
+    })
+    const json = await res.json()
+    if (!res.ok) return { error: json.error ?? 'Error al crear liga' }
+    setLiga(json.liga)
+    return {}
+  }
+
+  async function joinLiga(codigo: string): Promise<{ error?: string }> {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return { error: 'No hay sesión activa' }
+    const res = await fetch('/api/ligas/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ codigo: codigo.trim().toUpperCase() }),
+    })
+    const json = await res.json()
+    if (!res.ok) return { error: json.error ?? 'Error al unirse' }
+    const refreshRes = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${session.access_token}` } })
+    if (refreshRes.ok) { const d = await refreshRes.json(); setLiga(d.liga ?? null) }
+    return {}
+  }
 
   function persist(nextCalendar: DayPlan[], nextXp = xpEvents, nextExams = exams) {
     setCalendar(nextCalendar); setXpEvents(nextXp); setExams(nextExams)
@@ -424,7 +469,7 @@ export default function CaminoCalendarClient() {
 
         <CourseDirectory groups={courseGroups} />
 
-        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} /></section>
+        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} liga={liga} ligaLoading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} /></section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboarding?.subjects ?? []} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
       <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={calendar} subjects={onboarding.subjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(syncStatuses(next, xpEvents)); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
@@ -620,9 +665,9 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
 
-function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, totalXP, division, realUserCount }: { open: boolean; setOpen: (open: boolean) => void; tab: 'global' | 'community'; setTab: (tab: 'global' | 'community') => void; rows: RankingEntry[]; currentRow: RankingEntry | null; community: string; totalXP: number; division: string; realUserCount: number }) {
+function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, totalXP, division, realUserCount, liga, ligaLoading, onCreateLiga, onJoinLiga }: { open: boolean; setOpen: (open: boolean) => void; tab: 'global' | 'community'; setTab: (tab: 'global' | 'community') => void; rows: RankingEntry[]; currentRow: RankingEntry | null; community: string; totalXP: number; division: string; realUserCount: number; liga: LigaInfo | null; ligaLoading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
   const title = tab === 'community' ? `Ranking Comunidad · ${community}` : 'Ranking Global'
-  return <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left"><span><span className="block text-lg font-black text-slate-950">Ranking y divisiones</span><span className="mt-1 block text-sm font-semibold text-slate-500">Consulta tu posición cuando quieras.</span></span><ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} /></button><AnimatePresence>{open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="mt-5 rounded-3xl bg-slate-50 p-4"><div className="grid gap-3 sm:grid-cols-3"><MiniStat icon={<Trophy size={15} />} label="División" value={division} /><MiniStat icon={<Zap size={15} />} label="XP total" value={totalXP.toLocaleString('es-ES')} /><MiniStat icon={<BarChart3 size={15} />} label="Comunidad" value={community} /></div><p className="mt-3 text-sm font-semibold text-slate-500">Tu división refleja tu constancia y precisión. Los alumnos de relleno solo aparecen si faltan usuarios reales.</p><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-black text-slate-900">{community === 'Sin comunidad' && tab === 'community' ? 'Completa tu comunidad para ver tu ranking local.' : title}</h3><div className="flex gap-2"><button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Global</button><button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Comunidad</button></div></div><div className="mt-3 grid gap-2">{rows.map(row => <RankingRow key={row.id} row={row} />)}</div>{currentRow && <><div className="my-3 h-px bg-blue-100" /><RankingRow row={currentRow} fixed /></>}{realUserCount < 3 && <p className="mt-3 text-sm font-bold text-slate-500">El ranking se activará cuando haya más alumnos usando Pausia.</p>}</div></motion.div>}</AnimatePresence></div>
+  return <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left"><span><span className="block text-lg font-black text-slate-950">Ranking y divisiones</span><span className="mt-1 block text-sm font-semibold text-slate-500">Consulta tu posición cuando quieras.</span></span><ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} /></button><AnimatePresence>{open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="mt-5 rounded-3xl bg-slate-50 p-4"><div className="grid gap-3 sm:grid-cols-3"><MiniStat icon={<Trophy size={15} />} label="División" value={division} /><MiniStat icon={<Zap size={15} />} label="XP total" value={totalXP.toLocaleString('es-ES')} /><MiniStat icon={<BarChart3 size={15} />} label="Comunidad" value={community} /></div><p className="mt-3 text-sm font-semibold text-slate-500">Tu división refleja tu constancia y precisión. Los alumnos de relleno solo aparecen si faltan usuarios reales.</p><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-black text-slate-900">{community === 'Sin comunidad' && tab === 'community' ? 'Completa tu comunidad para ver tu ranking local.' : title}</h3><div className="flex gap-2"><button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Global</button><button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Comunidad</button></div></div><div className="mt-3 grid gap-2">{rows.map(row => <RankingRow key={row.id} row={row} />)}</div>{currentRow && <><div className="my-3 h-px bg-blue-100" /><RankingRow row={currentRow} fixed /></>}{realUserCount < 3 && <p className="mt-3 text-sm font-bold text-slate-500">El ranking se activará cuando haya más alumnos usando Pausia.</p>}<div className="my-4 h-px bg-blue-100" /><LigaSection liga={liga} loading={ligaLoading} onCreateLiga={onCreateLiga} onJoinLiga={onJoinLiga} /></div></motion.div>}</AnimatePresence></div>
 }
 function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean }) {
   const rowDivision = divisionFor(row.xp)
@@ -630,6 +675,107 @@ function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean
   return <div className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2 ${row.isCurrentUser ? 'border border-blue-200 bg-blue-50 shadow-sm' : podium ? 'bg-white shadow-sm' : 'bg-white/70'} ${fixed ? 'ring-1 ring-blue-100' : ''}`}><span className="min-w-0 text-sm font-black text-slate-800"><span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black" style={{ background: podium ? rowDivision.bg : '#f1f5f9', color: podium ? rowDivision.text : '#64748b' }}>{podium ? <Medal size={14} /> : `#${row.rank}`}</span>{row.name}{row.isMock && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-400">demo</span>}</span><span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: rowDivision.bg, color: rowDivision.text }}>{rowDivision.name}</span><span className="shrink-0 text-xs font-black text-blue-700">{row.xp.toLocaleString('es-ES')} XP</span></div>
 }
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
+
+function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaInfo | null; loading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
+  const [mode, setMode] = useState<'idle' | 'creating' | 'joining'>('idle')
+  const [nombre, setNombre] = useState('')
+  const [codigo, setCodigo] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  async function handleCreate() {
+    if (!nombre.trim()) return
+    setBusy(true); setErr(null)
+    const result = await onCreateLiga(nombre.trim())
+    setBusy(false)
+    if (result.error) { setErr(result.error); return }
+    setMode('idle'); setNombre('')
+  }
+
+  async function handleJoin() {
+    if (!codigo.trim()) return
+    setBusy(true); setErr(null)
+    const result = await onJoinLiga(codigo.trim())
+    setBusy(false)
+    if (result.error) { setErr(result.error); return }
+    setMode('idle'); setCodigo('')
+  }
+
+  function copyLink() {
+    if (!liga) return
+    navigator.clipboard.writeText(`${window.location.origin}/liga/${liga.codigo}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (loading) return <p className="text-xs font-bold text-slate-400">Cargando liga…</p>
+
+  if (liga) return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
+          <h3 className="text-sm font-black text-slate-950">{liga.nombre}</h3>
+        </div>
+        <button onClick={copyLink} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-black text-blue-700 transition hover:bg-blue-100">
+          {copied ? '✓ Copiado' : 'Compartir liga'}
+        </button>
+      </div>
+      <div className="grid gap-1.5">
+        {liga.miembros.map(m => (
+          <div key={m.user_id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2" style={{ background: m.name === 'Tú' ? '#eff6ff' : '#fff', border: m.name === 'Tú' ? '1px solid #bfdbfe' : '1px solid #f1f5f9' }}>
+            <span className="flex items-center gap-2 text-xs font-black text-slate-800">
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black" style={{ background: m.rank <= 3 ? '#eff6ff' : '#f1f5f9', color: m.rank <= 3 ? '#1d4ed8' : '#64748b' }}>
+                {m.rank <= 3 ? <Medal size={11} /> : m.rank}
+              </span>
+              {m.name}
+            </span>
+            <span className="text-[11px] font-bold text-blue-700 shrink-0">{m.weekly_xp} XP sem.</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  if (mode === 'idle') return (
+    <div>
+      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">
+          + Crear liga
+        </button>
+        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
+          Unirme a una liga
+        </button>
+      </div>
+    </div>
+  )
+
+  if (mode === 'creating') return (
+    <div>
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Crear liga</p>
+      <div className="flex gap-2">
+        <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre de la liga" maxLength={40} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-300 focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleCreate()} />
+        <button onClick={handleCreate} disabled={busy || !nombre.trim()} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Crear'}</button>
+        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
+      </div>
+      {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
+    </div>
+  )
+
+  return (
+    <div>
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Unirme a una liga</p>
+      <div className="flex gap-2">
+        <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="Código (ej. AB3K7M)" maxLength={10} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-300 focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleJoin()} />
+        <button onClick={handleJoin} disabled={busy || !codigo.trim()} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Entrar'}</button>
+        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
+      </div>
+      {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
+    </div>
+  )
+}
 
 function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
   const steps = [

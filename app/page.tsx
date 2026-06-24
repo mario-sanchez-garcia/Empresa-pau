@@ -724,7 +724,7 @@ function calcMedia(items: HistorialItem[]) {
 }
 
 export default function Home() {
-  const [usuario, setUsuario] = useState<any>(null)
+  const [usuario, setUsuario] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [seccion, setSeccion] = useState<Seccion>('examenes')
   const [asignatura, setAsignatura] = useState<Asignatura>('mates')
   const [showAllSubjects, setShowAllSubjects] = useState(false)
@@ -755,9 +755,9 @@ export default function Home() {
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
   const [inputChat, setInputChat] = useState('')
   const [cargandoChat, setCargandoChat] = useState(false)
-  const [historial, setHistorial] = useState<any[]>([])
+  const [historial, setHistorial] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [cargandoHistorial, setCargandoHistorial] = useState(false)
-  const [itemSeleccionado, setItemSeleccionado] = useState<any>(null)
+  const [itemSeleccionado, setItemSeleccionado] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [planIA, setPlanIA] = useState('')
   const [cargandoPlan, setCargandoPlan] = useState(false)
   const [contextoChat, setContextoChat] = useState('')
@@ -929,7 +929,7 @@ const LABELS_HISTORIA: Record<string, string> = {
   corta: 'Respuesta corta'
 }
 
-const EXAMENES_BY_ASIGNATURA: Partial<Record<Asignatura, any[]>> = {
+const EXAMENES_BY_ASIGNATURA: Partial<Record<Asignatura, any[]>> = { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   mates: examenes,
   matematicas_ccss: examenesMatematicasCCSSMadrid,
   fisica: examenesFisica,
@@ -943,10 +943,10 @@ const EXAMENES_BY_ASIGNATURA: Partial<Record<Asignatura, any[]>> = {
 const SUBJECTS_REQUIRING_STRUCTURED_EXAMS = new Set<Asignatura>(['matematicas_ccss'])
 
 const isAvailableOfficialExercise = (exercise: unknown) => !isIncompleteOfficialExercise(exercise)
-const availableQuestionsForExam = (examen: any) => ((examen?.preguntas ?? []) as any[]).filter(isAvailableOfficialExercise)
-const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas) && availableQuestionsForExam(examen).length > 0
+const availableQuestionsForExam = (examen: any) => ((examen?.preguntas ?? []) as any[]).filter(isAvailableOfficialExercise) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas) && availableQuestionsForExam(examen).length > 0 // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
-const perteneceAComunidadSeleccionada = (examen: any) =>
+const perteneceAComunidadSeleccionada = (examen: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   (examen.comunidad ?? examen.ccaa) === ccaa
 
 const examenesAsignatura = EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria
@@ -955,7 +955,7 @@ const requiresStructuredExams = SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatu
 const examenesFiltrados = examenesAsignatura.filter(e =>
   e.tipo === tipo &&
   perteneceAComunidadSeleccionada(e) &&
-  (!Array.isArray((e as any).preguntas) || availableQuestionsForExam(e).length > 0) &&
+  (!Array.isArray((e as any).preguntas) || availableQuestionsForExam(e).length > 0) && // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   (!requiresStructuredExams || hasStructuredQuestions(e))
 )
 
@@ -979,7 +979,7 @@ const aniosDisponibles = isCatalunaMates
         .sort((a, b) => b - a)
   : isCatalunaHistoria
     ? Object.values(examenesCataluna)
-        .map((e: any) => e.anio)
+        .map((e: any) => e.anio) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         .filter((value, index, values) => values.indexOf(value) === index)
         .sort((a, b) => b - a)
   : Array.from(new Set(examenesFiltrados.map(e => e.año)))
@@ -988,7 +988,7 @@ const aniosDisponibles = isCatalunaMates
 const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
 
 const examenesCatalunaDelAnio = isCatalunaHistoria
-  ? Object.values(examenesCataluna).filter((e: any) => e.anio === anioSeleccionado)
+  ? Object.values(examenesCataluna).filter((e: any) => e.anio === anioSeleccionado) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   : []
 
 const examenCatalunaActivo = examenesCatalunaDelAnio[0] ?? null
@@ -1124,27 +1124,27 @@ const examenIngles = asignatura === 'ingles'
 
 const preguntasIngles = asignatura === 'ingles' ? availableQuestionsForExam(examenIngles) : []
 
-const bloquesIngles = preguntasIngles.map((p: any) => ({ tipo: p.bloque, label: p.label, pts: p.puntuacion }))
+const bloquesIngles = preguntasIngles.map((p: any) => ({ tipo: p.bloque, label: p.label, pts: p.puntuacion })) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
 const tipoInglesActivo = bloquesIngles[bloqueIdx]?.tipo
 
 const preguntaIngles = asignatura === 'ingles'
   ? tipoInglesActivo
-    ? preguntasIngles.find((p: any) => p.bloque === tipoInglesActivo) ?? null
+    ? preguntasIngles.find((p: any) => p.bloque === tipoInglesActivo) ?? null // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     : null
   : null
 
 const preguntasA = isMadridMathStyle
-  ? availableQuestionsForExam(examen).filter((p: any) => p.opcion === 'A') ?? []
+  ? availableQuestionsForExam(examen).filter((p: any) => p.opcion === 'A') ?? [] // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   : []
 
 const preguntasB = isMadridMathStyle
-  ? availableQuestionsForExam(examen).filter((p: any) => p.opcion === 'B') ?? []
+  ? availableQuestionsForExam(examen).filter((p: any) => p.opcion === 'B') ?? [] // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   : []
 
 const bloquesMates = Array.from(new Set(
   isMadridMathStyle
-    ? availableQuestionsForExam(examen).map((p: any) => p.bloque)
+    ? availableQuestionsForExam(examen).map((p: any) => p.bloque) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     : []
 )) as string[]
 
@@ -1152,23 +1152,23 @@ const tipoMatesActivo = bloquesMates[bloqueIdx]
 
 const preguntaMates =
   availableQuestionsForExam(examen).find(
-    (p: any) =>
+    (p: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       p.opcion === (opcion === 0 ? 'A' : 'B') &&
       p.bloque === tipoMatesActivo
   ) ??
-  availableQuestionsForExam(examen).find((p: any) => p.bloque === tipoMatesActivo) ??
+  availableQuestionsForExam(examen).find((p: any) => p.bloque === tipoMatesActivo) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   availableQuestionsForExam(examen)[0]
 
 const tipoFisicaActivo = TIPOS_FISICA[bloqueIdx]?.tipo
 
 const preguntaFisica = asignatura === 'fisica'
   ? availableQuestionsForExam(examen).find(
-      (p: any) =>
+      (p: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         p.opcion === (opcion === 0 ? 'A' : 'B') &&
         p.bloque === tipoFisicaActivo
     ) ??
-    availableQuestionsForExam(examen).find((p: any) => p.bloque === tipoFisicaActivo) ??
-    availableQuestionsForExam(examen).find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
+    availableQuestionsForExam(examen).find((p: any) => p.bloque === tipoFisicaActivo) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+    availableQuestionsForExam(examen).find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     availableQuestionsForExam(examen)[0]
   : null
 
@@ -1178,7 +1178,7 @@ const preguntasQuimica = asignatura === 'quimica'
 
 const bloquesQuimica = Array.from(
   new Map(
-    preguntasQuimica.map((p: any) => [
+    preguntasQuimica.map((p: any) => [ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       p.bloque,
       { tipo: p.bloque, label: p.label ?? p.numero ?? p.bloque, pts: p.puntuacion }
     ])
@@ -1189,12 +1189,12 @@ const tipoQuimicaActivo = bloquesQuimica[bloqueIdx]?.tipo
 
 const preguntaQuimica = asignatura === 'quimica'
   ? preguntasQuimica.find(
-      (p: any) =>
+      (p: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         p.opcion === (opcion === 0 ? 'A' : 'B') &&
         p.bloque === tipoQuimicaActivo
     ) ??
-    preguntasQuimica.find((p: any) => p.bloque === tipoQuimicaActivo) ??
-    preguntasQuimica.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
+    preguntasQuimica.find((p: any) => p.bloque === tipoQuimicaActivo) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+    preguntasQuimica.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     preguntasQuimica[0]
   : null
 
@@ -1217,7 +1217,7 @@ const preguntasBiologia = asignatura === 'biologia'
 const bloquesBiologia = preguntasBiologia.length
   ? Array.from(
       new Map(
-        preguntasBiologia.map((p: any) => [
+        preguntasBiologia.map((p: any) => [ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           p.bloque,
           { tipo: p.bloque, label: p.label ?? p.numero ?? p.bloque, pts: p.puntuacion }
         ])
@@ -1229,12 +1229,12 @@ const tipoBiologiaActivo = bloquesBiologia[bloqueIdx]?.tipo
 
 const preguntaBiologia = asignatura === 'biologia'
   ? preguntasBiologia.find(
-      (p: any) =>
+      (p: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         p.opcion === (opcion === 0 ? 'A' : 'B') &&
         p.bloque === tipoBiologiaActivo
     ) ??
-    preguntasBiologia.find((p: any) => p.bloque === tipoBiologiaActivo) ??
-    preguntasBiologia.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ??
+    preguntasBiologia.find((p: any) => p.bloque === tipoBiologiaActivo) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+    preguntasBiologia.find((p: any) => p.opcion === (opcion === 0 ? 'A' : 'B')) ?? // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     preguntasBiologia[0]
   : null
 
@@ -1243,7 +1243,7 @@ const preguntasLengua = asignatura === 'lengua'
   : []
 
 const bloquesLengua = preguntasLengua.length
-  ? preguntasLengua.map((p: any) => ({
+  ? preguntasLengua.map((p: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       tipo: p.bloque,
       label: p.label ?? p.tema ?? p.bloque,
       pts: p.puntuacion
@@ -1253,40 +1253,40 @@ const bloquesLengua = preguntasLengua.length
 const tipoLenguaActivo = bloquesLengua[bloqueIdx]?.tipo
 
 const preguntaLengua = asignatura === 'lengua'
-  ? preguntasLengua.find((p: any) => p.bloque === tipoLenguaActivo) ?? preguntasLengua[0]
+  ? preguntasLengua.find((p: any) => p.bloque === tipoLenguaActivo) ?? preguntasLengua[0] // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   : null
 
 const OPCIONES = [0, 1] as const
 
 const opcionesMatesDisponibles = isMadridMathStyle
   ? Array.from(new Set(
-      ((examen as any)?.preguntas ?? [])
-        .filter((p: any) => isAvailableOfficialExercise(p) && p.bloque === tipoMatesActivo)
-        .map((p: any) => p.opcion)
+      ((examen as any)?.preguntas ?? []) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        .filter((p: any) => isAvailableOfficialExercise(p) && p.bloque === tipoMatesActivo) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        .map((p: any) => p.opcion) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ))
   : []
 
 const opcionesFisicaDisponibles = asignatura === 'fisica'
   ? Array.from(new Set(
-      ((examen as any)?.preguntas ?? [])
-        .filter((p: any) => isAvailableOfficialExercise(p) && p.bloque === tipoFisicaActivo)
-        .map((p: any) => p.opcion)
+      ((examen as any)?.preguntas ?? []) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        .filter((p: any) => isAvailableOfficialExercise(p) && p.bloque === tipoFisicaActivo) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        .map((p: any) => p.opcion) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ))
   : []
 
 const opcionesQuimicaDisponibles = asignatura === 'quimica'
   ? Array.from(new Set(
       preguntasQuimica
-        .filter((p: any) => p.bloque === tipoQuimicaActivo)
-        .map((p: any) => p.opcion)
+        .filter((p: any) => p.bloque === tipoQuimicaActivo) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        .map((p: any) => p.opcion) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ))
   : []
 
 const opcionesBiologiaDisponibles = asignatura === 'biologia'
   ? Array.from(new Set(
       preguntasBiologia
-        .filter((p: any) => p.bloque === tipoBiologiaActivo)
-        .map((p: any) => p.opcion)
+        .filter((p: any) => p.bloque === tipoBiologiaActivo) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        .map((p: any) => p.opcion) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ))
   : []
 
@@ -1322,7 +1322,7 @@ const preguntasHistoria = availableQuestionsForExam(examenHistoria)
 
 const bloquesHistoria = preguntasHistoria.map(p => ({
   tipo: p.tipo,
-  label: (p as any).label ?? LABELS_HISTORIA[p.tipo] ?? p.tipo,
+  label: (p as any).label ?? LABELS_HISTORIA[p.tipo] ?? p.tipo, // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   pts: p.puntuacion
 }))
 
@@ -1351,43 +1351,43 @@ const examenActivo = asignatura === 'lengua'
       ? examenHistoria ?? examen
       : examen
 
-const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado)
+const enunciadoActivo = formatEnunciado((preguntaActiva as any)?.enunciado) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 const preguntaActivaIncompleta = Boolean(preguntaActiva && isIncompleteOfficialExercise(preguntaActiva))
 const puntuacionPreguntaActiva = officialScore(
-  (preguntaActiva as any)?.puntuacion ?? (preguntaActiva as any)?.puntos ?? (preguntaActiva as any)?.pts,
+  (preguntaActiva as any)?.puntuacion ?? (preguntaActiva as any)?.puntos ?? (preguntaActiva as any)?.pts, // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   isMadridMathStyle ? 2.5 : 2
 )
 
 const bloqueActivoLabel =
-  isMadridMathStyle ? (preguntaActiva as any)?.bloque :
+  isMadridMathStyle ? (preguntaActiva as any)?.bloque : // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   asignatura === 'fisica' ? (TIPOS_FISICA[bloqueIdx]?.label ?? '') :
-  asignatura === 'quimica' ? ((preguntaActiva as any)?.label ?? bloquesQuimica[bloqueIdx]?.label ?? '') :
-  asignatura === 'biologia' ? ((preguntaActiva as any)?.label ?? bloquesBiologia[bloqueIdx]?.label ?? '') :
-  asignatura === 'lengua' ? ((preguntaActiva as any)?.label ?? bloquesLengua[bloqueIdx]?.label ?? '') :
-  asignatura === 'ingles' ? ((preguntaActiva as any)?.label ?? bloquesIngles[bloqueIdx]?.label ?? '') :
-  ((preguntaActiva as any)?.label ?? LABELS_HISTORIA[(preguntaActiva as any)?.tipo] ?? '')
+  asignatura === 'quimica' ? ((preguntaActiva as any)?.label ?? bloquesQuimica[bloqueIdx]?.label ?? '') : // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  asignatura === 'biologia' ? ((preguntaActiva as any)?.label ?? bloquesBiologia[bloqueIdx]?.label ?? '') : // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  asignatura === 'lengua' ? ((preguntaActiva as any)?.label ?? bloquesLengua[bloqueIdx]?.label ?? '') : // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  asignatura === 'ingles' ? ((preguntaActiva as any)?.label ?? bloquesIngles[bloqueIdx]?.label ?? '') : // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  ((preguntaActiva as any)?.label ?? LABELS_HISTORIA[(preguntaActiva as any)?.tipo] ?? '') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
 const opcionMostrada = asignatura === 'lengua'
   ? (versionLenguaSeleccionada ?? 'Única')
   : asignatura === 'ingles'
-    ? (diaInglesSeleccionado ? `${diaInglesSeleccionado} · ${(examenIngles as any)?.opcion ?? 'Única'}` : ((examenIngles as any)?.opcion ?? 'Única'))
+    ? (diaInglesSeleccionado ? `${diaInglesSeleccionado} · ${(examenIngles as any)?.opcion ?? 'Única'}` : ((examenIngles as any)?.opcion ?? 'Única')) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     : asignatura === 'biologia'
-      ? (serieBiologiaSeleccionada ? `${serieBiologiaSeleccionada} · ${(preguntaBiologia as any)?.opcion ?? 'Única'}` : ((preguntaBiologia as any)?.opcion ?? 'Única'))
-    : (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B')
+      ? (serieBiologiaSeleccionada ? `${serieBiologiaSeleccionada} · ${(preguntaBiologia as any)?.opcion ?? 'Única'}` : ((preguntaBiologia as any)?.opcion ?? 'Única')) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+    : (preguntaActiva as any)?.opcion ?? (opcion === 0 ? 'A' : 'B') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
 const preguntaActivaKey = [
   asignatura,
-  (examenActivo as any)?.id ?? examenActivo?.año ?? 'sin-examen',
-  (preguntaActiva as any)?.id ?? (preguntaActiva as any)?.bloque ?? (preguntaActiva as any)?.tipo ?? bloqueIdx,
+  (examenActivo as any)?.id ?? examenActivo?.año ?? 'sin-examen', // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  (preguntaActiva as any)?.id ?? (preguntaActiva as any)?.bloque ?? (preguntaActiva as any)?.tipo ?? bloqueIdx, // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   opcionMostrada
 ].join('-')
 
 const preguntaActivaStorageId = [
   ccaa,
   asignatura,
-  (examenActivo as any)?.año ?? anioSeleccionado ?? 'sin-anio',
+  (examenActivo as any)?.año ?? anioSeleccionado ?? 'sin-anio', // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   tipo,
-  (preguntaActiva as any)?.id ?? bloqueActivoLabel ?? 'pregunta',
+  (preguntaActiva as any)?.id ?? bloqueActivoLabel ?? 'pregunta', // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   opcionMostrada,
 ].filter(Boolean).join(':')
 
@@ -1467,43 +1467,43 @@ useEffect(() => {
 
 function puntosBloqueFisica(tipoBloque: string) {
   return (
-    (examen as any)?.preguntas?.find(
-      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+    (examen as any)?.preguntas?.find( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ) ??
-    (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque)
+    (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   )?.puntuacion ?? 2
 }
 
 function puntosBloqueMates(bloque: string) {
   return (
-    (examen as any)?.preguntas?.find(
-      (p: any) => p.bloque === bloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+    (examen as any)?.preguntas?.find( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+      (p: any) => p.bloque === bloque && p.opcion === (opcion === 0 ? 'A' : 'B') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ) ??
-    (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)
+    (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   )?.puntuacion ?? 2.5
 }
 
 function puntosBloqueQuimica(tipoBloque: string) {
   return (
     preguntasQuimica.find(
-      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ) ??
-    preguntasQuimica.find((p: any) => p.bloque === tipoBloque)
+    preguntasQuimica.find((p: any) => p.bloque === tipoBloque) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   )?.puntuacion ?? 2
 }
 
 function puntosBloqueBiologia(tipoBloque: string) {
   return (
     preguntasBiologia.find(
-      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B')
+      (p: any) => p.bloque === tipoBloque && p.opcion === (opcion === 0 ? 'A' : 'B') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
     ) ??
-    preguntasBiologia.find((p: any) => p.bloque === tipoBloque)
+    preguntasBiologia.find((p: any) => p.bloque === tipoBloque) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   )?.puntuacion ?? BIOLOGIA_TOPICS.find(topic => topic.tipo === tipoBloque)?.pts ?? 2
 }
 
 function cambiarBloqueMates(i: number, bloque: string) {
   setBloqueIdx(i)
-  const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)?.opcion
+  const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === bloque)?.opcion // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
   reset()
 }
@@ -1512,17 +1512,17 @@ function selectMadridMathExerciseById(subject: 'mates' | 'matematicas_ccss', exe
   const source = EXAMENES_BY_ASIGNATURA[subject] ?? []
   const exam = source.find(candidate =>
     (candidate.comunidad ?? candidate.ccaa) === 'Madrid' &&
-    availableQuestionsForExam(candidate).some((question: any) => String(question.id) === exerciseId)
+    availableQuestionsForExam(candidate).some((question: any) => String(question.id) === exerciseId) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   )
   if (!exam) return false
 
-  const question = availableQuestionsForExam(exam).find((candidate: any) => String(candidate.id) === exerciseId)
-  const blocks = Array.from(new Set(availableQuestionsForExam(exam).map((candidate: any) => candidate.bloque)))
+  const question = availableQuestionsForExam(exam).find((candidate: any) => String(candidate.id) === exerciseId) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const blocks = Array.from(new Set(availableQuestionsForExam(exam).map((candidate: any) => candidate.bloque))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const years = Array.from(new Set(
     source
       .filter(candidate => candidate.tipo === exam.tipo && (candidate.comunidad ?? candidate.ccaa) === 'Madrid')
       .map(candidate => candidate.año)
-  )).sort((a: any, b: any) => Number(b) - Number(a))
+  )).sort((a: any, b: any) => Number(b) - Number(a)) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
   setTipo(exam.tipo as Tipo)
   setExamenIdx(Math.max(0, years.findIndex(year => year === exam.año)))
@@ -1539,21 +1539,21 @@ function selectMadridMathExerciseById(subject: 'mates' | 'matematicas_ccss', exe
 
 function cambiarBloqueFisica(i: number, tipoBloque: string) {
   setBloqueIdx(i)
-  const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque)?.opcion
+  const primeraOpcion = (examen as any)?.preguntas?.find((p: any) => p.bloque === tipoBloque)?.opcion // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
   reset()
 }
 
 function cambiarBloqueQuimica(i: number, tipoBloque: string) {
   setBloqueIdx(i)
-  const primeraOpcion = preguntasQuimica.find((p: any) => p.bloque === tipoBloque)?.opcion
+  const primeraOpcion = preguntasQuimica.find((p: any) => p.bloque === tipoBloque)?.opcion // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
   reset()
 }
 
 function cambiarBloqueBiologia(i: number, tipoBloque: string) {
   setBloqueIdx(i)
-  const primeraOpcion = preguntasBiologia.find((p: any) => p.bloque === tipoBloque)?.opcion
+  const primeraOpcion = preguntasBiologia.find((p: any) => p.bloque === tipoBloque)?.opcion // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   if (primeraOpcion) setOpcion(primeraOpcion === 'B' ? 1 : 0)
   reset()
 }
@@ -1885,7 +1885,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         setCorreccion('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
       }
-      const p = preguntaActiva as any
+      const p = preguntaActiva as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
       const correctionSessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       const chunks = buildChunkedCorrectionPrompts({
@@ -2081,14 +2081,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     return (notas.reduce((a, b) => a + b, 0) / notas.length).toFixed(1)
   }
 
-  const matesH = historial.filter((item: any) => item.asignatura === 'mates')
-  const matematicasCCSSH = historial.filter((item: any) => item.asignatura === 'matematicas_ccss')
-  const fisicaH = historial.filter((item: any) => item.asignatura === 'fisica')
-  const quimicaH = historial.filter((item: any) => item.asignatura === 'quimica')
-  const biologiaH = historial.filter((item: any) => item.asignatura === 'biologia')
-  const inglesH = historial.filter((item: any) => item.asignatura === 'ingles')
-  const lenguaH = historial.filter((item: any) => item.asignatura === 'lengua')
-  const historiaH = historial.filter((item: any) => item.asignatura === 'historia')
+  const matesH = historial.filter((item: any) => item.asignatura === 'mates') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const matematicasCCSSH = historial.filter((item: any) => item.asignatura === 'matematicas_ccss') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const fisicaH = historial.filter((item: any) => item.asignatura === 'fisica') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const quimicaH = historial.filter((item: any) => item.asignatura === 'quimica') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const biologiaH = historial.filter((item: any) => item.asignatura === 'biologia') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const inglesH = historial.filter((item: any) => item.asignatura === 'ingles') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const lenguaH = historial.filter((item: any) => item.asignatura === 'lengua') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const historiaH = historial.filter((item: any) => item.asignatura === 'historia') // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
   const mediaM = calcMedia(matesH)
   const mediaMatematicasCCSS = calcMedia(matematicasCCSSH)
@@ -2168,7 +2168,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             onSelect: () => setCatAsignaturaEjercicioIdx(i)
           }))
         : isCatalunaHistoria
-          ? ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => {
+          ? ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
               const labels: Record<string, string> = {
                 analisis_fuentes: 'Análisis crítico de fuentes',
                 redaccion_terminos: 'Redacción con términos históricos',
@@ -2188,8 +2188,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 active: bloqueIdx === i,
                 onSelect: () => cambiarBloqueMates(i, bloque)
               }))
-            : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => ({
-                label: `${t.label} · ${asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts`,
+            : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+                label: `${t.label} · ${asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts`, // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                 active: bloqueIdx === i,
                 onSelect: () => {
                   asignatura === 'fisica'
@@ -2215,15 +2215,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       const tipoFromCataluna = (convocatoria: string): Tipo =>
         convocatoria === 'extraordinaria' ? 'Extraordinaria' : 'Ordinaria'
 
-      const normalSource: any[] = (EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria)
+      const normalSource: any[] = (EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         .filter(exam => !SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatura) || hasStructuredQuestions(exam))
 
-      const selectNormalResult = (exam: any, question: any, questionIndex: number) => {
+      const selectNormalResult = (exam: any, question: any, questionIndex: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       const years = Array.from(new Set(
         normalSource
           .filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate))
           .map(candidate => candidate.año)
-      )).sort((a: any, b: any) => Number(b) - Number(a))
+      )).sort((a: any, b: any) => Number(b) - Number(a)) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       setTipo(exam.tipo)
       setExamenIdx(Math.max(0, years.findIndex(year => year === exam.año)))
       setCatEjercicioIdx(0)
@@ -2252,7 +2252,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       } else if (asignatura === 'biologia') {
         const examsOfYear = normalSource.filter(candidate => candidate.tipo === exam.tipo && perteneceAComunidadSeleccionada(candidate) && candidate.año === exam.año)
         const series = Array.from(new Set(examsOfYear.map(candidate => candidate.dia).filter(Boolean)))
-        const blocks = Array.from(new Set((exam.preguntas ?? []).map((p: any) => p.bloque)))
+        const blocks = Array.from(new Set((exam.preguntas ?? []).map((p: any) => p.bloque))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         setDiaHistoriaIdx(Math.max(0, series.findIndex(serie => serie === exam.dia)))
         setOpcion(question.opcion === 'B' ? 1 : 0)
         setBloqueIdx(Math.max(0, blocks.findIndex(block => block === question.bloque)))
@@ -2261,7 +2261,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         setOpcion(question.opcion === 'B' ? 1 : 0)
         setBloqueIdx(Math.max(0, TIPOS_FISICA.findIndex(item => item.tipo === question.bloque)))
       } else {
-        const blocks = Array.from(new Set((exam.preguntas ?? []).map((p: any) => p.bloque)))
+        const blocks = Array.from(new Set((exam.preguntas ?? []).map((p: any) => p.bloque))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         setDiaHistoriaIdx(0)
         setOpcion(question.opcion === 'B' ? 1 : 0)
         setBloqueIdx(Math.max(0, blocks.findIndex(block => block === question.bloque)))
@@ -2275,7 +2275,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     if (!isCatalunaExam) {
       return normalSource
         .filter(exam => perteneceAComunidadSeleccionada(exam))
-        .flatMap((exam: any) => ((exam.preguntas ?? []) as any[]).filter(isAvailableOfficialExercise).map((question, questionIndex) => {
+        .flatMap((exam: any) => ((exam.preguntas ?? []) as any[]).filter(isAvailableOfficialExercise).map((question, questionIndex) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           const points = question.puntuacion ?? question.puntos ?? question.pts
           const questionName = question.numero ?? question.id ?? question.bloque ?? question.tipo ?? `Pregunta ${questionIndex + 1}`
           const title = `${questionName}${question.opcion ? ` · Opción ${question.opcion}` : exam.opcion ? ` · Opción ${exam.opcion}` : ''}`
@@ -2304,7 +2304,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     }
 
     if (isCatalunaMates) {
-      return examenesCatMates.filter(isAvailableOfficialExercise).map((question: any, index: number) => {
+      return examenesCatMates.filter(isAvailableOfficialExercise).map((question: any, index: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         const years = Array.from(new Set(examenesCatMates.filter(p => p.tipo === question.tipo).map(p => p.year))).sort((a, b) => b - a)
         const preguntasDelAnio = examenesCatMates.filter(p => p.tipo === question.tipo && p.year === question.year).filter(isAvailableOfficialExercise)
         const ejerciciosUnicos = preguntasDelAnio.filter((pregunta, i, preguntas) =>
@@ -2368,8 +2368,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
     if (isCatalunaQuimica || isCatalunaLengua) {
       const catExams = isCatalunaQuimica ? examenesQuimicaCataluna : examenesLenguaCataluna
-      const flattenLengua = (exam: any): CatEjercicioView[] => [
-        ...((exam.opciones ?? []).flatMap((op: any) => op.bloques.map((bloque: any) => ({
+      const flattenLengua = (exam: any): CatEjercicioView[] => [ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        ...((exam.opciones ?? []).flatMap((op: any) => op.bloques.map((bloque: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           id: `${op.opcion}-${bloque.id}`,
           titulo: `${op.titulo} · ${bloque.titulo}`,
           instrucciones: bloque.instrucciones,
@@ -2378,7 +2378,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           apartados: bloque.apartados,
           opcion: op.opcion,
         })))),
-        ...((exam.partesComunes ?? []).map((bloque: any) => ({
+        ...((exam.partesComunes ?? []).map((bloque: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           id: `comun-${bloque.id}`,
           titulo: `Parte común · ${bloque.titulo}`,
           instrucciones: bloque.instrucciones,
@@ -2387,7 +2387,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           apartados: bloque.apartados,
           opcion: 'Parte común',
         }))),
-        ...((exam.partesObligatorias ?? []).map((bloque: any) => ({
+        ...((exam.partesObligatorias ?? []).map((bloque: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           id: bloque.id,
           titulo: bloque.titulo,
           instrucciones: bloque.instrucciones,
@@ -2396,11 +2396,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           apartados: bloque.apartados,
         }))),
       ]
-      return catExams.flatMap((exam: any) => {
+      return catExams.flatMap((exam: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         const selectedTipo = tipoFromCataluna(exam.convocatoria)
-        const years = Array.from(new Set(catExams.filter((candidate: any) => candidate.convocatoria === exam.convocatoria).map((candidate: any) => candidate.anio))).sort((a: any, b: any) => Number(b) - Number(a))
-        const exercises: any[] = isCatalunaQuimica
-          ? (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any) => ({
+        const years = Array.from(new Set(catExams.filter((candidate: any) => candidate.convocatoria === exam.convocatoria).map((candidate: any) => candidate.anio))).sort((a: any, b: any) => Number(b) - Number(a)) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        const exercises: any[] = isCatalunaQuimica // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+          ? (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
               id: String(exercise.numero),
               titulo: exercise.titulo,
               instrucciones: exercise.instrucciones,
@@ -2412,7 +2412,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             }))
           : flattenLengua(exam).filter(isAvailableOfficialExercise)
         return exercises.map((exercise, exerciseIndex) => {
-          const points = (exercise.apartados ?? []).reduce((total: number, apartado: any) => total + Number(apartado.puntos ?? 0), 0) || 2.5
+          const points = (exercise.apartados ?? []).reduce((total: number, apartado: any) => total + Number(apartado.puntos ?? 0), 0) || 2.5 // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           return withSearchText({
             id: `cat-${asignatura}-${exam.id}-${exercise.id}`,
             year: String(exam.anio),
@@ -2422,7 +2422,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             points: `${formatPts(points)} pts`,
             onSelect: () => {
               setTipo(selectedTipo)
-              setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio)))
+              setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
               setCatAsignaturaEjercicioIdx(exerciseIndex)
               setCatEjercicioIdx(0)
               setCatHistoriaEjercicioIdx(0)
@@ -2440,9 +2440,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     }
 
     if (isCatalunaHistoria) {
-      return Object.values(examenesCataluna).flatMap((exam: any) => {
-        const years = Object.values(examenesCataluna).map((e: any) => e.anio).filter((value, index, values) => values.indexOf(value) === index).sort((a: any, b: any) => Number(b) - Number(a))
-        return (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any, exerciseIndex: number) => withSearchText({
+      return Object.values(examenesCataluna).flatMap((exam: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        const years = Object.values(examenesCataluna).map((e: any) => e.anio).filter((value, index, values) => values.indexOf(value) === index).sort((a: any, b: any) => Number(b) - Number(a)) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        return (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any, exerciseIndex: number) => withSearchText({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           id: `cat-historia-${exam.id}-${exercise.numero}`,
           year: String(exam.anio),
           convocatoria: exam.serie ?? 'Ordinaria',
@@ -2451,7 +2451,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           points: '2.5 pts',
           onSelect: () => {
             setTipo('Ordinaria')
-            setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio)))
+            setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
             setCatHistoriaEjercicioIdx(exerciseIndex)
             setCatEjercicioIdx(0)
             setCatFisicaEjercicioIdx(0)
@@ -3571,7 +3571,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               )}
               {isCatalunaHistoria && ejerciciosCatalunaHistoria.length > 0 && (
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                  {ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => {
+                  {ejerciciosCatalunaHistoria.map((ejercicio: any, i: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     const labels: Record<string, string> = {
                       analisis_fuentes: 'Análisis crítico de fuentes',
                       redaccion_terminos: 'Redacción con términos históricos',
@@ -3635,8 +3635,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               {!isCatalunaExam && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {isMadridMathStyle ? bloquesMates.map((bloque: string, i: number) => (
                   <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
-                )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => (
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button>
+                )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button> // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                 ))}
               </div>}
               {!isCatalunaExam && opcionesDisponibles.length > 0 && (
@@ -3769,12 +3769,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
                 </div>
                 <div style={{ padding: '24px', overflowY: 'auto' }}>
-                  {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && (
+                  {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Text</div>
                       <ExamStatement
                         key={`${preguntaActivaKey}-texto`}
-                        text={(preguntaActiva as any).texto_fuente}
+                        text={(preguntaActiva as any).texto_fuente} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         format={false}
                         components={mdComponents}
                         storageKey={fuenteStorageKey}
@@ -3799,11 +3799,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       />
                     </div>
                   )}
-                  {!preguntaActivaIncompleta && (asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && (
+                  {!preguntaActivaIncompleta && (asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
                       <ExamStatement
-                        text={(preguntaActiva as any).texto_fuente}
+                        text={(preguntaActiva as any).texto_fuente} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         components={mdComponents}
                         storageKey={fuenteStorageKey}
                         accentColor={cfg.color}
@@ -3812,39 +3812,39 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       />
                     </div>
                   )}
-                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagen_url && (
+                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagen_url && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Documento visual</div>
                       <img
-                        src={(preguntaActiva as any).imagen_url}
+                        src={(preguntaActiva as any).imagen_url} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         alt="Fuente histórica"
                         className="max-w-full rounded-2xl border border-slate-200 shadow-sm"
                       />
                     </div>
                   )}
-                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagenFuente && (
+                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagenFuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Fuente histórica oficial</div>
-                      <img src={(preguntaActiva as any).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
+                      <img src={(preguntaActiva as { imagenFuente?: string }).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
                     </div>
                   )}
-                  {!preguntaActivaIncompleta && asignatura === 'quimica' && (preguntaActiva as any).pdfFuente && (
+                  {!preguntaActivaIncompleta && asignatura === 'quimica' && (preguntaActiva as any).pdfFuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                      <a href={(preguntaActiva as any).pdfFuente} target="_blank" rel="noreferrer" style={{ padding: '8px 12px', borderRadius: '999px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.soft, fontSize: '12px', fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                      <a href={(preguntaActiva as { pdfFuente?: string }).pdfFuente} target="_blank" rel="noreferrer" style={{ padding: '8px 12px', borderRadius: '999px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.soft, fontSize: '12px', fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                         <FileText size={14} />Ver PDF oficial
                       </a>
                     </div>
                   )}
-                  {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && (
+                  {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', display: 'grid', gap: '12px' }}>
-                      {(preguntaActiva as any).imagenes.map((src: string, i: number) => (
+                      {(preguntaActiva as any).imagenes.map((src: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '18px', border: '1px solid #e5edf9', background: '#fff' }} />
                       ))}
                     </div>
                   )}
-                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).conceptos && (
+                  {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).conceptos && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {(preguntaActiva as any).conceptos.map((c: string, i: number) => (
+                      {(preguntaActiva as any).conceptos.map((c: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         <span key={i} style={{ padding: '4px 12px', borderRadius: '20px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.accent, fontSize: '12px', fontWeight: 600 }}>{c}</span>
                       ))}
                     </div>

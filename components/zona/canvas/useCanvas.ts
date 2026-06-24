@@ -253,12 +253,21 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   }
 
   function onElementPointerDown(event: ReactPointerEvent<HTMLDivElement>, element: CanvasElement) {
+    if (spaceDownRef.current || event.button === 1) {
+      event.stopPropagation()
+      return startDrag({ type: 'pan', start: { x: event.clientX, y: event.clientY } })
+    }
+    if (tool === 'connector') {
+      event.stopPropagation()
+      return connectElement(element.id)
+    }
+    if (tool === 'mind' && element.type === 'mind') {
+      event.stopPropagation()
+      return addMindChild(element)
+    }
+    if (tool !== 'select') return
     event.stopPropagation()
     const point = screenToWorld(event.clientX, event.clientY)
-    if (spaceDownRef.current || event.button === 1) return startDrag({ type: 'pan', start: { x: event.clientX, y: event.clientY } })
-    if (tool === 'connector') return connectElement(element.id)
-    if (tool === 'mind' && element.type === 'mind') return addMindChild(element)
-    if (tool !== 'select') return
     const ids = event.shiftKey ? toggleId(selectedIds, element.id) : selectedIds.includes(element.id) ? selectedIds : [element.id]
     setSelectedIds(ids)
     startDrag({ type: 'move', start: point, ids, snapshot: clone(elementsRef.current) })

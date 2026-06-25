@@ -1410,7 +1410,7 @@ useEffect(() => {
   if (randomEvauResolutionKeyRef.current === resolutionKey) return
   randomEvauResolutionKeyRef.current = resolutionKey
 
-  const subject = normalizeCaminoExamSubject(params.get('subject'))
+  const subject = normalizeCaminoExamSubject(params.get('subject')) as Asignatura | null
   if (!subject) return
 
   const selectedExerciseId = params.get('exerciseId')
@@ -1419,7 +1419,7 @@ useEffect(() => {
     setSeccion('examenes')
     setCCAA('Madrid')
     setAsignatura(subject)
-    selectMadridMathExerciseById(subject, selectedExerciseId)
+    selectMadridExerciseById(subject, selectedExerciseId)
     return
   }
 
@@ -1435,23 +1435,26 @@ useEffect(() => {
 
   const resolved = getRandomEvauExerciseForMission({
     subject,
+    community: params.get('community') ?? 'Madrid',
     block: params.get('block'),
     topic: params.get('topic'),
     missionId: params.get('missionId'),
     recentExerciseIds,
   })
 
+  setSeccion('examenes')
+  setCCAA('Madrid')
+  setAsignatura(subject)
+
   if (!resolved) {
-    setCaminoExerciseNotice('No he encontrado todavía un ejercicio PAU estructurado para esta misión. Puedes elegir uno manualmente en Exámenes.')
+    setCaminoExerciseNotice(`Todavía no tenemos un ejercicio PAU específico de este tema. Te mostramos la zona de ${nombreAsignatura(subject)} para elegir uno relacionado.`)
     return
   }
 
-  setSeccion('examenes')
-  setCCAA('Madrid')
   setAsignatura(resolved.subject)
-  selectMadridMathExerciseById(resolved.subject, resolved.exerciseId)
+  selectMadridExerciseById(resolved.subject, resolved.exerciseId)
   window.setTimeout(() => {
-    selectMadridMathExerciseById(resolved.subject, resolved.exerciseId)
+    selectMadridExerciseById(resolved.subject, resolved.exerciseId)
   }, 0)
   setCaminoExerciseNotice(resolved.warning ?? '')
 
@@ -1508,7 +1511,7 @@ function cambiarBloqueMates(i: number, bloque: string) {
   reset()
 }
 
-function selectMadridMathExerciseById(subject: 'mates' | 'matematicas_ccss', exerciseId: string) {
+function selectMadridExerciseById(subject: Asignatura, exerciseId: string) {
   const source = EXAMENES_BY_ASIGNATURA[subject] ?? []
   const exam = source.find(candidate =>
     (candidate.comunidad ?? candidate.ccaa) === 'Madrid' &&
@@ -1533,6 +1536,16 @@ function selectMadridMathExerciseById(subject: 'mates' | 'matematicas_ccss', exe
   setDiaHistoriaIdx(0)
   setOpcion(question?.opcion === 'B' ? 1 : 0)
   setBloqueIdx(Math.max(0, blocks.findIndex(block => block === question?.bloque)))
+  if (subject === 'historia') {
+    const dayOptions = Array.from(new Set(source.filter(candidate => candidate.tipo === exam.tipo && candidate.año === exam.año && (candidate.comunidad ?? candidate.ccaa) === 'Madrid').map(candidate => candidate.dia).filter(Boolean)))
+    setDiaHistoriaIdx(Math.max(0, dayOptions.findIndex(day => day === exam.dia)))
+  } else if (subject === 'lengua') {
+    const versionOptions = Array.from(new Set(source.filter(candidate => candidate.tipo === exam.tipo && candidate.año === exam.año && (candidate.comunidad ?? candidate.ccaa) === 'Madrid').map(candidate => candidate.dia ?? candidate.opcion).filter(Boolean)))
+    setDiaHistoriaIdx(Math.max(0, versionOptions.findIndex(version => version === (exam.dia ?? exam.opcion))))
+  } else if (subject === 'ingles') {
+    const dayOptions = Array.from(new Set(source.filter(candidate => candidate.tipo === exam.tipo && candidate.año === exam.año && (candidate.comunidad ?? candidate.ccaa) === 'Madrid').map(candidate => candidate.dia).filter(Boolean)))
+    setDiaHistoriaIdx(Math.max(0, dayOptions.findIndex(day => day === exam.dia)))
+  }
   reset()
   return true
 }

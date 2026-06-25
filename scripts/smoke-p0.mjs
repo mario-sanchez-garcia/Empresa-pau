@@ -192,15 +192,23 @@ assert(
     caminoCalendar.includes('guided_practice') &&
     caminoCalendar.includes('evau_practice') &&
     caminoCalendar.includes('exam_focus') &&
+    caminoCalendar.includes('target: string') &&
+    caminoCalendar.includes("source: 'camino_pau'") &&
+    caminoCalendar.includes("xpPolicy: 'after_correction'") &&
+    caminoCalendar.includes('missionMeta') &&
     caminoCalendar.includes('topicRotationBySubject') &&
     caminoCalendar.includes('nextCurriculumItem') &&
     caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
-    caminoCalendar.includes('actionHref(newMission.kind') &&
+    caminoCalendar.includes('missionMeta(newMission.kind') &&
     caminoCalendar.includes('hrefForMission') &&
     caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
     caminoCalendar.includes('source=camino_pau') &&
+    caminoCalendar.includes('const subjects = onboarding.subjects') &&
+    caminoCalendar.includes('Completa tu onboarding para que podamos construir tu Camino PAU') &&
+    !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']") &&
+    !caminoCalendar.includes('MATH_SUBJECTS') &&
     !caminoCalendar.includes('Marcar sin XP') &&
     !caminoCalendar.includes('error_review') &&
     !caminoCalendar.includes('view=historial') &&
@@ -327,22 +335,45 @@ assert(
 
 assert(
   'Camino EVAU missions resolve to random real Madrid exercises by topic',
-  randomEvauExercise.includes("from '../../data/examenes'") &&
+    randomEvauExercise.includes("from '../../data/examenes'") &&
     randomEvauExercise.includes("from '../../data/matematicas_ccss_madrid'") &&
+    randomEvauExercise.includes("from '../../data/lengua'") &&
+    randomEvauExercise.includes("from '../../data/ingles'") &&
+    randomEvauExercise.includes("from '../../data/historia_filosofia_madrid'") &&
     randomEvauExercise.includes('getRandomEvauExerciseForMission') &&
     randomEvauExercise.includes('Math.random') &&
     randomEvauExercise.includes("matchLevel: 'subject_fallback'") &&
     randomEvauExercise.includes('exerciseId') &&
     randomEvauExercise.includes("subject === 'matematicas_ccss'") &&
     randomEvauExercise.includes("return 'matematicas_ccss'") &&
+    randomEvauExercise.includes("return 'lengua'") &&
+    randomEvauExercise.includes("return 'historia'") &&
+    randomEvauExercise.includes("return 'historia_filosofia'") &&
+    randomEvauExercise.includes("return 'ingles'") &&
+    randomEvauExercise.includes("sintaxis: ['sintaxis'") &&
+    randomEvauExercise.includes('Todavía no tenemos un ejercicio PAU específico de este tema') &&
     page.includes("params.get('mode')") &&
     page.includes("source.startsWith('camino')") &&
     page.includes("mode === 'selected' && selectedExerciseId") &&
     page.includes('getRandomEvauExerciseForMission') &&
-    page.includes('selectMadridMathExerciseById') &&
+    page.includes('selectMadridExerciseById') &&
     page.includes('rememberRecentEvauExerciseIds') &&
     page.includes("window.history.replaceState(null, '', resolved.targetUrl)") &&
     caminoPlan.includes('mode=random&source=camino')
+)
+
+assert(
+  'Camino EVAU subject routing never falls back to maths for non-math missions',
+  randomEvauExercise.includes("type CaminoExamSubject = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'") &&
+    randomEvauExercise.includes('sourceForSubject(subject)') &&
+    randomEvauExercise.includes('flattenCandidates(subject') &&
+    randomEvauExercise.includes('SUBJECT_FALLBACK_LABELS[subject]') &&
+    page.includes('setAsignatura(subject)') &&
+    page.includes('setAsignatura(resolved.subject)') &&
+    page.includes('selectMadridExerciseById(resolved.subject, resolved.exerciseId)') &&
+    !randomEvauExercise.includes("return subject === 'matematicas_ccss'") &&
+    !randomEvauExercise.includes("return 'matematicas_ccss' : examenes") &&
+    !page.includes('selectMadridMathExerciseById')
 )
 
 assert(

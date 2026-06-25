@@ -10,6 +10,7 @@ import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
@@ -48,6 +49,7 @@ const CALENDAR_KEY = 'pausia_camino_calendar_v2'
 const EXAMS_KEY = 'pausia_camino_student_exams_v1'
 const XP_KEY = 'pausia_camino_xp_events_v1'
 const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
+const CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'
 
 const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
@@ -236,10 +238,14 @@ function findExamCurriculumItem(exam: StudentExam | undefined, subject: string, 
   }) ?? null
 }
 
-function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = []) {
+function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = [], planId: CaminoPlanId = 'free') {
+  const planLimits = getCaminoPlanLimits(planId)
   const start = mondayOf(new Date())
   const subjects = onboarding.subjects.length ? onboarding.subjects : ['Matemáticas II', 'Historia de España', 'Inglés']
-  const weeklyDays = onboarding.weeklyStudyDaysValue ?? 4
+  const weeklyDays = Math.min(onboarding.weeklyStudyDaysValue ?? 4, planLimits.maxStudyDaysPerWeek)
+  const weeklyCorrectionBudget = monthlyToWeeklyLimit(planLimits.correctionsPerMonth)
+  const weeklyPhotoBudget = monthlyToWeeklyLimit(planLimits.photosPerMonth)
+  const maxCorrectableMissions = Math.max(1, Math.min(weeklyCorrectionBudget, Math.max(weeklyPhotoBudget, planLimits.caminoMode === 'limited' ? 2 : weeklyCorrectionBudget)))
   const minutes = onboarding.dailyMinutes ?? 60
   const indexes = indexesFor(weeklyDays)
   let subjectRotation = 0
@@ -274,17 +280,23 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       if (!prioritySubject) subjectRotation += 1
       const kind = sameDay || strongExamNearby ? 'exam_focus' : kindFor(index)
       const reason = sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU/EVAU del bloque.` : weakItem ? `Refuerzo por una corrección baja anterior. Volvemos al tema con práctica.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
-      missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: weakItem ? `Refuerzo: ${curriculumItem?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, href: actionHref(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'evau_practice' || kind === 'exam_focus' ? 25 : 15, status: 'pending' })
+      if (missions.length < maxCorrectableMissions) {
+        missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: weakItem ? `Refuerzo: ${curriculumItem?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, href: actionHref(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'evau_practice' || kind === 'exam_focus' ? 25 : 15, status: 'pending' })
+      }
 
-      if (minutes >= 60 && !sameDay && !strongExamNearby) {
+      if (planLimits.caminoMode !== 'limited' && minutes >= 60 && !sameDay && !strongExamNearby && missions.length < maxCorrectableMissions) {
         const secondSubject = prioritySubject ?? subjects[subjectRotation % subjects.length]
         const secondItem = nextCurriculumItem(secondSubject)
         if (!prioritySubject) subjectRotation += 1
         missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'evau_practice', subject: secondSubject, block: secondItem?.block, topic: secondItem?.topic, title: `Ejercicio PAU/EVAU de ${secondItem?.topic ?? secondSubject}`, reason: 'Refuerzo con ejercicio real del bloque, sin enviar al historial.', href: actionHref('evau_practice', secondSubject, secondItem?.topic, secondItem?.block, secondItem?.planTopic), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 25, status: 'pending' })
       }
 
-      missions.push({ id: `${dateISO}-bonus-1`, role: 'bonus', kind: 'guided_example', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: ejemplo guiado de ${curriculumItem?.topic ?? subject}`, reason: 'Opcional para practicar con calma.', href: actionHref('guided_example', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 10, baseXP: 12, status: 'pending' })
-      missions.push({ id: `${dateISO}-bonus-2`, role: 'bonus', kind: 'evau_practice', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: ejercicio PAU de ${curriculumItem?.topic ?? subject}`, reason: 'Cierra el día con práctica real si te queda energía.', href: actionHref('evau_practice', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 12, baseXP: 12, status: 'pending' })
+      if (planLimits.includeBonusMissions) {
+        missions.push({ id: `${dateISO}-bonus-1`, role: 'bonus', kind: 'guided_example', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: ejemplo guiado de ${curriculumItem?.topic ?? subject}`, reason: 'Opcional para practicar con calma.', href: actionHref('guided_example', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 10, baseXP: 12, status: 'pending' })
+        if (missions.length < maxCorrectableMissions) {
+          missions.push({ id: `${dateISO}-bonus-2`, role: 'bonus', kind: 'evau_practice', subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: `Bonus: ejercicio PAU de ${curriculumItem?.topic ?? subject}`, reason: 'Cierra el día con práctica real si te queda energía.', href: actionHref('evau_practice', subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: 12, baseXP: 12, status: 'pending' })
+        }
+      }
     }
 
     return { date: dateISO, label: date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }), isToday: dateISO === todayISO(), missions }
@@ -312,6 +324,7 @@ export default function CaminoCalendarClient() {
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
   const [calendarEditorOpen, setCalendarEditorOpen] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
+  const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
@@ -320,6 +333,8 @@ export default function CaminoCalendarClient() {
     const loadedOnboarding = loadOnboarding()
     const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
     const loadedXp = loadJson<XpEvent[]>(XP_KEY, [])
+    const loadedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
+    const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
     setOnboarding(loadedOnboarding)
@@ -329,18 +344,19 @@ export default function CaminoCalendarClient() {
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
     setXpEvents(loadedXp)
+    setCalendarExpanded(loadedCalendarExpanded)
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
-    setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM), loadedXp))
+    setCalendar(syncStatuses(loadedCalendar.length ? loadedCalendar : generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free'), loadedXp))
     if (!window.localStorage.getItem('pausia_camino_onboarding_done')) setShowOnboarding(true)
     fetchCurriculumItems(loadedOnboarding.subjects)
       .then(items => {
         const nextItems = items.length ? items : FALLBACK_CURRICULUM
         setCurriculumItems(nextItems)
-        setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, nextItems), loadedXp))
+        if (!loadedCalendar.length) setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, nextItems, 'free'), loadedXp))
       })
       .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
   }, [])
@@ -358,6 +374,26 @@ export default function CaminoCalendarClient() {
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [onboarding?.community])
+
+  useEffect(() => {
+    if (!onboarding?.completedAt) return
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      if (!token || cancelled) return
+      const res = await fetch('/api/billing/me', { headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok || cancelled) return
+      const billing = await res.json() as { activePlans?: Array<{ planId?: string | null }> }
+      const planId = normalizeCaminoPlanId(billing.activePlans?.[0]?.planId)
+      setCaminoPlanId(planId)
+      const savedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
+      if (!savedCalendar.length) {
+        const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
+        setCalendar(syncStatuses(generateCalendar(onboarding, exams, source, planId), xpEvents))
+      }
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, [onboarding?.completedAt]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let cancelled = false
@@ -394,6 +430,7 @@ export default function CaminoCalendarClient() {
   const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
   const fixedCurrentRow = currentInTop ? null : currentRankingRow
   const courseGroups = courseTopicsForSubjects(onboarding?.subjects ?? [], curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
+  const caminoPlanLimits = getCaminoPlanLimits(caminoPlanId)
 
   async function createLiga(nombre: string): Promise<{ error?: string }> {
     const { data: { session } } = await supabase.auth.getSession()
@@ -428,7 +465,14 @@ export default function CaminoCalendarClient() {
     setCalendar(nextCalendar); setXpEvents(nextXp); setExams(nextExams)
     saveJson(CALENDAR_KEY, nextCalendar); saveJson(XP_KEY, nextXp); saveJson(EXAMS_KEY, nextExams)
   }
-  function regenerate(nextExams = exams) { if (!onboarding) return; persist(syncStatuses(generateCalendar(onboarding, nextExams, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM), xpEvents), xpEvents, nextExams); setToast('Camino PAU actualizado') }
+  function regenerate(nextExams = exams) { if (!onboarding) return; persist(syncStatuses(generateCalendar(onboarding, nextExams, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM, caminoPlanId), xpEvents), xpEvents, nextExams); setToast('Camino PAU actualizado') }
+  function toggleCalendarExpanded() {
+    setCalendarExpanded(current => {
+      const next = !current
+      saveJson(CALENDAR_VISIBILITY_KEY, next)
+      return next
+    })
+  }
   function postponeMission(missionId: string) {
     const dayIndex = calendar.findIndex(day => day.missions.some(mission => mission.id === missionId))
     if (dayIndex < 0 || dayIndex >= calendar.length - 1) return
@@ -462,10 +506,10 @@ export default function CaminoCalendarClient() {
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today?.label ?? 'Hoy'}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Hoy toca poco, pero bien hecho. Puedes añadir un parcial para ajustar la semana.</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} compact />)}</div></div>}</div>
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">{caminoPlanLimits.label} · Camino {caminoPlanLimits.caminoMode === 'limited' ? 'limitado' : caminoPlanLimits.caminoMode === 'intensive' ? 'intensivo' : 'completo'} · margen variable mínimo {(caminoPlanLimits.variableMarginFloor * 100).toFixed(0)}%</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
         </section>
 
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><button onClick={() => setCalendarExpanded(v => !v)} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
+        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
 
         <CourseDirectory groups={courseGroups} />
 

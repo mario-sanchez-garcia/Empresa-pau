@@ -25,6 +25,7 @@ const loginPage = read('app/login/page.tsx')
 const sidebar = read('app/components/Sidebar.tsx')
 const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
 const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
+const caminoPlanLimits = read('app/lib/camino/caminoPlanLimits.ts')
 const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const caminoCourseTopic = read('app/camino-pau/curso/[subject]/[block]/[topic]/page.tsx')
@@ -227,6 +228,55 @@ assert(
     !caminoCalendar.includes('Marcar sin XP') &&
     !caminoCalendar.includes('function completeMission') &&
     !caminoCalendar.includes('onComplete={completeMission')
+)
+
+assert(
+  'Camino PAU keeps calendar visibility and generated week persistent',
+  caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
+    caminoCalendar.includes('loadJson<DayPlan[]>(CALENDAR_KEY, [])') &&
+    caminoCalendar.includes('loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)') &&
+    caminoCalendar.includes('loadedCalendar.length ? loadedCalendar : generateCalendar') &&
+    caminoCalendar.includes('if (!loadedCalendar.length) setCalendar') &&
+    caminoCalendar.includes('function toggleCalendarExpanded()') &&
+    caminoCalendar.includes('saveJson(CALENDAR_VISIBILITY_KEY, next)') &&
+    caminoCalendar.includes('onClick={toggleCalendarExpanded}')
+)
+
+assert(
+  'Camino PAU applies plan limits with a minimum 20 percent variable margin',
+  caminoPlanLimits.includes('CAMINO_VARIABLE_MARGIN_FLOOR = 0.2') &&
+    caminoPlanLimits.includes("free: {") &&
+    caminoPlanLimits.includes("premium: {") &&
+    caminoPlanLimits.includes("curso_pau: {") &&
+    caminoPlanLimits.includes("intensivo: {") &&
+    caminoPlanLimits.includes("superpremium: {") &&
+    caminoPlanLimits.includes('maxStudyDaysPerWeek: 2') &&
+    caminoPlanLimits.includes('maxStudyDaysPerWeek: 6') &&
+    caminoPlanLimits.includes('correctionsPerMonth: 25') &&
+    caminoPlanLimits.includes('correctionsPerMonth: 600') &&
+    caminoPlanLimits.includes('photosPerMonth: 3') &&
+    caminoPlanLimits.includes('photosPerMonth: 200') &&
+    caminoPlanLimits.includes("caminoMode: 'limited'") &&
+    caminoPlanLimits.includes("caminoMode: 'complete'") &&
+    caminoPlanLimits.includes("caminoMode: 'intensive'") &&
+    caminoPlanLimits.includes('normalizeCaminoPlanId') &&
+    caminoPlanLimits.includes('monthlyToWeeklyLimit')
+)
+
+assert(
+  'Camino PAU reads billing plan and caps generated missions by subscription',
+  caminoCalendar.includes("fetch('/api/billing/me'") &&
+    caminoCalendar.includes('normalizeCaminoPlanId') &&
+    caminoCalendar.includes('setCaminoPlanId(planId)') &&
+    caminoCalendar.includes('getCaminoPlanLimits(planId)') &&
+    caminoCalendar.includes('Math.min(onboarding.weeklyStudyDaysValue ?? 4, planLimits.maxStudyDaysPerWeek)') &&
+    caminoCalendar.includes('monthlyToWeeklyLimit(planLimits.correctionsPerMonth)') &&
+    caminoCalendar.includes('monthlyToWeeklyLimit(planLimits.photosPerMonth)') &&
+    caminoCalendar.includes("planLimits.caminoMode !== 'limited'") &&
+    caminoCalendar.includes('planLimits.includeBonusMissions') &&
+    caminoCalendar.includes('missions.length < maxCorrectableMissions') &&
+    caminoCalendar.includes('Camino {caminoPlanLimits.caminoMode') &&
+    caminoCalendar.includes('variableMarginFloor')
 )
 
 assert(

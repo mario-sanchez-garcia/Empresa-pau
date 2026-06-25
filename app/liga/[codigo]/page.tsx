@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { Medal, Users, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -59,7 +60,7 @@ export default function LigaPublicPage() {
     <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f7fb' }}>
       <div style={{ textAlign: 'center' }}>
         <p style={{ color: '#ef4444', fontWeight: 800, fontSize: 16 }}>Liga no encontrada</p>
-        <a href="/" style={{ marginTop: 12, display: 'inline-block', color: '#2563eb', fontWeight: 700, fontSize: 14 }}>Volver al inicio</a>
+        <Link href="/" style={{ marginTop: 12, display: 'inline-block', color: '#2563eb', fontWeight: 700, fontSize: 14 }}>Volver al inicio</Link>
       </div>
     </div>
   )

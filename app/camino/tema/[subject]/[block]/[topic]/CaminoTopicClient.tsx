@@ -298,7 +298,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 {diegoLoading
                   ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
                   : diegoContent
-                    ? <MathMarkdown text={diegoContent} format="raw" />
+                    ? <MathMarkdown text={diegoContent} />
                     : currentTopic.explanation
                       ? <MathMarkdown text={currentTopic.explanation} />
                       : <EmptyContent />}

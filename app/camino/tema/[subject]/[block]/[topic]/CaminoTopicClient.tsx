@@ -85,10 +85,27 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [score, setScore] = useState<number | null>(null)
   const [xpAwarded, setXpAwarded] = useState<number | null>(null)
   const [correcting, setCorrecting] = useState(false)
+  const [diegoContent, setDiegoContent] = useState<string | null>(null)
+  const [diegoLoading, setDiegoLoading] = useState(true)
 
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [shouldStartExercise])
+
+  useEffect(() => {
+    if (!topic) { setDiegoLoading(false); return }
+    supabase
+      .from('curriculum_content')
+      .select('content_markdown')
+      .eq('subject', topic.subject)
+      .eq('block_slug', topic.blockSlug)
+      .eq('topic_slug', topic.topicSlug)
+      .single()
+      .then(({ data }) => {
+        if (data?.content_markdown) setDiegoContent(data.content_markdown)
+        setDiegoLoading(false)
+      })
+  }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
 
   if (!topic) {
     return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[28px] border border-blue-100 bg-white p-8 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
@@ -278,7 +295,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             <div className="grid gap-4">
               <LearningCard title="1. Explicación comprensible">
                 <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
-                {currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <EmptyContent />}
+                {diegoLoading
+                  ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
+                  : diegoContent
+                    ? <MathMarkdown text={diegoContent} />
+                    : currentTopic.explanation
+                      ? <MathMarkdown text={currentTopic.explanation} />
+                      : <EmptyContent />}
               </LearningCard>
               {videoId && (
                 <LearningCard title="🎥 Video explicativo">
@@ -363,6 +386,16 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function EmptyContent() {
   return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Todavía no hay apunte LaTeX estructurado para este tema. Camino PAU mantiene el tema en itinerario sin inventar contenido.</p>
+}
+
+function ContentSkeleton() {
+  return (
+    <div className="animate-pulse space-y-3">
+      {[80, 60, 90, 50, 75].map(w => (
+        <div key={w} className="h-3 rounded-full bg-slate-100" style={{ width: `${w}%` }} />
+      ))}
+    </div>
+  )
 }
 
 function LearningCard({ title, children }: { title: string; children: React.ReactNode }) {

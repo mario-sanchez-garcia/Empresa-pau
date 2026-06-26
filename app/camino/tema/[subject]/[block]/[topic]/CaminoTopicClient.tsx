@@ -17,6 +17,15 @@ import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
+const TOPIC_VIDEO_MAP: Record<string, string> = {
+  'matematicas_ii:algebra-lineal:matrices-operaciones': 'wMEHXzOvln0',
+  'matematicas_ii:algebra-lineal:sistemas-gauss':       '85Mu8Szvoz0',
+  'matematicas_ii:analisis:derivadas-optimizacion':     'h7Or6dNILgU',
+  'matematicas_ii:integrales:areas-integrales':         'Uft9Zds7N98',
+  'matematicas_ii:geometria-3d:producto-vectorial':     'J7IFZA1rfvA',
+  'matematicas_ii:probabilidad:normal-tipificacion':    'Mi9JBF_a0H8',
+}
+
 const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
 const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
 const CALENDAR_KEY = 'pausia_camino_calendar_v2'
@@ -91,6 +100,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const topicCompleted = Boolean(current.evau)
   const hasContent = hasLatexContent(currentTopic)
   const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
+  const videoId = TOPIC_VIDEO_MAP[key] ?? null
 
   function markNotSeen() {
     const feedback = loadJson<SchoolFeedback>(SCHOOL_FEEDBACK_KEY, [])
@@ -270,6 +280,17 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
                 {currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <EmptyContent />}
               </LearningCard>
+              {videoId && (
+                <LearningCard title="🎥 Video explicativo">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    title={`Video explicativo: ${currentTopic.title}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ width: '100%', height: 360, border: 'none', borderRadius: 12, display: 'block' }}
+                  />
+                </LearningCard>
+              )}
               <LearningCard title="2. Ejemplo guiado">
                 {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
               </LearningCard>

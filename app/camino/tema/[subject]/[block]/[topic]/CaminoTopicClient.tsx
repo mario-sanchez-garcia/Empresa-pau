@@ -426,7 +426,9 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
               onClick={() => setOpenIdx(isOpen ? null : i)}
               className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
             >
-              <span className="text-sm font-black leading-snug text-slate-800">{section.title}</span>
+              <span className="text-sm font-black leading-snug text-slate-800 [&_p]:inline [&_p]:m-0">
+                <MathMarkdown text={section.title} format="raw" />
+              </span>
               <ChevronDown
                 size={16}
                 className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}

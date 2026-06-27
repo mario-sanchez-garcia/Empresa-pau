@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Camera, Check, MessageCircle, PenLine, RotateCcw, School, UploadCloud, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, MessageCircle, PenLine, RotateCcw, School, UploadCloud, X } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import { buildEvauHref, hasLatexContent, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
@@ -298,7 +298,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 {diegoLoading
                   ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
                   : diegoContent
-                    ? <MathMarkdown text={diegoContent} />
+                    ? <DiegoContentCards markdown={diegoContent} />
                     : currentTopic.explanation
                       ? <MathMarkdown text={currentTopic.explanation} />
                       : <EmptyContent />}
@@ -377,6 +377,89 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         {toast && <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
       </main>
     </Shell>
+  )
+}
+
+// ── Diego content card components ────────────────────────────────────────────
+
+type Section = { title: string; body: string; caseStudy: string | null }
+
+function parseSections(md: string): Section[] {
+  const rawParts = ('\n' + md.trimStart()).split(/\n(?=## [^#])/)
+  const sections: Section[] = []
+  for (const part of rawParts) {
+    const trimmed = part.trimStart()
+    if (!trimmed) continue
+    const lines = trimmed.split('\n')
+    if (!lines[0].startsWith('## ')) continue
+    const title = lines[0].replace(/^## (?:\d+[a-zA-Z]*\. )?/, '').trim()
+    if (!title) continue
+    const restLines = lines.slice(1).join('\n').trim().split('\n')
+    const caseIdx = restLines.findIndex(l => l.startsWith('### '))
+    if (caseIdx >= 0) {
+      sections.push({
+        title,
+        body: restLines.slice(0, caseIdx).join('\n').trim(),
+        caseStudy: restLines.slice(caseIdx).join('\n').trim(),
+      })
+    } else {
+      sections.push({ title, body: restLines.join('\n').trim(), caseStudy: null })
+    }
+  }
+  return sections
+}
+
+function DiegoContentCards({ markdown }: { markdown: string }) {
+  const sections = useMemo(() => parseSections(markdown), [markdown])
+  const [openIdx, setOpenIdx] = useState<number | null>(0)
+
+  if (!sections.length) return <MathMarkdown text={markdown} />
+
+  return (
+    <div className="flex flex-col gap-2">
+      {sections.map((section, i) => {
+        const isOpen = openIdx === i
+        return (
+          <div key={i} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <button
+              type="button"
+              onClick={() => setOpenIdx(isOpen ? null : i)}
+              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+            >
+              <span className="text-sm font-black leading-snug text-slate-800">{section.title}</span>
+              <ChevronDown
+                size={16}
+                className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateRows: isOpen ? '1fr' : '0fr',
+                transition: 'grid-template-rows 280ms ease',
+              }}
+            >
+              <div className="overflow-hidden">
+                <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
+                  {section.body && (
+                    <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                      <MathMarkdown text={section.body} />
+                    </div>
+                  )}
+                  {section.caseStudy && (
+                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                        <MathMarkdown text={section.caseStudy} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

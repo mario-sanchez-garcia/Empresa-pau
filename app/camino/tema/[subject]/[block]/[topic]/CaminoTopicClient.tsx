@@ -18,12 +18,14 @@ import RichTextArea from '@/components/shared/RichTextArea'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
 const TOPIC_VIDEO_MAP: Record<string, string> = {
-  'matematicas_ii:algebra-lineal:matrices-operaciones': 'wMEHXzOvln0',
-  'matematicas_ii:algebra-lineal:sistemas-gauss':       '85Mu8Szvoz0',
-  'matematicas_ii:analisis:derivadas-optimizacion':     'h7Or6dNILgU',
-  'matematicas_ii:integrales:areas-integrales':         'Uft9Zds7N98',
-  'matematicas_ii:geometria-3d:producto-vectorial':     'J7IFZA1rfvA',
-  'matematicas_ii:probabilidad:normal-tipificacion':    'Mi9JBF_a0H8',
+  'matematicas_ii:algebra-lineal:matrices-operaciones':      'wMEHXzOvln0',
+  'matematicas_ii:algebra-lineal:sistemas-gauss':            '85Mu8Szvoz0',
+  'matematicas_ii:analisis:limites-continuidad':             '_FIE0_prPYE',
+  'matematicas_ii:analisis:derivadas-optimizacion':          'h7Or6dNILgU',
+  'matematicas_ii:integrales:areas-integrales':              'Uft9Zds7N98',
+  'matematicas_ii:geometria-3d:producto-vectorial':          'J7IFZA1rfvA',
+  'matematicas_ii:probabilidad:probabilidad-combinatoria':   'EmOykWKJ9Lc',
+  'matematicas_ii:probabilidad:normal-tipificacion':         'Mi9JBF_a0H8',
 }
 
 const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'

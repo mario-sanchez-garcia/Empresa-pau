@@ -697,6 +697,12 @@ export default function AdminPage() {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <Link
+              href="/admin/camino-preview"
+              style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
+            >
+              Preview Camino PAU
+            </Link>
             {updatedAt && (
               <span style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 500 }}>
                 Actualizado: {updatedAt}

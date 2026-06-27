@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const serviceKey = process.env.SUPABASE_SERVICE_KEY
   if (!url || !anonKey || !serviceKey) {
-    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+    const missing = [!url && 'NEXT_PUBLIC_SUPABASE_URL', !anonKey && 'NEXT_PUBLIC_SUPABASE_ANON_KEY', !serviceKey && 'SUPABASE_SERVICE_KEY'].filter(Boolean).join(', ')
+    return NextResponse.json({ error: `Server misconfiguration: missing ${missing}` }, { status: 500 })
   }
 
   const accessToken = getBearerToken(request)
@@ -38,14 +39,21 @@ export async function GET(request: NextRequest) {
   const serviceSupabase = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false }
   })
-  const { data, error } = await serviceSupabase
-    .from('curriculum_content')
-    .select('subject, block_slug, topic_slug, content_markdown')
-    .order('block_slug')
-    .order('topic_slug')
+
+  let data, error
+  try {
+    ;({ data, error } = await serviceSupabase
+      .from('curriculum_content')
+      .select('subject, block_slug, topic_slug, content_markdown')
+      .order('block_slug')
+      .order('topic_slug'))
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    return NextResponse.json({ error: `Query exception: ${msg}` }, { status: 500 })
+  }
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: `Supabase error: ${error.message}` }, { status: 500 })
   }
 
   const rows: CurriculumRow[] = (data ?? []).map(row => ({

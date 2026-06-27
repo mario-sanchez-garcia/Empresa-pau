@@ -154,7 +154,11 @@ export default function CaminoPreviewPage() {
       if (cancelled) return
       if (res.status === 403) { setState({ status: 'unauthorized' }); return }
       if (res.status === 401) { setState({ status: 'unauthenticated' }); return }
-      if (!res.ok) { setState({ status: 'error', message: `HTTP ${res.status}` }); return }
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`
+        try { const body = await res.json(); if (body?.error) msg = body.error } catch { /* ignore */ }
+        setState({ status: 'error', message: msg }); return
+      }
       const rows: CurriculumRow[] = await res.json()
       setState({ status: 'loaded', rows })
     }

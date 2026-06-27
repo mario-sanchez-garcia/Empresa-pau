@@ -445,13 +445,13 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
                 <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
                   {section.body && (
                     <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                      <MathMarkdown text={section.body} />
+                      <MathMarkdown text={section.body} format="raw" />
                     </div>
                   )}
                   {section.caseStudy && (
                     <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <MathMarkdown text={section.caseStudy} />
+                        <MathMarkdown text={section.caseStudy} format="raw" />
                       </div>
                     </div>
                   )}

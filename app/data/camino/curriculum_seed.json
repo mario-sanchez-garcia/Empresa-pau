@@ -2,130 +2,1382 @@
   {
     "subject": "matematicas_ii",
     "blockSlug": "algebra-lineal",
-    "blockTitle": "Álgebra lineal",
-    "topicSlug": "matrices-operaciones",
-    "title": "Matrices y operaciones",
+    "blockTitle": "Álgebra",
+    "topicSlug": "dimension-de-una-matriz",
+    "title": "Dimensión de una Matriz",
     "orderIndex": 1,
-    "contentStatus": "latex_notes",
-    "explanation": "Una matriz organiza datos en filas y columnas. En PAU se usa para representar sistemas, transformar expresiones y calcular operaciones con reglas estrictas de dimensión.",
-    "guidedExample": "Si $A=\\begin{pmatrix}1&2\\\\0&3\\end{pmatrix}$ y $B=\\begin{pmatrix}4&-1\\\\2&5\\end{pmatrix}$, entonces $A+B=\\begin{pmatrix}5&1\\\\2&8\\end{pmatrix}$ porque se suma elemento a elemento.",
-    "practicePrompt": "Calcula $2A-B$ para $A=\\begin{pmatrix}1&0\\\\-2&3\\end{pmatrix}$ y $B=\\begin{pmatrix}3&1\\\\4&-1\\end{pmatrix}$. Escribe cada entrada paso a paso.",
-    "rawLatex": "\\begin{flashcard}{Suma y resta de matrices} Solo se pueden sumar o restar matrices de la misma dimensión. \\end{flashcard}",
-    "evauPracticeQuery": { "subject": "mates", "block": "algebra", "topic": "matrices-operaciones" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "contentStatus": "flashcard",
+    "explanation": "Indica el tamaño de la tabla mediante el número de filas () y columnas (), escrito como .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Indica el tamaño de la tabla mediante el número de filas ($m$) y columnas ($n$), escrito como $m \\times n$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "dimension-de-una-matriz"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "b2bbdb67-f276-48cd-93b0-14486b6e28b8"
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "algebra-lineal",
-    "blockTitle": "Álgebra lineal",
-    "topicSlug": "sistemas-gauss",
-    "title": "Sistemas por Gauss",
+    "blockTitle": "Álgebra",
+    "topicSlug": "suma-y-resta-de-matrices",
+    "title": "Suma y Resta de Matrices",
     "orderIndex": 2,
-    "contentStatus": "latex_notes",
-    "explanation": "El método de Gauss transforma un sistema en otro equivalente más fácil, haciendo ceros por debajo de la diagonal hasta obtener una forma escalonada.",
-    "guidedExample": "En el sistema $\\begin{cases}x+y=3\\\\2x+y=5\\end{cases}$ hacemos $F_2\\to F_2-2F_1$ y queda $-y=-1$, por tanto $y=1$ y $x=2$.",
-    "practicePrompt": "Resuelve por Gauss: $\\begin{cases}x+y+z=2\\\\2x-y+z=3\\\\x+2y-z=0\\end{cases}$. Indica las operaciones de fila.",
-    "rawLatex": "\\begin{casoresuelto}[Gauss] Escalona la matriz ampliada y sustituye hacia atrás. \\end{casoresuelto}",
-    "evauPracticeQuery": { "subject": "mates", "block": "algebra", "topic": "sistemas-gauss" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "contentStatus": "flashcard",
+    "explanation": "Solo se pueden sumar o restar matrices que tengan exactamente la misma dimensión. La operación se realiza elemento a elemento en la misma posición.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Solo se pueden sumar o restar matrices que tengan exactamente la **misma dimensión**. La operación se realiza elemento a elemento en la misma posición.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "suma-y-resta-de-matrices"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "485dd87f-37bf-48fe-9285-c120a17d2fd2"
   },
   {
     "subject": "matematicas_ii",
-    "blockSlug": "analisis",
-    "blockTitle": "Análisis",
-    "topicSlug": "limites-continuidad",
-    "title": "Límites y continuidad",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "producto-por-un-escalar-numero-cdot-matr",
+    "title": "Producto por un Escalar (Número $\\cdot$ Matriz)",
     "orderIndex": 3,
-    "contentStatus": "latex_notes",
-    "explanation": "Los límites estudian el comportamiento de una función cerca de un punto. La continuidad garantiza que no hay saltos ni agujeros en la gráfica.",
-    "guidedExample": "Para $f(x)=\\frac{x^2-1}{x-1}$, el límite cuando $x\\to 1$ se resuelve factorizando: $\\lim_{x\\to 1}(x+1)=2$.",
-    "practicePrompt": "Estudia la continuidad de $f(x)=\\frac{x^2-4}{x-2}$ en $x=2$ y clasifica la discontinuidad si existe.",
-    "rawLatex": "\\[ \\lim_{x \\to c^-} f(x) = \\lim_{x \\to c^+} f(x) = L \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "analisis", "topic": "limites-continuidad" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "contentStatus": "flashcard",
+    "explanation": "Multiplicar un número real por una matriz consiste en multiplicar todos y cada uno de los elementos de la matriz por ese número.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Multiplicar un número real $k$ por una matriz consiste en multiplicar **todos y cada uno** de los elementos de la matriz por ese número.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "producto-por-un-escalar-numero-cdot-matr"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "0659d041-360a-4e1f-9f99-84f29f39535b"
   },
   {
     "subject": "matematicas_ii",
-    "blockSlug": "analisis",
-    "blockTitle": "Análisis",
-    "topicSlug": "derivadas-optimizacion",
-    "title": "Derivadas y optimización",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "multiplicacion-de-matrices-a-cdot-b",
+    "title": "Multiplicación de Matrices ($A \\cdot B$)",
     "orderIndex": 4,
-    "contentStatus": "latex_notes",
-    "explanation": "La derivada mide la variación instantánea. En problemas de optimización se deriva la función objetivo y se estudian puntos críticos.",
-    "guidedExample": "Para $f(x)=x^2-4x+1$, $f'(x)=2x-4$. El punto crítico cumple $2x-4=0$, luego $x=2$.",
-    "practicePrompt": "Una empresa tiene beneficio $B(x)=-x^2+8x-7$. Calcula el valor de $x$ que maximiza el beneficio y justifica con la segunda derivada.",
-    "rawLatex": "\\[ f'(x)=0 \\Rightarrow \\text{candidato a extremo} \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "analisis", "topic": "derivadas-optimizacion" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "contentStatus": "flashcard",
+    "explanation": "Solo es posible si el número de columnas de es igual al número de filas de . Se calcula multiplicando las filas de la primera por las columnas de la s",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Solo es posible si el **número de columnas de $A$** es igual al **número de filas de $B$**. Se calcula multiplicando las filas de la primera por las columnas de la segunda.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "multiplicacion-de-matrices-a-cdot-b"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "1d59427d-1c8c-4456-a8e2-77b8f3e64af6"
   },
   {
     "subject": "matematicas_ii",
-    "blockSlug": "integrales",
-    "blockTitle": "Integrales",
-    "topicSlug": "areas-integrales",
-    "title": "Áreas con integrales",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "propiedades-de-la-matriz-traspuesta-a-t",
+    "title": "Propiedades de la Matriz Traspuesta ($A^t$)",
     "orderIndex": 5,
-    "contentStatus": "latex_notes",
-    "explanation": "La integral definida acumula área firmada. Para áreas geométricas se resta función superior menos función inferior en el intervalo correcto.",
-    "guidedExample": "El área bajo $f(x)=x$ entre $0$ y $2$ es $\\int_0^2 x\\,dx=\\left[\\frac{x^2}{2}\\right]_0^2=2$.",
-    "practicePrompt": "Calcula el área encerrada entre $f(x)=x$ y $g(x)=x^2$ en $[0,1]$.",
-    "rawLatex": "\\[ A=\\int_a^b (f(x)-g(x))\\,dx \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "analisis", "topic": "areas-integrales" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "contentStatus": "flashcard",
+    "explanation": "La traspuesta consiste en cambiar filas por columnas. Cuando se combina con otras operaciones, sigue estas reglas fijas: 1. Múltiple traspuesta: (vuel",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "La traspuesta consiste en cambiar filas por columnas. Cuando se combina con otras operaciones, sigue estas reglas fijas:\n\n1. Múltiple traspuesta: $(A^t)^t = A$ (vuelve a la original).\n2. Con la suma: $(A + B)^t = A^t + B^t$\n3. Con un número: $(k \\cdot A)^t = k \\cdot A^t$\n4. **¡Peligro con el producto!** $(A \\cdot B)^t = B^t \\cdot A^t$ (el orden de las matrices **se invierte**).",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "propiedades-de-la-matriz-traspuesta-a-t"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "eaa924b5-c483-4a14-bd93-f55443cf066a"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "potencias-de-matrices-a-n",
+    "title": "Potencias de Matrices ($A^n$)",
+    "orderIndex": 6,
+    "contentStatus": "flashcard",
+    "explanation": "Para hallar potencias elevadas, calcula , y busca la regla o patrón numérico que se va repitiendo.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Para hallar potencias elevadas, calcula $A^2$, $A^3$ y busca la regla o patrón numérico que se va repitiendo.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "potencias-de-matrices-a-n"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "5d4aa1d4-6654-4da7-9c96-feb3bdbcf7ec"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "rango-de-una-matriz-metodo-de-gauss",
+    "title": "Rango de una Matriz (Método de Gauss)",
+    "orderIndex": 7,
+    "contentStatus": "flashcard",
+    "explanation": "El rango es el número de filas independientes. Usamos el método de Gauss haciendo operaciones entre filas para conseguir que los elementos por debajo ",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "El rango es el número de filas independientes. Usamos el método de Gauss haciendo operaciones entre filas para conseguir que los elementos por debajo de la diagonal principal sean **ceros** (escalonar). El rango es el número de filas finales que no sean por completo ceros.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "rango-de-una-matriz-metodo-de-gauss"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "90233258-d0f1-4959-9b81-be3905975350"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "matriz-inversa-por-gauss-jordan",
+    "title": "Matriz Inversa por Gauss-Jordan",
+    "orderIndex": 8,
+    "contentStatus": "flashcard",
+    "explanation": "Para hallar , se monta la matriz conjunta con la identidad y se aplican operaciones de filas hasta lograr que la identidad pase al lado izquierdo: .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Para hallar $A^{-1}$, se monta la matriz conjunta con la identidad $(A \\mid I)$ y se aplican operaciones de filas hasta lograr que la identidad pase al lado izquierdo: $(I \\mid A^{-1})$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "matriz-inversa-por-gauss-jordan"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "6befb9b7-c3d5-42bd-b1c3-bfe70658fc46"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "despejar-en-ecuaciones-matriciales",
+    "title": "Despejar en Ecuaciones Matriciales",
+    "orderIndex": 9,
+    "contentStatus": "flashcard",
+    "explanation": "Para despejar la incógnita , multiplicamos por la inversa del elemento que le estorbe, manteniendo estrictamente el mismo lado en el que se añade.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Para despejar la incógnita $X$, multiplicamos por la inversa del elemento que le estorbe, manteniendo estrictamente el mismo lado en el que se añade.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "despejar-en-ecuaciones-matriciales"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "98bef01b-6122-4397-8be4-93e6b85bd8ca"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "determinantes-de-orden-2-y-3-regla-de-sa",
+    "title": "Determinantes de Orden 2 y 3 (Regla de Sarrus)",
+    "orderIndex": 10,
+    "contentStatus": "flashcard",
+    "explanation": "Un determinante es un número real asociado a una matriz cuadrada. - Orden : Se multiplica la diagonal principal menos la diagonal secundaria. - Orden ",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Un determinante es un número real asociado a una matriz cuadrada.\n\n- **Orden $2 \\times 2$:** Se multiplica la diagonal principal menos la diagonal secundaria.\n- **Orden $3 \\times 3$ (Sarrus):** Se suman los productos de la diagonal principal y sus paralelas, y se restan los productos de la diagonal secundaria y sus paralelas.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "determinantes-de-orden-2-y-3-regla-de-sa"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "5f65022e-73c2-4071-baea-5f6778ea2337"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "propiedades-criticas-de-los-determinante",
+    "title": "Propiedades Críticas de los Determinantes",
+    "orderIndex": 11,
+    "contentStatus": "flashcard",
+    "explanation": "Trucos rápidos que ahorran tiempo en el examen: 1. Si una matriz tiene una fila o columna de ceros, su determinante es . 2. Si tiene dos filas o colum",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Trucos rápidos que ahorran tiempo en el examen:\n\n1. Si una matriz tiene una **fila o columna de ceros**, su determinante es $0$.\n2. Si tiene **dos filas o columnas iguales o proporcionales**, su determinante es $0$.\n3. El determinante de la traspuesta es igual al de la original: $|A^t| = |A|$.\n4. El determinante de un producto es el producto de determinantes: $|A \\cdot B| = |A| \\cdot |B|$.\n5. El determinante de la inversa es el inverso del determinante: $|A^{-1}| = \\frac{1}{|A|}$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "propiedades-criticas-de-los-determinante"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "0ddc64a6-ad7e-4a5a-9291-db957e193b83"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "determinante-de-matrices-triangulares-ha",
+    "title": "Determinante de Matrices Triangulares (Hacer Ceros)",
+    "orderIndex": 12,
+    "contentStatus": "flashcard",
+    "explanation": "Si logras que una matriz sea triangular (haciendo ceros por debajo de la diagonal mediante el método de Gauss), su determinante es simplemente multipl",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Si logras que una matriz sea **triangular** (haciendo ceros por debajo de la diagonal mediante el método de Gauss), su determinante es simplemente **multiplicar los números de la diagonal principal**.\n\n**Regla de oro al hacer Gauss en determinantes:**\n\n- Si a una fila le sumas o restas otra fila multiplicada por un número, el determinante **NO cambia**.\n- Si intercambias dos filas de posición, el determinante **cambia de signo** (se le pone un menos delante).",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "determinante-de-matrices-triangulares-ha"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "f4b9fef9-4822-402e-b9ee-b6173fdd13f5"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "calculo-de-la-inversa-por-adjuntos",
+    "title": "Cálculo de la Inversa por Adjuntos",
+    "orderIndex": 13,
+    "contentStatus": "flashcard",
+    "explanation": "Es el método alternativo a Gauss-Jordan, ideal para matrices . La fórmula es: ¡Cuidado! Cada elemento del adjunto lleva un signo que cambia los signos",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Es el método alternativo a Gauss-Jordan, ideal para matrices $3 \\times 3$. La fórmula es:\n\n$$\nA^{-1} = \\frac{1}{|A|} \\cdot (\\text{Adj}(A))^t\n$$\n*¡Cuidado!* Cada elemento del adjunto lleva un signo $(-1)^{i+j}$ que cambia los signos en forma de tablero de ajedrez: $\\begin{pmatrix} + & - & + \\\\ - & + & - \\\\ + & - & + \\end{pmatrix}$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "calculo-de-la-inversa-por-adjuntos"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "ad99bc56-0820-414e-9a8a-3f628a3ba3f8"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "expresion-matricial-de-un-sistema",
+    "title": "Expresión Matricial de un Sistema",
+    "orderIndex": 14,
+    "contentStatus": "flashcard",
+    "explanation": "Cualquier sistema de ecuaciones lineales se puede escribir de forma compacta como: Donde ** es la matriz de coeficientes, es el vector de incógnitas y",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Cualquier sistema de ecuaciones lineales se puede escribir de forma compacta como:\n\n$$\nA \\cdot X = B\n$$\nDonde **$A$** es la matriz de coeficientes, **$X$** es el vector de incógnitas $\\begin{pmatrix} x \\\\ y \\\\ z \\end{pmatrix}$ y **$B$** es el vector de términos independientes. La matriz ampliada se denota como **$A^*$** o **$(A|B)$**.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "expresion-matricial-de-un-sistema"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "d9b80114-8e9c-4387-9341-f81e32cf1cc7"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "teorema-de-rouche-frobenius-discusion",
+    "title": "Teorema de Rouché-Frobenius (Discusión)",
+    "orderIndex": 15,
+    "contentStatus": "flashcard",
+    "explanation": "Sirve para saber cuántas soluciones tiene un sistema calculando el rango de la matriz normal () y de la ampliada (): - Rango() Rango() Sistema Incompa",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Sirve para saber cuántas soluciones tiene un sistema calculando el rango de la matriz normal ($A$) y de la ampliada ($A^*$):\n\n- **Rango($A$) $\\neq$ Rango($A^*$)** $\\longrightarrow$ **Sistema Incompatible (SI):** No tiene solución.\n- **Rango($A$) $=$ Rango($A^*$) $=$ nº incógnitas** $\\longrightarrow$ **Sistema Compatible Determinado (SCD):** Solución única.\n- **Rango($A$) $=$ Rango($A^*$) $<$ nº incógnitas** $\\longrightarrow$ **Sistema Compatible Indeterminado (SCI):** Infinitas soluciones.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "teorema-de-rouche-frobenius-discusion"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "b0624a10-3c88-457b-874b-835981c2e24d"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "sistemas-homogeneos",
+    "title": "Sistemas Homogéneos",
+    "orderIndex": 16,
+    "contentStatus": "flashcard",
+    "explanation": "Un sistema es homogéneo cuando todos sus términos independientes son cero (). - ¡Ventaja!: Siempre son Compatibles (siempre tienen solución). - Soluci",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Un sistema es **homogéneo** cuando todos sus términos independientes son cero ($A \\cdot X = \\mathbf{0}$).\n\n- **¡Ventaja!:** Siempre son **Compatibles** (siempre tienen solución).\n- **Solución Trivial:** Siempre admiten la solución $x=0, y=0, z=0$.\n- Si es **SCD** (Rango = nº incógnitas) $\\rightarrow$ Solo tiene la solución trivial $(0,0,0)$.\n- Si es **SCI** (Rango < nº incógnitas) $\\rightarrow$ Tiene infinitas soluciones además de la $(0,0,0)$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "sistemas-homogeneos"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "fe81d1b8-1db2-41cf-b080-ae848ab1940d"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "resolucion-por-la-regla-de-cramer",
+    "title": "Resolución por la Regla de Cramer",
+    "orderIndex": 17,
+    "contentStatus": "flashcard",
+    "explanation": "Válido solo para sistemas Compatibles Determinados (SCD) con el mismo número de ecuaciones que de incógnitas. Donde consiste en cambiar la columna de ",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Válido solo para sistemas **Compatibles Determinados (SCD)** con el mismo número de ecuaciones que de incógnitas.\n\n$$\nx = \\frac{|A_x|}{|A|}, \\quad y = \\frac{|A_y|}{|A|}, \\quad z = \\frac{|A_z|}{|A|}\n$$\nDonde $A_x$ consiste en cambiar la columna de las $x$ por la columna de términos independientes ($B$).",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "resolucion-por-la-regla-de-cramer"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "eeed794a-7bb2-45db-a3fd-05d25de25cc1"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "el-metodo-de-gauss-paso-a-paso",
+    "title": "El Método de Gauss: Paso a Paso",
+    "orderIndex": 18,
+    "contentStatus": "flashcard",
+    "explanation": "El objetivo es escalonar la matriz: hacer un triángulo de ceros por debajo de la diagonal principal. El orden obligatorio para hacer los ceros es: Pas",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "El objetivo es **escalonar la matriz**: hacer un triángulo de **ceros** por debajo de la diagonal principal.\n\n**El orden obligatorio para hacer los ceros es:**\n\n$$\n\\begin{pmatrix}\n\\bullet & \\bullet & \\bullet \\\\\n\\mathbf{1^\\circ} & \\bullet & \\bullet \\\\\n\\mathbf{2^\\circ} & \\mathbf{3^\\circ} & \\bullet\n\\end{pmatrix}\n$$\n\n**Paso 1:** Hacer cero el $\\mathbf{1^\\circ}$ (Fila 2, Columna 1) usando la **Fila 1**.\n**Paso 2:** Hacer cero el $\\mathbf{2^\\circ}$ (Fila 3, Columna 1) usando la **Fila 1**.\n**Paso 3:** Hacer cero el $\\mathbf{3^\\circ}$ (Fila 3, Columna 2) usando **SÓLO la Fila 2** (para no romper los ceros anteriores).\n\n**Truco \"Multiplicar Cruzado\":** Si quieres hacer un cero entre dos filas, multiplica cada fila por el primer número de la otra fila.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "el-metodo-de-gauss-paso-a-paso"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "110837dd-a1ab-4f3a-b2e6-4c175b7cb4ab"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "analisis-de-sistemas-por-el-metodo-de-ga",
+    "title": "Análisis de Sistemas por el Método de Gauss",
+    "orderIndex": 19,
+    "contentStatus": "flashcard",
+    "explanation": "Para analizar y resolver cualquier sistema usando Gauss: 1. Escribir la matriz ampliada . 2. Hacer ceros (escalonar) por debajo de la diagonal princip",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Para analizar y resolver cualquier sistema usando Gauss:\n\n1. **Escribir la matriz ampliada** $(A|B)$.\n2. **Hacer ceros (escalonar)** por debajo de la diagonal principal.\n3. **Analizar la última fila (Discusión):**\n    \n- Si queda $(0 \\quad 0 \\quad 0 \\mid \\text{Número})$ $\\rightarrow$ **Sistema Incompatible (SI)**.\n- Si queda $(0 \\quad 0 \\quad 0 \\mid 0)$, esa fila se elimina porque no aporta información.\n4. **Resolver de abajo hacia arriba** una vez limpio y escalonado.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra-lineal",
+      "topic": "analisis-de-sistemas-por-el-metodo-de-ga"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "a4f7e040-5fa5-41ca-97d5-d7c0fd4c796d"
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "geometria-3d",
-    "blockTitle": "Geometría 3D",
-    "topicSlug": "producto-vectorial",
-    "title": "Producto vectorial y áreas",
-    "orderIndex": 6,
-    "contentStatus": "latex_notes",
-    "explanation": "El producto vectorial de dos vectores de $\\mathbb{R}^3$ da un vector perpendicular a ambos. Su módulo mide el área del paralelogramo que forman.",
-    "guidedExample": "Si $\\vec u=(1,0,0)$ y $\\vec v=(0,1,0)$, entonces $\\vec u\\times\\vec v=(0,0,1)$ y el área del triángulo es $\\frac12$.",
-    "practicePrompt": "Calcula $\\vec u\\times\\vec v$ para $\\vec u=(1,2,0)$ y $\\vec v=(0,1,3)$ y halla el área del triángulo.",
-    "rawLatex": "\\[ A_{triángulo}=\\frac{1}{2}\\lVert \\vec u\\times\\vec v\\rVert \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "geometria", "topic": "producto-vectorial" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "blockTitle": "Geometría",
+    "topicSlug": "repaso-puntos-y-vectores-en-el-plano-mat",
+    "title": "Repaso: Puntos y Vectores en el Plano ($\\mathbb{R}^2$)",
+    "orderIndex": 20,
+    "contentStatus": "flashcard",
+    "explanation": "Un punto representa una posición en el plano. Un vector representa un desplazamiento entre dos puntos. - Vector entre dos puntos: - Punto medio:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Un punto representa una posición en el plano. Un vector representa un desplazamiento entre dos puntos.\n\n- **Vector entre dos puntos:** $\\overrightarrow{AB} = B - A = (x_2 - x_1, \\ y_2 - y_1)$\n- **Punto medio:** $M = \\left(\\frac{x_1+x_2}{2}, \\frac{y_1+y_2}{2}\\right)$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "repaso-puntos-y-vectores-en-el-plano-mat"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "e853bbb6-f79c-4f11-816b-5f2bae393bbf"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "vectores-en-el-espacio-mathbb-r-3",
+    "title": "Vectores en el Espacio ($\\mathbb{R}^3$)",
+    "orderIndex": 21,
+    "contentStatus": "flashcard",
+    "explanation": "En el espacio tridimensional trabajamos con tres ejes perpendiculares (, , ). Un vector . - Módulo:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "En el espacio tridimensional trabajamos con tres ejes perpendiculares ($X$, $Y$, $Z$). Un vector $\\vec{u} = (u_1, u_2, u_3)$.\n\n- **Módulo:** $||\\vec{u}|| = \\sqrt{(u_1)^2 + (u_2)^2 + (u_3)^2}$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "vectores-en-el-espacio-mathbb-r-3"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "3f7d5231-573b-437f-84a8-ea8890c0e7c2"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "operaciones-elementales-con-vectores",
+    "title": "Operaciones Elementales con Vectores",
+    "orderIndex": 22,
+    "contentStatus": "flashcard",
+    "explanation": "- Suma y Resta: - Producto por un número: - Vectores paralelos:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Suma y Resta:** $\\vec{u} \\pm \\vec{v} = (u_1 \\pm v_1, \\ u_2 \\pm v_2, \\ u_3 \\pm v_3)$\n- **Producto por un número:** $k \\cdot \\vec{u} = (k \\cdot u_1, \\ k \\cdot u_2, \\ k \\cdot u_3)$\n- **Vectores paralelos:** $\\frac{u_1}{v_1} = \\frac{u_2}{v_2} = \\frac{u_3}{v_3} = k$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "operaciones-elementales-con-vectores"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "cd261d40-c8f4-412d-8fae-53ed98a6719b"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "dependencia-lineal-y-rango-de-vectores",
+    "title": "Dependencia Lineal y Rango de Vectores",
+    "orderIndex": 23,
+    "contentStatus": "flashcard",
+    "explanation": "- Linealmente Dependientes (L.D.): Si metemos los vectores en una matriz, su determinante da cero. - Linealmente Independientes (L.I.): Su determinant",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Linealmente Dependientes (L.D.):** Si metemos los vectores en una matriz, su determinante da **cero**.\n- **Linealmente Independientes (L.I.):** Su determinante asociado es **distinto de cero**.\n- **Rango del conjunto:** Número máximo de vectores L.I. que contiene.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "dependencia-lineal-y-rango-de-vectores"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "480d2231-fa1e-4928-b46d-c5e4699e52d6"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "base-y-sistema-de-referencia-en-el-espac",
+    "title": "Base y Sistema de Referencia en el Espacio",
+    "orderIndex": 24,
+    "contentStatus": "flashcard",
+    "explanation": "- Base: Tres vectores L.I. forman una base. Cualquier otro vector se puede escribir como combinación de ellos. - Base Canónica: , , . - Sistema de Ref",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Base:** Tres vectores L.I. forman una base. Cualquier otro vector se puede escribir como combinación de ellos.\n- **Base Canónica:** $\\vec{i}=(1,0,0)$, $\\vec{j}=(0,1,0)$, $\\vec{k}=(0,0,1)$.\n- **Sistema de Referencia ($R$):** Punto origen $O(0,0,0)$ más una base.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "base-y-sistema-de-referencia-en-el-espac"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "6c36deed-9514-4299-b11b-f5f331c398b8"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "producto-escalar-de-dos-vectores-vec-u-c",
+    "title": "Producto Escalar de dos Vectores ($\\vec{u} \\cdot \\vec{v}$)",
+    "orderIndex": 25,
+    "contentStatus": "flashcard",
+    "explanation": "¡Cuidado!: El resultado del producto escalar es un NÚMERO, no un vector. - Fórmula analítica: - Fórmula geométrica: - Cálculo del Ángulo: - Perpendicu",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "**¡Cuidado!:** El resultado del producto escalar es un **NÚMERO**, no un vector.\n\n- **Fórmula analítica:** $\\vec{u} \\cdot \\vec{v} = u_1 v_1 + u_2 v_2 + u_3 v_3$\n- **Fórmula geométrica:** $\\vec{u} \\cdot \\vec{v} = ||\\vec{u}|| \\cdot ||\\vec{v}|| \\cdot \\cos(\\alpha)$\n- **Cálculo del Ángulo:** $\\cos(\\alpha) = \\frac{\\vec{u} \\cdot \\vec{v}}{||\\vec{u}|| \\cdot ||\\vec{v}||}$\n- **Perpendicularidad:** $\\vec{u} \\perp \\vec{v}$ si y solo si $\\vec{u} \\cdot \\vec{v} = 0$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "producto-escalar-de-dos-vectores-vec-u-c"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "429c623b-1e87-4269-9751-ce2447f9df5e"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "producto-vectorial-vec-u-times-vec-v",
+    "title": "Producto Vectorial ($\\vec{u} \\times \\vec{v}$)",
+    "orderIndex": 26,
+    "contentStatus": "flashcard",
+    "explanation": "¡Cuidado!: El resultado del producto vectorial es un VECTOR perpendicular a la vez a los dos vectores originales. - Cómo se calcula: - Área del Parale",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "**¡Cuidado!:** El resultado del producto vectorial es un **VECTOR** perpendicular a la vez a los dos vectores originales.\n\n- **Cómo se calcula:**\n    \n$$\n\\vec{u} \\times \\vec{v} = \\begin{vmatrix} \\vec{i} & \\vec{j} & \\vec{k} \\\\ u_1 & u_2 & u_3 \\\\ v_1 & v_2 & v_3 \\end{vmatrix}\n$$\n- **Área del Paralelogramo:** $||\\vec{u} \\times \\vec{v}||$\n- **Área del Triángulo:** $\\frac{1}{2} ||\\vec{u} \\times \\vec{v}||$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "producto-vectorial-vec-u-times-vec-v"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "e6d7577b-63d4-4383-b79e-1f56199bedbf"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "producto-mixto",
+    "title": "Producto Mixto",
+    "orderIndex": 27,
+    "contentStatus": "flashcard",
+    "explanation": "Combina el producto escalar y el vectorial de tres vectores. El resultado es un NÚMERO. - Cómo se calcula: - Volumen del Paralelepípedo: - Volumen del",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Combina el producto escalar y el vectorial de tres vectores. El resultado es un **NÚMERO**.\n\n- **Cómo se calcula:**\n    \n$$\n[\\vec{u}, \\vec{v}, \\vec{w}] = \\begin{vmatrix} u_1 & u_2 & u_3 \\\\ v_1 & v_2 & v_3 \\\\ w_1 & w_2 & w_3 \\end{vmatrix}\n$$\n- **Volumen del Paralelepípedo:** $|[\\vec{u}, \\vec{v}, \\vec{w}]|$\n- **Volumen del Tetraedro:** $\\frac{1}{6} |[\\vec{u}, \\vec{v}, \\vec{w}]|$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "producto-mixto"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "7c68ff06-c133-4b89-994b-453bc58e66e4"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "la-recta-en-el-espacio-ecuaciones",
+    "title": "La Recta en el Espacio (Ecuaciones)",
+    "orderIndex": 28,
+    "contentStatus": "flashcard",
+    "explanation": "Una recta se define con un punto y un vector director : - Vectorial: - Paramétricas: - Continua: - Implícitas: Intersección de dos planos",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Una recta se define con un punto $A(x_0, y_0, z_0)$ y un vector director $\\vec{v}(v_1, v_2, v_3)$:\n\n- **Vectorial:** $(x, y, z) = (x_0, y_0, z_0) + \\lambda(v_1, v_2, v_3)$\n- **Paramétricas:** $\\begin{cases} x = x_0 + \\lambda v_1 \\\\ y = y_0 + \\lambda v_2 \\\\ z = z_0 + \\lambda v_3 \\end{cases}$\n- **Continua:** $\\frac{x - x_0}{v_1} = \\frac{y - y_0}{v_2} = \\frac{z - z_0}{v_3}$\n- **Implícitas:** Intersección de dos planos $\\begin{cases} Ax + By + Cz + D = 0 \\\\ A'x + B'y + C'z + D' = 0 \\end{cases}$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "la-recta-en-el-espacio-ecuaciones"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "e5c7e3c5-ee54-45da-8c03-a90b1efa905a"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "el-plano-en-el-espacio",
+    "title": "El Plano en el Espacio",
+    "orderIndex": 29,
+    "contentStatus": "flashcard",
+    "explanation": "Un plano se define mediante un vector normal perpendicular a la superficie. - Ecuación General: - Si nos dan tres puntos (, y ), calculamos y :",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Un plano se define mediante un **vector normal** $\\vec{n}(A, B, C)$ perpendicular a la superficie.\n\n- **Ecuación General:** $Ax + By + Cz + D = 0$\n- Si nos dan tres puntos ($A$, $B$ y $C$), calculamos $\\overrightarrow{AB}$ y $\\overrightarrow{AC}$:\n    \n$$\n\\begin{vmatrix} x - x_0 & y - y_0 & z - z_0 \\\\ u_1 & u_2 & u_3 \\\\ v_1 & v_2 & v_3 \\end{vmatrix} = 0\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "el-plano-en-el-espacio"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "fe565ae9-ca2b-47a4-8e49-76a8b4c7bec6"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "posiciones-relativas-rectas-y-planos",
+    "title": "Posiciones Relativas (Rectas y Planos)",
+    "orderIndex": 30,
+    "contentStatus": "flashcard",
+    "explanation": "- Entre dos rectas: Si sus directores son proporcionales: paralelas o coincidentes. Si no, el determinante con el vector puente : si da 0 se cortan, s",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Entre dos rectas:** Si sus directores son proporcionales: paralelas o coincidentes. Si no, el determinante con el vector puente $\\overrightarrow{AB}$: si da 0 se cortan, si no se cruzan.\n- **Entre recta y plano:** Producto escalar $\\vec{v} \\cdot \\vec{n}$. Si es $\\neq 0$ son secantes. Si da 0: paralela o contenida.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "posiciones-relativas-rectas-y-planos"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "065c5025-a461-4080-9972-0e5907cc22f0"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "angulos-en-el-espacio",
+    "title": "Ángulos en el Espacio",
+    "orderIndex": 31,
+    "contentStatus": "flashcard",
+    "explanation": "Todos se resuelven con el producto escalar en valor absoluto: - Dos rectas o dos planos: - Entre recta y plano (usa SENO, no coseno):",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Todos se resuelven con el producto escalar en valor absoluto:\n\n- **Dos rectas o dos planos:**\n    \n$$\n\\cos(\\alpha) = \\frac{|\\vec{u} \\cdot \\vec{v}|}{||\\vec{u}|| \\cdot ||\\vec{v}||}\n$$\n- **Entre recta y plano** (usa SENO, no coseno):\n    \n$$\n\\sin(\\alpha) = \\frac{|\\vec{v} \\cdot \\vec{n}|}{||\\vec{v}|| \\cdot ||\\vec{n}||}\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "angulos-en-el-espacio"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "8059845b-580d-4517-a740-1c584a30733b"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "proyecciones-ortogonales-y-puntos-simetr",
+    "title": "Proyecciones Ortogonales y Puntos Simétricos",
+    "orderIndex": 32,
+    "contentStatus": "flashcard",
+    "explanation": "- Proyección de sobre un plano : Punto donde la recta perpendicular a por corta al plano. - Punto Simétrico : es el punto medio de , por tanto:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Proyección de $P$ sobre un plano $\\pi$:** Punto $M$ donde la recta perpendicular a $\\pi$ por $P$ corta al plano.\n- **Punto Simétrico $P''$:** $M$ es el punto medio de $PP''$, por tanto:\n    \n$$\nP'' = 2M - P\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "proyecciones-ortogonales-y-puntos-simetr"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "21fa9453-2923-412e-a179-584609eea82d"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "distancias-en-el-espacio",
+    "title": "Distancias en el Espacio",
+    "orderIndex": 33,
+    "contentStatus": "flashcard",
+    "explanation": "- De Punto a Plano: - De Punto a Recta: - Entre dos rectas que se cruzan:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **De Punto a Plano:** $d(P, \\pi) = \\frac{|Ax_0 + By_0 + Cz_0 + D|}{\\sqrt{A^2 + B^2 + C^2}}$\n- **De Punto a Recta:** $d(P, r) = \\frac{||\\overrightarrow{AP} \\times \\vec{v}||}{||\\vec{v}||}$\n- **Entre dos rectas que se cruzan:** $d(r, s) = \\frac{|\\det(\\vec{u}, \\vec{v}, \\overrightarrow{AB})|}{||\\vec{u} \\times \\vec{v}||}$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "distancias-en-el-espacio"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "e291c1cf-459b-4c85-99a4-92328e078c28"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "areas-y-volumenes",
+    "title": "Áreas y Volúmenes",
+    "orderIndex": 34,
+    "contentStatus": "flashcard",
+    "explanation": "- Área de un Triángulo: - Volumen de un Tetraedro:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Área de un Triángulo:** $\\frac{1}{2} ||\\vec{u} \\times \\vec{v}||$\n- **Volumen de un Tetraedro:** $\\frac{1}{6} |\\det(\\vec{u}, \\vec{v}, \\vec{w})|$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria-3d",
+      "topic": "areas-y-volumenes"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "dc4ccef5-8491-4924-b737-b87b5d54b1eb"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "idea-intuitiva-de-limite",
+    "title": "Idea Intuitiva de Límite",
+    "orderIndex": 35,
+    "contentStatus": "flashcard",
+    "explanation": "El límite de en es el valor al que se aproximan las imágenes cuando se acerca a . No importa lo que ocurra exactamente en , sino el comportamiento en ",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "El límite de $f(x)$ en $x = c$ es el valor $L$ al que se aproximan las imágenes cuando $x$ se acerca a $c$. No importa lo que ocurra exactamente en $x = c$, sino el comportamiento en sus cercanías.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "idea-intuitiva-de-limite"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "8dc24b3e-8990-4d21-8eef-b75dda9e029f"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "definicion-de-limite-y-limites-laterales",
+    "title": "Definición de Límite y Límites Laterales",
+    "orderIndex": 36,
+    "contentStatus": "flashcard",
+    "explanation": "- Límites Laterales: El límite global existe si y solo si los límites por la izquierda y por la derecha existen y valen lo mismo:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Límites Laterales:** El límite global existe si y solo si los límites por la izquierda y por la derecha existen y valen lo mismo:\n    \n$$\n\\lim_{x \\to c^-} f(x) = \\lim_{x \\to c^+} f(x) = L\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "definicion-de-limite-y-limites-laterales"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "253550e2-555f-4aef-bdc4-da8a131bb82f"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "operaciones-con-limites",
+    "title": "Operaciones con Límites",
+    "orderIndex": 37,
+    "contentStatus": "flashcard",
+    "explanation": "Si y : - Suma/Resta: - Producto: - Cociente: (si ) - Potencia: (si )",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Si $\\lim_{x \\to c} f(x) = L$ y $\\lim_{x \\to c} g(x) = M$:\n\n- **Suma/Resta:** $\\lim [f(x) \\pm g(x)] = L \\pm M$\n- **Producto:** $\\lim [f(x) \\cdot g(x)] = L \\cdot M$\n- **Cociente:** $\\lim [f(x) / g(x)] = L / M$ (si $M \\neq 0$)\n- **Potencia:** $\\lim [f(x)^{g(x)}] = L^M$ (si $L > 0$)",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "operaciones-con-limites"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "e660e3b8-7645-4d5a-a789-54fabb8fd9dc"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "limites-infinitos",
+    "title": "Límites Infinitos",
+    "orderIndex": 38,
+    "contentStatus": "flashcard",
+    "explanation": "- En un punto finito: indica una asíntota vertical. - En el infinito: indica una asíntota horizontal.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **En un punto finito:** $\\lim_{x \\to c} f(x) = \\pm\\infty$ indica una asíntota vertical.\n- **En el infinito:** $\\lim_{x \\to \\pm\\infty} f(x) = L$ indica una asíntota horizontal.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "limites-infinitos"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "617deafb-aa18-48fb-95e5-0d4de074e790"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "calculo-de-limites-e-indeterminaciones",
+    "title": "Cálculo de Límites e Indeterminaciones",
+    "orderIndex": 39,
+    "contentStatus": "flashcard",
+    "explanation": "Al evaluar límites directos podemos encontrar expresiones no determinadas: - — se resuelve factorizando o usando conjugados. - — se resuelve comparand",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Al evaluar límites directos podemos encontrar expresiones no determinadas:\n\n- $\\frac{0}{0}$ — se resuelve factorizando o usando conjugados.\n- $\\frac{\\infty}{\\infty}$ — se resuelve comparando los grados de los términos principales.\n- $\\infty - \\infty$ — se opera combinando fracciones o racionalizando.\n- $1^\\infty$ — se aplica la fórmula directa basada en el número $e$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "calculo-de-limites-e-indeterminaciones"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "20c519a8-37b2-4cc3-a96a-701608ada263"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "continuidad-y-tipos-de-discontinuidad",
+    "title": "Continuidad y Tipos de Discontinuidad",
+    "orderIndex": 40,
+    "contentStatus": "flashcard",
+    "explanation": "es continua en si: existe , existe , y ambos coinciden. Si no: - Evitable: Existe el límite finito pero no coincide con el valor de la función. - Inev",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "$f(x)$ es continua en $x = c$ si: existe $f(c)$, existe $\\lim_{x \\to c} f(x)$, y ambos coinciden. Si no:\n\n- **Evitable:** Existe el límite finito pero no coincide con el valor de la función.\n- **Inevitable de salto finito:** Los límites laterales son finitos pero distintos.\n- **Inevitable de salto infinito:** Al menos un límite lateral es $\\pm\\infty$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "continuidad-y-tipos-de-discontinuidad"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "bb8e3bf9-0c2f-4aeb-ad0e-67c6a421bf92"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "concepto-de-derivada-e-interpretacion-ge",
+    "title": "Concepto de Derivada e Interpretación Geométrica",
+    "orderIndex": 41,
+    "contentStatus": "flashcard",
+    "explanation": "La derivada de en es la tasa de variación instantánea: - Interpretación geométrica: es la pendiente de la recta tangente en . - Ecuación de la recta t",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "La derivada de $f(x)$ en $x = c$ es la tasa de variación instantánea:\n\n$$\nf'(c) = \\lim_{h \\to 0} \\frac{f(c + h) - f(c)}{h}\n$$\n\n- **Interpretación geométrica:** $f'(c)$ es la **pendiente** de la recta tangente en $(c, f(c))$.\n- **Ecuación de la recta tangente:** $y - f(c) = f'(c) \\cdot (x - c)$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "concepto-de-derivada-e-interpretacion-ge"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "2b98e8d2-3de6-4425-b9f1-e678d23c6322"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "calculo-de-derivadas-y-regla-de-la-caden",
+    "title": "Cálculo de Derivadas y Regla de la Cadena",
+    "orderIndex": 42,
+    "contentStatus": "flashcard",
+    "explanation": "- Producto: - Cociente: - Regla de la Cadena:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Producto:** $(u \\cdot v)' = u' \\cdot v + u \\cdot v'$\n- **Cociente:** $\\left(\\frac{u}{v}\\right)' = \\frac{u' v - u v'}{v^2}$\n- **Regla de la Cadena:**\n    \n$$\n[f(g(x))]' = f'(g(x)) \\cdot g'(x)\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "calculo-de-derivadas-y-regla-de-la-caden"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "f9919023-6ace-408c-81d0-54cf3018671a"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "teoremas-de-rolle-y-del-valor-medio-lagr",
+    "title": "Teoremas de Rolle y del Valor Medio (Lagrange)",
+    "orderIndex": 43,
+    "contentStatus": "flashcard",
+    "explanation": "- Teorema de Rolle: Si es continua en , derivable en y , entonces tal que . - Teorema del Valor Medio: Bajo las mismas condiciones tal que:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Teorema de Rolle:** Si $f$ es continua en $[a,b]$, derivable en $(a,b)$ y $f(a) = f(b)$, entonces $\\exists c \\in (a,b)$ tal que $f'(c) = 0$.\n- **Teorema del Valor Medio:** Bajo las mismas condiciones $\\exists c \\in (a,b)$ tal que:\n    \n$$\nf'(c) = \\frac{f(b) - f(a)}{b - a}\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "teoremas-de-rolle-y-del-valor-medio-lagr"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "1227da0b-3ae6-4a11-aaa2-64efc096d6cc"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "informacion-extraida-de-la-propia-funcio",
+    "title": "Información Extraída de la Propia Función",
+    "orderIndex": 44,
+    "contentStatus": "flashcard",
+    "explanation": "- Dominio: Valores de para los que existe la función. - Cortes con los ejes: Eje : hacer ; Eje : hacer . - Simetría: Par si ; Impar si . - Asíntotas: ",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Dominio:** Valores de $x$ para los que existe la función.\n- **Cortes con los ejes:** Eje $OX$: hacer $f(x) = 0$; Eje $OY$: hacer $x = 0$.\n- **Simetría:** Par si $f(-x) = f(x)$; Impar si $f(-x) = -f(x)$.\n- **Asíntotas:** Vertical ($x=k$), horizontal ($y=L$) u oblicua ($y=mx+n$).",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "informacion-extraida-de-la-propia-funcio"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "f160dae8-0cdf-4143-9fcc-546b7b40d515"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "informacion-extraida-de-la-1a-y-2a-deriv",
+    "title": "Información Extraída de la 1ª y 2ª Derivada",
+    "orderIndex": 45,
+    "contentStatus": "flashcard",
+    "explanation": "- Primera Derivada (): Si la función crece; si decrece. Los puntos donde son puntos críticos. - Segunda Derivada (): Si es convexa (); si es cóncava (",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Primera Derivada ($f'$):** Si $f'(x) > 0$ la función crece; si $f'(x) < 0$ decrece. Los puntos donde $f'(x) = 0$ son puntos críticos.\n- **Segunda Derivada ($f''$):** Si $f''(x) > 0$ es convexa ($\\cup$); si $f''(x) < 0$ es cóncava ($\\cap$). Clasifica los extremos relativos y halla los puntos de inflexión.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "informacion-extraida-de-la-1a-y-2a-deriv"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "18a8dc22-dbed-4caa-b5c2-4d42ce1e74ab"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "primitiva-de-una-funcion-y-la-integral-i",
+    "title": "Primitiva de una Función y la Integral Indefinida",
+    "orderIndex": 46,
+    "contentStatus": "flashcard",
+    "explanation": "es primitiva de si . - Integral Indefinida: - Sigue propiedades de linealidad: permite extraer constantes y separar sumas o restas.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "$F(x)$ es primitiva de $f(x)$ si $F'(x) = f(x)$.\n\n- **Integral Indefinida:**\n    \n$$\n\\int f(x) \\, dx = F(x) + C\n$$\n- Sigue propiedades de linealidad: permite extraer constantes y separar sumas o restas.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "primitiva-de-una-funcion-y-la-integral-i"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "19c648a9-3e4d-4df6-a654-5d4128ecd68b"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "integrales-de-funciones-elementales-inme",
+    "title": "Integrales de Funciones Elementales (Inmediatas)",
+    "orderIndex": 47,
+    "contentStatus": "flashcard",
+    "explanation": "- Potenciales: - Logarítmicas: - Exponenciales: - Trigonométricas:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Potenciales:** $\\int x^n \\, dx = \\frac{x^{n+1}}{n+1} + C \\quad (n \\neq -1)$\n- **Logarítmicas:** $\\int \\frac{1}{x} \\, dx = \\ln|x| + C$\n- **Exponenciales:** $\\int e^x \\, dx = e^x + C$\n- **Trigonométricas:** $\\int \\cos x \\, dx = \\sin x + C$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "integrales-de-funciones-elementales-inme"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "2f9916cb-a62f-490a-80bf-71cad8e90900"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "metodos-de-integracion",
+    "title": "Métodos de Integración",
+    "orderIndex": 48,
+    "contentStatus": "flashcard",
+    "explanation": "- Cambio de Variable: Introducir , calcular . - Por Partes (regla mnemotécnica ALPES): - Racionales: Descomponer en fracciones simples.",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Cambio de Variable:** Introducir $t = g(x)$, calcular $dt = g'(x)dx$.\n- **Por Partes** (regla mnemotécnica ALPES):\n    \n$$\n\\int u \\, dv = u \\cdot v - \\int v \\, du\n$$\n- **Racionales:** Descomponer $\\frac{P(x)}{Q(x)}$ en fracciones simples.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "metodos-de-integracion"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "88e84207-b511-4734-9f7c-c9d88656c9c7"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "la-integral-definida-regla-de-barrow-y-a",
+    "title": "La Integral Definida (Regla de Barrow y Áreas)",
+    "orderIndex": 49,
+    "contentStatus": "flashcard",
+    "explanation": "La integral definida calcula el área neta encerrada por una curva en un intervalo: - Regla de Barrow: - Cálculo de Áreas: Para evitar que áreas por de",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "La integral definida calcula el área neta encerrada por una curva en un intervalo:\n\n- **Regla de Barrow:**\n    \n$$\n\\int_{a}^{b} f(x) \\, dx = [F(x)]_a^b = F(b) - F(a)\n$$\n- **Cálculo de Áreas:** Para evitar que áreas por debajo del eje se resten, calcula las raíces en el intervalo e integra por tramos usando valores absolutos.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "la-integral-definida-regla-de-barrow-y-a"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "e20dc23f-041a-4019-a801-0f7303f7ecd1"
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "probabilidad",
-    "blockTitle": "Probabilidad y estadística",
-    "topicSlug": "probabilidad-combinatoria",
-    "title": "Probabilidad y combinatoria",
-    "orderIndex": 7,
-    "contentStatus": "latex_notes",
-    "explanation": "La combinatoria cuenta agrupaciones posibles. La probabilidad mide la posibilidad de que ocurra un suceso usando la regla de Laplace y el Teorema de Bayes.",
-    "guidedExample": "La probabilidad de sacar un número par con un dado es $P=\\frac{3}{6}=0.5$ por la regla de Laplace.",
-    "practicePrompt": "Una urna tiene 4 bolas rojas y 6 azules. ¿Cuál es la probabilidad de sacar 2 rojas consecutivas sin reemplazamiento?",
-    "rawLatex": "\\[ P(A) = \\frac{\\text{casos favorables}}{\\text{casos posibles}} \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "probabilidad", "topic": "probabilidad-combinatoria" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "blockTitle": "Probabilidad",
+    "topicSlug": "algebra-de-sucesos-y-tipos-de-experiment",
+    "title": "Álgebra de Sucesos y Tipos de Experimentos",
+    "orderIndex": 50,
+    "contentStatus": "flashcard",
+    "explanation": "- Espacio Muestral (): Conjunto de todos los resultados posibles. - Operaciones: Unión (), Intersección (), Contrario (). - Leyes de Morgan: y .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Espacio Muestral ($\\Omega$):** Conjunto de todos los resultados posibles.\n- **Operaciones:** Unión ($A \\cup B$), Intersección ($A \\cap B$), Contrario ($\\bar{A}$).\n- **Leyes de Morgan:** $\\overline{A \\cup B} = \\bar{A} \\cap \\bar{B}$ y $\\overline{A \\cap B} = \\bar{A} \\cup \\bar{B}$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "algebra-de-sucesos-y-tipos-de-experiment"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "0b1107f9-1228-4137-9cd3-3d7ddb25f891"
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "probabilidad",
-    "blockTitle": "Probabilidad y estadística",
-    "topicSlug": "normal-tipificacion",
-    "title": "Normal y tipificación",
-    "orderIndex": 8,
-    "contentStatus": "latex_notes",
-    "explanation": "Tipificar transforma una variable normal $X\\sim N(\\mu,\\sigma)$ en una normal estándar $Z\\sim N(0,1)$.",
-    "guidedExample": "Si $X\\sim N(10,2)$, entonces $P(X\\le13)=P\\left(Z\\le\\frac{13-10}{2}\\right)=P(Z\\le1.5)$.",
-    "practicePrompt": "Para $X\\sim N(50,8)$, tipifica $P(X\\ge 62)$ y deja indicada la probabilidad con $Z$.",
-    "rawLatex": "\\[ Z=\\frac{X-\\mu}{\\sigma} \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "probabilidad", "topic": "normal-tipificacion" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "blockTitle": "Probabilidad",
+    "topicSlug": "asignacion-de-probabilidades-regla-de-la",
+    "title": "Asignación de Probabilidades (Regla de Laplace)",
+    "orderIndex": 51,
+    "contentStatus": "flashcard",
+    "explanation": "Si todos los resultados son equiprobables: La probabilidad es siempre un valor en .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Si todos los resultados son equiprobables:\n\n$$\nP(A) = \\frac{\\text{Número de casos favorables}}{\\text{Número de casos posibles}}\n$$\nLa probabilidad es siempre un valor en $[0, 1]$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "asignacion-de-probabilidades-regla-de-la"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "505ee7d1-d5b1-48bc-bbf2-107a706b9e8b"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "definicion-axiomatica-de-probabilidad-ko",
+    "title": "Definición Axiomática de Probabilidad (Kolmogorov)",
+    "orderIndex": 52,
+    "contentStatus": "flashcard",
+    "explanation": "Tres axiomas fundamentales: 1. para cualquier suceso . 2. . 3. Si : . Caso general compatible: .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Tres axiomas fundamentales:\n\n1. $P(A) \\ge 0$ para cualquier suceso $A$.\n2. $P(\\Omega) = 1$.\n3. Si $A \\cap B = \\emptyset$: $P(A \\cup B) = P(A) + P(B)$.\n\nCaso general compatible: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "definicion-axiomatica-de-probabilidad-ko"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "66916137-b8d0-4650-a4c3-953f1fd9c2f7"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "diagramas-de-arbol-y-tablas-de-contingen",
+    "title": "Diagramas de Árbol y Tablas de Contingencia",
+    "orderIndex": 53,
+    "contentStatus": "flashcard",
+    "explanation": "- Diagramas de Árbol: Se ramifican las opciones secuenciales. La probabilidad de un camino es el producto de sus ramas. - Tablas de Contingencia: Tabl",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Diagramas de Árbol:** Se ramifican las opciones secuenciales. La probabilidad de un camino es el producto de sus ramas.\n- **Tablas de Contingencia:** Tablas cruzadas para organizar conjuntos con dos características.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "diagramas-de-arbol-y-tablas-de-contingen"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "c9d71e1d-c4b1-4657-9389-33a303209cdf"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "teoremas-de-la-probabilidad-total-y-de-b",
+    "title": "Teoremas de la Probabilidad Total y de Bayes",
+    "orderIndex": 54,
+    "contentStatus": "flashcard",
+    "explanation": "- Probabilidad Total: - Teorema de Bayes:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Probabilidad Total:**\n    \n$$\nP(B) = \\sum [P(A_i) \\cdot P(B | A_i)]\n$$\n- **Teorema de Bayes:**\n    \n$$\nP(A_i | B) = \\frac{P(A_i) \\cdot P(B | A_i)}{P(B)}\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "teoremas-de-la-probabilidad-total-y-de-b"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "89b07efd-8f01-46b2-8994-ac209bed3e20"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "parametros-de-una-distribucion-media-var",
+    "title": "Parámetros de una Distribución: Media, Varianza y Desviación Típica",
+    "orderIndex": 55,
+    "contentStatus": "flashcard",
+    "explanation": "- Media (): Valor esperado: . - Varianza (): . - Desviación Típica (): .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "- **Media ($\\mu$):** Valor esperado: $\\mu = \\sum [x_i \\cdot P(x_i)]$.\n- **Varianza ($\\sigma^2$):** $\\sigma^2 = \\sum [x_i^2 \\cdot P(x_i)] - \\mu^2$.\n- **Desviación Típica ($\\sigma$):** $\\sigma = \\sqrt{\\sigma^2}$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "parametros-de-una-distribucion-media-var"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "924b3818-8230-4e7d-8086-cb154b82d731"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribucion-binomial-variable-discreta",
+    "title": "Distribución Binomial (Variable Discreta)",
+    "orderIndex": 56,
+    "contentStatus": "flashcard",
+    "explanation": "Modela experimentos independientes con éxito o fracaso . Se expresa . Parámetros directos: y .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Modela $n$ experimentos independientes con éxito $p$ o fracaso $q = 1-p$. Se expresa $X \\sim B(n, p)$.\n\n$$\nP(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\n$$\nParámetros directos: $\\mu = n \\cdot p$ y $\\sigma = \\sqrt{n \\cdot p \\cdot q}$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "distribucion-binomial-variable-discreta"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "4e6aa7e5-51c4-4d75-af3a-40e30f669db7"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "desigualdad-de-chebycheff",
+    "title": "Desigualdad de Chebycheff",
+    "orderIndex": 57,
+    "contentStatus": "flashcard",
+    "explanation": "Aplicable a cualquier variable estadística: La probabilidad de desviarse más de desviaciones típicas de la media es como máximo .",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Aplicable a cualquier variable estadística:\n\n$$\nP(|X - \\mu| \\ge k\\sigma) \\le \\frac{1}{k^2}\n$$\nLa probabilidad de desviarse más de $k$ desviaciones típicas de la media es como máximo $\\frac{1}{k^2}$.",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "desigualdad-de-chebycheff"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "fc1faecf-486c-4413-9f4e-42aabc996dea"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribuciones-de-probabilidad-continuas",
+    "title": "Distribuciones de Probabilidad Continuas",
+    "orderIndex": 58,
+    "contentStatus": "flashcard",
+    "explanation": "Variables que pueden tomar cualquier valor real. . La probabilidad de un tramo es el área bajo la función de densidad :",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Variables que pueden tomar cualquier valor real. $P(X=c) = 0$. La probabilidad de un tramo es el área bajo la función de densidad $f(x)$:\n\n$$\nP(a \\le X \\le b) = \\int_{a}^{b} f(x) \\, dx\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "distribuciones-de-probabilidad-continuas"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "12770117-126b-414b-ab71-f34ccb8089de"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribucion-normal-y-tipificacion",
+    "title": "Distribución Normal y Tipificación",
+    "orderIndex": 59,
+    "contentStatus": "flashcard",
+    "explanation": "La distribución continua más importante, simétrica y con forma de campana. . Para usar la tabla estándar , se tipifica:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "La distribución continua más importante, simétrica y con forma de campana. $X \\sim N(\\mu, \\sigma)$. Para usar la tabla estándar $N(0,1)$, se **tipifica**:\n\n$$\nZ = \\frac{X - \\mu}{\\sigma}\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "distribucion-normal-y-tipificacion"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "5e66e8f2-81c8-4d98-a1dc-e752e388c117"
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "aproximacion-de-la-binomial-a-la-normal",
+    "title": "Aproximación de la Binomial a la Normal (Moivre-Gauss)",
+    "orderIndex": 60,
+    "contentStatus": "flashcard",
+    "explanation": "Si es suficientemente grande en y se cumplen y , se puede aproximar:",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "Si $n$ es suficientemente grande en $X \\sim B(n, p)$ y se cumplen $n \\cdot p \\ge 5$ y $n \\cdot q \\ge 5$, se puede aproximar:\n\n$$\nY \\sim N(n \\cdot p, \\ \\sqrt{n \\cdot p \\cdot q})\n$$",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "aproximacion-de-la-binomial-a-la-normal"
+    },
+    "source": "curriculum_flashcards",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "flashcardId": "c4ad5082-847a-4395-91f4-f3f5e1e5dc7e"
   },
   {
     "subject": "matematicas_ccss",
@@ -139,9 +1391,15 @@
     "guidedExample": "En $\\begin{cases}x+y=3\\\\2x+y=5\\end{cases}$ restamos dos veces la primera ecuación a la segunda y obtenemos $-y=-1$.",
     "practicePrompt": "Resuelve por Gauss un sistema de tres ecuaciones y explica qué significa cada fila nula si aparece.",
     "rawLatex": "\\begin{casoresuelto}[Gauss en CCSS] Escalona la matriz ampliada y lee la solución. \\end{casoresuelto}",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "algebra", "topic": "sistemas-gauss" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "sistemas-gauss"
+    },
     "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "matematicas_ccss",
@@ -155,9 +1413,15 @@
     "guidedExample": "Si $B(x)=-x^2+10x-9$, entonces $B'(x)=-2x+10$ y el máximo se alcanza en $x=5$.",
     "practicePrompt": "Dada $C(x)=x^2+2x+10$ e $I(x)=12x$, construye $B(x)=I(x)-C(x)$ y maximiza.",
     "rawLatex": "\\[ B(x)=I(x)-C(x) \\]",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "analisis", "topic": "optimizacion-economica" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "optimizacion-economica"
+    },
     "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "matematicas_ccss",
@@ -171,9 +1435,15 @@
     "guidedExample": "Si $P(A)=0.4$, $P(B|A)=0.7$ y $P(B|A^c)=0.2$, entonces $P(B)=0.4\\cdot0.7+0.6\\cdot0.2$.",
     "practicePrompt": "Construye un árbol de probabilidad y calcula $P(A|B)$ aplicando Bayes.",
     "rawLatex": "\\[ P(A|B)=\\frac{P(A)P(B|A)}{P(B)} \\]",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "probabilidad", "topic": "bayes-tablas-arboles" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "bayes-tablas-arboles"
+    },
     "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "matematicas_ccss",
@@ -187,9 +1457,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "probabilidad", "topic": "intervalos-confianza" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "intervalos-confianza"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "fisica",
@@ -203,9 +1479,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "fisica", "block": "campo-gravitatorio", "topic": "satelites" },
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "satelites"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["fisica"]
+    "compatibleSubjects": [
+      "fisica"
+    ]
   },
   {
     "subject": "quimica",
@@ -219,9 +1501,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "quimica", "block": "equilibrio", "topic": "le-chatelier" },
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio",
+      "topic": "le-chatelier"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["quimica"]
+    "compatibleSubjects": [
+      "quimica"
+    ]
   },
   {
     "subject": "biologia",
@@ -235,9 +1523,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "biologia", "block": "genetica", "topic": "mendel-adn" },
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica",
+      "topic": "mendel-adn"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["biologia"]
+    "compatibleSubjects": [
+      "biologia"
+    ]
   },
   {
     "subject": "lengua",
@@ -251,9 +1545,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "lengua", "block": "comunicacion", "topic": "comentario-critico" },
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "comentario-critico"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["lengua"]
+    "compatibleSubjects": [
+      "lengua"
+    ]
   },
   {
     "subject": "historia",
@@ -267,9 +1567,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "historia", "block": "republica-guerra-civil", "topic": "constitucion-1931" },
+    "evauPracticeQuery": {
+      "subject": "historia",
+      "block": "republica-guerra-civil",
+      "topic": "constitucion-1931"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["historia"]
+    "compatibleSubjects": [
+      "historia"
+    ]
   },
   {
     "subject": "historia_filosofia",
@@ -283,9 +1589,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "historia_filosofia", "block": "moderna", "topic": "descartes-hume-kant" },
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "moderna",
+      "topic": "descartes-hume-kant"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["historia_filosofia"]
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
   },
   {
     "subject": "ingles",
@@ -299,9 +1611,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "ingles", "block": "writing", "topic": "essay-connectors" },
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "writing",
+      "topic": "essay-connectors"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["ingles"]
+    "compatibleSubjects": [
+      "ingles"
+    ]
   },
   {
     "subject": "llengua_catalana",
@@ -315,8 +1633,14 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "lengua", "block": "llengua-catalana", "topic": "pronoms-febles" },
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "llengua-catalana",
+      "topic": "pronoms-febles"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["llengua_catalana"]
+    "compatibleSubjects": [
+      "llengua_catalana"
+    ]
   }
 ]

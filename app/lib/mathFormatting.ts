@@ -318,8 +318,17 @@ function formatLatexBlockContent(content: string) {
 }
 
 function formatLatexEnvironment(environment: string, body: string) {
-  const rows = body
-    .trim()
+  let content = body.trim()
+  // Extract column spec (e.g. {ccc|c} in \begin{array}{ccc|c}) before any replacements
+  // so the | in the spec is not converted to & by the row-separator replacement below.
+  let spec = ''
+  const specMatch = content.match(/^(\{[^}]*\})/)
+  if (specMatch) {
+    spec = specMatch[1]
+    content = content.slice(spec.length)
+  }
+
+  const rows = content
     .replace(/\s*;\s*/g, ' \\\\ ')
     .replace(/\s*\|\s*/g, ' & ')
     .replace(/(?<!\\)\\\s+(?=\d|[A-Za-z])/g, () => ` ${String.raw`\\`} `)
@@ -328,7 +337,7 @@ function formatLatexEnvironment(environment: string, body: string) {
     .replace(/[ \t]{2,}/g, ' ')
     .trim()
 
-  return `\\begin{${environment}}\n${rows}\n\\end{${environment}}`
+  return `\\begin{${environment}}${spec}\n${rows}\n\\end{${environment}}`
 }
 
 function wrapExplicitLatex(text: string) {

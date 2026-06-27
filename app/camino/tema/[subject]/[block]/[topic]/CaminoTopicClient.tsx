@@ -384,6 +384,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
 type Section = { title: string; body: string; caseStudy: string | null }
 
+// Remove leading 4+ spaces from each line (Python-generated content adds them as indentation,
+// but in standard markdown 4-space indent means code block).
+function dedentContent(text: string): string {
+  return text.replace(/^ {4,}/gm, '')
+}
+
 function parseSections(md: string): Section[] {
   const rawParts = ('\n' + md.trimStart()).split(/\n(?=## [^#])/)
   const sections: Section[] = []
@@ -399,11 +405,11 @@ function parseSections(md: string): Section[] {
     if (caseIdx >= 0) {
       sections.push({
         title,
-        body: restLines.slice(0, caseIdx).join('\n').trim(),
-        caseStudy: restLines.slice(caseIdx).join('\n').trim(),
+        body: dedentContent(restLines.slice(0, caseIdx).join('\n').trim()),
+        caseStudy: dedentContent(restLines.slice(caseIdx).join('\n').trim()),
       })
     } else {
-      sections.push({ title, body: restLines.join('\n').trim(), caseStudy: null })
+      sections.push({ title, body: dedentContent(restLines.join('\n').trim()), caseStudy: null })
     }
   }
   return sections

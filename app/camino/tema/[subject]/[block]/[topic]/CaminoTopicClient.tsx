@@ -30,12 +30,15 @@ const TOPIC_VIDEO_MAP: Record<string, string> = {
 
 const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
 const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
+const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
+const CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'
 const CALENDAR_KEY = 'pausia_camino_calendar_v2'
 const XP_KEY = 'pausia_camino_xp_events_v1'
 const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
 
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 type SchoolFeedback = Array<{ schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }>
+type SchoolAdjustment = { schoolName: string | null; community: string | null; subject: string; blockSlug: string; topicSlug: string; feedbackType: 'not_seen_in_class'; status: 'not_seen' | 'delayed_for_school'; notSeenCount: number; date: string }
 type CaminoXpEvent = { id: string; missionId: string; date: string; subject: string; xp: number; bonus: boolean; score?: number }
 type CalendarMission = { id: string; status: 'pending' | 'done'; subject: string; role?: 'main' | 'bonus' }
 type CalendarDay = { date: string; missions: CalendarMission[] }
@@ -102,7 +105,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [shouldStartExercise])
 
   useEffect(() => {
-    if (!topic) { setDiegoLoading(false); return }
+    if (!topic) {
+      queueMicrotask(() => setDiegoLoading(false))
+      return
+    }
     supabase
       .from('curriculum_content')
       .select('content_markdown')
@@ -122,7 +128,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     const dates = new Set(events.map(e => e.date))
     let s = 0; let cur = toISO(new Date())
     while (dates.has(cur)) { s++; const d = new Date(cur); d.setDate(d.getDate() - 1); cur = toISO(d) }
-    setStreak(s)
+    queueMicrotask(() => setStreak(s))
 
     let cancelled = false
     supabase.auth.getSession().then(async ({ data }) => {
@@ -152,11 +158,72 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const videoId = TOPIC_VIDEO_MAP[key] ?? null
   const myLigaEntry = liga && currentUserId ? liga.miembros.find(m => m.user_id === currentUserId) ?? null : null
 
-  function markNotSeen() {
+  async function markNotSeen() {
+    const now = new Date().toISOString()
     const feedback = loadJson<SchoolFeedback>(SCHOOL_FEEDBACK_KEY, [])
-    const next = [...feedback, { schoolName: onboarding.schoolName, community: onboarding.community, subject: currentTopic.subject, block: currentTopic.blockSlug, topic: currentTopic.topicSlug, reason: 'not_seen_in_class' as const, date: new Date().toISOString() }]
+    const next = [...feedback, { schoolName: onboarding.schoolName, community: onboarding.community, subject: currentTopic.subject, block: currentTopic.blockSlug, topic: currentTopic.topicSlug, reason: 'not_seen_in_class' as const, date: now }]
+    const localCount = next.filter(item =>
+      item.schoolName === onboarding.schoolName &&
+      item.subject === currentTopic.subject &&
+      item.block === currentTopic.blockSlug &&
+      item.topic === currentTopic.topicSlug
+    ).length
+    let adjustment: SchoolAdjustment = {
+      schoolName: onboarding.schoolName,
+      community: onboarding.community,
+      subject: currentTopic.subject,
+      blockSlug: currentTopic.blockSlug,
+      topicSlug: currentTopic.topicSlug,
+      feedbackType: 'not_seen_in_class',
+      status: localCount >= 2 ? 'delayed_for_school' : 'not_seen',
+      notSeenCount: localCount,
+      date: now,
+    }
+
     saveJson(SCHOOL_FEEDBACK_KEY, next)
-    setToast('Perfecto, lo dejamos para más adelante y ajustamos tu plan.')
+    saveJson(SCHOOL_ADJUSTMENTS_KEY, [
+      adjustment,
+      ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
+        !(item.schoolName === adjustment.schoolName &&
+          item.subject === adjustment.subject &&
+          item.blockSlug === adjustment.blockSlug &&
+          item.topicSlug === adjustment.topicSlug)
+      )
+    ].slice(0, 80))
+    saveJson(CALENDAR_REFRESH_KEY, true)
+    window.localStorage.removeItem(CALENDAR_KEY)
+    window.dispatchEvent(new CustomEvent('pausia:school-topic-feedback', { detail: adjustment }))
+    setToast('Perfecto. Lo dejamos marcado como no dado y ajustamos tu calendario.')
+
+    try {
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (!token) return
+      const response = await fetch('/api/camino/school-topic-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(adjustment),
+      })
+      if (!response.ok) return
+      const remote = await response.json() as { status?: 'not_seen' | 'delayed_for_school'; notSeenCount?: number }
+      adjustment = {
+        ...adjustment,
+        status: remote.status ?? adjustment.status,
+        notSeenCount: remote.notSeenCount ?? adjustment.notSeenCount,
+      }
+      saveJson(SCHOOL_ADJUSTMENTS_KEY, [
+        adjustment,
+        ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
+          !(item.schoolName === adjustment.schoolName &&
+            item.subject === adjustment.subject &&
+            item.blockSlug === adjustment.blockSlug &&
+            item.topicSlug === adjustment.topicSlug)
+        )
+      ].slice(0, 80))
+      saveJson(CALENDAR_REFRESH_KEY, true)
+    } catch {
+      // Local adjustment already applied; Supabase sync is best-effort.
+    }
   }
 
   function chatHref(prompt?: string) {

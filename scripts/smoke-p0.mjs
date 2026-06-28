@@ -28,6 +28,7 @@ const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
 const caminoPlanLimits = read('app/lib/camino/caminoPlanLimits.ts')
 const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
+const caminoSchoolFeedbackRoute = read('app/api/camino/school-topic-feedback/route.ts')
 const caminoCourseTopic = read('app/camino-pau/curso/[subject]/[block]/[topic]/page.tsx')
 const randomEvauExercise = read('app/lib/camino/randomEvauExercise.ts')
 const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
@@ -37,6 +38,10 @@ const whyHistoryMigration = read('supabase/migrations/20260623113000_add_why_it_
 const whyExplanationComponent = read('components/shared/WhyExplanation.tsx')
 const packageJson = read('package.json')
 const nextConfig = read('next.config.ts')
+const qaCorrectionsScript = read('scripts/qa-corrections-p0.mjs')
+const qaCorrectionsChecklist = read('docs/qa/p0-corrections-checklist.md')
+const stripeQaChecklist = read('docs/qa/stripe-test-mode-checklist.md')
+const stripeSmoke = read('scripts/smoke-stripe-p0.mjs')
 
 assert(
   'streaming correction uses safe progressive stream before final renderer',
@@ -254,11 +259,11 @@ assert(
 
 assert(
   'Camino PAU keeps calendar visibility and generated week persistent',
-  caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
+    caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
     caminoCalendar.includes('loadJson<DayPlan[]>(CALENDAR_KEY, [])') &&
     caminoCalendar.includes('loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)') &&
-    caminoCalendar.includes('loadedCalendar.length ? loadedCalendar : generateCalendar') &&
-    caminoCalendar.includes('if (!loadedCalendar.length) setCalendar') &&
+    caminoCalendar.includes('loadedCalendar.length && !shouldRefreshCalendar ? loadedCalendar : generateCalendar') &&
+    caminoCalendar.includes('if (!loadedCalendar.length || shouldRefreshCalendar) setCalendar') &&
     caminoCalendar.includes('function toggleCalendarExpanded()') &&
     caminoCalendar.includes('saveJson(CALENDAR_VISIBILITY_KEY, next)') &&
     caminoCalendar.includes('onClick={toggleCalendarExpanded}')
@@ -410,6 +415,55 @@ assert(
     caminoTopic.includes('MathMarkdown text=') &&
     !caminoTopic.includes('askLocalTutor') &&
     !caminoTopic.includes('Fragmento LaTeX fuente')
+)
+
+assert(
+  'P0 correction QA tooling lists manual candidates and exports report',
+  packageJson.includes('qa:corrections:p0') &&
+    qaCorrectionsScript.includes('docs/qa/p0-corrections-report.md') &&
+    qaCorrectionsScript.includes('Candidato QA M2-1') &&
+    qaCorrectionsScript.includes('Candidato QA FIS-1') &&
+    qaCorrectionsScript.includes('Candidato QA HIS-1') &&
+    qaCorrectionsScript.includes('Candidato QA ING-1') &&
+    qaCorrectionsChecklist.includes('Correccion completa') &&
+    qaCorrectionsChecklist.includes('Historial guardado')
+)
+
+assert(
+  'P0 not-seen feedback persists locally, syncs to Supabase and refreshes calendar',
+  caminoTopic.includes("SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'") &&
+    caminoTopic.includes("CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'") &&
+    caminoTopic.includes("window.localStorage.removeItem(CALENDAR_KEY)") &&
+    caminoTopic.includes("fetch('/api/camino/school-topic-feedback'") &&
+    caminoTopic.includes('Perfecto. Lo dejamos marcado como no dado y ajustamos tu calendario.') &&
+    caminoSchoolFeedbackRoute.includes("reason: 'not_seen_in_class'") &&
+    caminoSchoolFeedbackRoute.includes("status = notSeenCount >= 2 ? 'delayed_for_school' : 'not_seen'") &&
+    caminoSchoolFeedbackRoute.includes("upsert({") &&
+    caminoSchoolFeedbackRoute.includes("onConflict: 'school_name,subject,block_slug,topic_slug'")
+)
+
+assert(
+  'P0 Camino calendar lowers priority for not-seen school topics',
+  caminoCalendar.includes("SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'") &&
+    caminoCalendar.includes('loadSchoolAdjustments') &&
+    caminoCalendar.includes('findAdjustmentForItem') &&
+    caminoCalendar.includes('findReplacementItem') &&
+    caminoCalendar.includes('schoolAdjustedItem') &&
+    caminoCalendar.includes('Este tema aparece en tu parcial, pero lo has marcado como no dado') &&
+    caminoCalendar.includes('Base previa') &&
+    caminoCalendar.includes('CALENDAR_REFRESH_KEY')
+)
+
+assert(
+  'P0 Stripe QA smoke and checklist cover signed webhook and passive success page',
+  packageJson.includes('smoke:stripe:p0') &&
+    packageJson.includes('node scripts/smoke-stripe-p0.mjs') &&
+    stripeSmoke.includes('constructEvent(rawBody, sig, getWebhookSecret())') &&
+    stripeSmoke.includes('Success page is passive') &&
+    stripeSmoke.includes('stripe_checkout_session_id') &&
+    stripeQaChecklist.includes('4242 4242 4242 4242') &&
+    stripeQaChecklist.includes('Success page no activa') &&
+    stripeQaChecklist.includes('user_entitlements')
 )
 
 assert(

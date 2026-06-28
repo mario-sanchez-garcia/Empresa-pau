@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "smoke": "node scripts/smoke-p0.mjs",
+    "smoke": "node scripts/smoke-p0.mjs && node scripts/smoke-stripe-p0.mjs",
+    "smoke:stripe:p0": "node scripts/smoke-stripe-p0.mjs",
+    "qa:corrections:p0": "node scripts/qa-corrections-p0.mjs",
     "seed:math-curriculum": "node scripts/seed-math-curriculum.mjs",
     "seed:camino-curriculum": "node scripts/seed-camino-curriculum.mjs"
   },

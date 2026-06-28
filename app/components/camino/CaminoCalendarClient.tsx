@@ -48,12 +48,17 @@ type LeaderboardPayload = {
 }
 type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
+type SchoolTopicAdjustment = { schoolName: string | null; community: string | null; subject: string; blockSlug: string | null; topicSlug: string; feedbackType: 'not_seen_in_class'; status: 'not_seen' | 'delayed_for_school'; notSeenCount: number; date: string }
+type LegacySchoolFeedback = { schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }
 
 const CALENDAR_KEY = 'pausia_camino_calendar_v2'
 const EXAMS_KEY = 'pausia_camino_student_exams_v1'
 const XP_KEY = 'pausia_camino_xp_events_v1'
 const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
 const CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'
+const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
+const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
+const CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'
 
 const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
@@ -236,6 +241,58 @@ function pickCurriculumItem(subject: string, rotation: number, curriculum: Curri
   return rows[rotation % rows.length]
 }
 
+function loadSchoolAdjustments(): SchoolTopicAdjustment[] {
+  const direct = loadJson<SchoolTopicAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, [])
+  const legacy = loadJson<LegacySchoolFeedback[]>(SCHOOL_FEEDBACK_KEY, []).map(item => ({
+    schoolName: item.schoolName,
+    community: item.community,
+    subject: item.subject,
+    blockSlug: item.block,
+    topicSlug: item.topic,
+    feedbackType: item.reason,
+    status: 'not_seen' as const,
+    notSeenCount: 1,
+    date: item.date,
+  }))
+  return [...direct, ...legacy].filter(item => item.feedbackType === 'not_seen_in_class')
+}
+
+function adjustmentMatchesSubject(adjustment: SchoolTopicAdjustment, subject: string) {
+  return adjustment.subject === subject || adjustment.subject === subjectSlug(subject)
+}
+
+function adjustmentMatchesSchool(adjustment: SchoolTopicAdjustment, onboarding: OnboardingData) {
+  if (!adjustment.schoolName) return true
+  return adjustment.schoolName === onboarding.schoolName
+}
+
+function findAdjustmentForItem(item: CurriculumItem | null | undefined, subject: string, onboarding: OnboardingData, adjustments: SchoolTopicAdjustment[]) {
+  if (!item) return null
+  return adjustments.find(adjustment =>
+    adjustmentMatchesSchool(adjustment, onboarding) &&
+    adjustmentMatchesSubject(adjustment, subject) &&
+    (!adjustment.blockSlug || adjustment.blockSlug === item.blockSlug || adjustment.blockSlug === textSlug(item.block)) &&
+    (adjustment.topicSlug === item.topicSlug || adjustment.topicSlug === textSlug(item.topic))
+  ) ?? null
+}
+
+function findReplacementItem(subject: string, blockedItem: CurriculumItem, onboarding: OnboardingData, curriculum: CurriculumItem[], adjustments: SchoolTopicAdjustment[]) {
+  const rows = curriculumForSubject(subject, curriculum)
+    .filter(item => item.blockSlug === blockedItem.blockSlug || item.block === blockedItem.block)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+  const before = rows.filter(item => item.sortOrder < blockedItem.sortOrder).reverse()
+  const after = rows.filter(item => item.sortOrder > blockedItem.sortOrder)
+  return [...before, ...after].find(item => !findAdjustmentForItem(item, subject, onboarding, adjustments)) ?? null
+}
+
+function schoolAdjustedItem(subject: string, item: CurriculumItem | null, onboarding: OnboardingData, curriculum: CurriculumItem[], adjustments: SchoolTopicAdjustment[], examContext?: StudentExam) {
+  const adjustment = findAdjustmentForItem(item, subject, onboarding, adjustments)
+  if (!item || !adjustment) return { item, adjustment: null, replacedTopic: null }
+  const replacement = findReplacementItem(subject, item, onboarding, curriculum, adjustments)
+  if (replacement) return { item: replacement, adjustment, replacedTopic: item.topic }
+  return { item: null, adjustment, replacedTopic: examContext?.topic || item.topic }
+}
+
 function findExamCurriculumItem(exam: StudentExam | undefined, subject: string, curriculum: CurriculumItem[]) {
   if (!exam) return null
   const blockNeedle = textSlug(exam.block || '')
@@ -268,11 +325,20 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
   let subjectRotation = 0
   const topicRotationBySubject = new Map<string, number>()
   const weakAreas = typeof window === 'undefined' ? [] : loadJson<Array<{ subject: string; block?: string; topic?: string; score: number }>>(WEAK_AREAS_KEY, [])
+  const schoolAdjustments = typeof window === 'undefined' ? [] : loadSchoolAdjustments()
   const nextCurriculumItem = (subject: string) => {
-    const nextRotation = topicRotationBySubject.get(subject) ?? 0
-    const item = pickCurriculumItem(subject, nextRotation, curriculum)
-    topicRotationBySubject.set(subject, nextRotation + 1)
-    return item
+    const rows = curriculumForSubject(subject, curriculum)
+    const startRotation = topicRotationBySubject.get(subject) ?? 0
+    for (let attempt = 0; attempt < Math.max(rows.length, 1); attempt += 1) {
+      const rotation = startRotation + attempt
+      const item = pickCurriculumItem(subject, rotation, curriculum)
+      if (!item || !findAdjustmentForItem(item, subject, onboarding, schoolAdjustments)) {
+        topicRotationBySubject.set(subject, rotation + 1)
+        return item
+      }
+    }
+    topicRotationBySubject.set(subject, startRotation + 1)
+    return pickCurriculumItem(subject, startRotation, curriculum)
   }
 
   return Array.from({ length: 7 }, (_, index): DayPlan => {
@@ -293,12 +359,20 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       const subject = prioritySubject ?? subjects[subjectRotation % subjects.length]
       const examContext = sameDay ?? (strongExamNearby ? upcoming : undefined)
       const weakItem = weakArea?.subject === subject ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
-      const curriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? weakItem ?? nextCurriculumItem(subject)
+      const rawCurriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? weakItem ?? nextCurriculumItem(subject)
+      const schoolAdjusted = schoolAdjustedItem(subject, rawCurriculumItem, onboarding, curriculum, schoolAdjustments, examContext)
+      const curriculumItem = schoolAdjusted.item
       if (!prioritySubject) subjectRotation += 1
-      const kind = sameDay || strongExamNearby ? 'exam_focus' : kindFor(index)
-      const reason = sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU/EVAU del bloque.` : weakItem ? `Refuerzo por una corrección baja anterior. Volvemos al tema con práctica.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
+      const kind = schoolAdjusted.adjustment ? 'concept_explanation' : sameDay || strongExamNearby ? 'exam_focus' : kindFor(index)
+      const reason = schoolAdjusted.adjustment
+        ? examContext
+          ? 'Este tema aparece en tu parcial, pero lo has marcado como no dado. Te proponemos una base previa antes de practicarlo.'
+          : schoolAdjusted.replacedTopic
+            ? `Tema marcado como no dado en clase: retrasamos ${schoolAdjusted.replacedTopic} y trabajamos una base previa del bloque.`
+            : 'Tema marcado como no dado en clase. Repasa la base previa de este bloque.'
+        : sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU/EVAU del bloque.` : weakItem ? `Refuerzo por una corrección baja anterior. Volvemos al tema con práctica.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
       if (missions.length < maxCorrectableMissions) {
-        missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block, topic: curriculumItem?.topic, title: weakItem ? `Refuerzo: ${curriculumItem?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, ...missionMeta(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'evau_practice' || kind === 'exam_focus' ? 25 : 15, status: 'pending' })
+        missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block ?? rawCurriculumItem?.block, topic: curriculumItem?.topic, title: schoolAdjusted.adjustment ? curriculumItem ? `Base previa: ${curriculumItem.topic}` : `Base previa de ${rawCurriculumItem?.block ?? subject}` : weakItem ? `Refuerzo: ${curriculumItem?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, ...missionMeta(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'evau_practice' || kind === 'exam_focus' ? 25 : 15, status: 'pending' })
       }
 
       if (planLimits.caminoMode !== 'limited' && minutes >= 60 && !sameDay && !strongExamNearby && missions.length < maxCorrectableMissions) {
@@ -352,6 +426,7 @@ export default function CaminoCalendarClient() {
     const loadedXp = loadJson<XpEvent[]>(XP_KEY, [])
     const loadedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
     const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
+    const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
     setOnboarding(loadedOnboarding)
@@ -367,13 +442,14 @@ export default function CaminoCalendarClient() {
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
-    setCalendar(syncStatuses(loadedCalendar.length ? loadedCalendar : generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free'), loadedXp))
+    setCalendar(syncStatuses(loadedCalendar.length && !shouldRefreshCalendar ? loadedCalendar : generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free'), loadedXp))
+    if (shouldRefreshCalendar) saveJson(CALENDAR_REFRESH_KEY, false)
     if (!window.localStorage.getItem('pausia_camino_onboarding_done')) setShowOnboarding(true)
     fetchCurriculumItems(loadedOnboarding.subjects)
       .then(items => {
         const nextItems = items.length ? items : FALLBACK_CURRICULUM
         setCurriculumItems(nextItems)
-        if (!loadedCalendar.length) setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, nextItems, 'free'), loadedXp))
+        if (!loadedCalendar.length || shouldRefreshCalendar) setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, nextItems, 'free'), loadedXp))
       })
       .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
   }, [])
@@ -404,9 +480,11 @@ export default function CaminoCalendarClient() {
       const planId = normalizeCaminoPlanId(billing.activePlans?.[0]?.planId)
       setCaminoPlanId(planId)
       const savedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
-      if (!savedCalendar.length) {
+      const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
+      if (!savedCalendar.length || shouldRefreshCalendar) {
         const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
         setCalendar(syncStatuses(generateCalendar(onboarding, exams, source, planId), xpEvents))
+        if (shouldRefreshCalendar) saveJson(CALENDAR_REFRESH_KEY, false)
       }
     }).catch(() => undefined)
     return () => { cancelled = true }

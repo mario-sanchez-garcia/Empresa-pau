@@ -1,0 +1,272 @@
+{
+  "generatedAt": "2026-06-28T09:01:40.366Z",
+  "successRate": 0,
+  "rows": [
+    {
+      "asignatura": "Matemáticas II",
+      "tema": "Matrices",
+      "ejercicio": "Candidato QA M2-1",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Matemáticas II",
+      "tema": "Sistemas",
+      "ejercicio": "Candidato QA M2-2",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Matemáticas II",
+      "tema": "Integrales",
+      "ejercicio": "Candidato QA M2-3",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Matemáticas II",
+      "tema": "Matrices/Sistemas",
+      "ejercicio": "Candidato QA M2-4",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Matemáticas II",
+      "tema": "Integrales/Áreas",
+      "ejercicio": "Candidato QA M2-5",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Física",
+      "tema": "Campo gravitatorio / electromagnetismo",
+      "ejercicio": "Candidato QA FIS-1",
+      "fuente": "app/data/fisica.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Física",
+      "tema": "Ondas",
+      "ejercicio": "Candidato QA FIS-2",
+      "fuente": "app/data/fisica.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Física",
+      "tema": "Física moderna",
+      "ejercicio": "Candidato QA FIS-3",
+      "fuente": "app/data/fisica.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Historia",
+      "tema": "Comentario/fuente",
+      "ejercicio": "Candidato QA HIS-1",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Historia",
+      "tema": "Siglo XIX",
+      "ejercicio": "Candidato QA HIS-2",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Historia",
+      "tema": "Siglo XX",
+      "ejercicio": "Candidato QA HIS-3",
+      "fuente": "app/data/examenes.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Inglés",
+      "tema": "Reading",
+      "ejercicio": "Candidato QA ING-1",
+      "fuente": "app/data/ingles.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Inglés",
+      "tema": "Use of English",
+      "ejercicio": "Candidato QA ING-2",
+      "fuente": "app/data/ingles.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    },
+    {
+      "asignatura": "Inglés",
+      "tema": "Writing",
+      "ejercicio": "Candidato QA ING-3",
+      "fuente": "app/data/ingles.ts",
+      "datosBasicos": "OK",
+      "correccionCompleta": "",
+      "latexCorrecto": "",
+      "historialGuardado": "",
+      "resultado": "",
+      "observaciones": "",
+      "checks": {
+        "enunciado": true,
+        "subject": true,
+        "blockTopic": true,
+        "criteria": true,
+        "sourceFileExists": true
+      }
+    }
+  ]
+}

@@ -28,6 +28,18 @@ const TOPIC_VIDEO_MAP: Record<string, string> = {
   'matematicas_ii:probabilidad:normal-tipificacion':         'Mi9JBF_a0H8',
 }
 
+// Maps each seed topic to its sort_order range in curriculum_content_v2
+const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
+  'matematicas_ii:algebra-lineal:matrices-operaciones':    { min: 1,  max: 9  },
+  'matematicas_ii:algebra-lineal:sistemas-gauss':          { min: 10, max: 19 },
+  'matematicas_ii:geometria-3d:producto-vectorial':        { min: 20, max: 34 },
+  'matematicas_ii:analisis:limites-continuidad':           { min: 35, max: 40 },
+  'matematicas_ii:analisis:derivadas-optimizacion':        { min: 41, max: 45 },
+  'matematicas_ii:integrales:areas-integrales':            { min: 46, max: 49 },
+  'matematicas_ii:probabilidad:probabilidad-combinatoria': { min: 50, max: 54 },
+  'matematicas_ii:probabilidad:normal-tipificacion':       { min: 55, max: 60 },
+}
+
 const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
 const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
 const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
@@ -45,6 +57,15 @@ type CalendarDay = { date: string; missions: CalendarMission[] }
 type UploadedImage = { data: string; preview: string; type: string }
 type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
+type CurriculumV2Card = {
+  sort_order: number
+  title: string
+  concept_markdown: string | null
+  worked_example_markdown: string | null
+  alert_markdown: string | null
+  practice_prompt: string | null
+  video_id: string | null
+}
 
 function loadJson<T>(key: string, fallback: T): T {
   try {
@@ -94,6 +115,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [correcting, setCorrecting] = useState(false)
   const [diegoContent, setDiegoContent] = useState<string | null>(null)
   const [diegoLoading, setDiegoLoading] = useState(true)
+  const [v2Cards, setV2Cards] = useState<CurriculumV2Card[]>([])
+  const [v2Loading, setV2Loading] = useState(true)
   const [videoOpen, setVideoOpen] = useState(false)
   const [streak, setStreak] = useState(0)
   const [liga, setLiga] = useState<LigaInfo | null>(null)
@@ -119,6 +142,23 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       .then(({ data }) => {
         if (data?.content_markdown) setDiegoContent(data.content_markdown)
         setDiegoLoading(false)
+      })
+  }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
+
+  useEffect(() => {
+    if (!topic) { setV2Loading(false); return }
+    const range = TOPIC_TO_V2_RANGE[`${topic.subject}:${topic.blockSlug}:${topic.topicSlug}`]
+    if (!range) { setV2Loading(false); return }
+    supabase
+      .from('curriculum_content_v2')
+      .select('sort_order, title, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
+      .eq('subject', topic.subject)
+      .gte('sort_order', range.min)
+      .lte('sort_order', range.max)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => {
+        if (data?.length) setV2Cards(data as CurriculumV2Card[])
+        setV2Loading(false)
       })
   }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
 
@@ -155,7 +195,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const topicCompleted = Boolean(current.evau)
   const hasContent = hasLatexContent(currentTopic)
   const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
-  const videoId = TOPIC_VIDEO_MAP[key] ?? null
+  const videoId = v2Cards[0]?.video_id ?? TOPIC_VIDEO_MAP[key] ?? null
   const myLigaEntry = liga && currentUserId ? liga.miembros.find(m => m.user_id === currentUserId) ?? null : null
 
   async function markNotSeen() {
@@ -307,7 +347,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         return
       }
       const subjectLabel = subjectLabelFromSlug(currentTopic.subject)
-      const statement = currentTopic.practicePrompt || currentTopic.guidedExample || `Ejercicio de ${currentTopic.title}`
+      const statement = v2Cards[v2Cards.length - 1]?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? `Ejercicio de ${currentTopic.title}`
       const prompt = buildCorrectionPrompt({
         subject: subjectLabel,
         simulacroId: `Camino PAU · ${subjectLabel} · ${currentTopic.blockTitle} · ${currentTopic.title}`,
@@ -395,13 +435,17 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             <div className="grid gap-4">
               <LearningCard title="1. Explicación comprensible">
                 <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
-                {diegoLoading
-                  ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
-                  : diegoContent
-                    ? <DiegoContentCards markdown={diegoContent} />
-                    : currentTopic.explanation
-                      ? <MathMarkdown text={currentTopic.explanation} />
-                      : <EmptyContent />}
+                {v2Loading
+                  ? <ContentSkeleton />
+                  : v2Cards.length > 0
+                    ? <V2FlashcardAccordion cards={v2Cards} />
+                    : diegoLoading
+                      ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
+                      : diegoContent
+                        ? <DiegoContentCards markdown={diegoContent} />
+                        : currentTopic.explanation
+                          ? <MathMarkdown text={currentTopic.explanation} />
+                          : <EmptyContent />}
                 {videoId && (
                   <div className="mt-4 border-t border-slate-100 pt-3">
                     <button
@@ -430,7 +474,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
               </LearningCard>
               <LearningCard title="3. Ahora inténtalo tú">
-                {currentTopic.practicePrompt ? <MathMarkdown text={currentTopic.practicePrompt} /> : <EmptyContent />}
+                {(() => {
+                  const prompt = v2Cards[v2Cards.length - 1]?.practice_prompt ?? currentTopic.practicePrompt
+                  return prompt ? <MathMarkdown text={prompt} /> : <EmptyContent />
+                })()}
               </LearningCard>
               <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -510,6 +557,68 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         {toast && <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
       </main>
     </Shell>
+  )
+}
+
+// ── curriculum_content_v2 accordion ─────────────────────────────────────────
+
+function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
+  const [openIdx, setOpenIdx] = useState<number | null>(0)
+  return (
+    <div className="flex flex-col gap-2">
+      {cards.map((card, i) => {
+        const isOpen = openIdx === i
+        return (
+          <div key={card.sort_order} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <button
+              type="button"
+              onClick={() => setOpenIdx(isOpen ? null : i)}
+              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+            >
+              <span className="text-sm font-black leading-snug text-slate-800">
+                <MathMarkdown text={card.title} format="raw" />
+              </span>
+              <ChevronDown
+                size={16}
+                className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateRows: isOpen ? '1fr' : '0fr',
+                transition: 'grid-template-rows 280ms ease',
+              }}
+            >
+              <div className="overflow-hidden">
+                <div className="space-y-3 border-t border-slate-100 px-5 pb-5 pt-4">
+                  {card.concept_markdown && (
+                    <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                      <MathMarkdown text={card.concept_markdown} format="raw" />
+                    </div>
+                  )}
+                  {card.alert_markdown && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-amber-800">
+                        <MathMarkdown text={card.alert_markdown} format="raw" />
+                      </div>
+                    </div>
+                  )}
+                  {card.worked_example_markdown && (
+                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+                      <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-emerald-700">Caso Práctico Resuelto</p>
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                        <MathMarkdown text={card.worked_example_markdown} format="raw" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

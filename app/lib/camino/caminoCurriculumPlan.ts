@@ -9,7 +9,7 @@ export type CaminoMissionType =
   | 'exam_focus'
   | 'mock_exam'
 
-export type CaminoContentStatus = 'latex_notes' | 'itinerary_only' | 'flashcard'
+export type CaminoContentStatus = 'latex_notes' | 'itinerary_only'
 
 export interface CaminoEvauPracticeQuery {
   subject: string
@@ -32,7 +32,6 @@ export interface CaminoCurriculumTopic {
   evauPracticeQuery: CaminoEvauPracticeQuery
   source: string
   compatibleSubjects: string[]
-  flashcardId?: string
 }
 
 export const SUBJECT_LABELS: Record<string, string> = {
@@ -101,5 +100,5 @@ export function buildEvauHref(topic: CaminoCurriculumTopic) {
 }
 
 export function hasLatexContent(topic: CaminoCurriculumTopic) {
-  return (topic.contentStatus === 'latex_notes' || topic.contentStatus === 'flashcard') && Boolean(topic.explanation || topic.guidedExample || topic.practicePrompt || topic.rawLatex)
+  return topic.contentStatus === 'latex_notes' && Boolean(topic.explanation || topic.guidedExample || topic.practicePrompt || topic.rawLatex)
 }

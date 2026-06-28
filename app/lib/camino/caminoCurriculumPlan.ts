@@ -9,7 +9,7 @@ export type CaminoMissionType =
   | 'exam_focus'
   | 'mock_exam'
 
-export type CaminoContentStatus = 'latex_notes' | 'itinerary_only'
+export type CaminoContentStatus = 'latex_notes' | 'itinerary_only' | 'flashcard_v2'
 
 export interface CaminoEvauPracticeQuery {
   subject: string
@@ -32,6 +32,7 @@ export interface CaminoCurriculumTopic {
   evauPracticeQuery: CaminoEvauPracticeQuery
   source: string
   compatibleSubjects: string[]
+  v2SortOrder?: number
 }
 
 export const SUBJECT_LABELS: Record<string, string> = {

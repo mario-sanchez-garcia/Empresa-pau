@@ -157,6 +157,30 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       return () => { cancelled = true }
     }
 
+    // flashcard_v2: fetch a single row by v2SortOrder
+    if (topic.contentStatus === 'flashcard_v2' && topic.v2SortOrder != null) {
+      supabase
+        .from('curriculum_content_v2')
+        .select('sort_order, title, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
+        .eq('subject', topic.subject)
+        .eq('sort_order', topic.v2SortOrder)
+        .single()
+        .then(
+          ({ data }) => {
+            if (cancelled) return
+            setV2Cards(data ? [data as CurriculumV2Card] : [])
+            setV2Loading(false)
+          },
+          () => {
+            if (cancelled) return
+            setV2Cards([])
+            setV2Loading(false)
+          }
+        )
+      return () => { cancelled = true }
+    }
+
+    // legacy topics: fetch range from TOPIC_TO_V2_RANGE
     const range = TOPIC_TO_V2_RANGE[topic.subject + ':' + topic.blockSlug + ':' + topic.topicSlug]
     if (!range) {
       queueMicrotask(() => { if (!cancelled) setV2Loading(false) })
@@ -184,7 +208,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       )
 
     return () => { cancelled = true }
-  }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
+  }, [topic?.subject, topic?.blockSlug, topic?.topicSlug, topic?.v2SortOrder])
 
   useEffect(() => {
     if (!v2Cards.length) {
@@ -503,6 +527,54 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4">
+              {/* Vista de mini-misión individual (flashcard_v2) */}
+              {currentTopic.contentStatus === 'flashcard_v2' ? (
+                v2Loading ? (
+                  <LearningCard title="Explicación"><ContentSkeleton /></LearningCard>
+                ) : selectedV2Card ? (
+                  <>
+                    <LearningCard title="Explicación">
+                      {selectedV2Card.concept_markdown
+                        ? <MathMarkdown text={selectedV2Card.concept_markdown} format="raw" />
+                        : <EmptyContent />}
+                      {selectedV2Card.alert_markdown && (
+                        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                          <MathMarkdown text={selectedV2Card.alert_markdown} format="raw" />
+                        </div>
+                      )}
+                    </LearningCard>
+                    {selectedV2Card.worked_example_markdown && (
+                      <LearningCard title="Caso práctico resuelto">
+                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                          <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                            <MathMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
+                          </div>
+                        </div>
+                      </LearningCard>
+                    )}
+                    {videoId && (
+                      <LearningCard title="Vídeo explicativo">
+                        <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
+                          🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
+                        </button>
+                        {videoOpen && (
+                          <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+                            <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                              <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
+                            </div>
+                          </div>
+                        )}
+                      </LearningCard>
+                    )}
+                    {selectedV2Card.practice_prompt && (
+                      <LearningCard title="Inténtalo tú">
+                        <MathMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                      </LearningCard>
+                    )}
+                  </>
+                ) : null
+              ) : (
+              <>
               {/* 1. Explicación comprensible: todos los apuntes en acordeón */}
               <LearningCard title="1. Explicación comprensible">
                 <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
@@ -583,6 +655,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     </button>
                   </div>
                 </article>
+              )}
+              </>
               )}
               {/* Entrega y corrección IA */}
               <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">

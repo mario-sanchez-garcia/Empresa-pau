@@ -2,130 +2,1382 @@
   {
     "subject": "matematicas_ii",
     "blockSlug": "algebra-lineal",
-    "blockTitle": "Álgebra lineal",
-    "topicSlug": "matrices-operaciones",
-    "title": "Matrices y operaciones",
+    "blockTitle": "Álgebra",
+    "topicSlug": "dimension-de-una-matriz",
+    "title": "Dimensión de una Matriz",
     "orderIndex": 1,
-    "contentStatus": "latex_notes",
-    "explanation": "Una matriz organiza datos en filas y columnas. En PAU se usa para representar sistemas, transformar expresiones y calcular operaciones con reglas estrictas de dimensión.",
-    "guidedExample": "Si $A=\\begin{pmatrix}1&2\\\\0&3\\end{pmatrix}$ y $B=\\begin{pmatrix}4&-1\\\\2&5\\end{pmatrix}$, entonces $A+B=\\begin{pmatrix}5&1\\\\2&8\\end{pmatrix}$ porque se suma elemento a elemento.",
-    "practicePrompt": "Calcula $2A-B$ para $A=\\begin{pmatrix}1&0\\\\-2&3\\end{pmatrix}$ y $B=\\begin{pmatrix}3&1\\\\4&-1\\end{pmatrix}$. Escribe cada entrada paso a paso.",
-    "rawLatex": "\\begin{flashcard}{Suma y resta de matrices} Solo se pueden sumar o restar matrices de la misma dimensión. \\end{flashcard}",
-    "evauPracticeQuery": { "subject": "mates", "block": "algebra", "topic": "matrices-operaciones" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "dimension-de-una-matriz"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 1
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "algebra-lineal",
-    "blockTitle": "Álgebra lineal",
-    "topicSlug": "sistemas-gauss",
-    "title": "Sistemas por Gauss",
+    "blockTitle": "Álgebra",
+    "topicSlug": "suma-y-resta-de-matrices",
+    "title": "Suma y Resta de Matrices",
     "orderIndex": 2,
-    "contentStatus": "latex_notes",
-    "explanation": "El método de Gauss transforma un sistema en otro equivalente más fácil, haciendo ceros por debajo de la diagonal hasta obtener una forma escalonada.",
-    "guidedExample": "En el sistema $\\begin{cases}x+y=3\\\\2x+y=5\\end{cases}$ hacemos $F_2\\to F_2-2F_1$ y queda $-y=-1$, por tanto $y=1$ y $x=2$.",
-    "practicePrompt": "Resuelve por Gauss: $\\begin{cases}x+y+z=2\\\\2x-y+z=3\\\\x+2y-z=0\\end{cases}$. Indica las operaciones de fila.",
-    "rawLatex": "\\begin{casoresuelto}[Gauss] Escalona la matriz ampliada y sustituye hacia atrás. \\end{casoresuelto}",
-    "evauPracticeQuery": { "subject": "mates", "block": "algebra", "topic": "sistemas-gauss" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "suma-y-resta-de-matrices"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 2
   },
   {
     "subject": "matematicas_ii",
-    "blockSlug": "analisis",
-    "blockTitle": "Análisis",
-    "topicSlug": "limites-continuidad",
-    "title": "Límites y continuidad",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "producto-por-un-escalar-numero-matriz",
+    "title": "Producto por un Escalar (Número · Matriz)",
     "orderIndex": 3,
-    "contentStatus": "latex_notes",
-    "explanation": "Los límites estudian el comportamiento de una función cerca de un punto. La continuidad garantiza que no hay saltos ni agujeros en la gráfica.",
-    "guidedExample": "Para $f(x)=\\frac{x^2-1}{x-1}$, el límite cuando $x\\to 1$ se resuelve factorizando: $\\lim_{x\\to 1}(x+1)=2$.",
-    "practicePrompt": "Estudia la continuidad de $f(x)=\\frac{x^2-4}{x-2}$ en $x=2$ y clasifica la discontinuidad si existe.",
-    "rawLatex": "\\[ \\lim_{x \\to c^-} f(x) = \\lim_{x \\to c^+} f(x) = L \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "analisis", "topic": "limites-continuidad" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "producto-por-un-escalar-numero-matriz"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 3
   },
   {
     "subject": "matematicas_ii",
-    "blockSlug": "analisis",
-    "blockTitle": "Análisis",
-    "topicSlug": "derivadas-optimizacion",
-    "title": "Derivadas y optimización",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "multiplicacion-de-matrices-a-b",
+    "title": "Multiplicación de Matrices (A · B)",
     "orderIndex": 4,
-    "contentStatus": "latex_notes",
-    "explanation": "La derivada mide la variación instantánea. En problemas de optimización se deriva la función objetivo y se estudian puntos críticos.",
-    "guidedExample": "Para $f(x)=x^2-4x+1$, $f'(x)=2x-4$. El punto crítico cumple $2x-4=0$, luego $x=2$.",
-    "practicePrompt": "Una empresa tiene beneficio $B(x)=-x^2+8x-7$. Calcula el valor de $x$ que maximiza el beneficio y justifica con la segunda derivada.",
-    "rawLatex": "\\[ f'(x)=0 \\Rightarrow \\text{candidato a extremo} \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "analisis", "topic": "derivadas-optimizacion" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "multiplicacion-de-matrices-a-b"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 4
   },
   {
     "subject": "matematicas_ii",
-    "blockSlug": "integrales",
-    "blockTitle": "Integrales",
-    "topicSlug": "areas-integrales",
-    "title": "Áreas con integrales",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "propiedades-de-la-matriz-traspuesta-a-t",
+    "title": "Propiedades de la Matriz Traspuesta (A^t)",
     "orderIndex": 5,
-    "contentStatus": "latex_notes",
-    "explanation": "La integral definida acumula área firmada. Para áreas geométricas se resta función superior menos función inferior en el intervalo correcto.",
-    "guidedExample": "El área bajo $f(x)=x$ entre $0$ y $2$ es $\\int_0^2 x\\,dx=\\left[\\frac{x^2}{2}\\right]_0^2=2$.",
-    "practicePrompt": "Calcula el área encerrada entre $f(x)=x$ y $g(x)=x^2$ en $[0,1]$.",
-    "rawLatex": "\\[ A=\\int_a^b (f(x)-g(x))\\,dx \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "analisis", "topic": "areas-integrales" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "propiedades-de-la-matriz-traspuesta-a-t"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "potencias-de-matrices-a-n",
+    "title": "Potencias de Matrices (A^n)",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "potencias-de-matrices-a-n"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 6
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "rango-de-una-matriz-metodo-de-gauss",
+    "title": "Rango de una Matriz (Método de Gauss)",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "rango-de-una-matriz-metodo-de-gauss"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "matriz-inversa-por-gauss-jordan",
+    "title": "Matriz Inversa por Gauss-Jordan",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "matriz-inversa-por-gauss-jordan"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "despejar-en-ecuaciones-matriciales",
+    "title": "Despejar en Ecuaciones Matriciales",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "despejar-en-ecuaciones-matriciales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "determinantes-de-orden-2-y-3-regla-de-sa",
+    "title": "Determinantes de Orden 2 y 3 (Regla de Sarrus)",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "determinantes-de-orden-2-y-3-regla-de-sa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "propiedades-criticas-de-los-determinante",
+    "title": "Propiedades Críticas de los Determinantes",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "propiedades-criticas-de-los-determinante"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "determinante-de-matrices-triangulares-ha",
+    "title": "Determinante de Matrices Triangulares (Hacer Ceros)",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "determinante-de-matrices-triangulares-ha"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 12
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "calculo-de-la-inversa-por-adjuntos",
+    "title": "Cálculo de la Inversa por Adjuntos",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "calculo-de-la-inversa-por-adjuntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 13
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "expresion-matricial-de-un-sistema",
+    "title": "Expresión Matricial de un Sistema",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "expresion-matricial-de-un-sistema"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 14
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "teorema-de-rouche-frobenius-discusion",
+    "title": "Teorema de Rouché-Frobenius (Discusión)",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "teorema-de-rouche-frobenius-discusion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 15
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "sistemas-homogeneos",
+    "title": "Sistemas Homogéneos",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "sistemas-homogeneos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 16
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "resolucion-por-la-regla-de-cramer",
+    "title": "Resolución por la Regla de Cramer",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "resolucion-por-la-regla-de-cramer"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 17
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "el-metodo-de-gauss-paso-a-paso",
+    "title": "El Método de Gauss: Paso a Paso",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "el-metodo-de-gauss-paso-a-paso"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 18
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "algebra-lineal",
+    "blockTitle": "Álgebra",
+    "topicSlug": "analisis-de-sistemas-por-el-metodo-de-ga",
+    "title": "Análisis de Sistemas por el Método de Gauss",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "algebra",
+      "topic": "analisis-de-sistemas-por-el-metodo-de-ga"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 19
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "geometria-3d",
-    "blockTitle": "Geometría 3D",
-    "topicSlug": "producto-vectorial",
-    "title": "Producto vectorial y áreas",
-    "orderIndex": 6,
-    "contentStatus": "latex_notes",
-    "explanation": "El producto vectorial de dos vectores de $\\mathbb{R}^3$ da un vector perpendicular a ambos. Su módulo mide el área del paralelogramo que forman.",
-    "guidedExample": "Si $\\vec u=(1,0,0)$ y $\\vec v=(0,1,0)$, entonces $\\vec u\\times\\vec v=(0,0,1)$ y el área del triángulo es $\\frac12$.",
-    "practicePrompt": "Calcula $\\vec u\\times\\vec v$ para $\\vec u=(1,2,0)$ y $\\vec v=(0,1,3)$ y halla el área del triángulo.",
-    "rawLatex": "\\[ A_{triángulo}=\\frac{1}{2}\\lVert \\vec u\\times\\vec v\\rVert \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "geometria", "topic": "producto-vectorial" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "blockTitle": "Geometría",
+    "topicSlug": "repaso-puntos-y-vectores-en-el-plano-r2",
+    "title": "Repaso: Puntos y Vectores en el Plano (R2)",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "repaso-puntos-y-vectores-en-el-plano-r2"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 20
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "vectores-en-el-espacio-r3",
+    "title": "Vectores en el Espacio (R3)",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "vectores-en-el-espacio-r3"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 21
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "operaciones-elementales-con-vectores",
+    "title": "Operaciones Elementales con Vectores",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "operaciones-elementales-con-vectores"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 22
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "dependencia-lineal-y-rango-de-vectores",
+    "title": "Dependencia Lineal y Rango de Vectores",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "dependencia-lineal-y-rango-de-vectores"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 23
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "base-y-sistema-de-referencia-en-el-espac",
+    "title": "Base y Sistema de Referencia en el Espacio",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "base-y-sistema-de-referencia-en-el-espac"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 24
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "producto-escalar-de-dos-vectores-u-v",
+    "title": "Producto Escalar de dos Vectores (u · v)",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "producto-escalar-de-dos-vectores-u-v"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 25
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "producto-vectorial-u-v",
+    "title": "Producto Vectorial (u × v)",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "producto-vectorial-u-v"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 26
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "producto-mixto",
+    "title": "Producto Mixto",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "producto-mixto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 27
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "la-recta-en-el-espacio-ecuaciones",
+    "title": "La Recta en el Espacio (Ecuaciones)",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "la-recta-en-el-espacio-ecuaciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 28
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "el-plano-en-el-espacio",
+    "title": "El Plano en el Espacio",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "el-plano-en-el-espacio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 29
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "posiciones-relativas-rectas-y-planos",
+    "title": "Posiciones Relativas (Rectas y Planos)",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "posiciones-relativas-rectas-y-planos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 30
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "angulos-en-el-espacio",
+    "title": "Ángulos en el Espacio",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "angulos-en-el-espacio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 31
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "proyecciones-ortogonales-y-puntos-simetr",
+    "title": "Proyecciones Ortogonales y Puntos Simétricos",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "proyecciones-ortogonales-y-puntos-simetr"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 32
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "distancias-en-el-espacio",
+    "title": "Distancias en el Espacio",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "distancias-en-el-espacio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 33
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "geometria-3d",
+    "blockTitle": "Geometría",
+    "topicSlug": "areas-y-volumenes",
+    "title": "Áreas y Volúmenes",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "geometria",
+      "topic": "areas-y-volumenes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 34
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "idea-intuitiva-de-limite",
+    "title": "Idea Intuitiva de Límite",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "idea-intuitiva-de-limite"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 35
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "definicion-de-limite-y-limites-laterales",
+    "title": "Definición de Límite y Límites Laterales",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "definicion-de-limite-y-limites-laterales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 36
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "operaciones-con-limites",
+    "title": "Operaciones con Límites",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "operaciones-con-limites"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 37
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "limites-infinitos",
+    "title": "Límites Infinitos",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "limites-infinitos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 38
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "calculo-de-limites-e-indeterminaciones",
+    "title": "Cálculo de Límites e Indeterminaciones",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "calculo-de-limites-e-indeterminaciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 39
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "continuidad-y-tipos-de-discontinuidad",
+    "title": "Continuidad y Tipos de Discontinuidad",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "continuidad-y-tipos-de-discontinuidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "concepto-de-derivada-e-interpretacion-ge",
+    "title": "Concepto de Derivada e Interpretación Geométrica",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "concepto-de-derivada-e-interpretacion-ge"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "calculo-de-derivadas-y-regla-de-la-caden",
+    "title": "Cálculo de Derivadas y Regla de la Cadena",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "calculo-de-derivadas-y-regla-de-la-caden"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "teoremas-de-rolle-y-del-valor-medio-lagr",
+    "title": "Teoremas de Rolle y del Valor Medio (Lagrange)",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "teoremas-de-rolle-y-del-valor-medio-lagr"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 43
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "informacion-extraida-de-la-propia-funcio",
+    "title": "Información Extraída de la Propia Función",
+    "orderIndex": 44,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "informacion-extraida-de-la-propia-funcio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 44
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "informacion-extraida-de-la-1-y-2-derivad",
+    "title": "Información Extraída de la 1ª y 2ª Derivada",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "informacion-extraida-de-la-1-y-2-derivad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 45
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "primitiva-de-una-funcion-y-la-integral-i",
+    "title": "Primitiva de una Función y la Integral Indefinida",
+    "orderIndex": 46,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "primitiva-de-una-funcion-y-la-integral-i"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 46
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "integrales-de-funciones-elementales-inme",
+    "title": "Integrales de Funciones Elementales (Inmediatas)",
+    "orderIndex": 47,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "integrales-de-funciones-elementales-inme"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 47
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "metodos-de-integracion",
+    "title": "Métodos de Integración",
+    "orderIndex": 48,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "metodos-de-integracion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 48
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "la-integral-definida-regla-de-barrow-y-a",
+    "title": "La Integral Definida (Regla de Barrow y Áreas)",
+    "orderIndex": 49,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "la-integral-definida-regla-de-barrow-y-a"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 49
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "probabilidad",
-    "blockTitle": "Probabilidad y estadística",
-    "topicSlug": "probabilidad-combinatoria",
-    "title": "Probabilidad y combinatoria",
-    "orderIndex": 7,
-    "contentStatus": "latex_notes",
-    "explanation": "La combinatoria cuenta agrupaciones posibles. La probabilidad mide la posibilidad de que ocurra un suceso usando la regla de Laplace y el Teorema de Bayes.",
-    "guidedExample": "La probabilidad de sacar un número par con un dado es $P=\\frac{3}{6}=0.5$ por la regla de Laplace.",
-    "practicePrompt": "Una urna tiene 4 bolas rojas y 6 azules. ¿Cuál es la probabilidad de sacar 2 rojas consecutivas sin reemplazamiento?",
-    "rawLatex": "\\[ P(A) = \\frac{\\text{casos favorables}}{\\text{casos posibles}} \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "probabilidad", "topic": "probabilidad-combinatoria" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii"]
+    "blockTitle": "Probabilidad",
+    "topicSlug": "algebra-de-sucesos-y-tipos-de-experiment",
+    "title": "Álgebra de Sucesos y Tipos de Experimentos",
+    "orderIndex": 50,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "algebra-de-sucesos-y-tipos-de-experiment"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 50
   },
   {
     "subject": "matematicas_ii",
     "blockSlug": "probabilidad",
-    "blockTitle": "Probabilidad y estadística",
-    "topicSlug": "normal-tipificacion",
-    "title": "Normal y tipificación",
-    "orderIndex": 8,
-    "contentStatus": "latex_notes",
-    "explanation": "Tipificar transforma una variable normal $X\\sim N(\\mu,\\sigma)$ en una normal estándar $Z\\sim N(0,1)$.",
-    "guidedExample": "Si $X\\sim N(10,2)$, entonces $P(X\\le13)=P\\left(Z\\le\\frac{13-10}{2}\\right)=P(Z\\le1.5)$.",
-    "practicePrompt": "Para $X\\sim N(50,8)$, tipifica $P(X\\ge 62)$ y deja indicada la probabilidad con $Z$.",
-    "rawLatex": "\\[ Z=\\frac{X-\\mu}{\\sigma} \\]",
-    "evauPracticeQuery": { "subject": "mates", "block": "probabilidad", "topic": "normal-tipificacion" },
-    "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ii", "matematicas_ccss"]
+    "blockTitle": "Probabilidad",
+    "topicSlug": "asignacion-de-probabilidades-regla-de-la",
+    "title": "Asignación de Probabilidades (Regla de Laplace)",
+    "orderIndex": 51,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "asignacion-de-probabilidades-regla-de-la"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 51
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "definicion-axiomatica-de-probabilidad-ko",
+    "title": "Definición Axiomática de Probabilidad (Kolmogorov)",
+    "orderIndex": 52,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "definicion-axiomatica-de-probabilidad-ko"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 52
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "diagramas-de-arbol-y-tablas-de-contingen",
+    "title": "Diagramas de Árbol y Tablas de Contingencia",
+    "orderIndex": 53,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "diagramas-de-arbol-y-tablas-de-contingen"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 53
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "teoremas-de-la-probabilidad-total-y-de-b",
+    "title": "Teoremas de la Probabilidad Total y de Bayes",
+    "orderIndex": 54,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "teoremas-de-la-probabilidad-total-y-de-b"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 54
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "parametros-de-una-distribucion-media-var",
+    "title": "Parámetros de una Distribución: Media, Varianza y Desviación Típica",
+    "orderIndex": 55,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "parametros-de-una-distribucion-media-var"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 55
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribucion-binomial-variable-discreta",
+    "title": "Distribución Binomial (Variable Discreta)",
+    "orderIndex": 56,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "distribucion-binomial-variable-discreta"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 56
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "desigualdad-de-chebycheff",
+    "title": "Desigualdad de Chebycheff",
+    "orderIndex": 57,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "desigualdad-de-chebycheff"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 57
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribuciones-de-probabilidad-continuas",
+    "title": "Distribuciones de Probabilidad Continuas",
+    "orderIndex": 58,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "distribuciones-de-probabilidad-continuas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 58
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribucion-normal-y-tipificacion",
+    "title": "Distribución Normal y Tipificación",
+    "orderIndex": 59,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "distribucion-normal-y-tipificacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 59
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "aproximacion-de-la-binomial-a-la-normal-",
+    "title": "Aproximación de la Binomial a la Normal (Moivre-Gauss)",
+    "orderIndex": 60,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "probabilidad",
+      "topic": "aproximacion-de-la-binomial-a-la-normal-"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 60
   },
   {
     "subject": "matematicas_ccss",
@@ -139,9 +1391,15 @@
     "guidedExample": "En $\\begin{cases}x+y=3\\\\2x+y=5\\end{cases}$ restamos dos veces la primera ecuación a la segunda y obtenemos $-y=-1$.",
     "practicePrompt": "Resuelve por Gauss un sistema de tres ecuaciones y explica qué significa cada fila nula si aparece.",
     "rawLatex": "\\begin{casoresuelto}[Gauss en CCSS] Escalona la matriz ampliada y lee la solución. \\end{casoresuelto}",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "algebra", "topic": "sistemas-gauss" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "sistemas-gauss"
+    },
     "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "matematicas_ccss",
@@ -155,9 +1413,15 @@
     "guidedExample": "Si $B(x)=-x^2+10x-9$, entonces $B'(x)=-2x+10$ y el máximo se alcanza en $x=5$.",
     "practicePrompt": "Dada $C(x)=x^2+2x+10$ e $I(x)=12x$, construye $B(x)=I(x)-C(x)$ y maximiza.",
     "rawLatex": "\\[ B(x)=I(x)-C(x) \\]",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "analisis", "topic": "optimizacion-economica" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "optimizacion-economica"
+    },
     "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "matematicas_ccss",
@@ -171,9 +1435,15 @@
     "guidedExample": "Si $P(A)=0.4$, $P(B|A)=0.7$ y $P(B|A^c)=0.2$, entonces $P(B)=0.4\\cdot0.7+0.6\\cdot0.2$.",
     "practicePrompt": "Construye un árbol de probabilidad y calcula $P(A|B)$ aplicando Bayes.",
     "rawLatex": "\\[ P(A|B)=\\frac{P(A)P(B|A)}{P(B)} \\]",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "probabilidad", "topic": "bayes-tablas-arboles" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "bayes-tablas-arboles"
+    },
     "source": "apuntes_mates_latex",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "matematicas_ccss",
@@ -187,9 +1457,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "matematicas_ccss", "block": "probabilidad", "topic": "intervalos-confianza" },
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "intervalos-confianza"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["matematicas_ccss"]
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ]
   },
   {
     "subject": "fisica",
@@ -203,9 +1479,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "fisica", "block": "campo-gravitatorio", "topic": "satelites" },
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "satelites"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["fisica"]
+    "compatibleSubjects": [
+      "fisica"
+    ]
   },
   {
     "subject": "quimica",
@@ -219,9 +1501,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "quimica", "block": "equilibrio", "topic": "le-chatelier" },
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio",
+      "topic": "le-chatelier"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["quimica"]
+    "compatibleSubjects": [
+      "quimica"
+    ]
   },
   {
     "subject": "biologia",
@@ -235,9 +1523,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "biologia", "block": "genetica", "topic": "mendel-adn" },
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica",
+      "topic": "mendel-adn"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["biologia"]
+    "compatibleSubjects": [
+      "biologia"
+    ]
   },
   {
     "subject": "lengua",
@@ -251,9 +1545,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "lengua", "block": "comunicacion", "topic": "comentario-critico" },
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "comentario-critico"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["lengua"]
+    "compatibleSubjects": [
+      "lengua"
+    ]
   },
   {
     "subject": "historia",
@@ -267,9 +1567,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "historia", "block": "republica-guerra-civil", "topic": "constitucion-1931" },
+    "evauPracticeQuery": {
+      "subject": "historia",
+      "block": "republica-guerra-civil",
+      "topic": "constitucion-1931"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["historia"]
+    "compatibleSubjects": [
+      "historia"
+    ]
   },
   {
     "subject": "historia_filosofia",
@@ -283,9 +1589,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "historia_filosofia", "block": "moderna", "topic": "descartes-hume-kant" },
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "moderna",
+      "topic": "descartes-hume-kant"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["historia_filosofia"]
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
   },
   {
     "subject": "ingles",
@@ -299,9 +1611,15 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "ingles", "block": "writing", "topic": "essay-connectors" },
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "writing",
+      "topic": "essay-connectors"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["ingles"]
+    "compatibleSubjects": [
+      "ingles"
+    ]
   },
   {
     "subject": "llengua_catalana",
@@ -315,8 +1633,14 @@
     "guidedExample": "",
     "practicePrompt": "",
     "rawLatex": "",
-    "evauPracticeQuery": { "subject": "lengua", "block": "llengua-catalana", "topic": "pronoms-febles" },
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "llengua-catalana",
+      "topic": "pronoms-febles"
+    },
     "source": "contenidos_2_bach",
-    "compatibleSubjects": ["llengua_catalana"]
+    "compatibleSubjects": [
+      "llengua_catalana"
+    ]
   }
 ]

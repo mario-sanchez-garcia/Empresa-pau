@@ -11,6 +11,7 @@ import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
+import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
 
 const DEFAULT_DURATION_MINUTES = 90
@@ -36,6 +37,7 @@ export default function SimulacroActivoPage() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'dirty'>('saved')
   const [submitStage, setSubmitStage] = useState('')
   const answersRef = useRef<Record<string, SimulacroAnswer>>({})
+  const answerTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const savedSnapshotRef = useRef('{}')
   const dirtyRef = useRef(false)
 
@@ -672,29 +674,41 @@ export default function SimulacroActivoPage() {
                   )}
                 </div>
               ) : (
-                <textarea
-                  value={answers[block.id]?.text ?? ''}
-                  onChange={event => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text: event.target.value } }))}
-                  placeholder="Desarrolla tu respuesta paso a paso..."
-                  className="w-full resize-y rounded-2xl border p-4 text-sm leading-7 outline-none transition"
-                  style={{
-                    height: 224,
-                    minHeight: 160,
-                    borderColor: '#dde8f8',
-                    background: '#f8fbff',
-                    color: '#0f172a',
-                  }}
-                  onFocus={e => {
-                    e.target.style.borderColor = cfg.color
-                    e.target.style.background = '#fff'
-                    e.target.style.boxShadow = `0 0 0 4px ${cfg.color}14`
-                  }}
-                  onBlur={e => {
-                    e.target.style.borderColor = '#dde8f8'
-                    e.target.style.background = '#f8fbff'
-                    e.target.style.boxShadow = 'none'
-                  }}
-                />
+                <div>
+                  <MathAnswerToolbar
+                    subject={record.asignatura}
+                    value={answers[block.id]?.text ?? ''}
+                    onChange={text => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text } }))}
+                    textareaRef={{ current: answerTextareaRefs.current[block.id] ?? null }}
+                    accentColor={cfg.color}
+                    softColor={`${cfg.color}10`}
+                    borderColor="#dde8f8"
+                  />
+                  <textarea
+                    ref={node => { answerTextareaRefs.current[block.id] = node }}
+                    value={answers[block.id]?.text ?? ''}
+                    onChange={event => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? {}), text: event.target.value } }))}
+                    placeholder="Desarrolla tu respuesta paso a paso..."
+                    className="w-full resize-y rounded-2xl border p-4 text-sm leading-7 outline-none transition"
+                    style={{
+                      height: 224,
+                      minHeight: 160,
+                      borderColor: '#dde8f8',
+                      background: '#f8fbff',
+                      color: '#0f172a',
+                    }}
+                    onFocus={e => {
+                      e.target.style.borderColor = cfg.color
+                      e.target.style.background = '#fff'
+                      e.target.style.boxShadow = `0 0 0 4px ${cfg.color}14`
+                    }}
+                    onBlur={e => {
+                      e.target.style.borderColor = '#dde8f8'
+                      e.target.style.background = '#f8fbff'
+                      e.target.style.boxShadow = 'none'
+                    }}
+                  />
+                </div>
               )}
             </div>}
           </section>

@@ -3924,6 +3924,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   accentColor={cfg.color}
                   softColor={cfg.light}
                   borderColor={cfg.soft}
+                  mathSubject={asignatura}
                 />
               ) : (
                 <div>

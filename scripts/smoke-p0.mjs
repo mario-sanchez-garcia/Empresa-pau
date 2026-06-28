@@ -17,6 +17,8 @@ const page = read('app/page.tsx')
 const chatRoute = read('app/api/chat/route.ts')
 const mathFormatting = read('app/lib/mathFormatting.ts')
 const mathMarkdown = read('components/shared/MathMarkdown.tsx')
+const mathAnswerToolbar = read('components/shared/MathAnswerToolbar.tsx')
+const richTextArea = read('components/shared/RichTextArea.tsx')
 const signupRoute = read('app/api/auth/signup/route.ts')
 const signupMigration = read('supabase/migrations/20260621130000_create_signup_attempts.sql')
 const pricing = read('app/pricing/page.tsx')
@@ -31,6 +33,9 @@ const caminoPlanLimits = read('app/lib/camino/caminoPlanLimits.ts')
 const onboardingStorage = read('app/lib/onboarding/onboardingStorage.ts')
 const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
+const simulacroActivePage = read('app/simulacros/[id]/page.tsx')
+const catEjercicioCard = read('app/components/CatEjercicioCard.tsx')
+const catFisicaEjercicioCard = read('app/components/CatFisicaEjercicioCard.tsx')
 const caminoSchoolFeedbackRoute = read('app/api/camino/school-topic-feedback/route.ts')
 const caminoCourseTopic = read('app/camino-pau/curso/[subject]/[block]/[topic]/page.tsx')
 const randomEvauExercise = read('app/lib/camino/randomEvauExercise.ts')
@@ -235,6 +240,43 @@ assert(
     !caminoCalendar.includes('error_review') &&
     !caminoCalendar.includes('view=historial') &&
     !caminoCalendar.includes('value="chat"')
+)
+
+assert(
+  'math answer toolbar appears only for math and science answer boxes',
+  mathAnswerToolbar.includes('data-pausia-math-toolbar="true"') &&
+    mathAnswerToolbar.includes('export function shouldShowMathToolbar') &&
+    mathAnswerToolbar.includes('"matematicas_ii"') &&
+    mathAnswerToolbar.includes('"matematicas_ccss"') &&
+    mathAnswerToolbar.includes('"fisica"') &&
+    mathAnswerToolbar.includes('"quimica"') &&
+    !mathAnswerToolbar.includes('"lengua"') &&
+    !mathAnswerToolbar.includes('"historia"') &&
+    !mathAnswerToolbar.includes('"historia_filosofia"') &&
+    !mathAnswerToolbar.includes('"ingles"') &&
+    richTextArea.includes('import MathAnswerToolbar') &&
+    page.includes('mathSubject={asignatura}') &&
+    caminoTopic.includes('mathSubject={currentTopic.subject}') &&
+    catEjercicioCard.includes('mathSubject={asignatura}') &&
+    catFisicaEjercicioCard.includes('mathSubject="fisica"') &&
+    simulacroActivePage.includes('MathAnswerToolbar') &&
+    simulacroActivePage.includes('subject={record.asignatura}')
+)
+
+assert(
+  'math answer toolbar inserts LaTeX snippets without replacing existing answer text',
+  mathAnswerToolbar.includes("value.slice(0, start) + snippet.latex + value.slice(end)") &&
+    mathAnswerToolbar.includes('requestAnimationFrame') &&
+    mathAnswerToolbar.includes('setSelectionRange(cursor, cursor)') &&
+    mathAnswerToolbar.includes('document.createTextNode(snippet.latex)') &&
+    mathAnswerToolbar.includes('onChange(editor.innerText)') &&
+    mathAnswerToolbar.includes('\\\\frac{}{}') &&
+    mathAnswerToolbar.includes('\\\\int_{}^{}  \\\\, dx') &&
+    mathAnswerToolbar.includes('\\\\begin{pmatrix}') &&
+    mathAnswerToolbar.includes('\\\\begin{cases}') &&
+    mathAnswerToolbar.includes('F = G\\\\frac{m_1m_2}{r^2}') &&
+    mathAnswerToolbar.includes('K_c') &&
+    mathAnswerToolbar.includes('\\\\rightleftharpoons')
 )
 
 assert(

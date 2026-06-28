@@ -308,7 +308,7 @@ export default function CatEjercicioCard({
             ))}
           </div>
           {modo === 'texto' ? (
-            <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe aquí tu respuesta." minHeight={220} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} />
+            <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe aquí tu respuesta." minHeight={220} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} mathSubject={asignatura} />
           ) : (
             <div>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-5 py-4 text-sm font-black" style={{ borderColor: UI.accent, backgroundColor: UI.light, color: UI.color }}>

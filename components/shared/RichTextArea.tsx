@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback } from "react"
 import { Bold, Italic } from "lucide-react"
+import MathAnswerToolbar from "@/components/shared/MathAnswerToolbar"
 
 interface RichTextAreaProps {
   value: string
@@ -13,6 +14,7 @@ interface RichTextAreaProps {
   borderColor?: string
   className?: string
   style?: React.CSSProperties
+  mathSubject?: string | null
 }
 
 export default function RichTextArea({
@@ -25,6 +27,7 @@ export default function RichTextArea({
   borderColor = "#dbe7fb",
   className,
   style,
+  mathSubject,
 }: RichTextAreaProps) {
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -42,7 +45,6 @@ export default function RichTextArea({
       const el = editorRef.current
       if (!el) return
       el.focus()
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
       document.execCommand(command, false)
       onChange(el.innerText)
     },
@@ -134,6 +136,16 @@ export default function RichTextArea({
           <Italic size={14} strokeWidth={2} />
         </button>
       </div>
+
+      <MathAnswerToolbar
+        subject={mathSubject}
+        value={value}
+        onChange={onChange}
+        editorRef={editorRef}
+        accentColor={accentColor}
+        softColor={softColor}
+        borderColor={borderColor}
+      />
 
       {/* Editable area */}
       <div

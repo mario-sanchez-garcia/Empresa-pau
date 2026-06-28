@@ -146,9 +146,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
 
   useEffect(() => {
-    if (!topic) { setV2Loading(false); return }
+    if (!topic) { queueMicrotask(() => setV2Loading(false)); return }
     const range = TOPIC_TO_V2_RANGE[`${topic.subject}:${topic.blockSlug}:${topic.topicSlug}`]
-    if (!range) { setV2Loading(false); return }
+    if (!range) { queueMicrotask(() => setV2Loading(false)); return }
     supabase
       .from('curriculum_content_v2')
       .select('sort_order, title, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
@@ -492,7 +492,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <button type="button" onClick={() => setAnswerMode('imagen')} className={`inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black ${answerMode === 'imagen' ? 'bg-blue-600 text-white' : 'border border-blue-100 bg-blue-50 text-blue-700'}`}><Camera size={14} /> Subir foto</button>
                 </div>
                 {answerMode === 'texto' ? (
-                  <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" />
+                  <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" mathSubject={currentTopic.subject} />
                 ) : (
                   <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 p-4">
                     <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} className="hidden" />

@@ -108,6 +108,7 @@ function toISO(date: Date) { return date.toISOString().slice(0, 10) }
 function todayISO() { return toISO(new Date()) }
 function addDays(date: Date, days: number) { const next = new Date(date); next.setDate(next.getDate() + days); return next }
 function mondayOf(date: Date) { const d = new Date(date); const day = d.getDay() || 7; d.setDate(d.getDate() - day + 1); d.setHours(0, 0, 0, 0); return d }
+function currentWeekStartISO() { return toISO(mondayOf(new Date())) }
 function daysUntil(dateISO: string) { return Math.ceil((new Date(dateISO).getTime() - new Date(todayISO()).getTime()) / 86400000) }
 function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
 function subjectSlug(subject: string) { return SUBJECT_SLUGS[subject] ?? subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_') }
@@ -138,7 +139,6 @@ function missionMeta(kind: MissionKind, subject: string, topic?: string, block?:
   return { href: target, target, source: 'camino_pau' as const, xpPolicy: 'after_correction' as const }
 }
 function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count === 4) return [0, 1, 3, 5]; if (count === 5) return [0, 1, 2, 4, 5]; if (count === 6) return [0, 1, 2, 3, 4, 5]; return [0, 1, 2, 3, 4, 5, 6] }
-function kindFor(index: number): MissionKind { return (['concept_explanation', 'guided_practice', 'evau_practice', 'guided_practice', 'evau_practice'] as MissionKind[])[index % 5] }
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU/EVAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
@@ -363,7 +363,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       const schoolAdjusted = schoolAdjustedItem(subject, rawCurriculumItem, onboarding, curriculum, schoolAdjustments, examContext)
       const curriculumItem = schoolAdjusted.item
       if (!prioritySubject) subjectRotation += 1
-      const kind = schoolAdjusted.adjustment ? 'concept_explanation' : sameDay || strongExamNearby ? 'exam_focus' : kindFor(index)
+      const kind = schoolAdjusted.adjustment ? 'concept_explanation' : sameDay || strongExamNearby ? 'exam_focus' : 'concept_explanation'
       const reason = schoolAdjusted.adjustment
         ? examContext
           ? 'Este tema aparece en tu parcial, pero lo has marcado como no dado. Te proponemos una base previa antes de practicarlo.'
@@ -372,14 +372,12 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
             : 'Tema marcado como no dado en clase. Repasa la base previa de este bloque.'
         : sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU/EVAU del bloque.` : weakItem ? `Refuerzo por una corrección baja anterior. Volvemos al tema con práctica.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
       if (missions.length < maxCorrectableMissions) {
-        missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block ?? rawCurriculumItem?.block, topic: curriculumItem?.topic, title: schoolAdjusted.adjustment ? curriculumItem ? `Base previa: ${curriculumItem.topic}` : `Base previa de ${rawCurriculumItem?.block ?? subject}` : weakItem ? `Refuerzo: ${curriculumItem?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, ...missionMeta(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'evau_practice' || kind === 'exam_focus' ? 25 : 15, status: 'pending' })
+        missions.push({ id: `${dateISO}-main-1`, role: 'main', kind, subject, block: curriculumItem?.block ?? rawCurriculumItem?.block, topic: curriculumItem?.topic, title: schoolAdjusted.adjustment ? curriculumItem ? `Base previa: ${curriculumItem.topic}` : `Base previa de ${rawCurriculumItem?.block ?? subject}` : weakItem ? `Refuerzo: ${curriculumItem?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : titleFor(kind, subject, curriculumItem ?? undefined), reason, ...missionMeta(kind, subject, curriculumItem?.topic, curriculumItem?.block, curriculumItem?.planTopic), estimatedMinutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60), baseXP: kind === 'exam_focus' ? 25 : 15, status: 'pending' })
       }
 
       if (planLimits.caminoMode !== 'limited' && minutes >= 60 && !sameDay && !strongExamNearby && missions.length < maxCorrectableMissions) {
-        const secondSubject = prioritySubject ?? subjects[subjectRotation % subjects.length]
-        const secondItem = nextCurriculumItem(secondSubject)
-        if (!prioritySubject) subjectRotation += 1
-        missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'evau_practice', subject: secondSubject, block: secondItem?.block, topic: secondItem?.topic, title: `Ejercicio PAU/EVAU de ${secondItem?.topic ?? secondSubject}`, reason: 'Refuerzo con ejercicio real del bloque, sin enviar al historial.', ...missionMeta('evau_practice', secondSubject, secondItem?.topic, secondItem?.block, secondItem?.planTopic), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 25, status: 'pending' })
+        const secondItem = curriculumItem
+        missions.push({ id: `${dateISO}-main-2`, role: 'main', kind: 'evau_practice', subject, block: secondItem?.block, topic: secondItem?.topic, title: `Ejercicio PAU/EVAU de ${secondItem?.topic ?? subject}`, reason: 'Después del curso, practica con un ejercicio PAU/EVAU del mismo tema.', ...missionMeta('evau_practice', subject, secondItem?.topic, secondItem?.block, secondItem?.planTopic), estimatedMinutes: Math.min(30, Math.max(15, Math.round(minutes / 3))), baseXP: 25, status: 'pending' })
       }
 
       if (planLimits.includeBonusMissions) {
@@ -397,6 +395,36 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
 function syncStatuses(calendar: DayPlan[], events: XpEvent[]) {
   const done = new Set(events.map(event => event.missionId))
   return calendar.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission, status: done.has(mission.id) ? 'done' : mission.status })) }))
+}
+
+function calendarStartsCurrentWeek(calendar: DayPlan[]) {
+  return calendar[0]?.date === currentWeekStartISO()
+}
+
+function missionBelongsToSubjects(mission: Mission, subjects: string[]) {
+  return Boolean(mission.subject && subjects.includes(mission.subject))
+}
+
+function missionHasStructuredTarget(mission: Mission) {
+  return Boolean(
+    mission.id &&
+    mission.subject &&
+    mission.block &&
+    mission.topic &&
+    mission.href &&
+    mission.target &&
+    mission.source === 'camino_pau' &&
+    mission.xpPolicy === 'after_correction'
+  )
+}
+
+function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingData) {
+  if (!calendarStartsCurrentWeek(calendar)) return false
+  return calendar.every(day => day.missions.every(mission =>
+    missionBelongsToSubjects(mission, onboarding.subjects) &&
+    missionHasStructuredTarget(mission) &&
+    !/flashcard|tarjeta|mazo|historial|corrige un error|revisa tus errores/i.test(`${mission.kind} ${mission.title} ${mission.reason}`)
+  ))
 }
 
 export default function CaminoCalendarClient() {
@@ -427,6 +455,7 @@ export default function CaminoCalendarClient() {
     const loadedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
     const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
     const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
+    const canReuseSavedCalendar = loadedCalendar.length > 0 && !shouldRefreshCalendar && calendarMatchesOnboarding(loadedCalendar, loadedOnboarding)
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
     setOnboarding(loadedOnboarding)
@@ -442,14 +471,20 @@ export default function CaminoCalendarClient() {
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
     // Seguro: efecto de montaje único que lee localStorage (client-only).
     // Lazy initializers causarían error de hidratación SSR.
-    setCalendar(syncStatuses(loadedCalendar.length && !shouldRefreshCalendar ? loadedCalendar : generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free'), loadedXp))
+    const initialCalendar = canReuseSavedCalendar ? loadedCalendar : generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free')
+    setCalendar(syncStatuses(initialCalendar, loadedXp))
+    if (!canReuseSavedCalendar) saveJson(CALENDAR_KEY, initialCalendar)
     if (shouldRefreshCalendar) saveJson(CALENDAR_REFRESH_KEY, false)
     if (!window.localStorage.getItem('pausia_camino_onboarding_done')) setShowOnboarding(true)
     fetchCurriculumItems(loadedOnboarding.subjects)
       .then(items => {
         const nextItems = items.length ? items : FALLBACK_CURRICULUM
         setCurriculumItems(nextItems)
-        if (!loadedCalendar.length || shouldRefreshCalendar) setCalendar(syncStatuses(generateCalendar(loadedOnboarding, loadedExams, nextItems, 'free'), loadedXp))
+        if (!canReuseSavedCalendar) {
+          const regenerated = generateCalendar(loadedOnboarding, loadedExams, nextItems, 'free')
+          setCalendar(syncStatuses(regenerated, loadedXp))
+          saveJson(CALENDAR_KEY, regenerated)
+        }
       })
       .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
   }, [])
@@ -481,9 +516,11 @@ export default function CaminoCalendarClient() {
       setCaminoPlanId(planId)
       const savedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
       const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
-      if (!savedCalendar.length || shouldRefreshCalendar) {
+      if (!savedCalendar.length || shouldRefreshCalendar || !calendarMatchesOnboarding(savedCalendar, onboarding)) {
         const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-        setCalendar(syncStatuses(generateCalendar(onboarding, exams, source, planId), xpEvents))
+        const regenerated = generateCalendar(onboarding, exams, source, planId)
+        setCalendar(syncStatuses(regenerated, xpEvents))
+        saveJson(CALENDAR_KEY, regenerated)
         if (shouldRefreshCalendar) saveJson(CALENDAR_REFRESH_KEY, false)
       }
     }).catch(() => undefined)

@@ -25,7 +25,10 @@ const loginPage = read('app/login/page.tsx')
 const sidebar = read('app/components/Sidebar.tsx')
 const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
 const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
+const caminoActions = read('app/lib/camino/caminoActions.ts')
+const caminoMissionGenerator = read('app/lib/camino/caminoMissionGenerator.ts')
 const caminoPlanLimits = read('app/lib/camino/caminoPlanLimits.ts')
+const onboardingStorage = read('app/lib/onboarding/onboardingStorage.ts')
 const caminoSeed = read('app/data/camino/curriculum_seed.json')
 const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const caminoSchoolFeedbackRoute = read('app/api/camino/school-topic-feedback/route.ts')
@@ -259,14 +262,47 @@ assert(
 
 assert(
   'Camino PAU keeps calendar visibility and generated week persistent',
-    caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
+  caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
     caminoCalendar.includes('loadJson<DayPlan[]>(CALENDAR_KEY, [])') &&
     caminoCalendar.includes('loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)') &&
-    caminoCalendar.includes('loadedCalendar.length && !shouldRefreshCalendar ? loadedCalendar : generateCalendar') &&
-    caminoCalendar.includes('if (!loadedCalendar.length || shouldRefreshCalendar) setCalendar') &&
+    caminoCalendar.includes('calendarMatchesOnboarding') &&
+    caminoCalendar.includes('calendarStartsCurrentWeek') &&
+    caminoCalendar.includes('canReuseSavedCalendar ? loadedCalendar : generateCalendar') &&
     caminoCalendar.includes('function toggleCalendarExpanded()') &&
     caminoCalendar.includes('saveJson(CALENDAR_VISIBILITY_KEY, next)') &&
     caminoCalendar.includes('onClick={toggleCalendarExpanded}')
+)
+
+assert(
+  'Camino PAU uses current week and never hardcodes the June demo week',
+  caminoCalendar.includes('function currentWeekStartISO()') &&
+    caminoCalendar.includes('mondayOf(new Date())') &&
+    caminoCalendar.includes('calendar[0]?.date === currentWeekStartISO()') &&
+    !caminoCalendar.includes('2026-06-19') &&
+    !caminoCalendar.includes('2026-06-15') &&
+    !caminoCalendar.includes('2026-06-21')
+)
+
+assert(
+  'Camino PAU is onboarding driven and does not invent default subjects',
+  onboardingStorage.includes('export const DEFAULT_SUBJECTS: string[] = []') &&
+    caminoCalendar.includes('const subjects = onboarding.subjects') &&
+    caminoCalendar.includes('missionBelongsToSubjects') &&
+    caminoCalendar.includes('subjects.includes(mission.subject)') &&
+    caminoCalendar.includes('Completa tu onboarding para que podamos construir tu Camino PAU') &&
+    !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']")
+)
+
+assert(
+  'Camino PAU visible missions follow course then same-topic EVAU and avoid flashcards/history tasks',
+  caminoCalendar.includes("kind, subject, block: curriculumItem?.block") &&
+    caminoCalendar.includes("kind: 'evau_practice', subject, block: secondItem?.block, topic: secondItem?.topic") &&
+    caminoCalendar.includes('Después del curso, practica con un ejercicio PAU/EVAU del mismo tema.') &&
+    caminoCalendar.includes("!\/flashcard|tarjeta|mazo|historial|corrige un error|revisa tus errores\/i.test") &&
+    caminoMissionGenerator.includes("type === 'flashcard' ? 'ejercicio_corto' : type") &&
+    caminoMissionGenerator.includes('title: `Refuerza ${weakBlocks[0]}`') &&
+    caminoActions.includes("label: 'Practicar refuerzo'") &&
+    !caminoActions.includes("href: '/?view=historial'")
 )
 
 assert(
@@ -390,6 +426,7 @@ assert(
     page.includes('setAsignatura(subject)') &&
     page.includes('setAsignatura(resolved.subject)') &&
     page.includes('selectMadridExerciseById(resolved.subject, resolved.exerciseId)') &&
+    randomEvauExercise.includes("return (examenes as ExamLike[]).filter(exam => exam.asignatura === 'Matemáticas II')") &&
     !randomEvauExercise.includes("return subject === 'matematicas_ccss'") &&
     !randomEvauExercise.includes("return 'matematicas_ccss' : examenes") &&
     !page.includes('selectMadridMathExerciseById')

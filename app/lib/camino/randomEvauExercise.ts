@@ -215,7 +215,7 @@ function sourceForSubject(subject: CaminoExamSubject): ExamLike[] {
       ],
     }))
   }
-  return examenes as ExamLike[]
+  return (examenes as ExamLike[]).filter(exam => exam.asignatura === 'Matemáticas II')
 }
 
 function flattenCandidates(subject: CaminoExamSubject, community = 'Madrid'): ExerciseCandidate[] {

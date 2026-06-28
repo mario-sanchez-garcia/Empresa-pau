@@ -51,8 +51,9 @@ export const CAMINO_ACTION_DEFAULTS: Record<CaminoTaskTypeId, CaminoAction> = {
     note: 'Lleva a Exámenes de Matemáticas donde está la corrección IA. Fase 2C: flujo de corrección directo.',
   },
   repaso_error: {
-    label: 'Ver historial',
-    href: '/?view=historial',
+    label: 'Practicar refuerzo',
+    href: '/?subject=mates&mode=random',
+    subject: 'mates',
     isDeepLink: true,
     isFallback: false,
   },

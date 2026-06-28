@@ -93,13 +93,12 @@ export function buildDailyTasksFromWeek(
   week: CaminoWeekData,
   weakBlocks: string[] = []
 ): DailyCaminoTask[] {
-  const tasks: DailyCaminoTask[] = week.misionTypes.map((type, index) => {
+  const visibleTypes = week.misionTypes.map(type => type === 'flashcard' ? 'ejercicio_corto' : type)
+  const tasks: DailyCaminoTask[] = visibleTypes.map((type, index) => {
     const { subjectKey, subjectLabel, blockDetail } = resolveTaskSubject(type, week)
     const id = `w${week.semana}-${type}-${index}`
     const action = buildCaminoAction(type, subjectKey)
-    const block = (type === 'flashcard' && subjectKey === 'mates')
-      ? (extractBlockKey(blockDetail) ?? undefined)
-      : undefined
+    const block = subjectKey === 'mates' ? (extractBlockKey(blockDetail) ?? undefined) : undefined
     return {
       id,
       title: buildTaskTitle(type, blockDetail),
@@ -119,14 +118,14 @@ export function buildDailyTasksFromWeek(
   if (!hasRepaso && weakBlocks.length > 0) {
     tasks.push({
       id: `w${week.semana}-repaso_error-weak`,
-      title: `Repaso de errores: ${weakBlocks[0]}`,
-      type: 'repaso_error',
-      xp: MISSION_TASK_XP.repaso_error,
+      title: `Refuerza ${weakBlocks[0]}`,
+      type: 'ejercicio_corto',
+      xp: MISSION_TASK_XP.ejercicio_corto,
       subject: 'Matemáticas II',
       subjectKey: 'mates',
       detail: `Trabajas este bloque porque aparece como punto débil reciente.`,
-      actionLabel: '→ Ver historial',
-      actionHref: '/?view=historial',
+      actionLabel: 'Practicar bloque',
+      actionHref: `/?subject=mates&block=${encodeURIComponent(weakBlocks[0])}&mode=random&source=camino_legacy`,
     })
   }
 

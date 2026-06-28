@@ -89,6 +89,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [correcting, setCorrecting] = useState(false)
   const [diegoContent, setDiegoContent] = useState<string | null>(null)
   const [diegoLoading, setDiegoLoading] = useState(true)
+  const [videoOpen, setVideoOpen] = useState(false)
 
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -304,18 +305,26 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     : currentTopic.explanation
                       ? <MathMarkdown text={currentTopic.explanation} />
                       : <EmptyContent />}
+                {videoId && (
+                  <div className="mt-4 border-t border-slate-100 pt-3">
+                    <button
+                      onClick={() => setVideoOpen(v => !v)}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600"
+                    >
+                      🎥 {videoOpen ? 'Ocultar video' : '¿No lo entiendes? Ver video explicativo'}
+                    </button>
+                    {videoOpen && (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${videoId}`}
+                        title={`Video explicativo: ${currentTopic.title}`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ width: '100%', height: 320, border: 'none', borderRadius: 12, display: 'block', marginTop: 12 }}
+                      />
+                    )}
+                  </div>
+                )}
               </LearningCard>
-              {videoId && (
-                <LearningCard title="🎥 Video explicativo">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${videoId}`}
-                    title={`Video explicativo: ${currentTopic.title}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ width: '100%', height: 360, border: 'none', borderRadius: 12, display: 'block' }}
-                  />
-                </LearningCard>
-              )}
               <LearningCard title="2. Ejemplo guiado">
                 {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
               </LearningCard>

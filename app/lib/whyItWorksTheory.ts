@@ -70,7 +70,7 @@ const TOPIC_RULES: TopicRule[] = [
   },
   {
     subject: 'matematicas_ii',
-    blockSlug: 'algebra',
+    blockSlug: 'algebra-lineal',
     topicSlug: 'sistemas-gauss',
     keywords: ['sistema', 'matriz', 'matrices', 'rango', 'rouche', 'frobenius', 'compatible', 'indeterminado', 'determinado', 'gauss', 'determinante'],
     concepts: [

@@ -172,34 +172,9 @@ async function fetchLeaderboard(token: string, community: string) {
 }
 
 async function fetchCurriculumItems(subjects: string[]): Promise<CurriculumItem[]> {
-  const seeded = getCurriculumForSubjects(subjects).map(seedTopicToCurriculumItem)
-  const dbSubjects = subjects.map(subject => DB_SUBJECTS[subject]).filter(Boolean)
-  if (dbSubjects.length === 0) return seeded
-  const { data, error } = await supabase
-    .from('curriculum_flashcards')
-    .select('subject, chapter_title, block_key, title, sort_order')
-    .in('subject', dbSubjects)
-    .eq('region', 'ambas')
-    .order('sort_order', { ascending: true })
-
-  if (error || !data) return seeded
-
-  const flashcardItems = data.map(row => {
-    const subject = row.subject === 'matematicas_ccss' ? 'Matemáticas CCSS' : 'Matemáticas II'
-    return {
-      subject,
-      subjectSlug: row.subject === 'matematicas_ccss' ? 'matematicas_ccss' : 'matematicas_ii',
-      block: row.block_key,
-      blockSlug: textSlug(row.block_key),
-      topic: row.chapter_title,
-      topicSlug: textSlug(row.chapter_title),
-      title: row.title,
-      sortOrder: row.sort_order,
-      contentStatus: 'latex_notes',
-      source: 'supabase' as const,
-    }
-  }).filter(item => item.subject !== 'Matemáticas CCSS' || item.block !== 'Geometría')
-  return [...seeded, ...flashcardItems]
+  // The seed is the single source of truth for all topics including flashcards.
+  // Fetching curriculum_flashcards separately would duplicate the 60 seed entries.
+  return getCurriculumForSubjects(subjects).map(seedTopicToCurriculumItem)
 }
 
 function curriculumForSubject(subject: string, curriculum: CurriculumItem[]) {

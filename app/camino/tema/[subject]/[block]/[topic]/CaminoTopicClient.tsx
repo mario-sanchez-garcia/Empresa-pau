@@ -40,6 +40,8 @@ type CaminoXpEvent = { id: string; missionId: string; date: string; subject: str
 type CalendarMission = { id: string; status: 'pending' | 'done'; subject: string; role?: 'main' | 'bonus' }
 type CalendarDay = { date: string; missions: CalendarMission[] }
 type UploadedImage = { data: string; preview: string; type: string }
+type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
+type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
 
 function loadJson<T>(key: string, fallback: T): T {
   try {
@@ -90,6 +92,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [diegoContent, setDiegoContent] = useState<string | null>(null)
   const [diegoLoading, setDiegoLoading] = useState(true)
   const [videoOpen, setVideoOpen] = useState(false)
+  const [streak, setStreak] = useState(0)
+  const [liga, setLiga] = useState<LigaInfo | null>(null)
+  const [ligaLoading, setLigaLoading] = useState(true)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -110,6 +116,29 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       })
   }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
 
+  useEffect(() => {
+    const toISO = (d: Date) => d.toISOString().slice(0, 10)
+    const events = loadJson<CaminoXpEvent[]>(XP_KEY, [])
+    const dates = new Set(events.map(e => e.date))
+    let s = 0; let cur = toISO(new Date())
+    while (dates.has(cur)) { s++; const d = new Date(cur); d.setDate(d.getDate() - 1); cur = toISO(d) }
+    setStreak(s)
+
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      const uid = data.session?.user?.id ?? null
+      if (!token || cancelled) { if (!cancelled) setLigaLoading(false); return }
+      if (!cancelled) setCurrentUserId(uid)
+      try {
+        const res = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${token}` } })
+        if (!cancelled && res.ok) { const json = await res.json(); setLiga(json.liga ?? null) }
+      } catch { /* silent */ }
+      if (!cancelled) setLigaLoading(false)
+    }).catch(() => { if (!cancelled) setLigaLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
   if (!topic) {
     return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[28px] border border-blue-100 bg-white p-8 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
   }
@@ -121,6 +150,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const hasContent = hasLatexContent(currentTopic)
   const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
   const videoId = TOPIC_VIDEO_MAP[key] ?? null
+  const myLigaEntry = liga && currentUserId ? liga.miembros.find(m => m.user_id === currentUserId) ?? null : null
 
   function markNotSeen() {
     const feedback = loadJson<SchoolFeedback>(SCHOOL_FEEDBACK_KEY, [])
@@ -314,13 +344,17 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                       🎥 {videoOpen ? 'Ocultar video' : '¿No lo entiendes? Ver video explicativo'}
                     </button>
                     {videoOpen && (
-                      <iframe
-                        src={`https://www.youtube.com/embed/${videoId}`}
-                        title={`Video explicativo: ${currentTopic.title}`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{ width: '100%', height: 320, border: 'none', borderRadius: 12, display: 'block', marginTop: 12 }}
-                      />
+                      <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+                        <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                          <iframe
+                            src={`https://www.youtube.com/embed/${videoId}`}
+                            title={`Video explicativo: ${currentTopic.title}`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
@@ -366,6 +400,27 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               </article>
             </div>
             <aside className="grid content-start gap-4">
+              <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 text-center">
+                    <p className="text-xl font-black leading-none text-blue-600">{streak}</p>
+                    <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">días racha</p>
+                  </div>
+                  <div className="h-8 w-px shrink-0 bg-slate-100" />
+                  <div className="min-w-0 flex-1">
+                    {ligaLoading ? (
+                      <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+                    ) : liga && myLigaEntry ? (
+                      <>
+                        <p className="truncate text-xs font-black text-slate-800">{liga.nombre}</p>
+                        <p className="text-[10px] font-semibold text-slate-400">#{myLigaEntry.rank} en liga · {myLigaEntry.weekly_xp} XP sem.</p>
+                      </>
+                    ) : (
+                      <Link href="/camino" className="text-xs font-black text-blue-600 hover:underline">Crear liga con amigos →</Link>
+                    )}
+                  </div>
+                </div>
+              </div>
               <div className="rounded-3xl border border-blue-100 bg-blue-50 p-4">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Práctica PAU/EVAU</p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>

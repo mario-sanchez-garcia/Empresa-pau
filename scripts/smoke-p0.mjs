@@ -227,7 +227,7 @@ assert(
     caminoCalendar.includes('hrefForMission') &&
     caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
     caminoCalendar.includes('source=camino_pau') &&
-    caminoCalendar.includes('const subjects = onboarding.subjects') &&
+    caminoCalendar.includes('const subjects = normalizeOnboardingSubjects(onboarding.subjects)') &&
     caminoCalendar.includes('Completa tu onboarding para que podamos construir tu Camino PAU') &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']") &&
     !caminoCalendar.includes('MATH_SUBJECTS') &&
@@ -286,11 +286,24 @@ assert(
 assert(
   'Camino PAU is onboarding driven and does not invent default subjects',
   onboardingStorage.includes('export const DEFAULT_SUBJECTS: string[] = []') &&
-    caminoCalendar.includes('const subjects = onboarding.subjects') &&
+    caminoCalendar.includes('const subjects = normalizeOnboardingSubjects(onboarding.subjects)') &&
     caminoCalendar.includes('missionBelongsToSubjects') &&
-    caminoCalendar.includes('subjects.includes(mission.subject)') &&
+    caminoCalendar.includes('normalizeSubjectSlug(mission.subject)') &&
+    caminoCalendar.includes('visibleCalendarForOnboarding') &&
     caminoCalendar.includes('Completa tu onboarding para que podamos construir tu Camino PAU') &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']")
+)
+
+assert(
+  'Camino PAU today card uses the real current date and filters stale saved missions',
+  caminoPlan.includes('export function normalizeSubjectSlug') &&
+    caminoCalendar.includes('function calendarDayLabel(dateISO: string)') &&
+    caminoCalendar.includes('const realToday = todayISO()') &&
+    caminoCalendar.includes('visibleCalendar.find(day => day.date === realToday)') &&
+    caminoCalendar.includes('isToday: day.date === realToday') &&
+    caminoCalendar.includes('Hoy no tienes misión principal. Puedes adelantar una del calendario o añadir una.') &&
+    !caminoCalendar.includes('calendar.find(day => day.isToday) ?? calendar[0]') &&
+    !caminoCalendar.includes('Hoy toca poco, pero bien hecho')
 )
 
 assert(
@@ -397,6 +410,9 @@ assert(
     randomEvauExercise.includes("from '../../data/historia_filosofia_madrid'") &&
     randomEvauExercise.includes('getRandomEvauExerciseForMission') &&
     randomEvauExercise.includes('Math.random') &&
+    randomEvauExercise.includes('pickLeastRecent') &&
+    randomEvauExercise.includes('recentExerciseIds.slice(-RECENT_LIMIT)') &&
+    randomEvauExercise.includes('avoidRecent?: boolean') &&
     randomEvauExercise.includes("matchLevel: 'subject_fallback'") &&
     randomEvauExercise.includes('exerciseId') &&
     randomEvauExercise.includes("subject === 'matematicas_ccss'") &&

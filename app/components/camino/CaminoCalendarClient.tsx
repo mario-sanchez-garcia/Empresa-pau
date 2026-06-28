@@ -10,7 +10,7 @@ import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
-import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeSubjectSlug, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
@@ -111,8 +111,21 @@ function mondayOf(date: Date) { const d = new Date(date); const day = d.getDay()
 function currentWeekStartISO() { return toISO(mondayOf(new Date())) }
 function daysUntil(dateISO: string) { return Math.ceil((new Date(dateISO).getTime() - new Date(todayISO()).getTime()) / 86400000) }
 function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
-function subjectSlug(subject: string) { return SUBJECT_SLUGS[subject] ?? subject.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_') }
+function subjectSlug(subject: string) { return normalizeSubjectSlug(SUBJECT_SLUGS[subject] ?? subject) }
+function normalizeOnboardingSubjects(subjects: string[]) {
+  const seen = new Set<string>()
+  return subjects.map(subject => {
+    const slug = normalizeSubjectSlug(subject)
+    const label = subjectLabelFromSlug(slug)
+    return { slug, label }
+  }).filter(({ slug }) => {
+    if (!slug || seen.has(slug)) return false
+    seen.add(slug)
+    return true
+  }).map(({ label }) => label)
+}
 function textSlug(value: string) { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }
+function calendarDayLabel(dateISO: string) { return new Date(`${dateISO}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) }
 function courseHrefForItem(item: CurriculumItem) {
   if (item.planTopic) return buildTopicHref(item.planTopic)
   return `/camino-pau/curso/${item.subjectSlug || subjectSlug(item.subject)}/${item.blockSlug || textSlug(item.block)}/${item.topicSlug || textSlug(item.topic)}`
@@ -216,7 +229,7 @@ function curriculumForSubject(subject: string, curriculum: CurriculumItem[]) {
 
 function courseTopicsForSubjects(subjects: string[], curriculum: CurriculumItem[]) {
   const source = (curriculum.length ? curriculum : FALLBACK_CURRICULUM).filter(item => item.planTopic)
-  const allowedSubjects = new Set(subjects)
+  const allowedSubjects = new Set(normalizeOnboardingSubjects(subjects))
   const grouped = new Map<string, Map<string, CurriculumItem[]>>()
   for (const item of source) {
     if (!allowedSubjects.has(item.subject)) continue
@@ -258,7 +271,7 @@ function loadSchoolAdjustments(): SchoolTopicAdjustment[] {
 }
 
 function adjustmentMatchesSubject(adjustment: SchoolTopicAdjustment, subject: string) {
-  return adjustment.subject === subject || adjustment.subject === subjectSlug(subject)
+  return normalizeSubjectSlug(adjustment.subject) === subjectSlug(subject)
 }
 
 function adjustmentMatchesSchool(adjustment: SchoolTopicAdjustment, onboarding: OnboardingData) {
@@ -308,12 +321,12 @@ function findExamCurriculumItem(exam: StudentExam | undefined, subject: string, 
 function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = [], planId: CaminoPlanId = 'free') {
   const planLimits = getCaminoPlanLimits(planId)
   const start = mondayOf(new Date())
-  const subjects = onboarding.subjects
+  const subjects = normalizeOnboardingSubjects(onboarding.subjects)
   if (!subjects.length) {
     return Array.from({ length: 7 }, (_, index): DayPlan => {
       const date = addDays(start, index)
       const dateISO = toISO(date)
-      return { date: dateISO, label: date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }), isToday: dateISO === todayISO(), missions: [] }
+      return { date: dateISO, label: calendarDayLabel(dateISO), isToday: dateISO === todayISO(), missions: [] }
     })
   }
   const weeklyDays = Math.min(onboarding.weeklyStudyDaysValue ?? 4, planLimits.maxStudyDaysPerWeek)
@@ -324,6 +337,8 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
   const indexes = indexesFor(weeklyDays)
   let subjectRotation = 0
   const topicRotationBySubject = new Map<string, number>()
+  const allowedSubjectSlugs = new Set(subjects.map(subject => subjectSlug(subject)))
+  const relevantExams = exams.filter(exam => allowedSubjectSlugs.has(normalizeSubjectSlug(exam.subject)))
   const weakAreas = typeof window === 'undefined' ? [] : loadJson<Array<{ subject: string; block?: string; topic?: string; score: number }>>(WEAK_AREAS_KEY, [])
   const schoolAdjustments = typeof window === 'undefined' ? [] : loadSchoolAdjustments()
   const nextCurriculumItem = (subject: string) => {
@@ -344,21 +359,22 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
   return Array.from({ length: 7 }, (_, index): DayPlan => {
     const date = addDays(start, index)
     const dateISO = toISO(date)
-    const upcoming = exams
+    const upcoming = relevantExams
       .map(exam => ({ exam, distance: daysUntil(exam.date), weight: priorityWeight(exam.priority) }))
       .filter(item => item.distance >= 0 && item.distance <= priorityLookahead(item.exam.priority))
       .sort((a, b) => a.distance - b.distance || b.weight - a.weight)[0]?.exam
-    const sameDay = exams.find(exam => exam.date === dateISO)
+    const sameDay = relevantExams.find(exam => exam.date === dateISO)
     const strongExamNearby = upcoming && priorityWeight(upcoming.priority) >= 3 && daysUntil(upcoming.date) <= 2
     const studyDay = indexes.includes(index) || Boolean(sameDay)
     const missions: Mission[] = []
 
     if (studyDay) {
-      const weakArea = weakAreas.find(area => subjects.includes(area.subject) && area.score < 6)
-      const prioritySubject = sameDay?.subject ?? (strongExamNearby || index <= 2 ? upcoming?.subject : null) ?? (index <= 2 ? weakArea?.subject : null)
+      const weakArea = weakAreas.find(area => subjects.some(subject => subjectSlug(subject) === normalizeSubjectSlug(area.subject)) && area.score < 6)
+      const rawPrioritySubject = sameDay?.subject ?? (strongExamNearby || index <= 2 ? upcoming?.subject : null) ?? (index <= 2 ? weakArea?.subject : null)
+      const prioritySubject = rawPrioritySubject ? subjectLabelFromSlug(normalizeSubjectSlug(rawPrioritySubject)) : null
       const subject = prioritySubject ?? subjects[subjectRotation % subjects.length]
       const examContext = sameDay ?? (strongExamNearby ? upcoming : undefined)
-      const weakItem = weakArea?.subject === subject ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
+      const weakItem = weakArea && normalizeSubjectSlug(weakArea.subject) === subjectSlug(subject) ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
       const rawCurriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? weakItem ?? nextCurriculumItem(subject)
       const schoolAdjusted = schoolAdjustedItem(subject, rawCurriculumItem, onboarding, curriculum, schoolAdjustments, examContext)
       const curriculumItem = schoolAdjusted.item
@@ -388,13 +404,19 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       }
     }
 
-    return { date: dateISO, label: date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }), isToday: dateISO === todayISO(), missions }
+    return { date: dateISO, label: calendarDayLabel(dateISO), isToday: dateISO === todayISO(), missions }
   })
 }
 
 function syncStatuses(calendar: DayPlan[], events: XpEvent[]) {
   const done = new Set(events.map(event => event.missionId))
-  return calendar.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission, status: done.has(mission.id) ? 'done' : mission.status })) }))
+  const realToday = todayISO()
+  return calendar.map(day => ({
+    ...day,
+    label: calendarDayLabel(day.date),
+    isToday: day.date === realToday,
+    missions: day.missions.map(mission => ({ ...mission, status: done.has(mission.id) ? 'done' : mission.status })),
+  }))
 }
 
 function calendarStartsCurrentWeek(calendar: DayPlan[]) {
@@ -402,7 +424,8 @@ function calendarStartsCurrentWeek(calendar: DayPlan[]) {
 }
 
 function missionBelongsToSubjects(mission: Mission, subjects: string[]) {
-  return Boolean(mission.subject && subjects.includes(mission.subject))
+  const allowed = new Set(subjects.map(subject => normalizeSubjectSlug(subject)))
+  return Boolean(mission.subject && allowed.has(normalizeSubjectSlug(mission.subject)))
 }
 
 function missionHasStructuredTarget(mission: Mission) {
@@ -416,6 +439,14 @@ function missionHasStructuredTarget(mission: Mission) {
     mission.source === 'camino_pau' &&
     mission.xpPolicy === 'after_correction'
   )
+}
+
+function visibleCalendarForOnboarding(calendar: DayPlan[], onboarding: OnboardingData | null) {
+  if (!onboarding) return calendar
+  return calendar.map(day => ({
+    ...day,
+    missions: day.missions.filter(mission => missionBelongsToSubjects(mission, onboarding.subjects) && missionHasStructuredTarget(mission)),
+  }))
 }
 
 function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingData) {
@@ -540,8 +571,10 @@ export default function CaminoCalendarClient() {
   }, [])
 
   const hasProfile = Boolean(onboarding?.completedAt && onboarding.community && onboarding.subjects.length)
-  const today = calendar.find(day => day.isToday) ?? calendar[0]
-  const allMissions = calendar.flatMap(day => day.missions)
+  const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding)
+  const realToday = todayISO()
+  const today = visibleCalendar.find(day => day.date === realToday) ?? { date: realToday, label: calendarDayLabel(realToday), isToday: true, missions: [] }
+  const allMissions = visibleCalendar.flatMap(day => day.missions)
   const totalMain = allMissions.filter(mission => mission.role === 'main').length
   const completedMain = allMissions.filter(mission => mission.role === 'main' && mission.status === 'done').length
   const todayMain = today?.missions.filter(mission => mission.role === 'main') ?? []
@@ -561,7 +594,8 @@ export default function CaminoCalendarClient() {
   const rankingTopRows = fillWithMockRows(rankingSource?.top ?? [fallbackCurrent], rankingTab, rankingCommunity)
   const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
   const fixedCurrentRow = currentInTop ? null : currentRankingRow
-  const courseGroups = courseTopicsForSubjects(onboarding?.subjects ?? [], curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
+  const onboardingSubjects = normalizeOnboardingSubjects(onboarding?.subjects ?? [])
+  const courseGroups = courseTopicsForSubjects(onboardingSubjects, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
   const caminoPlanLimits = getCaminoPlanLimits(caminoPlanId)
   const hasOnboardingSubjects = Boolean(onboarding?.subjects.length)
 
@@ -638,11 +672,11 @@ export default function CaminoCalendarClient() {
       <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Editar calendario</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today?.label ?? 'Hoy'}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{hasOnboardingSubjects ? 'Hoy toca poco, pero bien hecho. Puedes añadir un parcial para ajustar la semana.' : 'Completa tu onboarding para que podamos construir tu Camino PAU.'}</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} compact />)}</div></div>}</div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today.label}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{hasOnboardingSubjects ? 'Hoy no tienes misión principal. Puedes adelantar una del calendario o añadir una.' : 'Completa tu onboarding para que podamos construir tu Camino PAU.'}</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} compact />)}</div></div>}</div>
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">{caminoPlanLimits.label} · Camino {caminoPlanLimits.caminoMode === 'limited' ? 'limitado' : caminoPlanLimits.caminoMode === 'intensive' ? 'intensivo' : 'completo'} · margen variable mínimo {(caminoPlanLimits.variableMarginFloor * 100).toFixed(0)}%</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
         </section>
 
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{calendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
+        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">Semana actual</h2></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{visibleCalendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
 
         <CourseDirectory groups={courseGroups} />
 
@@ -652,8 +686,8 @@ export default function CaminoCalendarClient() {
           <ParentLinkModule billing={{ loading: false, hasActivePack: caminoPlanId !== 'free', activePlans: [], pendingParentCheckout: null }} />
         </section>
       </main>
-      <AnimatePresence>{showExamForm && <ExamModal subjects={onboarding?.subjects ?? []} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
-      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={calendar} subjects={onboarding.subjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(syncStatuses(next, xpEvents)); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
+      <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
+      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={visibleCalendar} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(syncStatuses(next, xpEvents)); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
     </Shell>

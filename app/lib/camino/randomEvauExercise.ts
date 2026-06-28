@@ -55,6 +55,7 @@ export interface RandomEvauExerciseQuery {
   topicSlug?: string | null
   missionId?: string | null
   recentExerciseIds?: string[]
+  avoidRecent?: boolean
 }
 
 export interface RandomEvauExerciseResult {
@@ -267,8 +268,8 @@ function topicFamily(topicSlug: string) {
   return topicSlug
 }
 
-function filteredByRecent(candidates: ExerciseCandidate[], recentExerciseIds: string[]) {
-  if (!recentExerciseIds.length || candidates.length <= 1) return candidates
+function filteredByRecent(candidates: ExerciseCandidate[], recentExerciseIds: string[], avoidRecent = true) {
+  if (!avoidRecent || !recentExerciseIds.length || candidates.length <= 1) return candidates
   const recent = new Set(recentExerciseIds.slice(-RECENT_LIMIT))
   const fresh = candidates.filter(candidate => !recent.has(candidate.exerciseId))
   return fresh.length ? fresh : candidates
@@ -276,6 +277,16 @@ function filteredByRecent(candidates: ExerciseCandidate[], recentExerciseIds: st
 
 function pickRandom(candidates: ExerciseCandidate[]) {
   return candidates[Math.floor(Math.random() * candidates.length)]
+}
+
+function pickLeastRecent(candidates: ExerciseCandidate[], recentExerciseIds: string[], avoidRecent = true) {
+  if (!avoidRecent || !recentExerciseIds.length || candidates.length <= 1) return pickRandom(candidates)
+  const recent = recentExerciseIds.slice(-RECENT_LIMIT)
+  const recentOrder = new Map(recent.map((id, index) => [id, index]))
+  const unseen = candidates.filter(candidate => !recentOrder.has(candidate.exerciseId))
+  if (unseen.length) return pickRandom(unseen)
+  const oldestIndex = Math.min(...candidates.map(candidate => recentOrder.get(candidate.exerciseId) ?? -1))
+  return pickRandom(candidates.filter(candidate => (recentOrder.get(candidate.exerciseId) ?? -1) === oldestIndex))
 }
 
 function scoreCandidates(candidates: ExerciseCandidate[], blockSlug: string, topicSlug: string) {
@@ -305,8 +316,8 @@ export function getRandomEvauExerciseForMission(query: RandomEvauExerciseQuery):
   if (!allCandidates.length) return null
 
   const scored = scoreCandidates(allCandidates, blockSlug, topicSlug)
-  const candidates = filteredByRecent(scored.candidates, query.recentExerciseIds ?? [])
-  const selected = pickRandom(candidates)
+  const candidates = filteredByRecent(scored.candidates, query.recentExerciseIds ?? [], query.avoidRecent)
+  const selected = pickLeastRecent(candidates, query.recentExerciseIds ?? [], query.avoidRecent)
   const warning = scored.matchLevel === 'subject_fallback'
     ? `Todavía no tenemos un ejercicio PAU específico de este tema. Te mostramos uno relacionado con ${SUBJECT_FALLBACK_LABELS[subject]}.`
     : undefined

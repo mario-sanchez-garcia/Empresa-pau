@@ -59,8 +59,35 @@ export function subjectLabelFromSlug(subject: string) {
   return SUBJECT_LABELS[subject] ?? subject
 }
 
+export function normalizeSubjectSlug(subject?: string | null) {
+  const slug = (subject ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+  if (slug === 'mates' || slug === 'matematicas' || slug === 'matematicas_ii') return 'matematicas_ii'
+  if (
+    slug === 'matematicas_ccss' ||
+    slug === 'matematicas_sociales' ||
+    slug === 'matematicas_aplicadas_ccss' ||
+    slug === 'matematicas_aplicadas_a_las_ciencias_sociales'
+  ) return 'matematicas_ccss'
+  if (slug === 'fisica') return 'fisica'
+  if (slug === 'quimica') return 'quimica'
+  if (slug === 'biologia') return 'biologia'
+  if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_y_literatura') return 'lengua'
+  if (slug === 'historia' || slug === 'historia_de_espana') return 'historia'
+  if (slug === 'filosofia' || slug === 'historia_filosofia' || slug === 'historia_de_la_filosofia') return 'historia_filosofia'
+  if (slug === 'ingles' || slug === 'english') return 'ingles'
+  if (slug === 'llengua_catalana') return 'llengua_catalana'
+
+  return SUBJECT_SLUG_BY_LABEL[subject ?? ''] ?? slug
+}
+
 export function subjectSlugFromLabel(label: string) {
-  return SUBJECT_SLUG_BY_LABEL[label] ?? label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_')
+  return normalizeSubjectSlug(label)
 }
 
 export function getCurriculumForSubject(subject: string) {

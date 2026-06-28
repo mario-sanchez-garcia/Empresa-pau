@@ -228,7 +228,7 @@ assert(
     caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
-    caminoCalendar.includes('missionMeta(newMission.kind') &&
+    caminoCalendar.includes('missionMeta(kind, subject') &&
     caminoCalendar.includes('hrefForMission') &&
     caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
     caminoCalendar.includes('source=camino_pau') &&
@@ -305,11 +305,14 @@ assert(
 assert(
   'Camino PAU keeps calendar visibility and generated week persistent',
   caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
+    caminoCalendar.includes("CALENDAR_WEEKS_KEY = 'pausia_camino_calendar_weeks_v1'") &&
     caminoCalendar.includes('loadJson<DayPlan[]>(CALENDAR_KEY, [])') &&
+    caminoCalendar.includes('loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})') &&
     caminoCalendar.includes('loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)') &&
     caminoCalendar.includes('calendarMatchesOnboarding') &&
-    caminoCalendar.includes('calendarStartsCurrentWeek') &&
-    caminoCalendar.includes('canReuseSavedCalendar ? loadedCalendar : generateCalendar') &&
+    caminoCalendar.includes('calendarStartsWeek') &&
+    caminoCalendar.includes('loadOrGenerateWeek') &&
+    caminoCalendar.includes('cacheWeek') &&
     caminoCalendar.includes('function toggleCalendarExpanded()') &&
     caminoCalendar.includes('saveJson(CALENDAR_VISIBILITY_KEY, next)') &&
     caminoCalendar.includes('onClick={toggleCalendarExpanded}')
@@ -319,7 +322,7 @@ assert(
   'Camino PAU uses current week and never hardcodes the June demo week',
   caminoCalendar.includes('function currentWeekStartISO()') &&
     caminoCalendar.includes('mondayOf(new Date())') &&
-    caminoCalendar.includes('calendar[0]?.date === currentWeekStartISO()') &&
+    caminoCalendar.includes('calendarStartsWeek(calendar, weekStartISO)') &&
     !caminoCalendar.includes('2026-06-19') &&
     !caminoCalendar.includes('2026-06-15') &&
     !caminoCalendar.includes('2026-06-21')
@@ -340,6 +343,7 @@ assert(
   'Camino PAU today card uses the real current date and filters stale saved missions',
   caminoPlan.includes('export function normalizeSubjectSlug') &&
     caminoCalendar.includes('function calendarDayLabel(dateISO: string)') &&
+    caminoCalendar.includes('const [selectedWeekStart, setSelectedWeekStart]') &&
     caminoCalendar.includes('const realToday = todayISO()') &&
     caminoCalendar.includes('visibleCalendar.find(day => day.date === realToday)') &&
     caminoCalendar.includes('isToday: day.date === realToday') &&
@@ -349,9 +353,41 @@ assert(
 )
 
 assert(
+  'Camino PAU can navigate weeks without changing real today',
+  caminoCalendar.includes('function weekRangeLabel') &&
+    caminoCalendar.includes('function weekOffset') &&
+    caminoCalendar.includes('function goToWeek(weekStartISO: string)') &&
+    caminoCalendar.includes('function goToCurrentWeek()') &&
+    caminoCalendar.includes('Semana anterior') &&
+    caminoCalendar.includes('Semana siguiente') &&
+    caminoCalendar.includes('Hoy') &&
+    caminoCalendar.includes('setSelectedWeekStart(weekStartISO)') &&
+    caminoCalendar.includes('generateCalendar(onboarding, exams, curriculum, planId, weekStartISO, cache)')
+)
+
+assert(
+  'Camino PAU plans around exams with course, EVAU and simulation limits',
+  caminoCalendar.includes('function missionPhaseForExam') &&
+    caminoCalendar.includes("return 'close'") &&
+    caminoCalendar.includes("return 'medium'") &&
+    caminoCalendar.includes('topicIsCompleted') &&
+    caminoCalendar.includes('blockIsCompleted') &&
+    caminoCalendar.includes('getSimulationLimitForPlan') &&
+    caminoCalendar.includes('getMonthlySimulationUsage') &&
+    caminoCalendar.includes('canScheduleSimulation') &&
+    caminoCalendar.includes("kind === 'mock_exam'") &&
+    caminoCalendar.includes('Has alcanzado el límite de simulacros de tu plan este mes. Te proponemos ejercicios PAU del mismo tema.') &&
+    caminoCalendar.includes('Simulacro corto:') &&
+    caminoCalendar.includes('Bloque completado: pasamos a ejercicio PAU mixto') &&
+    caminoCalendar.includes('Tema completado: evitamos repetir teoría básica') &&
+    caminoCalendar.includes('Refuerza ${curriculumItem?.topic')
+)
+
+assert(
   'Camino PAU visible missions follow course then same-topic EVAU and avoid flashcards/history tasks',
-  caminoCalendar.includes("kind, subject, block: curriculumItem?.block") &&
-    caminoCalendar.includes("kind: 'evau_practice', subject, block: secondItem?.block, topic: secondItem?.topic") &&
+  caminoCalendar.includes('buildMission({') &&
+    caminoCalendar.includes("kind: 'evau_practice'") &&
+    caminoCalendar.includes('item: secondItem') &&
     caminoCalendar.includes('Después del curso, practica con un ejercicio PAU/EVAU del mismo tema.') &&
     caminoCalendar.includes("!\/flashcard|tarjeta|mazo|historial|corrige un error|revisa tus errores\/i.test") &&
     caminoMissionGenerator.includes("type === 'flashcard' ? 'ejercicio_corto' : type") &&
@@ -394,7 +430,8 @@ assert(
     caminoCalendar.includes('planLimits.includeBonusMissions') &&
     caminoCalendar.includes('missions.length < maxCorrectableMissions') &&
     caminoCalendar.includes('Camino {caminoPlanLimits.caminoMode') &&
-    caminoCalendar.includes('variableMarginFloor')
+    caminoCalendar.includes('variableMarginFloor') &&
+    caminoCalendar.includes('fullMocksPerMonth')
 )
 
 assert(

@@ -490,7 +490,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU → {subjectLabelFromSlug(currentTopic.subject)} → {currentTopic.blockTitle}</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{selectedMissionTitle}</h1>
+              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{currentTopic.title}</h1>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{selectedV2Card ? 'Mini-misión 25 min' : '25 min'}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
@@ -503,52 +503,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4">
-              {v2Cards.length > 0 && (
-                <V2MiniMissionSelector cards={v2Cards} activeIndex={activeV2Index} onSelect={selectV2Card} />
-              )}
-              <LearningCard title="1. Vídeo explicativo">
-                <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">{videoSupportCopy}</p>
-                {videoId ? (
-                  <div>
-                    <button
-                      onClick={() => setVideoOpen(v => !v)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600"
-                    >
-                      🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
-                    </button>
-                    {videoOpen && (
-                      <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-                        <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                          <iframe
-                            src={'https://www.youtube.com/embed/' + videoId}
-                            title={'Vídeo de apoyo: ' + selectedMissionTitle}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : <EmptyContent />}
-              </LearningCard>
-              <LearningCard title="2. Explicación comprensible">
+              {/* 1. Explicación comprensible: todos los apuntes en acordeón */}
+              <LearningCard title="1. Explicación comprensible">
                 <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
                 {v2Loading
                   ? <ContentSkeleton />
-                  : selectedV2Card
-                    ? (
-                      <div className="space-y-4">
-                        {selectedV2Card.concept_markdown
-                          ? <MathMarkdown text={selectedV2Card.concept_markdown} format="raw" />
-                          : <EmptyContent />}
-                        {selectedV2Card.alert_markdown && (
-                          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                            <MathMarkdown text={selectedV2Card.alert_markdown} format="raw" />
-                          </div>
-                        )}
-                      </div>
-                    )
+                  : v2Cards.length > 0
+                    ? <V2FlashcardAccordion cards={v2Cards} />
                     : diegoLoading
                       ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
                       : diegoContent
@@ -557,43 +518,77 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                           ? <MathMarkdown text={currentTopic.explanation} />
                           : <EmptyContent />}
               </LearningCard>
-              <LearningCard title="3. Caso práctico resuelto">
-                {selectedV2Card
-                  ? selectedV2Card.worked_example_markdown
-                    ? <MathMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
-                    : <EmptyContent />
-                  : currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
-              </LearningCard>
-              <LearningCard title="4. Ahora inténtalo tú">
-                {(() => {
-                  const prompt = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt
-                  return prompt ? <MathMarkdown text={prompt} format={selectedV2Card ? 'raw' : undefined} /> : <EmptyContent />
-                })()}
-                {v2Cards.length > 0 && (
+              {/* Secciones fallback cuando no hay datos v2 */}
+              {!v2Loading && v2Cards.length === 0 && (
+                <>
+                  <LearningCard title="Vídeo explicativo">
+                    {videoId ? (
+                      <div>
+                        <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
+                          🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
+                        </button>
+                        {videoOpen && (
+                          <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+                            <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                              <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo de apoyo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : <EmptyContent />}
+                  </LearningCard>
+                  <LearningCard title="Caso práctico resuelto">
+                    {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
+                  </LearningCard>
+                  <LearningCard title="Ahora inténtalo tú">
+                    {currentTopic.practicePrompt ? <MathMarkdown text={currentTopic.practicePrompt} /> : <EmptyContent />}
+                  </LearningCard>
+                </>
+              )}
+              {/* 2. Tu misión de hoy: selector + vídeo + práctica + navegación */}
+              {v2Cards.length > 0 && (
+                <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
+                  <h2 className="text-lg font-black text-slate-950">🎯 Tu misión de hoy</h2>
+                  <p className="mt-1 mb-4 text-sm font-semibold text-slate-500">Elige una mini-misión y pon en práctica lo que has aprendido arriba.</p>
+                  <V2MiniMissionSelector cards={v2Cards} activeIndex={activeV2Index} onSelect={selectV2Card} />
+                  {videoId && (
+                    <div className="mt-4">
+                      <p className="mb-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">{videoSupportCopy}</p>
+                      <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
+                        🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
+                      </button>
+                      {videoOpen && (
+                        <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+                          <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                            <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {selectedV2Card?.practice_prompt && (
+                    <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                      <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-blue-700">Ahora inténtalo tú</p>
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                        <MathMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => selectV2Card(activeV2Index - 1)}
-                      disabled={activeV2Index === 0}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-xs font-black text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
+                    <button type="button" onClick={() => selectV2Card(activeV2Index - 1)} disabled={activeV2Index === 0} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-xs font-black text-blue-700 disabled:cursor-not-allowed disabled:opacity-40">
                       <ArrowLeft size={14} /> Misión anterior
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => selectV2Card(activeV2Index + 1)}
-                      disabled={activeV2Index >= v2Cards.length - 1}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
-                    >
+                    <button type="button" onClick={() => selectV2Card(activeV2Index + 1)} disabled={activeV2Index >= v2Cards.length - 1} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40">
                       Siguiente misión <ArrowRight size={14} />
                     </button>
                   </div>
-                )}
-              </LearningCard>
+                </article>
+              )}
+              {/* Entrega y corrección IA */}
               <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="text-lg font-black text-slate-950">5. Entrega tu ejercicio</h2>
+                    <h2 className="text-lg font-black text-slate-950">Entrega tu ejercicio</h2>
                     <p className="mt-1 text-sm font-semibold text-slate-500">El XP se asigna sólo después de corregir con Pausia y depende de la nota obtenida.</p>
                   </div>
                   {missionId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Misión conectada</span>}
@@ -668,6 +663,57 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         {toast && <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
       </main>
     </Shell>
+  )
+}
+
+// ── curriculum_content_v2 flashcard accordion (todos los apuntes) ────────────
+
+function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
+  const [openIdx, setOpenIdx] = useState<number>(0)
+  return (
+    <div className="flex flex-col gap-2">
+      {cards.map((card, i) => {
+        const isOpen = openIdx === i
+        return (
+          <div key={card.sort_order} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <button
+              type="button"
+              onClick={() => setOpenIdx(isOpen ? -1 : i)}
+              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+            >
+              <span className="flex items-center gap-2 text-sm font-black leading-snug text-slate-800">
+                <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-blue-500">#{i + 1}</span>
+                <span className="[&_p]:m-0 [&_p]:inline"><MathMarkdown text={card.title} format="raw" /></span>
+              </span>
+              <ChevronDown size={16} className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div style={{ display: 'grid', gridTemplateRows: isOpen ? '1fr' : '0fr', transition: 'grid-template-rows 280ms ease' }}>
+              <div className="overflow-hidden">
+                <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
+                  {card.concept_markdown && (
+                    <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                      <MathMarkdown text={card.concept_markdown} format="raw" />
+                    </div>
+                  )}
+                  {card.alert_markdown && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                      <MathMarkdown text={card.alert_markdown} format="raw" />
+                    </div>
+                  )}
+                  {card.worked_example_markdown && (
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                        <MathMarkdown text={card.worked_example_markdown} format="raw" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

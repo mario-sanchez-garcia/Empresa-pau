@@ -763,6 +763,7 @@ export default function Home() {
   const [contextoChat, setContextoChat] = useState('')
   const [caminoExerciseNotice, setCaminoExerciseNotice] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const chatInputRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const randomEvauResolutionKeyRef = useRef('')
   const cfg = ASIGNATURAS[asignatura]
@@ -816,6 +817,16 @@ export default function Home() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
+
+  useEffect(() => {
+    const textarea = chatInputRef.current
+    if (!textarea) return
+    const maxHeight = 180
+    textarea.style.height = 'auto'
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight)
+    textarea.style.height = `${nextHeight}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [inputChat])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -4152,7 +4163,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             <div style={{ padding: '10px 32px 18px', maxWidth: 820, width: '100%', margin: '0 auto', flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, boxSizing: 'border-box', background: 'linear-gradient(180deg, rgba(248,251,255,0), rgba(248,251,255,0.94) 22%, rgba(248,251,255,0.98))' }}>
               <div style={{ borderTop: '1px solid rgba(219,231,251,0.84)', paddingTop: 16 }}>
                 <div className="chat-input-wrap">
-                  <textarea value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, lineHeight: '1.6', resize: 'none', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', maxHeight: 120 }} />
+                  <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, minHeight: 56, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '15px 4px 15px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' }} />
                   <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
                     {cargandoChat ? <PausiaLoadingDot /> : <SendHorizontal size={15} />}
                     {cargandoChat ? 'Pensando...' : 'Enviar'}

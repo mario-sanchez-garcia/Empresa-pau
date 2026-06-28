@@ -66,6 +66,20 @@ assert(
 )
 
 assert(
+  'chat composer auto-resizes multiline textarea without hiding first lines',
+  page.includes('const chatInputRef = useRef<HTMLTextAreaElement>(null)') &&
+    page.includes('const maxHeight = 180') &&
+    page.includes("textarea.style.height = 'auto'") &&
+    page.includes('Math.min(textarea.scrollHeight, maxHeight)') &&
+    page.includes("textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'") &&
+    page.includes('ref={chatInputRef}') &&
+    page.includes('minHeight: 56') &&
+    page.includes('maxHeight: 180') &&
+    page.includes("lineHeight: '24px'") &&
+    page.includes("if (e.key === 'Enter' && !e.shiftKey)")
+)
+
+assert(
   'truncation sentinel is propagated by stream and parsed by client',
   chatRoute.includes('STREAM_TRUNCATION_SENTINEL') &&
     chatRoute.includes("finalMsg.stop_reason === 'max_tokens'") &&

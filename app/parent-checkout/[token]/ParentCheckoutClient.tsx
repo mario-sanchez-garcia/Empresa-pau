@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Lock, Shield, Timer } from 'lucide-react'
+import { CheckCircle2, Lock, PenLine, Shield, Sparkles, Timer, TrendingUp } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 
 interface Props {
@@ -83,6 +83,32 @@ export default function ParentCheckoutClient({
           </p>
         </div>
 
+        {/* What is Pausia */}
+        <div style={styles.whatIsSection}>
+          <p style={styles.whatIsText}>
+            Pausia es la plataforma que prepara a tu hijo/a para la PAU con inteligencia artificial. Corrige sus ejercicios con las rúbricas oficiales de corrección, igual que haría un profesor — en segundos.
+          </p>
+        </div>
+
+        {/* How it works */}
+        <div style={styles.howItWorksSection}>
+          <p style={styles.sectionLabel}>Cómo funciona</p>
+          <div style={styles.stepsList}>
+            <div style={styles.stepItem}>
+              <div style={styles.stepIconWrap}><PenLine size={16} style={{ color: '#2563eb' }} /></div>
+              <p style={styles.stepText}>Tu hijo/a hace ejercicios de sus exámenes PAU reales</p>
+            </div>
+            <div style={styles.stepItem}>
+              <div style={styles.stepIconWrap}><Sparkles size={16} style={{ color: '#7c3aed' }} /></div>
+              <p style={styles.stepText}>La IA los corrige con criterios oficiales y explica cada error</p>
+            </div>
+            <div style={styles.stepItem}>
+              <div style={styles.stepIconWrap}><TrendingUp size={16} style={{ color: '#059669' }} /></div>
+              <p style={styles.stepText}>Mejora cada día con su plan de estudio personalizado</p>
+            </div>
+          </div>
+        </div>
+
         {/* Features */}
         <div style={styles.featuresCard}>
           <p style={styles.featuresTitle}>Qué incluye el {planLabel}</p>
@@ -97,10 +123,10 @@ export default function ParentCheckoutClient({
         </div>
 
         {/* Guarantee */}
-        <div style={styles.guarantee}>
-          <Shield size={18} style={{ color: '#2563eb', flexShrink: 0 }} />
-          <p style={styles.guaranteeText}>
-            <strong>Garantía de 7 días.</strong> Si el alumno no está satisfecho en los primeros 7 días, puedes solicitar el reembolso escribiendo a <a href="mailto:hola@pausia.es" style={{ color: '#1e40af' }}>hola@pausia.es</a>. Ver <a href="/legal/reembolsos" style={{ color: '#1e40af' }}>política de reembolsos</a>.
+        <div style={styles.guaranteeGreen}>
+          <Shield size={20} style={{ color: '#15803d', flexShrink: 0 }} />
+          <p style={styles.guaranteeGreenText}>
+            <strong>Garantía de devolución de 7 días.</strong> Si no estás satisfecho, te devolvemos el dinero sin preguntas. <a href="mailto:hola@pausia.es" style={{ color: '#15803d' }}>hola@pausia.es</a> · <a href="/legal/reembolsos" style={{ color: '#15803d' }}>Política de reembolsos</a>
           </p>
         </div>
 
@@ -121,6 +147,10 @@ export default function ParentCheckoutClient({
           <p style={styles.priceNote}>Un solo pago. Sin suscripción mensual.</p>
 
           {error && <p style={styles.errorMsg}>{error}</p>}
+
+          <p style={styles.trustNote}>
+            Pago único de {price}. Sin suscripción. Sin renovaciones automáticas. Tu hijo/a tiene acceso durante todo el curso 2026-2027.
+          </p>
 
           <button
             type="button"
@@ -211,6 +241,36 @@ const styles = {
   hero: { display: 'flex' as const, flexDirection: 'column' as const, gap: 8 },
   heroTitle: { fontSize: 24, fontWeight: 900, color: '#0d1424', margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' },
   heroSub: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0 },
+  whatIsSection: {
+    background: 'rgba(241,245,254,0.85)',
+    borderRadius: 14,
+    padding: '14px 16px',
+    border: '1px solid rgba(219,231,251,0.7)',
+  },
+  whatIsText: { fontSize: 14, color: '#374151', lineHeight: 1.65, margin: 0 },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: 800,
+    color: '#94a3b8',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    margin: 0,
+  },
+  howItWorksSection: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
+  stepsList: { display: 'flex' as const, flexDirection: 'column' as const, gap: 10 },
+  stepItem: { display: 'flex' as const, alignItems: 'center' as const, gap: 12 },
+  stepIconWrap: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    background: 'rgba(248,250,252,0.95)',
+    border: '1px solid rgba(226,232,240,0.85)',
+    flexShrink: 0,
+  },
+  stepText: { fontSize: 14, color: '#374151', lineHeight: 1.5, margin: 0 },
   featuresCard: {
     background: 'rgba(248,251,255,0.9)',
     borderRadius: 18,
@@ -234,6 +294,16 @@ const styles = {
     alignItems: 'flex-start' as const,
   },
   guaranteeText: { fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0 },
+  guaranteeGreen: {
+    display: 'flex' as const,
+    gap: 12,
+    background: 'rgba(220,252,231,0.75)',
+    border: '1px solid rgba(134,239,172,0.65)',
+    borderRadius: 16,
+    padding: '16px 18px',
+    alignItems: 'flex-start' as const,
+  },
+  guaranteeGreenText: { fontSize: 13, color: '#14532d', lineHeight: 1.55, margin: 0 },
   ctaSection: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
   priceRow: {
     display: 'flex' as const,
@@ -244,6 +314,15 @@ const styles = {
   priceLabel: { fontSize: 14, fontWeight: 600, color: '#64748b' },
   priceValue: { fontSize: 28, fontWeight: 900, color: '#111827' },
   priceNote: { fontSize: 12, color: '#94a3b8', margin: 0, textAlign: 'right' as const },
+  trustNote: {
+    fontSize: 13,
+    color: '#374151',
+    lineHeight: 1.55,
+    margin: 0,
+    textAlign: 'center' as const,
+    fontWeight: 500,
+    padding: '2px 0',
+  },
   errorMsg: {
     background: '#fef2f2',
     border: '1px solid #fecaca',

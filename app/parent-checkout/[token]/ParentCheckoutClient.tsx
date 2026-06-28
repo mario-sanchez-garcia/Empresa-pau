@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Lock, PenLine, Shield, Sparkles, Timer, TrendingUp } from 'lucide-react'
+import { BookOpen, CheckCircle2, Lock, Shield, Target, Zap } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 
 interface Props {
@@ -29,29 +29,71 @@ function formatExpiry(iso: string): string {
   } catch { return '' }
 }
 
+const C = {
+  blue:        '#3B3BCA',
+  blueDark:    '#2D2DA8',
+  blueLight:   '#EEF2FF',
+  blueBorder:  '#C7D2FE',
+  green:       '#16A34A',
+  greenLight:  '#DCFCE7',
+  greenBorder: '#86EFAC',
+  greenDark:   '#14532D',
+  text:        '#111827',
+  textSub:     '#4B5563',
+  textMuted:   '#9CA3AF',
+  bg:          '#F9FAFB',
+  white:       '#FFFFFF',
+  border:      '#E5E7EB',
+  amber:       '#B45309',
+  amberLight:  '#FEF9C3',
+  amberBorder: '#FDE047',
+  red:         '#DC2626',
+  redLight:    '#FEF2F2',
+  redBorder:   '#FECACA',
+}
+
+const STEPS = [
+  {
+    num: '01',
+    title: 'Hace ejercicios de sus exámenes PAU reales',
+    desc: 'Tu hijo/a practica con exámenes oficiales de años anteriores, en papel o en pantalla.',
+  },
+  {
+    num: '02',
+    title: 'La IA lo corrige con los criterios oficiales',
+    desc: 'Explica exactamente qué ha fallado y por qué — igual que haría un corrector PAU oficial.',
+  },
+  {
+    num: '03',
+    title: 'Mejora cada día con su plan personalizado',
+    desc: 'Un itinerario de estudio semana a semana desde septiembre hasta la PAU.',
+  },
+]
+
+const STATS = [
+  { Icon: BookOpen, value: '+5.000',  label: 'ejercicios PAU reales' },
+  { Icon: Zap,      value: '< 30 s',  label: 'tiempo de corrección'  },
+  { Icon: Target,   value: '2 CCAA',  label: 'Madrid y Cataluña'     },
+]
+
 export default function ParentCheckoutClient({
-  token, planLabel, planFeatures, priceCents, currency, studentDisplayName, expiresAt
+  token, planLabel, planFeatures, priceCents, currency, studentDisplayName, expiresAt,
 }: Props) {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError]     = useState<string | null>(null)
 
   async function handleCheckout() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/checkout/parent-session', {
+      const res  = await fetch('/api/checkout/parent-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ token }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Error al iniciar el pago. Inténtalo de nuevo.')
-        return
-      }
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl
-      }
+      if (!res.ok) { setError(data.error ?? 'Error al iniciar el pago. Inténtalo de nuevo.'); return }
+      if (data.checkoutUrl) window.location.href = data.checkoutUrl
     } catch {
       setError('Error de conexión. Inténtalo de nuevo.')
     } finally {
@@ -59,307 +101,214 @@ export default function ParentCheckoutClient({
     }
   }
 
-  const price = formatPrice(priceCents, currency)
+  const price  = formatPrice(priceCents, currency)
   const expiry = formatExpiry(expiresAt)
-  const name = studentDisplayName
+  const name   = studentDisplayName
+
+  const container: React.CSSProperties = { maxWidth: 600, margin: '0 auto', padding: '0 20px' }
+  const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Helvetica, sans-serif'
 
   return (
-    <main style={styles.page}>
-      <div style={styles.container}>
-        {/* Header */}
-        <div style={styles.header}>
-          <Logo />
-          <div style={styles.badge}>Pago seguro</div>
-        </div>
+    <div style={{ fontFamily: font, background: C.bg, minHeight: '100dvh', WebkitFontSmoothing: 'antialiased' }}>
 
-        {/* Hero */}
-        <div style={styles.hero}>
-          <h1 style={styles.heroTitle}>
-            {name ? `Camino PAU para ${name}` : 'Camino PAU · Pausia'}
+      {/* ── 1. HEADER ──────────────────────────────────────────── */}
+      <header style={{ position: 'sticky', top: 0, zIndex: 100, background: C.white, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 600, margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <PausiaBrand subtitle={null} size="sm" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.greenLight, border: `1px solid ${C.greenBorder}`, borderRadius: 999, padding: '6px 12px' }}>
+            <Lock size={12} style={{ color: C.green }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>Pago seguro</span>
+          </div>
+        </div>
+      </header>
+
+      {/* ── 2. HERO ────────────────────────────────────────────── */}
+      <section style={{ background: 'linear-gradient(160deg, #EEF2FF 0%, #F0F4FF 55%, #F9FAFB 100%)', padding: '52px 0 44px' }}>
+        <div style={{ ...container, textAlign: 'center' }}>
+
+          {/* Pill */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: C.white, border: `1px solid ${C.blueBorder}`, borderRadius: 999, padding: '6px 16px', marginBottom: 24 }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: C.blue, letterSpacing: '0.02em' }}>Tu hijo/a te ha pedido esto</span>
+          </div>
+
+          {/* H1 */}
+          <h1 style={{ fontSize: 'clamp(26px, 8vw, 40px)', fontWeight: 900, color: C.text, margin: '0 0 16px', lineHeight: 1.15, letterSpacing: '-0.025em', whiteSpace: 'pre-line' }}>
+            {name ? `La PAU de ${name}\nempieza aquí` : 'La PAU de tu hijo/a\nempieza aquí'}
           </h1>
-          <p style={styles.heroSub}>
-            Plan de estudio PAU de septiembre a junio con misiones diarias personalizadas,
-            correcciones con IA y simulacros completos.
+
+          {/* Sub */}
+          <p style={{ fontSize: 17, color: C.textSub, lineHeight: 1.65, margin: '0 auto 40px', maxWidth: 460 }}>
+            Pausia corrige sus ejercicios con las rúbricas oficiales — igual que un profesor, en segundos. Plan completo de septiembre a junio.
           </p>
-        </div>
 
-        {/* What is Pausia */}
-        <div style={styles.whatIsSection}>
-          <p style={styles.whatIsText}>
-            Pausia es la plataforma que prepara a tu hijo/a para la PAU con inteligencia artificial. Corrige sus ejercicios con las rúbricas oficiales de corrección, igual que haría un profesor — en segundos.
-          </p>
-        </div>
-
-        {/* How it works */}
-        <div style={styles.howItWorksSection}>
-          <p style={styles.sectionLabel}>Cómo funciona</p>
-          <div style={styles.stepsList}>
-            <div style={styles.stepItem}>
-              <div style={styles.stepIconWrap}><PenLine size={16} style={{ color: '#2563eb' }} /></div>
-              <p style={styles.stepText}>Tu hijo/a hace ejercicios de sus exámenes PAU reales</p>
-            </div>
-            <div style={styles.stepItem}>
-              <div style={styles.stepIconWrap}><Sparkles size={16} style={{ color: '#7c3aed' }} /></div>
-              <p style={styles.stepText}>La IA los corrige con criterios oficiales y explica cada error</p>
-            </div>
-            <div style={styles.stepItem}>
-              <div style={styles.stepIconWrap}><TrendingUp size={16} style={{ color: '#059669' }} /></div>
-              <p style={styles.stepText}>Mejora cada día con su plan de estudio personalizado</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div style={styles.featuresCard}>
-          <p style={styles.featuresTitle}>Qué incluye el {planLabel}</p>
-          <ul style={styles.featuresList}>
-            {planFeatures.map(f => (
-              <li key={f} style={styles.featureItem}>
-                <CheckCircle2 size={16} style={{ color: '#16a34a', flexShrink: 0, marginTop: 2 }} />
-                <span style={styles.featureText}>{f}</span>
-              </li>
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            {STATS.map(({ Icon, value, label }) => (
+              <div key={label} style={{ background: C.white, borderRadius: 16, border: `1px solid ${C.border}`, padding: '16px 10px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                  <Icon size={18} style={{ color: C.blue }} />
+                </div>
+                <p style={{ fontSize: 17, fontWeight: 900, color: C.blue, margin: 0, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
+                <p style={{ fontSize: 11, fontWeight: 600, color: C.textMuted, margin: '5px 0 0', lineHeight: 1.3 }}>{label}</p>
+              </div>
             ))}
-          </ul>
-        </div>
-
-        {/* Guarantee */}
-        <div style={styles.guaranteeGreen}>
-          <Shield size={20} style={{ color: '#15803d', flexShrink: 0 }} />
-          <p style={styles.guaranteeGreenText}>
-            <strong>Garantía de devolución de 7 días.</strong> Si no estás satisfecho, te devolvemos el dinero sin preguntas. <a href="mailto:hola@pausia.es" style={{ color: '#15803d' }}>hola@pausia.es</a> · <a href="/legal/reembolsos" style={{ color: '#15803d' }}>Política de reembolsos</a>
-          </p>
-        </div>
-
-        {/* IA disclaimer */}
-        <div style={styles.disclaimer}>
-          <p style={styles.disclaimerText}>
-            Las correcciones generadas por IA son orientativas y pueden contener errores. No sustituyen a un profesor ni a los criterios oficiales de corrección PAU.{' '}
-            <a href="/legal/ia" style={{ color: '#94a3b8', textDecoration: 'underline' }}>Política de uso de IA</a>
-          </p>
-        </div>
-
-        {/* Price + CTA */}
-        <div style={styles.ctaSection}>
-          <div style={styles.priceRow}>
-            <span style={styles.priceLabel}>Precio único</span>
-            <span style={styles.priceValue}>{price}</span>
           </div>
-          <p style={styles.priceNote}>Un solo pago. Sin suscripción mensual.</p>
+        </div>
+      </section>
 
-          {error && <p style={styles.errorMsg}>{error}</p>}
+      {/* ── 3. CÓMO FUNCIONA ───────────────────────────────────── */}
+      <section style={{ background: C.white, padding: '56px 0' }}>
+        <div style={container}>
+          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', color: C.blue, textTransform: 'uppercase', margin: '0 0 8px' }}>Cómo funciona</p>
+          <h2 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, color: C.text, margin: '0 0 28px', lineHeight: 1.2 }}>¿Cómo ayuda Pausia a tu hijo/a?</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {STEPS.map(step => (
+              <div key={step.num} style={{ display: 'flex', gap: 18, alignItems: 'flex-start', background: C.bg, borderRadius: 18, padding: '20px', border: `1px solid ${C.border}` }}>
+                <div style={{ minWidth: 44, height: 44, borderRadius: 12, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 13, fontWeight: 900, color: C.white, letterSpacing: '-0.02em' }}>{step.num}</span>
+                </div>
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 800, color: C.text, margin: '0 0 5px', lineHeight: 1.3 }}>{step.title}</p>
+                  <p style={{ fontSize: 14, color: C.textSub, lineHeight: 1.6, margin: 0 }}>{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <p style={styles.trustNote}>
-            Pago único de {price}. Sin suscripción. Sin renovaciones automáticas. Tu hijo/a tiene acceso durante todo el curso 2026-2027.
+      {/* ── 4. QUÉ INCLUYE ─────────────────────────────────────── */}
+      <section style={{ background: C.bg, padding: '56px 0' }}>
+        <div style={container}>
+          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', color: C.blue, textTransform: 'uppercase', margin: '0 0 8px' }}>Qué incluye</p>
+          <h2 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, color: C.text, margin: '0 0 20px', lineHeight: 1.2 }}>Todo lo que incluye el {planLabel}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {planFeatures.map((f, i) => {
+              const highlight = f.toLowerCase().includes('correcciones ia')
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 14, background: highlight ? C.blueLight : C.white, border: `1px solid ${highlight ? C.blueBorder : C.border}` }}>
+                  <CheckCircle2 size={18} style={{ color: C.green, flexShrink: 0 }} />
+                  <span style={{ fontSize: 15, fontWeight: highlight ? 700 : 500, color: highlight ? C.blue : C.text, lineHeight: 1.4, flex: 1 }}>{f}</span>
+                  {highlight && (
+                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', color: C.blue, background: C.blueBorder, borderRadius: 999, padding: '3px 9px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      Destacado
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. PRECIO + CTA ────────────────────────────────────── */}
+      <section style={{ background: C.white, padding: '56px 0' }}>
+        <div style={{ ...container, textAlign: 'center' }}>
+
+          {/* Price */}
+          <div style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 'clamp(48px, 13vw, 68px)', fontWeight: 900, color: C.text, letterSpacing: '-0.04em', lineHeight: 1 }}>{price}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: C.textMuted, marginLeft: 10 }}>pago único</span>
+          </div>
+
+          <p style={{ fontSize: 14, color: C.textMuted, margin: '0 0 16px', fontWeight: 600 }}>
+            Sin suscripción · Sin renovaciones · Acceso hasta junio 2027
           </p>
 
+          {/* Comparison */}
+          <p style={{ fontSize: 13, color: C.textSub, margin: '0 auto 32px', maxWidth: 380, lineHeight: 1.55, background: C.bg, borderRadius: 12, padding: '12px 16px', border: `1px solid ${C.border}` }}>
+            Las academias cobran <strong>200 €/mes</strong>. Pausia cuesta{' '}
+            <strong style={{ color: C.blue }}>{price} todo el curso</strong>.
+          </p>
+
+          {/* Error */}
+          {error && (
+            <div role="alert" style={{ background: C.redLight, border: `1px solid ${C.redBorder}`, borderRadius: 14, padding: '12px 16px', marginBottom: 16, fontSize: 14, color: C.red, fontWeight: 600, textAlign: 'left' }}>
+              {error}
+            </div>
+          )}
+
+          {/* CTA */}
           <button
             type="button"
             onClick={handleCheckout}
             disabled={loading}
-            style={{ ...styles.ctaButton, opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer' }}
+            aria-busy={loading}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              width: '100%', minHeight: 58,
+              background: loading
+                ? '#818CF8'
+                : `linear-gradient(135deg, ${C.blue} 0%, #4F46E5 100%)`,
+              color: C.white, border: 'none', borderRadius: 18,
+              padding: '18px 24px', fontSize: 17, fontWeight: 800,
+              cursor: loading ? 'wait' : 'pointer',
+              boxShadow: loading ? 'none' : '0 10px 28px rgba(59,59,202,0.32)',
+              transition: 'transform 160ms ease, box-shadow 160ms ease',
+              touchAction: 'manipulation',
+              letterSpacing: '-0.01em',
+            }}
           >
-            <Lock size={16} />
-            {loading ? 'Redirigiendo a pago…' : `Desbloquear ${planLabel}`}
+            <Lock size={18} />
+            {loading ? 'Redirigiendo al pago…' : `Desbloquear Pausia para ${name ?? 'tu hijo/a'}`}
           </button>
 
-          <div style={styles.securityRow}>
-            <Shield size={13} />
-            <span style={styles.securityText}>Pago procesado por Stripe · Datos cifrados</span>
+          {/* Security */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12 }}>
+            <Shield size={13} style={{ color: C.textMuted }} />
+            <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 600 }}>Pago procesado por Stripe · Datos cifrados SSL</span>
           </div>
-        </div>
 
-        {/* Expiry notice */}
-        {expiry && (
-          <div style={styles.expiryRow}>
-            <Timer size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
-            <p style={styles.expiryText}>Este enlace caduca el {expiry}</p>
+          {/* Expiry */}
+          {expiry && (
+            <p style={{ fontSize: 13, color: C.amber, fontWeight: 700, marginTop: 20, background: C.amberLight, border: `1px solid ${C.amberBorder}`, borderRadius: 10, padding: '9px 16px', display: 'inline-block' }}>
+              Este enlace caduca el {expiry}
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* ── 6. GARANTÍA ────────────────────────────────────────── */}
+      <section style={{ background: C.greenLight, borderTop: `1px solid ${C.greenBorder}`, padding: '52px 0' }}>
+        <div style={{ ...container, textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 60, height: 60, borderRadius: 20, background: C.white, border: `1px solid ${C.greenBorder}`, marginBottom: 20, boxShadow: '0 4px 12px rgba(22,163,74,0.12)' }}>
+            <Shield size={28} style={{ color: C.green }} />
           </div>
-        )}
-
-        {/* Legal footer */}
-        <div style={styles.legalFooter}>
-          <a href="/legal/privacidad" style={styles.legalLink}>Privacidad</a>
-          <span style={styles.legalSep}>·</span>
-          <a href="/legal/terminos" style={styles.legalLink}>Términos</a>
-          <span style={styles.legalSep}>·</span>
-          <a href="/legal/reembolsos" style={styles.legalLink}>Reembolsos</a>
-          <span style={styles.legalSep}>·</span>
-          <a href="/legal/ia" style={styles.legalLink}>Uso de IA</a>
-          <span style={styles.legalSep}>·</span>
-          <a href="/contacto" style={styles.legalLink}>Contacto</a>
+          <h2 style={{ fontSize: 22, fontWeight: 900, color: C.greenDark, margin: '0 0 12px', lineHeight: 1.2 }}>Garantía de devolución de 7 días</h2>
+          <p style={{ fontSize: 15, color: '#166534', lineHeight: 1.7, margin: '0 auto', maxWidth: 420 }}>
+            Si en los primeros 7 días no estás satisfecho, te devolvemos el dinero completo sin preguntas.
+            Escríbenos a{' '}
+            <a href="mailto:legal@pausia.es" style={{ color: C.green, fontWeight: 700 }}>legal@pausia.es</a>.
+            {' '}Ver{' '}
+            <a href="/legal/reembolsos" style={{ color: C.green, fontWeight: 700 }}>política de reembolsos</a>.
+          </p>
         </div>
-      </div>
-    </main>
-  )
-}
+      </section>
 
-function Logo() {
-  return (
-    <PausiaBrand subtitle={null} size="sm" />
-  )
-}
+      {/* ── 7. FOOTER ──────────────────────────────────────────── */}
+      <footer style={{ background: '#F3F4F6', borderTop: `1px solid ${C.border}`, padding: '32px 0' }}>
+        <div style={{ ...container, textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 18px', marginBottom: 14 }}>
+            {[
+              { label: '© 2026 Pausia', href: null },
+              { label: 'legal@pausia.es', href: 'mailto:legal@pausia.es' },
+              { label: 'Términos', href: '/legal/terminos' },
+              { label: 'Privacidad', href: '/legal/privacidad' },
+            ].map(({ label, href }) =>
+              href ? (
+                <a key={label} href={href} style={{ fontSize: 13, color: C.textMuted, fontWeight: 600, textDecoration: 'none' }}>{label}</a>
+              ) : (
+                <span key={label} style={{ fontSize: 13, color: C.textMuted, fontWeight: 600 }}>{label}</span>
+              )
+            )}
+          </div>
+          <p style={{ fontSize: 11, color: '#D1D5DB', lineHeight: 1.6, margin: '0 auto', maxWidth: 460 }}>
+            Las correcciones generadas por IA son orientativas y pueden contener errores. No sustituyen a un profesor ni a los criterios oficiales de corrección PAU.{' '}
+            <a href="/legal/ia" style={{ color: '#D1D5DB', textDecoration: 'underline' }}>Política de uso de IA</a>
+          </p>
+        </div>
+      </footer>
 
-const styles = {
-  page: {
-    minHeight: '100vh',
-    background: 'radial-gradient(ellipse 90% 60% at -5% -5%, rgba(219,234,254,0.55) 0%, transparent 55%), radial-gradient(ellipse 60% 50% at 105% -10%, rgba(224,231,255,0.42) 0%, transparent 50%), radial-gradient(ellipse 50% 70% at 50% 110%, rgba(239,246,255,0.35) 0%, transparent 60%), linear-gradient(165deg, #f7faff 0%, #f0f5fe 60%, #edf2fd 100%)',
-    display: 'flex' as const,
-    alignItems: 'flex-start' as const,
-    justifyContent: 'center' as const,
-    padding: '32px 16px 64px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif',
-  },
-  container: {
-    background: 'rgba(255,255,255,0.78)',
-    backdropFilter: 'blur(20px) saturate(1.16)',
-    WebkitBackdropFilter: 'blur(20px) saturate(1.16)',
-    borderRadius: 24,
-    border: '1px solid rgba(219,231,251,0.80)',
-    boxShadow: '0 22px 60px rgba(37,99,235,0.11), 0 2px 8px rgba(37,99,235,0.05)',
-    padding: '36px 32px',
-    maxWidth: 460,
-    width: '100%',
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 24,
-  },
-  header: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-  },
-  badge: {
-    background: 'rgba(5,150,105,0.08)',
-    border: '1px solid rgba(5,150,105,0.22)',
-    color: '#065f46',
-    borderRadius: 999,
-    padding: '4px 12px',
-    fontSize: 11,
-    fontWeight: 800,
-    letterSpacing: '0.02em',
-  },
-  hero: { display: 'flex' as const, flexDirection: 'column' as const, gap: 8 },
-  heroTitle: { fontSize: 24, fontWeight: 900, color: '#0d1424', margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' },
-  heroSub: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0 },
-  whatIsSection: {
-    background: 'rgba(241,245,254,0.85)',
-    borderRadius: 14,
-    padding: '14px 16px',
-    border: '1px solid rgba(219,231,251,0.7)',
-  },
-  whatIsText: { fontSize: 14, color: '#374151', lineHeight: 1.65, margin: 0 },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: 800,
-    color: '#94a3b8',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.08em',
-    margin: 0,
-  },
-  howItWorksSection: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
-  stepsList: { display: 'flex' as const, flexDirection: 'column' as const, gap: 10 },
-  stepItem: { display: 'flex' as const, alignItems: 'center' as const, gap: 12 },
-  stepIconWrap: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    background: 'rgba(248,250,252,0.95)',
-    border: '1px solid rgba(226,232,240,0.85)',
-    flexShrink: 0,
-  },
-  stepText: { fontSize: 14, color: '#374151', lineHeight: 1.5, margin: 0 },
-  featuresCard: {
-    background: 'rgba(248,251,255,0.9)',
-    borderRadius: 18,
-    padding: '18px 20px',
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 12,
-    border: '1px solid rgba(219,231,251,0.75)',
-  },
-  featuresTitle: { fontSize: 13, fontWeight: 800, color: '#64748b', margin: 0 },
-  featuresList: { listStyle: 'none', margin: 0, padding: 0, display: 'flex' as const, flexDirection: 'column' as const, gap: 8 },
-  featureItem: { display: 'flex' as const, alignItems: 'flex-start' as const, gap: 10 },
-  featureText: { fontSize: 14, color: '#374151', lineHeight: 1.5 },
-  guarantee: {
-    display: 'flex' as const,
-    gap: 12,
-    background: 'rgba(239,246,255,0.85)',
-    border: '1px solid #bfdbfe',
-    borderRadius: 16,
-    padding: '14px 16px',
-    alignItems: 'flex-start' as const,
-  },
-  guaranteeText: { fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0 },
-  guaranteeGreen: {
-    display: 'flex' as const,
-    gap: 12,
-    background: 'rgba(220,252,231,0.75)',
-    border: '1px solid rgba(134,239,172,0.65)',
-    borderRadius: 16,
-    padding: '16px 18px',
-    alignItems: 'flex-start' as const,
-  },
-  guaranteeGreenText: { fontSize: 13, color: '#14532d', lineHeight: 1.55, margin: 0 },
-  ctaSection: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
-  priceRow: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-    padding: '0 4px',
-  },
-  priceLabel: { fontSize: 14, fontWeight: 600, color: '#64748b' },
-  priceValue: { fontSize: 28, fontWeight: 900, color: '#111827' },
-  priceNote: { fontSize: 12, color: '#94a3b8', margin: 0, textAlign: 'right' as const },
-  trustNote: {
-    fontSize: 13,
-    color: '#374151',
-    lineHeight: 1.55,
-    margin: 0,
-    textAlign: 'center' as const,
-    fontWeight: 500,
-    padding: '2px 0',
-  },
-  errorMsg: {
-    background: '#fef2f2',
-    border: '1px solid #fecaca',
-    borderRadius: 14,
-    padding: '10px 14px',
-    fontSize: 13,
-    color: '#dc2626',
-    margin: 0,
-  },
-  ctaButton: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: 8,
-    background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #38bdf8 100%)',
-    color: 'white',
-    border: 'none',
-    borderRadius: 16,
-    padding: '16px 24px',
-    fontSize: 16,
-    fontWeight: 800,
-    width: '100%',
-    boxShadow: '0 14px 32px rgba(37,99,235,0.22)',
-    transition: 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)',
-  },
-  securityRow: { display: 'flex' as const, justifyContent: 'center' as const, alignItems: 'center' as const, gap: 6, color: '#94a3b8' },
-  securityText: { fontSize: 12, color: '#94a3b8' },
-  expiryRow: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 6,
-    justifyContent: 'center' as const,
-  },
-  expiryText: { fontSize: 12, color: '#94a3b8', margin: 0 },
-  disclaimer: { background: '#f8fafc', borderRadius: 10, padding: '10px 14px' },
-  disclaimerText: { fontSize: 12, color: '#94a3b8', lineHeight: 1.5, margin: 0 },
-  legalFooter: { display: 'flex' as const, flexWrap: 'wrap' as const, gap: 8, justifyContent: 'center' as const, paddingTop: 4 },
-  legalLink: { fontSize: 12, color: '#94a3b8', textDecoration: 'none' },
-  legalSep: { fontSize: 12, color: '#d1d5db' },
+    </div>
+  )
 }

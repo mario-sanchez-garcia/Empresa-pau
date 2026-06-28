@@ -117,6 +117,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [diegoLoading, setDiegoLoading] = useState(true)
   const [v2Cards, setV2Cards] = useState<CurriculumV2Card[]>([])
   const [v2Loading, setV2Loading] = useState(true)
+  const [activeV2Index, setActiveV2Index] = useState(0)
   const [videoOpen, setVideoOpen] = useState(false)
   const [streak, setStreak] = useState(0)
   const [liga, setLiga] = useState<LigaInfo | null>(null)
@@ -146,9 +147,22 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
 
   useEffect(() => {
-    if (!topic) { queueMicrotask(() => setV2Loading(false)); return }
-    const range = TOPIC_TO_V2_RANGE[`${topic.subject}:${topic.blockSlug}:${topic.topicSlug}`]
-    if (!range) { queueMicrotask(() => setV2Loading(false)); return }
+    let cancelled = false
+    setV2Loading(true)
+    setV2Cards([])
+    setActiveV2Index(0)
+
+    if (!topic) {
+      queueMicrotask(() => { if (!cancelled) setV2Loading(false) })
+      return () => { cancelled = true }
+    }
+
+    const range = TOPIC_TO_V2_RANGE[topic.subject + ':' + topic.blockSlug + ':' + topic.topicSlug]
+    if (!range) {
+      queueMicrotask(() => { if (!cancelled) setV2Loading(false) })
+      return () => { cancelled = true }
+    }
+
     supabase
       .from('curriculum_content_v2')
       .select('sort_order, title, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
@@ -156,11 +170,46 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       .gte('sort_order', range.min)
       .lte('sort_order', range.max)
       .order('sort_order', { ascending: true })
-      .then(({ data }) => {
-        if (data?.length) setV2Cards(data as CurriculumV2Card[])
-        setV2Loading(false)
-      })
+      .then(
+        ({ data }) => {
+          if (cancelled) return
+          setV2Cards(data?.length ? data as CurriculumV2Card[] : [])
+          setV2Loading(false)
+        },
+        () => {
+          if (cancelled) return
+          setV2Cards([])
+          setV2Loading(false)
+        }
+      )
+
+    return () => { cancelled = true }
   }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
+
+  useEffect(() => {
+    if (!v2Cards.length) {
+      setActiveV2Index(0)
+      return
+    }
+    if (typeof window === 'undefined') return
+
+    const syncActiveCardFromUrl = () => {
+      const raw = new URLSearchParams(window.location.search).get('card')
+      const requested = Number(raw)
+      const nextIndex = Number.isInteger(requested) && requested >= 1 && requested <= v2Cards.length ? requested - 1 : 0
+      setActiveV2Index(nextIndex)
+
+      if (raw && (nextIndex !== requested - 1 || requested < 1 || requested > v2Cards.length)) {
+        const url = new URL(window.location.href)
+        url.searchParams.set('card', '1')
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash)
+      }
+    }
+
+    syncActiveCardFromUrl()
+    window.addEventListener('popstate', syncActiveCardFromUrl)
+    return () => window.removeEventListener('popstate', syncActiveCardFromUrl)
+  }, [v2Cards.length, topic?.subject, topic?.blockSlug, topic?.topicSlug])
 
   useEffect(() => {
     const toISO = (d: Date) => d.toISOString().slice(0, 10)
@@ -195,8 +244,28 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const topicCompleted = Boolean(current.evau)
   const hasContent = hasLatexContent(currentTopic)
   const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
-  const videoId = v2Cards[0]?.video_id ?? TOPIC_VIDEO_MAP[key] ?? null
+  const selectedV2Card = v2Cards[activeV2Index] ?? v2Cards[0] ?? null
+  const selectedV2Number = selectedV2Card ? activeV2Index + 1 : null
+  const selectedMissionTitle = selectedV2Card?.title ?? currentTopic.title
+  const uniqueV2VideoIds = Array.from(new Set(v2Cards.map(card => card.video_id).filter((id): id is string => Boolean(id))))
+  const videoId = selectedV2Card?.video_id ?? TOPIC_VIDEO_MAP[key] ?? null
+  const videoSupportCopy = selectedV2Card
+    ? uniqueV2VideoIds.length === 1 && v2Cards.length > 1
+      ? 'Vídeo de apoyo del tema. Algunas mini-misiones comparten el mismo vídeo mientras completamos el mapa individual.'
+      : 'Vídeo explicativo de esta mini-misión.'
+    : 'Vídeo explicativo del tema.'
   const myLigaEntry = liga && currentUserId ? liga.miembros.find(m => m.user_id === currentUserId) ?? null : null
+
+  function selectV2Card(index: number, mode: 'push' | 'replace' = 'push') {
+    if (!v2Cards.length) return
+    const safeIndex = Math.min(Math.max(index, 0), v2Cards.length - 1)
+    setActiveV2Index(safeIndex)
+    if (typeof window === 'undefined') return
+
+    const url = new URL(window.location.href)
+    url.searchParams.set('card', String(safeIndex + 1))
+    window.history[mode === 'replace' ? 'replaceState' : 'pushState'](null, '', url.pathname + url.search + url.hash)
+  }
 
   async function markNotSeen() {
     const now = new Date().toISOString()
@@ -347,16 +416,16 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         return
       }
       const subjectLabel = subjectLabelFromSlug(currentTopic.subject)
-      const statement = v2Cards[v2Cards.length - 1]?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? `Ejercicio de ${currentTopic.title}`
+      const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
       const prompt = buildCorrectionPrompt({
         subject: subjectLabel,
-        simulacroId: `Camino PAU · ${subjectLabel} · ${currentTopic.blockTitle} · ${currentTopic.title}`,
+        simulacroId: 'Camino PAU · ' + subjectLabel + ' · ' + currentTopic.blockTitle + ' · ' + selectedMissionTitle,
         option: 'Curso',
         elapsedMinutes: 0,
         difficulty: 'Media',
         blocks: [{
           numeroBloque: 'Ejercicio de curso',
-          tema: currentTopic.title,
+          tema: selectedMissionTitle,
           year: new Date().getFullYear(),
           convocatoria: 'Camino PAU',
           option: 'Curso',
@@ -421,11 +490,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU → {subjectLabelFromSlug(currentTopic.subject)} → {currentTopic.blockTitle}</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{currentTopic.title}</h1>
+              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{selectedMissionTitle}</h1>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">25 min</span>
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{selectedV2Card ? 'Mini-misión 25 min' : '25 min'}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
-                <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">Subpágina de aprendizaje</span>
+                <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">{selectedV2Card ? `Misión ${selectedV2Card.sort_order} de 60` : 'Subpágina de aprendizaje'}</span>
+                {selectedV2Number && <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700">Mini-misión {selectedV2Number} de {v2Cards.length}</span>}
               </div>
               <p className="mt-3 text-sm font-semibold text-slate-500">{hasContent ? 'Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.' : 'Itinerario preparado. Falta cargar apunte LaTeX específico para este tema.'}</p>
             </div>
@@ -433,33 +503,25 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4">
-              <LearningCard title="1. Explicación comprensible">
-                <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
-                {v2Loading
-                  ? <ContentSkeleton />
-                  : v2Cards.length > 0
-                    ? <V2FlashcardAccordion cards={v2Cards} />
-                    : diegoLoading
-                      ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
-                      : diegoContent
-                        ? <DiegoContentCards markdown={diegoContent} />
-                        : currentTopic.explanation
-                          ? <MathMarkdown text={currentTopic.explanation} />
-                          : <EmptyContent />}
-                {videoId && (
-                  <div className="mt-4 border-t border-slate-100 pt-3">
+              {v2Cards.length > 0 && (
+                <V2MiniMissionSelector cards={v2Cards} activeIndex={activeV2Index} onSelect={selectV2Card} />
+              )}
+              <LearningCard title="1. Vídeo explicativo">
+                <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">{videoSupportCopy}</p>
+                {videoId ? (
+                  <div>
                     <button
                       onClick={() => setVideoOpen(v => !v)}
                       className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600"
                     >
-                      🎥 {videoOpen ? 'Ocultar video' : '¿No lo entiendes? Ver video explicativo'}
+                      🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                     </button>
                     {videoOpen && (
                       <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
                         <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                           <iframe
-                            src={`https://www.youtube.com/embed/${videoId}`}
-                            title={`Video explicativo: ${currentTopic.title}`}
+                            src={'https://www.youtube.com/embed/' + videoId}
+                            title={'Vídeo de apoyo: ' + selectedMissionTitle}
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
@@ -468,21 +530,70 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                       </div>
                     )}
                   </div>
-                )}
+                ) : <EmptyContent />}
               </LearningCard>
-              <LearningCard title="2. Ejemplo guiado">
-                {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
+              <LearningCard title="2. Explicación comprensible">
+                <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
+                {v2Loading
+                  ? <ContentSkeleton />
+                  : selectedV2Card
+                    ? (
+                      <div className="space-y-4">
+                        {selectedV2Card.concept_markdown
+                          ? <MathMarkdown text={selectedV2Card.concept_markdown} format="raw" />
+                          : <EmptyContent />}
+                        {selectedV2Card.alert_markdown && (
+                          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                            <MathMarkdown text={selectedV2Card.alert_markdown} format="raw" />
+                          </div>
+                        )}
+                      </div>
+                    )
+                    : diegoLoading
+                      ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
+                      : diegoContent
+                        ? <DiegoContentCards markdown={diegoContent} />
+                        : currentTopic.explanation
+                          ? <MathMarkdown text={currentTopic.explanation} />
+                          : <EmptyContent />}
               </LearningCard>
-              <LearningCard title="3. Ahora inténtalo tú">
+              <LearningCard title="3. Caso práctico resuelto">
+                {selectedV2Card
+                  ? selectedV2Card.worked_example_markdown
+                    ? <MathMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
+                    : <EmptyContent />
+                  : currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
+              </LearningCard>
+              <LearningCard title="4. Ahora inténtalo tú">
                 {(() => {
-                  const prompt = v2Cards[v2Cards.length - 1]?.practice_prompt ?? currentTopic.practicePrompt
-                  return prompt ? <MathMarkdown text={prompt} /> : <EmptyContent />
+                  const prompt = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt
+                  return prompt ? <MathMarkdown text={prompt} format={selectedV2Card ? 'raw' : undefined} /> : <EmptyContent />
                 })()}
+                {v2Cards.length > 0 && (
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => selectV2Card(activeV2Index - 1)}
+                      disabled={activeV2Index === 0}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-xs font-black text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <ArrowLeft size={14} /> Misión anterior
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => selectV2Card(activeV2Index + 1)}
+                      disabled={activeV2Index >= v2Cards.length - 1}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Siguiente misión <ArrowRight size={14} />
+                    </button>
+                  </div>
+                )}
               </LearningCard>
               <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="text-lg font-black text-slate-950">4. Entrega tu ejercicio</h2>
+                    <h2 className="text-lg font-black text-slate-950">5. Entrega tu ejercicio</h2>
                     <p className="mt-1 text-sm font-semibold text-slate-500">El XP se asigna sólo después de corregir con Pausia y depende de la nota obtenida.</p>
                   </div>
                   {missionId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Misión conectada</span>}
@@ -560,65 +671,37 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   )
 }
 
-// ── curriculum_content_v2 accordion ─────────────────────────────────────────
+// ── curriculum_content_v2 mini-mission selector ─────────────────────────────
 
-function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
-  const [openIdx, setOpenIdx] = useState<number | null>(0)
+function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: CurriculumV2Card[]; activeIndex: number; onSelect: (index: number) => void }) {
   return (
-    <div className="flex flex-col gap-2">
-      {cards.map((card, i) => {
-        const isOpen = openIdx === i
-        return (
-          <div key={card.sort_order} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+    <section className="rounded-3xl border border-blue-100 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Misiones de este tema</p>
+          <p className="mt-1 text-sm font-semibold text-slate-500">Cada tarjeta es una mini-misión independiente.</p>
+        </div>
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{cards.length} mini-misiones</span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {cards.map((card, index) => {
+          const isActive = activeIndex === index
+          return (
             <button
+              key={card.sort_order}
               type="button"
-              onClick={() => setOpenIdx(isOpen ? null : i)}
-              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+              onClick={() => onSelect(index)}
+              className={'rounded-2xl border px-4 py-3 text-left transition-all ' + (isActive ? 'border-blue-300 bg-blue-50 shadow-sm' : 'border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-white')}
             >
-              <span className="text-sm font-black leading-snug text-slate-800">
+              <span className={'mb-1 block text-[10px] font-black uppercase tracking-[0.12em] ' + (isActive ? 'text-blue-700' : 'text-slate-400')}>Mini-misión {index + 1}</span>
+              <span className={'block text-sm font-black leading-snug ' + (isActive ? 'text-blue-950' : 'text-slate-700') + ' [&_p]:m-0 [&_p]:inline'}>
                 <MathMarkdown text={card.title} format="raw" />
               </span>
-              <ChevronDown
-                size={16}
-                className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-              />
             </button>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateRows: isOpen ? '1fr' : '0fr',
-                transition: 'grid-template-rows 280ms ease',
-              }}
-            >
-              <div className="overflow-hidden">
-                <div className="space-y-3 border-t border-slate-100 px-5 pb-5 pt-4">
-                  {card.concept_markdown && (
-                    <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                      <MathMarkdown text={card.concept_markdown} format="raw" />
-                    </div>
-                  )}
-                  {card.alert_markdown && (
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-amber-800">
-                        <MathMarkdown text={card.alert_markdown} format="raw" />
-                      </div>
-                    </div>
-                  )}
-                  {card.worked_example_markdown && (
-                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
-                      <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-emerald-700">Caso Práctico Resuelto</p>
-                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <MathMarkdown text={card.worked_example_markdown} format="raw" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      })}
-    </div>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 

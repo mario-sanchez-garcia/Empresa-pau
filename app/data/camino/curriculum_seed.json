@@ -1360,7 +1360,7 @@
     "subject": "matematicas_ii",
     "blockSlug": "probabilidad",
     "blockTitle": "Probabilidad",
-    "topicSlug": "aproximacion-de-la-binomial-a-la-normal-",
+    "topicSlug": "aproximacion-de-la-binomial-a-la-normal",
     "title": "Aproximación de la Binomial a la Normal (Moivre-Gauss)",
     "orderIndex": 60,
     "contentStatus": "flashcard_v2",
@@ -1371,7 +1371,7 @@
     "evauPracticeQuery": {
       "subject": "mates",
       "block": "probabilidad",
-      "topic": "aproximacion-de-la-binomial-a-la-normal-"
+      "topic": "aproximacion-de-la-binomial-a-la-normal"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [

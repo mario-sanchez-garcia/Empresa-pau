@@ -42,6 +42,7 @@ export const SUBJECT_LABELS: Record<string, string> = {
   quimica: 'Química',
   biologia: 'Biología',
   lengua: 'Lengua Castellana',
+  historia_espana: 'Historia de España',
   historia: 'Historia de España',
   historia_filosofia: 'Historia de la Filosofía',
   ingles: 'Inglés',
@@ -79,7 +80,8 @@ export function normalizeSubjectSlug(subject?: string | null) {
   if (slug === 'quimica') return 'quimica'
   if (slug === 'biologia') return 'biologia'
   if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_y_literatura') return 'lengua'
-  if (slug === 'historia' || slug === 'historia_de_espana') return 'historia'
+  if (slug === 'historia') return 'historia'
+  if (slug === 'historia_de_espana' || slug === 'historia_espana') return 'historia_espana'
   if (slug === 'filosofia' || slug === 'historia_filosofia' || slug === 'historia_de_la_filosofia') return 'historia_filosofia'
   if (slug === 'ingles' || slug === 'english') return 'ingles'
   if (slug === 'llengua_catalana') return 'llengua_catalana'

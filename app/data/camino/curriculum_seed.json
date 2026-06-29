@@ -1693,7 +1693,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "el-neolitico-la-revolucion-agricola-y",
+    "topicSlug": "el-neolitico-la-revolucion-agricola-y-el",
     "title": "El Neolítico: La Revolución Agrícola y el Sedentarismo",
     "orderIndex": 3,
     "contentStatus": "flashcard_v2",
@@ -1704,7 +1704,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "el-neolitico-la-revolucion-agricola-y"
+      "topic": "el-neolitico-la-revolucion-agricola-y-el"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1716,7 +1716,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "el-arte-rupestre-neolitico-la-escuela",
+    "topicSlug": "el-arte-rupestre-neolitico-la-escuela-le",
     "title": "El Arte Rupestre Neolítico: La Escuela Levantina",
     "orderIndex": 4,
     "contentStatus": "flashcard_v2",
@@ -1727,7 +1727,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "el-arte-rupestre-neolitico-la-escuela"
+      "topic": "el-arte-rupestre-neolitico-la-escuela-le"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1739,7 +1739,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "la-edad-de-los-metales-del-cobre-al",
+    "topicSlug": "la-edad-de-los-metales-del-cobre-al-hier",
     "title": "La Edad de los Metales: Del Cobre al Hierro",
     "orderIndex": 5,
     "contentStatus": "flashcard_v2",
@@ -1750,7 +1750,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "la-edad-de-los-metales-del-cobre-al"
+      "topic": "la-edad-de-los-metales-del-cobre-al-hier"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1785,7 +1785,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "los-celtas-y-celtiberos-organizacion-y",
+    "topicSlug": "los-celtas-y-celtiberos-organizacion-y-c",
     "title": "Los Celtas y Celtíberos: Organización y Cultura",
     "orderIndex": 7,
     "contentStatus": "flashcard_v2",
@@ -1796,7 +1796,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "los-celtas-y-celtiberos-organizacion-y"
+      "topic": "los-celtas-y-celtiberos-organizacion-y-c"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1808,7 +1808,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "tartessos-el-primer-gran-reino",
+    "topicSlug": "tartessos-el-primer-gran-reino-peninsula",
     "title": "Tartessos: El Primer Gran Reino Peninsular",
     "orderIndex": 8,
     "contentStatus": "flashcard_v2",
@@ -1819,7 +1819,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "tartessos-el-primer-gran-reino"
+      "topic": "tartessos-el-primer-gran-reino-peninsula"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1831,7 +1831,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "las-colonizaciones-historicas-fenicios",
+    "topicSlug": "las-colonizaciones-historicas-fenicios-g",
     "title": "Las Colonizaciones Históricas: Fenicios, Griegos y Cartagineses",
     "orderIndex": 9,
     "contentStatus": "flashcard_v2",
@@ -1842,7 +1842,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "las-colonizaciones-historicas-fenicios"
+      "topic": "las-colonizaciones-historicas-fenicios-g"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1854,7 +1854,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "la-conquista-romana-de-hispania-las",
+    "topicSlug": "la-conquista-romana-de-hispania-las-tres",
     "title": "La Conquista Romana de Hispania: Las Tres Fases (218–19 a.C.)",
     "orderIndex": 10,
     "contentStatus": "flashcard_v2",
@@ -1865,7 +1865,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "la-conquista-romana-de-hispania-las"
+      "topic": "la-conquista-romana-de-hispania-las-tres"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1877,7 +1877,7 @@
     "subject": "historia_espana",
     "blockSlug": "prehistoria-edad-antigua",
     "blockTitle": "Prehistoria y Edad Antigua",
-    "topicSlug": "la-romanizacion-mecanismos-economia-y",
+    "topicSlug": "la-romanizacion-mecanismos-economia-y-le",
     "title": "La Romanización: Mecanismos, Economía y Legado Cultural",
     "orderIndex": 11,
     "contentStatus": "flashcard_v2",
@@ -1888,7 +1888,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "prehistoria-edad-antigua",
-      "topic": "la-romanizacion-mecanismos-economia-y"
+      "topic": "la-romanizacion-mecanismos-economia-y-le"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1923,7 +1923,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "el-emirato-independiente-de-abderraman",
+    "topicSlug": "el-emirato-independiente-de-abderraman-i",
     "title": "El Emirato Independiente de Abderramán I (756–929)",
     "orderIndex": 13,
     "contentStatus": "flashcard_v2",
@@ -1934,7 +1934,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "el-emirato-independiente-de-abderraman"
+      "topic": "el-emirato-independiente-de-abderraman-i"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1946,7 +1946,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "el-califato-de-cordoba-esplendor-y",
+    "topicSlug": "el-califato-de-cordoba-esplendor-y-poder",
     "title": "El Califato de Córdoba: Esplendor y Poder (929–1031)",
     "orderIndex": 14,
     "contentStatus": "flashcard_v2",
@@ -1957,7 +1957,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "el-califato-de-cordoba-esplendor-y"
+      "topic": "el-califato-de-cordoba-esplendor-y-poder"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1969,7 +1969,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "la-dictadura-de-almanzor-y-la-fitna",
+    "topicSlug": "la-dictadura-de-almanzor-y-la-fitna-976",
     "title": "La Dictadura de Almanzor y la Fitna (976–1031)",
     "orderIndex": 15,
     "contentStatus": "flashcard_v2",
@@ -1980,7 +1980,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "la-dictadura-de-almanzor-y-la-fitna"
+      "topic": "la-dictadura-de-almanzor-y-la-fitna-976"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -1992,7 +1992,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "los-reinos-de-taifas-y-las-invasiones",
+    "topicSlug": "los-reinos-de-taifas-y-las-invasiones-no",
     "title": "Los Reinos de Taifas y las Invasiones Norteafricanas (1031–1212)",
     "orderIndex": 16,
     "contentStatus": "flashcard_v2",
@@ -2003,7 +2003,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "los-reinos-de-taifas-y-las-invasiones"
+      "topic": "los-reinos-de-taifas-y-las-invasiones-no"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2015,7 +2015,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "el-reino-nazari-de-granada-12381492",
+    "topicSlug": "el-reino-nazari-de-granada-1238-1492",
     "title": "El Reino Nazarí de Granada (1238–1492)",
     "orderIndex": 17,
     "contentStatus": "flashcard_v2",
@@ -2026,7 +2026,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "el-reino-nazari-de-granada-12381492"
+      "topic": "el-reino-nazari-de-granada-1238-1492"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2038,7 +2038,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "la-economia-de-al-andalus-agricultura",
+    "topicSlug": "la-economia-de-al-andalus-agricultura-in",
     "title": "La Economía de Al-Ándalus: Agricultura, Industria y Comercio",
     "orderIndex": 18,
     "contentStatus": "flashcard_v2",
@@ -2049,7 +2049,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "la-economia-de-al-andalus-agricultura"
+      "topic": "la-economia-de-al-andalus-agricultura-in"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2061,7 +2061,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "la-sociedad-andalusi-jerarquia-etnico",
+    "topicSlug": "la-sociedad-andalusi-jerarquia-etnico-re",
     "title": "La Sociedad Andalusí: Jerarquía Étnico-Religiosa",
     "orderIndex": 19,
     "contentStatus": "flashcard_v2",
@@ -2072,7 +2072,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "la-sociedad-andalusi-jerarquia-etnico"
+      "topic": "la-sociedad-andalusi-jerarquia-etnico-re"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2084,7 +2084,7 @@
     "subject": "historia_espana",
     "blockSlug": "al-andalus",
     "blockTitle": "Al-Ándalus",
-    "topicSlug": "el-legado-cultural-y-cientifico-de-al",
+    "topicSlug": "el-legado-cultural-y-cientifico-de-al-an",
     "title": "El Legado Cultural y Científico de Al-Ándalus",
     "orderIndex": 20,
     "contentStatus": "flashcard_v2",
@@ -2095,7 +2095,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "al-andalus",
-      "topic": "el-legado-cultural-y-cientifico-de-al"
+      "topic": "el-legado-cultural-y-cientifico-de-al-an"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2107,7 +2107,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "el-nucleo-astur-leones-de-covadonga-al",
+    "topicSlug": "el-nucleo-astur-leones-de-covadonga-al-r",
     "title": "El Núcleo Astur-Leonés: De Covadonga al Reino de León",
     "orderIndex": 21,
     "contentStatus": "flashcard_v2",
@@ -2118,7 +2118,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "el-nucleo-astur-leones-de-covadonga-al"
+      "topic": "el-nucleo-astur-leones-de-covadonga-al-r"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2153,7 +2153,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "la-reconquista-los-grandes-hitos-de-la",
+    "topicSlug": "la-reconquista-los-grandes-hitos-de-la-e",
     "title": "La Reconquista: Los Grandes Hitos de la Expansión Cristiana",
     "orderIndex": 23,
     "contentStatus": "flashcard_v2",
@@ -2164,7 +2164,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "la-reconquista-los-grandes-hitos-de-la"
+      "topic": "la-reconquista-los-grandes-hitos-de-la-e"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2176,7 +2176,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "los-modelos-de-repoblacion-siglos",
+    "topicSlug": "los-modelos-de-repoblacion-siglos-viii-x",
     "title": "Los Modelos de Repoblación (Siglos VIII–XIII)",
     "orderIndex": 24,
     "contentStatus": "flashcard_v2",
@@ -2187,7 +2187,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "los-modelos-de-repoblacion-siglos"
+      "topic": "los-modelos-de-repoblacion-siglos-viii-x"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2199,7 +2199,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "corona-de-castilla-vs-corona-de-aragon",
+    "topicSlug": "corona-de-castilla-vs-corona-de-aragon-d",
     "title": "Corona de Castilla vs. Corona de Aragón: Dos Modelos de Estado",
     "orderIndex": 25,
     "contentStatus": "flashcard_v2",
@@ -2210,7 +2210,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "corona-de-castilla-vs-corona-de-aragon"
+      "topic": "corona-de-castilla-vs-corona-de-aragon-d"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2222,7 +2222,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "la-crisis-del-siglo-xiv-la-peste-negra",
+    "topicSlug": "la-crisis-del-siglo-xiv-la-peste-negra-d",
     "title": "La Crisis del Siglo XIV: La Peste Negra de 1348",
     "orderIndex": 26,
     "contentStatus": "flashcard_v2",
@@ -2233,7 +2233,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "la-crisis-del-siglo-xiv-la-peste-negra"
+      "topic": "la-crisis-del-siglo-xiv-la-peste-negra-d"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2245,7 +2245,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "conflictividad-social-del-siglo-xv",
+    "topicSlug": "conflictividad-social-del-siglo-xv-revue",
     "title": "Conflictividad Social del Siglo XV: Revueltas y Pogromos de 1391",
     "orderIndex": 27,
     "contentStatus": "flashcard_v2",
@@ -2256,7 +2256,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "conflictividad-social-del-siglo-xv"
+      "topic": "conflictividad-social-del-siglo-xv-revue"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2268,7 +2268,7 @@
     "subject": "historia_espana",
     "blockSlug": "reinos-medievales",
     "blockTitle": "Reinos Medievales Cristianos",
-    "topicSlug": "las-guerras-civiles-y-la-instauracion",
+    "topicSlug": "las-guerras-civiles-y-la-instauracion-de",
     "title": "Las Guerras Civiles y la Instauración de la Dinastía Trastámara",
     "orderIndex": 28,
     "contentStatus": "flashcard_v2",
@@ -2279,7 +2279,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reinos-medievales",
-      "topic": "las-guerras-civiles-y-la-instauracion"
+      "topic": "las-guerras-civiles-y-la-instauracion-de"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2291,7 +2291,7 @@
     "subject": "historia_espana",
     "blockSlug": "reyes-catolicos",
     "blockTitle": "Los Reyes Católicos",
-    "topicSlug": "la-union-dinastica-y-la-construccion",
+    "topicSlug": "la-union-dinastica-y-la-construccion-del",
     "title": "La Unión Dinástica y la Construcción del Estado Moderno",
     "orderIndex": 29,
     "contentStatus": "flashcard_v2",
@@ -2302,7 +2302,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reyes-catolicos",
-      "topic": "la-union-dinastica-y-la-construccion"
+      "topic": "la-union-dinastica-y-la-construccion-del"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2314,7 +2314,7 @@
     "subject": "historia_espana",
     "blockSlug": "reyes-catolicos",
     "blockTitle": "Los Reyes Católicos",
-    "topicSlug": "la-politica-de-uniformidad-religiosa",
+    "topicSlug": "la-politica-de-uniformidad-religiosa-inq",
     "title": "La Política de Uniformidad Religiosa: Inquisición, Judíos y Mudéjares",
     "orderIndex": 30,
     "contentStatus": "flashcard_v2",
@@ -2325,7 +2325,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reyes-catolicos",
-      "topic": "la-politica-de-uniformidad-religiosa"
+      "topic": "la-politica-de-uniformidad-religiosa-inq"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2337,7 +2337,7 @@
     "subject": "historia_espana",
     "blockSlug": "reyes-catolicos",
     "blockTitle": "Los Reyes Católicos",
-    "topicSlug": "la-expansion-territorial-guerra-de",
+    "topicSlug": "la-expansion-territorial-guerra-de-grana",
     "title": "La Expansión Territorial: Guerra de Granada e Incorporación de Navarra",
     "orderIndex": 31,
     "contentStatus": "flashcard_v2",
@@ -2348,7 +2348,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reyes-catolicos",
-      "topic": "la-expansion-territorial-guerra-de"
+      "topic": "la-expansion-territorial-guerra-de-grana"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2360,7 +2360,7 @@
     "subject": "historia_espana",
     "blockSlug": "reyes-catolicos",
     "blockTitle": "Los Reyes Católicos",
-    "topicSlug": "el-descubrimiento-de-america-1492-y-el",
+    "topicSlug": "el-descubrimiento-de-america-1492-y-el-t",
     "title": "El Descubrimiento de América (1492) y el Tratado de Tordesillas",
     "orderIndex": 32,
     "contentStatus": "flashcard_v2",
@@ -2371,7 +2371,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "reyes-catolicos",
-      "topic": "el-descubrimiento-de-america-1492-y-el"
+      "topic": "el-descubrimiento-de-america-1492-y-el-t"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2383,7 +2383,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "la-herencia-territorial-de-carlos-i-y",
+    "topicSlug": "la-herencia-territorial-de-carlos-i-y-el",
     "title": "La Herencia Territorial de Carlos I y el Imperio de Carlos V",
     "orderIndex": 33,
     "contentStatus": "flashcard_v2",
@@ -2394,7 +2394,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "la-herencia-territorial-de-carlos-i-y"
+      "topic": "la-herencia-territorial-de-carlos-i-y-el"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2406,7 +2406,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "las-comunidades-de-castilla-15201521",
+    "topicSlug": "las-comunidades-de-castilla-1520-1521",
     "title": "Las Comunidades de Castilla (1520–1521)",
     "orderIndex": 34,
     "contentStatus": "flashcard_v2",
@@ -2417,7 +2417,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "las-comunidades-de-castilla-15201521"
+      "topic": "las-comunidades-de-castilla-1520-1521"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2429,7 +2429,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "las-germanias-de-valencia-y-mallorca",
+    "topicSlug": "las-germanias-de-valencia-y-mallorca-151",
     "title": "Las Germanías de Valencia y Mallorca (1519–1523)",
     "orderIndex": 35,
     "contentStatus": "flashcard_v2",
@@ -2440,7 +2440,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "las-germanias-de-valencia-y-mallorca"
+      "topic": "las-germanias-de-valencia-y-mallorca-151"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2452,7 +2452,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "la-politica-exterior-de-carlos-v",
+    "topicSlug": "la-politica-exterior-de-carlos-v-francia",
     "title": "La Política Exterior de Carlos V: Francia, Turcos y Protestantismo",
     "orderIndex": 36,
     "contentStatus": "flashcard_v2",
@@ -2463,7 +2463,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "la-politica-exterior-de-carlos-v"
+      "topic": "la-politica-exterior-de-carlos-v-francia"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2475,7 +2475,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "el-modelo-politico-de-felipe-ii",
+    "topicSlug": "el-modelo-politico-de-felipe-ii-centrali",
     "title": "El Modelo Político de Felipe II: Centralización y Burocracia",
     "orderIndex": 37,
     "contentStatus": "flashcard_v2",
@@ -2486,7 +2486,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "el-modelo-politico-de-felipe-ii"
+      "topic": "el-modelo-politico-de-felipe-ii-centrali"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2498,7 +2498,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "los-conflictos-internos-de-felipe-ii",
+    "topicSlug": "los-conflictos-internos-de-felipe-ii-las",
     "title": "Los Conflictos Internos de Felipe II: Las Alpujarras y el Caso Pérez",
     "orderIndex": 38,
     "contentStatus": "flashcard_v2",
@@ -2509,7 +2509,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "los-conflictos-internos-de-felipe-ii"
+      "topic": "los-conflictos-internos-de-felipe-ii-las"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2521,7 +2521,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "la-batalla-de-lepanto-1571-y-la",
+    "topicSlug": "la-batalla-de-lepanto-1571-y-la-rebelion",
     "title": "La Batalla de Lepanto (1571) y la Rebelión de los Países Bajos",
     "orderIndex": 39,
     "contentStatus": "flashcard_v2",
@@ -2532,7 +2532,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "la-batalla-de-lepanto-1571-y-la"
+      "topic": "la-batalla-de-lepanto-1571-y-la-rebelion"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2544,7 +2544,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "la-armada-invencible-1588-y-la-union",
+    "topicSlug": "la-armada-invencible-1588-y-la-union-ibe",
     "title": "La Armada Invencible (1588) y la Unión Ibérica (1580)",
     "orderIndex": 40,
     "contentStatus": "flashcard_v2",
@@ -2555,7 +2555,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "la-armada-invencible-1588-y-la-union"
+      "topic": "la-armada-invencible-1588-y-la-union-ibe"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2636,7 +2636,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "los-austrias-menores-el-sistema-de",
+    "topicSlug": "los-austrias-menores-el-sistema-de-valid",
     "title": "Los Austrias Menores: El Sistema de Validos y la Expulsión de los Moriscos",
     "orderIndex": 44,
     "contentStatus": "flashcard_v2",
@@ -2647,7 +2647,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "los-austrias-menores-el-sistema-de"
+      "topic": "los-austrias-menores-el-sistema-de-valid"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2659,7 +2659,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "el-conde-duque-de-olivares-y-la-union",
+    "topicSlug": "el-conde-duque-de-olivares-y-la-union-de",
     "title": "El Conde-Duque de Olivares y la Unión de Armas (1626)",
     "orderIndex": 45,
     "contentStatus": "flashcard_v2",
@@ -2670,7 +2670,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "el-conde-duque-de-olivares-y-la-union"
+      "topic": "el-conde-duque-de-olivares-y-la-union-de"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2682,7 +2682,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "la-crisis-de-1640-la-rebelion-de",
+    "topicSlug": "la-crisis-de-1640-la-rebelion-de-catalun",
     "title": "La Crisis de 1640: La Rebelión de Cataluña y la Independencia de Portugal",
     "orderIndex": 46,
     "contentStatus": "flashcard_v2",
@@ -2693,7 +2693,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "la-crisis-de-1640-la-rebelion-de"
+      "topic": "la-crisis-de-1640-la-rebelion-de-catalun"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2705,7 +2705,7 @@
     "subject": "historia_espana",
     "blockSlug": "imperio-austrias",
     "blockTitle": "El Imperio de los Austrias",
-    "topicSlug": "el-fin-de-la-hegemonia-westfalia-1648",
+    "topicSlug": "el-fin-de-la-hegemonia-westfalia-1648-lo",
     "title": "El Fin de la Hegemonía: Westfalia (1648), Los Pirineos (1659) y el Siglo de Oro",
     "orderIndex": 47,
     "contentStatus": "flashcard_v2",
@@ -2716,7 +2716,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "imperio-austrias",
-      "topic": "el-fin-de-la-hegemonia-westfalia-1648"
+      "topic": "el-fin-de-la-hegemonia-westfalia-1648-lo"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2728,7 +2728,7 @@
     "subject": "historia_espana",
     "blockSlug": "siglo-xviii-borbones",
     "blockTitle": "El Siglo XVIII: Los Borbones",
-    "topicSlug": "la-guerra-de-sucesion-espanola-y-el",
+    "topicSlug": "la-guerra-de-sucesion-espanola-y-el-trat",
     "title": "La Guerra de Sucesión Española y el Tratado de Utrecht (1713)",
     "orderIndex": 48,
     "contentStatus": "flashcard_v2",
@@ -2739,7 +2739,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "siglo-xviii-borbones",
-      "topic": "la-guerra-de-sucesion-espanola-y-el"
+      "topic": "la-guerra-de-sucesion-espanola-y-el-trat"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2751,7 +2751,7 @@
     "subject": "historia_espana",
     "blockSlug": "siglo-xviii-borbones",
     "blockTitle": "El Siglo XVIII: Los Borbones",
-    "topicSlug": "los-decretos-de-nueva-planta-y-la",
+    "topicSlug": "los-decretos-de-nueva-planta-y-la-centra",
     "title": "Los Decretos de Nueva Planta y la Centralización Borbónica",
     "orderIndex": 49,
     "contentStatus": "flashcard_v2",
@@ -2762,7 +2762,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "siglo-xviii-borbones",
-      "topic": "los-decretos-de-nueva-planta-y-la"
+      "topic": "los-decretos-de-nueva-planta-y-la-centra"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2820,7 +2820,7 @@
     "subject": "historia_espana",
     "blockSlug": "siglo-xviii-borbones",
     "blockTitle": "El Siglo XVIII: Los Borbones",
-    "topicSlug": "la-politica-americana-de-los-borbones",
+    "topicSlug": "la-politica-americana-de-los-borbones-vi",
     "title": "La Política Americana de los Borbones: Virreinatos, Comercio y Pactos de Familia",
     "orderIndex": 52,
     "contentStatus": "flashcard_v2",
@@ -2831,7 +2831,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "siglo-xviii-borbones",
-      "topic": "la-politica-americana-de-los-borbones"
+      "topic": "la-politica-americana-de-los-borbones-vi"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2843,7 +2843,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "carlos-iv-godoy-y-el-impacto-de-la",
+    "topicSlug": "carlos-iv-godoy-y-el-impacto-de-la-revol",
     "title": "Carlos IV, Godoy y el Impacto de la Revolución Francesa",
     "orderIndex": 53,
     "contentStatus": "flashcard_v2",
@@ -2854,7 +2854,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "carlos-iv-godoy-y-el-impacto-de-la"
+      "topic": "carlos-iv-godoy-y-el-impacto-de-la-revol"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2889,7 +2889,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "el-2-de-mayo-de-1808-y-la-organizacion",
+    "topicSlug": "el-2-de-mayo-de-1808-y-la-organizacion-d",
     "title": "El 2 de Mayo de 1808 y la Organización de la Resistencia",
     "orderIndex": 55,
     "contentStatus": "flashcard_v2",
@@ -2900,7 +2900,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "el-2-de-mayo-de-1808-y-la-organizacion"
+      "topic": "el-2-de-mayo-de-1808-y-la-organizacion-d"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2912,7 +2912,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "las-fases-militares-de-la-guerra-de-la",
+    "topicSlug": "las-fases-militares-de-la-guerra-de-la-i",
     "title": "Las Fases Militares de la Guerra de la Independencia (1808–1814)",
     "orderIndex": 56,
     "contentStatus": "flashcard_v2",
@@ -2923,7 +2923,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "las-fases-militares-de-la-guerra-de-la"
+      "topic": "las-fases-militares-de-la-guerra-de-la-i"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2958,7 +2958,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "las-cortes-de-cadiz-composicion",
+    "topicSlug": "las-cortes-de-cadiz-composicion-corrient",
     "title": "Las Cortes de Cádiz: Composición, Corrientes y Obra Legislativa",
     "orderIndex": 58,
     "contentStatus": "flashcard_v2",
@@ -2969,7 +2969,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "las-cortes-de-cadiz-composicion"
+      "topic": "las-cortes-de-cadiz-composicion-corrient"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -2981,7 +2981,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "la-constitucion-de-1812-la-pepa",
+    "topicSlug": "la-constitucion-de-1812-la-pepa-principi",
     "title": "La Constitución de 1812 (\"La Pepa\"): Principios Fundamentales",
     "orderIndex": 59,
     "contentStatus": "flashcard_v2",
@@ -2992,7 +2992,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "la-constitucion-de-1812-la-pepa"
+      "topic": "la-constitucion-de-1812-la-pepa-principi"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3004,7 +3004,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "fernando-vii-el-sexenio-absolutista",
+    "topicSlug": "fernando-vii-el-sexenio-absolutista-1814",
     "title": "Fernando VII: El Sexenio Absolutista (1814–1820)",
     "orderIndex": 60,
     "contentStatus": "flashcard_v2",
@@ -3015,7 +3015,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "fernando-vii-el-sexenio-absolutista"
+      "topic": "fernando-vii-el-sexenio-absolutista-1814"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3027,7 +3027,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "el-trienio-liberal-18201823",
+    "topicSlug": "el-trienio-liberal-1820-1823",
     "title": "El Trienio Liberal (1820–1823)",
     "orderIndex": 61,
     "contentStatus": "flashcard_v2",
@@ -3038,7 +3038,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "el-trienio-liberal-18201823"
+      "topic": "el-trienio-liberal-1820-1823"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3050,7 +3050,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "los-cien-mil-hijos-de-san-luis-y-la",
+    "topicSlug": "los-cien-mil-hijos-de-san-luis-y-la-deca",
     "title": "Los Cien Mil Hijos de San Luis y la Década Ominosa (1823–1833)",
     "orderIndex": 62,
     "contentStatus": "flashcard_v2",
@@ -3061,7 +3061,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "los-cien-mil-hijos-de-san-luis-y-la"
+      "topic": "los-cien-mil-hijos-de-san-luis-y-la-deca"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3073,7 +3073,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "la-emancipacion-de-la-america-espanola",
+    "topicSlug": "la-emancipacion-de-la-america-espanola-1",
     "title": "La Emancipación de la América Española (1808–1824)",
     "orderIndex": 63,
     "contentStatus": "flashcard_v2",
@@ -3084,7 +3084,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "la-emancipacion-de-la-america-espanola"
+      "topic": "la-emancipacion-de-la-america-espanola-1"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3096,7 +3096,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "el-problema-sucesorio-y-la-primera",
+    "topicSlug": "el-problema-sucesorio-y-la-primera-guerr",
     "title": "El Problema Sucesorio y la Primera Guerra Carlista (1833–1840)",
     "orderIndex": 64,
     "contentStatus": "flashcard_v2",
@@ -3107,7 +3107,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "el-problema-sucesorio-y-la-primera"
+      "topic": "el-problema-sucesorio-y-la-primera-guerr"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3119,7 +3119,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "los-partidos-politicos-del-siglo-xix",
+    "topicSlug": "los-partidos-politicos-del-siglo-xix-mod",
     "title": "Los Partidos Políticos del Siglo XIX: Moderados y Progresistas",
     "orderIndex": 65,
     "contentStatus": "flashcard_v2",
@@ -3130,7 +3130,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "los-partidos-politicos-del-siglo-xix"
+      "topic": "los-partidos-politicos-del-siglo-xix-mod"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3142,7 +3142,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "la-regencia-de-maria-cristina-y-la",
+    "topicSlug": "la-regencia-de-maria-cristina-y-la-desam",
     "title": "La Regencia de María Cristina y la Desamortización de Mendizábal (1836)",
     "orderIndex": 66,
     "contentStatus": "flashcard_v2",
@@ -3153,7 +3153,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "la-regencia-de-maria-cristina-y-la"
+      "topic": "la-regencia-de-maria-cristina-y-la-desam"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3165,7 +3165,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "la-regencia-del-general-espartero",
+    "topicSlug": "la-regencia-del-general-espartero-1840-1",
     "title": "La Regencia del General Espartero (1840–1843)",
     "orderIndex": 67,
     "contentStatus": "flashcard_v2",
@@ -3176,7 +3176,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "la-regencia-del-general-espartero"
+      "topic": "la-regencia-del-general-espartero-1840-1"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3211,7 +3211,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-antiguo-regimen-liberalismo",
     "blockTitle": "Crisis del Antiguo Régimen y Liberalismo",
-    "topicSlug": "el-bienio-progresista-y-la",
+    "topicSlug": "el-bienio-progresista-y-la-desamortizaci",
     "title": "El Bienio Progresista y la Desamortización de Madoz (1854–1856)",
     "orderIndex": 69,
     "contentStatus": "flashcard_v2",
@@ -3222,7 +3222,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-antiguo-regimen-liberalismo",
-      "topic": "el-bienio-progresista-y-la"
+      "topic": "el-bienio-progresista-y-la-desamortizaci"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3257,7 +3257,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-sistema-canovista-constitucion-de",
+    "topicSlug": "el-sistema-canovista-constitucion-de-187",
     "title": "El Sistema Canovista: Constitución de 1876 y el Turno de Partidos",
     "orderIndex": 71,
     "contentStatus": "flashcard_v2",
@@ -3268,7 +3268,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-sistema-canovista-constitucion-de"
+      "topic": "el-sistema-canovista-constitucion-de-187"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3280,7 +3280,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-fraude-electoral-caciquismo",
+    "topicSlug": "el-fraude-electoral-caciquismo-encasilla",
     "title": "El Fraude Electoral: Caciquismo, Encasillado y Pucherazo",
     "orderIndex": 72,
     "contentStatus": "flashcard_v2",
@@ -3291,7 +3291,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-fraude-electoral-caciquismo"
+      "topic": "el-fraude-electoral-caciquismo-encasilla"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3303,7 +3303,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "la-oposicion-al-sistema-republicanos",
+    "topicSlug": "la-oposicion-al-sistema-republicanos-car",
     "title": "La Oposición al Sistema: Republicanos, Carlistas y Nacionalismos Periféricos",
     "orderIndex": 73,
     "contentStatus": "flashcard_v2",
@@ -3314,7 +3314,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "la-oposicion-al-sistema-republicanos"
+      "topic": "la-oposicion-al-sistema-republicanos-car"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3326,7 +3326,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-anarquismo-en-espana-la-ftre-y-la",
+    "topicSlug": "el-anarquismo-en-espana-la-ftre-y-la-pro",
     "title": "El Anarquismo en España: La FTRE y la \"Propaganda por el Hecho\"",
     "orderIndex": 74,
     "contentStatus": "flashcard_v2",
@@ -3337,7 +3337,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-anarquismo-en-espana-la-ftre-y-la"
+      "topic": "el-anarquismo-en-espana-la-ftre-y-la-pro"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3349,7 +3349,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-socialismo-en-espana-el-psoe-y-la",
+    "topicSlug": "el-socialismo-en-espana-el-psoe-y-la-ugt",
     "title": "El Socialismo en España: El PSOE y la UGT (1879–1888)",
     "orderIndex": 75,
     "contentStatus": "flashcard_v2",
@@ -3360,7 +3360,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-socialismo-en-espana-el-psoe-y-la"
+      "topic": "el-socialismo-en-espana-el-psoe-y-la-ugt"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3372,7 +3372,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "la-guerra-de-cuba-y-filipinas-18951898",
+    "topicSlug": "la-guerra-de-cuba-y-filipinas-1895-1898",
     "title": "La Guerra de Cuba y Filipinas (1895–1898)",
     "orderIndex": 76,
     "contentStatus": "flashcard_v2",
@@ -3383,7 +3383,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "la-guerra-de-cuba-y-filipinas-18951898"
+      "topic": "la-guerra-de-cuba-y-filipinas-1895-1898"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3395,7 +3395,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-desastre-de-1898-santiago-de-cuba-y",
+    "topicSlug": "el-desastre-de-1898-santiago-de-cuba-y-e",
     "title": "El Desastre de 1898: Santiago de Cuba y el Tratado de París",
     "orderIndex": 77,
     "contentStatus": "flashcard_v2",
@@ -3406,7 +3406,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-desastre-de-1898-santiago-de-cuba-y"
+      "topic": "el-desastre-de-1898-santiago-de-cuba-y-e"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3418,7 +3418,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-regeneracionismo-y-la-crisis-de",
+    "topicSlug": "el-regeneracionismo-y-la-crisis-de-conci",
     "title": "El Regeneracionismo y la Crisis de Conciencia Nacional del 98",
     "orderIndex": 78,
     "contentStatus": "flashcard_v2",
@@ -3429,7 +3429,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-regeneracionismo-y-la-crisis-de"
+      "topic": "el-regeneracionismo-y-la-crisis-de-conci"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3441,7 +3441,7 @@
     "subject": "historia_espana",
     "blockSlug": "restauracion",
     "blockTitle": "La Restauración",
-    "topicSlug": "el-sexenio-democratico-18681874-la",
+    "topicSlug": "el-sexenio-democratico-1868-1874-la-glor",
     "title": "El Sexenio Democrático (1868–1874): La Gloriosa y sus Fracasos",
     "orderIndex": 79,
     "contentStatus": "flashcard_v2",
@@ -3452,7 +3452,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "restauracion",
-      "topic": "el-sexenio-democratico-18681874-la"
+      "topic": "el-sexenio-democratico-1868-1874-la-glor"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3464,7 +3464,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "alfonso-xiii-y-el-reformismo-maura-y",
+    "topicSlug": "alfonso-xiii-y-el-reformismo-maura-y-can",
     "title": "Alfonso XIII y el Reformismo: Maura y Canalejas",
     "orderIndex": 80,
     "contentStatus": "flashcard_v2",
@@ -3475,7 +3475,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "alfonso-xiii-y-el-reformismo-maura-y"
+      "topic": "alfonso-xiii-y-el-reformismo-maura-y-can"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3487,7 +3487,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "la-semana-tragica-de-barcelona-26",
+    "topicSlug": "la-semana-tragica-de-barcelona-26-julio",
     "title": "La Semana Trágica de Barcelona (26 julio–2 agosto de 1909)",
     "orderIndex": 81,
     "contentStatus": "flashcard_v2",
@@ -3498,7 +3498,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "la-semana-tragica-de-barcelona-26"
+      "topic": "la-semana-tragica-de-barcelona-26-julio"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3556,7 +3556,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "el-desastre-de-annual-1921-y-el",
+    "topicSlug": "el-desastre-de-annual-1921-y-el-expedien",
     "title": "El Desastre de Annual (1921) y el Expediente Picasso",
     "orderIndex": 84,
     "contentStatus": "flashcard_v2",
@@ -3567,7 +3567,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "el-desastre-de-annual-1921-y-el"
+      "topic": "el-desastre-de-annual-1921-y-el-expedien"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3579,7 +3579,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "el-golpe-de-estado-de-primo-de-rivera",
+    "topicSlug": "el-golpe-de-estado-de-primo-de-rivera-13",
     "title": "El Golpe de Estado de Primo de Rivera (13 septiembre 1923)",
     "orderIndex": 85,
     "contentStatus": "flashcard_v2",
@@ -3590,7 +3590,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "el-golpe-de-estado-de-primo-de-rivera"
+      "topic": "el-golpe-de-estado-de-primo-de-rivera-13"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3602,7 +3602,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "el-desembarco-de-alhucemas-1925-el-fin",
+    "topicSlug": "el-desembarco-de-alhucemas-1925-el-fin-d",
     "title": "El Desembarco de Alhucemas (1925): El Fin de la Guerra del Rif",
     "orderIndex": 86,
     "contentStatus": "flashcard_v2",
@@ -3613,7 +3613,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "el-desembarco-de-alhucemas-1925-el-fin"
+      "topic": "el-desembarco-de-alhucemas-1925-el-fin-d"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3625,7 +3625,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "el-directorio-civil-de-primo-de-rivera",
+    "topicSlug": "el-directorio-civil-de-primo-de-rivera-p",
     "title": "El Directorio Civil de Primo de Rivera: Política Económica (1925–1930)",
     "orderIndex": 87,
     "contentStatus": "flashcard_v2",
@@ -3636,7 +3636,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "el-directorio-civil-de-primo-de-rivera"
+      "topic": "el-directorio-civil-de-primo-de-rivera-p"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3648,7 +3648,7 @@
     "subject": "historia_espana",
     "blockSlug": "crisis-restauracion-dictadura",
     "blockTitle": "Crisis de la Restauración y la Dictadura",
-    "topicSlug": "la-caida-de-primo-de-rivera-y-la",
+    "topicSlug": "la-caida-de-primo-de-rivera-y-la-dictabl",
     "title": "La Caída de Primo de Rivera y la \"Dictablanda\" (1930–1931)",
     "orderIndex": 88,
     "contentStatus": "flashcard_v2",
@@ -3659,7 +3659,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "crisis-restauracion-dictadura",
-      "topic": "la-caida-de-primo-de-rivera-y-la"
+      "topic": "la-caida-de-primo-de-rivera-y-la-dictabl"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3717,7 +3717,7 @@
     "subject": "historia_espana",
     "blockSlug": "segunda-republica",
     "blockTitle": "La Segunda República",
-    "topicSlug": "el-bienio-reformista-reforma-militar-y",
+    "topicSlug": "el-bienio-reformista-reforma-militar-y-r",
     "title": "El Bienio Reformista: Reforma Militar y Reforma Agraria (1931–1933)",
     "orderIndex": 91,
     "contentStatus": "flashcard_v2",
@@ -3728,7 +3728,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "segunda-republica",
-      "topic": "el-bienio-reformista-reforma-militar-y"
+      "topic": "el-bienio-reformista-reforma-militar-y-r"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3740,7 +3740,7 @@
     "subject": "historia_espana",
     "blockSlug": "segunda-republica",
     "blockTitle": "La Segunda República",
-    "topicSlug": "el-bienio-reformista-reforma-educativa",
+    "topicSlug": "el-bienio-reformista-reforma-educativa-r",
     "title": "El Bienio Reformista: Reforma Educativa, Religiosa y Estatuto de Cataluña",
     "orderIndex": 92,
     "contentStatus": "flashcard_v2",
@@ -3751,7 +3751,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "segunda-republica",
-      "topic": "el-bienio-reformista-reforma-educativa"
+      "topic": "el-bienio-reformista-reforma-educativa-r"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3763,7 +3763,7 @@
     "subject": "historia_espana",
     "blockSlug": "segunda-republica",
     "blockTitle": "La Segunda República",
-    "topicSlug": "la-sanjurjada-1932-y-el-fin-del-bienio",
+    "topicSlug": "la-sanjurjada-1932-y-el-fin-del-bienio-r",
     "title": "La Sanjurjada (1932) y el Fin del Bienio Reformista: Casas Viejas (1933)",
     "orderIndex": 93,
     "contentStatus": "flashcard_v2",
@@ -3774,7 +3774,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "segunda-republica",
-      "topic": "la-sanjurjada-1932-y-el-fin-del-bienio"
+      "topic": "la-sanjurjada-1932-y-el-fin-del-bienio-r"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3809,7 +3809,7 @@
     "subject": "historia_espana",
     "blockSlug": "segunda-republica",
     "blockTitle": "La Segunda República",
-    "topicSlug": "la-revolucion-de-octubre-de-1934",
+    "topicSlug": "la-revolucion-de-octubre-de-1934-asturia",
     "title": "La Revolución de Octubre de 1934: Asturias y Cataluña",
     "orderIndex": 95,
     "contentStatus": "flashcard_v2",
@@ -3820,7 +3820,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "segunda-republica",
-      "topic": "la-revolucion-de-octubre-de-1934"
+      "topic": "la-revolucion-de-octubre-de-1934-asturia"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3878,7 +3878,7 @@
     "subject": "historia_espana",
     "blockSlug": "guerra-civil",
     "blockTitle": "La Guerra Civil",
-    "topicSlug": "el-alzamiento-de-julio-de-1936-y-el",
+    "topicSlug": "el-alzamiento-de-julio-de-1936-y-el-puen",
     "title": "El Alzamiento de Julio de 1936 y el Puente Aéreo de Marruecos",
     "orderIndex": 98,
     "contentStatus": "flashcard_v2",
@@ -3889,7 +3889,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "guerra-civil",
-      "topic": "el-alzamiento-de-julio-de-1936-y-el"
+      "topic": "el-alzamiento-de-julio-de-1936-y-el-puen"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3901,7 +3901,7 @@
     "subject": "historia_espana",
     "blockSlug": "guerra-civil",
     "blockTitle": "La Guerra Civil",
-    "topicSlug": "las-fases-militares-de-la-guerra-civil",
+    "topicSlug": "las-fases-militares-de-la-guerra-civil-e",
     "title": "Las Fases Militares de la Guerra Civil: El Frente de Madrid y la Campaña del Norte (1936–1937)",
     "orderIndex": 99,
     "contentStatus": "flashcard_v2",
@@ -3912,7 +3912,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "guerra-civil",
-      "topic": "las-fases-militares-de-la-guerra-civil"
+      "topic": "las-fases-militares-de-la-guerra-civil-e"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3947,7 +3947,7 @@
     "subject": "historia_espana",
     "blockSlug": "guerra-civil",
     "blockTitle": "La Guerra Civil",
-    "topicSlug": "la-revolucion-social-en-la-zona",
+    "topicSlug": "la-revolucion-social-en-la-zona-republic",
     "title": "La Revolución Social en la Zona Republicana y el Terror Rojo (1936)",
     "orderIndex": 101,
     "contentStatus": "flashcard_v2",
@@ -3958,7 +3958,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "guerra-civil",
-      "topic": "la-revolucion-social-en-la-zona"
+      "topic": "la-revolucion-social-en-la-zona-republic"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -3970,7 +3970,7 @@
     "subject": "historia_espana",
     "blockSlug": "guerra-civil",
     "blockTitle": "La Guerra Civil",
-    "topicSlug": "los-gobiernos-republicanos-de-guerra-y",
+    "topicSlug": "los-gobiernos-republicanos-de-guerra-y-l",
     "title": "Los Gobiernos Republicanos de Guerra y los Sucesos de Mayo de 1937 en Barcelona",
     "orderIndex": 102,
     "contentStatus": "flashcard_v2",
@@ -3981,7 +3981,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "guerra-civil",
-      "topic": "los-gobiernos-republicanos-de-guerra-y"
+      "topic": "los-gobiernos-republicanos-de-guerra-y-l"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4039,7 +4039,7 @@
     "subject": "historia_espana",
     "blockSlug": "guerra-civil",
     "blockTitle": "La Guerra Civil",
-    "topicSlug": "el-apoyo-sovietico-las-brigadas",
+    "topicSlug": "el-apoyo-sovietico-las-brigadas-internac",
     "title": "El Apoyo Soviético, las Brigadas Internacionales y el \"Oro de Moscú\"",
     "orderIndex": 105,
     "contentStatus": "flashcard_v2",
@@ -4050,7 +4050,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "guerra-civil",
-      "topic": "el-apoyo-sovietico-las-brigadas"
+      "topic": "el-apoyo-sovietico-las-brigadas-internac"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4062,7 +4062,7 @@
     "subject": "historia_espana",
     "blockSlug": "guerra-civil",
     "blockTitle": "La Guerra Civil",
-    "topicSlug": "las-consecuencias-de-la-guerra-civil",
+    "topicSlug": "las-consecuencias-de-la-guerra-civil-esp",
     "title": "Las Consecuencias de la Guerra Civil Española (1939)",
     "orderIndex": 106,
     "contentStatus": "flashcard_v2",
@@ -4073,7 +4073,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "guerra-civil",
-      "topic": "las-consecuencias-de-la-guerra-civil"
+      "topic": "las-consecuencias-de-la-guerra-civil-esp"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4085,7 +4085,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "las-bases-ideologicas-del-franquismo-y",
+    "topicSlug": "las-bases-ideologicas-del-franquismo-y-l",
     "title": "Las Bases Ideológicas del Franquismo y las \"Familias del Régimen\"",
     "orderIndex": 107,
     "contentStatus": "flashcard_v2",
@@ -4096,7 +4096,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "las-bases-ideologicas-del-franquismo-y"
+      "topic": "las-bases-ideologicas-del-franquismo-y-l"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4108,7 +4108,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "la-represion-de-posguerra-instrumentos",
+    "topicSlug": "la-represion-de-posguerra-instrumentos-l",
     "title": "La Represión de Posguerra: Instrumentos Legales, Magnitud y Exilio (1939–1945)",
     "orderIndex": 108,
     "contentStatus": "flashcard_v2",
@@ -4119,7 +4119,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "la-represion-de-posguerra-instrumentos"
+      "topic": "la-represion-de-posguerra-instrumentos-l"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4131,7 +4131,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "la-autarquia-economica-19391959",
+    "topicSlug": "la-autarquia-economica-1939-1959-princip",
     "title": "La Autarquía Económica (1939–1959): Principios, el INI y los \"Años del Hambre\"",
     "orderIndex": 109,
     "contentStatus": "flashcard_v2",
@@ -4142,7 +4142,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "la-autarquia-economica-19391959"
+      "topic": "la-autarquia-economica-1939-1959-princip"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4154,7 +4154,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "franco-y-la-segunda-guerra-mundial",
+    "topicSlug": "franco-y-la-segunda-guerra-mundial-henda",
     "title": "Franco y la Segunda Guerra Mundial: Hendaya y la División Azul (1939–1945)",
     "orderIndex": 110,
     "contentStatus": "flashcard_v2",
@@ -4165,7 +4165,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "franco-y-la-segunda-guerra-mundial"
+      "topic": "franco-y-la-segunda-guerra-mundial-henda"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4177,7 +4177,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "el-aislamiento-internacional-19451953-y",
+    "topicSlug": "el-aislamiento-internacional-1945-1953-y",
     "title": "El Aislamiento Internacional (1945–1953) y la Integración en la Guerra Fría",
     "orderIndex": 111,
     "contentStatus": "flashcard_v2",
@@ -4188,7 +4188,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "el-aislamiento-internacional-19451953-y"
+      "topic": "el-aislamiento-internacional-1945-1953-y"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4223,7 +4223,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "el-desarrollismo-los-planes-de",
+    "topicSlug": "el-desarrollismo-los-planes-de-desarroll",
     "title": "El Desarrollismo: los Planes de Desarrollo y el \"Milagro Económico\" (1960–1973)",
     "orderIndex": 113,
     "contentStatus": "flashcard_v2",
@@ -4234,7 +4234,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "el-desarrollismo-los-planes-de"
+      "topic": "el-desarrollismo-los-planes-de-desarroll"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4246,7 +4246,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "las-transformaciones-sociales-del",
+    "topicSlug": "las-transformaciones-sociales-del-desarr",
     "title": "Las Transformaciones Sociales del Desarrollismo: Éxodo Rural, Emigración y Nueva Clase Media",
     "orderIndex": 114,
     "contentStatus": "flashcard_v2",
@@ -4257,7 +4257,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "las-transformaciones-sociales-del"
+      "topic": "las-transformaciones-sociales-del-desarr"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4269,7 +4269,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "el-auge-de-la-oposicion-democratica",
+    "topicSlug": "el-auge-de-la-oposicion-democratica-cc-o",
     "title": "El Auge de la Oposición Democrática: CC.OO., Estudiantes, Iglesia y ETA",
     "orderIndex": 115,
     "contentStatus": "flashcard_v2",
@@ -4280,7 +4280,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "el-auge-de-la-oposicion-democratica"
+      "topic": "el-auge-de-la-oposicion-democratica-cc-o"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4292,7 +4292,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "el-asesinato-de-carrero-blanco-1973-y",
+    "topicSlug": "el-asesinato-de-carrero-blanco-1973-y-la",
     "title": "El Asesinato de Carrero Blanco (1973) y la Crisis del Petróleo",
     "orderIndex": 116,
     "contentStatus": "flashcard_v2",
@@ -4303,7 +4303,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "el-asesinato-de-carrero-blanco-1973-y"
+      "topic": "el-asesinato-de-carrero-blanco-1973-y-la"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4315,7 +4315,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "la-agonia-del-franquismo-el-sahara-los",
+    "topicSlug": "la-agonia-del-franquismo-el-sahara-los-f",
     "title": "La Agonía del Franquismo: el Sáhara, los Fusilamientos de 1975 y la Muerte de Franco",
     "orderIndex": 117,
     "contentStatus": "flashcard_v2",
@@ -4326,7 +4326,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "la-agonia-del-franquismo-el-sahara-los"
+      "topic": "la-agonia-del-franquismo-el-sahara-los-f"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4338,7 +4338,7 @@
     "subject": "historia_espana",
     "blockSlug": "dictadura-franquista",
     "blockTitle": "La Dictadura Franquista",
-    "topicSlug": "sintesis-y-cronologia-del-franquismo",
+    "topicSlug": "sintesis-y-cronologia-del-franquismo-193",
     "title": "Síntesis y Cronología del Franquismo (1939–1975)",
     "orderIndex": 118,
     "contentStatus": "flashcard_v2",
@@ -4349,7 +4349,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "dictadura-franquista",
-      "topic": "sintesis-y-cronologia-del-franquismo"
+      "topic": "sintesis-y-cronologia-del-franquismo-193"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4384,7 +4384,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "adolfo-suarez-y-la-ley-para-la-reforma",
+    "topicSlug": "adolfo-suarez-y-la-ley-para-la-reforma-p",
     "title": "Adolfo Suárez y la Ley para la Reforma Política (julio–diciembre 1976)",
     "orderIndex": 120,
     "contentStatus": "flashcard_v2",
@@ -4395,7 +4395,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "adolfo-suarez-y-la-ley-para-la-reforma"
+      "topic": "adolfo-suarez-y-la-ley-para-la-reforma-p"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4407,7 +4407,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "la-legalizacion-del-pce-y-las-primeras",
+    "topicSlug": "la-legalizacion-del-pce-y-las-primeras-e",
     "title": "La Legalización del PCE y las Primeras Elecciones Democráticas (junio 1977)",
     "orderIndex": 121,
     "contentStatus": "flashcard_v2",
@@ -4418,7 +4418,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "la-legalizacion-del-pce-y-las-primeras"
+      "topic": "la-legalizacion-del-pce-y-las-primeras-e"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4430,7 +4430,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "los-pactos-de-la-moncloa-octubre-1977",
+    "topicSlug": "los-pactos-de-la-moncloa-octubre-1977-el",
     "title": "Los Pactos de la Moncloa (octubre 1977): el Gran Consenso Económico y Político",
     "orderIndex": 122,
     "contentStatus": "flashcard_v2",
@@ -4441,7 +4441,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "los-pactos-de-la-moncloa-octubre-1977"
+      "topic": "los-pactos-de-la-moncloa-octubre-1977-el"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4453,7 +4453,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "la-constitucion-de-1978-los-padres-de",
+    "topicSlug": "la-constitucion-de-1978-los-padres-de-la",
     "title": "La Constitución de 1978: los \"Padres de la Constitución\" y sus Características",
     "orderIndex": 123,
     "contentStatus": "flashcard_v2",
@@ -4464,7 +4464,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "la-constitucion-de-1978-los-padres-de"
+      "topic": "la-constitucion-de-1978-los-padres-de-la"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4476,7 +4476,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "el-estado-de-las-autonomias-el",
+    "topicSlug": "el-estado-de-las-autonomias-el-terrorism",
     "title": "El Estado de las Autonomías, el Terrorismo y el 23-F (1979–1981)",
     "orderIndex": 124,
     "contentStatus": "flashcard_v2",
@@ -4487,7 +4487,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "el-estado-de-las-autonomias-el"
+      "topic": "el-estado-de-las-autonomias-el-terrorism"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4499,7 +4499,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "la-crisis-de-la-ucd-y-el-cambio-la",
+    "topicSlug": "la-crisis-de-la-ucd-y-el-cambio-la-victo",
     "title": "La Crisis de la UCD y el \"Cambio\": la Victoria del PSOE en 1982",
     "orderIndex": 125,
     "contentStatus": "flashcard_v2",
@@ -4510,7 +4510,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "la-crisis-de-la-ucd-y-el-cambio-la"
+      "topic": "la-crisis-de-la-ucd-y-el-cambio-la-victo"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4522,7 +4522,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "los-gobiernos-del-psoe-19821996-cee",
+    "topicSlug": "los-gobiernos-del-psoe-1982-1996-cee-ota",
     "title": "Los Gobiernos del PSOE (1982–1996): CEE, OTAN, Reconversión Industrial y Estado de Bienestar",
     "orderIndex": 126,
     "contentStatus": "flashcard_v2",
@@ -4533,7 +4533,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "los-gobiernos-del-psoe-19821996-cee"
+      "topic": "los-gobiernos-del-psoe-1982-1996-cee-ota"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4545,7 +4545,7 @@
     "subject": "historia_espana",
     "blockSlug": "transicion-democracia",
     "blockTitle": "La Transición y la Democracia",
-    "topicSlug": "el-declive-de-los-gobiernos-gonzalez",
+    "topicSlug": "el-declive-de-los-gobiernos-gonzalez-cor",
     "title": "El Declive de los Gobiernos González: Corrupción y la Segunda Alternancia (1993–1996)",
     "orderIndex": 127,
     "contentStatus": "flashcard_v2",
@@ -4556,7 +4556,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "transicion-democracia",
-      "topic": "el-declive-de-los-gobiernos-gonzalez"
+      "topic": "el-declive-de-los-gobiernos-gonzalez-cor"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -4568,7 +4568,7 @@
     "subject": "historia_espana",
     "blockSlug": "tecnicas-pau",
     "blockTitle": "Técnicas PAU",
-    "topicSlug": "como-hacer-un-comentario-de-texto",
+    "topicSlug": "como-hacer-un-comentario-de-texto-histor",
     "title": "Cómo hacer un comentario de texto histórico",
     "orderIndex": 128,
     "contentStatus": "flashcard_v2",
@@ -4579,7 +4579,7 @@
     "evauPracticeQuery": {
       "subject": "historia",
       "block": "tecnicas-pau",
-      "topic": "como-hacer-un-comentario-de-texto"
+      "topic": "como-hacer-un-comentario-de-texto-histor"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [

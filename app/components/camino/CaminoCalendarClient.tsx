@@ -66,7 +66,7 @@ const CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'
 
 const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
-  'Historia de España': 'historia', 'Historia de la Filosofía': 'historia_filosofia', 'Lengua Castellana': 'lengua', 'Inglés': 'ingles', 'Biología': 'biologia'
+  'Historia de España': 'historia_espana', 'Historia de la Filosofía': 'historia_filosofia', 'Lengua Castellana': 'lengua', 'Inglés': 'ingles', 'Biología': 'biologia'
 }
 const DB_SUBJECTS: Record<string, string> = {
   'Matemáticas II': 'mates',

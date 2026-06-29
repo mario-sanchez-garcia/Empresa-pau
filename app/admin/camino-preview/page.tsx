@@ -33,7 +33,7 @@ type PageState =
   | { status: 'loading' }
   | { status: 'unauthenticated' }
   | { status: 'error'; message: string }
-  | { status: 'loaded'; rows: V2MissionRow[] }
+  | { status: 'loaded'; mat: V2MissionRow[]; his: V2MissionRow[] }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function slugify(title: string): string {
@@ -63,17 +63,19 @@ function Indicator({ ok, label }: { ok: boolean; label: string }) {
 }
 
 // ─── Preview Table ────────────────────────────────────────────────────────────
-function V2PreviewTable({ rows }: { rows: V2MissionRow[] }) {
-  const BLOCK_ORDER = ['Álgebra', 'Geometría', 'Análisis', 'Probabilidad']
-
+function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
+  rows: V2MissionRow[]
+  subjectLabel: string
+  blockOrder?: string[]
+}) {
   const byBlock: Record<string, V2MissionRow[]> = {}
   for (const row of rows) {
     if (!byBlock[row.block_key]) byBlock[row.block_key] = []
     byBlock[row.block_key].push(row)
   }
 
-  const blocks = BLOCK_ORDER.filter(b => byBlock[b]).concat(
-    Object.keys(byBlock).filter(b => !BLOCK_ORDER.includes(b))
+  const blocks = blockOrder.filter(b => byBlock[b]).concat(
+    Object.keys(byBlock).filter(b => !blockOrder.includes(b))
   )
 
   if (blocks.length === 0) {
@@ -99,7 +101,7 @@ function V2PreviewTable({ rows }: { rows: V2MissionRow[] }) {
             <div style={{ background: '#f8faff', padding: '12px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 2px' }}>
-                  Matemáticas II
+                  {subjectLabel}
                 </p>
                 <h2 style={{ fontSize: 14, fontWeight: 800, color: C.ink, margin: 0 }}>
                   {blockKey}
@@ -186,6 +188,20 @@ function V2PreviewTable({ rows }: { rows: V2MissionRow[] }) {
   )
 }
 
+// ─── Section header ───────────────────────────────────────────────────────────
+function SectionHeader({ title, rows }: { title: string; rows: V2MissionRow[] }) {
+  const conVideo = rows.filter(r => r.video_id).length
+  const conConcepto = rows.filter(r => r.concept_markdown?.trim()).length
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+      <h2 style={{ fontSize: 16, fontWeight: 800, color: C.ink, margin: 0 }}>{title}</h2>
+      <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
+        {rows.length} flashcards · {conVideo} con vídeo · {conConcepto} con concepto
+      </p>
+    </div>
+  )
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function CaminoPreviewPage() {
   const [state, setState] = useState<PageState>({ status: 'loading' })
@@ -201,12 +217,18 @@ export default function CaminoPreviewPage() {
       const { data, error } = await supabase
         .from('curriculum_content_v2')
         .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt')
-        .eq('subject', 'matematicas_ii')
+        .in('subject', ['matematicas_ii', 'historia_espana'])
         .order('sort_order', { ascending: true })
 
       if (cancelled) return
       if (error) { setState({ status: 'error', message: error.message }); return }
-      setState({ status: 'loaded', rows: (data ?? []) as V2MissionRow[] })
+
+      const all = (data ?? []) as V2MissionRow[]
+      setState({
+        status: 'loaded',
+        mat: all.filter(r => r.subject === 'matematicas_ii'),
+        his: all.filter(r => r.subject === 'historia_espana'),
+      })
     }
 
     load()
@@ -236,7 +258,7 @@ export default function CaminoPreviewPage() {
               Preview Camino PAU
             </h1>
             <p style={{ color: '#93c5fd', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
-              60 mini-misiones de curriculum_content_v2 · Matemáticas II
+              curriculum_content_v2 · Matemáticas II (60) · Historia de España (128)
             </p>
           </div>
         </div>
@@ -265,12 +287,24 @@ export default function CaminoPreviewPage() {
 
         {state.status === 'loaded' && (
           <>
-            <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-              <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
-                {state.rows.length} mini-misiones · {state.rows.filter(r => r.video_id).length} con vídeo · {state.rows.filter(r => r.concept_markdown?.trim()).length} con concepto
-              </p>
-            </div>
-            <V2PreviewTable rows={state.rows} />
+            {/* ── Matemáticas II ── */}
+            <section style={{ marginBottom: 52 }}>
+              <SectionHeader title="Matemáticas II" rows={state.mat} />
+              <V2PreviewTable
+                rows={state.mat}
+                subjectLabel="Matemáticas II"
+                blockOrder={['Álgebra', 'Geometría', 'Análisis', 'Probabilidad']}
+              />
+            </section>
+
+            {/* ── Historia de España ── */}
+            <section>
+              <SectionHeader title="Historia de España" rows={state.his} />
+              <V2PreviewTable
+                rows={state.his}
+                subjectLabel="Historia de España"
+              />
+            </section>
           </>
         )}
       </div>

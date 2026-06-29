@@ -113,11 +113,15 @@ export function getCurriculumForSubjects(subjectLabels: string[]) {
 
 export function getTopic(subject: string, blockSlug: string, topicSlug: string) {
   const subjectSlug = SUBJECT_LABELS[subject] ? subject : subjectSlugFromLabel(subject)
-  return CAMINO_CURRICULUM_TOPICS.find(topic =>
-    topic.subject === subjectSlug &&
-    topic.blockSlug === blockSlug &&
-    topic.topicSlug === topicSlug
-  ) ?? null
+  const inSubjectBlock = CAMINO_CURRICULUM_TOPICS.filter(t =>
+    t.subject === subjectSlug && t.blockSlug === blockSlug
+  )
+  // Exact match first
+  const exact = inSubjectBlock.find(t => t.topicSlug === topicSlug)
+  if (exact) return exact
+  // Prefix fallback: handles legacy slugs from old chapter_titles or truncated toKebab slugs
+  // (url slug is a leading substring of the canonical seed slug)
+  return inSubjectBlock.find(t => t.topicSlug.startsWith(topicSlug) && topicSlug.length >= 12) ?? null
 }
 
 export function buildTopicHref(topic: Pick<CaminoCurriculumTopic, 'subject' | 'blockSlug' | 'topicSlug'>) {

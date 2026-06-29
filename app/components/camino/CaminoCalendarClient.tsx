@@ -69,7 +69,6 @@ const SUBJECT_SLUGS: Record<string, string> = {
   'Historia de España': 'historia_espana', 'Historia de la Filosofía': 'historia_filosofia', 'Lengua Castellana': 'lengua', 'Inglés': 'ingles', 'Biología': 'biologia'
 }
 const DB_SUBJECTS: Record<string, string> = {
-  'Matemáticas II': 'mates',
   'Matemáticas CCSS': 'matematicas_ccss',
 }
 const seedTopicToCurriculumItem = (topic: CaminoCurriculumTopic): CurriculumItem => ({

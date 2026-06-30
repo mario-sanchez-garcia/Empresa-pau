@@ -119,9 +119,12 @@ export function getTopic(subject: string, blockSlug: string, topicSlug: string) 
   // Exact match first
   const exact = inSubjectBlock.find(t => t.topicSlug === topicSlug)
   if (exact) return exact
-  // Prefix fallback: handles legacy slugs from old chapter_titles or truncated toKebab slugs
-  // (url slug is a leading substring of the canonical seed slug)
-  return inSubjectBlock.find(t => t.topicSlug.startsWith(topicSlug) && topicSlug.length >= 12) ?? null
+  // Bidirectional prefix fallback: handles legacy chapter_title slugs (url shorter than seed)
+  // and full textSlug urls (url longer than truncated seed slug). Min 12 chars avoids false positives.
+  return inSubjectBlock.find(t => {
+    const minLen = Math.min(t.topicSlug.length, topicSlug.length)
+    return minLen >= 12 && (t.topicSlug.startsWith(topicSlug) || topicSlug.startsWith(t.topicSlug))
+  }) ?? null
 }
 
 export function buildTopicHref(topic: Pick<CaminoCurriculumTopic, 'subject' | 'blockSlug' | 'topicSlug'>) {

@@ -8,7 +8,6 @@ const C = {
   bg: '#2563eb',
   bgDark: '#1d4ed8',
   light: '#eff6ff',
-  accent: '#60a5fa',
   ink: '#111827',
   muted: '#64748b',
   border: '#dbe7fb',
@@ -17,7 +16,7 @@ const C = {
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type V2MissionRow = {
+type V2Row = {
   sort_order: number
   title: string
   block_key: string
@@ -29,23 +28,21 @@ type V2MissionRow = {
   practice_prompt: string | null
 }
 
-type PageState =
+type SubjectKey = 'matematicas_ii' | 'historia_espana'
+
+type LoadState =
+  | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'unauthenticated' }
   | { status: 'error'; message: string }
-  | { status: 'loaded'; mat: V2MissionRow[]; his: V2MissionRow[] }
+  | { status: 'loaded'; rows: V2Row[] }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-function slugify(title: string): string {
+function textSlug(title: string): string {
   return title
-    .replace(/\$[^$]*\$/g, '')
-    .replace(/[()[\]{}$\\·×]/g, '')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 40)
-    .replace(/-+$/g, '')
 }
 
 function Indicator({ ok, label }: { ok: boolean; label: string }) {
@@ -65,16 +62,15 @@ function Indicator({ ok, label }: { ok: boolean; label: string }) {
 
 // ─── Preview Table ────────────────────────────────────────────────────────────
 function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
-  rows: V2MissionRow[]
+  rows: V2Row[]
   subjectLabel: string
   blockOrder?: string[]
 }) {
-  const byBlock: Record<string, V2MissionRow[]> = {}
+  const byBlock: Record<string, V2Row[]> = {}
   for (const row of rows) {
     if (!byBlock[row.block_key]) byBlock[row.block_key] = []
     byBlock[row.block_key].push(row)
   }
-
   const blocks = blockOrder.filter(b => byBlock[b]).concat(
     Object.keys(byBlock).filter(b => !blockOrder.includes(b))
   )
@@ -98,15 +94,12 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
 
         return (
           <div key={blockKey} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: C.shadow }}>
-            {/* Block header */}
             <div style={{ background: '#f8faff', padding: '12px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 2px' }}>
                   {subjectLabel}
                 </p>
-                <h2 style={{ fontSize: 14, fontWeight: 800, color: C.ink, margin: 0 }}>
-                  {blockKey}
-                </h2>
+                <h2 style={{ fontSize: 14, fontWeight: 800, color: C.ink, margin: 0 }}>{blockKey}</h2>
               </div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{blockRows.length} misiones</span>
@@ -116,8 +109,6 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                 <span style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>✏️ {conEjercicio}/{blockRows.length} ejercicio</span>
               </div>
             </div>
-
-            {/* Mission rows */}
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
@@ -134,13 +125,7 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                 </thead>
                 <tbody>
                   {blockRows.map((row, i) => {
-                    const topicSlug = slugify(row.title)
-                    const href = `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
-                    const tieneConcepto = Boolean(row.concept_markdown?.trim())
-                    const tieneCaso = Boolean(row.worked_example_markdown?.trim())
-                    const tieneEjercicio = Boolean(row.practice_prompt?.trim())
-                    const tieneVideo = Boolean(row.video_id)
-
+                    const href = `/camino-pau/curso/${row.subject}/${row.block_slug}/${textSlug(row.title)}`
                     return (
                       <tr key={row.sort_order} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
                         <td style={{ padding: '9px 14px', color: C.muted, fontWeight: 700, fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>
@@ -151,28 +136,24 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                         </td>
                         <td style={{ padding: '9px 14px', borderBottom: `1px solid ${C.border}` }}>
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                            <Indicator ok={tieneConcepto} label="concepto" />
-                            <Indicator ok={tieneCaso} label="caso" />
-                            <Indicator ok={tieneEjercicio} label="ejercicio" />
+                            <Indicator ok={Boolean(row.concept_markdown?.trim())} label="concepto" />
+                            <Indicator ok={Boolean(row.worked_example_markdown?.trim())} label="caso" />
+                            <Indicator ok={Boolean(row.practice_prompt?.trim())} label="ejercicio" />
                             <span style={{
                               display: 'inline-flex', alignItems: 'center', gap: 3,
                               fontSize: 11, fontWeight: 700,
-                              color: tieneVideo ? '#1d4ed8' : '#94a3b8',
-                              background: tieneVideo ? '#eff6ff' : '#f8fafc',
-                              border: `1px solid ${tieneVideo ? '#bfdbfe' : '#e2e8f0'}`,
+                              color: row.video_id ? '#1d4ed8' : '#94a3b8',
+                              background: row.video_id ? '#eff6ff' : '#f8fafc',
+                              border: `1px solid ${row.video_id ? '#bfdbfe' : '#e2e8f0'}`,
                               borderRadius: 6, padding: '2px 7px', whiteSpace: 'nowrap',
                             }}>
-                              {tieneVideo ? '🎥' : '❌'} video
+                              {row.video_id ? '🎥' : '❌'} video
                             </span>
                           </div>
                         </td>
                         <td style={{ padding: '9px 14px', borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>
-                          <Link
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: C.bg, fontWeight: 700, fontSize: 12, textDecoration: 'none' }}
-                          >
+                          <Link href={href} target="_blank" rel="noopener noreferrer"
+                            style={{ color: C.bg, fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>
                             Ver →
                           </Link>
                         </td>
@@ -189,52 +170,55 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
   )
 }
 
-// ─── Section header ───────────────────────────────────────────────────────────
-function SectionHeader({ title, rows }: { title: string; rows: V2MissionRow[] }) {
-  const conVideo = rows.filter(r => r.video_id).length
-  const conConcepto = rows.filter(r => r.concept_markdown?.trim()).length
-  return (
-    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-      <h2 style={{ fontSize: 16, fontWeight: 800, color: C.ink, margin: 0 }}>{title}</h2>
-      <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
-        {rows.length} flashcards · {conVideo} con vídeo · {conConcepto} con concepto
-      </p>
-    </div>
-  )
-}
+// ─── Subject config ───────────────────────────────────────────────────────────
+const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
+  { key: 'matematicas_ii', label: 'Matemáticas II', blockOrder: ['Álgebra', 'Geometría', 'Análisis', 'Probabilidad'] },
+  { key: 'historia_espana', label: 'Historia de España' },
+]
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function CaminoPreviewPage() {
-  const [state, setState] = useState<PageState>({ status: 'loading' })
+  const [activeSubject, setActiveSubject] = useState<SubjectKey>('matematicas_ii')
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authed, setAuthed] = useState(false)
+  const [cache, setCache] = useState<Partial<Record<SubjectKey, LoadState>>>({})
 
+  // Auth check once
   useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (cancelled) return
-      if (!session) { setState({ status: 'unauthenticated' }); return }
-
-      const { data, error } = await supabase
-        .from('curriculum_content_v2')
-        .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt')
-        .in('subject', ['matematicas_ii', 'historia_espana'])
-        .order('sort_order', { ascending: true })
-
-      if (cancelled) return
-      if (error) { setState({ status: 'error', message: error.message }); return }
-
-      const all = (data ?? []) as V2MissionRow[]
-      setState({
-        status: 'loaded',
-        mat: all.filter(r => r.subject === 'matematicas_ii'),
-        his: all.filter(r => r.subject === 'historia_espana'),
-      })
-    }
-
-    load()
-    return () => { cancelled = true }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthed(Boolean(session))
+      setAuthChecked(true)
+    })
   }, [])
+
+  // Load active subject when needed
+  useEffect(() => {
+    if (!authed) return
+    const already = cache[activeSubject]
+    if (already && already.status !== 'idle') return
+
+    setCache(c => ({ ...c, [activeSubject]: { status: 'loading' } }))
+
+    let cancelled = false
+    supabase
+      .from('curriculum_content_v2')
+      .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt')
+      .eq('subject', activeSubject)
+      .order('sort_order', { ascending: true })
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error) {
+          setCache(c => ({ ...c, [activeSubject]: { status: 'error', message: error.message } }))
+        } else {
+          setCache(c => ({ ...c, [activeSubject]: { status: 'loaded', rows: (data ?? []) as V2Row[] } }))
+        }
+      })
+
+    return () => { cancelled = true }
+  }, [authed, activeSubject]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const subjectCfg = SUBJECTS.find(s => s.key === activeSubject)!
+  const loadState = cache[activeSubject] ?? { status: 'idle' }
 
   return (
     <div style={{ minHeight: '100vh', background: `linear-gradient(160deg, ${C.light} 0%, #f8faff 100%)` }}>
@@ -259,53 +243,81 @@ export default function CaminoPreviewPage() {
               Preview Camino PAU
             </h1>
             <p style={{ color: '#93c5fd', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
-              curriculum_content_v2 · Matemáticas II (60) · Historia de España (128)
+              curriculum_content_v2
             </p>
+          </div>
+
+          {/* ── Subject selector ── */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {SUBJECTS.map(s => {
+              const active = s.key === activeSubject
+              return (
+                <button
+                  key={s.key}
+                  onClick={() => setActiveSubject(s.key)}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: 10,
+                    border: active ? '2px solid rgba(255,255,255,0.9)' : '2px solid rgba(255,255,255,0.25)',
+                    background: active ? 'rgba(255,255,255,0.18)' : 'transparent',
+                    color: active ? '#ffffff' : 'rgba(255,255,255,0.65)',
+                    fontWeight: active ? 800 : 600,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {s.label}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
 
       {/* ── Body ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '28px 24px 48px' }}>
-        {state.status === 'loading' && (
+
+        {!authChecked && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
-            <p style={{ color: C.muted, fontSize: 15 }}>Cargando misiones…</p>
+            <p style={{ color: C.muted, fontSize: 15 }}>Verificando sesión…</p>
           </div>
         )}
 
-        {state.status === 'unauthenticated' && (
+        {authChecked && !authed && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
             <p style={{ fontSize: 18, color: C.ink, fontWeight: 700, marginBottom: 12 }}>Inicia sesión para acceder.</p>
             <a href="/login" style={{ color: C.bg, fontSize: 14, fontWeight: 700, textDecoration: 'underline' }}>Ir a login →</a>
           </div>
         )}
 
-        {state.status === 'error' && (
+        {authChecked && authed && (loadState.status === 'idle' || loadState.status === 'loading') && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
-            <p style={{ fontSize: 15, color: '#dc2626', fontWeight: 700 }}>Error: {state.message}</p>
+            <p style={{ color: C.muted, fontSize: 15 }}>Cargando {subjectCfg.label}…</p>
           </div>
         )}
 
-        {state.status === 'loaded' && (
-          <>
-            {/* ── Matemáticas II ── */}
-            <section style={{ marginBottom: 52 }}>
-              <SectionHeader title="Matemáticas II" rows={state.mat} />
-              <V2PreviewTable
-                rows={state.mat}
-                subjectLabel="Matemáticas II"
-                blockOrder={['Álgebra', 'Geometría', 'Análisis', 'Probabilidad']}
-              />
-            </section>
+        {authChecked && authed && loadState.status === 'error' && (
+          <div style={{ textAlign: 'center', marginTop: 80 }}>
+            <p style={{ fontSize: 15, color: '#dc2626', fontWeight: 700 }}>Error: {loadState.message}</p>
+          </div>
+        )}
 
-            {/* ── Historia de España ── */}
-            <section>
-              <SectionHeader title="Historia de España" rows={state.his} />
-              <V2PreviewTable
-                rows={state.his}
-                subjectLabel="Historia de España"
-              />
-            </section>
+        {authChecked && authed && loadState.status === 'loaded' && (
+          <>
+            <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
+                {loadState.rows.length} flashcards
+                {' · '}{loadState.rows.filter(r => r.video_id).length} con vídeo
+                {' · '}{loadState.rows.filter(r => r.concept_markdown?.trim()).length} con concepto
+              </p>
+            </div>
+            <V2PreviewTable
+              rows={loadState.rows}
+              subjectLabel={subjectCfg.label}
+              blockOrder={subjectCfg.blockOrder}
+            />
           </>
         )}
       </div>

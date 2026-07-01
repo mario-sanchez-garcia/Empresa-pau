@@ -1,5 +1,7 @@
 import ParentCheckoutClient from '../[token]/ParentCheckoutClient'
 
+const PREVIEW_EXPIRES_AT = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
 const PREVIEW_FEATURES = [
   'Camino PAU: misiones diarias personalizadas',
   'Correcciones IA con uso razonable',
@@ -10,8 +12,6 @@ const PREVIEW_FEATURES = [
 ]
 
 export default function ParentCheckoutPreviewPage() {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-
   return (
     <div>
       <div style={{
@@ -31,7 +31,7 @@ export default function ParentCheckoutPreviewPage() {
           priceCents={4900}
           currency="eur"
           studentDisplayName="Mario"
-          expiresAt={expiresAt}
+          expiresAt={PREVIEW_EXPIRES_AT}
         />
       </div>
     </div>

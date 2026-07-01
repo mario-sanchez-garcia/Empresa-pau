@@ -164,9 +164,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
   useEffect(() => {
     let cancelled = false
-    setV2Loading(true)
-    setV2Cards([])
-    setActiveV2Index(0)
+    queueMicrotask(() => {
+      if (cancelled) return
+      setV2Loading(true)
+      setV2Cards([])
+      setActiveV2Index(0)
+    })
 
     if (!topic) {
       queueMicrotask(() => { if (!cancelled) setV2Loading(false) })
@@ -228,7 +231,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
   useEffect(() => {
     if (!v2Cards.length) {
-      setActiveV2Index(0)
+      queueMicrotask(() => setActiveV2Index(0))
       return
     }
     if (typeof window === 'undefined') return

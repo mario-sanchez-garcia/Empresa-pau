@@ -197,9 +197,8 @@ export default function CaminoPreviewPage() {
     const already = cache[activeSubject]
     if (already && already.status !== 'idle') return
 
-    setCache(c => ({ ...c, [activeSubject]: { status: 'loading' } }))
-
     let cancelled = false
+    queueMicrotask(() => { if (!cancelled) setCache(c => ({ ...c, [activeSubject]: { status: 'loading' } })) })
     supabase
       .from('curriculum_content_v2')
       .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt')

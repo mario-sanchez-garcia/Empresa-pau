@@ -69,6 +69,24 @@ type QueueItem = {
   metadata: Record<string, unknown> | null
 }
 
+// Returns a lower number = higher PAU priority
+function rescuePriority(subject: string, sortOrder: number): number {
+  if (subject === 'matematicas_ii') {
+    if (sortOrder >= 35 && sortOrder <= 49) return 1 // Análisis
+    if (sortOrder >= 50 && sortOrder <= 60) return 2 // Probabilidad
+    if (sortOrder >= 1 && sortOrder <= 19) return 3  // Álgebra
+    if (sortOrder >= 20 && sortOrder <= 34) return 4 // Geometría
+    return 5
+  }
+  if (subject === 'historia_espana') {
+    if (sortOrder >= 53 && sortOrder <= 79) return 1   // Siglo XIX y Restauración
+    if (sortOrder >= 89 && sortOrder <= 106) return 2  // 2ª República y Guerra Civil
+    if (sortOrder >= 107 && sortOrder <= 127) return 3 // Franquismo y Transición
+    return 4 // Resto de bloques
+  }
+  return 10
+}
+
 function commentTextIntervalDays(today: string): number | null {
   if (today >= '2026-09-01' && today <= '2026-12-31') return 28
   if (today >= '2027-01-01' && today <= '2027-03-31') return 14
@@ -232,7 +250,8 @@ export async function ensureCaminoCalendar(
 
   const workingDaysUntilExam = countWorkingDays(today, EXAM_DATE)
   const ratio = workingDaysUntilExam > 0 ? (remainingQueue ?? 0) / workingDaysUntilExam : 0
-  const itemsPerDay = ratio > 1.5 ? 2 : 1
+  const rescueMode = ratio > 2
+  const itemsPerDay = rescueMode || ratio > 1.5 ? 2 : 1
 
   // Obtener items pendientes de la cola ordenados por posición
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
@@ -250,6 +269,36 @@ export async function ensureCaminoCalendar(
     if (!subjectQueues[item.subject]) subjectQueues[item.subject] = []
     subjectQueues[item.subject].push(item)
   }
+
+  // Rescue mode: re-sort by PAU priority and mark overflow items inactive
+  if (rescueMode) {
+    const inactiveIds: string[] = []
+    const perSubjectCap = Math.ceil((CALENDAR_HORIZON * 2) / subjects.length)
+
+    for (const subj of subjects) {
+      const queue = subjectQueues[subj] ?? []
+      queue.sort((a, b) => {
+        const pa = rescuePriority(a.subject, a.v2_sort_order)
+        const pb = rescuePriority(b.subject, b.v2_sort_order)
+        return pa !== pb ? pa - pb : a.v2_sort_order - b.v2_sort_order
+      })
+      if (queue.length > perSubjectCap) {
+        for (const item of queue.slice(perSubjectCap)) inactiveIds.push(item.id)
+        subjectQueues[subj] = queue.slice(0, perSubjectCap)
+      } else {
+        subjectQueues[subj] = queue
+      }
+    }
+
+    if (inactiveIds.length > 0) {
+      await supabase
+        .from('user_learning_queue')
+        .update({ queue_status: 'inactive' })
+        .in('id', inactiveIds)
+        .eq('user_id', userId)
+    }
+  }
+
   const cursors: Record<string, number> = Object.fromEntries(subjects.map(s => [s, 0]))
 
   // Días hábiles vacíos que necesitan misión (ventana amplia para cubrir gaps)
@@ -276,7 +325,9 @@ export async function ensureCaminoCalendar(
       const item = queue[cursor]
       const itemMeta = item.metadata ?? {}
       const missionType = (itemMeta.mission_type as string) ?? 'concept'
-      const calMetadata = itemMeta.express ? { express: true } : {}
+      const calMetadata: Record<string, unknown> = {}
+      if (itemMeta.express) calMetadata.express = true
+      if (rescueMode) calMetadata.plan_mode = 'rescue'
       calendarRows.push({
         user_id: userId,
         scheduled_date: dateStr,

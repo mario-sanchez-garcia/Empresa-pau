@@ -45,7 +45,6 @@ type Mission = {
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 type StudentExam = { id: string; subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }
-type XpEvent = { id: string; missionId: string; date: string; subject: string; xp: number; bonus: boolean; score?: number }
 type CurriculumItem = { subject: string; subjectSlug: string; block: string; blockSlug: string; topic: string; topicSlug: string; title: string; sortOrder: number; contentStatus: string; source: 'supabase' | 'fallback' | 'seed'; planTopic?: CaminoCurriculumTopic }
 type RankingEntry = { id: string; name: string; community: string; xp: number; rank: number; isCurrentUser: boolean; isMock?: boolean }
 type LeaderboardPayload = {
@@ -61,16 +60,12 @@ type LegacySchoolFeedback = { schoolName: string | null; community: string | nul
 type CalendarWeekCache = Record<string, DayPlan[]>
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 
-const CALENDAR_KEY = 'pausia_camino_calendar_v2'
-const CALENDAR_WEEKS_KEY = 'pausia_camino_calendar_weeks_v1'
 const EXAMS_KEY = 'pausia_camino_student_exams_v1'
-const XP_KEY = 'pausia_camino_xp_events_v1'
 const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
 const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
 const CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'
 const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
 const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
-const CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'
 
 const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
@@ -148,9 +143,6 @@ function weekRangeLabel(weekStartISO: string) {
   return `Semana del ${startText} al ${endText}`
 }
 function weekOffset(weekStartISO: string, weeks: number) { return toISO(addDays(dateFromISO(weekStartISO), weeks * 7)) }
-function cacheWeek(cache: CalendarWeekCache, weekStartISO: string, calendar: DayPlan[]) {
-  return { ...cache, [weekStartISO]: calendar }
-}
 function getSimulationLimitForPlan(planId: CaminoPlanId) {
   return getCaminoPlanLimits(planId).fullMocksPerMonth
 }
@@ -610,17 +602,6 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
   })
 }
 
-function syncStatuses(calendar: DayPlan[], events: XpEvent[]) {
-  const done = new Set(events.map(event => event.missionId))
-  const realToday = todayISO()
-  return calendar.map(day => ({
-    ...day,
-    label: calendarDayLabel(day.date),
-    isToday: day.date === realToday,
-    missions: day.missions.map(mission => ({ ...mission, status: done.has(mission.id) ? 'done' : mission.status })),
-  }))
-}
-
 function calendarStartsWeek(calendar: DayPlan[], weekStartISO: string) {
   return calendar[0]?.date === weekStartISO
 }
@@ -660,26 +641,13 @@ function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingDa
   ))
 }
 
-function loadOrGenerateWeek(
-  weekStartISO: string,
-  onboarding: OnboardingData,
-  exams: StudentExam[],
-  curriculum: CurriculumItem[],
-  planId: CaminoPlanId,
-  xpEvents: XpEvent[],
-  cache: CalendarWeekCache
-) {
-  const cached = cache[weekStartISO]
-  if (cached?.length && calendarMatchesOnboarding(cached, onboarding, weekStartISO)) return syncStatuses(cached, xpEvents)
-  return syncStatuses(generateCalendar(onboarding, exams, curriculum, planId, weekStartISO, cache), xpEvents)
-}
-
 export default function CaminoCalendarClient() {
   const router = useRouter()
   const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
   const [exams, setExams] = useState<StudentExam[]>([])
-  const [xpEvents, setXpEvents] = useState<XpEvent[]>([])
+  const [xpTotal, setXpTotal] = useState(0)
+  const [weeklyXP, setWeeklyXP] = useState(0)
   const [rankingOpen, setRankingOpen] = useState(false)
   const [rankingTab, setRankingTab] = useState<'global' | 'community'>('global')
   const [showExamForm, setShowExamForm] = useState(false)
@@ -704,49 +672,15 @@ export default function CaminoCalendarClient() {
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
     const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
-    const loadedXp = loadJson<XpEvent[]>(XP_KEY, [])
-    const loadedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
-    const loadedWeekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})
-    const currentWeek = currentWeekStartISO()
     const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
-    const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
-    const legacyCurrentWeek = loadedCalendar.length > 0 && calendarMatchesOnboarding(loadedCalendar, loadedOnboarding, currentWeek) ? loadedCalendar : []
-    const canReuseSavedCalendar = !shouldRefreshCalendar && Boolean(loadedWeekCache[currentWeek]?.length || legacyCurrentWeek.length)
-    // Seguro: efecto de montaje único que lee localStorage (client-only).
-    // Lazy initializers causarían error de hidratación SSR.
     setOnboarding(loadedOnboarding)
-    // Seguro: efecto de montaje único que lee localStorage (client-only).
-    // Lazy initializers causarían error de hidratación SSR.
     setExams(loadedExams)
-    // Seguro: efecto de montaje único que lee localStorage (client-only).
-    // Lazy initializers causarían error de hidratación SSR.
-    setXpEvents(loadedXp)
     setCalendarExpanded(loadedCalendarExpanded)
-    setSelectedWeekStart(currentWeek)
-    // Seguro: efecto de montaje único que lee localStorage (client-only).
-    // Lazy initializers causarían error de hidratación SSR.
+    setSelectedWeekStart(currentWeekStartISO())
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
-    // Seguro: efecto de montaje único que lee localStorage (client-only).
-    // Lazy initializers causarían error de hidratación SSR.
-    const initialCache = legacyCurrentWeek.length ? cacheWeek(loadedWeekCache, currentWeek, legacyCurrentWeek) : loadedWeekCache
-    const initialCalendar = canReuseSavedCalendar ? loadOrGenerateWeek(currentWeek, loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free', loadedXp, initialCache) : generateCalendar(loadedOnboarding, loadedExams, FALLBACK_CURRICULUM, 'free', currentWeek, initialCache)
-    setCalendar(syncStatuses(initialCalendar, loadedXp))
-    saveJson(CALENDAR_WEEKS_KEY, cacheWeek(initialCache, currentWeek, initialCalendar))
-    saveJson(CALENDAR_KEY, initialCalendar)
-    if (shouldRefreshCalendar) saveJson(CALENDAR_REFRESH_KEY, false)
     if (!window.localStorage.getItem('pausia_camino_onboarding_done')) setShowOnboarding(true)
     fetchCurriculumItems(loadedOnboarding.subjects)
-      .then(items => {
-        const nextItems = items.length ? items : FALLBACK_CURRICULUM
-        setCurriculumItems(nextItems)
-        if (!canReuseSavedCalendar) {
-          const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})
-          const regenerated = generateCalendar(loadedOnboarding, loadedExams, nextItems, 'free', currentWeek, cache)
-          setCalendar(syncStatuses(regenerated, loadedXp))
-          saveJson(CALENDAR_KEY, regenerated)
-          saveJson(CALENDAR_WEEKS_KEY, cacheWeek(cache, currentWeek, regenerated))
-        }
-      })
+      .then(items => setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM))
       .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
   }, [])
 
@@ -762,18 +696,21 @@ export default function CaminoCalendarClient() {
       }
       await ensureCaminoCalendar(userId, supabase)
       if (cancelled) return
-      const [days, rachaValue, matCount, histCount] = await Promise.all([
+      const weekStart = currentWeekStartISO()
+      const [calDays, rachaValue, matCount, histCount, progressRow, weeklyXpRows] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
+        supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
+        supabase.from('camino_xp_events').select('xp').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
       ])
       if (cancelled) return
-      if (days && days.length > 0) {
-        setCalendar(days)
+      if (calDays && calDays.length > 0) {
+        setCalendar(calDays)
         setSupabaseCalLoaded(true)
         const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-        const todayDay = days.find(d => d.date === realTodayStr)
+        const todayDay = calDays.find(d => d.date === realTodayStr)
         const heroMission = todayDay?.missions.find(m => m.role === 'main')
         if (heroMission?.blockKey) {
           supabase
@@ -787,6 +724,8 @@ export default function CaminoCalendarClient() {
       }
       setStreak(rachaValue)
       setSubjectProgress({ matematicas_ii: matCount.count ?? 0, historia_espana: histCount.count ?? 0 })
+      setXpTotal(Number(progressRow.data?.xp_total) || 0)
+      setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp: number }>).reduce((sum, r) => sum + (Number(r.xp) || 0), 0))
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
@@ -815,18 +754,7 @@ export default function CaminoCalendarClient() {
       if (!res.ok || cancelled) return
       const billing = await res.json() as { activePlans?: Array<{ planId?: string | null }> }
       const planId = normalizeCaminoPlanId(billing.activePlans?.[0]?.planId)
-      setCaminoPlanId(planId)
-      const savedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
-      const savedWeekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})
-      const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
-      if (!supabaseCalLoaded && (!savedCalendar.length || shouldRefreshCalendar || !calendarMatchesOnboarding(savedWeekCache[selectedWeekStart] ?? savedCalendar, onboarding, selectedWeekStart))) {
-        const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-        const regenerated = generateCalendar(onboarding, exams, source, planId, selectedWeekStart, savedWeekCache)
-        setCalendar(syncStatuses(regenerated, xpEvents))
-        saveJson(CALENDAR_KEY, regenerated)
-        saveJson(CALENDAR_WEEKS_KEY, cacheWeek(savedWeekCache, selectedWeekStart, regenerated))
-        if (shouldRefreshCalendar) saveJson(CALENDAR_REFRESH_KEY, false)
-      }
+      if (!cancelled) setCaminoPlanId(planId)
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [onboarding?.completedAt]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -853,9 +781,7 @@ export default function CaminoCalendarClient() {
   const todayMain = today?.missions.filter(mission => mission.role === 'main') ?? []
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
-  const totalXP = xpEvents.reduce((sum, event) => sum + event.xp, 0)
-  const weeklyXP = xpEvents.filter(e => e.date >= currentWeekStartISO()).reduce((sum, e) => sum + e.xp, 0)
-  const displayedXP = leaderboard?.currentXp ?? totalXP
+  const displayedXP = leaderboard?.currentXp ?? xpTotal
   const division = divisionFor(displayedXP)
   const nextDivision = DIVISIONS[DIVISIONS.indexOf(division) + 1]
   const divisionPct = nextDivision ? Math.min(100, Math.round(((displayedXP - division.min) / (nextDivision.min - division.min)) * 100)) : 100
@@ -918,6 +844,8 @@ export default function CaminoCalendarClient() {
       ...day,
       missions: day.missions.map(m => m.id === mission.id ? { ...m, status: 'done' as MissionStatus } : m),
     })))
+    setXpTotal(prev => prev + 20)
+    setWeeklyXP(prev => prev + 20)
     setToast('¡Misión completada! +20 XP')
     await supabase
       .from('camino_calendar')
@@ -933,20 +861,17 @@ export default function CaminoCalendarClient() {
       })
   }
 
-  function persist(nextCalendar: DayPlan[], nextXp = xpEvents, nextExams = exams) {
-    setCalendar(nextCalendar); setXpEvents(nextXp); setExams(nextExams)
-    const cache = cacheWeek(loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {}), selectedWeekStart, nextCalendar)
-    saveJson(CALENDAR_WEEKS_KEY, cache); saveJson(CALENDAR_KEY, nextCalendar); saveJson(XP_KEY, nextXp); saveJson(EXAMS_KEY, nextExams)
+  function persist(nextCalendar: DayPlan[], nextExams = exams) {
+    setCalendar(nextCalendar)
+    setExams(nextExams)
+    saveJson(EXAMS_KEY, nextExams)
   }
   function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
     if (!onboarding) return []
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-    const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})
-    const nextCalendar = loadOrGenerateWeek(weekStartISO, onboarding, nextExams, source, planId, xpEvents, cache)
+    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, {})
     setSelectedWeekStart(weekStartISO)
     setCalendar(nextCalendar)
-    saveJson(CALENDAR_KEY, nextCalendar)
-    saveJson(CALENDAR_WEEKS_KEY, cacheWeek(cache, weekStartISO, nextCalendar))
     return nextCalendar
   }
   function goToWeek(weekStartISO: string) {
@@ -958,9 +883,8 @@ export default function CaminoCalendarClient() {
   function regenerate(nextExams = exams) {
     if (!onboarding) return
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-    const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})
-    const regenerated = syncStatuses(generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, cache), xpEvents)
-    persist(regenerated, xpEvents, nextExams)
+    const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {})
+    persist(regenerated, nextExams)
     setToast('Camino PAU actualizado')
   }
   function toggleCalendarExpanded() {
@@ -1112,7 +1036,7 @@ export default function CaminoCalendarClient() {
         </section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
-      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={visibleCalendar} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(syncStatuses(next, xpEvents)); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
+      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={visibleCalendar} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
     </Shell>
@@ -1217,7 +1141,7 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, planId, onClose
     const item = topics.find(topic => topic.topic === newMission.topic) ?? topics[0]
     const subject = newMission.subject
     const topic = item?.topic ?? newMission.topic
-    const cache = cacheWeek(loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {}), calendar[0]?.date ?? currentWeekStartISO(), draft)
+    const cache: CalendarWeekCache = { [calendar[0]?.date ?? currentWeekStartISO()]: draft }
     const requestedKind = newMission.kind
     const kind = requestedKind === 'mock_exam' && !canScheduleSimulation(null, planId, newMission.day, cache)
       ? 'evau_practice'

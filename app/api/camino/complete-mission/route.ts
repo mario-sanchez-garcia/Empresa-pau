@@ -10,10 +10,6 @@ const XP_BY_MISSION_TYPE: Record<string, number> = {
   pau_practice: 30,
 }
 
-function getMadridToday(): string {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-}
-
 export async function POST(request: NextRequest) {
   try {
     const authContext = await getAuthContext(request)
@@ -38,7 +34,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const today = getMadridToday()
     const db = createServiceClient()
     const now = new Date().toISOString()
 
@@ -52,7 +47,6 @@ export async function POST(request: NextRequest) {
         updated_at: now,
       })
       .eq('user_id', user.id)
-      .eq('scheduled_date', today)
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
       .eq('status', 'pending')

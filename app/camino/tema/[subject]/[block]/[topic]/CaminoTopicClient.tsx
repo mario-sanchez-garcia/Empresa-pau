@@ -13,6 +13,8 @@ import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import { calcularRacha } from '@/app/lib/calcularRacha'
+import { useBillingStatus } from '@/app/hooks/useBillingStatus'
+import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
@@ -85,6 +87,12 @@ function progressKey(topic: CaminoCurriculumTopic) {
   return `${topic.subject}:${topic.blockSlug}:${topic.topicSlug}`
 }
 
+function daysSince(isoDate: string): number {
+  const createdDay = new Date(isoDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+  const todayDay = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+  return Math.floor((new Date(todayDay + 'T00:00:00Z').getTime() - new Date(createdDay + 'T00:00:00Z').getTime()) / 86400000)
+}
+
 function xpFromScore(score: number) {
   const baseXP = 10
   const bonusXP = score < 4 ? 5 : score < 6 ? 12 : score < 8 ? 22 : score < 9 ? 32 : 45
@@ -124,6 +132,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [daysSinceRegistration, setDaysSinceRegistration] = useState<number | null>(null)
+  const [showPaywall, setShowPaywall] = useState(false)
+  const billing = useBillingStatus()
 
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -248,8 +259,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     supabase.auth.getSession().then(async ({ data }) => {
       const token = data.session?.access_token ?? null
       const uid = data.session?.user?.id ?? null
+      const createdAt = data.session?.user?.created_at
       if (!token || cancelled) { if (!cancelled) setLigaLoading(false); return }
       if (!cancelled) setCurrentUserId(uid)
+      if (createdAt && !cancelled) setDaysSinceRegistration(daysSince(createdAt))
       try {
         const res = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${token}` } })
         if (!cancelled && res.ok) { const json = await res.json(); setLiga(json.liga ?? null) }
@@ -268,6 +281,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const current = progress[key] ?? { xp: 0 }
   const topicCompleted = Boolean(current.evau)
   const hasContent = hasLatexContent(currentTopic)
+  const isFreeAndExpired = !billing.loading && !billing.hasActivePack && daysSinceRegistration !== null && daysSinceRegistration >= 7
   const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
   const selectedV2Card = v2Cards[activeV2Index] ?? v2Cards[0] ?? null
   const selectedV2Number = selectedV2Card ? activeV2Index + 1 : null
@@ -700,7 +714,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     )}
                   </div>
                 )}
-                <button type="button" onClick={correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
                   {correcting ? <><PausiaLoadingDot /> Corrigiendo con Pausia...</> : <>Corregir con Pausia <Check size={16} /></>}
                 </button>
                 {score != null && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800">Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}</p>}
@@ -749,6 +763,21 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
         </section>
         {toast && <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
+        {showPaywall && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-black text-slate-950">Tu plan gratuito ha terminado</h2>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Has completado 7 días de Camino PAU. Para seguir avanzando, desbloquea el acceso completo.</p>
+                </div>
+                <button type="button" onClick={() => setShowPaywall(false)} className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
+              </div>
+              <ParentLinkModule billing={billing} />
+              <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
+            </div>
+          </div>
+        )}
       </main>
     </Shell>
   )

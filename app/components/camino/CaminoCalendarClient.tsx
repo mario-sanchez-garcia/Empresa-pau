@@ -684,6 +684,7 @@ export default function CaminoCalendarClient() {
   const [ligaLoading, setLigaLoading] = useState(true)
   const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
   const [streak, setStreak] = useState(0)
+  const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -741,9 +742,11 @@ export default function CaminoCalendarClient() {
       if (!userId || cancelled) return
       await ensureCaminoCalendar(userId, supabase)
       if (cancelled) return
-      const [days, rachaValue] = await Promise.all([
+      const [days, rachaValue, matCount, histCount] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
+        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
+        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
       ])
       if (cancelled) return
       if (days && days.length > 0) {
@@ -751,6 +754,7 @@ export default function CaminoCalendarClient() {
         setSupabaseCalLoaded(true)
       }
       setStreak(rachaValue)
+      setSubjectProgress({ matematicas_ii: matCount.count ?? 0, historia_espana: histCount.count ?? 0 })
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
@@ -963,6 +967,32 @@ export default function CaminoCalendarClient() {
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">{caminoPlanLimits.label} · Camino {caminoPlanLimits.caminoMode === 'limited' ? 'limitado' : caminoPlanLimits.caminoMode === 'intensive' ? 'intensivo' : 'completo'} · margen variable mínimo {(caminoPlanLimits.variableMarginFloor * 100).toFixed(0)}%</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p>{streak > 0 && <p className="mt-3 text-[11px] font-black text-orange-500">🔥 {streak} día{streak !== 1 ? 's' : ''} de racha</p>}</div>
         </section>
 
+        {(subjectProgress.matematicas_ii != null || subjectProgress.historia_espana != null) && (
+          <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+            <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-slate-400">Progreso del temario</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {([
+                { subject: 'matematicas_ii', label: 'Matemáticas II', total: 60, color: '#2563eb' },
+                { subject: 'historia_espana', label: 'Historia de España', total: 128, color: '#7c3aed' },
+              ] as const).map(({ subject, label, total, color }) => {
+                const done = subjectProgress[subject] ?? 0
+                const pct = Math.min(100, Math.round((done / total) * 100))
+                return (
+                  <div key={subject}>
+                    <div className="mb-1.5 flex items-baseline justify-between gap-2">
+                      <span className="text-sm font-black text-slate-700">{label}</span>
+                      <span className="text-xs font-bold text-slate-400">{done}/{total}</span>
+                    </div>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
+                    </div>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">{pct}% completado</p>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
         <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">{selectedWeekLabel}</h2><p className="mt-1 text-xs font-bold text-slate-400">{selectedIsCurrentWeek ? 'Estás viendo la semana actual.' : 'Semana seleccionada. Qué hacer hoy sigue usando la fecha real.'}</p></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><div className="mt-4 flex flex-wrap items-center gap-2"><button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Semana anterior</button><button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3 py-2 text-xs font-black text-white transition hover:bg-blue-700">Hoy</button><button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Semana siguiente <ArrowRight size={14} /></button></div><button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{visibleCalendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
 
         <CourseDirectory groups={courseGroups} />

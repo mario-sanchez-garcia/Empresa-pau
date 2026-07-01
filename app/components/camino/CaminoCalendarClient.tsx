@@ -1108,7 +1108,7 @@ export default function CaminoCalendarClient() {
 }</section>
 
         <section className="mt-5" id="acceso-premium">
-          <ParentLinkModule billing={{ loading: false, hasActivePack: caminoPlanId !== 'free', activePlans: [], pendingParentCheckout: null }} />
+          <ParentLinkModule billing={{ loading: false, hasActivePack: caminoPlanId !== 'free', activePlans: [], pendingParentCheckout: null }} daysSinceReg={daysSinceReg} />
         </section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>

@@ -61,7 +61,7 @@ export default function Login() {
         setMensaje(result.error ?? 'No se pudo crear la cuenta. Inténtalo de nuevo.')
       } else {
         await supabase.auth.setSession(result.session)
-        window.location.href = '/camino'
+        window.location.href = '/onboarding'
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })

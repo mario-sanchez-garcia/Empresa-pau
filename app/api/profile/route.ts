@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   const db = createServiceClient()
   const { data, error: fetchError } = await db
-    .from('profiles')
+    .from('perfiles')
     .select('email_notifications')
     .eq('id', user.id)
     .maybeSingle()
@@ -52,7 +52,7 @@ export async function PATCH(request: NextRequest) {
 
   const db = createServiceClient()
   const { error: upsertError } = await db
-    .from('profiles')
+    .from('perfiles')
     .upsert({ id: user.id, ...allowed }, { onConflict: 'id' })
 
   if (upsertError) return NextResponse.json({ error: upsertError.message }, { status: 500 })

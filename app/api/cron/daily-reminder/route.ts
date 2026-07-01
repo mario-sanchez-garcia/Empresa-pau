@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
   // Filter users who opted out of email notifications
   const { data: profileRows } = await db
-    .from('profiles')
+    .from('perfiles')
     .select('id, email_notifications')
     .in('id', targets.map(u => u.id))
   const optedOutSet = new Set(

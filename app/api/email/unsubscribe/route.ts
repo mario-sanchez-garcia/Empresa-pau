@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   try {
     const db = createServiceClient()
     await db
-      .from('profiles')
+      .from('perfiles')
       .upsert({ id: userId, email_notifications: false }, { onConflict: 'id' })
   } catch (err) {
     console.error('[unsubscribe] failed:', err)

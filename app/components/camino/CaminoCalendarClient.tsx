@@ -875,6 +875,11 @@ export default function CaminoCalendarClient() {
   const isRescueMode = calendar.some(day => day.missions.some(m => m.metadata?.plan_mode === 'rescue'))
   const selectedWeekLabel = weekRangeLabel(selectedWeekStart)
   const selectedIsCurrentWeek = selectedWeekStart === currentWeekStartISO()
+  const nextMissionInCalendar = visibleCalendar
+    .filter(day => day.date > realToday)
+    .flatMap(day => day.missions.filter(m => m.role === 'main' && m.status !== 'done'))
+    [0] ?? null
+  const showWeeklyGoal = !leaderboard || (leaderboard.realUserCount ?? 0) <= 1
 
   async function createLiga(nombre: string): Promise<{ error?: string }> {
     const { data: { session } } = await supabase.auth.getSession()
@@ -1016,27 +1021,39 @@ export default function CaminoCalendarClient() {
 
   return (
     <Shell>
-      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Editar calendario</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></div></header>
+      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-          <HeroMissionCard
-            mission={todayMain[0] ?? null}
-            blockCompleted={blockCompletedCount}
-            streak={streak}
-            completedThisWeek={completedMain}
-            totalThisWeek={Math.min(totalMain, 5)}
-            weeklyXP={weeklyXP}
-            onPostpone={() => todayMain[0] && postponeMission(todayMain[0].id)}
-            onMarkNotSeen={markNotSeenHero}
-            hasOnboardingSubjects={hasOnboardingSubjects}
-          />
+          <div className="grid gap-4 content-start">
+            <HeroMissionCard
+              mission={todayMain[0] ?? null}
+              blockCompleted={blockCompletedCount}
+              streak={streak}
+              completedThisWeek={completedMain}
+              totalThisWeek={Math.min(totalMain, 5)}
+              weeklyXP={weeklyXP}
+              onPostpone={() => todayMain[0] && postponeMission(todayMain[0].id)}
+              onMarkNotSeen={markNotSeenHero}
+              hasOnboardingSubjects={hasOnboardingSubjects}
+              nextMissionTitle={nextMissionInCalendar?.title ?? null}
+            />
+            {todayBonus.length > 0 && (
+              <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Extras opcionales</p>
+                <p className="mt-1 text-sm font-semibold text-slate-500">Haz primero la misión principal. Los extras son opcionales.</p>
+                <div className="mt-3 grid gap-2">
+                  {todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} onComplete={completeMission} compact />)}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">Plan gratuito · Te quedan {Math.max(0, 7 - (daysSinceReg ?? 0))} días de prueba</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p>{streak > 0 && <p className="mt-3 text-[11px] font-black text-orange-500">🔥 {streak} día{streak !== 1 ? 's' : ''} de racha</p>}</div>
         </section>
 
         {(subjectProgress.matematicas_ii != null || subjectProgress.historia_espana != null) && (
           <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-slate-400">Progreso del temario</p>
+            <p className="mb-4 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu avance</p>
             <div className="grid gap-4 sm:grid-cols-2">
               {([
                 { subject: 'matematicas_ii', label: 'Matemáticas II', total: 60, color: '#2563eb' },
@@ -1060,11 +1077,35 @@ export default function CaminoCalendarClient() {
             </div>
           </section>
         )}
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Calendario editable</p><h2 className="text-xl font-black text-slate-950">{selectedWeekLabel}</h2><p className="mt-1 text-xs font-bold text-slate-400">{selectedIsCurrentWeek ? 'Estás viendo la semana actual.' : 'Semana seleccionada. Qué hacer hoy sigue usando la fecha real.'}</p></div><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-500">{completedMain} de {totalMain} misiones principales completadas</p><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar calendario</button></div></div><div className="mt-4 flex flex-wrap items-center gap-2"><button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Semana anterior</button><button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3 py-2 text-xs font-black text-white transition hover:bg-blue-700">Hoy</button><button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Semana siguiente <ArrowRight size={14} /></button></div><button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100"><ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />{calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}</button>{calendarExpanded && <div className="mt-4 grid gap-3 lg:grid-cols-7">{visibleCalendar.map(day => <DayCard key={day.date} day={day} exams={exams.filter(exam => exam.date === day.date)} />)}</div>}</section>
+        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu semana</p>
+              <h2 className="text-xl font-black text-slate-950">{selectedWeekLabel}</h2>
+              <p className="mt-1 text-xs font-bold text-slate-400">{completedMain} de {totalMain} misiones completadas</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar</button>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Anterior</button>
+            <button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3 py-2 text-xs font-black text-white transition hover:bg-blue-700">Esta semana</button>
+            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Siguiente <ArrowRight size={14} /></button>
+          </div>
+          <button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100">
+            <ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />
+            {calendarExpanded ? 'Ocultar' : 'Ver semana'}
+          </button>
+          {calendarExpanded && <CompactWeekView days={visibleCalendar} exams={exams} />}
+        </section>
 
         <CourseDirectory groups={courseGroups} />
 
-        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div><RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} liga={liga} ligaLoading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} /></section>
+        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{exams.length ? exams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}</div></div>{showWeeklyGoal
+  ? <WeeklyGoalCard completed={completedMain} target={5} />
+  : <RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} liga={liga} ligaLoading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+}</section>
 
         <section className="mt-5" id="acceso-premium">
           <ParentLinkModule billing={{ loading: false, hasActivePack: caminoPlanId !== 'free', activePlans: [], pendingParentCheckout: null }} />
@@ -1091,7 +1132,7 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Temario guiado</p>
-          <h2 className="text-xl font-black text-slate-950">Cursos de tu Camino</h2>
+          <h2 className="text-xl font-black text-slate-950">Explorar temas</h2>
           <p className="mt-1 text-sm font-semibold text-slate-500">Elige asignatura, bloque y tema cuando quieras entrar manualmente a una ruta de aprendizaje.</p>
         </div>
         <button onClick={() => setOpen(value => !value)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> {open ? 'Cerrar cursos' : 'Ver cursos'}</button>
@@ -1265,7 +1306,7 @@ function formatBlockLabel(blockKey?: string): string {
   return blockKey.replace(/^bloque-\d+-/, '').replace(/-/g, ' ')
 }
 
-function heroReason(mission: Mission, blockCompleted: number): string {
+function heroReason(mission: Mission, blockCompleted: number, nextMissionTitle?: string | null): string {
   if (mission.missionType === 'comment_text') {
     return 'Práctica de técnica PAU. Aparece periódicamente para que domines el comentario de texto antes del examen.'
   }
@@ -1276,13 +1317,16 @@ function heroReason(mission: Mission, blockCompleted: number): string {
     return 'Repaso rápido antes de entrar en materia nueva.'
   }
   const blockName = formatBlockLabel(mission.blockKey) || 'este bloque'
+  if (nextMissionTitle) {
+    return `Hoy refuerzas una idea clave de ${blockName}. Cuando lo entiendas, "${nextMissionTitle}" te resultará mucho más fácil.`
+  }
   if (blockCompleted === 0) {
-    return `Empezamos por aquí porque es la base de ${blockName}. Completar esta misión desbloquea las siguientes.`
+    return `Empezamos por ${blockName}. Completar esta misión desbloquea las siguientes.`
   }
   return `Sigues avanzando en ${blockName}. Llevas ${blockCompleted} misión${blockCompleted !== 1 ? 'es' : ''} completada${blockCompleted !== 1 ? 's' : ''} en este bloque.`
 }
 
-function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, totalThisWeek, weeklyXP, onPostpone, onMarkNotSeen, hasOnboardingSubjects }: {
+function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, totalThisWeek, weeklyXP, onPostpone, onMarkNotSeen, hasOnboardingSubjects, nextMissionTitle }: {
   mission: Mission | null
   blockCompleted: number
   streak: number
@@ -1292,13 +1336,14 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   onPostpone: () => void
   onMarkNotSeen: () => void
   hasOnboardingSubjects: boolean
+  nextMissionTitle?: string | null
 }) {
   const theme = mission ? themeFor(mission.subject) : { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
   const subjectUpper = (mission?.subject ?? '').toUpperCase()
   const blockLabel = formatBlockLabel(mission?.blockKey).toUpperCase()
   const headerParts = ['CAMINO PAU', subjectUpper, blockLabel].filter(Boolean)
   const target = mission ? hrefForMission(mission) : null
-  const reason = mission ? heroReason(mission, blockCompleted) : null
+  const reason = mission ? heroReason(mission, blockCompleted, nextMissionTitle) : null
 
   return (
     <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
@@ -1358,6 +1403,84 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
           <p className="mt-0.5 text-[11px] font-semibold text-slate-400">XP semanal</p>
         </div>
       </div>
+    </div>
+  )
+}
+
+function shortSubjectLabel(subject: string): string {
+  const s = subject.toLowerCase()
+  if (s.includes('matemát')) return 'Mates'
+  if (s.includes('historia')) return 'Historia'
+  if (s.includes('inglés') || s.includes('ingles')) return 'Inglés'
+  if (s.includes('física') || s.includes('fisica')) return 'Física'
+  if (s.includes('química') || s.includes('quimica')) return 'Química'
+  if (s.includes('biolog')) return 'Bio'
+  return subject.split(' ')[0]
+}
+
+function compactDayLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }).replace('.', '')
+}
+
+function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[] }) {
+  const [expandedDate, setExpandedDate] = useState<string | null>(null)
+  return (
+    <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
+      {days.map(day => {
+        const main = day.missions.filter(m => m.role === 'main')
+        const done = main.length > 0 && main.every(m => m.status === 'done')
+        const subjects = [...new Set(main.map(m => m.subject))]
+        const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : 'Sin misión'
+        const missionCount = main.length
+        const isExpanded = expandedDate === day.date
+        const isToday = day.isToday
+        return (
+          <div key={day.date}>
+            <button
+              onClick={() => setExpandedDate(isExpanded ? null : day.date)}
+              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 ${isToday ? 'bg-blue-50/60' : 'bg-white'}`}
+            >
+              <span className={`w-24 shrink-0 text-xs font-black capitalize ${isToday ? 'text-blue-700' : 'text-slate-500'}`}>{compactDayLabel(day.date)}</span>
+              <span className="flex-1 text-sm font-semibold text-slate-700">{subjectLabel}</span>
+              <span className={`shrink-0 text-xs font-bold ${done ? 'text-emerald-600' : missionCount === 0 ? 'text-slate-300' : 'text-slate-400'}`}>
+                {done ? '✅ Hecho' : missionCount === 0 ? 'Libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
+              </span>
+              <ChevronDown size={13} className={`shrink-0 text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+            {isExpanded && (
+              <div className="border-t border-slate-100 bg-slate-50/50 p-3">
+                <DayCard day={day} exams={exams.filter(e => e.date === day.date)} />
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function WeeklyGoalCard({ completed, target }: { completed: number; target: number }) {
+  const pct = Math.min(100, Math.round((completed / target) * 100))
+  const remaining = Math.max(0, target - completed)
+  return (
+    <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Objetivo semanal</p>
+      <h2 className="mt-1 text-lg font-black text-slate-950">Tu objetivo de la semana</h2>
+      <div className="mt-4 flex items-end gap-1.5">
+        <span className="text-4xl font-black leading-none text-blue-600">{completed}</span>
+        <span className="mb-1 text-sm font-semibold text-slate-400">/ {target} misiones</span>
+      </div>
+      <div className="mt-3 flex gap-1">
+        {Array.from({ length: target }).map((_, i) => (
+          <div key={i} className={`h-2 flex-1 rounded-full transition-all duration-500 ${i < completed ? 'bg-blue-600' : 'bg-slate-100'}`} />
+        ))}
+      </div>
+      <p className="mt-3 text-sm font-semibold text-slate-500">
+        {remaining === 0
+          ? '¡Objetivo de la semana completado!'
+          : `${remaining === target ? 'Completa' : `${remaining} más y habrás completado`} ${remaining === target ? target : ''} misiones esta semana para seguir a tiempo.`}
+      </p>
     </div>
   )
 }

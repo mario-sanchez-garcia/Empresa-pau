@@ -12,6 +12,7 @@ import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeSubjectSlug, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
+import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
@@ -736,6 +737,8 @@ export default function CaminoCalendarClient() {
     supabase.auth.getSession().then(async ({ data }) => {
       const userId = data.session?.user.id
       if (!userId || cancelled) return
+      await ensureCaminoCalendar(userId, supabase)
+      if (cancelled) return
       const days = await fetchCaminoCalendar(userId)
       if (!cancelled && days && days.length > 0) {
         setCalendar(days)

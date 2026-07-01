@@ -66,6 +66,7 @@ type QueueItem = {
   title: string
   block_key: string | null
   block_slug: string | null
+  metadata: Record<string, unknown> | null
 }
 
 export async function ensureCaminoCalendar(
@@ -148,7 +149,7 @@ export async function ensureCaminoCalendar(
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
   const { data: queueItems } = await supabase
     .from('user_learning_queue')
-    .select('id, subject, v2_sort_order, title, block_key, block_slug')
+    .select('id, subject, v2_sort_order, title, block_key, block_slug, metadata')
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
     .in('subject', subjects)
@@ -184,6 +185,9 @@ export async function ensureCaminoCalendar(
     for (let slot = 0; slot < itemsPerDay; slot++) {
       if (cursor >= queue.length) break
       const item = queue[cursor]
+      const itemMeta = item.metadata ?? {}
+      const missionType = (itemMeta.mission_type as string) ?? 'concept'
+      const calMetadata = itemMeta.express ? { express: true } : {}
       calendarRows.push({
         user_id: userId,
         scheduled_date: dateStr,
@@ -192,13 +196,14 @@ export async function ensureCaminoCalendar(
         title: item.title,
         block_key: item.block_key,
         block_slug: item.block_slug,
-        mission_type: 'concept',
+        mission_type: missionType,
         is_main: true,
         is_bonus: false,
         status: 'pending',
         source: 'algorithm',
         generated_by: 'algorithm_v1',
         queue_id: item.id,
+        metadata: calMetadata,
       })
       scheduledQueueIds.push(item.id)
       cursor++

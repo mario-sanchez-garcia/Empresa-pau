@@ -107,16 +107,26 @@ export async function POST(request: NextRequest) {
         for (const subject of subjectsToQueue) {
           const items = bySubject[subject] ?? []
 
-          // For 'mid': first 2 blocks → mission_type review in metadata
-          let reviewBlocks = new Set<string>()
+          // First 2 unique block_keys per subject (for 'mid' startMode)
+          let earlyBlocks = new Set<string>()
           if (startMode === 'mid') {
             const uniqueBlocks = [...new Set(items.map(i => i.block_key))]
-            reviewBlocks = new Set(uniqueBlocks.slice(0, 2))
+            earlyBlocks = new Set(uniqueBlocks.slice(0, 2))
           }
 
           for (let i = 0; i < items.length; i++) {
             const fc = items[i]
-            const isReview = startMode === 'mid' && reviewBlocks.has(fc.block_key)
+            let metadata: Record<string, unknown>
+            if (startMode === 'review') {
+              metadata = { mission_type: 'review' }
+            } else if (startMode === 'mid') {
+              metadata = earlyBlocks.has(fc.block_key)
+                ? { mission_type: 'review', express: true }
+                : { mission_type: 'concept' }
+            } else {
+              // zero, first_block, unknown
+              metadata = { mission_type: 'concept' }
+            }
             queueRows.push({
               user_id: user.id,
               subject: fc.subject,
@@ -126,7 +136,7 @@ export async function POST(request: NextRequest) {
               title: fc.title,
               subject_position: i + 1,
               queue_status: 'pending',
-              metadata: isReview ? { mission_type: 'review' } : {},
+              metadata,
             })
           }
         }
@@ -157,7 +167,7 @@ export async function POST(request: NextRequest) {
     // Load pending queue items per subject (ordered by subject_position)
     const { data: queueItems } = await db
       .from('user_learning_queue')
-      .select('id, subject, v2_sort_order, title, block_key, block_slug')
+      .select('id, subject, v2_sort_order, title, block_key, block_slug, metadata')
       .eq('user_id', user.id)
       .eq('queue_status', 'pending')
       .in('subject', subjects)
@@ -171,6 +181,9 @@ export async function POST(request: NextRequest) {
     }
     const cursors: Record<string, number> = Object.fromEntries(subjects.map(s => [s, 0]))
 
+    // 'review' startMode fills calendar more aggressively (2 missions/day)
+    const slotsPerDay = startMode === 'review' ? 2 : 1
+
     const calRows: object[] = []
     const scheduledQueueIds: string[] = []
     const now = new Date().toISOString()
@@ -181,30 +194,37 @@ export async function POST(request: NextRequest) {
       const subject = subjectForDay(dateStr, subjects)
       if (!subject) continue
 
-      const queue = subjectQueues[subject] ?? []
-      const cursor = cursors[subject] ?? 0
-      if (cursor >= queue.length) continue
+      for (let slot = 0; slot < slotsPerDay; slot++) {
+        const queue = subjectQueues[subject] ?? []
+        const cursor = cursors[subject] ?? 0
+        if (cursor >= queue.length) break
 
-      const item = queue[cursor]
-      cursors[subject] = cursor + 1
+        const item = queue[cursor]
+        cursors[subject] = cursor + 1
 
-      calRows.push({
-        user_id: user.id,
-        scheduled_date: dateStr,
-        subject: item.subject,
-        v2_sort_order: item.v2_sort_order,
-        title: item.title,
-        block_key: item.block_key,
-        block_slug: item.block_slug,
-        mission_type: 'concept',
-        is_main: true,
-        is_bonus: false,
-        status: 'pending',
-        source: 'algorithm',
-        generated_by: 'algorithm_v1',
-        queue_id: item.id,
-      })
-      scheduledQueueIds.push(item.id)
+        const itemMeta = (item.metadata as Record<string, unknown> | null) ?? {}
+        const missionType = (itemMeta.mission_type as string) ?? 'concept'
+        const calMetadata = itemMeta.express ? { express: true } : {}
+
+        calRows.push({
+          user_id: user.id,
+          scheduled_date: dateStr,
+          subject: item.subject,
+          v2_sort_order: item.v2_sort_order,
+          title: item.title,
+          block_key: item.block_key,
+          block_slug: item.block_slug,
+          mission_type: missionType,
+          is_main: true,
+          is_bonus: false,
+          status: 'pending',
+          source: 'algorithm',
+          generated_by: 'algorithm_v1',
+          queue_id: item.id,
+          metadata: calMetadata,
+        })
+        scheduledQueueIds.push(item.id)
+      }
     }
 
     if (calRows.length > 0) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthContext, createUserSupabase, isValidRouteId } from '@/app/lib/camino/caminoProgressServer'
+import { getAuthContext, isValidRouteId } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -22,7 +22,7 @@ function cleanStringArray(value: unknown) {
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
-  const { user, accessToken } = authContext
+  const { user } = authContext
 
   let body: Record<string, unknown> = {}
   try { body = await request.json() } catch { /* ok */ }
@@ -43,17 +43,6 @@ export async function POST(request: NextRequest) {
   const weeklyStudyDays = cleanString(body.weeklyStudyDays)
 
   const entryDate = new Date().toISOString().slice(0, 10)
-  const userSupabase = createUserSupabase(accessToken)
-
-  await userSupabase.from('camino_route_settings').upsert(
-    {
-      user_id: user.id,
-      route_id: routeId,
-      entry_date: entryDate,
-      changed_at: new Date().toISOString()
-    },
-    { onConflict: 'user_id' }
-  )
 
   try {
     const serviceDb = createServiceClient()

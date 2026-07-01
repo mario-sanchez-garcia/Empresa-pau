@@ -508,6 +508,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       })
       const data = await response.json()
       if (!response.ok) {
+        if (data.error === 'free_plan_expired' || data.error === 'correction_limit_reached') {
+          setShowPaywall(true)
+          return
+        }
         setCorrection(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }

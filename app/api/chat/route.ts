@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
+import { createServiceClient } from '@/app/lib/billing/supabase'
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
@@ -96,6 +97,24 @@ export async function POST(request: NextRequest) {
   contenido.push({ type: 'text', text: `${responseFormatRules}\n\n${pregunta}` })
 
   if (!internalUser) {
+    const billing = await getUserBilling(authContext.user.id)
+    if (!billing.hasActivePack) {
+      const daysSince = getDaysSince(authContext.user.created_at)
+      if (daysSince >= 7) {
+        return NextResponse.json(
+          { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.' },
+          { status: 403 }
+        )
+      }
+      const monthlyCount = await getMonthlyCorrections(authContext.user.id)
+      if (monthlyCount >= 25) {
+        return NextResponse.json(
+          { error: 'correction_limit_reached', message: 'Has alcanzado el límite de 25 correcciones este mes.' },
+          { status: 429 }
+        )
+      }
+    }
+
     const rateLimit = await checkAiRateLimit({
       userId: authContext.user.id,
       route: '/api/chat',
@@ -261,4 +280,43 @@ function rateLimitResponse(action: RateLimitAction, result: { limit: number; cou
       headers: result.retryAfterSeconds ? { 'Retry-After': String(result.retryAfterSeconds) } : undefined
     }
   )
+}
+
+async function getUserBilling(userId: string): Promise<{ hasActivePack: boolean }> {
+  try {
+    const db = createServiceClient()
+    const now = new Date().toISOString()
+    const { data } = await db
+      .from('user_entitlements')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
+      .limit(1)
+    return { hasActivePack: (data?.length ?? 0) > 0 }
+  } catch {
+    return { hasActivePack: false }
+  }
+}
+
+function getDaysSince(isoDate: string): number {
+  return Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000)
+}
+
+async function getMonthlyCorrections(userId: string): Promise<number> {
+  try {
+    const db = createServiceClient()
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const { count } = await db
+      .from('ai_usage_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .in('action', ['chat', 'image_correction'])
+      .eq('status', 'success')
+      .gte('created_at', startOfMonth)
+    return count ?? 0
+  } catch {
+    return 0
+  }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
@@ -115,6 +115,7 @@ export default function OnboardingFlow() {
   const [schoolQuery, setSchoolQuery] = useState('')
   const [manualSchool, setManualSchool] = useState('')
   const [savingError, setSavingError] = useState('')
+  const generateRetriesRef = useRef(0)
 
   useEffect(() => {
     if (data.schoolSource === 'manual' && data.schoolName) setManualSchool(data.schoolName)
@@ -214,18 +215,39 @@ export default function OnboardingFlow() {
           .filter((s): s is string => Boolean(s))
 
         if (subjectSlugs.length > 0) {
-          await fetch('/api/onboarding/generate', {
+          generateRetriesRef.current += 1
+          const genRes = await fetch('/api/onboarding/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
             body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero' }),
           })
+          if (!genRes.ok) {
+            setSavingError(
+              generateRetriesRef.current >= 2
+                ? 'Algo fue mal. Contacta con soporte en hola@pausia.es'
+                : 'No pudimos generar tu plan. Inténtalo de nuevo.'
+            )
+            return
+          }
+          const genJson = await genRes.json()
+          if (!genJson.success) {
+            setSavingError(
+              generateRetriesRef.current >= 2
+                ? 'Algo fue mal. Contacta con soporte en hola@pausia.es'
+                : 'No pudimos generar tu plan. Inténtalo de nuevo.'
+            )
+            return
+          }
         }
       }
       markOnboardingComplete()
       router.push('/camino')
     } catch {
-      setSavingError('No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
-      setStep('confirm')
+      setSavingError(
+        generateRetriesRef.current >= 2
+          ? 'Algo fue mal. Contacta con soporte en hola@pausia.es'
+          : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.'
+      )
     }
   }
 
@@ -394,6 +416,22 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'saving') {
+      if (savingError) {
+        return (
+          <div className="space-y-4 rounded-3xl border border-red-100 bg-red-50 p-6 text-center">
+            <p className="text-sm font-bold text-red-800">{savingError}</p>
+            {generateRetriesRef.current < 2 && (
+              <button
+                type="button"
+                onClick={finish}
+                className="mx-auto flex items-center justify-center rounded-2xl bg-red-600 px-6 py-3 text-sm font-black text-white transition hover:bg-red-700 active:scale-[0.98]"
+              >
+                Reintentar
+              </button>
+            )}
+          </div>
+        )
+      }
       return (
         <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 text-center">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />

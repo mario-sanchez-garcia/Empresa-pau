@@ -77,6 +77,33 @@ export async function POST(request: NextRequest) {
 
     const db = createServiceClient()
 
+    // ── PASO 4: Idempotency — already scheduled ─────────────────────────────
+    const { count: scheduledCount } = await db
+      .from('user_learning_queue')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .in('subject', subjects)
+      .eq('queue_status', 'scheduled')
+
+    if (scheduledCount && scheduledCount > 0) {
+      const todayIdempotent = getMadridToday()
+      const { data: firstCal } = await db
+        .from('camino_calendar')
+        .select('title, subject, scheduled_date')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .gte('scheduled_date', todayIdempotent)
+        .order('scheduled_date', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+
+      return NextResponse.json({
+        success: true,
+        daysGenerated: scheduledCount,
+        firstMission: firstCal ?? null,
+      })
+    }
+
     // ── PASO 2: user_learning_queue ─────────────────────────────────────────
     // Check per subject — only insert for subjects that have no queue yet
     const { data: existingQueueCheck } = await db

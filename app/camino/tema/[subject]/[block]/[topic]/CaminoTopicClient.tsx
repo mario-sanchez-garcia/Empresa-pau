@@ -135,6 +135,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [daysSinceRegistration, setDaysSinceRegistration] = useState<number | null>(null)
   const [showPaywall, setShowPaywall] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [nextMissionTitle, setNextMissionTitle] = useState<string | null>(null)
+  const [blockProgress, setBlockProgress] = useState<{ completed: number; total: number }>({ completed: 0, total: 0 })
   const billing = useBillingStatus()
 
   useEffect(() => {
@@ -549,6 +552,32 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           correccion: storedCorrection
         })
         calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
+        if (rawScore != null) {
+          const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+          const [nextRes, blockRes] = await Promise.all([
+            supabase
+              .from('camino_calendar')
+              .select('title')
+              .eq('user_id', userData.user.id)
+              .eq('status', 'pending')
+              .gt('scheduled_date', todayStr)
+              .order('scheduled_date', { ascending: true })
+              .limit(1),
+            supabase
+              .from('camino_calendar')
+              .select('status')
+              .eq('user_id', userData.user.id)
+              .eq('subject', currentTopic.subject)
+              .eq('block_slug', currentTopic.blockSlug),
+          ])
+          setNextMissionTitle(nextRes.data?.[0]?.title ?? null)
+          const blockRows = blockRes.data ?? []
+          setBlockProgress({
+            completed: blockRows.filter(r => r.status === 'completed').length,
+            total: blockRows.length,
+          })
+          setTimeout(() => setShowSuccessModal(true), 1000)
+        }
       }
     } finally {
       setCorrecting(false)
@@ -799,6 +828,18 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             </div>
           </div>
         )}
+        {showSuccessModal && score != null && (
+          <SuccessModal
+            score={score}
+            xp={xpAwarded ?? 0}
+            streak={streak}
+            blockProgress={blockProgress}
+            nextMissionTitle={nextMissionTitle}
+            onViewWeek={() => { setShowSuccessModal(false); router.push('/camino') }}
+            onDoBonus={() => setShowSuccessModal(false)}
+            onClose={() => setShowSuccessModal(false)}
+          />
+        )}
       </main>
     </Shell>
   )
@@ -976,6 +1017,85 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function motivationalPhrase(score: number): string {
+  if (score >= 9) return '¡Perfecto! Dominas este tema.'
+  if (score >= 7) return 'Muy bien. Estás en el buen camino.'
+  if (score >= 5) return 'Aprobado. Repasa los errores antes del examen.'
+  return 'Sigue practicando. La PAU se gana con constancia.'
+}
+
+function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onViewWeek, onDoBonus, onClose }: {
+  score: number
+  xp: number
+  streak: number
+  blockProgress: { completed: number; total: number }
+  nextMissionTitle: string | null
+  onViewWeek: () => void
+  onDoBonus: () => void
+  onClose: () => void
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="relative w-full max-w-sm rounded-[28px] bg-white p-7 shadow-[0_32px_80px_rgba(0,0,0,0.18)]">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100"
+          aria-label="Cerrar"
+        >
+          <X size={18} />
+        </button>
+
+        <div className="text-center text-5xl leading-none">🎉</div>
+        <h2 className="mt-3 text-center text-2xl font-black text-slate-950">¡Misión completada!</h2>
+
+        <div className="mt-5 flex divide-x divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
+          <div className="flex-1 py-3 text-center">
+            <p className="text-base font-black text-blue-600">+{xp} XP</p>
+            <p className="mt-0.5 text-[10px] font-semibold text-slate-400">ganados</p>
+          </div>
+          <div className="flex-1 py-3 text-center">
+            <p className="text-base font-black text-orange-500">{streak > 0 ? `🔥 ${streak}` : streak} días</p>
+            <p className="mt-0.5 text-[10px] font-semibold text-slate-400">de racha</p>
+          </div>
+          {blockProgress.total > 0 && (
+            <div className="flex-1 py-3 text-center">
+              <p className="text-base font-black text-slate-700">{blockProgress.completed}/{blockProgress.total}</p>
+              <p className="mt-0.5 text-[10px] font-semibold text-slate-400">del bloque</p>
+            </div>
+          )}
+        </div>
+
+        <p className="mt-4 text-center text-sm font-semibold text-slate-600">{motivationalPhrase(score)}</p>
+
+        {nextMissionTitle && (
+          <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-400">Mañana toca</p>
+            <p className="mt-1 text-sm font-black text-blue-900 leading-snug">{nextMissionTitle}</p>
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-2">
+          <button
+            onClick={onViewWeek}
+            className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
+          >
+            Ver mi semana <ArrowRight size={15} />
+          </button>
+          <button
+            onClick={onDoBonus}
+            className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-600 transition hover:bg-slate-50"
+          >
+            Hacer bonus
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

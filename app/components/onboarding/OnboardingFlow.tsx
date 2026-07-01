@@ -177,6 +177,11 @@ export default function OnboardingFlow() {
     update({ subjects: data.subjects.includes(subject) ? data.subjects.filter(item => item !== subject) : [...data.subjects, subject] })
   }
 
+  const SUBJECT_TO_SLUG: Record<string, string> = {
+    'Matemáticas II': 'matematicas_ii',
+    'Historia de España': 'historia_espana',
+  }
+
   async function finish() {
     setSavingError('')
     setStep('saving')
@@ -203,9 +208,21 @@ export default function OnboardingFlow() {
             onboardingCompleted: true,
           }),
         })
+
+        const subjectSlugs = data.subjects
+          .map(s => SUBJECT_TO_SLUG[s])
+          .filter((s): s is string => Boolean(s))
+
+        if (subjectSlugs.length > 0) {
+          await fetch('/api/onboarding/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero' }),
+          })
+        }
       }
       markOnboardingComplete()
-      setStep('done')
+      router.push('/camino')
     } catch {
       setSavingError('No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
       setStep('confirm')
@@ -377,7 +394,13 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'saving') {
-      return <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 text-sm font-bold text-blue-800">Guardando tu configuración y preparando Camino PAU...</div>
+      return (
+        <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+          <p className="text-sm font-bold text-blue-800">Preparando tu Camino PAU...</p>
+          <p className="mt-1 text-xs font-semibold text-blue-500">Estamos generando tu plan personalizado</p>
+        </div>
+      )
     }
 
     if (step === 'done') {

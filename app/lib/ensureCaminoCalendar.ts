@@ -218,7 +218,7 @@ export async function ensureCaminoCalendar(
     .select('scheduled_date')
     .eq('user_id', userId)
     .gte('scheduled_date', today)
-    .eq('status', 'pending')
+    .in('status', ['pending', 'postponed'])
 
   const futureDaySet = new Set((futureDayRows ?? []).map(r => r.scheduled_date as string))
   if (futureDaySet.size >= CALENDAR_HORIZON) return

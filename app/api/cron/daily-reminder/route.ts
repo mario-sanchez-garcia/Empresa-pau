@@ -14,15 +14,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const dow = new Date().getUTCDay()
+  if (dow === 0 || dow === 6) {
+    return NextResponse.json({ sent: 0, skipped: 0, reason: 'weekend' })
+  }
+
   const db = createServiceClient()
   const today = getMadridToday()
 
-  // Users registered >= 1 day ago with at least 1 pending mission
+  // Users registered >= 1 day ago with at least 1 pending mission (today or overdue)
   const { data: candidates, error: candidatesError } = await db
     .from('camino_calendar')
     .select('user_id')
     .eq('status', 'pending')
-    .lt('scheduled_date', today)
+    .lte('scheduled_date', today)
     .limit(500)
 
   if (candidatesError) {

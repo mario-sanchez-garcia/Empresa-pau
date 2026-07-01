@@ -69,6 +69,95 @@ type QueueItem = {
   metadata: Record<string, unknown> | null
 }
 
+function commentTextIntervalDays(today: string): number | null {
+  if (today >= '2026-09-01' && today <= '2026-12-31') return 28
+  if (today >= '2027-01-01' && today <= '2027-03-31') return 14
+  if (today >= '2027-04-01' && today <= '2027-05-31') return 7
+  return null
+}
+
+async function maybeInjectCommentText(
+  userId: string,
+  supabase: SupabaseClient,
+  today: string,
+): Promise<void> {
+  const intervalDays = commentTextIntervalDays(today)
+  if (intervalDays === null) return
+
+  // Only for users who have historia_espana in their queue
+  const { count: histCount } = await supabase
+    .from('user_learning_queue')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('subject', 'historia_espana')
+  if (!histCount) return
+
+  // Skip if there's already a future comment_text scheduled
+  const { data: futureRows } = await supabase
+    .from('camino_calendar')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('mission_type', 'comment_text')
+    .gte('scheduled_date', today)
+    .limit(1)
+  if (futureRows && futureRows.length > 0) return
+
+  // Check interval since last past comment_text
+  const { data: lastRows } = await supabase
+    .from('camino_calendar')
+    .select('scheduled_date')
+    .eq('user_id', userId)
+    .eq('mission_type', 'comment_text')
+    .lt('scheduled_date', today)
+    .order('scheduled_date', { ascending: false })
+    .limit(1)
+
+  const lastDate: string | null = lastRows?.[0]?.scheduled_date ?? null
+  if (lastDate) {
+    const daysSinceLast = Math.floor(
+      (new Date(today + 'T12:00:00Z').getTime() - new Date(lastDate + 'T12:00:00Z').getTime()) / 86400000,
+    )
+    if (daysSinceLast < intervalDays) return
+  }
+
+  // Get taken dates in the next 42 days to find a free slot
+  const horizon = addDays(today, 42)
+  const { data: existingDates } = await supabase
+    .from('camino_calendar')
+    .select('scheduled_date')
+    .eq('user_id', userId)
+    .gte('scheduled_date', today)
+    .lte('scheduled_date', horizon)
+  const takenDates = new Set((existingDates ?? []).map(r => r.scheduled_date as string))
+
+  // Find next available Friday; fall back to Thursday if Friday is taken
+  let candidate: string | null = null
+  for (let i = 0; i < 42; i++) {
+    const d = addDays(today, i)
+    const dow = new Date(d + 'T12:00:00Z').getUTCDay()
+    if (dow !== 5 || HOLIDAYS.has(d)) continue // only Fridays, non-holiday
+    if (!takenDates.has(d)) { candidate = d; break }
+    // Friday taken — try Thursday (day before)
+    const thu = addDays(d, -1)
+    if (thu >= today && !HOLIDAYS.has(thu) && !takenDates.has(thu)) { candidate = thu; break }
+  }
+  if (!candidate) return
+
+  await supabase.from('camino_calendar').insert({
+    user_id: userId,
+    scheduled_date: candidate,
+    subject: 'historia_espana',
+    v2_sort_order: 128,
+    title: 'Comentario de texto histórico',
+    mission_type: 'comment_text',
+    is_main: true,
+    is_bonus: false,
+    status: 'pending',
+    source: 'algorithm',
+    generated_by: 'algorithm_v1',
+  })
+}
+
 export async function ensureCaminoCalendar(
   userId: string,
   supabase: SupabaseClient,
@@ -222,4 +311,6 @@ export async function ensureCaminoCalendar(
       .in('id', scheduledQueueIds)
       .eq('user_id', userId)
   }
+
+  await maybeInjectCommentText(userId, supabase, today)
 }

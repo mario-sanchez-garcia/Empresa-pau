@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, MessageCircle, PenLine, RotateCcw, School, UploadCloud, X } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
 import { buildEvauHref, hasLatexContent, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
@@ -108,6 +108,7 @@ function scoreFromCorrection(data: unknown, maxScore: number) {
 
 export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTopic | null }) {
   const onboarding = useMemo(() => loadOnboarding(), [])
+  const router = useRouter()
   const params = useSearchParams()
   const missionId = params.get('missionId')
   const shouldStartExercise = params.get('start') === 'exercise'
@@ -341,37 +342,57 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     saveJson(CALENDAR_REFRESH_KEY, true)
     window.localStorage.removeItem(CALENDAR_KEY)
     window.dispatchEvent(new CustomEvent('pausia:school-topic-feedback', { detail: adjustment }))
-    setToast('Perfecto. Lo dejamos marcado como no dado y ajustamos tu calendario.')
+    setToast('Tema postponado. Lo verás más adelante.')
 
     try {
       const { data } = await supabase.auth.getSession()
       const token = data.session?.access_token
-      if (!token) return
+      if (!token) { router.push('/camino'); return }
+
+      // Sync school feedback (best-effort)
       const response = await fetch('/api/camino/school-topic-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(adjustment),
       })
-      if (!response.ok) return
-      const remote = await response.json() as { status?: 'not_seen' | 'delayed_for_school'; notSeenCount?: number }
-      adjustment = {
-        ...adjustment,
-        status: remote.status ?? adjustment.status,
-        notSeenCount: remote.notSeenCount ?? adjustment.notSeenCount,
+      if (response.ok) {
+        const remote = await response.json() as { status?: 'not_seen' | 'delayed_for_school'; notSeenCount?: number }
+        adjustment = {
+          ...adjustment,
+          status: remote.status ?? adjustment.status,
+          notSeenCount: remote.notSeenCount ?? adjustment.notSeenCount,
+        }
+        saveJson(SCHOOL_ADJUSTMENTS_KEY, [
+          adjustment,
+          ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
+            !(item.schoolName === adjustment.schoolName &&
+              item.subject === adjustment.subject &&
+              item.blockSlug === adjustment.blockSlug &&
+              item.topicSlug === adjustment.topicSlug)
+          )
+        ].slice(0, 80))
+        saveJson(CALENDAR_REFRESH_KEY, true)
       }
-      saveJson(SCHOOL_ADJUSTMENTS_KEY, [
-        adjustment,
-        ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
-          !(item.schoolName === adjustment.schoolName &&
-            item.subject === adjustment.subject &&
-            item.blockSlug === adjustment.blockSlug &&
-            item.topicSlug === adjustment.topicSlug)
-        )
-      ].slice(0, 80))
-      saveJson(CALENDAR_REFRESH_KEY, true)
+
+      // Persist postpone to Supabase queue + calendar
+      if (currentTopic.v2SortOrder != null) {
+        const postponeRes = await fetch('/api/camino/postpone-mission', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ subject: currentTopic.subject, v2SortOrder: currentTopic.v2SortOrder }),
+        })
+        if (postponeRes.ok) {
+          const postponeData = await postponeRes.json() as { success?: boolean; warning?: boolean }
+          if (postponeData.warning) {
+            setToast('Avisamos: tendrás que ver este bloque antes de la PAU')
+          }
+        }
+      }
     } catch {
-      // Local adjustment already applied; Supabase sync is best-effort.
+      // Local adjustment already applied; best-effort.
     }
+
+    setTimeout(() => router.push('/camino'), 1600)
   }
 
   function chatHref(prompt?: string) {

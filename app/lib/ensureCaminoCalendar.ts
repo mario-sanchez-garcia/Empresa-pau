@@ -145,6 +145,7 @@ export async function ensureCaminoCalendar(
   const itemsPerDay = ratio > 1.5 ? 2 : 1
 
   // Obtener items pendientes de la cola ordenados por posición
+  // queue_status='pending' excluye automáticamente postponed/scheduled/completed
   const { data: queueItems } = await supabase
     .from('user_learning_queue')
     .select('id, subject, v2_sort_order, title, block_key, block_slug')

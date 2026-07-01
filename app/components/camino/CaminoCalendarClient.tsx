@@ -37,6 +37,10 @@ type Mission = {
   baseXP: number
   status: MissionStatus
   metadata?: Record<string, unknown>
+  subjectSlug?: string
+  v2SortOrder?: number
+  blockKey?: string
+  missionType?: string
 }
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
@@ -232,6 +236,8 @@ type CaminoCalRow = {
   is_main: boolean
   is_bonus: boolean
   status: string
+  v2_sort_order: number | null
+  mission_type: string
   metadata?: Record<string, unknown> | null
 }
 
@@ -259,6 +265,10 @@ function calRowToMission(row: CaminoCalRow): Mission {
     baseXP: 20,
     status: row.status === 'completed' ? 'done' : 'pending',
     metadata: row.metadata ?? undefined,
+    subjectSlug: row.subject,
+    v2SortOrder: row.v2_sort_order ?? undefined,
+    blockKey: row.block_key ?? undefined,
+    missionType: row.mission_type,
   }
 }
 
@@ -266,7 +276,7 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
   const todayStr = todayMadrid()
   const { data, error } = await supabase
     .from('camino_calendar')
-    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, metadata')
+    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, metadata')
     .eq('user_id', userId)
     .gte('scheduled_date', todayStr)
     .order('scheduled_date', { ascending: true })
@@ -688,6 +698,7 @@ export default function CaminoCalendarClient() {
   const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
   const [streak, setStreak] = useState(0)
   const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
+  const [blockCompletedCount, setBlockCompletedCount] = useState(0)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -755,6 +766,18 @@ export default function CaminoCalendarClient() {
       if (days && days.length > 0) {
         setCalendar(days)
         setSupabaseCalLoaded(true)
+        const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+        const todayDay = days.find(d => d.date === realTodayStr)
+        const heroMission = todayDay?.missions.find(m => m.role === 'main')
+        if (heroMission?.blockKey) {
+          supabase
+            .from('camino_calendar')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('block_key', heroMission.blockKey)
+            .eq('status', 'completed')
+            .then(({ count }) => { if (!cancelled) setBlockCompletedCount(count ?? 0) })
+        }
       }
       setStreak(rachaValue)
       setSubjectProgress({ matematicas_ii: matCount.count ?? 0, historia_espana: histCount.count ?? 0 })
@@ -825,6 +848,7 @@ export default function CaminoCalendarClient() {
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
   const totalXP = xpEvents.reduce((sum, event) => sum + event.xp, 0)
+  const weeklyXP = xpEvents.filter(e => e.date >= currentWeekStartISO()).reduce((sum, e) => sum + e.xp, 0)
   const displayedXP = leaderboard?.currentXp ?? totalXP
   const division = divisionFor(displayedXP)
   const nextDivision = DIVISIONS[DIVISIONS.indexOf(division) + 1]
@@ -958,6 +982,28 @@ export default function CaminoCalendarClient() {
   }
   function deleteExam(id: string) { regenerate(exams.filter(exam => exam.id !== id)) }
 
+  async function markNotSeenHero() {
+    const mission = todayMain[0]
+    if (!mission?.subjectSlug || mission.v2SortOrder == null) return
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    setCalendar(current => current.map(day => ({
+      ...day,
+      missions: day.missions.filter(m => m.id !== mission.id),
+    })))
+    try {
+      const res = await fetch('/api/camino/postpone-mission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ subject: mission.subjectSlug, v2SortOrder: mission.v2SortOrder }),
+      })
+      const json = await res.json()
+      setToast(json.warning ? 'Avisamos: tendrás que ver este bloque antes de la PAU.' : 'Tema marcado como no visto en clase.')
+    } catch {
+      setToast('Error al marcar el tema.')
+    }
+  }
+
   if (!hasProfile) return (
     <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-700"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Pausia cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
   )
@@ -968,7 +1014,17 @@ export default function CaminoCalendarClient() {
       <main className="mx-auto max-w-7xl px-5 py-6">
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today.label}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} onComplete={completeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{hasOnboardingSubjects ? 'Hoy no tienes misión principal. Puedes adelantar una del calendario o añadir una.' : 'Completa tu onboarding para que podamos construir tu Camino PAU.'}</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} onComplete={completeMission} compact />)}</div></div>}</div>
+          <HeroMissionCard
+            mission={todayMain[0] ?? null}
+            blockCompleted={blockCompletedCount}
+            streak={streak}
+            completedThisWeek={completedMain}
+            totalThisWeek={Math.min(totalMain, 5)}
+            weeklyXP={weeklyXP}
+            onPostpone={() => todayMain[0] && postponeMission(todayMain[0].id)}
+            onMarkNotSeen={markNotSeenHero}
+            hasOnboardingSubjects={hasOnboardingSubjects}
+          />
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">{caminoPlanLimits.label} · Camino {caminoPlanLimits.caminoMode === 'limited' ? 'limitado' : caminoPlanLimits.caminoMode === 'intensive' ? 'intensivo' : 'completo'} · margen variable mínimo {(caminoPlanLimits.variableMarginFloor * 100).toFixed(0)}%</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p>{streak > 0 && <p className="mt-3 text-[11px] font-black text-orange-500">🔥 {streak} día{streak !== 1 ? 's' : ''} de racha</p>}</div>
         </section>
 
@@ -1195,6 +1251,108 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, planId, onClose
         <style>{`.mini-input{min-width:0;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;padding:7px 8px;font-size:11px;font-weight:800;color:#475569;outline:none}.mini-input:focus{border-color:#93c5fd;background:#fff}`}</style>
       </motion.section>
     </motion.div>
+  )
+}
+
+function formatBlockLabel(blockKey?: string): string {
+  if (!blockKey) return ''
+  return blockKey.replace(/^bloque-\d+-/, '').replace(/-/g, ' ')
+}
+
+function heroReason(mission: Mission, blockCompleted: number): string {
+  if (mission.missionType === 'comment_text') {
+    return 'Práctica de técnica PAU. Aparece periódicamente para que domines el comentario de texto antes del examen.'
+  }
+  if (mission.metadata?.plan_mode === 'rescue') {
+    return 'Modo Rescate: priorizamos este tema por su peso específico en la PAU.'
+  }
+  if (mission.metadata?.express) {
+    return 'Repaso rápido antes de entrar en materia nueva.'
+  }
+  const blockName = formatBlockLabel(mission.blockKey) || 'este bloque'
+  if (blockCompleted === 0) {
+    return `Empezamos por aquí porque es la base de ${blockName}. Completar esta misión desbloquea las siguientes.`
+  }
+  return `Sigues avanzando en ${blockName}. Llevas ${blockCompleted} misión${blockCompleted !== 1 ? 'es' : ''} completada${blockCompleted !== 1 ? 's' : ''} en este bloque.`
+}
+
+function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, totalThisWeek, weeklyXP, onPostpone, onMarkNotSeen, hasOnboardingSubjects }: {
+  mission: Mission | null
+  blockCompleted: number
+  streak: number
+  completedThisWeek: number
+  totalThisWeek: number
+  weeklyXP: number
+  onPostpone: () => void
+  onMarkNotSeen: () => void
+  hasOnboardingSubjects: boolean
+}) {
+  const theme = mission ? themeFor(mission.subject) : { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
+  const subjectUpper = (mission?.subject ?? '').toUpperCase()
+  const blockLabel = formatBlockLabel(mission?.blockKey).toUpperCase()
+  const headerParts = ['CAMINO PAU', subjectUpper, blockLabel].filter(Boolean)
+  const target = mission ? hrefForMission(mission) : null
+  const reason = mission ? heroReason(mission, blockCompleted) : null
+
+  return (
+    <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{headerParts.join(' · ')}</p>
+
+      {mission ? (
+        <>
+          <h2 className="mt-3 text-2xl font-black leading-tight text-slate-950">{mission.title}</h2>
+          <p className="mt-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-400">
+            <span>{mission.estimatedMinutes} min · Misión principal</span>
+            {!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}
+          </p>
+
+          {reason && (
+            <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+              <p className="text-sm font-semibold text-slate-600">{reason}</p>
+            </div>
+          )}
+
+          <div className="mt-5">
+            {mission.status === 'done' ? (
+              <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-sm font-black text-emerald-700"><Check size={15} /> Misión completada hoy</div>
+            ) : target?.href ? (
+              <a href={target.href} className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700">Empezar misión <ArrowRight size={15} /></a>
+            ) : (
+              <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-black text-slate-400">Contenido en preparación</div>
+            )}
+          </div>
+
+          {mission.status !== 'done' && (
+            <div className="mt-3 flex justify-center gap-3">
+              <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50"><RotateCcw size={12} /> Posponer</button>
+              {mission.subjectSlug && mission.v2SortOrder != null && (
+                <button onClick={onMarkNotSeen} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50">No lo he dado en clase</button>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="mt-4">
+          <h2 className="text-xl font-black text-slate-400">{hasOnboardingSubjects ? 'No hay misión asignada hoy' : 'Completa tu onboarding para empezar'}</h2>
+          <p className="mt-1 text-sm font-semibold text-slate-400">{hasOnboardingSubjects ? 'Puedes revisar el calendario o descansar.' : 'Configura tu perfil y construiremos tu Camino PAU.'}</p>
+        </div>
+      )}
+
+      <div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
+        <div className="text-center">
+          <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '—'}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">días de racha</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-black text-slate-900">{completedThisWeek}<span className="text-sm font-semibold text-slate-400">/{totalThisWeek}</span></p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">esta semana</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-black text-slate-900">{weeklyXP}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">XP semanal</p>
+        </div>
+      </div>
+    </div>
   )
 }
 

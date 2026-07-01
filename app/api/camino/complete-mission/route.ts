@@ -4,10 +4,14 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 
 export const dynamic = 'force-dynamic'
 
-const XP_BY_MISSION_TYPE: Record<string, number> = {
+const XP_MAP: Record<string, number> = {
   concept: 20,
   review: 10,
   pau_practice: 30,
+  comment_text: 30,
+  mock_exam: 50,
+  bonus: 10,
+  recovery: 10,
 }
 
 export async function POST(request: NextRequest) {
@@ -22,10 +26,7 @@ export async function POST(request: NextRequest) {
     const subject = typeof body.subject === 'string' ? body.subject : null
     const v2SortOrder = typeof body.v2SortOrder === 'number' ? body.v2SortOrder : null
     const missionType = typeof body.missionType === 'string' ? body.missionType : 'concept'
-    const xpAwarded =
-      typeof body.xpAwarded === 'number'
-        ? body.xpAwarded
-        : (XP_BY_MISSION_TYPE[missionType] ?? 20)
+    const title = typeof body.title === 'string' ? body.title : null
 
     if (!subject || v2SortOrder == null) {
       return NextResponse.json(
@@ -34,24 +35,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // PASO 1 — XP siempre calculado en servidor
+    const xp = XP_MAP[missionType] ?? 20
+
     const db = createServiceClient()
     const now = new Date().toISOString()
 
-    // PASO 2: Marcar la entrada del calendario como completada
-    await db
+    // PASO 2 — Marcar calendario como completado y detectar si ya estaba
+    const { data: updated } = await db
       .from('camino_calendar')
       .update({
         status: 'completed',
         completed_at: now,
-        xp_awarded: xpAwarded,
+        xp_awarded: xp,
         updated_at: now,
       })
       .eq('user_id', user.id)
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
       .eq('status', 'pending')
+      .select('id')
 
-    // PASO 3: Marcar el item de la cola como completado
+    // PASO 4 — Idempotencia: 0 filas afectadas = ya completada o no existe
+    if (!updated || updated.length === 0) {
+      return NextResponse.json({ success: false, reason: 'already_completed' })
+    }
+
+    // PASO 2b — Marcar cola como completada (best-effort)
     await db
       .from('user_learning_queue')
       .update({ queue_status: 'completed' })
@@ -59,7 +69,56 @@ export async function POST(request: NextRequest) {
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
 
-    return NextResponse.json({ success: true })
+    // PASO 2c — Registrar XP event
+    await db.from('camino_xp_events').insert({
+      user_id: user.id,
+      xp,
+      source: 'camino_mission',
+      metadata: {
+        mission_id: updated[0].id,
+        subject,
+        v2_sort_order: v2SortOrder,
+        mission_type: missionType,
+        title,
+      },
+    })
+
+    // PASO 3 — Actualizar camino_user_progress
+    const { data: currentProgress } = await db
+      .from('camino_user_progress')
+      .select('xp_total, missions_completed')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const newXpTotal = (Number(currentProgress?.xp_total) || 0) + xp
+    const newMissionsCompleted = (Number(currentProgress?.missions_completed) || 0) + 1
+
+    if (!currentProgress) {
+      await db.from('camino_user_progress').insert({
+        user_id: user.id,
+        xp_total: xp,
+        streak_days: 0,
+        longest_streak: 0,
+        missions_completed: 1,
+        level_mates: 1,
+        level_historia: 1,
+        level_ingles: 1,
+        progress_towards_pau: 1,
+        updated_at: now,
+      })
+    } else {
+      await db
+        .from('camino_user_progress')
+        .update({
+          xp_total: newXpTotal,
+          missions_completed: newMissionsCompleted,
+          updated_at: now,
+        })
+        .eq('user_id', user.id)
+    }
+
+    // PASO 5 — Respuesta
+    return NextResponse.json({ success: true, xpAwarded: xp, totalXp: newXpTotal })
   } catch (err) {
     console.error('[camino/complete-mission]', err)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

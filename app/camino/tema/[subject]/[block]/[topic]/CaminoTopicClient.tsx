@@ -519,21 +519,31 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       if (rawScore == null) {
         setToast('Corrección recibida sin nota clara. No se asigna XP hasta tener una nota.')
       } else {
-        const { xp, xpChanged } = awardCorrectionXp(rawScore)
+        const { xp } = awardCorrectionXp(rawScore)
         setScore(rawScore)
-        setToast(xpChanged ? `+${xp} XP por corrección · nota ${rawScore}/10` : `Nota ${rawScore}/10 · XP ya registrado para esta misión`)
+        let toastText = `+${xp} XP por corrección · nota ${rawScore}/10`
         if (currentTopic.v2SortOrder != null) {
-          fetch('/api/camino/complete-mission', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-            body: JSON.stringify({
-              subject: currentTopic.subject,
-              v2SortOrder: currentTopic.v2SortOrder,
-              missionType: 'concept',
-              xpAwarded: xp,
-            }),
-          }).catch(() => { /* silent — no bloquear UX */ })
+          try {
+            const cmRes = await fetch('/api/camino/complete-mission', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+              body: JSON.stringify({
+                subject: currentTopic.subject,
+                v2SortOrder: currentTopic.v2SortOrder,
+                missionType: 'concept',
+                title: selectedMissionTitle,
+              }),
+            })
+            const cmJson = await cmRes.json()
+            if (cmJson.success && typeof cmJson.xpAwarded === 'number') {
+              setXpAwarded(cmJson.xpAwarded)
+              toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10`
+            } else if (cmJson.reason === 'already_completed') {
+              toastText = `Nota ${rawScore}/10 · Misión ya completada`
+            }
+          } catch { /* silent */ }
         }
+        setToast(toastText)
       }
 
       const { data: userData } = await supabase.auth.getUser()

@@ -699,6 +699,7 @@ export default function CaminoCalendarClient() {
   const [streak, setStreak] = useState(0)
   const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
   const [blockCompletedCount, setBlockCompletedCount] = useState(0)
+  const [daysSinceReg, setDaysSinceReg] = useState<number | null>(null)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -754,6 +755,11 @@ export default function CaminoCalendarClient() {
     supabase.auth.getSession().then(async ({ data }) => {
       const userId = data.session?.user.id
       if (!userId || cancelled) return
+      const created = data.session?.user.created_at
+      if (created) {
+        const days = Math.floor((Date.now() - new Date(created).getTime()) / 86400000)
+        if (!cancelled) setDaysSinceReg(days)
+      }
       await ensureCaminoCalendar(userId, supabase)
       if (cancelled) return
       const [days, rachaValue, matCount, histCount] = await Promise.all([
@@ -1025,7 +1031,7 @@ export default function CaminoCalendarClient() {
             onMarkNotSeen={markNotSeenHero}
             hasOnboardingSubjects={hasOnboardingSubjects}
           />
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">{caminoPlanLimits.label} · Camino {caminoPlanLimits.caminoMode === 'limited' ? 'limitado' : caminoPlanLimits.caminoMode === 'intensive' ? 'intensivo' : 'completo'} · margen variable mínimo {(caminoPlanLimits.variableMarginFloor * 100).toFixed(0)}%</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p>{streak > 0 && <p className="mt-3 text-[11px] font-black text-orange-500">🔥 {streak} día{streak !== 1 ? 's' : ''} de racha</p>}</div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">Plan gratuito · Te quedan {Math.max(0, 7 - (daysSinceReg ?? 0))} días de prueba</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p>{streak > 0 && <p className="mt-3 text-[11px] font-black text-orange-500">🔥 {streak} día{streak !== 1 ? 's' : ''} de racha</p>}</div>
         </section>
 
         {(subjectProgress.matematicas_ii != null || subjectProgress.historia_espana != null) && (
@@ -1340,7 +1346,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
 
       <div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
         <div className="text-center">
-          <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '—'}</p>
+          <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '0'}</p>
           <p className="mt-0.5 text-[11px] font-semibold text-slate-400">días de racha</p>
         </div>
         <div className="text-center">

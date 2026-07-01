@@ -483,6 +483,18 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         const { xp, xpChanged } = awardCorrectionXp(rawScore)
         setScore(rawScore)
         setToast(xpChanged ? `+${xp} XP por corrección · nota ${rawScore}/10` : `Nota ${rawScore}/10 · XP ya registrado para esta misión`)
+        if (currentTopic.v2SortOrder != null) {
+          fetch('/api/camino/complete-mission', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+            body: JSON.stringify({
+              subject: currentTopic.subject,
+              v2SortOrder: currentTopic.v2SortOrder,
+              missionType: 'concept',
+              xpAwarded: xp,
+            }),
+          }).catch(() => { /* silent — no bloquear UX */ })
+        }
       }
 
       const { data: userData } = await supabase.auth.getUser()

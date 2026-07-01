@@ -12,6 +12,7 @@ import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/c
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import { calcularRacha } from '@/app/lib/calcularRacha'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
@@ -512,6 +513,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           respuesta: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : studentAnswer.substring(0, 4000),
           correccion: storedCorrection
         })
+        calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
       }
     } finally {
       setCorrecting(false)

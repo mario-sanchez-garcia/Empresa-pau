@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, BookOpen, CalendarDays, ChevronDown, ChevronLeft, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, BookOpen, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
@@ -19,6 +19,7 @@ type MissionStatus = 'pending' | 'done'
 
 type Mission = {
   id: string
+  calendarRowId?: string
   role: MissionRole
   kind: MissionKind
   subject: string
@@ -109,6 +110,7 @@ const MOCK_RANKING: RankingEntry[] = [
 
 function toISO(date: Date) { return date.toISOString().slice(0, 10) }
 function todayISO() { return toISO(new Date()) }
+function todayMadrid() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' }) }
 function dateFromISO(dateISO: string) { return new Date(`${dateISO}T12:00:00Z`) }
 function addDays(date: Date, days: number) { const next = new Date(date); next.setDate(next.getDate() + days); return next }
 function mondayOf(date: Date) { const d = new Date(date); const day = d.getDay() || 7; d.setDate(d.getDate() - day + 1); d.setHours(0, 0, 0, 0); return d }
@@ -215,6 +217,68 @@ async function fetchLeaderboard(token: string, community: string) {
   } catch {
     return null
   }
+}
+
+type CaminoCalRow = {
+  id: string
+  scheduled_date: string
+  subject: string
+  title: string
+  block_key: string | null
+  block_slug: string | null
+  is_main: boolean
+  is_bonus: boolean
+  status: string
+}
+
+function calRowToMission(row: CaminoCalRow): Mission {
+  const subjectLabel = subjectLabelFromSlug(row.subject)
+  const blockSlug = row.block_slug ?? (row.block_key ? textSlug(row.block_key) : '')
+  const href = blockSlug
+    ? `/camino-pau/curso/${row.subject}/${blockSlug}/${textSlug(row.title)}`
+    : ''
+  return {
+    id: row.id,
+    calendarRowId: row.id,
+    role: row.is_main ? 'main' : 'bonus',
+    kind: 'concept_explanation',
+    subject: subjectLabel,
+    block: row.block_key ?? subjectLabel,
+    topic: row.title,
+    title: row.title,
+    reason: row.block_key ? `${row.block_key} · misión de tu Camino PAU.` : 'Misión de tu Camino PAU.',
+    href,
+    target: href,
+    source: 'camino_pau',
+    xpPolicy: 'after_correction',
+    estimatedMinutes: 30,
+    baseXP: 20,
+    status: row.status === 'completed' ? 'done' : 'pending',
+  }
+}
+
+async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
+  const todayStr = todayMadrid()
+  const { data, error } = await supabase
+    .from('camino_calendar')
+    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status')
+    .eq('user_id', userId)
+    .gte('scheduled_date', todayStr)
+    .order('scheduled_date', { ascending: true })
+    .limit(14)
+  if (error || !data || data.length === 0) return null
+  const byDate = new Map<string, CaminoCalRow[]>()
+  for (const row of data as CaminoCalRow[]) {
+    if (!byDate.has(row.scheduled_date)) byDate.set(row.scheduled_date, [])
+    byDate.get(row.scheduled_date)!.push(row)
+  }
+  const today = todayMadrid()
+  return Array.from(byDate.entries()).map(([date, rows]) => ({
+    date,
+    label: calendarDayLabel(date),
+    isToday: date === today,
+    missions: rows.map(calRowToMission),
+  }))
 }
 
 async function fetchCurriculumItems(subjects: string[]): Promise<CurriculumItem[]> {
@@ -616,6 +680,7 @@ export default function CaminoCalendarClient() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
+  const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -667,6 +732,20 @@ export default function CaminoCalendarClient() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const userId = data.session?.user.id
+      if (!userId || cancelled) return
+      const days = await fetchCaminoCalendar(userId)
+      if (!cancelled && days && days.length > 0) {
+        setCalendar(days)
+        setSupabaseCalLoaded(true)
+      }
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
     if (!onboarding?.community) return
     const community = onboarding.community
     let cancelled = false
@@ -694,7 +773,7 @@ export default function CaminoCalendarClient() {
       const savedCalendar = loadJson<DayPlan[]>(CALENDAR_KEY, [])
       const savedWeekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})
       const shouldRefreshCalendar = loadJson<boolean>(CALENDAR_REFRESH_KEY, false)
-      if (!savedCalendar.length || shouldRefreshCalendar || !calendarMatchesOnboarding(savedWeekCache[selectedWeekStart] ?? savedCalendar, onboarding, selectedWeekStart)) {
+      if (!supabaseCalLoaded && (!savedCalendar.length || shouldRefreshCalendar || !calendarMatchesOnboarding(savedWeekCache[selectedWeekStart] ?? savedCalendar, onboarding, selectedWeekStart))) {
         const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
         const regenerated = generateCalendar(onboarding, exams, source, planId, selectedWeekStart, savedWeekCache)
         setCalendar(syncStatuses(regenerated, xpEvents))
@@ -720,7 +799,7 @@ export default function CaminoCalendarClient() {
 
   const hasProfile = Boolean(onboarding?.completedAt && onboarding.community && onboarding.subjects.length)
   const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding)
-  const realToday = todayISO()
+  const realToday = todayMadrid()
   const today = visibleCalendar.find(day => day.date === realToday) ?? { date: realToday, label: calendarDayLabel(realToday), isToday: true, missions: [] }
   const allMissions = visibleCalendar.flatMap(day => day.missions)
   const totalMain = allMissions.filter(mission => mission.role === 'main').length
@@ -776,6 +855,29 @@ export default function CaminoCalendarClient() {
     const refreshRes = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${session.access_token}` } })
     if (refreshRes.ok) { const d = await refreshRes.json(); setLiga(d.liga ?? null) }
     return {}
+  }
+
+  async function completeMission(mission: Mission) {
+    if (!mission.calendarRowId) return
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    setCalendar(current => current.map(day => ({
+      ...day,
+      missions: day.missions.map(m => m.id === mission.id ? { ...m, status: 'done' as MissionStatus } : m),
+    })))
+    setToast('¡Misión completada! +20 XP')
+    await supabase
+      .from('camino_calendar')
+      .update({ status: 'completed', completed_at: new Date().toISOString(), xp_awarded: 20 })
+      .eq('id', mission.calendarRowId)
+    await supabase
+      .from('camino_xp_events')
+      .insert({
+        user_id: session.user.id,
+        xp: 20,
+        source: 'camino_mission',
+        metadata: { mission_id: mission.calendarRowId, subject: mission.subject, title: mission.title },
+      })
   }
 
   function persist(nextCalendar: DayPlan[], nextXp = xpEvents, nextExams = exams) {
@@ -847,7 +949,7 @@ export default function CaminoCalendarClient() {
       <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Editar calendario</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today.label}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{hasOnboardingSubjects ? 'Hoy no tienes misión principal. Puedes adelantar una del calendario o añadir una.' : 'Completa tu onboarding para que podamos construir tu Camino PAU.'}</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} compact />)}</div></div>}</div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qué hacer hoy</p><h2 className="mt-2 text-2xl font-black text-slate-950">{today.label}</h2><p className="mt-2 text-sm font-semibold text-slate-500">Empieza por la misión principal. Completa lo importante y desbloquea bonus sin presión.</p><div className="mt-5 grid gap-3">{todayMain.length ? todayMain.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} onComplete={completeMission} />) : <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{hasOnboardingSubjects ? 'Hoy no tienes misión principal. Puedes adelantar una del calendario o añadir una.' : 'Completa tu onboarding para que podamos construir tu Camino PAU.'}</p>}</div>{todayDone && <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-4"><h3 className="font-black text-emerald-900">Día completado</h3><p className="mt-1 text-sm font-semibold text-emerald-700">Has hecho lo importante de hoy. Puedes parar aquí o sumar XP con misiones bonus.</p><div className="mt-3 grid gap-2">{todayBonus.map(mission => <MissionRow key={mission.id} mission={mission} onPostpone={postponeMission} onComplete={completeMission} compact />)}</div></div>}</div>
           <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">{caminoPlanLimits.label} · Camino {caminoPlanLimits.caminoMode === 'limited' ? 'limitado' : caminoPlanLimits.caminoMode === 'intensive' ? 'intensivo' : 'completo'} · margen variable mínimo {(caminoPlanLimits.variableMarginFloor * 100).toFixed(0)}%</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p></div>
         </section>
 
@@ -1051,10 +1153,10 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, planId, onClose
   )
 }
 
-function MissionRow({ mission, onPostpone, compact = false }: { mission: Mission; onPostpone: (id: string) => void; compact?: boolean }) {
+function MissionRow({ mission, onPostpone, onComplete, compact = false }: { mission: Mission; onPostpone: (id: string) => void; onComplete?: (mission: Mission) => void; compact?: boolean }) {
   const theme = themeFor(mission.subject)
   const target = hrefForMission(mission)
-  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
+  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {

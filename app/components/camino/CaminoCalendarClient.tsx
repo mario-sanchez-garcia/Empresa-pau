@@ -668,6 +668,8 @@ export default function CaminoCalendarClient() {
   const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
   const [blockCompletedCount, setBlockCompletedCount] = useState(0)
   const [daysSinceReg, setDaysSinceReg] = useState<number | null>(null)
+  const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -697,18 +699,20 @@ export default function CaminoCalendarClient() {
       await ensureCaminoCalendar(userId, supabase)
       if (cancelled) return
       const weekStart = currentWeekStartISO()
-      const [calDays, rachaValue, matCount, histCount, progressRow, weeklyXpRows] = await Promise.all([
+      const [calDays, rachaValue, matCount, histCount, progressRow, weeklyXpRows, queueResult] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
         supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
         supabase.from('camino_xp_events').select('xp').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
+        supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       ])
       if (cancelled) return
       if (calDays && calDays.length > 0) {
         setCalendar(calDays)
         setSupabaseCalLoaded(true)
+        setCaminoReadyStatus('ready')
         const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
         const todayDay = calDays.find(d => d.date === realTodayStr)
         const heroMission = todayDay?.missions.find(m => m.role === 'main')
@@ -721,6 +725,9 @@ export default function CaminoCalendarClient() {
             .eq('status', 'completed')
             .then(({ count }) => { if (!cancelled) setBlockCompletedCount(count ?? 0) })
         }
+      } else {
+        const qCount = (queueResult as { count: number | null }).count ?? 0
+        if (!cancelled) setCaminoReadyStatus(qCount > 0 ? 'no_future' : 'no_queue')
       }
       setStreak(rachaValue)
       setSubjectProgress({ matematicas_ii: matCount.count ?? 0, historia_espana: histCount.count ?? 0 })
@@ -729,6 +736,28 @@ export default function CaminoCalendarClient() {
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+    if (caminoReadyStatus !== 'no_future') return
+    let cancelled = false
+    const timer = setTimeout(async () => {
+      if (cancelled) return
+      const { data } = await supabase.auth.getSession()
+      const userId = data.session?.user.id
+      if (!userId || cancelled) return
+      await ensureCaminoCalendar(userId, supabase)
+      const calDays = await fetchCaminoCalendar(userId)
+      if (cancelled) return
+      if (calDays && calDays.length > 0) {
+        setCalendar(calDays)
+        setSupabaseCalLoaded(true)
+        setCaminoReadyStatus('ready')
+      } else {
+        setCaminoReadyStatus('no_queue')
+      }
+    }, 2000)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [caminoReadyStatus]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!onboarding?.community) return
@@ -861,6 +890,31 @@ export default function CaminoCalendarClient() {
       })
   }
 
+  async function generateCamino() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    setIsGenerating(true)
+    try {
+      const subjectSlugs = (onboarding?.subjects ?? []).map(s => SUBJECT_SLUGS[s]).filter(Boolean)
+      const subjects = subjectSlugs.length > 0 ? subjectSlugs : ['matematicas_ii', 'historia_espana']
+      const res = await fetch('/api/onboarding/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ subjects, startMode: 'zero' }),
+      })
+      if (res.ok) {
+        await ensureCaminoCalendar(session.user.id, supabase)
+        const calDays = await fetchCaminoCalendar(session.user.id)
+        if (calDays && calDays.length > 0) {
+          setCalendar(calDays)
+          setSupabaseCalLoaded(true)
+          setCaminoReadyStatus('ready')
+        }
+      }
+    } catch { /* silent */ }
+    setIsGenerating(false)
+  }
+
   function persist(nextCalendar: DayPlan[], nextExams = exams) {
     setCalendar(nextCalendar)
     setExams(nextExams)
@@ -941,6 +995,41 @@ export default function CaminoCalendarClient() {
 
   if (!hasProfile) return (
     <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-700"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Pausia cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
+  )
+
+  if (caminoReadyStatus === 'no_queue') return (
+    <Shell>
+      <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
+        <section className="w-full rounded-[32px] border border-amber-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
+            <RotateCcw size={30} />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-950">Tu Camino PAU aún no está listo</h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Algo fue mal al generar tu plan. Vamos a intentarlo de nuevo.</p>
+          <button
+            onClick={generateCamino}
+            disabled={isGenerating}
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] disabled:opacity-60"
+          >
+            {isGenerating
+              ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Generando...</>
+              : <>Generar mi Camino PAU <ArrowRight size={16} /></>}
+          </button>
+        </section>
+      </main>
+    </Shell>
+  )
+
+  if (caminoReadyStatus === 'no_future') return (
+    <Shell>
+      <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
+        <section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
+          <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+          <h1 className="text-2xl font-black tracking-tight text-slate-950">Preparando tus próximas misiones...</h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Esto solo tarda un momento.</p>
+        </section>
+      </main>
+    </Shell>
   )
 
   return (

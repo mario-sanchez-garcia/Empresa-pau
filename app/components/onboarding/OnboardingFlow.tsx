@@ -138,7 +138,7 @@ export default function OnboardingFlow() {
   const canContinue = (() => {
     if (step === 'community') return Boolean(data.community)
     if (step === 'school') return Boolean(data.schoolName?.trim())
-    if (step === 'subjects') return data.subjects.length > 0
+    if (step === 'subjects') return data.subjects.length > 0 && data.subjects.some(s => s === 'Matemáticas II' || s === 'Historia de España')
     if (step === 'feeling') return Boolean(data.preparationFeeling)
     if (step === 'daily-time') return Boolean(data.dailyStudyTime)
     if (step === 'weekly-days') return Boolean(data.weeklyStudyDays)
@@ -371,17 +371,39 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'subjects') {
+      const SUPPORTED_SUBJECTS = new Set(['Matemáticas II', 'Historia de España'])
+      const hasSelected = data.subjects.length > 0
+      const allUnsupported = hasSelected && data.subjects.every(s => !SUPPORTED_SUBJECTS.has(s))
       return (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {SUBJECT_OPTS.map(subject => {
-            const selected = data.subjects.includes(subject.id)
-            return (
-              <button key={subject.id} onClick={() => toggleSubject(subject.id)} className="flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left transition active:scale-[0.98]" style={{ borderColor: selected ? subject.color : '#e2e8f0', background: selected ? subject.bg : '#ffffff', boxShadow: selected ? `0 0 0 3px ${subject.color}1a` : '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2" style={{ borderColor: selected ? subject.color : '#cbd5e1', background: selected ? subject.color : 'white' }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
-                <span className="text-sm font-black" style={{ color: selected ? subject.color : '#334155' }}>{subject.label}</span>
-              </button>
-            )
-          })}
+        <div className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-2">
+            {SUBJECT_OPTS.map(subject => {
+              const selected = data.subjects.includes(subject.id)
+              return (
+                <button key={subject.id} onClick={() => toggleSubject(subject.id)} className="flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left transition active:scale-[0.98]" style={{ borderColor: selected ? subject.color : '#e2e8f0', background: selected ? subject.bg : '#ffffff', boxShadow: selected ? `0 0 0 3px ${subject.color}1a` : '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2" style={{ borderColor: selected ? subject.color : '#cbd5e1', background: selected ? subject.color : 'white' }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
+                  <span className="text-sm font-black" style={{ color: selected ? subject.color : '#334155' }}>{subject.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          {allUnsupported && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-bold text-amber-800">Camino PAU completo disponible para Matemáticas II e Historia de España. Estamos trabajando en el resto de asignaturas.</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {!data.subjects.includes('Matemáticas II') && (
+                  <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Matemáticas II'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
+                    + Añadir Matemáticas II
+                  </button>
+                )}
+                {!data.subjects.includes('Historia de España') && (
+                  <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Historia de España'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
+                    + Añadir Historia de España
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )
     }

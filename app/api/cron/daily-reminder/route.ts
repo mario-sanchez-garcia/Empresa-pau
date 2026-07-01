@@ -73,6 +73,21 @@ export async function GET(request: NextRequest) {
     u.created_at <= cutoff
   )
 
+  // Filter users who opted out of email notifications
+  const { data: profileRows } = await db
+    .from('profiles')
+    .select('id, email_notifications')
+    .in('id', targets.map(u => u.id))
+  const optedOutSet = new Set(
+    (profileRows ?? [])
+      .filter((p: { id: string; email_notifications: boolean | null }) => p.email_notifications === false)
+      .map((p: { id: string }) => p.id),
+  )
+  const finalTargets = targets.filter(u => !optedOutSet.has(u.id))
+  if (finalTargets.length === 0) {
+    return NextResponse.json({ sent: 0, skipped: candidateIds.length })
+  }
+
   const html = `
 <!DOCTYPE html>
 <html lang="es">
@@ -93,7 +108,7 @@ export async function GET(request: NextRequest) {
             Ver mi misión →
           </a>
           <p style="margin:28px 0 0;font-size:12px;color:#94a3b8">
-            Si no quieres recibir estos emails, ignóralos.
+            Recibes este email porque tienes Camino PAU activo.
           </p>
         </td></tr>
       </table>
@@ -105,12 +120,13 @@ export async function GET(request: NextRequest) {
   let sent = 0
   let failed = 0
 
-  for (const user of targets) {
+  for (const user of finalTargets) {
     try {
       await sendEmail({
         to: user.email!,
         subject: 'Tu misión de hoy en Pausia te espera 📚',
         html,
+        userId: user.id,
       })
       sent++
     } catch (err) {
@@ -119,6 +135,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  console.log(`[daily-reminder] sent=${sent} failed=${failed} skipped=${candidateIds.length - toNotify.length}`)
-  return NextResponse.json({ sent, failed, skipped: candidateIds.length - toNotify.length })
+  const skipped = candidateIds.length - toNotify.length + optedOutSet.size
+  console.log(`[daily-reminder] sent=${sent} failed=${failed} skipped=${skipped}`)
+  return NextResponse.json({ sent, failed, skipped })
 }

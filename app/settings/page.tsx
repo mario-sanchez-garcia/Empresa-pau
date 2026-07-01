@@ -41,12 +41,25 @@ export default function SettingsPage() {
   const [preferences, setPreferences] = useState<Preferences>(defaults)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [emailNotifSaving, setEmailNotifSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.push('/login')
-      else setEmail(data.user.email ?? '')
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { router.push('/login'); return }
+      setEmail(data.user.email ?? '')
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (token) {
+        try {
+          const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+          if (res.ok) {
+            const json = await res.json() as { email_notifications: boolean }
+            setEmailNotifications(json.email_notifications ?? true)
+          }
+        } catch { /* silent */ }
+      }
     })
     try {
       // setState síncrono de inicialización desde localStorage
@@ -64,6 +77,23 @@ export default function SettingsPage() {
     const reader = new FileReader()
     reader.onload = () => setPreferences(current => ({ ...current, photo: reader.result as string }))
     reader.readAsDataURL(file)
+  }
+
+  async function saveEmailNotifications(value: boolean) {
+    setEmailNotifications(value)
+    setEmailNotifSaving(true)
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (token) {
+        await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ email_notifications: value }),
+        })
+      }
+    } catch { /* silent */ }
+    setEmailNotifSaving(false)
   }
 
   function save() {
@@ -126,6 +156,19 @@ export default function SettingsPage() {
               <div className="mt-5 divide-y divide-blue-50">
                 <Toggle label="Recordatorios de estudio" description="Mantener activa tu rutina de Mi Plan." checked={preferences.studyReminders} onChange={value => setPreferences(current => ({ ...current, studyReminders: value }))} />
                 <Toggle label="Resumen de correcciones por email" description="Preparar un resumen periódico de tu progreso." checked={preferences.correctionEmails} onChange={value => setPreferences(current => ({ ...current, correctionEmails: value }))} />
+                <div className="flex cursor-pointer items-center justify-between gap-4 py-4">
+                  <span>
+                    <strong className="block text-sm">Recibir recordatorios diarios por email</strong>
+                    <small className="mt-1 block text-xs text-slate-500">Pausia te avisará cuando tengas misiones pendientes en Camino PAU.{emailNotifSaving ? ' Guardando…' : ''}</small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications}
+                    onChange={e => saveEmailNotifications(e.target.checked)}
+                    disabled={emailNotifSaving}
+                    className="h-5 w-5 accent-blue-700"
+                  />
+                </div>
               </div>
             </section>
 

@@ -535,7 +535,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">{selectedV2Card ? `Misión ${selectedV2Card.sort_order} de 60` : 'Subpágina de aprendizaje'}</span>
                 {selectedV2Number && <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700">Mini-misión {selectedV2Number} de {v2Cards.length}</span>}
               </div>
-              <p className="mt-3 text-sm font-semibold text-slate-500">{hasContent ? 'Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.' : 'Itinerario preparado. Falta cargar apunte LaTeX específico para este tema.'}</p>
+              <p className="mt-3 text-sm font-semibold text-slate-500">Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.</p>
             </div>
             <button onClick={markNotSeen} className="inline-flex items-center gap-2 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700"><School size={16} /> No lo he dado en clase</button>
           </div>

@@ -478,3 +478,61 @@ function labelFor(subject: SimulacroSubject, theme: string) {
 function shuffle<T>(items: T[]) {
   return [...items].sort(() => Math.random() - 0.5)
 }
+
+// ─── Practice Session ────────────────────────────────────────────────────────
+
+export interface PracticeSession {
+  id: string
+  subject: SimulacroSubject
+  block: string
+  comunidad: string
+  questions: SimulacroBlock[]
+  type: 'practice_session'
+  created_at: string
+}
+
+export function generatePracticeSession(
+  subject: SimulacroSubject,
+  blockFilter: string,
+  comunidad: string,
+  numQuestions: number = 3,
+): PracticeSession | null {
+  const pool = normalizeQuestions(subject, comunidad).filter(
+    item => normalizeTheme(subject, item.rawTheme) === blockFilter && !isIncompleteOfficialExercise(item.block),
+  )
+  if (pool.length === 0) return null
+
+  const shuffled = shuffle(pool)
+  const usedYears = new Set<number>()
+  const selected: SimulacroBlock[] = []
+
+  // First pass: prefer distinct years
+  for (const q of shuffled) {
+    if (selected.length >= numQuestions) break
+    if (!usedYears.has(q.year)) {
+      usedYears.add(q.year)
+      selected.push({ ...q.block, numero: selected.length + 1 })
+    }
+  }
+
+  // Second pass: fill remaining from any unused question
+  if (selected.length < numQuestions) {
+    for (const q of shuffled) {
+      if (selected.length >= numQuestions) break
+      if (selected.some(b => b.id === q.block.id)) continue
+      selected.push({ ...q.block, numero: selected.length + 1 })
+    }
+  }
+
+  if (selected.length === 0) return null
+
+  return {
+    id: crypto.randomUUID(),
+    subject,
+    block: blockFilter,
+    comunidad,
+    questions: withCommunity(selected, comunidad),
+    type: 'practice_session',
+    created_at: new Date().toISOString(),
+  }
+}

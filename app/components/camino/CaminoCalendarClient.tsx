@@ -183,6 +183,16 @@ function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') r
 function priorityLabel(priority: ExamPriority) { return priority === 'muy_alta' ? 'Muy alta' : priority.charAt(0).toUpperCase() + priority.slice(1) }
 function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) }
 function hrefForMission(mission: Mission) {
+  if (mission.missionType === 'partial_practice') {
+    const simSubject = String(mission.metadata?.simulacro_subject ?? '')
+    const simBlock = String(mission.metadata?.simulacro_block_filter ?? mission.block ?? '')
+    if (simSubject && simBlock) {
+      return {
+        href: `/simulacros/practica/nueva?subject=${encodeURIComponent(simSubject)}&block=${encodeURIComponent(simBlock)}&source=camino_partial&missionId=${encodeURIComponent(mission.id)}`,
+        fallback: '',
+      }
+    }
+  }
   const target = mission.href ? { href: mission.href, fallback: '' } : getMissionTarget(mission.kind, mission.subject, mission.topic, mission.block)
   if (!target.href) return target
   const separator = target.href.includes('?') ? '&' : '?'
@@ -1603,8 +1613,8 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
   const simSubject = PARTIAL_SIM_SUBJECT[subjectSlug] ?? subjectSlug
   const blockDisplay = exam.block ? (PARTIAL_BLOCK_DISPLAY[exam.block] ?? exam.block) : ''
   const href = exam.block
-    ? `/simulacros?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial`
-    : `/simulacros?subject=${simSubject}&source=camino_partial`
+    ? `/simulacros/practica/nueva?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial`
+    : `/simulacros/practica/nueva?subject=${simSubject}&source=camino_partial`
 
   if (daysDiff === 0) {
     return (

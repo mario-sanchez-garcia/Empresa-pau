@@ -1096,7 +1096,7 @@ export default function CaminoCalendarClient() {
       <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
-        <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="mb-5 grid items-stretch gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="flex flex-col gap-4">
             {upcomingPartial && <PartialExamBanner exam={upcomingPartial} today={realToday} />}
             <div className="flex-1 min-h-0">
@@ -1777,12 +1777,12 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
               <p className="text-sm font-semibold text-slate-400">Completa tu perfil con tu comunidad autónoma para ver el ranking local.</p>
             ) : visibleRows.length ? (
               <div className="grid gap-1.5">
-                {visibleRows.map(row => <RankingRow key={row.id} row={row} />)}
+                {visibleRows.slice(0, 3).map(row => <RankingRow key={row.id} row={row} />)}
               </div>
             ) : (
               <p className="text-sm font-semibold text-slate-400">Sin datos por ahora.</p>
             )}
-            {currentRow && (
+            {currentRow && !visibleRows.slice(0, 3).some(r => r.isCurrentUser) && (
               <>
                 <div className="my-3 h-px bg-blue-100" />
                 <RankingRow row={currentRow} fixed />
@@ -1797,11 +1797,6 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
             </p>
           </div>
         )}
-
-        {/* Liga siempre visible */}
-        <div className="border-t border-slate-100 pt-3">
-          <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={onCreateLiga} onJoinLiga={onJoinLiga} />
-        </div>
       </div>
     </div>
   )

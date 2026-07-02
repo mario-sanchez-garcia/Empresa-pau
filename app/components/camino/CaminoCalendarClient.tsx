@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, BookOpen, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, Bookmark, BookOpen, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, GripVertical, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
@@ -1260,55 +1260,122 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, planId, onClose
     { value: 'mock_exam', label: 'Simulacro' },
   ]
 
+  async function handleSave() {
+    onSave(draft)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user?.id) return
+      const rows = draft.flatMap(day =>
+        day.missions
+          .filter(m => m.calendarRowId)
+          .map(m => ({
+            id: m.calendarRowId!,
+            scheduled_date: day.date,
+            is_main: m.role === 'main',
+            is_bonus: m.role !== 'main',
+            title: m.title,
+            source: 'manual',
+            is_locked: true,
+          }))
+      )
+      for (const { id, ...fields } of rows) {
+        supabase.from('camino_calendar').update(fields).eq('id', id).then(() => {}, () => {})
+      }
+    } catch { /* silent */ }
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-4 backdrop-blur-sm max-lg:left-0 lg:left-[248px]">
-      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 px-5 py-4">
-          <div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Editar calendario</p><h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2></div>
-          <div className="flex flex-wrap gap-2"><button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button><button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button><button onClick={() => onSave(draft)} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">Guardar cambios</button></div>
-        </header>
-        <div className="grid flex-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
-          <div className="grid gap-3 lg:grid-cols-2">
-            {draft.map(day => (
-              <article key={day.date} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }} className="rounded-3xl border border-blue-100 bg-slate-50 p-4">
-                <h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>
-                <div className="mt-3 grid gap-2">
-                  {day.missions.length ? day.missions.map(mission => (
-                    <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="cursor-grab rounded-2xl border border-white bg-white p-3 shadow-sm active:cursor-grabbing">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-xs font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>
-                          <input value={mission.title} onChange={event => updateMission(mission.id, { title: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-100 bg-slate-50 px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-blue-200 focus:bg-white" />
-                        </div>
-                        <button onClick={() => deleteMission(mission.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar misión"><Trash2 size={15} /></button>
-                      </div>
-                      <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                        <select value={mission.subject} onChange={event => updateMission(mission.id, { subject: event.target.value })} className="mini-input">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select>
-                        <select value={mission.kind} onChange={event => updateMission(mission.id, { kind: event.target.value as MissionKind })} className="mini-input">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
-                        <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mini-input">{draft.map(option => <option key={option.date} value={option.date}>{option.label}</option>)}</select>
-                      </div>
-                      <label className="mt-2 inline-flex items-center gap-2 text-xs font-black text-slate-500"><input type="checkbox" checked={mission.role === 'bonus'} onChange={event => updateMission(mission.id, { role: event.target.checked ? 'bonus' : 'main' })} /> Bonus/opcional</label>
-                    </div>
-                  )) : <p className="text-xs font-bold text-slate-400">Sin misiones.</p>}
-                </div>
-              </article>
-            ))}
+      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
+
+        {/* Header — no Guardar aquí para evitar overflow */}
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-blue-100 px-5 py-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Editar calendario</p>
+            <h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2>
           </div>
-          <aside className="rounded-3xl border border-blue-100 bg-blue-50/60 p-4">
-            <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
-            {editorNotice && <p className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
-            <div className="mt-4 grid gap-3">
-              <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{draft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
-              <Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field>
-              <Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field>
-              <Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
-              <Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
-              <label className="inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
-              <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir misión</button>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button>
+            <button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button>
+          </div>
+        </header>
+
+        {/* Scrollable body — overflow-x-hidden elimina el scroll horizontal */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-5">
+          <p className="mb-5 text-sm font-semibold text-slate-500">Ajusta tu semana sin perder el ritmo. Pausia respetará tus cambios manuales.</p>
+          <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+
+            {/* Cuadrícula de días */}
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+              {draft.map(day => (
+                <article
+                  key={day.date}
+                  onDragOver={event => event.preventDefault()}
+                  onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}
+                  className="min-w-0 rounded-3xl border border-blue-100 bg-slate-50 p-3"
+                >
+                  <h3 className="text-xs font-black capitalize text-slate-900">{day.label}</h3>
+                  <div className="mt-2 grid gap-2">
+                    {day.missions.length ? day.missions.map(mission => {
+                      const theme = themeFor(mission.subject)
+                      return (
+                        <div
+                          key={mission.id}
+                          draggable
+                          onDragStart={() => setDraggedMissionId(mission.id)}
+                          onDragEnd={() => setDraggedMissionId(null)}
+                          className="min-w-0 rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm"
+                        >
+                          <div className="flex min-w-0 items-start gap-2">
+                            <div className="min-w-0 flex-1">
+                              <span className="inline-block max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
+                              <p className="mt-1 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
+                              <p className="mt-0.5 text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min · {mission.role === 'main' ? 'Principal' : 'Opcional'}</p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-0.5">
+                              <button type="button" aria-label="Arrastrar para mover" className="cursor-grab rounded-lg p-1.5 text-slate-300 hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"><GripVertical size={13} /></button>
+                              <button
+                                type="button"
+                                onClick={() => updateMission(mission.id, { role: mission.role === 'bonus' ? 'main' : 'bonus' })}
+                                aria-label={mission.role === 'bonus' ? 'Hacer principal' : 'Hacer opcional'}
+                                className={`rounded-lg p-1.5 transition-colors ${mission.role === 'bonus' ? 'text-violet-500 hover:bg-violet-50' : 'text-slate-300 hover:bg-slate-100 hover:text-slate-500'}`}
+                              >
+                                <Bookmark size={13} className={mission.role === 'bonus' ? 'fill-violet-400' : ''} />
+                              </button>
+                              <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión" className="rounded-lg p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }) : <p className="text-[11px] font-bold text-slate-400">Sin misiones. Arrastra aquí para añadir.</p>}
+                  </div>
+                </article>
+              ))}
             </div>
-          </aside>
+
+            {/* Panel añadir misión */}
+            <aside className="min-w-0 rounded-3xl border border-blue-100 bg-blue-50/60 p-4">
+              <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
+              {editorNotice && <p className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
+              <div className="mt-4 grid gap-3">
+                <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{draft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
+                <Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field>
+                <Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field>
+                <Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
+                <Field label="Duración (min)"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
+                <label className="inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
+                <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir misión</button>
+              </div>
+            </aside>
+          </div>
         </div>
-        <style>{`.mini-input{min-width:0;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;padding:7px 8px;font-size:11px;font-weight:800;color:#475569;outline:none}.mini-input:focus{border-color:#93c5fd;background:#fff}`}</style>
+
+        {/* Footer sticky con Guardar */}
+        <footer className="shrink-0 border-t border-blue-100 bg-white px-5 py-4">
+          <button onClick={handleSave} className="inline-flex w-full items-center justify-center rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.20)] transition hover:bg-blue-700">Guardar cambios</button>
+        </footer>
+
+        <style>{`.inputish{width:100%;border-radius:14px;border:1px solid #dbe7fb;background:#f8fbff;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#93c5fd;background:white}`}</style>
       </motion.section>
     </motion.div>
   )

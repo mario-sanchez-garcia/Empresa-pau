@@ -19,6 +19,7 @@ type SimulacroOptionSelection = 'mixed' | SimulacroOption
 interface GenerateSimulacroSettings {
   yearSelection?: SimulacroYearSelection
   optionSelection?: SimulacroOptionSelection
+  blockFilter?: string
 }
 
 export const SUBJECTS = {
@@ -103,22 +104,50 @@ export function generateSimulacro(
   const usedYears = new Set<number>()
   const blocks: SimulacroBlock[] = []
 
-  for (const theme of THEME_ORDER[subject]) {
-    const sameTheme = shuffle(questions.filter(item => normalizeTheme(subject, item.rawTheme) === theme))
-    const preferred = sameTheme.find(item => !usedYears.has(item.year)) ?? sameTheme[0]
-    if (!preferred) continue
-    usedYears.add(preferred.year)
-    blocks.push({ ...preferred.block, numero: blocks.length + 1 })
-    if (blocks.length === 4) break
-  }
+  if (settings.blockFilter) {
+    const targetTheme = settings.blockFilter
+    const targetPool = shuffle(questions.filter(item => normalizeTheme(subject, item.rawTheme) === targetTheme))
+    const otherThemes = (THEME_ORDER[subject] ?? []).filter(t => t !== targetTheme)
 
-  if (blocks.length < 4) {
-    for (const candidate of shuffle(questions)) {
-      if (blocks.some(block => block.id === candidate.block.id)) continue
-      if (usedYears.has(candidate.year) && distinctYears >= 4) continue
-      usedYears.add(candidate.year)
-      blocks.push({ ...candidate.block, numero: blocks.length + 1 })
+    // Up to 2 questions from the target block
+    for (const q of targetPool) {
+      if (blocks.length >= 2) break
+      blocks.push({ ...q.block, numero: blocks.length + 1 })
+    }
+
+    // 1 question each from other blocks until we have 4 total
+    for (const theme of shuffle(otherThemes)) {
+      if (blocks.length >= 4) break
+      const pool = shuffle(questions.filter(item => normalizeTheme(subject, item.rawTheme) === theme))
+      if (pool[0]) blocks.push({ ...pool[0].block, numero: blocks.length + 1 })
+    }
+
+    // Fallback: fill remaining slots from any unused question
+    if (blocks.length < 4) {
+      for (const q of shuffle(questions)) {
+        if (blocks.length >= 4) break
+        if (blocks.some(b => b.id === q.block.id)) continue
+        blocks.push({ ...q.block, numero: blocks.length + 1 })
+      }
+    }
+  } else {
+    for (const theme of THEME_ORDER[subject]) {
+      const sameTheme = shuffle(questions.filter(item => normalizeTheme(subject, item.rawTheme) === theme))
+      const preferred = sameTheme.find(item => !usedYears.has(item.year)) ?? sameTheme[0]
+      if (!preferred) continue
+      usedYears.add(preferred.year)
+      blocks.push({ ...preferred.block, numero: blocks.length + 1 })
       if (blocks.length === 4) break
+    }
+
+    if (blocks.length < 4) {
+      for (const candidate of shuffle(questions)) {
+        if (blocks.some(block => block.id === candidate.block.id)) continue
+        if (usedYears.has(candidate.year) && distinctYears >= 4) continue
+        usedYears.add(candidate.year)
+        blocks.push({ ...candidate.block, numero: blocks.length + 1 })
+        if (blocks.length === 4) break
+      }
     }
   }
 

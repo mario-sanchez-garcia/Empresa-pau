@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle2, Eye, EyeOff, ListChecks, PlayCircle, Settings2, Shuffle, Target, TrendingDown } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
@@ -41,9 +41,22 @@ const OPTION_CHOICES: Array<{ id: OptionChoice; label: string; description: stri
   { id: 'B', label: 'Opción B', description: 'Solo ejercicios de opción B.' },
 ]
 
-export default function SimulacrosPage() {
+const BLOCK_DISPLAY: Record<string, string> = {
+  Algebra: 'Álgebra', Analisis: 'Análisis', Geometria: 'Geometría', Probabilidad: 'Probabilidad'
+}
+
+function SimulacrosPage() {
+  const searchParams = useSearchParams()
+  const caminoBlock = searchParams.get('block')
+  const caminoSource = searchParams.get('source')
+  const isCaminoPartial = caminoSource === 'camino_partial' && !!caminoBlock
+  const autoTriggeredRef = useRef(false)
+
   const [userId, setUserId] = useState('')
-  const [subject, setSubject] = useState<SimulacroSubject>('mates')
+  const caminoSubjectParam = searchParams.get('subject') as SimulacroSubject | null
+  const [subject, setSubject] = useState<SimulacroSubject>(
+    () => caminoSubjectParam && caminoSubjectParam in SUBJECTS ? caminoSubjectParam : 'mates'
+  )
   const [mode, setMode] = useState<SimulacroMode>('normal')
   const [yearChoice, setYearChoice] = useState<YearChoice>('all')
   const [optionChoice, setOptionChoice] = useState<OptionChoice>('mixed')
@@ -81,6 +94,12 @@ export default function SimulacrosPage() {
       }
     })
   }, [router])
+
+  useEffect(() => {
+    if (!isCaminoPartial || !userId || autoTriggeredRef.current) return
+    autoTriggeredRef.current = true
+    void createSimulacro()
+  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadHistory(uid = userId) {
     if (!uid) return
@@ -132,6 +151,7 @@ export default function SimulacrosPage() {
       const generated = generateSimulacro(subject, technicalDifficulty, generatorOption, ccaa, {
         yearSelection,
         optionSelection,
+        ...(isCaminoPartial && caminoBlock ? { blockFilter: caminoBlock } : {}),
       })
 
       const weakBlocks = mode === 'errores'
@@ -154,7 +174,9 @@ export default function SimulacrosPage() {
       }
       const generatedId = generated?.id ?? crypto.randomUUID()
       const storedOption = finalBlocks.find(block => block.option === 'A' || block.option === 'B')?.option ?? generatorOption
-      const configLabel = buildConfigLabel(mode, effectiveYearChoice, optionSelection)
+      const configLabel = isCaminoPartial && caminoBlock
+        ? `Parcial · ${caminoBlock}`
+        : buildConfigLabel(mode, effectiveYearChoice, optionSelection)
       const now = new Date().toISOString()
       const row = {
         id: generatedId,
@@ -203,6 +225,15 @@ export default function SimulacrosPage() {
       }
     >
       <div className="mx-auto grid max-w-6xl gap-7">
+
+        {/* Camino parcial banner */}
+        {isCaminoPartial && caminoBlock && (
+          <div className="pau-reveal flex items-center gap-3 rounded-2xl border p-4 text-sm font-semibold" style={{ borderColor: '#bfdbfe', background: '#eff6ff', color: '#1e40af' }}>
+            <PlayCircle size={16} className="shrink-0" />
+            Simulacro enfocado en <strong className="ml-1">{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
+            <span className="ml-1 font-normal" style={{ color: '#3b82f6' }}>— generando para tu parcial...</span>
+          </div>
+        )}
 
         {/* Stats */}
         <section className="pau-reveal">
@@ -829,4 +860,8 @@ function blockIdentity(block: SimulacroBlock) {
   const statement = (block.enunciado || '').replace(/\s+/g, ' ').trim().slice(0, 160)
   if (statement) return `${block.year || ''}:${statement}`
   return `${block.id || ''}:${block.year || ''}:${block.tema || ''}`
+}
+
+export default function SimulacrosPageRoot() {
+  return <Suspense><SimulacrosPage /></Suspense>
 }

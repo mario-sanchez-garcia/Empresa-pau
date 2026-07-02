@@ -971,7 +971,20 @@ export default function CaminoCalendarClient() {
   function openEditExam(exam: StudentExam) { setEditingExamId(exam.id); setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, name: exam.name, priority: exam.priority }); setShowExamForm(true) }
   function saveExam() {
     if (!examDraft.subject || !examDraft.date) return
-    const nextExams = editingExamId ? exams.map(exam => exam.id === editingExamId ? { ...exam, ...examDraft } : exam) : [...exams, { id: `exam-${examDraft.date}-${exams.length + 1}`, ...examDraft }]
+    const BLOCK_NORMALIZE: Record<string, string> = {
+      'álgebra': 'Algebra', 'algebra': 'Algebra',
+      'análisis': 'Analisis', 'analisis': 'Analisis',
+      'análisis matemático': 'Analisis',
+      'geometría': 'Geometria', 'geometria': 'Geometria',
+      'probabilidad': 'Probabilidad',
+      'probabilidad y estadística': 'Probabilidad',
+    }
+    const rawBlock = examDraft.block?.toLowerCase().trim() ?? ''
+    const normalizedBlock = BLOCK_NORMALIZE[rawBlock] ?? examDraft.block
+    const draft = { ...examDraft, block: normalizedBlock }
+    const nextExams = editingExamId
+      ? exams.map(exam => exam.id === editingExamId ? { ...exam, ...draft } : exam)
+      : [...exams, { id: `exam-${examDraft.date}-${exams.length + 1}`, ...draft }]
     resetExamDraft()
     regenerate(nextExams)
   }

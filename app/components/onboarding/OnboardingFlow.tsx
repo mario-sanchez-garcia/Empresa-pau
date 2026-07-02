@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { CENTROS_MADRID } from '@/app/data/centros_madrid'
+import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import {
   loadOnboarding,
   markOnboardingComplete,
@@ -111,7 +113,19 @@ export default function OnboardingFlow() {
   const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
   const [savingError, setSavingError] = useState('')
   const [savingMsgIdx, setSavingMsgIdx] = useState(0)
+  const [schoolQuery, setSchoolQuery] = useState('')
+  const [schoolOpen, setSchoolOpen] = useState(false)
   const generateRetriesRef = useRef(0)
+
+  const centers = useMemo(
+    () => data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : [],
+    [data.community]
+  )
+  const filteredCenters = useMemo(() => {
+    const q = normalizeSearch(schoolQuery)
+    if (q.length < 2) return []
+    return centers.filter(c => normalizeSearch(c).includes(q)).slice(0, 10)
+  }, [centers, schoolQuery])
 
   const savingMessages = useMemo(() => {
     const msgs: string[] = []
@@ -167,6 +181,14 @@ export default function OnboardingFlow() {
 
   function selectCommunity(community: OnboardingCommunity) {
     update({ community, schoolName: null, schoolSource: null })
+    setSchoolQuery('')
+    setSchoolOpen(false)
+  }
+
+  function selectSchool(name: string, source: 'dataset' | 'manual') {
+    update({ schoolName: name, schoolSource: source })
+    setSchoolQuery(name)
+    setSchoolOpen(false)
   }
 
   function toggleSubject(subject: string) {
@@ -343,15 +365,46 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'school') {
+      const showDropdown = schoolOpen && schoolQuery.length >= 2
       return (
-        <input
-          type="text"
-          value={data.schoolName ?? ''}
-          onChange={e => update({ schoolName: e.target.value, schoolSource: 'manual' })}
-          placeholder="Ej: IES Ramiro de Maeztu"
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-bold text-slate-700 outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
-          autoFocus
-        />
+        <div className="relative">
+          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition">
+            <Search size={17} className="shrink-0 text-slate-400" />
+            <input
+              type="text"
+              value={schoolQuery}
+              onChange={e => { setSchoolQuery(e.target.value); setSchoolOpen(true) }}
+              onFocus={() => setSchoolOpen(true)}
+              onBlur={() => setTimeout(() => setSchoolOpen(false), 150)}
+              placeholder="Busca tu instituto..."
+              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-700 outline-none placeholder:font-semibold placeholder:text-slate-400"
+              autoFocus
+            />
+          </label>
+          {showDropdown && (
+            <div className="absolute left-0 right-0 top-full z-20 mt-1.5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.12)]">
+              {filteredCenters.map(center => (
+                <button
+                  key={center}
+                  type="button"
+                  onMouseDown={() => selectSchool(center, 'dataset')}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-blue-50 hover:text-blue-800 border-b border-slate-100 last:border-0"
+                >
+                  <Check size={13} className={`shrink-0 ${data.schoolName === center ? 'text-blue-600' : 'text-transparent'}`} strokeWidth={3} />
+                  {center}
+                </button>
+              ))}
+              <button
+                type="button"
+                onMouseDown={() => selectSchool('Mi centro no aparece', 'manual')}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
+              >
+                <Check size={13} className={`shrink-0 ${data.schoolName === 'Mi centro no aparece' ? 'text-blue-600' : 'text-transparent'}`} strokeWidth={3} />
+                Mi centro no aparece
+              </button>
+            </div>
+          )}
+        </div>
       )
     }
 
@@ -477,6 +530,15 @@ export default function OnboardingFlow() {
       </button>
     )
   }
+}
+
+function normalizeSearch(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
 }
 
 function OptionGrid({ children }: { children: ReactNode }) {

@@ -1200,21 +1200,14 @@ export default function CaminoCalendarClient() {
           <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{activeExams.length ? activeExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}{pastExams.length > 0 && <div className="mt-2"><button onClick={() => setShowPastExams(v => !v)} className="flex w-full items-center gap-2 py-1.5 text-xs font-black text-slate-400 hover:text-slate-600"><ChevronDown size={13} className={`transition-transform${showPastExams ? ' rotate-180' : ''}`} />Exámenes pasados ({pastExams.length})</button>{showPastExams && <div className="mt-1 grid gap-1">{pastExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 opacity-60"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-600">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)}</p></div><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-300 hover:bg-red-50 hover:text-red-500" aria-label="Eliminar examen pasado"><Trash2 size={15} /></button></div>)}</div>}</div>}</div></div>
           <CourseDirectory groups={courseGroups} />
           <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-blue-100 bg-white px-3 py-2 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-blue-100 bg-white px-3 py-1.5 shadow-sm">
               <span className="rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
               <span className="text-xs font-semibold text-slate-700">{displayedXP.toLocaleString('es-ES')} XP</span>
               {caminoPlanId === 'free' && daysSinceReg !== null && (
                 <span className="text-[11px] font-semibold text-slate-400">· {Math.max(0, 7 - daysSinceReg)}d de prueba</span>
               )}
             </div>
-            {showWeeklyGoal ? (
-              <div className="rounded-[28px] border border-blue-100 bg-white px-4 py-3 shadow-[0_4px_16px_rgba(37,99,235,0.08)]">
-                <p className="text-xs font-black text-slate-400">Ranking</p>
-                <p className="mt-1 text-xs font-semibold text-slate-400">Aún no hay ranking en tu división.</p>
-              </div>
-            ) : (
-              <RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} liga={liga} ligaLoading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
-            )}
+            <RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} liga={liga} ligaLoading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
           </div>
         </section>
 
@@ -1760,78 +1753,63 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
   const visibleRows = tab === 'community' ? rows.filter(row => row.community === community) : rows
 
   return (
-    <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left">
-        <span>
-          <span className="block text-lg font-black text-slate-950">Ranking y divisiones</span>
-          <span className="mt-1 block text-sm font-semibold text-slate-500">
-            {hasEnoughUsers ? `División: ${division} · ${totalXP.toLocaleString('es-ES')} XP` : 'Compite cuando haya más actividad.'}
-          </span>
-        </span>
-        <ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} />
-      </button>
+    <div className="flex flex-1 flex-col rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+      <p className="text-base font-black text-slate-950">Ranking y divisiones</p>
+      <div className="mt-4 grid gap-4">
+        {/* División + XP compacto */}
+        <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">División actual</p>
+            <p className="mt-0.5 text-sm font-black text-slate-900">{division}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">XP total</p>
+            <p className="mt-0.5 text-sm font-black text-blue-700">{totalXP.toLocaleString('es-ES')} XP</p>
+          </div>
+        </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <div className="mt-5 grid gap-4">
-              {/* División + XP compacto */}
-              <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">División actual</p>
-                  <p className="mt-0.5 text-sm font-black text-slate-900">{division}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">XP total</p>
-                  <p className="mt-0.5 text-sm font-black text-blue-700">{totalXP.toLocaleString('es-ES')} XP</p>
-                </div>
-              </div>
-
-              {/* Ranking real o empty state */}
-              {hasEnoughUsers ? (
-                <div>
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
-                      {tab === 'community' && community !== 'Sin comunidad' ? `Ranking · ${community}` : 'Ranking global'}
-                    </p>
-                    <div className="flex gap-1">
-                      <button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Global</button>
-                      <button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Comunidad</button>
-                    </div>
-                  </div>
-                  {tab === 'community' && community === 'Sin comunidad' ? (
-                    <p className="text-sm font-semibold text-slate-400">Completa tu perfil con tu comunidad autónoma para ver el ranking local.</p>
-                  ) : visibleRows.length ? (
-                    <div className="grid gap-1.5">
-                      {visibleRows.map(row => <RankingRow key={row.id} row={row} />)}
-                    </div>
-                  ) : (
-                    <p className="text-sm font-semibold text-slate-400">Sin datos por ahora.</p>
-                  )}
-                  {currentRow && (
-                    <>
-                      <div className="my-3 h-px bg-blue-100" />
-                      <RankingRow row={currentRow} fixed />
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <p className="text-sm font-semibold text-slate-500">Aún no hay suficientes alumnos activos para mostrar un ranking real.</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">
-                    {totalXP === 0 ? 'Empieza completando tu primera misión para sumar XP.' : 'Completa misiones esta semana para seguir sumando XP.'}
-                  </p>
-                </div>
-              )}
-
-              {/* Liga siempre visible */}
-              <div className="border-t border-slate-100 pt-3">
-                <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={onCreateLiga} onJoinLiga={onJoinLiga} />
+        {/* Ranking real o empty state */}
+        {hasEnoughUsers ? (
+          <div>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                {tab === 'community' && community !== 'Sin comunidad' ? `Ranking · ${community}` : 'Ranking global'}
+              </p>
+              <div className="flex gap-1">
+                <button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Global</button>
+                <button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Comunidad</button>
               </div>
             </div>
-          </motion.div>
+            {tab === 'community' && community === 'Sin comunidad' ? (
+              <p className="text-sm font-semibold text-slate-400">Completa tu perfil con tu comunidad autónoma para ver el ranking local.</p>
+            ) : visibleRows.length ? (
+              <div className="grid gap-1.5">
+                {visibleRows.map(row => <RankingRow key={row.id} row={row} />)}
+              </div>
+            ) : (
+              <p className="text-sm font-semibold text-slate-400">Sin datos por ahora.</p>
+            )}
+            {currentRow && (
+              <>
+                <div className="my-3 h-px bg-blue-100" />
+                <RankingRow row={currentRow} fixed />
+              </>
+            )}
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm font-semibold text-slate-500">Aún no hay suficientes alumnos activos para mostrar un ranking real.</p>
+            <p className="mt-1 text-sm font-semibold text-slate-500">
+              {totalXP === 0 ? 'Empieza completando tu primera misión para sumar XP.' : 'Completa misiones esta semana para seguir sumando XP.'}
+            </p>
+          </div>
         )}
-      </AnimatePresence>
+
+        {/* Liga siempre visible */}
+        <div className="border-t border-slate-100 pt-3">
+          <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={onCreateLiga} onJoinLiga={onJoinLiga} />
+        </div>
+      </div>
     </div>
   )
 }

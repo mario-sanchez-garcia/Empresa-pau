@@ -833,6 +833,12 @@ export default function CaminoCalendarClient() {
     .flatMap(day => day.missions.filter(m => m.role === 'main' && m.status !== 'done'))
     [0] ?? null
   const showWeeklyGoal = !leaderboard || (leaderboard.realUserCount ?? 0) <= 1
+  const upcomingPartial = (() => {
+    const horizon = toISO(addDays(new Date(), 7))
+    return exams
+      .filter(e => e.date >= realToday && e.date <= horizon)
+      .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null
+  })()
 
   async function createLiga(nombre: string): Promise<{ error?: string }> {
     const { data: { session } } = await supabase.auth.getSession()
@@ -1077,6 +1083,7 @@ export default function CaminoCalendarClient() {
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="grid gap-4 content-start">
+            {upcomingPartial && <PartialExamBanner exam={upcomingPartial} today={realToday} />}
             <HeroMissionCard
               mission={todayMain[0] ?? null}
               blockCompleted={blockCompletedCount}
@@ -1580,6 +1587,59 @@ function compactDayLabel(dateStr: string): string {
   return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }).replace('.', '')
 }
 
+const PARTIAL_SIM_SUBJECT: Record<string, string> = {
+  matematicas_ii: 'mates', historia_espana: 'historia',
+  fisica: 'fisica', quimica: 'quimica', biologia: 'biologia', ingles: 'ingles', lengua: 'lengua',
+}
+const PARTIAL_BLOCK_DISPLAY: Record<string, string> = {
+  Algebra: 'Álgebra', Analisis: 'Análisis', Geometria: 'Geometría', Probabilidad: 'Probabilidad',
+}
+
+function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }) {
+  const daysDiff = Math.round(
+    (new Date(exam.date + 'T12:00:00Z').getTime() - new Date(today + 'T12:00:00Z').getTime()) / 86400000
+  )
+  const subjectSlug = SUBJECT_SLUGS[exam.subject] ?? exam.subject
+  const simSubject = PARTIAL_SIM_SUBJECT[subjectSlug] ?? subjectSlug
+  const blockDisplay = exam.block ? (PARTIAL_BLOCK_DISPLAY[exam.block] ?? exam.block) : ''
+  const href = exam.block
+    ? `/simulacros?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial`
+    : `/simulacros?subject=${simSubject}&source=camino_partial`
+
+  if (daysDiff === 0) {
+    return (
+      <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4">
+        <p className="text-base font-black text-amber-900">¡Hoy es tu parcial de {exam.subject}!</p>
+        <p className="mt-1 text-sm font-semibold text-amber-700">Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-[24px] border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-[0_8px_24px_rgba(251,146,60,0.10)]">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-600">Próximo parcial</p>
+          <p className="mt-1 text-base font-black text-slate-900">
+            {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
+            {exam.subject ? ` · ${exam.subject}` : ''}
+            {blockDisplay ? ` · ${blockDisplay}` : ''}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-600">
+            Pausia ha ajustado esta semana para que llegues preparado.
+          </p>
+        </div>
+        <a
+          href={href}
+          className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-amber-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_4px_12px_rgba(245,158,11,0.30)] transition hover:-translate-y-0.5 hover:bg-amber-600"
+        >
+          Empezar práctica <ArrowRight size={14} />
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[] }) {
   const [expandedDate, setExpandedDate] = useState<string | null>(null)
   return (
@@ -1600,6 +1660,9 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
             >
               <span className={`w-24 shrink-0 text-xs font-black capitalize ${isToday ? 'text-blue-700' : 'text-slate-500'}`}>{compactDayLabel(day.date)}</span>
               <span className="flex-1 text-sm font-semibold text-slate-700">{subjectLabel}</span>
+              {main.some(m => m.missionType === 'partial_practice') && (
+                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>
+              )}
               <span className={`shrink-0 text-xs font-bold ${done ? 'text-emerald-600' : missionCount === 0 ? 'text-slate-300' : 'text-slate-400'}`}>
                 {done ? '✅ Hecho' : missionCount === 0 ? 'Libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
               </span>
@@ -1654,7 +1717,7 @@ function MissionRow({ mission, onPostpone, onComplete, compact = false }: { miss
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   const main = day.missions.filter(mission => mission.role === 'main')
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p><p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { subjects: string[]; draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }; setDraft: (draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }) => void; onClose: () => void; onSave: () => void; editing: boolean }) {

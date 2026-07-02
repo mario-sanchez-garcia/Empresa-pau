@@ -3,17 +3,14 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
-import { CENTROS_MADRID } from '@/app/data/centros_madrid'
-import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import {
   loadOnboarding,
   markOnboardingComplete,
   saveOnboarding,
   type OnboardingCommunity,
   type OnboardingData,
-  type OnboardingSchoolSource,
 } from '@/app/lib/onboarding/onboardingStorage'
 
 type Step = 'welcome' | 'community' | 'school' | 'subjects' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
@@ -76,7 +73,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   },
   school: {
     title: '¿Cuál es tu centro educativo?',
-    help: 'Así podremos adaptar mejor tu experiencia y entender desde dónde vienen los primeros alumnos.',
+    help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.',
   },
   subjects: {
     title: '¿Qué asignaturas quieres preparar?',
@@ -112,28 +109,33 @@ export default function OnboardingFlow() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('welcome')
   const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
-  const [schoolQuery, setSchoolQuery] = useState('')
-  const [manualSchool, setManualSchool] = useState('')
   const [savingError, setSavingError] = useState('')
+  const [savingMsgIdx, setSavingMsgIdx] = useState(0)
   const generateRetriesRef = useRef(0)
 
+  const savingMessages = useMemo(() => {
+    const msgs: string[] = []
+    if (data.subjects.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
+    if (data.subjects.includes('Historia de España')) msgs.push('Preparando tus 128 flashcards de Historia…')
+    if (msgs.length === 0) {
+      msgs.push('Calculando tu ritmo de estudio…')
+      msgs.push('Construyendo tu Camino PAU…')
+    }
+    msgs.push('Listo — tu primer día empieza mañana.')
+    return msgs
+  }, [data.subjects])
+
   useEffect(() => {
-    if (data.schoolSource === 'manual' && data.schoolName) setManualSchool(data.schoolName)
-  }, [data.schoolName, data.schoolSource])
+    if (step !== 'saving' || savingError) return
+    const interval = setInterval(() => {
+      setSavingMsgIdx(i => Math.min(i + 1, savingMessages.length - 1))
+    }, 2200)
+    return () => clearInterval(interval)
+  }, [step, savingError, savingMessages.length])
 
   const stepIndex = STEPS.indexOf(step)
   const currentStep = stepIndex >= 0 ? stepIndex + 1 : 0
   const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
-  const centers = useMemo(
-    () => data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : [],
-    [data.community]
-  )
-  const normalizedQuery = normalizeSearch(schoolQuery)
-  const filteredCenters = useMemo(() => {
-    if (!centers.length) return []
-    if (!normalizedQuery) return [...centers].slice(0, 10)
-    return centers.filter(center => normalizeSearch(center).includes(normalizedQuery)).slice(0, 10)
-  }, [centers, normalizedQuery])
 
   const canContinue = (() => {
     if (step === 'community') return Boolean(data.community)
@@ -165,13 +167,6 @@ export default function OnboardingFlow() {
 
   function selectCommunity(community: OnboardingCommunity) {
     update({ community, schoolName: null, schoolSource: null })
-    setSchoolQuery('')
-    setManualSchool('')
-  }
-
-  function selectSchool(name: string, source: OnboardingSchoolSource) {
-    update({ schoolName: name, schoolSource: source })
-    if (source === 'dataset') setSchoolQuery(name)
   }
 
   function toggleSubject(subject: string) {
@@ -185,6 +180,7 @@ export default function OnboardingFlow() {
 
   async function finish() {
     setSavingError('')
+    setSavingMsgIdx(0)
     setStep('saving')
     const completedAt = new Date().toISOString()
     saveOnboarding({ ...data, completedAt })
@@ -269,36 +265,38 @@ export default function OnboardingFlow() {
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[320px_1fr] lg:py-12">
-        <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-8 lg:self-start">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
-          <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Una configuración breve, amable y útil para empezar sin burocracia.</p>
+      <main className={`mx-auto grid w-full max-w-6xl gap-6 px-5 py-8 lg:py-12 ${step !== 'welcome' ? 'lg:grid-cols-[320px_1fr]' : ''}`}>
+        {step !== 'welcome' && (
+          <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-8 lg:self-start">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Una configuración breve, amable y útil para empezar sin burocracia.</p>
 
-          <div className="my-6">
-            <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-              <span>Progreso</span>
-              <span>{progressPct}%</span>
+            <div className="my-6">
+              <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                <span>Progreso</span>
+                <span>{progressPct}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #1d4ed8, #7c3aed)' }} animate={{ width: `${progressPct}%` }} transition={{ duration: 0.45 }} />
+              </div>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-              <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #1d4ed8, #7c3aed)' }} animate={{ width: `${progressPct}%` }} transition={{ duration: 0.45 }} />
-            </div>
-          </div>
 
-          <div className="space-y-3">
-            {['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar'].map((item, index) => {
-              const active = currentStep >= index + 1 || step === 'done'
-              return (
-                <div key={item} className="flex items-center gap-3">
-                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    {active ? <Check size={13} strokeWidth={3} /> : index + 1}
-                  </span>
-                  <span className={`text-sm font-bold ${active ? 'text-slate-800' : 'text-slate-400'}`}>{item}</span>
-                </div>
-              )
-            })}
-          </div>
-        </aside>
+            <div className="space-y-3">
+              {['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar'].map((item, index) => {
+                const active = currentStep >= index + 1 || step === 'done'
+                return (
+                  <div key={item} className="flex items-center gap-3">
+                    <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      {active ? <Check size={13} strokeWidth={3} /> : index + 1}
+                    </span>
+                    <span className={`text-sm font-bold ${active ? 'text-slate-800' : 'text-slate-400'}`}>{item}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </aside>
+        )}
 
         <section className="flex min-h-[620px] items-center">
           <motion.div key={step} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="w-full rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(15,23,42,0.10)] sm:p-8">
@@ -345,28 +343,15 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'school') {
-      const manualSelected = data.schoolSource === 'manual'
       return (
-        <div className="space-y-4">
-          {centers.length > 0 ? (
-            <>
-              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-blue-300 focus-within:bg-white">
-                <Search size={18} className="text-slate-400" />
-                <input value={schoolQuery} onChange={event => setSchoolQuery(event.target.value)} placeholder="Busca tu centro por nombre" className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400" />
-              </label>
-              <div className="grid gap-2">
-                {filteredCenters.map(center => <ChoiceCard key={center} title={center} selected={data.schoolName === center && data.schoolSource === 'dataset'} onClick={() => selectSchool(center, 'dataset')} compact />)}
-              </div>
-            </>
-          ) : (
-            <p className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Para esta comunidad puedes escribir tu centro manualmente.</p>
-          )}
-
-          <button onClick={() => selectSchool(manualSchool || 'Mi centro no aparece', 'manual')} className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${manualSelected ? 'border-blue-500 bg-blue-50 text-blue-800' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50'}`}>Mi centro no aparece</button>
-          {manualSelected && (
-            <input value={manualSchool} onChange={event => { setManualSchool(event.target.value); update({ schoolName: event.target.value, schoolSource: 'manual' }) }} placeholder="Escribe el nombre de tu centro" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-300" />
-          )}
-        </div>
+        <input
+          type="text"
+          value={data.schoolName ?? ''}
+          onChange={e => update({ schoolName: e.target.value, schoolSource: 'manual' })}
+          placeholder="Ej: IES Ramiro de Maeztu"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-bold text-slate-700 outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+          autoFocus
+        />
       )
     }
 
@@ -432,7 +417,7 @@ export default function OnboardingFlow() {
             <SummaryItem label="Tiempo diario" value={data.dailyStudyTime || '-'} />
             <SummaryItem label="Días por semana" value={data.weeklyStudyDays || '-'} />
           </div>
-          <PrimaryButton onClick={finish}>Empezar con Pausia <ArrowRight size={16} /></PrimaryButton>
+          <PrimaryButton onClick={finish}>Crear mi Camino PAU <ArrowRight size={16} /></PrimaryButton>
         </div>
       )
     }
@@ -457,8 +442,18 @@ export default function OnboardingFlow() {
       return (
         <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 text-center">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
-          <p className="text-sm font-bold text-blue-800">Preparando tu Camino PAU...</p>
-          <p className="mt-1 text-xs font-semibold text-blue-500">Estamos generando tu plan personalizado</p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={savingMsgIdx}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3 }}
+              className="text-sm font-bold text-blue-800"
+            >
+              {savingMessages[savingMsgIdx]}
+            </motion.p>
+          </AnimatePresence>
         </div>
       )
     }
@@ -482,15 +477,6 @@ export default function OnboardingFlow() {
       </button>
     )
   }
-}
-
-function normalizeSearch(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ')
 }
 
 function OptionGrid({ children }: { children: ReactNode }) {

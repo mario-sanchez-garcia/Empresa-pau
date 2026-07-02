@@ -1097,20 +1097,22 @@ export default function CaminoCalendarClient() {
       <main className="mx-auto max-w-7xl px-5 py-6">
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="grid gap-4 content-start">
+          <div className="flex flex-col gap-4">
             {upcomingPartial && <PartialExamBanner exam={upcomingPartial} today={realToday} />}
-            <HeroMissionCard
-              mission={todayMain[0] ?? null}
-              blockCompleted={blockCompletedCount}
-              streak={streak}
-              completedThisWeek={completedMain}
-              totalThisWeek={Math.min(totalMain, 5)}
-              weeklyXP={weeklyXP}
-              onPostpone={() => todayMain[0] && postponeMission(todayMain[0].id)}
-              onMarkNotSeen={markNotSeenHero}
-              hasOnboardingSubjects={hasOnboardingSubjects}
-              nextMissionTitle={nextMissionInCalendar?.title ?? null}
-            />
+            <div className="flex-1 min-h-0">
+              <HeroMissionCard
+                mission={todayMain[0] ?? null}
+                blockCompleted={blockCompletedCount}
+                streak={streak}
+                completedThisWeek={completedMain}
+                totalThisWeek={Math.min(totalMain, 5)}
+                weeklyXP={weeklyXP}
+                onPostpone={() => todayMain[0] && postponeMission(todayMain[0].id)}
+                onMarkNotSeen={markNotSeenHero}
+                hasOnboardingSubjects={hasOnboardingSubjects}
+                nextMissionTitle={nextMissionInCalendar?.title ?? null}
+              />
+            </div>
             {todayBonus.length > 0 && (
               <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Extras opcionales</p>
@@ -1509,7 +1511,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   const reason = mission ? heroReason(mission, blockCompleted, nextMissionTitle) : null
 
   return (
-    <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <div className="h-full rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{headerParts.join(' · ')}</p>
 
       {mission ? (

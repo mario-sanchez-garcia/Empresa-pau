@@ -102,13 +102,6 @@ const DIVISIONS = [
   { name: 'Diamante', min: 7000, max: 12999, bg: '#eff6ff', text: '#1d4ed8', bar: '#2563eb' },
   { name: 'Élite PAU', min: 13000, max: Infinity, bg: '#f5f3ff', text: '#6d28d9', bar: '#7c3aed' },
 ]
-const MOCK_RANKING: RankingEntry[] = [
-  { id: 'mock-a-garcia', name: 'A. García', community: 'Madrid', xp: 8420, rank: 1, isCurrentUser: false, isMock: true },
-  { id: 'mock-n-soler', name: 'N. Soler', community: 'Cataluña', xp: 7310, rank: 2, isCurrentUser: false, isMock: true },
-  { id: 'mock-m-ruiz', name: 'M. Ruiz', community: 'Madrid', xp: 6040, rank: 3, isCurrentUser: false, isMock: true },
-  { id: 'mock-l-ferrer', name: 'L. Ferrer', community: 'Cataluña', xp: 4860, rank: 4, isCurrentUser: false, isMock: true },
-  { id: 'mock-d-martin', name: 'D. Martín', community: 'Madrid', xp: 3920, rank: 5, isCurrentUser: false, isMock: true },
-]
 
 function toISO(date: Date) { return date.toISOString().slice(0, 10) }
 function todayISO() { return toISO(new Date()) }
@@ -196,15 +189,6 @@ function hrefForMission(mission: Mission) {
   return { ...target, href: `${target.href}${separator}missionId=${encodeURIComponent(mission.id)}&source=camino_pau${start}` }
 }
 function localCurrentEntry(community: string, xp: number): RankingEntry { return { id: 'local-current-user', name: 'Tú', community, xp, rank: 1, isCurrentUser: true } }
-function fillWithMockRows(rows: RankingEntry[], tab: 'global' | 'community', community: string) {
-  const used = new Set(rows.map(row => row.id))
-  const bots = MOCK_RANKING
-    .filter(row => tab === 'global' || row.community === community)
-    .filter(row => !used.has(row.id))
-    .slice(0, Math.max(0, 5 - rows.length))
-    .map((row, index) => ({ ...row, rank: rows.length + index + 1 }))
-  return [...rows, ...bots].slice(0, 5)
-}
 
 async function fetchLeaderboard(token: string, community: string) {
   try {
@@ -820,7 +804,7 @@ export default function CaminoCalendarClient() {
     ? leaderboard?.global
     : leaderboard?.community
   const currentRankingRow = rankingSource?.current ?? fallbackCurrent
-  const rankingTopRows = fillWithMockRows(rankingSource?.top ?? [fallbackCurrent], rankingTab, rankingCommunity)
+  const rankingTopRows = rankingSource?.top ?? []
   const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
   const fixedCurrentRow = currentInTop ? null : currentRankingRow
   const onboardingSubjects = normalizeOnboardingSubjects(onboarding?.subjects ?? [])
@@ -1625,8 +1609,84 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
 
 function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, totalXP, division, realUserCount, liga, ligaLoading, onCreateLiga, onJoinLiga }: { open: boolean; setOpen: (open: boolean) => void; tab: 'global' | 'community'; setTab: (tab: 'global' | 'community') => void; rows: RankingEntry[]; currentRow: RankingEntry | null; community: string; totalXP: number; division: string; realUserCount: number; liga: LigaInfo | null; ligaLoading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
-  const title = tab === 'community' ? `Ranking Comunidad · ${community}` : 'Ranking Global'
-  return <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left"><span><span className="block text-lg font-black text-slate-950">Ranking y divisiones</span><span className="mt-1 block text-sm font-semibold text-slate-500">Consulta tu posición cuando quieras.</span></span><ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} /></button><AnimatePresence>{open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="mt-5 rounded-3xl bg-slate-50 p-4"><div className="grid gap-3 sm:grid-cols-3"><MiniStat icon={<Trophy size={15} />} label="División" value={division} /><MiniStat icon={<Zap size={15} />} label="XP total" value={totalXP.toLocaleString('es-ES')} /><MiniStat icon={<BarChart3 size={15} />} label="Comunidad" value={community} /></div><p className="mt-3 text-sm font-semibold text-slate-500">Tu división refleja tu constancia y precisión. Los alumnos de relleno solo aparecen si faltan usuarios reales.</p><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-black text-slate-900">{community === 'Sin comunidad' && tab === 'community' ? 'Completa tu comunidad para ver tu ranking local.' : title}</h3><div className="flex gap-2"><button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Global</button><button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500'}`}>Comunidad</button></div></div><div className="mt-3 grid gap-2">{rows.map(row => <RankingRow key={row.id} row={row} />)}</div>{currentRow && <><div className="my-3 h-px bg-blue-100" /><RankingRow row={currentRow} fixed /></>}{realUserCount < 3 && <p className="mt-3 text-sm font-bold text-slate-500">El ranking se activará cuando haya más alumnos usando Pausia.</p>}<div className="my-4 h-px bg-blue-100" /><LigaSection liga={liga} loading={ligaLoading} onCreateLiga={onCreateLiga} onJoinLiga={onJoinLiga} /></div></motion.div>}</AnimatePresence></div>
+  const hasEnoughUsers = realUserCount >= 3
+  const visibleRows = tab === 'community' ? rows.filter(row => row.community === community) : rows
+
+  return (
+    <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left">
+        <span>
+          <span className="block text-lg font-black text-slate-950">Ranking y divisiones</span>
+          <span className="mt-1 block text-sm font-semibold text-slate-500">
+            {hasEnoughUsers ? `División: ${division} · ${totalXP.toLocaleString('es-ES')} XP` : 'Compite cuando haya más actividad.'}
+          </span>
+        </span>
+        <ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <div className="mt-5 grid gap-4">
+              {/* División + XP compacto */}
+              <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">División actual</p>
+                  <p className="mt-0.5 text-sm font-black text-slate-900">{division}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">XP total</p>
+                  <p className="mt-0.5 text-sm font-black text-blue-700">{totalXP.toLocaleString('es-ES')} XP</p>
+                </div>
+              </div>
+
+              {/* Ranking real o empty state */}
+              {hasEnoughUsers ? (
+                <div>
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                      {tab === 'community' && community !== 'Sin comunidad' ? `Ranking · ${community}` : 'Ranking global'}
+                    </p>
+                    <div className="flex gap-1">
+                      <button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Global</button>
+                      <button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Comunidad</button>
+                    </div>
+                  </div>
+                  {tab === 'community' && community === 'Sin comunidad' ? (
+                    <p className="text-sm font-semibold text-slate-400">Completa tu perfil con tu comunidad autónoma para ver el ranking local.</p>
+                  ) : visibleRows.length ? (
+                    <div className="grid gap-1.5">
+                      {visibleRows.map(row => <RankingRow key={row.id} row={row} />)}
+                    </div>
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-400">Sin datos por ahora.</p>
+                  )}
+                  {currentRow && (
+                    <>
+                      <div className="my-3 h-px bg-blue-100" />
+                      <RankingRow row={currentRow} fixed />
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm font-semibold text-slate-500">Aún no hay suficientes alumnos activos para mostrar un ranking real.</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    {totalXP === 0 ? 'Empieza completando tu primera misión para sumar XP.' : 'Completa misiones esta semana para seguir sumando XP.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Liga siempre visible */}
+              <div className="border-t border-slate-100 pt-3">
+                <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={onCreateLiga} onJoinLiga={onJoinLiga} />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean }) {
   const rowDivision = divisionFor(row.xp)

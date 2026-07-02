@@ -675,6 +675,19 @@ export default function CaminoCalendarClient() {
     supabase.auth.getSession().then(async ({ data }) => {
       const userId = data.session?.user.id
       if (!userId || cancelled) return
+      const token = data.session?.access_token
+      const storedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
+      if (storedExams.length === 0 && token) {
+        fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.json())
+          .then((profile: { student_exams?: StudentExam[] }) => {
+            if (Array.isArray(profile.student_exams) && profile.student_exams.length > 0 && !cancelled) {
+              setExams(profile.student_exams)
+              saveJson(EXAMS_KEY, profile.student_exams)
+            }
+          })
+          .catch(() => undefined)
+      }
       const created = data.session?.user.created_at
       if (created) {
         const days = Math.floor((Date.now() - new Date(created).getTime()) / 86400000)
@@ -903,6 +916,15 @@ export default function CaminoCalendarClient() {
     setCalendar(nextCalendar)
     setExams(nextExams)
     saveJson(EXAMS_KEY, nextExams)
+    supabase.auth.getSession().then(({ data: sessionData }) => {
+      const token = sessionData.session?.access_token
+      if (!token) return
+      fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ student_exams: nextExams }),
+      }).catch(() => undefined)
+    }, () => undefined)
   }
   function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
     if (!onboarding) return []

@@ -27,13 +27,16 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications')
+    .select('email_notifications, student_exams')
     .eq('id', user.id)
     .maybeSingle()
 
   if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 })
 
-  return NextResponse.json({ email_notifications: data?.email_notifications ?? true })
+  return NextResponse.json({
+    email_notifications: data?.email_notifications ?? true,
+    student_exams: data?.student_exams ?? [],
+  })
 }
 
 export async function PATCH(request: NextRequest) {
@@ -48,6 +51,7 @@ export async function PATCH(request: NextRequest) {
 
   const allowed: Record<string, unknown> = {}
   if (typeof body.email_notifications === 'boolean') allowed.email_notifications = body.email_notifications
+  if (Array.isArray(body.student_exams)) allowed.student_exams = body.student_exams
   if (Object.keys(allowed).length === 0) return NextResponse.json({ error: 'Sin campos válidos' }, { status: 400 })
 
   const db = createServiceClient()

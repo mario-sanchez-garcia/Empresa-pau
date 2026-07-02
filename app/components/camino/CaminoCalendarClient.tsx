@@ -1034,7 +1034,7 @@ export default function CaminoCalendarClient() {
 
   return (
     <Shell>
-      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-5 py-3 text-sm font-black text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)]"><Plus size={16} /> Añadir examen</button></div></div></header>
+      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
@@ -1061,7 +1061,30 @@ export default function CaminoCalendarClient() {
               </div>
             )}
           </div>
-          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">XP y división</p><h2 className="mt-1 text-base font-bold text-slate-600">{displayedXP.toLocaleString('es-ES')} XP</h2></div><span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span></div><p className="mt-3 text-sm font-semibold text-slate-500">Ganas XP por practicar y aún más cuando mejoras tu precisión.</p><p className="mt-2 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">Plan gratuito · Te quedan {Math.max(0, 7 - (daysSinceReg ?? 0))} días de prueba</p><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full" style={{ width: `${divisionPct}%`, background: division.bar }} /></div><p className="mt-2 text-[11px] font-semibold text-slate-400">{nextDivision ? `Faltan ${Math.max(0, nextDivision.min - displayedXP).toLocaleString('es-ES')} XP para ${nextDivision.name}.` : 'División máxima alcanzada.'}</p>{streak > 0 && <p className="mt-3 text-[11px] font-black text-orange-500">🔥 {streak} día{streak !== 1 ? 's' : ''} de racha</p>}</div>
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu objetivo de hoy</p>
+            {todayMain[0] ? (
+              <>
+                <p className="mt-3 text-sm font-black text-slate-700">Completa esta misión para:</p>
+                <ul className="mt-2.5 grid gap-2">
+                  <li className="text-sm font-semibold text-slate-600">• <span className="font-black text-blue-600">+{todayMain[0].baseXP} XP</span></li>
+                  <li className="text-sm font-semibold text-slate-600">• {streak > 0 ? 'Mantener tu racha' : 'Empezar una racha'}</li>
+                  <li className="text-sm font-semibold text-slate-600">• Avanzar en <span className="font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
+                </ul>
+              </>
+            ) : (
+              <p className="mt-3 text-sm font-semibold text-slate-500">Cuando llegue tu misión, aquí verás qué ganarás al completarla.</p>
+            )}
+            <div className="mt-5 border-t border-slate-100 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-400">División</span>
+                <span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
+              </div>
+              {caminoPlanId === 'free' && daysSinceReg !== null && (
+                <p className="mt-3 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
+              )}
+            </div>
+          </div>
         </section>
 
         {(subjectProgress.matematicas_ii != null || subjectProgress.historia_espana != null) && (
@@ -1418,6 +1441,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   hasOnboardingSubjects: boolean
   nextMissionTitle?: string | null
 }) {
+  const [showNotSeenConfirm, setShowNotSeenConfirm] = useState(false)
   const theme = mission ? themeFor(mission.subject) : { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
   const subjectUpper = (mission?.subject ?? '').toUpperCase()
   const blockLabel = formatBlockLabel(mission?.blockKey).toUpperCase()
@@ -1457,7 +1481,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
             <div className="mt-3 flex justify-center gap-3">
               <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50"><RotateCcw size={12} /> Posponer</button>
               {mission.subjectSlug && mission.v2SortOrder != null && (
-                <button onClick={onMarkNotSeen} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50">No lo he dado en clase</button>
+                <button onClick={() => setShowNotSeenConfirm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50">Aún no lo he dado</button>
               )}
             </div>
           )}
@@ -1471,18 +1495,33 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
 
       <div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
         <div className="text-center">
-          <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '0'}</p>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">días de racha</p>
+          <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '—'}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{streak > 0 ? 'días de racha' : 'Empieza tu racha hoy'}</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-black text-slate-900">{completedThisWeek}<span className="text-sm font-semibold text-slate-400">/{totalThisWeek}</span></p>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">esta semana</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">misiones esta semana</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-black text-slate-900">{weeklyXP}</p>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">XP semanal</p>
+          <p className="text-lg font-black text-slate-900">{weeklyXP > 0 ? `+${weeklyXP}` : '—'}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{weeklyXP > 0 ? 'XP esta semana' : 'Gana XP al completar'}</p>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showNotSeenConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-black text-slate-950">¿Aún no lo has dado en clase?</h3>
+              <p className="mt-2 text-sm font-semibold text-slate-500">Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
+              <div className="mt-5 flex justify-end gap-2">
+                <button onClick={() => setShowNotSeenConfirm(false)} className="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-500">Cancelar</button>
+                <button onClick={() => { setShowNotSeenConfirm(false); onMarkNotSeen() }} className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white">Confirmar</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -1541,26 +1580,29 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
 }
 
 function WeeklyGoalCard({ completed, target }: { completed: number; target: number }) {
-  const pct = Math.min(100, Math.round((completed / target) * 100))
+  const [open, setOpen] = useState(false)
   const remaining = Math.max(0, target - completed)
   return (
     <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Objetivo semanal</p>
-      <h2 className="mt-1 text-lg font-black text-slate-950">Tu objetivo de la semana</h2>
-      <div className="mt-4 flex items-end gap-1.5">
-        <span className="text-4xl font-black leading-none text-blue-600">{completed}</span>
-        <span className="mb-1 text-sm font-semibold text-slate-400">/ {target} misiones</span>
-      </div>
-      <div className="mt-3 flex gap-1">
-        {Array.from({ length: target }).map((_, i) => (
-          <div key={i} className={`h-2 flex-1 rounded-full transition-all duration-500 ${i < completed ? 'bg-blue-600' : 'bg-slate-100'}`} />
-        ))}
-      </div>
-      <p className="mt-3 text-sm font-semibold text-slate-500">
-        {remaining === 0
-          ? '¡Objetivo de la semana completado!'
-          : `${remaining === target ? 'Completa' : `${remaining} más y habrás completado`} ${remaining === target ? target : ''} misiones esta semana para seguir a tiempo.`}
-      </p>
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left">
+        <span>
+          <span className="block text-lg font-black text-slate-950">Ranking y divisiones</span>
+          <span className="mt-1 block text-sm font-semibold text-slate-500">Consulta tu posición cuando quieras.</span>
+        </span>
+        <ChevronDown className={`text-slate-400 transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <div className="mt-5 rounded-3xl bg-slate-50 p-4">
+              <p className="text-sm font-black text-slate-800">Tu objetivo semanal</p>
+              <p className="mt-2 text-sm font-semibold text-slate-500">
+                {remaining === 0 ? '¡Has completado tu objetivo de la semana! 🎉' : `Completa ${remaining} misión${remaining !== 1 ? 'es' : ''} más esta semana.`}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

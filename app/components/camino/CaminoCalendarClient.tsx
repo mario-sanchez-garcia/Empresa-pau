@@ -1121,25 +1121,29 @@ export default function CaminoCalendarClient() {
               </div>
             )}
           </div>
-          <div className="rounded-[28px] border border-blue-100 bg-white p-4 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+          <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu objetivo de hoy</p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {todayMain[0] && (
-                <span className="rounded-full bg-blue-600 px-2.5 py-1 text-xs font-black text-white">+{todayMain[0].baseXP} XP</span>
-              )}
-              <span className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
-            </div>
             {todayMain[0] ? (
-              <ul className="mt-2 grid gap-1">
-                <li className="text-sm font-semibold text-slate-600">• {streak > 0 ? 'Mantener tu racha' : 'Empezar una racha'}</li>
-                <li className="text-sm font-semibold text-slate-600">• Avanzar en <span className="font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
-              </ul>
+              <>
+                <p className="mt-3 text-sm font-black text-slate-700">Completa esta misión para:</p>
+                <ul className="mt-2.5 grid gap-2">
+                  <li className="text-sm font-semibold text-slate-600">• <span className="font-black text-blue-600">+{todayMain[0].baseXP} XP</span></li>
+                  <li className="text-sm font-semibold text-slate-600">• {streak > 0 ? 'Mantener tu racha' : 'Empezar una racha'}</li>
+                  <li className="text-sm font-semibold text-slate-600">• Avanzar en <span className="font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
+                </ul>
+              </>
             ) : (
-              <p className="mt-2 text-sm font-semibold text-slate-500">Completa misiones para ganar XP.</p>
+              <p className="mt-3 text-sm font-semibold text-slate-500">Cuando llegue tu misión, aquí verás qué ganarás al completarla.</p>
             )}
-            {caminoPlanId === 'free' && daysSinceReg !== null && (
-              <p className="mt-3 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
-            )}
+            <div className="mt-5 border-t border-slate-100 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-400">División</span>
+                <span className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
+              </div>
+              {caminoPlanId === 'free' && daysSinceReg !== null && (
+                <p className="mt-3 rounded-2xl bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
+              )}
+            </div>
           </div>
         </section>
 
@@ -1194,7 +1198,10 @@ export default function CaminoCalendarClient() {
 
         <CourseDirectory groups={courseGroups} />
 
-        <section><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{activeExams.length ? activeExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}{pastExams.length > 0 && <div className="mt-2"><button onClick={() => setShowPastExams(v => !v)} className="flex w-full items-center gap-2 py-1.5 text-xs font-black text-slate-400 hover:text-slate-600"><ChevronDown size={13} className={`transition-transform${showPastExams ? ' rotate-180' : ''}`} />Exámenes pasados ({pastExams.length})</button>{showPastExams && <div className="mt-1 grid gap-1">{pastExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 opacity-60"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-600">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)}</p></div><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-300 hover:bg-red-50 hover:text-red-500" aria-label="Eliminar examen pasado"><Trash2 size={15} /></button></div>)}</div>}</div>}</div></div></section>
+        <section className="grid gap-5 lg:grid-cols-[1fr_0.85fr]"><div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Pausia ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{activeExams.length ? activeExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}{pastExams.length > 0 && <div className="mt-2"><button onClick={() => setShowPastExams(v => !v)} className="flex w-full items-center gap-2 py-1.5 text-xs font-black text-slate-400 hover:text-slate-600"><ChevronDown size={13} className={`transition-transform${showPastExams ? ' rotate-180' : ''}`} />Exámenes pasados ({pastExams.length})</button>{showPastExams && <div className="mt-1 grid gap-1">{pastExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 opacity-60"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-600">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)}</p></div><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-300 hover:bg-red-50 hover:text-red-500" aria-label="Eliminar examen pasado"><Trash2 size={15} /></button></div>)}</div>}</div>}</div></div>{showWeeklyGoal
+  ? <WeeklyGoalCard completed={completedMain} target={5} />
+  : <RankingCard open={rankingOpen} setOpen={setRankingOpen} tab={rankingTab} setTab={setRankingTab} rows={rankingTopRows} currentRow={fixedCurrentRow} community={rankingCommunity} totalXP={displayedXP} division={division.name} realUserCount={leaderboard?.realUserCount ?? 1} liga={liga} ligaLoading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+}</section>
 
         <section className="mt-5" id="acceso-premium">
           <ParentLinkModule billing={{ loading: false, hasActivePack: caminoPlanId !== 'free', activePlans: [], pendingParentCheckout: null }} daysSinceReg={daysSinceReg} />

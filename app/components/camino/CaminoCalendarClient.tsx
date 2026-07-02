@@ -13,6 +13,7 @@ import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboar
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeSubjectSlug, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
+import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
@@ -982,13 +983,31 @@ export default function CaminoCalendarClient() {
     const rawBlock = examDraft.block?.toLowerCase().trim() ?? ''
     const normalizedBlock = BLOCK_NORMALIZE[rawBlock] ?? examDraft.block
     const draft = { ...examDraft, block: normalizedBlock }
-    const nextExams = editingExamId
-      ? exams.map(exam => exam.id === editingExamId ? { ...exam, ...draft } : exam)
+    const currentEditingId = editingExamId
+    const nextExams = currentEditingId
+      ? exams.map(exam => exam.id === currentEditingId ? { ...exam, ...draft } : exam)
       : [...exams, { id: `exam-${examDraft.date}-${exams.length + 1}`, ...draft }]
     resetExamDraft()
     regenerate(nextExams)
+    const savedExam = currentEditingId
+      ? nextExams.find(e => e.id === currentEditingId)
+      : nextExams[nextExams.length - 1]
+    if (savedExam) {
+      supabase.auth.getSession().then(({ data }) => {
+        const userId = data.session?.user.id
+        if (!userId) return
+        injectPartialExamMissions(userId, supabase, savedExam)
+      }, () => undefined)
+    }
   }
-  function deleteExam(id: string) { regenerate(exams.filter(exam => exam.id !== id)) }
+  function deleteExam(id: string) {
+    regenerate(exams.filter(exam => exam.id !== id))
+    supabase.auth.getSession().then(({ data }) => {
+      const userId = data.session?.user.id
+      if (!userId) return
+      deletePartialExamMissions(userId, supabase, id)
+    }, () => undefined)
+  }
 
   async function markNotSeenHero() {
     const mission = todayMain[0]

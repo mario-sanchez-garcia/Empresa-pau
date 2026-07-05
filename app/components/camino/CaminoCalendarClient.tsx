@@ -72,6 +72,7 @@ const SUBJECT_SLUGS: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii', 'Matemáticas CCSS': 'matematicas_ccss', 'Física': 'fisica', 'Química': 'quimica',
   'Historia de España': 'historia_espana', 'Historia de la Filosofía': 'historia_filosofia', 'Lengua Castellana': 'lengua', 'Inglés': 'ingles', 'Biología': 'biologia'
 }
+const PRIVATE_BETA_SUBJECT_SLUGS = new Set(['matematicas_ii', 'matematicas_ccss'])
 const DB_SUBJECTS: Record<string, string> = {
   'Matemáticas CCSS': 'matematicas_ccss',
 }
@@ -122,7 +123,7 @@ function normalizeOnboardingSubjects(subjects: string[]) {
     const label = subjectLabelFromSlug(slug)
     return { slug, label }
   }).filter(({ slug }) => {
-    if (!slug || seen.has(slug)) return false
+    if (!slug || seen.has(slug) || !PRIVATE_BETA_SUBJECT_SLUGS.has(slug)) return false
     seen.add(slug)
     return true
   }).map(({ label }) => label)
@@ -708,11 +709,11 @@ export default function CaminoCalendarClient() {
       await ensureCaminoCalendar(userId, supabase)
       if (cancelled) return
       const weekStart = currentWeekStartISO()
-      const [calDays, rachaValue, matCount, histCount, progressRow, weeklyXpRows, queueResult] = await Promise.all([
+      const [calDays, rachaValue, matCount, ccssCount, progressRow, weeklyXpRows, queueResult] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
+        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ccss'),
         supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
         supabase.from('camino_xp_events').select('xp').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
         supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
@@ -739,7 +740,7 @@ export default function CaminoCalendarClient() {
         if (!cancelled) setCaminoReadyStatus(qCount > 0 ? 'no_future' : 'no_queue')
       }
       setStreak(rachaValue)
-      setSubjectProgress({ matematicas_ii: matCount.count ?? 0, historia_espana: histCount.count ?? 0 })
+      setSubjectProgress({ matematicas_ii: matCount.count ?? 0, matematicas_ccss: ccssCount.count ?? 0 })
       setXpTotal(Number(progressRow.data?.xp_total) || 0)
       setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp: number }>).reduce((sum, r) => sum + (Number(r.xp) || 0), 0))
     }).catch(() => undefined)
@@ -914,8 +915,8 @@ export default function CaminoCalendarClient() {
     if (!session) return
     setIsGenerating(true)
     try {
-      const subjectSlugs = (onboarding?.subjects ?? []).map(s => SUBJECT_SLUGS[s]).filter(Boolean)
-      const subjects = subjectSlugs.length > 0 ? subjectSlugs : ['matematicas_ii', 'historia_espana']
+      const subjectSlugs = (onboarding?.subjects ?? []).map(s => SUBJECT_SLUGS[s]).filter((slug): slug is string => Boolean(slug) && PRIVATE_BETA_SUBJECT_SLUGS.has(slug))
+      const subjects = subjectSlugs.length > 0 ? subjectSlugs : ['matematicas_ii']
       const res = await fetch('/api/onboarding/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
@@ -1150,13 +1151,13 @@ export default function CaminoCalendarClient() {
           </div>
         </section>
 
-        {(subjectProgress.matematicas_ii != null || subjectProgress.historia_espana != null) && (
+        {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null) && (
           <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
             <p className="mb-4 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu avance</p>
             <div className="grid gap-4 sm:grid-cols-2">
               {([
                 { subject: 'matematicas_ii', label: 'Matemáticas II', total: 60, color: '#2563eb' },
-                { subject: 'historia_espana', label: 'Historia de España', total: 128, color: '#7c3aed' },
+                { subject: 'matematicas_ccss', label: 'Matemáticas CCSS', total: 60, color: '#7c3aed' },
               ] as const).map(({ subject, label, total, color }) => {
                 const done = subjectProgress[subject] ?? 0
                 const pct = Math.min(100, Math.round((done / total) * 100))
@@ -1604,7 +1605,7 @@ function compactDayLabel(dateStr: string): string {
 }
 
 const PARTIAL_SIM_SUBJECT: Record<string, string> = {
-  matematicas_ii: 'mates', historia_espana: 'historia',
+  matematicas_ii: 'mates', matematicas_ccss: 'matematicas_ccss', historia_espana: 'historia',
   fisica: 'fisica', quimica: 'quimica', biologia: 'biologia', ingles: 'ingles', lengua: 'lengua',
 }
 const PARTIAL_BLOCK_DISPLAY: Record<string, string> = {

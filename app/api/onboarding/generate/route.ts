@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 const VALID_START_MODES = ['zero', 'first_block', 'mid', 'review', 'unknown'] as const
 type StartMode = typeof VALID_START_MODES[number]
 
-const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'historia_espana'])
+// Private beta scope: Camino PAU is active only for Matemáticas II and Matemáticas CCSS.
+const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])
 
 const HOLIDAYS = new Set([
   '2026-10-12', '2026-11-01', '2026-11-02',
@@ -42,7 +43,7 @@ function getStudyDays(startDate: string, n: number): string[] {
   return days
 }
 
-// Mon(1)/Tue(2) → matematicas_ii, Wed(3)/Thu(4)/Fri(5) → historia_espana
+// Private beta scheduler: alternate only between supported math tracks.
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 1) return subjects[0]
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
@@ -50,7 +51,7 @@ function subjectForDay(dateStr: string, subjects: string[]): string | null {
     return subjects.includes('matematicas_ii') ? 'matematicas_ii' : subjects[0]
   }
   if (dow === 3 || dow === 4 || dow === 5) {
-    return subjects.includes('historia_espana') ? 'historia_espana' : subjects[subjects.length - 1]
+    return subjects.includes('matematicas_ccss') ? 'matematicas_ccss' : subjects[subjects.length - 1]
   }
   return null
 }

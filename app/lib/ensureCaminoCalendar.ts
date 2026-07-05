@@ -54,7 +54,7 @@ function subjectForDay(dateStr: string, subjects: string[]): string | null {
     return subjects.includes('matematicas_ii') ? 'matematicas_ii' : subjects[0]
   }
   if (dow === 3 || dow === 4 || dow === 5) {
-    return subjects.includes('historia_espana') ? 'historia_espana' : subjects[subjects.length - 1]
+    return subjects.includes('matematicas_ccss') ? 'matematicas_ccss' : subjects[subjects.length - 1]
   }
   return null
 }
@@ -225,6 +225,8 @@ export async function ensureCaminoCalendar(
 
   // PASO 4+5 — Generar días hasta completar CALENDAR_HORIZON
 
+  // Private beta scope: the Supabase calendar engine only schedules Matemáticas II and Matemáticas CCSS.
+  // Historia remains in the codebase/data, but it is not activated for beta users yet.
   // Obtener asignaturas del usuario desde la cola
   const { data: subjectRows } = await supabase
     .from('user_learning_queue')
@@ -236,7 +238,7 @@ export async function ensureCaminoCalendar(
   const subjectSet = new Set(
     (subjectRows ?? [])
       .map(r => r.subject as string)
-      .filter(s => s === 'matematicas_ii' || s === 'historia_espana'),
+      .filter(s => s === 'matematicas_ii' || s === 'matematicas_ccss'),
   )
   const subjects = [...subjectSet]
   if (subjects.length === 0) return

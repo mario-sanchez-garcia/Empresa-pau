@@ -28,14 +28,8 @@ const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: stri
 const SUBJECT_OPTS = [
   { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff' },
   { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
-  { id: 'Física', label: 'Física', color: '#ca8a04', bg: '#fefce8' },
-  { id: 'Química', label: 'Química', color: '#ea580c', bg: '#fff7ed' },
-  { id: 'Historia de España', label: 'Historia de España', color: '#78350f', bg: '#fff8f1' },
-  { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#4f46e5', bg: '#eef2ff' },
-  { id: 'Lengua Castellana', label: 'Lengua Castellana', color: '#0284c7', bg: '#e0f2fe' },
-  { id: 'Inglés', label: 'Inglés', color: '#0891b2', bg: '#ecfeff' },
-  { id: 'Biología', label: 'Biología', color: '#047857', bg: '#d1fae5' },
 ]
+const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(SUBJECT_OPTS.map(subject => subject.id))
 
 const FEELING_OPTS = [
   'Voy bastante bien',
@@ -130,7 +124,7 @@ export default function OnboardingFlow() {
   const savingMessages = useMemo(() => {
     const msgs: string[] = []
     if (data.subjects.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
-    if (data.subjects.includes('Historia de España')) msgs.push('Preparando tus 128 flashcards de Historia…')
+    if (data.subjects.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
     if (msgs.length === 0) {
       msgs.push('Calculando tu ritmo de estudio…')
       msgs.push('Construyendo tu Camino PAU…')
@@ -154,7 +148,7 @@ export default function OnboardingFlow() {
   const canContinue = (() => {
     if (step === 'community') return Boolean(data.community)
     if (step === 'school') return Boolean(data.schoolName?.trim())
-    if (step === 'subjects') return data.subjects.length > 0 && data.subjects.some(s => s === 'Matemáticas II' || s === 'Historia de España')
+    if (step === 'subjects') return data.subjects.length > 0 && data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
     if (step === 'feeling') return Boolean(data.preparationFeeling)
     if (step === 'daily-time') return Boolean(data.dailyStudyTime)
     if (step === 'weekly-days') return Boolean(data.weeklyStudyDays)
@@ -197,7 +191,7 @@ export default function OnboardingFlow() {
 
   const SUBJECT_TO_SLUG: Record<string, string> = {
     'Matemáticas II': 'matematicas_ii',
-    'Historia de España': 'historia_espana',
+    'Matemáticas CCSS': 'matematicas_ccss',
   }
 
   async function finish() {
@@ -409,9 +403,8 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'subjects') {
-      const SUPPORTED_SUBJECTS = new Set(['Matemáticas II', 'Historia de España'])
       const hasSelected = data.subjects.length > 0
-      const allUnsupported = hasSelected && data.subjects.every(s => !SUPPORTED_SUBJECTS.has(s))
+      const allUnsupported = hasSelected && data.subjects.every(s => !PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
       return (
         <div className="space-y-3">
           <div className="grid gap-2 sm:grid-cols-2">
@@ -427,16 +420,16 @@ export default function OnboardingFlow() {
           </div>
           {allUnsupported && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-sm font-bold text-amber-800">Camino PAU completo disponible para Matemáticas II e Historia de España. Estamos trabajando en el resto de asignaturas.</p>
+              <p className="text-sm font-bold text-amber-800">Beta privada disponible para Matemáticas II y Matemáticas CCSS. Historia y el resto de asignaturas entrarán en próximas semanas.</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {!data.subjects.includes('Matemáticas II') && (
                   <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Matemáticas II'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
                     + Añadir Matemáticas II
                   </button>
                 )}
-                {!data.subjects.includes('Historia de España') && (
-                  <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Historia de España'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
-                    + Añadir Historia de España
+                {!data.subjects.includes('Matemáticas CCSS') && (
+                  <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Matemáticas CCSS'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
+                    + Añadir Matemáticas CCSS
                   </button>
                 )}
               </div>

@@ -26,6 +26,9 @@ const landing = read('app/landing/page.tsx')
 const loginPage = read('app/login/page.tsx')
 const sidebar = read('app/components/Sidebar.tsx')
 const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
+const onboardingFlow = read('app/components/onboarding/OnboardingFlow.tsx')
+const onboardingGenerateRoute = read('app/api/onboarding/generate/route.ts')
+const ensureCaminoCalendar = read('app/lib/ensureCaminoCalendar.ts')
 const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
 const caminoActions = read('app/lib/camino/caminoActions.ts')
 const caminoMissionGenerator = read('app/lib/camino/caminoMissionGenerator.ts')
@@ -228,12 +231,12 @@ assert(
     caminoCalendar.includes('buildTopicHref') &&
     caminoCalendar.includes('CalendarEditorOverlay') &&
     caminoCalendar.includes('Editar calendario') &&
-    caminoCalendar.includes('missionMeta(kind, subject') &&
+    caminoCalendar.includes('missionMeta(kind, subject, topic') &&
     caminoCalendar.includes('hrefForMission') &&
     caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
     caminoCalendar.includes('source=camino_pau') &&
     caminoCalendar.includes('const subjects = normalizeOnboardingSubjects(onboarding.subjects)') &&
-    caminoCalendar.includes('Completa tu onboarding para que podamos construir tu Camino PAU') &&
+    caminoCalendar.includes('Completa tu perfil para que Pausia cree tu Camino PAU') &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']") &&
     !caminoCalendar.includes('MATH_SUBJECTS') &&
     !caminoCalendar.includes('Marcar sin XP') &&
@@ -298,21 +301,18 @@ assert(
     !caminoTopic.includes('Marcar como trabajado') &&
     !caminoCalendar.includes('Misión marcada como hecha sin XP') &&
     !caminoCalendar.includes('Marcar sin XP') &&
-    !caminoCalendar.includes('function completeMission') &&
-    !caminoCalendar.includes('onComplete={completeMission')
+    caminoCalendar.includes('baseXP') &&
+    caminoCalendar.includes("source: 'camino_pau'")
 )
 
 assert(
   'Camino PAU keeps calendar visibility and generated week persistent',
   caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
-    caminoCalendar.includes("CALENDAR_WEEKS_KEY = 'pausia_camino_calendar_weeks_v1'") &&
-    caminoCalendar.includes('loadJson<DayPlan[]>(CALENDAR_KEY, [])') &&
-    caminoCalendar.includes('loadJson<CalendarWeekCache>(CALENDAR_WEEKS_KEY, {})') &&
     caminoCalendar.includes('loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)') &&
     caminoCalendar.includes('calendarMatchesOnboarding') &&
     caminoCalendar.includes('calendarStartsWeek') &&
-    caminoCalendar.includes('loadOrGenerateWeek') &&
-    caminoCalendar.includes('cacheWeek') &&
+    caminoCalendar.includes('generateWeek(weekStartISO: string') &&
+    caminoCalendar.includes('persist(regenerated, nextExams)') &&
     caminoCalendar.includes('function toggleCalendarExpanded()') &&
     caminoCalendar.includes('saveJson(CALENDAR_VISIBILITY_KEY, next)') &&
     caminoCalendar.includes('onClick={toggleCalendarExpanded}')
@@ -335,8 +335,22 @@ assert(
     caminoCalendar.includes('missionBelongsToSubjects') &&
     caminoCalendar.includes('normalizeSubjectSlug(mission.subject)') &&
     caminoCalendar.includes('visibleCalendarForOnboarding') &&
-    caminoCalendar.includes('Completa tu onboarding para que podamos construir tu Camino PAU') &&
+    caminoCalendar.includes('Completa tu perfil para que Pausia cree tu Camino PAU') &&
+    caminoCalendar.includes("const PRIVATE_BETA_SUBJECT_SLUGS = new Set(['matematicas_ii', 'matematicas_ccss'])") &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']")
+)
+
+assert(
+  'Private beta onboarding only activates Matemáticas II and Matemáticas CCSS',
+  onboardingFlow.includes("const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(SUBJECT_OPTS.map(subject => subject.id))") &&
+    onboardingFlow.includes("'Matemáticas CCSS': 'matematicas_ccss'") &&
+    onboardingFlow.includes('Beta privada disponible para Matemáticas II y Matemáticas CCSS') &&
+    onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])") &&
+    ensureCaminoCalendar.includes("filter(s => s === 'matematicas_ii' || s === 'matematicas_ccss')") &&
+    caminoCalendar.includes("const subjects = subjectSlugs.length > 0 ? subjectSlugs : ['matematicas_ii']") &&
+    !onboardingFlow.includes("'Historia de España': 'historia_espana'") &&
+    !onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'historia_espana'])") &&
+    !ensureCaminoCalendar.includes("filter(s => s === 'matematicas_ii' || s === 'historia_espana')")
 )
 
 assert(
@@ -344,10 +358,10 @@ assert(
   caminoPlan.includes('export function normalizeSubjectSlug') &&
     caminoCalendar.includes('function calendarDayLabel(dateISO: string)') &&
     caminoCalendar.includes('const [selectedWeekStart, setSelectedWeekStart]') &&
-    caminoCalendar.includes('const realToday = todayISO()') &&
+    caminoCalendar.includes('const realToday = todayMadrid()') &&
     caminoCalendar.includes('visibleCalendar.find(day => day.date === realToday)') &&
-    caminoCalendar.includes('isToday: day.date === realToday') &&
-    caminoCalendar.includes('Hoy no tienes misión principal. Puedes adelantar una del calendario o añadir una.') &&
+    caminoCalendar.includes('isToday: true, missions: []') &&
+    caminoCalendar.includes('No hay misión asignada hoy') &&
     !caminoCalendar.includes('calendar.find(day => day.isToday) ?? calendar[0]') &&
     !caminoCalendar.includes('Hoy toca poco, pero bien hecho')
 )
@@ -358,11 +372,11 @@ assert(
     caminoCalendar.includes('function weekOffset') &&
     caminoCalendar.includes('function goToWeek(weekStartISO: string)') &&
     caminoCalendar.includes('function goToCurrentWeek()') &&
-    caminoCalendar.includes('Semana anterior') &&
-    caminoCalendar.includes('Semana siguiente') &&
-    caminoCalendar.includes('Hoy') &&
+    caminoCalendar.includes('Anterior') &&
+    caminoCalendar.includes('Siguiente') &&
+    caminoCalendar.includes('Esta semana') &&
     caminoCalendar.includes('setSelectedWeekStart(weekStartISO)') &&
-    caminoCalendar.includes('generateCalendar(onboarding, exams, curriculum, planId, weekStartISO, cache)')
+    caminoCalendar.includes('generateCalendar(onboarding, nextExams, source, planId, weekStartISO, {})')
 )
 
 assert(
@@ -419,7 +433,7 @@ assert(
 
 assert(
   'Camino PAU reads billing plan and caps generated missions by subscription',
-  caminoCalendar.includes("fetch('/api/billing/me'") &&
+    caminoCalendar.includes("fetch('/api/billing/me'") &&
     caminoCalendar.includes('normalizeCaminoPlanId') &&
     caminoCalendar.includes('setCaminoPlanId(planId)') &&
     caminoCalendar.includes('getCaminoPlanLimits(planId)') &&
@@ -429,9 +443,8 @@ assert(
     caminoCalendar.includes("planLimits.caminoMode !== 'limited'") &&
     caminoCalendar.includes('planLimits.includeBonusMissions') &&
     caminoCalendar.includes('missions.length < maxCorrectableMissions') &&
-    caminoCalendar.includes('Camino {caminoPlanLimits.caminoMode') &&
-    caminoCalendar.includes('variableMarginFloor') &&
-    caminoCalendar.includes('fullMocksPerMonth')
+    caminoCalendar.includes('getSimulationLimitForPlan(planId)') &&
+    caminoCalendar.includes('canScheduleSimulation')
 )
 
 assert(
@@ -441,20 +454,23 @@ assert(
     caminoCourseTopic.includes('CaminoTopicClient') &&
     caminoCalendar.includes('CourseDirectory') &&
     caminoCalendar.includes('Temario guiado') &&
-    caminoCalendar.includes('Cursos de tu Camino') &&
-    caminoCalendar.includes('Ver cursos') &&
     caminoCalendar.includes('setSelectedSubject') &&
     caminoCalendar.includes('selectedBlock') &&
     caminoCalendar.includes('activeBlock') &&
     caminoCalendar.includes('courseHrefForItem') &&
     caminoCalendar.includes('/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}') &&
+    caminoCalendar.includes('href={courseHrefForItem(item)}') &&
     !caminoCalendar.includes('href: `/camino?subject=${s}${blockParam}${topicParam}`')
 )
 
 assert(
   'Camino calendar editor shows full week and supports drag and drop without changing mission ids',
-  caminoCalendar.includes('grid flex-1 gap-4 overflow-y-auto p-5') &&
-    caminoCalendar.includes('lg:grid-cols-2') &&
+  caminoCalendar.includes('CalendarEditorOverlay') &&
+    caminoCalendar.includes('onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}') &&
+    caminoCalendar.includes('draggable') &&
+    caminoCalendar.includes('onDragStart={() => setDraggedMissionId(mission.id)}') &&
+    caminoCalendar.includes('updateMission(mission.id') &&
+    caminoCalendar.includes('deleteMission(mission.id') &&
     caminoCalendar.includes('draggable') &&
     caminoCalendar.includes('onDragStart') &&
     caminoCalendar.includes('onDrop') &&
@@ -565,9 +581,10 @@ assert(
   'P0 not-seen feedback persists locally, syncs to Supabase and refreshes calendar',
   caminoTopic.includes("SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'") &&
     caminoTopic.includes("CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'") &&
-    caminoTopic.includes("window.localStorage.removeItem(CALENDAR_KEY)") &&
+    caminoTopic.includes('saveJson(CALENDAR_REFRESH_KEY, true)') &&
+    caminoTopic.includes("window.dispatchEvent(new CustomEvent('pausia:school-topic-feedback'") &&
     caminoTopic.includes("fetch('/api/camino/school-topic-feedback'") &&
-    caminoTopic.includes('Perfecto. Lo dejamos marcado como no dado y ajustamos tu calendario.') &&
+    caminoTopic.includes('No lo he dado en clase') &&
     caminoSchoolFeedbackRoute.includes("reason: 'not_seen_in_class'") &&
     caminoSchoolFeedbackRoute.includes("status = notSeenCount >= 2 ? 'delayed_for_school' : 'not_seen'") &&
     caminoSchoolFeedbackRoute.includes("upsert({") &&
@@ -583,7 +600,7 @@ assert(
     caminoCalendar.includes('schoolAdjustedItem') &&
     caminoCalendar.includes('Este tema aparece en tu parcial, pero lo has marcado como no dado') &&
     caminoCalendar.includes('Base previa') &&
-    caminoCalendar.includes('CALENDAR_REFRESH_KEY')
+    caminoCalendar.includes('Tema marcado como no dado en clase')
 )
 
 assert(

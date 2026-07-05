@@ -137,7 +137,60 @@ const COMPARE_ROWS = [
   { label: 'Disponible 24 horas al día',     pausia: true,   academia: false, solo: true  },
   { label: 'Chat con tutor IA',              pausia: true,   academia: false, solo: false },
   { label: 'Historial de progreso',          pausia: true,   academia: false, solo: false },
-  { label: 'Precio mensual',                 pText: 'Gratis / 7,99€', aText: '100–200€', sText: 'Gratis' },
+  { label: 'Precio mensual',                 pText: 'Free / 9,99€', aText: '100–200€', sText: 'Gratis' },
+]
+
+const LANDING_PRICING = [
+  {
+    name: 'Free',
+    price: '0 €',
+    period: 'Para empezar',
+    badge: 'Prueba',
+    description: 'Para probar Pausia y empezar a entrenar.',
+    bullets: ['25 correcciones/mes', '3 fotos/mes', '1 parcial/mes', 'Camino PAU limitado', 'Preview de ranking'],
+    cta: 'Empezar gratis',
+    featured: false,
+  },
+  {
+    name: 'Premium',
+    price: '9,99 €/mes',
+    period: 'Plan principal',
+    badge: 'Recomendado',
+    description: 'El plan principal para preparar la PAU durante el curso.',
+    bullets: ['200 correcciones/mes', '80 fotos/mes', '5 simulacros completos/mes', 'Camino PAU completo', 'Ranking completo'],
+    cta: 'Probar Premium',
+    featured: true,
+  },
+  {
+    name: 'Intensivo PAU',
+    price: '19,99 € / 3 meses',
+    period: 'Sprint final',
+    badge: 'Sprint PAU',
+    description: 'Para el sprint final antes de la PAU.',
+    bullets: ['150 correcciones/mes', '60 fotos/mes', '6 simulacros completos/mes', 'Camino PAU intensivo', 'Ranking completo'],
+    cta: 'Preparar sprint final',
+    featured: false,
+  },
+  {
+    name: 'Superpremium',
+    price: '17,99 €/mes',
+    period: 'Uso intensivo',
+    badge: 'Avanzado',
+    description: 'Para alumnos que quieren entrenar mucho más sin ansiedad de límites.',
+    bullets: ['600 correcciones/mes', '200 fotos/mes', '20 simulacros completos/mes', 'Camino PAU avanzado', 'Uso intensivo con política razonable'],
+    cta: 'Entrenar al máximo',
+    featured: false,
+  },
+  {
+    name: 'Curso PAU',
+    price: 'Desde 59 €',
+    period: 'Pago único',
+    badge: 'Curso completo',
+    description: 'Pago único para preparar la PAU con Camino completo.',
+    bullets: ['Early: 59 €', 'Normal: 79 €', '80 fotos/mes', '5 simulacros/mes', 'Ranking completo'],
+    cta: 'Reservar Curso PAU',
+    featured: false,
+  },
 ]
 
 const TESTIMONIALS = [
@@ -824,6 +877,9 @@ export default function LandingPage() {
         .lp-compare-row:nth-child(even) { background: ${C.bgSub}; }
 
         /* ── Responsive ── */
+        @media (max-width: 1100px) {
+          .lp-plan-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+        }
         @media (max-width: 768px) {
           .lp-hero-grid, .lp-moment-grid { grid-template-columns: 1fr !important; }
           .lp-screens-grid { grid-template-columns: 1fr !important; }
@@ -1488,82 +1544,57 @@ export default function LandingPage() {
           Precios
         </p>
         <h2 style={{ fontSize: 'clamp(1.8rem,4vw,2.4rem)', fontWeight: 900, color: C.ink, margin: '0 0 44px', letterSpacing: '-0.03em', lineHeight: 1.15, textWrap: 'balance' as never }}>
-          Empieza gratis. Sube cuando quieras.
+          Exámenes oficiales, correcciones con foto y Camino PAU diario.
         </h2>
-        <div className="lp-plan-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, maxWidth: 740, margin: '0 auto' }}>
-          {/* Free */}
-          <div className="lp-card" style={{
-            background: C.bg, borderRadius: 18,
-            padding: '28px 26px',
-            border: `1px solid ${C.border}`,
-            boxShadow: '0 1px 4px rgba(15,23,42,0.04)',
-          }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>Básico</div>
-            <div style={{ fontSize: 38, fontWeight: 900, color: C.ink, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 4 }}>Gratis</div>
-            <div style={{ fontSize: 12, color: C.soft, marginBottom: 22 }}>Para empezar</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 24 }}>
-              {['10 correcciones al mes', 'Sin Camino PAU', 'Sin simulacros', 'Historial básico'].map((item) => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.ink2 }}>
-                  <Check size={14} style={{ color: C.green, flexShrink: 0 }} /> {item}
-                </div>
-              ))}
-            </div>
-            <Link href="/login" className="lp-btn-ghost" style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              padding: '11px 20px', borderRadius: 12,
-              border: `1.5px solid ${C.border}`, background: C.bg,
-              color: C.ink2, fontWeight: 700, fontSize: 14, textDecoration: 'none',
+        <p style={{ maxWidth: 680, margin: '-28px auto 28px', color: C.muted, fontSize: 15, lineHeight: 1.7, textAlign: 'center' }}>
+          Menos que una clase particular al mes. Beta privada: de momento probamos Matemáticas II y Matemáticas CCSS.
+        </p>
+        <div className="lp-plan-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,minmax(0,1fr))', gap: 14, maxWidth: 1040, margin: '0 auto' }}>
+          {LANDING_PRICING.map((plan) => (
+            <div key={plan.name} className="lp-card" style={{
+              background: plan.featured ? C.blue : C.bg,
+              borderRadius: 18,
+              padding: '24px 20px',
+              border: plan.featured ? 'none' : `1px solid ${C.border}`,
+              boxShadow: plan.featured ? '0 16px 40px rgba(37,99,235,0.28)' : '0 1px 4px rgba(15,23,42,0.04)',
+              position: 'relative',
+              overflow: 'hidden',
             }}>
-              Empezar gratis
-            </Link>
-          </div>
-
-          {/* Premium */}
-          <div className="lp-card" style={{
-            background: C.blue, borderRadius: 18,
-            padding: '28px 26px',
-            border: 'none',
-            boxShadow: '0 16px 40px rgba(37,99,235,0.28)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', top: -30, right: -30,
-              width: 140, height: 140, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.06)', pointerEvents: 'none',
-            }} />
-            <div style={{ position: 'relative' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Premium</div>
-                <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(255,255,255,0.18)', color: '#fff', padding: '2px 8px', borderRadius: 999 }}>Recomendado</span>
+              {plan.featured && <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />}
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: plan.featured ? 'rgba(255,255,255,0.7)' : C.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{plan.name}</div>
+                  <span style={{ fontSize: 10, fontWeight: 800, background: plan.featured ? 'rgba(255,255,255,0.18)' : C.bgBlue, color: plan.featured ? '#fff' : C.blueDeep, padding: '2px 8px', borderRadius: 999 }}>{plan.badge}</span>
+                </div>
+                <div style={{ fontSize: plan.price.length > 12 ? 25 : 34, fontWeight: 900, color: plan.featured ? '#fff' : C.ink, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 5 }}>{plan.price}</div>
+                <div style={{ fontSize: 12, color: plan.featured ? 'rgba(255,255,255,0.64)' : C.soft, marginBottom: 14 }}>{plan.period}</div>
+                <p style={{ minHeight: 58, margin: '0 0 16px', fontSize: 12, lineHeight: 1.55, color: plan.featured ? 'rgba(255,255,255,0.82)' : C.muted, fontWeight: 600 }}>{plan.description}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+                  {plan.bullets.map((item) => (
+                    <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 12, lineHeight: 1.35, color: plan.featured ? 'rgba(255,255,255,0.9)' : C.ink2 }}>
+                      <Check size={13} style={{ color: plan.featured ? 'rgba(255,255,255,0.84)' : C.green, flexShrink: 0, marginTop: 1 }} /> {item}
+                    </div>
+                  ))}
+                </div>
+                <Link href="/login" className={plan.featured ? 'lp-btn-primary' : 'lp-btn-ghost'} style={{
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 7,
+                  padding: '10px 14px', borderRadius: 12,
+                  border: plan.featured ? 'none' : `1.5px solid ${C.border}`,
+                  background: plan.featured ? '#fff' : C.bg,
+                  color: plan.featured ? C.blueDeep : C.ink2,
+                  fontWeight: 800, fontSize: 13, textDecoration: 'none',
+                  boxShadow: plan.featured ? '0 4px 14px rgba(0,0,0,0.12)' : 'none',
+                }}>
+                  {plan.cta}{plan.featured && <ArrowRight size={14} />}
+                </Link>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                <div style={{ fontSize: 38, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>7,99€</div>
-                <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(255,255,255,0.22)', color: '#fff', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>Precio de lanzamiento</span>
-              </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 22 }}>por mes · cancela cuando quieras</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 24 }}>
-                {['Exámenes oficiales disponibles', 'Plan semanal personalizado', 'Chat tutor IA con límite diario', 'Flashcards y zona de repaso', 'Historial completo', 'Acceso anticipado a nuevas materias'].map((item) => (
-                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>
-                    <Check size={14} style={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0 }} /> {item}
-                  </div>
-                ))}
-              </div>
-              <Link href="/login" className="lp-btn-primary" style={{
-                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
-                padding: '11px 20px', borderRadius: 12,
-                background: '#fff', color: C.blueDeep,
-                fontWeight: 800, fontSize: 14, textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
-              }}>
-                Empezar con Premium <ArrowRight size={14} />
-              </Link>
             </div>
-          </div>
+          ))}
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <Link href="/pricing" style={{ fontSize: 13, color: C.blue, fontWeight: 600, textDecoration: 'none' }}>
-            Ver todos los detalles del plan →
+            Ver todos los detalles de planes →
           </Link>
         </div>
       </section>

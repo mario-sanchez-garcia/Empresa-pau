@@ -204,9 +204,26 @@ assert(
 )
 
 assert(
-  'pricing and landing do not advertise unlimited AI usage',
-  !/ilimitad/i.test(pricing) &&
-    !/ilimitad/i.test(landing)
+  'pricing and landing use definitive honest plan copy',
+    !/ilimitad/i.test(pricing) &&
+    !/ilimitad/i.test(landing) &&
+    !pricing.includes("price: '7,99 €'") &&
+    !pricing.includes("price: '49 €'") &&
+    !landing.includes('7,99€') &&
+    pricing.includes('0 €') &&
+    pricing.includes('9,99 €') &&
+    pricing.includes('19,99 €') &&
+    pricing.includes('17,99 €') &&
+    pricing.includes('Desde 59 €') &&
+    pricing.includes('79 €') &&
+    pricing.includes('Recomendado') &&
+    pricing.includes('Uso intensivo con política de uso razonable') &&
+    landing.includes('9,99 €/mes') &&
+    landing.includes('19,99 € / 3 meses') &&
+    landing.includes('17,99 €/mes') &&
+    landing.includes('Desde 59 €') &&
+    landing.includes('Normal: 79 €') &&
+    landing.includes('Beta privada: de momento probamos Matemáticas II y Matemáticas CCSS')
 )
 
 assert(

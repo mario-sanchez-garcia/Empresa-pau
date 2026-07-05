@@ -25,70 +25,87 @@ const plans: Plan[] = [
     name: 'Free',
     price: '0 €',
     period: 'sin tarjeta',
-    description: 'Para probar Pausia y practicar con exámenes reales sin ningún compromiso.',
+    description: 'Para probar Pausia y empezar a entrenar.',
     features: [
-      { text: '10 correcciones con IA al mes', included: true },
-      { text: 'Todos los exámenes oficiales', included: true },
-      { text: 'Historial básico', included: true },
-      { text: 'Camino PAU', included: false },
-      { text: 'Simulacros', included: false },
-      { text: 'Chat tutor IA con límite diario', included: false },
+      { text: '25 correcciones/mes', included: true },
+      { text: '3 fotos/mes', included: true },
+      { text: '1 parcial/mes', included: true },
+      { text: 'Camino PAU limitado', included: true },
+      { text: 'Misión diaria, racha y XP propios', included: true },
+      { text: 'Preview de ranking', included: true },
+      { text: 'Calendario completo editable', included: false },
     ],
     cta: 'Empezar gratis',
     href: '/login',
   },
   {
-    name: 'Mensual',
-    price: '7,99 €',
-    period: '/mes · cancela cuando quieras',
-    description: 'Todo incluido. La forma más flexible de preparar la PAU mes a mes.',
+    name: 'Premium',
+    price: '9,99 €',
+    period: '/mes',
+    description: 'El plan principal para preparar la PAU durante el curso.',
     features: [
-      { text: 'Correcciones amplias con IA con uso responsable', included: true },
-      { text: 'Todos los exámenes oficiales', included: true },
-      { text: 'Camino PAU y misiones diarias', included: true },
-      { text: 'Simulacros diarios según plan', included: true },
-      { text: 'Chat con tutor IA con límite diario', included: true },
-      { text: 'Plan de estudio personalizado', included: true },
+      { text: '200 correcciones/mes', included: true },
+      { text: '80 fotos/mes', included: true },
+      { text: '5 simulacros completos/mes', included: true },
+      { text: 'Camino PAU completo', included: true },
+      { text: 'Ranking completo', included: true },
+      { text: 'Recomendaciones completas por asignatura', included: true },
     ],
-    cta: 'Empezar ahora',
+    cta: 'Probar Premium',
     href: '/login',
     popular: true,
-    popularLabel: 'Precio de lanzamiento',
+    popularLabel: 'Recomendado',
   },
   {
-    name: 'Pack Curso PAU',
-    price: '49 €',
+    name: 'Curso PAU',
+    price: 'Desde 59 €',
     priceStrike: '79 €',
-    period: 'sep–jun · pago único',
-    description: 'Acceso para todo el curso académico. La opción más completa y económica.',
+    period: 'pago único',
+    description: 'Pago único para preparar la PAU con Camino completo. Early: 59 €. Normal: 79 €.',
     features: [
-      { text: 'Correcciones amplias con IA con uso responsable', included: true },
-      { text: 'Todos los exámenes oficiales', included: true },
-      { text: 'Camino PAU completo sep–jun', included: true },
-      { text: 'Simulacros diarios según plan', included: true },
-      { text: 'Chat con tutor IA con límite diario', included: true },
+      { text: 'Igual que Premium', included: true },
+      { text: '80 fotos/mes', included: true },
+      { text: '5 simulacros/mes', included: true },
+      { text: 'Camino PAU completo', included: true },
+      { text: 'Ranking completo', included: true },
       { text: 'Sin renovación mensual', included: true },
     ],
-    cta: 'Reservar early bird',
+    cta: 'Reservar Curso PAU',
     href: '/login',
-    popular: true,
-    popularLabel: 'Early bird hasta 30 sep',
     popularAmber: true,
   },
   {
-    name: 'Pack Intensivo',
+    name: 'Intensivo PAU',
     price: '19,99 €',
-    period: 'mayo–jul · pago único',
-    description: 'Para la recta final de la PAU. Acceso completo mayo–julio sin renovación.',
+    period: '/ 3 meses',
+    description: 'Para el sprint final antes de la PAU.',
     features: [
-      { text: 'Correcciones amplias con IA con uso responsable', included: true },
-      { text: 'Todos los exámenes oficiales', included: true },
-      { text: 'Camino PAU mayo–julio', included: true },
-      { text: 'Simulacros diarios según plan', included: true },
-      { text: 'Chat con tutor IA con límite diario', included: true },
-      { text: 'Sin renovación', included: true },
+      { text: '150 correcciones/mes', included: true },
+      { text: '60 fotos/mes', included: true },
+      { text: '6 simulacros completos/mes', included: true },
+      { text: 'Camino PAU intensivo', included: true },
+      { text: 'Ranking completo', included: true },
     ],
-    cta: 'Quiero el Pack Intensivo',
+    cta: 'Preparar sprint final',
+    href: '/login',
+    popular: true,
+    popularLabel: 'Sprint PAU',
+    popularAmber: true,
+  },
+  {
+    name: 'Superpremium',
+    price: '17,99 €',
+    period: '/mes',
+    description: 'Para alumnos que quieren entrenar mucho más sin ansiedad de límites.',
+    features: [
+      { text: '600 correcciones/mes', included: true },
+      { text: '200 fotos/mes', included: true },
+      { text: '20 simulacros completos/mes', included: true },
+      { text: 'Camino PAU avanzado', included: true },
+      { text: 'Ranking avanzado', included: true },
+      { text: 'Uso intensivo con política de uso razonable', included: true },
+    ],
+    cta: 'Entrenar al máximo',
     href: '/login',
   },
 ]
@@ -116,19 +133,19 @@ export default function PricingPage() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="mx-auto max-w-2xl space-y-5 text-center">
             <span className="inline-flex items-center rounded-full border border-border bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
-              Precios de lanzamiento
+              Precios definitivos
             </span>
             <h1 className="text-4xl font-black tracking-tight lg:text-5xl" style={{ letterSpacing: '-0.025em' }}>
               Elige tu plan PAU
             </h1>
             <p className="text-base text-muted-foreground" style={{ maxWidth: 'none' }}>
-              Empieza gratis. Actualiza cuando quieras.{' '}
-              <span className="font-semibold text-foreground">Sin permanencia</span> en el plan mensual.
+              Exámenes oficiales, correcciones con foto y un Camino PAU diario{' '}
+              <span className="font-semibold text-foreground">por menos que una clase particular al mes.</span>
             </p>
           </div>
 
           {/* Cards grid */}
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-16 xl:grid-cols-5">
             {plans.map((plan) => (
               <Card
                 key={plan.name}
@@ -223,7 +240,7 @@ export default function PricingPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Los precios incluyen IVA. El Pack Curso PAU early bird está disponible hasta el 30 de septiembre de 2026.
+            Los precios incluyen IVA. Curso PAU Early: 59 €. Precio normal: 79 €. TODO: actualizar price IDs cuando se pase a Stripe live.
           </p>
         </div>
       </section>

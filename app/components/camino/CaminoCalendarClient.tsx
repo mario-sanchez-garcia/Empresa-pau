@@ -1210,7 +1210,7 @@ export default function CaminoCalendarClient() {
         </section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
-      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={visibleCalendar} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
+      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={visibleCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
     </Shell>
@@ -1279,18 +1279,36 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
   )
 }
 
-function CalendarEditorOverlay({ calendar, subjects, curriculum, planId, onClose, onAddExam, onSave }: { calendar: DayPlan[]; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; onClose: () => void; onAddExam: () => void; onSave: (calendar: DayPlan[]) => void }) {
+function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, planId, onNavigateWeek, onClose, onAddExam, onSave }: { calendar: DayPlan[]; weekStartISO: string; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onSave: (calendar: DayPlan[]) => void }) {
   const safeSubjects: string[] = subjects
   const [draft, setDraft] = useState<DayPlan[]>(() => calendar.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
   const [newMission, setNewMission] = useState({ day: calendar[0]?.date ?? todayISO(), subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, bonus: false })
   const [draggedMissionId, setDraggedMissionId] = useState<string | null>(null)
   const [editorNotice, setEditorNotice] = useState('')
+  const [editorWeekStart, setEditorWeekStart] = useState(weekStartISO)
+  const [missionPanelOpen, setMissionPanelOpen] = useState(false)
   const topics = curriculumForSubject(newMission.subject, curriculum)
+  const orderedDraft = draft.slice().sort((a, b) => a.date.localeCompare(b.date))
+  const mainMissionCount = orderedDraft.reduce((total, day) => total + day.missions.filter(mission => mission.role === 'main').length, 0)
+  const bonusMissions = orderedDraft.flatMap(day => day.missions.filter(mission => mission.role === 'bonus').map(mission => ({ mission, day })))
+
+  function cloneWeek(days: DayPlan[]) {
+    return days.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) }))
+  }
+
+  function navigateEditorWeek(nextWeekStart: string) {
+    const nextWeek = onNavigateWeek(nextWeekStart)
+    const nextDraft = cloneWeek(nextWeek)
+    setEditorWeekStart(nextWeekStart)
+    setDraft(nextDraft)
+    setNewMission(current => ({ ...current, day: nextDraft[0]?.date ?? nextWeekStart }))
+    setDraggedMissionId(null)
+  }
 
   function moveMission(missionId: string, nextDate: string) {
     const sourceDay = draft.find(day => day.missions.some(mission => mission.id === missionId))
     const mission = sourceDay?.missions.find(item => item.id === missionId)
-    if (!sourceDay || !mission) return
+    if (!sourceDay || !mission || sourceDay.date === nextDate) return
     setDraft(current => current.map(day => {
       if (day.date === sourceDay.date) return { ...day, missions: day.missions.filter(item => item.id !== missionId) }
       if (day.date === nextDate) return { ...day, missions: [...day.missions, mission] }
@@ -1370,94 +1388,137 @@ function CalendarEditorOverlay({ calendar, subjects, curriculum, planId, onClose
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-4 backdrop-blur-sm max-lg:left-0 lg:left-[248px]">
-      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
-
-        {/* Header — no Guardar aquí para evitar overflow */}
-        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-blue-100 px-5 py-4">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Editar calendario</p>
-            <h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-3 backdrop-blur-sm max-lg:left-0 sm:p-4 lg:left-[248px]">
+      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
+        <header className="shrink-0 border-b border-blue-100 px-4 py-4 sm:px-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Editar calendario</p>
+              <h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">Mueve misiones entre días. Pausia respetará tus cambios manuales al guardar.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button>
+              <button onClick={() => setMissionPanelOpen(current => !current)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_6px_18px_rgba(37,99,235,0.18)]"><Plus size={15} /> Añadir misión</button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button>
-            <button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Semana anterior</button>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black text-slate-700">{weekRangeLabel(editorWeekStart)}</div>
+            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-900 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"><RotateCcw size={14} /> Hoy</button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Semana siguiente <ArrowRight size={14} /></button>
           </div>
         </header>
 
-        {/* Scrollable body — overflow-x-hidden elimina el scroll horizontal */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-5">
-          <p className="mb-5 text-sm font-semibold text-slate-500">Ajusta tu semana sin perder el ritmo. Pausia respetará tus cambios manuales.</p>
-          <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-white to-blue-50/40 p-4 sm:p-5">
+          {editorNotice && <p className="mb-4 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
 
-            {/* Cuadrícula de días */}
-            <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-              {draft.map(day => (
-                <article
-                  key={day.date}
-                  onDragOver={event => event.preventDefault()}
-                  onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}
-                  className="min-w-0 rounded-3xl border border-blue-100 bg-slate-50 p-3"
-                >
-                  <h3 className="text-xs font-black capitalize text-slate-900">{day.label}</h3>
-                  <div className="mt-2 grid gap-2">
-                    {day.missions.length ? day.missions.map(mission => {
-                      const theme = themeFor(mission.subject)
-                      return (
-                        <div
-                          key={mission.id}
-                          draggable
-                          onDragStart={() => setDraggedMissionId(mission.id)}
-                          onDragEnd={() => setDraggedMissionId(null)}
-                          className="min-w-0 rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm"
-                        >
-                          <div className="flex min-w-0 items-start gap-2">
-                            <div className="min-w-0 flex-1">
-                              <span className="inline-block max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
-                              <p className="mt-1 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
-                              <p className="mt-0.5 text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min · {mission.role === 'main' ? 'Principal' : 'Opcional'}</p>
-                            </div>
-                            <div className="flex shrink-0 items-center gap-0.5">
-                              <button type="button" aria-label="Arrastrar para mover" className="cursor-grab rounded-lg p-1.5 text-slate-300 hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"><GripVertical size={13} /></button>
-                              <button
-                                type="button"
-                                onClick={() => updateMission(mission.id, { role: mission.role === 'bonus' ? 'main' : 'bonus' })}
-                                aria-label={mission.role === 'bonus' ? 'Hacer principal' : 'Hacer opcional'}
-                                className={`rounded-lg p-1.5 transition-colors ${mission.role === 'bonus' ? 'text-violet-500 hover:bg-violet-50' : 'text-slate-300 hover:bg-slate-100 hover:text-slate-500'}`}
-                              >
-                                <Bookmark size={13} className={mission.role === 'bonus' ? 'fill-violet-400' : ''} />
-                              </button>
-                              <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión" className="rounded-lg p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    }) : <p className="text-[11px] font-bold text-slate-400">Sin misiones. Arrastra aquí para añadir.</p>}
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            {/* Panel añadir misión */}
-            <aside className="min-w-0 rounded-3xl border border-blue-100 bg-blue-50/60 p-4">
-              <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
-              {editorNotice && <p className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
-              <div className="mt-4 grid gap-3">
-                <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{draft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
+          {missionPanelOpen && (
+            <aside className="mb-4 rounded-3xl border border-blue-100 bg-white p-4 shadow-[0_12px_34px_rgba(37,99,235,0.08)]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
+                <button onClick={() => setMissionPanelOpen(false)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-500">Cerrar</button>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+                <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{orderedDraft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
                 <Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field>
                 <Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field>
                 <Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
-                <Field label="Duración (min)"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
-                <label className="inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
-                <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir misión</button>
+                <Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
+                <div className="flex items-end">
+                  <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir</button>
+                </div>
               </div>
+              <label className="mt-3 inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
             </aside>
-          </div>
+          )}
+
+          <section className="min-w-0 overflow-x-auto rounded-[28px] border border-blue-100 bg-white shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
+            <div className="grid min-w-[980px] grid-cols-7 divide-x divide-blue-100">
+              {orderedDraft.map(day => {
+                const mainMissions = day.missions.filter(mission => mission.role === 'main')
+                return (
+                  <article
+                    key={day.date}
+                    onDragOver={event => event.preventDefault()}
+                    onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}
+                    className={`min-h-[430px] bg-white ${day.isToday ? 'ring-2 ring-inset ring-blue-300' : ''}`}
+                  >
+                    <div className="sticky top-0 z-10 border-b border-blue-100 bg-white/95 px-3 py-3 backdrop-blur">
+                      <h3 className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{day.label.split(' ')[0]}</h3>
+                      <p className="mt-1 text-sm font-black text-slate-950">{day.label.replace(day.label.split(' ')[0], '').trim()}</p>
+                    </div>
+                    <div className="grid gap-2 p-2.5">
+                      {mainMissions.length ? mainMissions.map(mission => {
+                        const theme = themeFor(mission.subject)
+                        return (
+                          <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="group min-w-0 rounded-2xl border bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: theme.border }}>
+                            <div className="flex items-start gap-2">
+                              <button type="button" aria-label="Arrastrar para mover" className="cursor-grab rounded-lg p-1.5 text-slate-300 hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"><GripVertical size={13} /></button>
+                              <div className="min-w-0 flex-1">
+                                <span className="inline-block max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
+                                <p className="mt-1 line-clamp-3 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
+                                <p className="mt-1 text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min · {mission.kind}</p>
+                                <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-500 sm:hidden">
+                                  {orderedDraft.map(optionDay => <option key={optionDay.date} value={optionDay.date}>Mover a {optionDay.label}</option>)}
+                                </select>
+                              </div>
+                              <div className="flex shrink-0 flex-col gap-1">
+                                <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-violet-50 hover:text-violet-500"><Bookmark size={13} /></button>
+                                <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión" className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }) : <p className="rounded-2xl border border-dashed border-blue-100 bg-blue-50/50 px-3 py-4 text-center text-[11px] font-bold text-slate-400">Sin misiones. Arrastra aquí.</p>}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="mt-5 rounded-[28px] border border-violet-100 bg-white p-4 shadow-[0_12px_34px_rgba(124,58,237,0.06)]">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-500">Misiones extra / bonus</p>
+                <h3 className="text-base font-black text-slate-950">Opcionales para sumar ritmo sin romper el plan</h3>
+              </div>
+              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-600">{bonusMissions.length} bonus</span>
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {bonusMissions.length ? bonusMissions.map(({ mission, day }) => {
+                const theme = themeFor(mission.subject)
+                return (
+                  <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="rounded-2xl border border-violet-100 bg-violet-50/40 p-3">
+                    <div className="flex items-start gap-2">
+                      <button type="button" aria-label="Arrastrar para mover bonus" className="cursor-grab rounded-lg p-1.5 text-violet-300 hover:bg-white hover:text-violet-500"><GripVertical size={13} /></button>
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-block max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
+                        <p className="mt-1 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-violet-500">{day.label} · {mission.estimatedMinutes} min</p>
+                        <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-xl border border-violet-100 bg-white px-2 py-1.5 text-[11px] font-bold text-slate-500">
+                          {orderedDraft.map(optionDay => <option key={optionDay.date} value={optionDay.date}>Mover a {optionDay.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex shrink-0 flex-col gap-1">
+                        <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="rounded-lg p-1.5 text-violet-500 transition-colors hover:bg-white"><Bookmark size={13} className="fill-violet-400" /></button>
+                        <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión bonus" className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }) : <p className="rounded-2xl border border-dashed border-violet-100 bg-violet-50/50 px-4 py-4 text-sm font-bold text-violet-500">No hay bonus opcionales esta semana.</p>}
+            </div>
+          </section>
         </div>
 
-        {/* Footer sticky con Guardar */}
-        <footer className="shrink-0 border-t border-blue-100 bg-white px-5 py-4">
-          <button onClick={handleSave} className="inline-flex w-full items-center justify-center rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.20)] transition hover:bg-blue-700">Guardar cambios</button>
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-blue-100 bg-white px-5 py-4">
+          <p className="text-xs font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={onClose} className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-500">Cancelar</button>
+            <button onClick={handleSave} className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.20)] transition hover:bg-blue-700">Guardar cambios</button>
+          </div>
         </footer>
 
         <style>{`.inputish{width:100%;border-radius:14px;border:1px solid #dbe7fb;background:#f8fbff;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#93c5fd;background:white}`}</style>

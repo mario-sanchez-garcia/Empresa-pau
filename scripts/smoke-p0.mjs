@@ -478,9 +478,26 @@ assert(
 assert(
   'Camino calendar editor shows full week and supports drag and drop without changing mission ids',
   caminoCalendar.includes('CalendarEditorOverlay') &&
+    caminoCalendar.includes('weekStartISO={selectedWeekStart}') &&
+    caminoCalendar.includes('onNavigateWeek={generateWeek}') &&
+    caminoCalendar.includes('const [editorWeekStart, setEditorWeekStart]') &&
+    caminoCalendar.includes('function navigateEditorWeek(nextWeekStart: string)') &&
+    caminoCalendar.includes('navigateEditorWeek(weekOffset(editorWeekStart, -1))') &&
+    caminoCalendar.includes('navigateEditorWeek(currentWeekStartISO())') &&
+    caminoCalendar.includes('navigateEditorWeek(weekOffset(editorWeekStart, 1))') &&
+    caminoCalendar.includes('Semana anterior') &&
+    caminoCalendar.includes('Hoy') &&
+    caminoCalendar.includes('Semana siguiente') &&
+    caminoCalendar.includes('grid min-w-[980px] grid-cols-7') &&
+    caminoCalendar.includes("mission.role === 'main'") &&
+    caminoCalendar.includes('Misiones extra / bonus') &&
+    caminoCalendar.includes('bonusMissions') &&
+    caminoCalendar.includes('const [missionPanelOpen, setMissionPanelOpen]') &&
+    caminoCalendar.includes('setMissionPanelOpen(current => !current)') &&
     caminoCalendar.includes('onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}') &&
     caminoCalendar.includes('draggable') &&
     caminoCalendar.includes('onDragStart={() => setDraggedMissionId(mission.id)}') &&
+    caminoCalendar.includes('onChange={event => moveMission(mission.id, event.target.value)}') &&
     caminoCalendar.includes('updateMission(mission.id') &&
     caminoCalendar.includes('deleteMission(mission.id') &&
     caminoCalendar.includes('draggable') &&

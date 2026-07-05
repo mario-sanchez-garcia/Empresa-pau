@@ -110,8 +110,8 @@ function todayISO() { return toISO(new Date()) }
 function todayMadrid() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' }) }
 function dateFromISO(dateISO: string) { return new Date(`${dateISO}T12:00:00Z`) }
 function addDays(date: Date, days: number) { const next = new Date(date); next.setDate(next.getDate() + days); return next }
-function mondayOf(date: Date) { const d = new Date(date); const day = d.getDay() || 7; d.setDate(d.getDate() - day + 1); d.setHours(0, 0, 0, 0); return d }
-function currentWeekStartISO() { return toISO(mondayOf(new Date())) }
+function mondayOf(date: Date) { const d = new Date(date); const day = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() - day + 1); d.setUTCHours(12, 0, 0, 0); return d }
+function currentWeekStartISO() { return toISO(mondayOf(dateFromISO(todayMadrid()))) }
 function daysBetween(fromISO: string, toDateISO: string) { return Math.ceil((dateFromISO(toDateISO).getTime() - dateFromISO(fromISO).getTime()) / 86400000) }
 function monthKey(dateISO: string) { return dateISO.slice(0, 7) }
 function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
@@ -138,6 +138,16 @@ function weekRangeLabel(weekStartISO: string) {
   return `Semana del ${startText} al ${endText}`
 }
 function weekOffset(weekStartISO: string, weeks: number) { return toISO(addDays(dateFromISO(weekStartISO), weeks * 7)) }
+function isRealToday(dateISO: string) { return dateISO === todayMadrid() }
+function buildWeekDays(weekStartISO: string, sourceDays: DayPlan[] = []) {
+  const byDate = new Map(sourceDays.map(day => [day.date, day]))
+  const start = dateFromISO(weekStartISO)
+  return Array.from({ length: 7 }, (_, index): DayPlan => {
+    const dateISO = toISO(addDays(start, index))
+    const source = byDate.get(dateISO)
+    return { date: dateISO, label: calendarDayLabel(dateISO), isToday: isRealToday(dateISO), missions: source?.missions ?? [] }
+  })
+}
 function getSimulationLimitForPlan(planId: CaminoPlanId) {
   return getCaminoPlanLimits(planId).fullMocksPerMonth
 }
@@ -472,7 +482,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     return Array.from({ length: 7 }, (_, index): DayPlan => {
       const date = addDays(start, index)
       const dateISO = toISO(date)
-      return { date: dateISO, label: calendarDayLabel(dateISO), isToday: dateISO === todayISO(), missions: [] }
+      return { date: dateISO, label: calendarDayLabel(dateISO), isToday: isRealToday(dateISO), missions: [] }
     })
   }
   const weeklyDays = Math.min(onboarding.weeklyStudyDaysValue ?? 4, planLimits.maxStudyDaysPerWeek)
@@ -594,7 +604,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       }
     }
 
-    return { date: dateISO, label: calendarDayLabel(dateISO), isToday: dateISO === todayISO(), missions }
+    return { date: dateISO, label: calendarDayLabel(dateISO), isToday: isRealToday(dateISO), missions }
   })
 }
 
@@ -846,7 +856,7 @@ export default function CaminoCalendarClient() {
     [0] ?? null
   const showWeeklyGoal = !leaderboard || rankingTopRows.length < 2
   const weekEndISO = toISO(addDays(dateFromISO(selectedWeekStart), 6))
-  const weekCalendar = visibleCalendar.filter(day => day.date >= selectedWeekStart && day.date <= weekEndISO)
+  const weekCalendar = buildWeekDays(selectedWeekStart, visibleCalendar.filter(day => day.date >= selectedWeekStart && day.date <= weekEndISO))
   const activeExams = exams.filter(e => e.date >= realToday)
   const pastExams = exams.filter(e => e.date < realToday)
   const upcomingPartial = (() => {
@@ -1210,7 +1220,7 @@ export default function CaminoCalendarClient() {
         </section>
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
-      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={visibleCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
+      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={weekCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
     </Shell>
@@ -1736,8 +1746,12 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
               onClick={() => setExpandedDate(isExpanded ? null : day.date)}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 ${isToday ? 'bg-blue-50/60' : 'bg-white'}`}
             >
-              <span className={`w-24 shrink-0 text-xs font-black capitalize ${isToday ? 'text-blue-700' : 'text-slate-500'}`}>{compactDayLabel(day.date)}</span>
+              <span className={`flex w-24 shrink-0 items-center gap-1.5 text-xs font-black capitalize ${isToday ? 'text-blue-700' : 'text-slate-500'}`}>
+                {compactDayLabel(day.date)}
+                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" aria-label="Hoy" />}
+              </span>
               <span className="flex-1 text-sm font-semibold text-slate-700">{subjectLabel}</span>
+              {isToday && <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}
               {main.some(m => m.missionType === 'partial_practice') && (
                 <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>
               )}
@@ -1795,7 +1809,7 @@ function MissionRow({ mission, onPostpone, onComplete, compact = false }: { miss
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   const main = day.missions.filter(mission => mission.role === 'main')
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black capitalize text-slate-900">{day.label}</h3>{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { subjects: string[]; draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }; setDraft: (draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }) => void; onClose: () => void; onSave: () => void; editing: boolean }) {

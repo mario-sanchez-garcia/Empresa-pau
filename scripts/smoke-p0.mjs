@@ -321,8 +321,13 @@ assert(
 assert(
   'Camino PAU uses current week and never hardcodes the June demo week',
   caminoCalendar.includes('function currentWeekStartISO()') &&
-    caminoCalendar.includes('mondayOf(new Date())') &&
+    caminoCalendar.includes('getUTCDay() || 7') &&
+    caminoCalendar.includes('setUTCHours(12, 0, 0, 0)') &&
+    caminoCalendar.includes('mondayOf(dateFromISO(todayMadrid()))') &&
     caminoCalendar.includes('calendarStartsWeek(calendar, weekStartISO)') &&
+    caminoCalendar.includes('function buildWeekDays(weekStartISO: string, sourceDays: DayPlan[] = [])') &&
+    caminoCalendar.includes('return Array.from({ length: 7 }, (_, index): DayPlan =>') &&
+    caminoCalendar.includes('const dateISO = toISO(addDays(start, index))') &&
     !caminoCalendar.includes('2026-06-19') &&
     !caminoCalendar.includes('2026-06-15') &&
     !caminoCalendar.includes('2026-06-21')
@@ -369,9 +374,14 @@ assert(
   'Camino PAU today card uses the real current date and filters stale saved missions',
   caminoPlan.includes('export function normalizeSubjectSlug') &&
     caminoCalendar.includes('function calendarDayLabel(dateISO: string)') &&
+    caminoCalendar.includes('function isRealToday(dateISO: string)') &&
+    caminoCalendar.includes('isToday: isRealToday(dateISO)') &&
     caminoCalendar.includes('const [selectedWeekStart, setSelectedWeekStart]') &&
     caminoCalendar.includes('const realToday = todayMadrid()') &&
     caminoCalendar.includes('visibleCalendar.find(day => day.date === realToday)') &&
+    caminoCalendar.includes('const weekCalendar = buildWeekDays(selectedWeekStart') &&
+    caminoCalendar.includes('bg-blue-50/60') &&
+    caminoCalendar.includes('aria-label="Hoy"') &&
     caminoCalendar.includes('isToday: true, missions: []') &&
     caminoCalendar.includes('No hay misión asignada hoy') &&
     !caminoCalendar.includes('calendar.find(day => day.isToday) ?? calendar[0]') &&
@@ -382,8 +392,11 @@ assert(
   'Camino PAU can navigate weeks without changing real today',
   caminoCalendar.includes('function weekRangeLabel') &&
     caminoCalendar.includes('function weekOffset') &&
+    caminoCalendar.includes('weekOffset(selectedWeekStart, -1)') &&
+    caminoCalendar.includes('weekOffset(selectedWeekStart, 1)') &&
     caminoCalendar.includes('function goToWeek(weekStartISO: string)') &&
     caminoCalendar.includes('function goToCurrentWeek()') &&
+    caminoCalendar.includes('goToWeek(currentWeekStartISO())') &&
     caminoCalendar.includes('Anterior') &&
     caminoCalendar.includes('Siguiente') &&
     caminoCalendar.includes('Esta semana') &&

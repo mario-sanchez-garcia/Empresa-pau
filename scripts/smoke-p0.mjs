@@ -341,13 +341,25 @@ assert(
 )
 
 assert(
-  'Private beta onboarding only activates Matemáticas II and Matemáticas CCSS',
-  onboardingFlow.includes("const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(SUBJECT_OPTS.map(subject => subject.id))") &&
+  'Private beta onboarding shows locked upcoming subjects but only activates Matemáticas II and Matemáticas CCSS',
+  onboardingFlow.includes("const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'enabled')") &&
+    onboardingFlow.includes("const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'locked')") &&
+    onboardingFlow.includes("const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => subject.id))") &&
+    onboardingFlow.includes("betaStatus: 'locked'") &&
+    onboardingFlow.includes("badge: 'Próximamente'") &&
+    onboardingFlow.includes('PRIVATE_BETA_LOCKED_SUBJECTS.map') &&
+    onboardingFlow.includes('disabled title="Esta asignatura estará disponible próximamente') &&
+    onboardingFlow.includes('De momento puedes probar Pausia con Matemáticas II y Matemáticas CCSS') &&
+    onboardingFlow.includes('Selecciona al menos una asignatura disponible') &&
     onboardingFlow.includes("'Matemáticas CCSS': 'matematicas_ccss'") &&
-    onboardingFlow.includes('Beta privada disponible para Matemáticas II y Matemáticas CCSS') &&
+    onboardingFlow.includes('selectedEnabledSubjects') &&
+    onboardingFlow.includes('subjects: selectedEnabledSubjects') &&
     onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])") &&
     ensureCaminoCalendar.includes("filter(s => s === 'matematicas_ii' || s === 'matematicas_ccss')") &&
     caminoCalendar.includes("const subjects = subjectSlugs.length > 0 ? subjectSlugs : ['matematicas_ii']") &&
+    onboardingFlow.includes('Historia de España') &&
+    onboardingFlow.includes('Física') &&
+    onboardingFlow.includes('Lengua Castellana y Literatura') &&
     !onboardingFlow.includes("'Historia de España': 'historia_espana'") &&
     !onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'historia_espana'])") &&
     !ensureCaminoCalendar.includes("filter(s => s === 'matematicas_ii' || s === 'historia_espana')")

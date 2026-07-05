@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Lock, Search } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
@@ -25,11 +25,20 @@ const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: stri
   { id: 'Otra', label: 'Otra comunidad', desc: 'Ruta troncal común' },
 ]
 
-const SUBJECT_OPTS = [
-  { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff' },
-  { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
+const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; bg: string; betaStatus: 'enabled' | 'locked'; badge?: string }> = [
+  { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff', betaStatus: 'enabled' },
+  { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff', betaStatus: 'enabled' },
+  { id: 'Lengua Castellana', label: 'Lengua Castellana y Literatura', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Historia de España', label: 'Historia de España', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Inglés', label: 'Inglés', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Física', label: 'Física', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Química', label: 'Química', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Biología', label: 'Biología', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
 ]
-const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(SUBJECT_OPTS.map(subject => subject.id))
+const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'enabled')
+const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'locked')
+const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => subject.id))
 
 const FEELING_OPTS = [
   'Voy bastante bien',
@@ -123,8 +132,9 @@ export default function OnboardingFlow() {
 
   const savingMessages = useMemo(() => {
     const msgs: string[] = []
-    if (data.subjects.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
-    if (data.subjects.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
+    const selectedEnabledSubjects = data.subjects.filter(subject => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject))
+    if (selectedEnabledSubjects.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
+    if (selectedEnabledSubjects.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
     if (msgs.length === 0) {
       msgs.push('Calculando tu ritmo de estudio…')
       msgs.push('Construyendo tu Camino PAU…')
@@ -148,7 +158,7 @@ export default function OnboardingFlow() {
   const canContinue = (() => {
     if (step === 'community') return Boolean(data.community)
     if (step === 'school') return Boolean(data.schoolName?.trim())
-    if (step === 'subjects') return data.subjects.length > 0 && data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+    if (step === 'subjects') return data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
     if (step === 'feeling') return Boolean(data.preparationFeeling)
     if (step === 'daily-time') return Boolean(data.dailyStudyTime)
     if (step === 'weekly-days') return Boolean(data.weeklyStudyDays)
@@ -186,6 +196,7 @@ export default function OnboardingFlow() {
   }
 
   function toggleSubject(subject: string) {
+    if (!PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject)) return
     update({ subjects: data.subjects.includes(subject) ? data.subjects.filter(item => item !== subject) : [...data.subjects, subject] })
   }
 
@@ -199,7 +210,8 @@ export default function OnboardingFlow() {
     setSavingMsgIdx(0)
     setStep('saving')
     const completedAt = new Date().toISOString()
-    saveOnboarding({ ...data, completedAt })
+    const selectedEnabledSubjects = data.subjects.filter(subject => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject))
+    saveOnboarding({ ...data, subjects: selectedEnabledSubjects, completedAt })
     try {
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
@@ -212,7 +224,7 @@ export default function OnboardingFlow() {
             community: data.community,
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,
-            subjects: data.subjects,
+            subjects: selectedEnabledSubjects,
             preparationFeeling: data.preparationFeeling,
             dailyStudyTime: data.dailyStudyTime,
             dailyMinutes: data.dailyMinutes,
@@ -222,7 +234,7 @@ export default function OnboardingFlow() {
           }),
         })
 
-        const subjectSlugs = data.subjects
+        const subjectSlugs = selectedEnabledSubjects
           .map(s => SUBJECT_TO_SLUG[s])
           .filter((s): s is string => Boolean(s))
 
@@ -403,38 +415,43 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'subjects') {
-      const hasSelected = data.subjects.length > 0
-      const allUnsupported = hasSelected && data.subjects.every(s => !PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
       return (
-        <div className="space-y-3">
-          <div className="grid gap-2 sm:grid-cols-2">
-            {SUBJECT_OPTS.map(subject => {
-              const selected = data.subjects.includes(subject.id)
-              return (
-                <button key={subject.id} onClick={() => toggleSubject(subject.id)} className="flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left transition active:scale-[0.98]" style={{ borderColor: selected ? subject.color : '#e2e8f0', background: selected ? subject.bg : '#ffffff', boxShadow: selected ? `0 0 0 3px ${subject.color}1a` : '0 1px 3px rgba(0,0,0,0.04)' }}>
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2" style={{ borderColor: selected ? subject.color : '#cbd5e1', background: selected ? subject.color : 'white' }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
-                  <span className="text-sm font-black" style={{ color: selected ? subject.color : '#334155' }}>{subject.label}</span>
-                </button>
-              )
-            })}
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
+            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Beta privada</p>
+            <p className="mt-1 text-sm font-bold leading-5 text-blue-900">De momento puedes probar Pausia con Matemáticas II y Matemáticas CCSS. El resto de asignaturas se irán abriendo próximamente.</p>
           </div>
-          {allUnsupported && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-sm font-bold text-amber-800">Beta privada disponible para Matemáticas II y Matemáticas CCSS. Historia y el resto de asignaturas entrarán en próximas semanas.</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {!data.subjects.includes('Matemáticas II') && (
-                  <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Matemáticas II'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
-                    + Añadir Matemáticas II
+          <div>
+            <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Disponibles en beta privada</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => {
+                const selected = data.subjects.includes(subject.id)
+                return (
+                  <button key={subject.id} onClick={() => toggleSubject(subject.id)} className="flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left transition active:scale-[0.98]" style={{ borderColor: selected ? subject.color : '#e2e8f0', background: selected ? subject.bg : '#ffffff', boxShadow: selected ? `0 0 0 3px ${subject.color}1a` : '0 1px 3px rgba(0,0,0,0.04)' }}>
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2" style={{ borderColor: selected ? subject.color : '#cbd5e1', background: selected ? subject.color : 'white' }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
+                    <span className="text-sm font-black" style={{ color: selected ? subject.color : '#334155' }}>{subject.label}</span>
                   </button>
-                )}
-                {!data.subjects.includes('Matemáticas CCSS') && (
-                  <button type="button" onClick={() => update({ subjects: [...data.subjects, 'Matemáticas CCSS'] })} className="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 transition hover:bg-amber-200">
-                    + Añadir Matemáticas CCSS
-                  </button>
-                )}
-              </div>
+                )
+              })}
             </div>
-          )}
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Próximamente</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {PRIVATE_BETA_LOCKED_SUBJECTS.map(subject => {
+                return (
+                  <button key={subject.id} type="button" disabled title="Esta asignatura estará disponible próximamente. En esta beta estamos probando Matemáticas II y Matemáticas CCSS." className="flex min-h-14 cursor-not-allowed items-center justify-between gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 text-left opacity-75">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-slate-300 bg-white text-slate-400"><Lock size={11} strokeWidth={3} /></span>
+                      <span className="truncate text-sm font-black text-slate-500">{subject.label}</span>
+                    </span>
+                    <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">{subject.badge}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          {!canContinue && <p className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">Selecciona al menos una asignatura disponible para construir tu Camino PAU.</p>}
         </div>
       )
     }

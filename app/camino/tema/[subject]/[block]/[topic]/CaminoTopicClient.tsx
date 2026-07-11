@@ -497,7 +497,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           option: 'Curso',
           maxScore,
           officialPrompt: statement,
-          criteria: currentTopic.guidedExample ? `Solución orientativa del curso:\n${currentTopic.guidedExample}` : 'Corrección orientativa de curso. No hay rúbrica oficial asociada a este ejercicio.',
+          criteria: currentTopic.referenceSolution
+            ? `Solución orientativa del curso:\n${currentTopic.referenceSolution}`
+            : currentTopic.guidedExample
+              ? `Solución orientativa del curso:\n${currentTopic.guidedExample}`
+              : 'Corrección orientativa de curso. No hay rúbrica oficial asociada a este ejercicio.',
           studentAnswer: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.' : studentAnswer,
         }]
       })

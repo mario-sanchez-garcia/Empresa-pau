@@ -4,22 +4,25 @@ type PartialMissionType = 'conceptual_review' | 'evau_practice' | 'block_mock' |
 
 const SUBJECT_SLUG: Record<string, string> = {
   'Matemáticas II': 'matematicas_ii',
+  'Matemáticas CCSS': 'matematicas_ccss',
   'Historia de España': 'historia_espana',
+  'Lengua Castellana': 'lengua',
+  'Lengua Castellana y Literatura': 'lengua',
   'Física': 'fisica',
   'Química': 'quimica',
   'Biología': 'biologia',
   'Inglés': 'ingles',
-  'Lengua Castellana': 'lengua',
 }
 
 const SIMULACRO_SUBJECT: Record<string, string> = {
   matematicas_ii: 'mates',
+  matematicas_ccss: 'matematicas_ccss',
   historia_espana: 'historia',
+  lengua: 'lengua',
   fisica: 'fisica',
   quimica: 'quimica',
   biologia: 'biologia',
   ingles: 'ingles',
-  lengua: 'lengua',
 }
 
 const BLOCK_DISPLAY: Record<string, string> = {

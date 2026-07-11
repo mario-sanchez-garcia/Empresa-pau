@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { recordBetaMetric } from '@/app/lib/betaMetrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,6 +77,14 @@ export async function POST(request: NextRequest) {
     const total = totalInBlock ?? 0
     const postponed = postponedInBlock ?? 0
     const warning = total > 0 && postponed / total > 0.3
+    await recordBetaMetric(db, user.id, 'no_dado_en_clase_clicked', {
+      subject,
+      v2_sort_order: v2SortOrder,
+      block_key: blockKey,
+      postponed_in_block: postponed,
+      total_in_block: total,
+      warning,
+    })
 
     return NextResponse.json({
       success: true,

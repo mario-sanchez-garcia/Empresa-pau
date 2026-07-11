@@ -1,5 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
+import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
+
 const HOLIDAYS = new Set([
   '2026-10-12', '2026-11-01', '2026-11-02',
   '2026-12-06', '2026-12-08', '2026-12-25',
@@ -49,14 +51,10 @@ function countWorkingDays(from: string, to: string): number {
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 0) return null
   if (subjects.length === 1) return subjects[0]
+  const ordered = (PRIVATE_BETA_SUBJECTS as readonly string[]).filter(subject => subjects.includes(subject))
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  if (dow === 1 || dow === 2) {
-    return subjects.includes('matematicas_ii') ? 'matematicas_ii' : subjects[0]
-  }
-  if (dow === 3 || dow === 4 || dow === 5) {
-    return subjects.includes('matematicas_ccss') ? 'matematicas_ccss' : subjects[subjects.length - 1]
-  }
-  return null
+  if (dow === 0 || dow === 6) return null
+  return ordered[(dow - 1) % ordered.length] ?? subjects[0]
 }
 
 type QueueItem = {
@@ -225,8 +223,7 @@ export async function ensureCaminoCalendar(
 
   // PASO 4+5 — Generar días hasta completar CALENDAR_HORIZON
 
-  // Private beta scope: the Supabase calendar engine only schedules Matemáticas II and Matemáticas CCSS.
-  // Historia remains in the codebase/data, but it is not activated for beta users yet.
+  // Private beta scope: the Supabase calendar engine only schedules the active core PAU subjects.
   // Obtener asignaturas del usuario desde la cola
   const { data: subjectRows } = await supabase
     .from('user_learning_queue')
@@ -238,7 +235,7 @@ export async function ensureCaminoCalendar(
   const subjectSet = new Set(
     (subjectRows ?? [])
       .map(r => r.subject as string)
-      .filter(s => s === 'matematicas_ii' || s === 'matematicas_ccss'),
+      .filter(isPrivateBetaSubject),
   )
   const subjects = [...subjectSet]
   if (subjects.length === 0) return

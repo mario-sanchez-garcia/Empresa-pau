@@ -133,8 +133,8 @@ export function normalizeCaminoExamSubject(value?: string | null): CaminoExamSub
   if (slug === 'fisica') return 'fisica'
   if (slug === 'quimica') return 'quimica'
   if (slug === 'biologia') return 'biologia'
-  if (slug === 'lengua' || slug === 'lengua_castellana') return 'lengua'
-  if (slug === 'historia' || slug === 'historia_de_espana') return 'historia'
+  if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_literatura' || slug === 'lengua_castellana_y_literatura') return 'lengua'
+  if (slug === 'historia' || slug === 'historia_de_espana' || slug === 'historia_espana') return 'historia'
   if (slug === 'historia_filosofia' || slug === 'filosofia' || slug === 'historia_de_la_filosofia') return 'historia_filosofia'
   if (slug === 'ingles' || slug === 'english') return 'ingles'
   return null

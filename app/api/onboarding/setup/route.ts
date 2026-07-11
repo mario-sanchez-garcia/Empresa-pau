@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, isValidRouteId } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { recordBetaMetric } from '@/app/lib/betaMetrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,10 +47,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const serviceDb = createServiceClient()
-    await serviceDb.from('billing_events').insert({
-      user_id: user.id,
-      event_type: 'onboarding_completed',
-      payload: {
+    await recordBetaMetric(serviceDb, user.id, 'onboarding_completed', {
         community,
         school_name: schoolName,
         school_source: schoolSource,
@@ -61,7 +59,6 @@ export async function POST(request: NextRequest) {
         weekly_study_days_value: weeklyStudyDaysValue,
         route_id: routeId,
         onboarding_completed: true,
-      }
     })
   } catch { /* non-critical */ }
 

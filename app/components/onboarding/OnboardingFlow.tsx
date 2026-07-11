@@ -28,8 +28,8 @@ const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: stri
 const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; bg: string; betaStatus: 'enabled' | 'locked'; badge?: string }> = [
   { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff', betaStatus: 'enabled' },
   { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff', betaStatus: 'enabled' },
-  { id: 'Lengua Castellana', label: 'Lengua Castellana y Literatura', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
-  { id: 'Historia de España', label: 'Historia de España', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Lengua Castellana', label: 'Lengua Castellana y Literatura', color: '#0891b2', bg: '#ecfeff', betaStatus: 'enabled' },
+  { id: 'Historia de España', label: 'Historia de España', color: '#b45309', bg: '#fff7ed', betaStatus: 'enabled' },
   { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
   { id: 'Inglés', label: 'Inglés', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
   { id: 'Física', label: 'Física', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
@@ -135,6 +135,8 @@ export default function OnboardingFlow() {
     const selectedEnabledSubjects = data.subjects.filter(subject => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject))
     if (selectedEnabledSubjects.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
     if (selectedEnabledSubjects.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
+    if (selectedEnabledSubjects.includes('Lengua Castellana')) msgs.push('Preparando comentario, gramática y literatura…')
+    if (selectedEnabledSubjects.includes('Historia de España')) msgs.push('Construyendo tu cronología de Historia de España…')
     if (msgs.length === 0) {
       msgs.push('Calculando tu ritmo de estudio…')
       msgs.push('Construyendo tu Camino PAU…')
@@ -203,6 +205,8 @@ export default function OnboardingFlow() {
   const SUBJECT_TO_SLUG: Record<string, string> = {
     'Matemáticas II': 'matematicas_ii',
     'Matemáticas CCSS': 'matematicas_ccss',
+    'Lengua Castellana': 'lengua',
+    'Historia de España': 'historia_espana',
   }
 
   async function finish() {
@@ -419,7 +423,7 @@ export default function OnboardingFlow() {
         <div className="space-y-4">
           <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
             <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Beta privada</p>
-            <p className="mt-1 text-sm font-bold leading-5 text-blue-900">De momento puedes probar Pausia con Matemáticas II y Matemáticas CCSS. El resto de asignaturas se irán abriendo próximamente.</p>
+            <p className="mt-1 text-sm font-bold leading-5 text-blue-900">De momento puedes probar Pausia con Matemáticas II, Matemáticas CCSS, Lengua e Historia. El resto de asignaturas se irán abriendo próximamente.</p>
           </div>
           <div>
             <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Disponibles en beta privada</p>
@@ -440,7 +444,7 @@ export default function OnboardingFlow() {
             <div className="grid gap-2 sm:grid-cols-2">
               {PRIVATE_BETA_LOCKED_SUBJECTS.map(subject => {
                 return (
-                  <button key={subject.id} type="button" disabled title="Esta asignatura estará disponible próximamente. En esta beta estamos probando Matemáticas II y Matemáticas CCSS." className="flex min-h-14 cursor-not-allowed items-center justify-between gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 text-left opacity-75">
+                  <button key={subject.id} type="button" disabled title="Esta asignatura estará disponible próximamente. En esta beta estamos probando Matemáticas II, Matemáticas CCSS, Lengua e Historia." className="flex min-h-14 cursor-not-allowed items-center justify-between gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 text-left opacity-75">
                     <span className="flex min-w-0 items-center gap-3">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-slate-300 bg-white text-slate-400"><Lock size={11} strokeWidth={3} /></span>
                       <span className="truncate text-sm font-black text-slate-500">{subject.label}</span>

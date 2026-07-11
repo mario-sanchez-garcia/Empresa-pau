@@ -30,6 +30,7 @@ const onboardingFlow = read('app/components/onboarding/OnboardingFlow.tsx')
 const onboardingGenerateRoute = read('app/api/onboarding/generate/route.ts')
 const ensureCaminoCalendar = read('app/lib/ensureCaminoCalendar.ts')
 const caminoPlan = read('app/lib/camino/caminoCurriculumPlan.ts')
+const betaCurriculum = read('app/lib/camino/betaCurriculum.ts')
 const caminoActions = read('app/lib/camino/caminoActions.ts')
 const caminoMissionGenerator = read('app/lib/camino/caminoMissionGenerator.ts')
 const caminoPlanLimits = read('app/lib/camino/caminoPlanLimits.ts')
@@ -358,12 +359,12 @@ assert(
     caminoCalendar.includes('normalizeSubjectSlug(mission.subject)') &&
     caminoCalendar.includes('visibleCalendarForOnboarding') &&
     caminoCalendar.includes('Completa tu perfil para que Pausia cree tu Camino PAU') &&
-    caminoCalendar.includes("const PRIVATE_BETA_SUBJECT_SLUGS = new Set(['matematicas_ii', 'matematicas_ccss'])") &&
+    caminoCalendar.includes('const PRIVATE_BETA_SUBJECT_SLUGS = new Set<string>(PRIVATE_BETA_SUBJECTS)') &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']")
 )
 
 assert(
-  'Private beta onboarding shows locked upcoming subjects but only activates Matemáticas II and Matemáticas CCSS',
+  'Private beta onboarding activates four core PAU subjects and locks the rest',
   onboardingFlow.includes("const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'enabled')") &&
     onboardingFlow.includes("const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'locked')") &&
     onboardingFlow.includes("const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => subject.id))") &&
@@ -371,18 +372,19 @@ assert(
     onboardingFlow.includes("badge: 'Próximamente'") &&
     onboardingFlow.includes('PRIVATE_BETA_LOCKED_SUBJECTS.map') &&
     onboardingFlow.includes('disabled title="Esta asignatura estará disponible próximamente') &&
-    onboardingFlow.includes('De momento puedes probar Pausia con Matemáticas II y Matemáticas CCSS') &&
+    onboardingFlow.includes('De momento puedes probar Pausia con Matemáticas II, Matemáticas CCSS, Lengua e Historia') &&
     onboardingFlow.includes('Selecciona al menos una asignatura disponible') &&
     onboardingFlow.includes("'Matemáticas CCSS': 'matematicas_ccss'") &&
+    onboardingFlow.includes("'Lengua Castellana': 'lengua'") &&
+    onboardingFlow.includes("'Historia de España': 'historia_espana'") &&
     onboardingFlow.includes('selectedEnabledSubjects') &&
     onboardingFlow.includes('subjects: selectedEnabledSubjects') &&
-    onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])") &&
-    ensureCaminoCalendar.includes("filter(s => s === 'matematicas_ii' || s === 'matematicas_ccss')") &&
+    onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana'])") &&
+    ensureCaminoCalendar.includes('filter(isPrivateBetaSubject)') &&
     caminoCalendar.includes("const subjects = subjectSlugs.length > 0 ? subjectSlugs : ['matematicas_ii']") &&
     onboardingFlow.includes('Historia de España') &&
     onboardingFlow.includes('Física') &&
     onboardingFlow.includes('Lengua Castellana y Literatura') &&
-    !onboardingFlow.includes("'Historia de España': 'historia_espana'") &&
     !onboardingGenerateRoute.includes("const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'historia_espana'])") &&
     !ensureCaminoCalendar.includes("filter(s => s === 'matematicas_ii' || s === 'historia_espana')")
 )
@@ -548,6 +550,9 @@ assert(
 assert(
   'Camino curriculum seed has topic lessons and keeps CCSS free of 3D geometry',
   caminoPlan.includes('CAMINO_CURRICULUM_TOPICS') &&
+    betaCurriculum.includes('PRIVATE_BETA_CURRICULUM_TOPICS') &&
+    betaCurriculum.includes("'lengua'") &&
+    betaCurriculum.includes("'historia_espana'") &&
     caminoPlan.includes('buildEvauHref') &&
     caminoSeed.includes('"subject": "matematicas_ccss"') &&
     caminoSeed.includes('"subject": "matematicas_ii"') &&

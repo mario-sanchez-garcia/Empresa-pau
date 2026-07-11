@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
+import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 
 export const dynamic = 'force-dynamic'
 
 const VALID_START_MODES = ['zero', 'first_block', 'mid', 'review', 'unknown'] as const
 type StartMode = typeof VALID_START_MODES[number]
 
-// Private beta scope: Camino PAU is active only for Matemáticas II and Matemáticas CCSS.
-const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])
+// Private beta scope: Camino PAU is active only for the four core PAU subjects.
+const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana'])
 
 const HOLIDAYS = new Set([
   '2026-10-12', '2026-11-01', '2026-11-02',
@@ -43,17 +45,36 @@ function getStudyDays(startDate: string, n: number): string[] {
   return days
 }
 
-// Private beta scheduler: alternate only between supported math tracks.
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 1) return subjects[0]
+  const ordered = ['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana']
+    .filter(subject => subjects.includes(subject))
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  if (dow === 1 || dow === 2) {
-    return subjects.includes('matematicas_ii') ? 'matematicas_ii' : subjects[0]
-  }
-  if (dow === 3 || dow === 4 || dow === 5) {
-    return subjects.includes('matematicas_ccss') ? 'matematicas_ccss' : subjects[subjects.length - 1]
-  }
-  return null
+  if (dow === 0 || dow === 6) return null
+  return ordered[(dow - 1) % ordered.length] ?? subjects[0]
+}
+
+type QueueSourceItem = {
+  sort_order: number
+  title: string
+  block_key: string | null
+  block_slug: string | null
+  subject: string
+}
+
+function betaSequenceItems(subject: string): QueueSourceItem[] {
+  const normalized = normalizeSubjectSlug(subject)
+  if (!isPrivateBetaSubject(normalized)) return []
+  return PRIVATE_BETA_CURRICULUM_TOPICS
+    .filter(topic => topic.subject === normalized)
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map(topic => ({
+      sort_order: topic.orderIndex,
+      title: topic.title,
+      block_key: topic.blockTitle,
+      block_slug: topic.blockSlug,
+      subject: topic.subject,
+    }))
 }
 
 export async function POST(request: NextRequest) {
@@ -67,7 +88,10 @@ export async function POST(request: NextRequest) {
 
     // ── Validate input ──────────────────────────────────────────────────────
     const subjects = Array.isArray(body.subjects)
-      ? body.subjects.filter((s): s is string => typeof s === 'string' && ALLOWED_SUBJECTS.has(s))
+      ? [...new Set(body.subjects
+        .filter((s): s is string => typeof s === 'string')
+        .map(s => normalizeSubjectSlug(s))
+        .filter(subject => ALLOWED_SUBJECTS.has(subject)))]
       : []
     if (subjects.length === 0) {
       return NextResponse.json({ error: 'Se requiere al menos una asignatura válida' }, { status: 400 })
@@ -124,51 +148,56 @@ export async function POST(request: NextRequest) {
         .order('subject', { ascending: true })
         .order('sort_order', { ascending: true })
 
-      if (flashcards && flashcards.length > 0) {
-        const bySubject: Record<string, typeof flashcards> = {}
-        for (const fc of flashcards) {
+      const bySubject: Record<string, QueueSourceItem[]> = {}
+      for (const fc of (flashcards ?? [])) {
+        if (isPrivateBetaSubject(fc.subject)) {
           if (!bySubject[fc.subject]) bySubject[fc.subject] = []
-          bySubject[fc.subject].push(fc)
+          bySubject[fc.subject].push(fc as QueueSourceItem)
+        }
+      }
+      for (const subject of subjectsToQueue) {
+        if (!bySubject[subject]?.length) bySubject[subject] = betaSequenceItems(subject)
+      }
+
+      const queueRows = []
+      for (const subject of subjectsToQueue) {
+        const items = bySubject[subject] ?? []
+
+        // First 2 unique block_keys per subject (for 'mid' startMode)
+        let earlyBlocks = new Set<string | null>()
+        if (startMode === 'mid') {
+          const uniqueBlocks = [...new Set(items.map(i => i.block_key))]
+          earlyBlocks = new Set(uniqueBlocks.slice(0, 2))
         }
 
-        const queueRows = []
-        for (const subject of subjectsToQueue) {
-          const items = bySubject[subject] ?? []
-
-          // First 2 unique block_keys per subject (for 'mid' startMode)
-          let earlyBlocks = new Set<string>()
-          if (startMode === 'mid') {
-            const uniqueBlocks = [...new Set(items.map(i => i.block_key))]
-            earlyBlocks = new Set(uniqueBlocks.slice(0, 2))
+        for (let i = 0; i < items.length; i++) {
+          const fc = items[i]
+          let metadata: Record<string, unknown>
+          if (startMode === 'review') {
+            metadata = { mission_type: 'review' }
+          } else if (startMode === 'mid') {
+            metadata = earlyBlocks.has(fc.block_key)
+              ? { mission_type: 'review', express: true }
+              : { mission_type: 'concept' }
+          } else {
+            // zero, first_block, unknown
+            metadata = { mission_type: 'concept', beta_sequence: true }
           }
-
-          for (let i = 0; i < items.length; i++) {
-            const fc = items[i]
-            let metadata: Record<string, unknown>
-            if (startMode === 'review') {
-              metadata = { mission_type: 'review' }
-            } else if (startMode === 'mid') {
-              metadata = earlyBlocks.has(fc.block_key)
-                ? { mission_type: 'review', express: true }
-                : { mission_type: 'concept' }
-            } else {
-              // zero, first_block, unknown
-              metadata = { mission_type: 'concept' }
-            }
-            queueRows.push({
-              user_id: user.id,
-              subject: fc.subject,
-              block_key: fc.block_key,
-              block_slug: fc.block_slug,
-              v2_sort_order: fc.sort_order,
-              title: fc.title,
-              subject_position: i + 1,
-              queue_status: 'pending',
-              metadata,
-            })
-          }
+          queueRows.push({
+            user_id: user.id,
+            subject: fc.subject,
+            block_key: fc.block_key,
+            block_slug: fc.block_slug,
+            v2_sort_order: fc.sort_order,
+            title: fc.title,
+            subject_position: i + 1,
+            queue_status: 'pending',
+            metadata,
+          })
         }
+      }
 
+      if (queueRows.length > 0) {
         // Batch insert in chunks of 100
         for (let i = 0; i < queueRows.length; i += 100) {
           const { error } = await db.from('user_learning_queue').insert(queueRows.slice(i, i + 100))

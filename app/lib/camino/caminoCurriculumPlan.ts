@@ -1,4 +1,5 @@
 import curriculumSeed from '@/app/data/camino/curriculum_seed.json'
+import { PRIVATE_BETA_CURRICULUM_TOPICS } from './betaCurriculum'
 
 export type CaminoMissionType =
   | 'concept_explanation'
@@ -29,6 +30,17 @@ export interface CaminoCurriculumTopic {
   guidedExample: string
   practicePrompt: string
   rawLatex: string
+  appliedExercise?: string
+  referenceSolution?: string
+  commonMistakes?: string[]
+  progressCriteria?: {
+    seen: string
+    practiced: string
+    completed: string
+    mastered: string
+  }
+  examTags?: string[]
+  estimatedMinutes?: number
   evauPracticeQuery: CaminoEvauPracticeQuery
   source: string
   compatibleSubjects: string[]
@@ -53,7 +65,10 @@ export const SUBJECT_SLUG_BY_LABEL: Record<string, string> = Object.fromEntries(
   Object.entries(SUBJECT_LABELS).map(([slug, label]) => [label, slug])
 )
 
-export const CAMINO_CURRICULUM_TOPICS = (curriculumSeed as CaminoCurriculumTopic[])
+export const CAMINO_CURRICULUM_TOPICS = [
+  ...(curriculumSeed as CaminoCurriculumTopic[]),
+  ...PRIVATE_BETA_CURRICULUM_TOPICS,
+]
   .slice()
   .sort((a, b) => a.subject.localeCompare(b.subject) || a.orderIndex - b.orderIndex)
 
@@ -79,7 +94,7 @@ export function normalizeSubjectSlug(subject?: string | null) {
   if (slug === 'fisica') return 'fisica'
   if (slug === 'quimica') return 'quimica'
   if (slug === 'biologia') return 'biologia'
-  if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_y_literatura') return 'lengua'
+  if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_y_literatura' || slug === 'lengua_castellana_literatura') return 'lengua'
   if (slug === 'historia') return 'historia'
   if (slug === 'historia_de_espana' || slug === 'historia_espana') return 'historia_espana'
   if (slug === 'filosofia' || slug === 'historia_filosofia' || slug === 'historia_de_la_filosofia') return 'historia_filosofia'

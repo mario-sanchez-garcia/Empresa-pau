@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { recordBetaMetric } from '@/app/lib/betaMetrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,6 +82,18 @@ export async function POST(request: NextRequest) {
         mission_type: missionType,
         title,
       },
+    })
+    await recordBetaMetric(db, user.id, 'correction_completed', {
+      subject,
+      v2_sort_order: v2SortOrder,
+      mission_type: missionType,
+      title,
+    })
+    await recordBetaMetric(db, user.id, 'xp_awarded', {
+      subject,
+      v2_sort_order: v2SortOrder,
+      mission_type: missionType,
+      xp,
     })
 
     // PASO 3 — Actualizar camino_user_progress

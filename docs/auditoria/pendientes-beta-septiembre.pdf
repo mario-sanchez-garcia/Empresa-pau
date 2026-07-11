@@ -1,0 +1,304 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [ 3 0 R 5 0 R 7 0 R ] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> /F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 5675 >>
+stream
+BT
+/F2 11 Tf
+1 0 0 1 48 790 Tm (PENDIENTES PAUSIA - BETA PRIVADA Y SEPTIEMBRE) Tj
+/F1 9 Tf
+1 0 0 1 48 777 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 764 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 751 Tm () Tj
+/F2 11 Tf
+1 0 0 1 48 738 Tm (1. Resumen ejecutivo) Tj
+/F1 9 Tf
+1 0 0 1 48 725 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 712 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 699 Tm (Pausia está cerca de una beta privada controlada con 3-5 alumnos si el foco se mantiene en Matemáticas II) Tj
+/F1 9 Tf
+1 0 0 1 48 686 Tm (y Matemáticas CCSS. Ya existen onboarding limitado, Camino PAU, calendario, cursos por tema, corrección) Tj
+/F1 9 Tf
+1 0 0 1 48 673 Tm (IA, XP, historial, ejercicios PAU/EVAU, simulacros, Stripe test mode, legal básico y smoke tests.) Tj
+/F1 9 Tf
+1 0 0 1 48 660 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 647 Tm (Lo que falta para que la beta no parezca una demo es cerrar el corazón del método: una progresión real) Tj
+/F1 9 Tf
+1 0 0 1 48 634 Tm (por asignatura, explicaciones de curso con más valor, ejercicio aplicado corregible, XP solo tras) Tj
+/F1 9 Tf
+1 0 0 1 48 621 Tm (corrección y EVAU del mismo tema sin repeticiones raras. Para septiembre, además, hay que cerrar) Tj
+/F1 9 Tf
+1 0 0 1 48 608 Tm (métricas, QA académico, pricing/legal/Stripe live si se cobra y decidir qué asignaturas se prometen) Tj
+/F1 9 Tf
+1 0 0 1 48 595 Tm (públicamente.) Tj
+/F1 9 Tf
+1 0 0 1 48 582 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 569 Tm () Tj
+/F2 11 Tf
+1 0 0 1 48 556 Tm (2. Pendientes para beta privada) Tj
+/F1 9 Tf
+1 0 0 1 48 543 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 530 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 517 Tm (Prioridad | Cosa que falta | Qué necesita Codex para hacerlo | Información valiosa / contexto) Tj
+/F1 9 Tf
+1 0 0 1 48 504 Tm (P0 | Cerrar base real de planificación de Camino PAU | Secuencia editorial de Matemáticas II y CCSS con) Tj
+/F1 9 Tf
+1 0 0 1 48 491 Tm (bloque, tema, orden, prerequisitos, misión esperada y query EVAU | [Parcial] Parcial: hay) Tj
+/F1 9 Tf
+1 0 0 1 48 478 Tm (`user_learning_queue`, `camino_calendar`, `ensureCaminoCalendar` y seed; falta una fuente única que diga) Tj
+/F1 9 Tf
+1 0 0 1 48 465 Tm (qué tema viene después y cuándo pasar a EVAU) Tj
+/F1 9 Tf
+1 0 0 1 48 452 Tm (P0 | Desarrollar un poco más las explicaciones de los cursos activos | Apuntes LaTeX, lista exacta de) Tj
+/F1 9 Tf
+1 0 0 1 48 439 Tm (temas beta y decisión de si se actualiza `curriculum_content_v2`, seed o Supabase | [Pendiente]) Tj
+/F1 9 Tf
+1 0 0 1 48 426 Tm (Pendiente: deben responder qué es, para qué sirve, cuándo se usa en PAU, error típico y conexión con) Tj
+/F1 9 Tf
+1 0 0 1 48 413 Tm (ejercicio; mini clase, no teoría larga) Tj
+/F1 9 Tf
+1 0 0 1 48 400 Tm (P0 | Cerrar curso -> ejercicio aplicado -> corrección -> XP | Confirmar flujo en `/camino/tema`,) Tj
+/F1 9 Tf
+1 0 0 1 48 387 Tm (`/api/chat`, `/api/camino/complete-mission` e historial; definir si toda misión se completa solo tras) Tj
+/F1 9 Tf
+1 0 0 1 48 374 Tm (corrección | [Parcial] Parcial: el curso corrige y llama a `complete-mission` si hay nota; hay riesgo de) Tj
+/F1 9 Tf
+1 0 0 1 48 361 Tm (XP directo en calendario manual y falta QA de no duplicidad) Tj
+/F1 9 Tf
+1 0 0 1 48 348 Tm (P0 | Garantizar EVAU por tema sin abrir siempre lo primero | Etiquetado mínimo tema/bloque en ejercicios) Tj
+/F1 9 Tf
+1 0 0 1 48 335 Tm (de Matemáticas II y CCSS; lista de fallbacks aceptables | [Parcial] Parcial: `randomEvauExercise` respeta) Tj
+/F1 9 Tf
+1 0 0 1 48 322 Tm (subject y evita recientes, pero usa keywords y puede caer en `subject_fallback`) Tj
+/F1 9 Tf
+1 0 0 1 48 309 Tm (P0 | Métricas básicas de beta | Definir dónde registrar eventos y nombres: `onboarding_completed`,) Tj
+/F1 9 Tf
+1 0 0 1 48 296 Tm (`camino_opened`, `course_opened`, `exercise_submitted`, `correction_completed`, `xp_awarded`,) Tj
+/F1 9 Tf
+1 0 0 1 48 283 Tm (`evau_exercise_opened`, `day_2_return` | [Pendiente] Pendiente: hay `billing_events` y admin de uso IA,) Tj
+/F1 9 Tf
+1 0 0 1 48 270 Tm (pero no un tracking de producto cerrado para beta) Tj
+/F1 9 Tf
+1 0 0 1 48 257 Tm (P0 | Mensaje claro de beta privada | Ubicación exacta: onboarding, Camino o dashboard; copy final |) Tj
+/F1 9 Tf
+1 0 0 1 48 244 Tm ([Parcial] Parcial: el onboarding bloquea materias, pero conviene mostrar explícitamente "Estás en la beta) Tj
+/F1 9 Tf
+1 0 0 1 48 231 Tm (privada& Matemáticas II y CCSS") Tj
+/F1 9 Tf
+1 0 0 1 48 218 Tm (P0 | QA manual de beta privada | Checklist con 3-5 alumnos, casos Madrid/CCSS/Mates II, móvil y) Tj
+/F1 9 Tf
+1 0 0 1 48 205 Tm (escritorio | [Parcial] Parcial: hay smoke tests y docs QA, pero no sustituyen una prueba real de punta a) Tj
+/F1 9 Tf
+1 0 0 1 48 192 Tm (punta) Tj
+/F1 9 Tf
+1 0 0 1 48 179 Tm (P1 | Mejorar "No lo he dado en clase" para beta | Confirmar comportamiento deseado al marcar tema:) Tj
+/F1 9 Tf
+1 0 0 1 48 166 Tm (retrasar, sustituir por previo y no repetirlo mañana | [Parcial] Parcial: `postpone-mission` guarda) Tj
+/F1 9 Tf
+1 0 0 1 48 153 Tm (`not_taught_in_class`; el cliente tiene lógica de sustitución, pero falta QA real) Tj
+/F1 9 Tf
+1 0 0 1 48 140 Tm (P1 | Parciales y simulacros en beta | Decidir si los alumnos reales añaden parciales por bloque o por) Tj
+/F1 9 Tf
+1 0 0 1 48 127 Tm (tema; validar límites del plan | [Parcial] Parcial: existe `injectPartialExamMissions`, banner y límites;) Tj
+/F1 9 Tf
+1 0 0 1 48 114 Tm (falta comprobar que adapta Camino de forma comprensible) Tj
+/F1 9 Tf
+1 0 0 1 48 101 Tm (P1 | Revisar calendario visible | Criterio final de semana: 7 días, 14 días o solo hoy + próximos |) Tj
+/F1 9 Tf
+1 0 0 1 48 88 Tm ([Parcial] Parcial: semana empieza lunes, hay navegación, editor simple y bonus; el motor Supabase genera) Tj
+/F1 9 Tf
+1 0 0 1 48 75 Tm (14 días, el cliente también genera semanas) Tj
+/F1 9 Tf
+1 0 0 1 48 62 Tm () Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> /F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 5564 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 48 790 Tm () Tj
+/F2 11 Tf
+1 0 0 1 48 777 Tm (3. Pendientes para septiembre / beta pública) Tj
+/F1 9 Tf
+1 0 0 1 48 764 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 751 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 738 Tm (Prioridad | Cosa que falta | Qué necesita Codex para hacerlo | Información valiosa / contexto) Tj
+/F1 9 Tf
+1 0 0 1 48 725 Tm (P1 | Secuencia curricular sólida para todo el curso | Programación 38 semanas o 60 días, por asignatura,) Tj
+/F1 9 Tf
+1 0 0 1 48 712 Tm (con fases y ventanas de repaso | [Pendiente] Falta como motor único; existe) Tj
+/F1 9 Tf
+1 0 0 1 48 699 Tm (`calendario-38-semanas-revisado.tsv`, pero no gobierna el planning) Tj
+/F1 9 Tf
+1 0 0 1 48 686 Tm (P1 | Matemáticas CCSS completa y separada de Matemáticas II | Secuencia CCSS sin geometría 3D: álgebra,) Tj
+/F1 9 Tf
+1 0 0 1 48 673 Tm (análisis económico, probabilidad e inferencia | [Pendiente] Falta granularidad: el seed CCSS tiene pocos) Tj
+/F1 9 Tf
+1 0 0 1 48 660 Tm (hitos; el helper filtra geometría, pero el contenido debe crecer) Tj
+/F1 9 Tf
+1 0 0 1 48 647 Tm (P1 | Más contenido de curso con LaTeX | Apuntes LaTeX definitivos, mapping a `curriculum_content_v2` y) Tj
+/F1 9 Tf
+1 0 0 1 48 634 Tm (revisión académica | [Parcial] Parcial: hay tarjetas, MathMarkdown y contenido v2; falta calidad) Tj
+/F1 9 Tf
+1 0 0 1 48 621 Tm (homogénea de mini clase) Tj
+/F1 9 Tf
+1 0 0 1 48 608 Tm (P1 | Etiquetado EVAU por tema | Mapa tema curricular -> ejercicios reales por año/convocatoria/opción |) Tj
+/F1 9 Tf
+1 0 0 1 48 595 Tm ([Parcial] Parcial: hay ejercicios reales y heurística; para pública debe ser más determinista) Tj
+/F1 9 Tf
+1 0 0 1 48 582 Tm (P1 | Límites por plan conectados de punta a punta | Definir cuotas finales para correcciones, fotos,) Tj
+/F1 9 Tf
+1 0 0 1 48 569 Tm (parciales, simulacros, Camino y chat | [Parcial] Parcial: pricing está actualizado y `caminoPlanLimits`) Tj
+/F1 9 Tf
+1 0 0 1 48 556 Tm (existe; falta comprobar aplicación homogénea) Tj
+/F1 9 Tf
+1 0 0 1 48 543 Tm (P1 | Stripe live si se cobra | Claves live, webhook producción, price IDs finales, prueba end-to-end,) Tj
+/F1 9 Tf
+1 0 0 1 48 530 Tm (soporte y reembolsos | [Parcial] Parcial: Stripe test/webhook está cubierto por smoke; para septiembre) Tj
+/F1 9 Tf
+1 0 0 1 48 517 Tm (falta live y operación real) Tj
+/F1 9 Tf
+1 0 0 1 48 504 Tm (P1 | Legal y política de uso razonable | Texto final de términos, privacidad, IA, reembolsos y límites de) Tj
+/F1 9 Tf
+1 0 0 1 48 491 Tm (uso | [Parcial] Parcial: hay páginas legales beta; deben alinearse con pricing final antes de cobrar) Tj
+/F1 9 Tf
+1 0 0 1 48 478 Tm (P1 | Landing/pricing pública coherente | Confirmar copy final y promesas de asignaturas | [Hecho]) Tj
+/F1 9 Tf
+1 0 0 1 48 465 Tm (Bastante avanzado: aparecen Free, Premium 9,99 ¬, Curso desde 59/79, Intensivo 19,99 ¬, Superpremium) Tj
+/F1 9 Tf
+1 0 0 1 48 452 Tm (17,99 ¬ y smoke anti "ilimitado") Tj
+/F1 9 Tf
+1 0 0 1 48 439 Tm (P1 | Observabilidad y métricas de producto | Dashboard o tabla/eventos para cohortes, retención y costes) Tj
+/F1 9 Tf
+1 0 0 1 48 426 Tm (por flujo | [Parcial] Parcial: hay admin de uso IA; faltan eventos de aprendizaje y retención) Tj
+/F1 9 Tf
+1 0 0 1 48 413 Tm (P2 | Más asignaturas o promesa explícita de no ofrecerlas | Decisión de alcance: solo mates al inicio o) Tj
+/F1 9 Tf
+1 0 0 1 48 400 Tm (añadir Historia/Lengua/Física/Química | [Parcial] Parcial: datos existen en varias materias, pero beta) Tj
+/F1 9 Tf
+1 0 0 1 48 387 Tm (Camino debe limitarse para no prometer de más) Tj
+/F1 9 Tf
+1 0 0 1 48 374 Tm (P2 | Ranking/ligas avanzado | Decidir si es core de septiembre o mejora posterior | [Parcial] Parcial:) Tj
+/F1 9 Tf
+1 0 0 1 48 361 Tm (ranking y ligas existen, pero no son bloqueo de beta privada) Tj
+/F1 9 Tf
+1 0 0 1 48 348 Tm (P2 | Admin académico de contenidos | Pantalla o proceso para revisar temas, explicaciones, ejercicios y) Tj
+/F1 9 Tf
+1 0 0 1 48 335 Tm (fallbacks | [Pendiente] Falta como operación de contenidos; hoy depende más de seeds/scripts/código) Tj
+/F1 9 Tf
+1 0 0 1 48 322 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 309 Tm () Tj
+/F2 11 Tf
+1 0 0 1 48 296 Tm (4. Decisiones que debe tomar el equipo) Tj
+/F1 9 Tf
+1 0 0 1 48 283 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 270 Tm () Tj
+/F2 11 Tf
+1 0 0 1 48 257 Tm (1. ¿Beta privada solo Matemáticas II y Matemáticas CCSS definitivamente?) Tj
+/F2 11 Tf
+1 0 0 1 48 244 Tm (2. ¿Cuántos temas mínimos deben tener explicación útil antes de invitar alumnos?) Tj
+/F2 11 Tf
+1 0 0 1 48 231 Tm (3. ¿El calendario beta debe enseñar 7 días, 14 días o una vista de 60 días?) Tj
+/F2 11 Tf
+1 0 0 1 48 218 Tm (4. ¿Cuántas misiones al día son razonables para no abrumar?) Tj
+/F2 11 Tf
+1 0 0 1 48 205 Tm (5. ¿Qué pesa más: avanzar temario, corregir errores o preparar parciales próximos?) Tj
+/F2 11 Tf
+1 0 0 1 48 192 Tm (6. ¿Qué hacemos si un tema no tiene explicación LaTeX suficiente: fallback corto, no mostrarlo o mandar) Tj
+/F1 9 Tf
+1 0 0 1 48 179 Tm (directo a EVAU?) Tj
+/F2 11 Tf
+1 0 0 1 48 166 Tm (7. ¿Se cobra en septiembre o primero se abre beta pública gratuita?) Tj
+/F2 11 Tf
+1 0 0 1 48 153 Tm (8. ¿Qué asignaturas se prometen públicamente en landing y onboarding?) Tj
+/F2 11 Tf
+1 0 0 1 48 140 Tm (9. ¿Qué significa "tema completado": leer teoría, entregar ejercicio, recibir corrección o aprobar EVAU?) Tj
+/F2 11 Tf
+1 0 0 1 48 127 Tm (10. ¿Quién valida académicamente las explicaciones y el etiquetado por tema?) Tj
+/F1 9 Tf
+1 0 0 1 48 114 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 101 Tm () Tj
+/F2 11 Tf
+1 0 0 1 48 88 Tm (5. Recomendación de orden de trabajo) Tj
+/F1 9 Tf
+1 0 0 1 48 75 Tm () Tj
+/F1 9 Tf
+1 0 0 1 48 62 Tm () Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> /F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1041 >>
+stream
+BT
+/F2 11 Tf
+1 0 0 1 48 790 Tm (1. Cerrar una secuencia beta única para Matemáticas II y Matemáticas CCSS.) Tj
+/F2 11 Tf
+1 0 0 1 48 777 Tm (2. Mejorar explicaciones de cursos activos con formato mini clase: qué es, uso PAU, error típico y) Tj
+/F1 9 Tf
+1 0 0 1 48 764 Tm (conexión con ejercicio.) Tj
+/F2 11 Tf
+1 0 0 1 48 751 Tm (3. Validar curso -> ejercicio aplicado -> corrección -> XP -> historial -> misión completada, sin XP) Tj
+/F1 9 Tf
+1 0 0 1 48 738 Tm (duplicado.) Tj
+/F2 11 Tf
+1 0 0 1 48 725 Tm (4. Reforzar EVAU por tema para Matemáticas II y CCSS, con fallback transparente y sin repetición.) Tj
+/F2 11 Tf
+1 0 0 1 48 712 Tm (5. Añadir métricas básicas de beta y mensaje claro de beta privada.) Tj
+/F2 11 Tf
+1 0 0 1 48 699 Tm (6. Hacer QA manual con 3-5 alumnos y recoger feedback.) Tj
+/F2 11 Tf
+1 0 0 1 48 686 Tm (7. Después preparar septiembre: más contenido, tagging EVAU, límites por plan, Stripe live, legal/copy) Tj
+/F1 9 Tf
+1 0 0 1 48 673 Tm (final y decisión de asignaturas públicas.) Tj
+/F1 9 Tf
+1 0 0 1 48 660 Tm () Tj
+ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000135 00000 n 
+0000000374 00000 n 
+0000006101 00000 n 
+0000006340 00000 n 
+0000011956 00000 n 
+0000012195 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+13288
+%%EOF

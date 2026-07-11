@@ -10,7 +10,7 @@ import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
-import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeSubjectSlug, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeSubjectSlug, normalizeTopicSlug, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
@@ -246,8 +246,11 @@ type CaminoCalRow = {
 function calRowToMission(row: CaminoCalRow): Mission {
   const subjectLabel = subjectLabelFromSlug(row.subject)
   const blockSlug = row.block_slug ?? (row.block_key ? textSlug(row.block_key) : '')
+  const topicSlug = typeof row.metadata?.topic_slug === 'string'
+    ? normalizeTopicSlug(row.metadata.topic_slug)
+    : textSlug(row.title)
   const href = blockSlug
-    ? `/camino-pau/curso/${row.subject}/${blockSlug}/${textSlug(row.title)}`
+    ? `/camino-pau/curso/${row.subject}/${blockSlug}/${topicSlug}`
     : ''
   return {
     id: row.id,
@@ -490,18 +493,29 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     })
   }
   const weeklyDays = Math.min(onboarding.weeklyStudyDaysValue ?? 4, planLimits.maxStudyDaysPerWeek)
+  const weekDelta = Math.max(0, Math.floor(daysBetween(currentWeekStartISO(), weekStartISO) / 7))
+  const topicStepPerWeek = Math.max(1, Math.ceil(weeklyDays / Math.max(subjects.length, 1)))
   const weeklyCorrectionBudget = monthlyToWeeklyLimit(planLimits.correctionsPerMonth)
   const weeklyPhotoBudget = monthlyToWeeklyLimit(planLimits.photosPerMonth)
   const maxCorrectableMissions = Math.max(1, Math.min(weeklyCorrectionBudget, Math.max(weeklyPhotoBudget, planLimits.caminoMode === 'limited' ? 2 : weeklyCorrectionBudget)))
   const minutes = onboarding.dailyMinutes ?? 60
   const indexes = indexesFor(weeklyDays)
-  let subjectRotation = 0
-  const topicRotationBySubject = new Map<string, number>()
+  let subjectRotation = weekDelta * weeklyDays
+  const topicRotationBySubject = new Map<string, number>(
+    subjects.map(subject => [subject, weekDelta * topicStepPerWeek])
+  )
   const allowedSubjectSlugs = new Set(subjects.map(subject => subjectSlug(subject)))
   const relevantExams = exams.filter(exam => allowedSubjectSlugs.has(normalizeSubjectSlug(exam.subject)))
   const weakAreas = typeof window === 'undefined' ? [] : loadJson<Array<{ subject: string; block?: string; topic?: string; score: number }>>(WEAK_AREAS_KEY, [])
   const topicProgress = typeof window === 'undefined' ? {} : loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {})
   const schoolAdjustments = typeof window === 'undefined' ? [] : loadSchoolAdjustments()
+  const recentTopicKeys = new Set(
+    Object.values(weekCache)
+      .flat()
+      .flatMap(day => day.missions)
+      .map(mission => `${subjectSlug(mission.subject)}:${mission.block ?? ''}:${mission.topic ?? ''}`)
+      .filter(Boolean),
+  )
   let plannedSimulationsThisRun = 0
   const nextCurriculumItem = (subject: string) => {
     const rows = curriculumForSubject(subject, curriculum)
@@ -509,7 +523,8 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     for (let attempt = 0; attempt < Math.max(rows.length, 1); attempt += 1) {
       const rotation = startRotation + attempt
       const item = pickCurriculumItem(subject, rotation, curriculum)
-      if (!item || !findAdjustmentForItem(item, subject, onboarding, schoolAdjustments)) {
+      const recentKey = item ? `${subjectSlug(subject)}:${item.block}:${item.topic}` : ''
+      if (!item || (!recentTopicKeys.has(recentKey) && !findAdjustmentForItem(item, subject, onboarding, schoolAdjustments))) {
         topicRotationBySubject.set(subject, rotation + 1)
         return item
       }

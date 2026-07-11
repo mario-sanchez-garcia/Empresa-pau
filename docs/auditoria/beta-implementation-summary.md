@@ -34,6 +34,30 @@ El resto de asignaturas queda visible como Próximamente en onboarding y no debe
 - La corrección de curso usa `referenceSolution` cuando existe.
 - Se registran métricas beta mínimas en `billing_events`.
 
+## Corrección de carga LaTeX / contenido
+
+El aviso de apunte pendiente aparecía en temas que sí tenían contenido porque algunas misiones abrían URLs creadas desde `title` (`textSlug(row.title)`) o desde slugs legacy de `curriculum_content_v2`. Esos slugs no siempre coincidían con los `topicSlug` de la secuencia beta local.
+
+La solución actual:
+
+- `caminoCurriculumPlan.ts` expone `normalizeTopicSlug`.
+- `getTopic` normaliza `subject`, `blockSlug` y `topicSlug`.
+- Se añadieron alias controlados para slugs legacy como `dimension-de-una-matriz` hacia contenido beta local como `matrices-operaciones`.
+- Si el tema exacto legacy no tiene contenido local, pero existe alias con explicación/ejemplo/ejercicio, el curso usa ese contenido sin mostrar fallback.
+- El fallback queda reservado para temas realmente incompletos y usa un texto menos alarmante.
+
+## Corrección de progresión semanal
+
+Las semanas podían repetirse porque el generador local de calendario inicializaba la rotación de temas desde cero cada vez que se generaba una semana. Además, el calendario persistido no guardaba siempre el `topicSlug` canónico, por lo que podía reconstruir enlaces desde el título.
+
+La solución actual:
+
+- `/api/onboarding/generate` guarda `metadata.topic_slug` y `block_slug` canónico al crear la cola.
+- `ensureCaminoCalendar` recalcula `topic_slug` canónico si la cola viene de datos legacy.
+- `CaminoCalendarClient` lee `metadata.topic_slug` para construir el enlace del curso.
+- La generación local de semanas usa `weekDelta` para desplazar `subjectRotation` y `topicRotationBySubject`.
+- Se evita repetir temas recientes desde la caché semanal cuando hay alternativa.
+
 ## Reglas de progreso
 
 - Tema visto: el alumno abre la explicación del curso.

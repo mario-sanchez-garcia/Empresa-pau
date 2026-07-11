@@ -20,13 +20,19 @@
 - [ ] Matemáticas II sí puede mostrar Geometría 3D.
 - [ ] La misión principal del día es clara y no hay 5 tareas obligatorias.
 - [ ] Las misiones bonus aparecen debajo y son opcionales.
+- [ ] Semana siguiente avanza a temas posteriores de la secuencia.
+- [ ] Misma semana recargada mantiene las misiones guardadas.
+- [ ] No se repite el mismo `topicSlug` en semanas consecutivas salvo repaso explícito.
 
 ## Curso, corrección y XP
 
 - [ ] El curso/tema abre bien desde Camino.
+- [ ] Un tema con contenido local/LaTeX no muestra el fallback de apunte pendiente.
+- [ ] `Dimensión de una Matriz` carga contenido útil mediante alias a la secuencia beta.
 - [ ] La explicación tiene valor: qué es, uso PAU, reconocimiento y error típico.
 - [ ] Hay ejemplo guiado.
 - [ ] Hay ejercicio aplicado corregible.
+- [ ] Hay errores típicos y criterio de avance.
 - [ ] El alumno puede entregar texto.
 - [ ] El alumno puede subir imagen si el flujo lo permite.
 - [ ] La corrección con Pausia funciona.
@@ -72,3 +78,12 @@
 - [ ] `npm.cmd run smoke`
 - [ ] `npm.cmd run build`
 - [ ] `npm.cmd run lint`
+
+## Carga de contenido y progresión
+
+- Fuente de verdad de secuencia beta: `app/lib/camino/betaCurriculum.ts`, combinada en `app/lib/camino/caminoCurriculumPlan.ts`.
+- Fuente de verdad legacy de mini-misiones Matemáticas II: `app/data/camino/curriculum_seed.json` y `curriculum_content_v2` cuando Supabase tiene filas.
+- El curso resuelve `subject/blockSlug/topicSlug` con `normalizeSubjectSlug`, `normalizeTopicSlug` y alias controlados en `caminoCurriculumPlan.ts`.
+- Si existe contenido local de la secuencia beta, el curso lo usa antes del fallback vacío.
+- La cola/calendario guarda `metadata.topic_slug` para que el enlace use el slug canónico, no el título convertido a slug.
+- Las semanas generadas localmente arrancan desde un offset por `weekDelta`, de modo que semana siguiente avanza en la secuencia.

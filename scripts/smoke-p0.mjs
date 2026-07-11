@@ -551,6 +551,8 @@ assert(
   'Camino curriculum seed has topic lessons and keeps CCSS free of 3D geometry',
   caminoPlan.includes('CAMINO_CURRICULUM_TOPICS') &&
     betaCurriculum.includes('PRIVATE_BETA_CURRICULUM_TOPICS') &&
+    caminoPlan.includes('normalizeTopicSlug') &&
+    caminoPlan.includes("'matematicas_ii:algebra-lineal:dimension-de-una-matriz': 'matrices-operaciones'") &&
     betaCurriculum.includes("'lengua'") &&
     betaCurriculum.includes("'historia_espana'") &&
     caminoPlan.includes('buildEvauHref') &&
@@ -558,6 +560,26 @@ assert(
     caminoSeed.includes('"subject": "matematicas_ii"') &&
     caminoSeed.includes('"blockSlug": "geometria-3d"') &&
     !/"subject": "matematicas_ccss"[\s\S]{0,240}"blockSlug": "geometria-3d"/.test(caminoSeed)
+)
+
+assert(
+  'Camino beta content loading maps legacy mission slugs to local LaTeX lessons',
+  caminoCourseTopic.includes('getTopic(subject, block, topic)') &&
+    caminoPlan.includes('hasLocalLessonContent(exact)') &&
+    caminoPlan.includes('aliasTopicSlug(subjectSlug, normalizedBlockSlug, normalizedTopicSlug)') &&
+    caminoTopic.includes('Este tema aún no tiene apunte estructurado completo') &&
+    caminoTopic.includes('Errores típicos y criterio de avance') &&
+    !caminoTopic.includes('Todavía no hay apunte LaTeX estructurado para este tema')
+)
+
+assert(
+  'Camino weekly generation advances by week and keeps canonical topic slugs',
+  onboardingGenerateRoute.includes('topic_slug: topicMeta.topicSlug') &&
+    ensureCaminoCalendar.includes('calMetadata.topic_slug = topicMeta.topicSlug') &&
+    caminoCalendar.includes('row.metadata?.topic_slug') &&
+    caminoCalendar.includes('weekDelta * topicStepPerWeek') &&
+    caminoCalendar.includes('let subjectRotation = weekDelta * weeklyDays') &&
+    caminoCalendar.includes('!recentTopicKeys.has(recentKey)')
 )
 
 assert(

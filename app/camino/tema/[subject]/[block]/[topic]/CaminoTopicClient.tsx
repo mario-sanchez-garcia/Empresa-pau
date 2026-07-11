@@ -714,6 +714,23 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <LearningCard title="Ahora inténtalo tú">
                     {currentTopic.practicePrompt ? <MathMarkdown text={currentTopic.practicePrompt} /> : <EmptyContent />}
                   </LearningCard>
+                  {(currentTopic.commonMistakes?.length || currentTopic.progressCriteria) && (
+                    <LearningCard title="Errores típicos y criterio de avance">
+                      {currentTopic.commonMistakes?.length ? (
+                        <ul className="space-y-2 text-sm font-semibold text-slate-700">
+                          {currentTopic.commonMistakes.map(mistake => <li key={mistake}>• {mistake}</li>)}
+                        </ul>
+                      ) : null}
+                      {currentTopic.progressCriteria && (
+                        <div className="mt-4 grid gap-2 text-sm font-semibold text-slate-700 sm:grid-cols-2">
+                          <p><span className="font-black text-blue-700">Visto:</span> {currentTopic.progressCriteria.seen}</p>
+                          <p><span className="font-black text-blue-700">Practicado:</span> {currentTopic.progressCriteria.practiced}</p>
+                          <p><span className="font-black text-blue-700">Completado:</span> {currentTopic.progressCriteria.completed}</p>
+                          <p><span className="font-black text-blue-700">Dominado:</span> {currentTopic.progressCriteria.mastered}</p>
+                        </div>
+                      )}
+                    </LearningCard>
+                  )}
                 </>
               )}
               {/* 2. Tu misión de hoy: selector + vídeo + práctica + navegación */}
@@ -1126,7 +1143,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function EmptyContent() {
-  return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Todavía no hay apunte LaTeX estructurado para este tema. Camino PAU mantiene el tema en itinerario sin inventar contenido.</p>
+  return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Este tema aún no tiene apunte estructurado completo. Camino PAU lo mantiene en el itinerario, pero no inventa teoría. Puedes practicar con ejercicios disponibles o marcarlo para completar contenido.</p>
 }
 
 function ContentSkeleton() {

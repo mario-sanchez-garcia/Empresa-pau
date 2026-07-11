@@ -1,6 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
+import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug } from './camino/caminoCurriculumPlan'
 
 const HOLIDAYS = new Set([
   '2026-10-12', '2026-11-01', '2026-11-02',
@@ -65,6 +66,22 @@ type QueueItem = {
   block_key: string | null
   block_slug: string | null
   metadata: Record<string, unknown> | null
+}
+
+function queueTopicMeta(item: QueueItem) {
+  const subject = normalizeSubjectSlug(item.subject)
+  const fromMetadata = typeof item.metadata?.topic_slug === 'string' ? item.metadata.topic_slug : null
+  const topic = CAMINO_CURRICULUM_TOPICS.find(candidate =>
+    candidate.subject === subject &&
+    (candidate.v2SortOrder === item.v2_sort_order || candidate.orderIndex === item.v2_sort_order)
+  ) ?? CAMINO_CURRICULUM_TOPICS.find(candidate =>
+    candidate.subject === subject &&
+    normalizeTopicSlug(candidate.title) === normalizeTopicSlug(item.title)
+  )
+  return {
+    blockSlug: item.block_slug ?? topic?.blockSlug ?? null,
+    topicSlug: fromMetadata ?? topic?.topicSlug ?? normalizeTopicSlug(item.title),
+  }
 }
 
 // Returns a lower number = higher PAU priority
@@ -323,8 +340,10 @@ export async function ensureCaminoCalendar(
       if (cursor >= queue.length) break
       const item = queue[cursor]
       const itemMeta = item.metadata ?? {}
+      const topicMeta = queueTopicMeta(item)
       const missionType = (itemMeta.mission_type as string) ?? 'concept'
       const calMetadata: Record<string, unknown> = {}
+      calMetadata.topic_slug = topicMeta.topicSlug
       if (itemMeta.express) calMetadata.express = true
       if (rescueMode) calMetadata.plan_mode = 'rescue'
       calendarRows.push({
@@ -334,7 +353,7 @@ export async function ensureCaminoCalendar(
         v2_sort_order: item.v2_sort_order,
         title: item.title,
         block_key: item.block_key,
-        block_slug: item.block_slug,
+        block_slug: topicMeta.blockSlug,
         mission_type: missionType,
         is_main: true,
         is_bonus: false,

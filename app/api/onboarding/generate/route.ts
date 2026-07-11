@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
-import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +60,22 @@ type QueueSourceItem = {
   block_key: string | null
   block_slug: string | null
   subject: string
+  topic_slug?: string | null
+}
+
+function queueTopicMeta(item: QueueSourceItem) {
+  const subject = normalizeSubjectSlug(item.subject)
+  const topic = CAMINO_CURRICULUM_TOPICS.find(candidate =>
+    candidate.subject === subject &&
+    (candidate.v2SortOrder === item.sort_order || candidate.orderIndex === item.sort_order)
+  ) ?? CAMINO_CURRICULUM_TOPICS.find(candidate =>
+    candidate.subject === subject &&
+    normalizeTopicSlug(candidate.title) === normalizeTopicSlug(item.title)
+  )
+  return {
+    blockSlug: item.block_slug ?? topic?.blockSlug ?? null,
+    topicSlug: item.topic_slug ?? topic?.topicSlug ?? normalizeTopicSlug(item.title),
+  }
 }
 
 function betaSequenceItems(subject: string): QueueSourceItem[] {
@@ -74,6 +90,7 @@ function betaSequenceItems(subject: string): QueueSourceItem[] {
       block_key: topic.blockTitle,
       block_slug: topic.blockSlug,
       subject: topic.subject,
+      topic_slug: topic.topicSlug,
     }))
 }
 
@@ -172,22 +189,23 @@ export async function POST(request: NextRequest) {
 
         for (let i = 0; i < items.length; i++) {
           const fc = items[i]
+          const topicMeta = queueTopicMeta(fc)
           let metadata: Record<string, unknown>
           if (startMode === 'review') {
-            metadata = { mission_type: 'review' }
+            metadata = { mission_type: 'review', topic_slug: topicMeta.topicSlug }
           } else if (startMode === 'mid') {
             metadata = earlyBlocks.has(fc.block_key)
-              ? { mission_type: 'review', express: true }
-              : { mission_type: 'concept' }
+              ? { mission_type: 'review', express: true, topic_slug: topicMeta.topicSlug }
+              : { mission_type: 'concept', topic_slug: topicMeta.topicSlug }
           } else {
             // zero, first_block, unknown
-            metadata = { mission_type: 'concept', beta_sequence: true }
+            metadata = { mission_type: 'concept', beta_sequence: true, topic_slug: topicMeta.topicSlug }
           }
           queueRows.push({
             user_id: user.id,
             subject: fc.subject,
             block_key: fc.block_key,
-            block_slug: fc.block_slug,
+            block_slug: topicMeta.blockSlug,
             v2_sort_order: fc.sort_order,
             title: fc.title,
             subject_position: i + 1,
@@ -261,7 +279,7 @@ export async function POST(request: NextRequest) {
 
         const itemMeta = (item.metadata as Record<string, unknown> | null) ?? {}
         const missionType = (itemMeta.mission_type as string) ?? 'concept'
-        const calMetadata = itemMeta.express ? { express: true } : {}
+        const calMetadata = itemMeta.express ? { express: true, topic_slug: itemMeta.topic_slug } : { topic_slug: itemMeta.topic_slug }
 
         calRows.push({
           user_id: user.id,

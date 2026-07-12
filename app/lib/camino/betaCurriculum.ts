@@ -25,8 +25,424 @@ type TopicInput = {
   minutes?: number
 }
 
+type TopicLessonContent = {
+  guidedExample: string
+  practicePrompt: string
+  appliedExercise: string
+  referenceSolution: string
+  commonMistakes: string[]
+}
+
+function mathContent(item: TopicInput): TopicLessonContent {
+  const defaults = {
+    commonMistakes: [
+      'Escribir solo el resultado sin justificar la operación.',
+      'Copiar mal signos o dimensiones en una matriz.',
+      'No interpretar si el resultado responde al enunciado PAU.',
+    ],
+  }
+
+  if (item.topicSlug.includes('matrices-operaciones')) {
+    const practice = `Dadas
+
+$$
+A=\begin{pmatrix}2 & -1\\\\0 & 3\end{pmatrix},
+\qquad
+B=\begin{pmatrix}1 & 4\\\\-2 & 5\end{pmatrix}
+$$
+
+calcula \(A+B\) y explica por qué la operación se puede realizar.`
+    return {
+      guidedExample: `Dadas las matrices
+
+$$
+A=\begin{pmatrix}1 & 2\\\\3 & 4\end{pmatrix},
+\qquad
+B=\begin{pmatrix}2 & 0\\\\1 & -1\end{pmatrix}
+$$
+
+calcula \(A+B\).
+
+**Paso 1.** Comprueba dimensiones: \(A,B\in M_{2\times 2}\), luego se pueden sumar.
+
+**Paso 2.** Suma elemento a elemento:
+
+$$
+A+B=\begin{pmatrix}1+2 & 2+0\\\\3+1 & 4+(-1)\end{pmatrix}
+=\begin{pmatrix}3 & 2\\\\4 & 3\end{pmatrix}
+$$
+
+**Conclusión.** La suma existe porque ambas matrices tienen la misma dimensión.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `La suma se hace elemento a elemento:
+
+$$
+A+B=\begin{pmatrix}3 & 3\\\\-2 & 8\end{pmatrix}
+$$
+
+Se puede realizar porque ambas matrices son \(2\times 2\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('determinantes')) {
+    const practice = `Calcula el determinante de
+
+$$
+A=\begin{pmatrix}2 & -1\\\\5 & 3\end{pmatrix}
+$$
+
+y explica si la matriz es invertible.`
+    return {
+      guidedExample: `Para
+
+$$
+A=\begin{pmatrix}1 & 2\\\\3 & 4\end{pmatrix}
+$$
+
+calcula \(\det(A)\).
+
+**Paso 1.** En una matriz \(2\times 2\), si \(A=\begin{pmatrix}a & b\\\\c & d\end{pmatrix}\), entonces \(\det(A)=ad-bc\).
+
+**Paso 2.** Sustituye:
+
+$$
+\det(A)=1\cdot 4-2\cdot 3=4-6=-2
+$$
+
+**Conclusión.** Como \(\det(A)\neq 0\), la matriz es invertible.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(\det(A)=2\cdot 3-(-1)\cdot 5=6+5=11\). Como \(11\neq 0\), la matriz es invertible.`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('sistemas') || item.topicSlug.includes('gauss')) {
+    const practice = `Resuelve por eliminación:
+
+$$
+\begin{cases}
+2x+y=7\\\\
+x-y=1
+\end{cases}
+$$
+
+Explica cada operación elemental que uses.`
+    return {
+      guidedExample: `Resuelve el sistema
+
+$$
+\begin{cases}
+x+y=3\\\\
+2x-y=0
+\end{cases}
+$$
+
+**Paso 1.** Suma las dos ecuaciones para eliminar \(y\):
+
+$$
+3x=3
+$$
+
+**Paso 2.** Despeja \(x=1\). Sustituye en \(x+y=3\):
+
+$$
+1+y=3 \Rightarrow y=2
+$$
+
+**Resultado.** La solución es \((x,y)=(1,2)\).`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `Sumando las ecuaciones se obtiene \(3x=8\), por tanto \(x=\frac{8}{3}\). Al sustituir en \(x-y=1\), \(y=\frac{5}{3}\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('vectores')) {
+    const practice = `Dados \(\vec u=(1,2,0)\) y \(\vec v=(3,-1,2)\), calcula \(\vec u\cdot\vec v\) e interpreta si son perpendiculares.`
+    return {
+      guidedExample: `Dados \(\vec u=(1,0,2)\) y \(\vec v=(3,-1,4)\), calcula el producto escalar.
+
+$$
+\vec u\cdot\vec v=1\cdot3+0\cdot(-1)+2\cdot4=11
+$$
+
+Como el producto escalar no es \(0\), los vectores no son perpendiculares.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(\vec u\cdot\vec v=1\cdot3+2\cdot(-1)+0\cdot2=1\). No son perpendiculares.`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('rectas-planos')) {
+    const practice = `Estudia si las rectas con vectores directores \(\vec u=(1,2,1)\) y \(\vec v=(2,4,2)\) pueden ser paralelas. Justifica la respuesta.`
+    return {
+      guidedExample: `Si dos rectas tienen vectores directores proporcionales, pueden ser paralelas o coincidentes.
+
+Para \(\vec u=(1,2,1)\) y \(\vec v=(2,4,2)\):
+
+$$
+\vec v=2\vec u
+$$
+
+Los vectores son proporcionales, así que las rectas tienen la misma dirección.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `Sí. Como \((2,4,2)=2(1,2,1)\), los vectores directores son proporcionales y las rectas tienen direcciones paralelas.`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('limites')) {
+    const practice = `Calcula
+
+$$
+\lim_{x\to 2}\frac{x^2-4}{x-2}
+$$
+
+factorizando antes de sustituir.`
+    return {
+      guidedExample: `Calcula
+
+$$
+\lim_{x\to 0}\frac{\sin x}{x}
+$$
+
+Este es un límite notable:
+
+$$
+\lim_{x\to 0}\frac{\sin x}{x}=1
+$$
+
+En PAU se usa para reconocer indeterminaciones y simplificar expresiones trigonométricas.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(\frac{x^2-4}{x-2}=\frac{(x-2)(x+2)}{x-2}=x+2\). Por tanto, el límite vale \(4\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('derivadas')) {
+    const practice = `Para \(f(x)=x^3-3x^2+2\), calcula \(f'(x)\), estudia los puntos críticos y clasifícalos.`
+    return {
+      guidedExample: `Sea
+
+$$
+f(x)=x^3-3x^2+2
+$$
+
+**Paso 1.** Deriva:
+
+$$
+f'(x)=3x^2-6x=3x(x-2)
+$$
+
+**Paso 2.** Igualamos a cero:
+
+$$
+3x(x-2)=0 \Rightarrow x=0,\;x=2
+$$
+
+Estos son los candidatos a máximo o mínimo.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(f'(x)=3x^2-6x\). Los puntos críticos son \(x=0\) y \(x=2\). Con \(f''(x)=6x-6\), en \(x=0\) hay máximo relativo y en \(x=2\) mínimo relativo.`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('primitivas') || item.topicSlug.includes('integrales')) {
+    const practice = `Calcula
+
+$$
+\int (3x^2-4x+1)\,dx
+$$
+
+indicando la constante de integración.`
+    return {
+      guidedExample: `Calcula una primitiva de \(2x+3\).
+
+$$
+\int (2x+3)\,dx=\int 2x\,dx+\int 3\,dx
+$$
+
+$$
+\int (2x+3)\,dx=x^2+3x+C
+$$
+
+La constante \(C\) aparece porque hay infinitas primitivas.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(\int (3x^2-4x+1)\,dx=x^3-2x^2+x+C\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('probabilidad') || item.topicSlug.includes('bayes') || item.topicSlug.includes('sucesos')) {
+    const practice = `En una clase, \(P(A)=0.5\), \(P(B|A)=0.6\) y \(P(B|A^c)=0.2\). Calcula \(P(B)\).`
+    return {
+      guidedExample: `Si \(P(A)=0.4\), \(P(B|A)=0.7\) y \(P(B|A^c)=0.2\), aplica probabilidad total:
+
+$$
+P(B)=P(A)\cdot P(B|A)+P(A^c)\cdot P(B|A^c)
+$$
+
+$$
+P(B)=0.4\cdot 0.7+0.6\cdot 0.2=0.28+0.12=0.40
+$$`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(P(B)=0.5\cdot0.6+0.5\cdot0.2=0.4\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('programacion-lineal')) {
+    const practice = `Maximiza \(Z=3x+2y\) con \(x+y\le 6\), \(x\le 4\), \(y\le 5\), \(x,y\ge0\). Evalúa los vértices.`
+    return {
+      guidedExample: `Maximiza \(Z=2x+3y\) sujeto a:
+
+$$
+x+y\le 4,\quad x\le 3,\quad y\le 2,\quad x,y\ge0
+$$
+
+Los vértices factibles son \((0,0)\), \((3,0)\), \((3,1)\), \((2,2)\), \((0,2)\).
+
+$$
+Z(0,0)=0,\quad Z(3,0)=6,\quad Z(3,1)=9,\quad Z(2,2)=10,\quad Z(0,2)=6
+$$
+
+El máximo se alcanza en \((2,2)\).`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `Los vértices principales son \((0,0)\), \((4,0)\), \((4,2)\), \((1,5)\), \((0,5)\). Los valores son \(0,12,16,13,10\); máximo en \((4,2)\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('intervalos') || item.topicSlug.includes('contrastes')) {
+    const practice = `Con \(\hat p=0.62\), \(n=400\) y \(z_{0.975}=1.96\), calcula el margen de error de un intervalo al 95%.`
+    return {
+      guidedExample: `Para una proporción muestral \(\hat p=0.60\), \(n=100\) y \(z_{0.975}=1.96\):
+
+$$
+E=z\sqrt{\frac{\hat p(1-\hat p)}{n}}
+=1.96\sqrt{\frac{0.6\cdot0.4}{100}}
+\approx 0.096
+$$
+
+El intervalo es aproximadamente \((0.504,0.696)\).`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `\(E=1.96\sqrt{\frac{0.62\cdot0.38}{400}}\approx0.0476\).`,
+      ...defaults,
+    }
+  }
+
+  return {
+    guidedExample: `Resuelve \(2x+3=7\). Restamos \(3\) en ambos lados y queda \(2x=4\); después dividimos entre \(2\), luego \(x=2\).`,
+    practicePrompt: `Resuelve \(3x-5=10\) justificando cada transformación algebraica.`,
+    appliedExercise: `Resuelve \(3x-5=10\) justificando cada transformación algebraica.`,
+    referenceSolution: `\(3x-5=10 \Rightarrow 3x=15 \Rightarrow x=5\).`,
+    ...defaults,
+  }
+}
+
+function lenguaContent(): TopicLessonContent {
+  const text = 'El uso excesivo del móvil ha transformado la forma en que muchos adolescentes se relacionan. Aunque facilita la comunicación inmediata, también puede reducir la conversación cara a cara y aumentar la dependencia de la aprobación externa.'
+  const practice = `Lee este fragmento:
+
+> La lectura diaria no solo mejora el vocabulario, sino que también ayuda a ordenar el pensamiento y a comprender mejor los problemas complejos.
+
+Formula:
+
+1. el tema;
+2. un resumen de 3-4 líneas;
+3. una tesis para un comentario crítico.`
+
+  return {
+    guidedExample: `Texto breve: “${text}”
+
+**Tema posible:** crítica al impacto del uso excesivo del móvil en las relaciones personales de los jóvenes.
+
+**Resumen modelo:** El texto plantea que el móvil ha cambiado la comunicación adolescente. Reconoce su utilidad para comunicarse con rapidez, pero advierte de que puede empobrecer el trato directo y generar dependencia de la validación social.
+
+**Tesis para comentario crítico:** La tecnología es útil si se usa con criterio, pero no debería sustituir los vínculos presenciales ni convertirse en medida de autoestima.`,
+    practicePrompt: practice,
+    appliedExercise: practice,
+    referenceSolution: `Tema posible: defensa de la lectura diaria como hábito que mejora expresión y pensamiento. Resumen: el fragmento afirma que leer cada día amplía el vocabulario, estructura las ideas y permite afrontar cuestiones complejas con más claridad. Tesis: la lectura sigue siendo una herramienta esencial para formar ciudadanos críticos.`,
+    commonMistakes: [
+      'Confundir tema con resumen: el tema debe ser breve y abstracto.',
+      'Copiar literalmente frases del texto en el resumen.',
+      'Hacer un comentario crítico sin tesis clara.',
+    ],
+  }
+}
+
+function historiaContent(item: TopicInput): TopicLessonContent {
+  if (item.topicSlug.includes('origenes')) {
+    const practice = 'Redacta una respuesta breve sobre las diferencias entre arte rupestre cantábrico y levantino.'
+    return {
+      guidedExample: `Pregunta: explica las características principales del arte rupestre cantábrico.
+
+**Respuesta modelo:**
+
+El arte rupestre cantábrico se desarrolló durante el Paleolítico superior y se localiza principalmente en cuevas del norte peninsular, como Altamira. Sus pinturas representan animales aislados, sobre todo bisontes, caballos y ciervos, con gran realismo y policromía. Se interpreta como un arte relacionado con rituales de caza o creencias simbólicas.
+
+**Cómo está construida la respuesta:**
+
+1. Sitúa cronología y localización.
+2. Describe rasgos visuales.
+3. Da ejemplos.
+4. Añade interpretación.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: `El arte cantábrico es paleolítico, se sitúa en cuevas profundas del norte y representa animales aislados con realismo y policromía. El levantino es posterior, aparece en abrigos al aire libre del área mediterránea, incluye figuras humanas y escenas dinámicas de caza, danza o recolección.`,
+      commonMistakes: [
+        'Mezclar arte cantábrico y levantino sin comparar criterios claros.',
+        'Olvidar cronología y localización.',
+        'Responder solo con ejemplos sin explicar rasgos.',
+      ],
+    }
+  }
+
+  const practice = `Redacta una respuesta PAU de 8-10 líneas sobre ${item.title}, incorporando al menos tres conceptos: ${item.tags.slice(0, 3).join(', ')}.`
+  return {
+    guidedExample: `Pregunta: explica la importancia histórica de ${item.title}.
+
+**Respuesta modelo breve:**
+
+${item.title} debe situarse dentro del bloque de ${item.blockTitle}. Para responder bien conviene ordenar la explicación en contexto, causas, desarrollo y consecuencias. En una respuesta PAU deben aparecer conceptos como ${item.tags.slice(0, 3).join(', ')}, conectados con una idea central y no como una lista suelta.
+
+**Estructura recomendada:**
+
+1. Presenta el marco cronológico.
+2. Explica dos rasgos o causas.
+3. Añade consecuencias.
+4. Cierra con una frase de síntesis.`,
+    practicePrompt: practice,
+    appliedExercise: practice,
+    referenceSolution: `Una respuesta válida sitúa ${item.title} en ${item.blockTitle}, usa correctamente ${item.tags.slice(0, 3).join(', ')} y organiza causas, desarrollo y consecuencias con redacción histórica.`,
+    commonMistakes: [
+      'Responder con una lista de conceptos sin relación causal.',
+      'No situar el tema en su periodo histórico.',
+      'Olvidar consecuencias o valoración final.',
+    ],
+  }
+}
+
+function topicLessonContent(item: TopicInput): TopicLessonContent {
+  if (item.subject === 'matematicas_ii' || item.subject === 'matematicas_ccss') return mathContent(item)
+  if (item.subject === 'lengua') return lenguaContent()
+  return historiaContent(item)
+}
+
 function compactLesson(item: TopicInput) {
   const tags = item.tags.slice(0, 4).join(', ')
+  const content = topicLessonContent(item)
   return {
     explanation: [
       `Qué es: ${item.title} es una unidad de ${item.blockTitle} que debes reconocer antes de pasar a práctica PAU.`,
@@ -34,8 +450,11 @@ function compactLesson(item: TopicInput) {
       `Cuándo se usa en PAU/EVAU: cuando el enunciado pide explicar, calcular, justificar o redactar una respuesta del bloque ${item.blockTitle}.`,
       `Error típico: aprender el nombre del tema sin conectar el procedimiento con el tipo de pregunta.`,
     ].join('\n\n'),
-    guidedExample: `Ejemplo guiado: identifica primero el bloque (${item.blockTitle}), subraya los datos o conceptos clave y escribe una respuesta breve siguiendo el orden: idea principal, desarrollo y comprobación.`,
-    practicePrompt: `Ejercicio aplicado: resuelve una práctica corta sobre ${item.title}. Explica el procedimiento y justifica cada paso para que Pausia pueda corregirte.`,
+    guidedExample: content.guidedExample,
+    practicePrompt: content.practicePrompt,
+    appliedExercise: content.appliedExercise,
+    referenceSolution: content.referenceSolution,
+    commonMistakes: content.commonMistakes,
     rawLatex: '',
   }
 }
@@ -51,13 +470,6 @@ function topic(input: TopicInput): CaminoCurriculumTopic {
       block: input.blockSlug,
       topic: input.topicSlug,
     },
-    appliedExercise: `Resuelve una actividad aplicada de ${input.title} y escribe una justificación clara. No basta con dar el resultado: explica por qué usas cada paso.`,
-    referenceSolution: `Una respuesta válida identifica el tipo de ejercicio, aplica el método propio de ${input.blockTitle}, justifica los pasos y revisa el resultado final.`,
-    commonMistakes: [
-      'Saltar directamente al resultado sin explicar el procedimiento.',
-      'Confundir el bloque del tema con otro parecido.',
-      'No comprobar si la respuesta encaja con el enunciado PAU.',
-    ],
     progressCriteria: {
       seen: 'El alumno abre la explicación del curso.',
       practiced: 'El alumno entrega el ejercicio aplicado.',

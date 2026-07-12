@@ -603,6 +603,22 @@ assert(
 )
 
 assert(
+  'Camino private beta lessons use real guided examples and exercises',
+  betaCurriculum.includes('topicLessonContent(item)') &&
+    betaCurriculum.includes('begin{pmatrix}1 & 2') &&
+    betaCurriculum.includes('begin{pmatrix}1+2 & 2+0') &&
+    betaCurriculum.includes('begin{pmatrix}2 & -1') &&
+    betaCurriculum.includes('det(A)=1') &&
+    betaCurriculum.includes('f(x)=x^3-3x^2+2') &&
+    betaCurriculum.includes('int (2x+3)') &&
+    betaCurriculum.includes('Resumen modelo') &&
+    betaCurriculum.includes('Respuesta modelo') &&
+    betaCurriculum.includes('referenceSolution: content.referenceSolution') &&
+    !betaCurriculum.includes('identifica primero el bloque') &&
+    !betaCurriculum.includes('resuelve una práctica corta sobre')
+)
+
+assert(
   'Camino weekly generation advances by week and keeps canonical topic slugs',
   onboardingGenerateRoute.includes('topic_slug: topicMeta.topicSlug') &&
     ensureCaminoCalendar.includes('calMetadata.topic_slug = topicMeta.topicSlug') &&

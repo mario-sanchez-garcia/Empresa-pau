@@ -40,6 +40,11 @@
 - [ ] La toolbar matemática solo aparece en asignaturas donde tiene sentido.
 - [ ] Historia y Lengua renderizan tablas y listas de forma legible.
 - [ ] Las tablas Markdown rotas o compactadas se normalizan antes de mostrarse.
+- [ ] Los ejemplos guiados usan contenido real del tema, no frases comodín.
+- [ ] Matemáticas muestra fórmulas, matrices o cálculos reales en el ejemplo guiado.
+- [ ] Practica tú usa ejercicios corregibles reales.
+- [ ] Las soluciones de referencia existen para orientar la corrección.
+- [ ] Si existe contenido estructurado, no se usa el fallback genérico.
 - [ ] El alumno puede entregar texto.
 - [ ] El alumno puede subir imagen si el flujo lo permite.
 - [ ] La corrección con Pausia funciona.

@@ -64,6 +64,8 @@ La barra de símbolos del editor de entrega inserta plantillas completas para l�
 
 El render de lecciones normaliza tablas Markdown compactadas o mal partidas y las muestra como tablas responsive, evitando que Historia o Lengua enseñen filas con `|` como texto plano.
 
+Los bloques `Ejemplo guiado paso a paso` y `Practica tú` ya no dependen de texto comodín. La secuencia beta aporta ejemplos reales por tema: Matemáticas usa matrices, determinantes, sistemas, derivadas, integrales, probabilidad o programación lineal; Lengua incluye respuesta modelo; Historia incluye respuesta modelo y práctica concreta. La solución de referencia queda asociada al tema para orientar la corrección sin mostrarse como enunciado de práctica.
+
 ## Corrección de progresión semanal
 
 Las semanas podían repetirse porque el generador local de calendario inicializaba la rotación de temas desde cero cada vez que se generaba una semana. Además, el calendario persistido no guardaba siempre el `topicSlug` canónico, por lo que podía reconstruir enlaces desde el título.

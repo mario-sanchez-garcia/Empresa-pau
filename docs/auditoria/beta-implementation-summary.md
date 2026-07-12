@@ -46,6 +46,20 @@ La solución actual:
 - Si el tema exacto legacy no tiene contenido local, pero existe alias con explicación/ejemplo/ejercicio, el curso usa ese contenido sin mostrar fallback.
 - El fallback queda reservado para temas realmente incompletos y usa un texto menos alarmante.
 
+## Recuperación visual de cursos
+
+La pantalla de curso prioriza ahora una estructura de mini clase:
+
+- Idea clave.
+- Cómo se trabaja.
+- Ejemplo guiado paso a paso.
+- Error típico.
+- Práctica corregible.
+
+El contenido se sigue renderizando con `MathMarkdown` para conservar LaTeX/KaTeX. El bloque `Vídeo explicativo` solo se muestra cuando existe un `videoId` real; si no hay vídeo, no aparece tarjeta vacía ni fallback dentro de ese bloque.
+
+Lengua e Historia usan títulos y pasos adaptados a respuesta escrita, comentario, contexto, causas y consecuencias, evitando una plantilla matemática rígida.
+
 ## Corrección de progresión semanal
 
 Las semanas podían repetirse porque el generador local de calendario inicializaba la rotación de temas desde cero cada vez que se generaba una semana. Además, el calendario persistido no guardaba siempre el `topicSlug` canónico, por lo que podía reconstruir enlaces desde el título.

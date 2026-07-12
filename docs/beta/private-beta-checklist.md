@@ -33,6 +33,9 @@
 - [ ] Hay ejemplo guiado.
 - [ ] Hay ejercicio aplicado corregible.
 - [ ] Hay errores típicos y criterio de avance.
+- [ ] El layout muestra mini clase visual: idea clave, cómo se trabaja, ejemplo, alerta y práctica.
+- [ ] El bloque `Vídeo explicativo` solo aparece si hay `videoId` real.
+- [ ] Lengua e Historia usan tono de mini clase propio, no una plantilla rígida de Matemáticas.
 - [ ] El alumno puede entregar texto.
 - [ ] El alumno puede subir imagen si el flujo lo permite.
 - [ ] La corrección con Pausia funciona.
@@ -85,5 +88,7 @@
 - Fuente de verdad legacy de mini-misiones Matemáticas II: `app/data/camino/curriculum_seed.json` y `curriculum_content_v2` cuando Supabase tiene filas.
 - El curso resuelve `subject/blockSlug/topicSlug` con `normalizeSubjectSlug`, `normalizeTopicSlug` y alias controlados en `caminoCurriculumPlan.ts`.
 - Si existe contenido local de la secuencia beta, el curso lo usa antes del fallback vacío.
+- El contenido local se presenta como mini clase visual y se renderiza con `MathMarkdown`.
+- El bloque de vídeo no se pinta si no hay `videoId` real.
 - La cola/calendario guarda `metadata.topic_slug` para que el enlace use el slug canónico, no el título convertido a slug.
 - Las semanas generadas localmente arrancan desde un offset por `weekDelta`, de modo que semana siguiente avanza en la secuencia.

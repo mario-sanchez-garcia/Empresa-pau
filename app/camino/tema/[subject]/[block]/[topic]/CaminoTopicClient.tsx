@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, MessageCircle, PenLine, RotateCcw, School, UploadCloud, X } from 'lucide-react'
 import Sidebar from '@/app/components/Sidebar'
-import { buildEvauHref, hasLatexContent, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildEvauHref, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
@@ -287,7 +287,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const key = progressKey(currentTopic)
   const current = progress[key] ?? { xp: 0 }
   const topicCompleted = Boolean(current.evau)
-  const hasContent = hasLatexContent(currentTopic)
   const isFreeAndExpired = !billing.loading && !billing.hasActivePack && daysSinceRegistration !== null && daysSinceRegistration >= 7
   const statusLabel = topicCompleted ? 'Completado' : 'Pendiente'
   const selectedV2Card = v2Cards[activeV2Index] ?? v2Cards[0] ?? null
@@ -632,7 +631,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <LearningCard title="Explicación"><ContentSkeleton /></LearningCard>
                 ) : selectedV2Card ? (
                   <>
-                    <LearningCard title="Explicación">
+                    <LearningCard title="Idea clave">
                       {selectedV2Card.concept_markdown
                         ? <MathMarkdown text={selectedV2Card.concept_markdown} format="raw" />
                         : <EmptyContent />}
@@ -674,26 +673,25 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 ) : null
               ) : (
               <>
-              {/* 1. Explicación comprensible: todos los apuntes en acordeón */}
-              <LearningCard title="1. Explicación comprensible">
-                <p className="mb-3 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">Qué es, para qué sirve, cuándo se usa en PAU y qué error conviene evitar.</p>
+              {/* Mini clase: contenido real primero, fallback discreto solo si falta */}
+              <LearningCard title={lessonTitleFor(currentTopic)}>
                 {v2Loading
                   ? <ContentSkeleton />
                   : v2Cards.length > 0
                     ? <V2FlashcardAccordion cards={v2Cards} />
                     : diegoLoading
-                      ? (currentTopic.explanation ? <MathMarkdown text={currentTopic.explanation} /> : <ContentSkeleton />)
+                      ? (currentTopic.explanation ? <StructuredLesson topic={currentTopic} /> : <ContentSkeleton />)
                       : diegoContent
                         ? <DiegoContentCards markdown={diegoContent} />
                         : currentTopic.explanation
-                          ? <MathMarkdown text={currentTopic.explanation} />
+                          ? <StructuredLesson topic={currentTopic} />
                           : <EmptyContent />}
               </LearningCard>
               {/* Secciones fallback cuando no hay datos v2 */}
               {!v2Loading && v2Cards.length === 0 && (
                 <>
-                  <LearningCard title="Vídeo explicativo">
-                    {videoId ? (
+                  {videoId && (
+                    <LearningCard title="Vídeo explicativo">
                       <div>
                         <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
                           🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
@@ -706,13 +704,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                           </div>
                         )}
                       </div>
-                    ) : <EmptyContent />}
+                    </LearningCard>
+                  )}
+                  <LearningCard title="Ejemplo guiado paso a paso">
+                    {currentTopic.guidedExample ? <GuidedExamplePanel text={currentTopic.guidedExample} /> : <EmptyContent compact />}
                   </LearningCard>
-                  <LearningCard title="Caso práctico resuelto">
-                    {currentTopic.guidedExample ? <MathMarkdown text={currentTopic.guidedExample} /> : <EmptyContent />}
-                  </LearningCard>
-                  <LearningCard title="Ahora inténtalo tú">
-                    {currentTopic.practicePrompt ? <MathMarkdown text={currentTopic.practicePrompt} /> : <EmptyContent />}
+                  <LearningCard title="Practica tú">
+                    {currentTopic.practicePrompt ? <PracticePromptPanel text={currentTopic.practicePrompt} /> : <EmptyContent compact />}
                   </LearningCard>
                   {(currentTopic.commonMistakes?.length || currentTopic.progressCriteria) && (
                     <LearningCard title="Errores típicos y criterio de avance">
@@ -1142,8 +1140,109 @@ function Shell({ children }: { children: React.ReactNode }) {
   return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div>
 }
 
-function EmptyContent() {
-  return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">Este tema aún no tiene apunte estructurado completo. Camino PAU lo mantiene en el itinerario, pero no inventa teoría. Puedes practicar con ejercicios disponibles o marcarlo para completar contenido.</p>
+function cleanLessonLine(value: string) {
+  return value
+    .replace(/^(Qué es|Para qué sirve|Cuándo se usa en PAU\/EVAU|Error típico)\s*:\s*/i, '')
+    .trim()
+}
+
+function pickLessonLine(topic: CaminoCurriculumTopic, label: string, fallback = '') {
+  const line = topic.explanation
+    .split(/\n+/)
+    .map(item => item.trim())
+    .find(item => item.toLowerCase().startsWith(label.toLowerCase()))
+  return line ? cleanLessonLine(line) : fallback
+}
+
+function lessonTitleFor(topic: CaminoCurriculumTopic) {
+  if (topic.subject === 'lengua') return 'Mini clase de Lengua'
+  if (topic.subject === 'historia_espana' || topic.subject === 'historia') return 'Mini clase de Historia'
+  return 'Mini clase visual'
+}
+
+function lessonStepsFor(topic: CaminoCurriculumTopic) {
+  if (topic.subject === 'lengua') {
+    return ['Lee el enunciado y localiza qué te pide exactamente.', 'Identifica la función del fragmento o del concepto.', 'Redacta con una plantilla clara: idea, explicación y ejemplo.', 'Revisa precisión, cohesión y ortografía antes de entregar.']
+  }
+  if (topic.subject === 'historia_espana' || topic.subject === 'historia') {
+    return ['Sitúa el tema en su etapa histórica.', 'Ordena causas, hechos principales y consecuencias.', 'Usa fechas o conceptos clave sin convertir la respuesta en una lista.', 'Cierra conectando el tema con la pregunta PAU.']
+  }
+  return ['Identifica datos, incógnitas y tipo de ejercicio.', 'Elige el procedimiento del bloque antes de calcular.', 'Escribe los pasos con notación clara y comprueba el resultado.', 'Relaciona el resultado con lo que pregunta el enunciado PAU.']
+}
+
+function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
+  const idea = pickLessonLine(topic, 'Qué es', topic.explanation)
+  const use = pickLessonLine(topic, 'Para qué sirve')
+  const pau = pickLessonLine(topic, 'Cuándo se usa en PAU/EVAU')
+  const alert = pickLessonLine(topic, 'Error típico', topic.commonMistakes?.[0] ?? '')
+  const tags = topic.examTags?.slice(0, 4) ?? []
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
+        <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">Idea clave</p>
+        <MathMarkdown text={idea} />
+      </div>
+      {(use || pau || tags.length > 0) && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {use && <InfoTile label="Para qué sirve" text={use} />}
+          {pau && <InfoTile label="Cómo aparece en PAU" text={pau} />}
+          {tags.length > 0 && <InfoTile label="Etiquetas PAU" text={tags.join(' · ')} />}
+        </div>
+      )}
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <p className="mb-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Cómo se trabaja</p>
+        <ol className="space-y-2">
+          {lessonStepsFor(topic).map((step, index) => (
+            <li key={step} className="flex gap-3 text-sm font-semibold leading-6 text-slate-700">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-black text-white">{index + 1}</span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      {alert && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="text-sm font-black text-amber-800">Error típico</p>
+          <p className="mt-1 text-sm font-semibold leading-6 text-amber-900">{alert}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function InfoTile({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+      <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+      <MathMarkdown text={text} />
+    </div>
+  )
+}
+
+function GuidedExamplePanel({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Ejemplo guiado</p>
+      <MathMarkdown text={text} />
+    </div>
+  )
+}
+
+function PracticePromptPanel({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
+      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Ejercicio corregible</p>
+      <MathMarkdown text={text} />
+    </div>
+  )
+}
+
+function EmptyContent({ compact = false }: { compact?: boolean }) {
+  const copy = compact
+    ? 'Este bloque aún necesita contenido completo.'
+    : 'Este tema aún necesita contenido completo. Puedes practicar con ejercicios disponibles.'
+  return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{copy}</p>
 }
 
 function ContentSkeleton() {

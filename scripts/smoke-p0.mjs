@@ -567,9 +567,22 @@ assert(
   caminoCourseTopic.includes('getTopic(subject, block, topic)') &&
     caminoPlan.includes('hasLocalLessonContent(exact)') &&
     caminoPlan.includes('aliasTopicSlug(subjectSlug, normalizedBlockSlug, normalizedTopicSlug)') &&
-    caminoTopic.includes('Este tema aún no tiene apunte estructurado completo') &&
+    caminoTopic.includes('Este tema aún necesita contenido completo') &&
     caminoTopic.includes('Errores típicos y criterio de avance') &&
     !caminoTopic.includes('Todavía no hay apunte LaTeX estructurado para este tema')
+)
+
+assert(
+  'Camino course lessons use visual structured layout and hide empty video blocks',
+  caminoTopic.includes('function StructuredLesson') &&
+    caminoTopic.includes('Idea clave') &&
+    caminoTopic.includes('Cómo se trabaja') &&
+    caminoTopic.includes('function GuidedExamplePanel') &&
+    caminoTopic.includes('function PracticePromptPanel') &&
+    caminoTopic.includes("lessonTitleFor(currentTopic)") &&
+    caminoTopic.includes("{videoId && (") &&
+    !caminoTopic.includes('Qué es, para qué sirve, cuándo se usa en PAU') &&
+    !caminoTopic.includes('{videoId ? (')
 )
 
 assert(

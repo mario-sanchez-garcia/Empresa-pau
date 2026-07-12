@@ -66,6 +66,8 @@ El render de lecciones normaliza tablas Markdown compactadas o mal partidas y la
 
 Los bloques `Ejemplo guiado paso a paso` y `Practica tú` ya no dependen de texto comodín. La secuencia beta aporta ejemplos reales por tema: Matemáticas usa matrices, determinantes, sistemas, derivadas, integrales, probabilidad o programación lineal; Lengua incluye respuesta modelo; Historia incluye respuesta modelo y práctica concreta. La solución de referencia queda asociada al tema para orientar la corrección sin mostrarse como enunciado de práctica.
 
+Las lecciones incluyen ahora una sección de teoría conceptual antes del ejemplo guiado. El contenido matemático se guarda con `String.raw` para conservar `\begin`, `\times`, `\frac` y el resto de comandos LaTeX; además, el render de lecciones repara de forma defensiva escapes antiguos dañados solo dentro de contenido de curso.
+
 ## Corrección de progresión semanal
 
 Las semanas podían repetirse porque el generador local de calendario inicializaba la rotación de temas desde cero cada vez que se generaba una semana. Además, el calendario persistido no guardaba siempre el `topicSlug` canónico, por lo que podía reconstruir enlaces desde el título.

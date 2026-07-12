@@ -116,9 +116,16 @@ function scoreFromCorrection(data: unknown, maxScore: number) {
 
 function normalizeLessonMarkdown(text?: string | null): string {
   const value = dedentContent(text ?? '').replace(/\r\n?/g, '\n').trim()
-  if (!value.includes('|---') && !value.includes('| ---')) return value
+  const repaired = value
+    .replace(/\u0008egin\{/g, '\\begin{')
+    .replace(/\u0009imes/g, '\\times')
+    .replace(/\u000crac/g, '\\frac')
+    .replace(/\u000bec/g, '\\vec')
+    .replace(/(^|[^\\])end\{(pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)\}/g, '$1\\end{$2}')
+    .replace(/(^|[^\\])det\(/g, '$1\\det(')
+  if (!repaired.includes('|---') && !repaired.includes('| ---')) return repaired
 
-  return value.replace(/(\|[^\n]+?\|)[ \t]+(?=\|)/g, '$1\n')
+  return repaired.replace(/(\|[^\n]+?\|)[ \t]+(?=\|)/g, '$1\n')
 }
 
 function splitMarkdownTableRow(line: string): string[] | null {
@@ -1262,7 +1269,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function cleanLessonLine(value: string) {
   return value
-    .replace(/^(Qué es|Para qué sirve|Cuándo se usa en PAU\/EVAU|Error típico)\s*:\s*/i, '')
+    .replace(/^(Qué es|Teoría rápida|Para qué sirve|Cuándo se usa en PAU\/EVAU|Error típico)\s*:\s*/i, '')
     .trim()
 }
 
@@ -1292,6 +1299,7 @@ function lessonStepsFor(topic: CaminoCurriculumTopic) {
 
 function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
   const idea = pickLessonLine(topic, 'Qué es', topic.explanation)
+  const theory = pickLessonLine(topic, 'Teoría rápida')
   const use = pickLessonLine(topic, 'Para qué sirve')
   const pau = pickLessonLine(topic, 'Cuándo se usa en PAU/EVAU')
   const alert = pickLessonLine(topic, 'Error típico', topic.commonMistakes?.[0] ?? '')
@@ -1303,6 +1311,12 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
         <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">Idea clave</p>
         <LessonMarkdown text={idea} />
       </div>
+      {theory && (
+        <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 shadow-sm">
+          <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-indigo-600">Teoría rápida</p>
+          <LessonMarkdown text={theory} />
+        </div>
+      )}
       {(use || pau || tags.length > 0) && (
         <div className="grid gap-3 sm:grid-cols-2">
           {use && <InfoTile label="Para qué sirve" text={use} />}

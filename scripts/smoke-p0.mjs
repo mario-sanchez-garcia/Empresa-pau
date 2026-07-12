@@ -583,6 +583,7 @@ assert(
     caminoTopic.includes('function normalizeLessonMarkdown') &&
     caminoTopic.includes('function LessonMarkdownTable') &&
     caminoTopic.includes('Idea clave') &&
+    caminoTopic.includes('Teoría rápida') &&
     caminoTopic.includes('Cómo se trabaja') &&
     caminoTopic.includes('function GuidedExamplePanel') &&
     caminoTopic.includes('function PracticePromptPanel') &&
@@ -594,7 +595,7 @@ assert(
 
 assert(
   'Camino lesson markdown normalizes compact tables before rendering',
-  caminoTopic.includes("value.replace(/(\\|[^\\n]+?\\|)[ \\t]+(?=\\|)/g, '$1\\n')") &&
+  caminoTopic.includes("replace(/(\\|[^\\n]+?\\|)[ \\t]+(?=\\|)/g, '$1\\n')") &&
     caminoTopic.includes('splitMarkdownTableRow') &&
     caminoTopic.includes('isMarkdownTableSeparator') &&
     caminoTopic.includes('overflow-x-auto rounded-2xl border border-blue-100') &&
@@ -603,8 +604,21 @@ assert(
 )
 
 assert(
+  'Camino lesson markdown repairs damaged lesson-only LaTeX escapes',
+  caminoTopic.includes('u0008egin') &&
+    caminoTopic.includes('u0009imes') &&
+    caminoTopic.includes('u000crac') &&
+    caminoTopic.includes('u000bec') &&
+    caminoTopic.includes('end\\{(pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)') &&
+    !caminoTopic.includes('□egin')
+)
+
+assert(
   'Camino private beta lessons use real guided examples and exercises',
   betaCurriculum.includes('topicLessonContent(item)') &&
+    betaCurriculum.includes('const md = String.raw') &&
+    betaCurriculum.includes('Teoría rápida: ${theoryText(item)}') &&
+    betaCurriculum.includes('Una matriz es una tabla ordenada') &&
     betaCurriculum.includes('begin{pmatrix}1 & 2') &&
     betaCurriculum.includes('begin{pmatrix}1+2 & 2+0') &&
     betaCurriculum.includes('begin{pmatrix}2 & -1') &&
@@ -614,6 +628,8 @@ assert(
     betaCurriculum.includes('Resumen modelo') &&
     betaCurriculum.includes('Respuesta modelo') &&
     betaCurriculum.includes('referenceSolution: content.referenceSolution') &&
+    !betaCurriculum.includes('M_{2 imes 2}') &&
+    !betaCurriculum.includes('□egin') &&
     !betaCurriculum.includes('identifica primero el bloque') &&
     !betaCurriculum.includes('resuelve una práctica corta sobre')
 )

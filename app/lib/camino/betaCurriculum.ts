@@ -33,6 +33,48 @@ type TopicLessonContent = {
   commonMistakes: string[]
 }
 
+const md = String.raw
+
+function theoryText(item: TopicInput) {
+  if (item.topicSlug.includes('matrices-operaciones') || item.topicSlug.includes('matrices-sistemas')) {
+    return md`Una matriz es una tabla ordenada de números colocados en filas y columnas. Su dimensión se escribe \(m\times n\): \(m\) filas y \(n\) columnas. Dos matrices solo se suman si tienen la misma dimensión, y la regla es sumar posición a posición: \((A+B)_{ij}=a_{ij}+b_{ij}\).`
+  }
+  if (item.topicSlug.includes('determinantes')) {
+    return md`El determinante es un número asociado a una matriz cuadrada. En \(2\times2\), \(\det\begin{pmatrix}a & b\\c & d\end{pmatrix}=ad-bc\). Si el determinante no es cero, la matriz tiene inversa.`
+  }
+  if (item.topicSlug.includes('sistemas') || item.topicSlug.includes('gauss')) {
+    return md`Un sistema reúne varias ecuaciones que deben cumplirse a la vez. El método de Gauss transforma el sistema en otro equivalente más sencillo usando operaciones elementales, hasta poder despejar las incógnitas sin cambiar las soluciones.`
+  }
+  if (item.topicSlug.includes('vectores')) {
+    return md`Un vector representa dirección, sentido y módulo. El producto escalar mide alineación entre vectores y permite estudiar ángulos y perpendicularidad; si \(\vec u\cdot\vec v=0\), los vectores son perpendiculares.`
+  }
+  if (item.topicSlug.includes('rectas-planos')) {
+    return md`En geometría analítica, rectas y planos se describen con puntos y vectores. Comparar vectores directores y normales permite decidir si dos objetos son paralelos, se cortan o coinciden.`
+  }
+  if (item.topicSlug.includes('limites')) {
+    return md`Un límite describe a qué valor se acerca una función cuando \(x\) se aproxima a un punto. Antes de sustituir, conviene detectar indeterminaciones y simplificar la expresión si aparece \(0/0\).`
+  }
+  if (item.topicSlug.includes('derivadas')) {
+    return md`La derivada mide la variación instantánea de una función. En PAU se usa para hallar rectas tangentes, crecimiento, máximos, mínimos y problemas de optimización.`
+  }
+  if (item.topicSlug.includes('primitivas') || item.topicSlug.includes('integrales')) {
+    return md`Una integral permite recuperar una función a partir de su derivada o calcular áreas bajo una curva. En primitivas siempre aparece una constante \(C\), porque muchas funciones tienen la misma derivada.`
+  }
+  if (item.topicSlug.includes('probabilidad') || item.topicSlug.includes('bayes') || item.topicSlug.includes('sucesos')) {
+    return md`La probabilidad mide la posibilidad de que ocurra un suceso. En árboles y tablas es clave distinguir \(P(A)\), \(P(B|A)\) y \(P(A\cap B)\), porque no significan lo mismo.`
+  }
+  if (item.topicSlug.includes('programacion-lineal')) {
+    return md`La programación lineal busca maximizar o minimizar una función objetivo con restricciones. La solución óptima aparece en un vértice de la región factible.`
+  }
+  if (item.topicSlug.includes('intervalos') || item.topicSlug.includes('contrastes')) {
+    return md`La inferencia usa datos de una muestra para estimar o contrastar una afirmación sobre la población. El margen de error depende del nivel de confianza, el tamaño muestral y la variabilidad.`
+  }
+  if (item.subject === 'lengua') {
+    return 'En Lengua no basta con decir de qué habla el texto: hay que formular la idea central con precisión, resumir sin copiar y construir una valoración propia con argumentos claros.'
+  }
+  return 'En Historia no basta con memorizar hechos: una respuesta PAU debe situar el tema en contexto, explicar causas, desarrollar hechos principales y cerrar con consecuencias.'
+}
+
 function mathContent(item: TopicInput): TopicLessonContent {
   const defaults = {
     commonMistakes: [
@@ -43,22 +85,22 @@ function mathContent(item: TopicInput): TopicLessonContent {
   }
 
   if (item.topicSlug.includes('matrices-operaciones')) {
-    const practice = `Dadas
+    const practice = md`Dadas
 
 $$
-A=\begin{pmatrix}2 & -1\\\\0 & 3\end{pmatrix},
+A=\begin{pmatrix}2 & -1\\0 & 3\end{pmatrix},
 \qquad
-B=\begin{pmatrix}1 & 4\\\\-2 & 5\end{pmatrix}
+B=\begin{pmatrix}1 & 4\\-2 & 5\end{pmatrix}
 $$
 
 calcula \(A+B\) y explica por qué la operación se puede realizar.`
     return {
-      guidedExample: `Dadas las matrices
+      guidedExample: md`Dadas las matrices
 
 $$
-A=\begin{pmatrix}1 & 2\\\\3 & 4\end{pmatrix},
+A=\begin{pmatrix}1 & 2\\3 & 4\end{pmatrix},
 \qquad
-B=\begin{pmatrix}2 & 0\\\\1 & -1\end{pmatrix}
+B=\begin{pmatrix}2 & 0\\1 & -1\end{pmatrix}
 $$
 
 calcula \(A+B\).
@@ -68,17 +110,17 @@ calcula \(A+B\).
 **Paso 2.** Suma elemento a elemento:
 
 $$
-A+B=\begin{pmatrix}1+2 & 2+0\\\\3+1 & 4+(-1)\end{pmatrix}
-=\begin{pmatrix}3 & 2\\\\4 & 3\end{pmatrix}
+A+B=\begin{pmatrix}1+2 & 2+0\\3+1 & 4+(-1)\end{pmatrix}
+=\begin{pmatrix}3 & 2\\4 & 3\end{pmatrix}
 $$
 
 **Conclusión.** La suma existe porque ambas matrices tienen la misma dimensión.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `La suma se hace elemento a elemento:
+      referenceSolution: md`La suma se hace elemento a elemento:
 
 $$
-A+B=\begin{pmatrix}3 & 3\\\\-2 & 8\end{pmatrix}
+A+B=\begin{pmatrix}3 & 3\\-2 & 8\end{pmatrix}
 $$
 
 Se puede realizar porque ambas matrices son \(2\times 2\).`,
@@ -87,23 +129,23 @@ Se puede realizar porque ambas matrices son \(2\times 2\).`,
   }
 
   if (item.topicSlug.includes('determinantes')) {
-    const practice = `Calcula el determinante de
+    const practice = md`Calcula el determinante de
 
 $$
-A=\begin{pmatrix}2 & -1\\\\5 & 3\end{pmatrix}
+A=\begin{pmatrix}2 & -1\\5 & 3\end{pmatrix}
 $$
 
 y explica si la matriz es invertible.`
     return {
-      guidedExample: `Para
+      guidedExample: md`Para
 
 $$
-A=\begin{pmatrix}1 & 2\\\\3 & 4\end{pmatrix}
+A=\begin{pmatrix}1 & 2\\3 & 4\end{pmatrix}
 $$
 
 calcula \(\det(A)\).
 
-**Paso 1.** En una matriz \(2\times 2\), si \(A=\begin{pmatrix}a & b\\\\c & d\end{pmatrix}\), entonces \(\det(A)=ad-bc\).
+**Paso 1.** En una matriz \(2\times 2\), si \(A=\begin{pmatrix}a & b\\c & d\end{pmatrix}\), entonces \(\det(A)=ad-bc\).
 
 **Paso 2.** Sustituye:
 
@@ -114,28 +156,28 @@ $$
 **Conclusión.** Como \(\det(A)\neq 0\), la matriz es invertible.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(\det(A)=2\cdot 3-(-1)\cdot 5=6+5=11\). Como \(11\neq 0\), la matriz es invertible.`,
+      referenceSolution: md`\(\det(A)=2\cdot 3-(-1)\cdot 5=6+5=11\). Como \(11\neq 0\), la matriz es invertible.`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('sistemas') || item.topicSlug.includes('gauss')) {
-    const practice = `Resuelve por eliminación:
+    const practice = md`Resuelve por eliminación:
 
 $$
 \begin{cases}
-2x+y=7\\\\
+2x+y=7\\
 x-y=1
 \end{cases}
 $$
 
 Explica cada operación elemental que uses.`
     return {
-      guidedExample: `Resuelve el sistema
+      guidedExample: md`Resuelve el sistema
 
 $$
 \begin{cases}
-x+y=3\\\\
+x+y=3\\
 2x-y=0
 \end{cases}
 $$
@@ -155,15 +197,15 @@ $$
 **Resultado.** La solución es \((x,y)=(1,2)\).`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `Sumando las ecuaciones se obtiene \(3x=8\), por tanto \(x=\frac{8}{3}\). Al sustituir en \(x-y=1\), \(y=\frac{5}{3}\).`,
+      referenceSolution: md`Sumando las ecuaciones se obtiene \(3x=8\), por tanto \(x=\frac{8}{3}\). Al sustituir en \(x-y=1\), \(y=\frac{5}{3}\).`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('vectores')) {
-    const practice = `Dados \(\vec u=(1,2,0)\) y \(\vec v=(3,-1,2)\), calcula \(\vec u\cdot\vec v\) e interpreta si son perpendiculares.`
+    const practice = md`Dados \(\vec u=(1,2,0)\) y \(\vec v=(3,-1,2)\), calcula \(\vec u\cdot\vec v\) e interpreta si son perpendiculares.`
     return {
-      guidedExample: `Dados \(\vec u=(1,0,2)\) y \(\vec v=(3,-1,4)\), calcula el producto escalar.
+      guidedExample: md`Dados \(\vec u=(1,0,2)\) y \(\vec v=(3,-1,4)\), calcula el producto escalar.
 
 $$
 \vec u\cdot\vec v=1\cdot3+0\cdot(-1)+2\cdot4=11
@@ -172,15 +214,15 @@ $$
 Como el producto escalar no es \(0\), los vectores no son perpendiculares.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(\vec u\cdot\vec v=1\cdot3+2\cdot(-1)+0\cdot2=1\). No son perpendiculares.`,
+      referenceSolution: md`\(\vec u\cdot\vec v=1\cdot3+2\cdot(-1)+0\cdot2=1\). No son perpendiculares.`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('rectas-planos')) {
-    const practice = `Estudia si las rectas con vectores directores \(\vec u=(1,2,1)\) y \(\vec v=(2,4,2)\) pueden ser paralelas. Justifica la respuesta.`
+    const practice = md`Estudia si las rectas con vectores directores \(\vec u=(1,2,1)\) y \(\vec v=(2,4,2)\) pueden ser paralelas. Justifica la respuesta.`
     return {
-      guidedExample: `Si dos rectas tienen vectores directores proporcionales, pueden ser paralelas o coincidentes.
+      guidedExample: md`Si dos rectas tienen vectores directores proporcionales, pueden ser paralelas o coincidentes.
 
 Para \(\vec u=(1,2,1)\) y \(\vec v=(2,4,2)\):
 
@@ -191,13 +233,13 @@ $$
 Los vectores son proporcionales, así que las rectas tienen la misma dirección.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `Sí. Como \((2,4,2)=2(1,2,1)\), los vectores directores son proporcionales y las rectas tienen direcciones paralelas.`,
+      referenceSolution: md`Sí. Como \((2,4,2)=2(1,2,1)\), los vectores directores son proporcionales y las rectas tienen direcciones paralelas.`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('limites')) {
-    const practice = `Calcula
+    const practice = md`Calcula
 
 $$
 \lim_{x\to 2}\frac{x^2-4}{x-2}
@@ -205,7 +247,7 @@ $$
 
 factorizando antes de sustituir.`
     return {
-      guidedExample: `Calcula
+      guidedExample: md`Calcula
 
 $$
 \lim_{x\to 0}\frac{\sin x}{x}
@@ -220,15 +262,15 @@ $$
 En PAU se usa para reconocer indeterminaciones y simplificar expresiones trigonométricas.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(\frac{x^2-4}{x-2}=\frac{(x-2)(x+2)}{x-2}=x+2\). Por tanto, el límite vale \(4\).`,
+      referenceSolution: md`\(\frac{x^2-4}{x-2}=\frac{(x-2)(x+2)}{x-2}=x+2\). Por tanto, el límite vale \(4\).`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('derivadas')) {
-    const practice = `Para \(f(x)=x^3-3x^2+2\), calcula \(f'(x)\), estudia los puntos críticos y clasifícalos.`
+    const practice = md`Para \(f(x)=x^3-3x^2+2\), calcula \(f'(x)\), estudia los puntos críticos y clasifícalos.`
     return {
-      guidedExample: `Sea
+      guidedExample: md`Sea
 
 $$
 f(x)=x^3-3x^2+2
@@ -249,13 +291,13 @@ $$
 Estos son los candidatos a máximo o mínimo.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(f'(x)=3x^2-6x\). Los puntos críticos son \(x=0\) y \(x=2\). Con \(f''(x)=6x-6\), en \(x=0\) hay máximo relativo y en \(x=2\) mínimo relativo.`,
+      referenceSolution: md`\(f'(x)=3x^2-6x\). Los puntos críticos son \(x=0\) y \(x=2\). Con \(f''(x)=6x-6\), en \(x=0\) hay máximo relativo y en \(x=2\) mínimo relativo.`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('primitivas') || item.topicSlug.includes('integrales')) {
-    const practice = `Calcula
+    const practice = md`Calcula
 
 $$
 \int (3x^2-4x+1)\,dx
@@ -263,7 +305,7 @@ $$
 
 indicando la constante de integración.`
     return {
-      guidedExample: `Calcula una primitiva de \(2x+3\).
+      guidedExample: md`Calcula una primitiva de \(2x+3\).
 
 $$
 \int (2x+3)\,dx=\int 2x\,dx+\int 3\,dx
@@ -276,15 +318,15 @@ $$
 La constante \(C\) aparece porque hay infinitas primitivas.`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(\int (3x^2-4x+1)\,dx=x^3-2x^2+x+C\).`,
+      referenceSolution: md`\(\int (3x^2-4x+1)\,dx=x^3-2x^2+x+C\).`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('probabilidad') || item.topicSlug.includes('bayes') || item.topicSlug.includes('sucesos')) {
-    const practice = `En una clase, \(P(A)=0.5\), \(P(B|A)=0.6\) y \(P(B|A^c)=0.2\). Calcula \(P(B)\).`
+    const practice = md`En una clase, \(P(A)=0.5\), \(P(B|A)=0.6\) y \(P(B|A^c)=0.2\). Calcula \(P(B)\).`
     return {
-      guidedExample: `Si \(P(A)=0.4\), \(P(B|A)=0.7\) y \(P(B|A^c)=0.2\), aplica probabilidad total:
+      guidedExample: md`Si \(P(A)=0.4\), \(P(B|A)=0.7\) y \(P(B|A^c)=0.2\), aplica probabilidad total:
 
 $$
 P(B)=P(A)\cdot P(B|A)+P(A^c)\cdot P(B|A^c)
@@ -295,15 +337,15 @@ P(B)=0.4\cdot 0.7+0.6\cdot 0.2=0.28+0.12=0.40
 $$`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(P(B)=0.5\cdot0.6+0.5\cdot0.2=0.4\).`,
+      referenceSolution: md`\(P(B)=0.5\cdot0.6+0.5\cdot0.2=0.4\).`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('programacion-lineal')) {
-    const practice = `Maximiza \(Z=3x+2y\) con \(x+y\le 6\), \(x\le 4\), \(y\le 5\), \(x,y\ge0\). Evalúa los vértices.`
+    const practice = md`Maximiza \(Z=3x+2y\) con \(x+y\le 6\), \(x\le 4\), \(y\le 5\), \(x,y\ge0\). Evalúa los vértices.`
     return {
-      guidedExample: `Maximiza \(Z=2x+3y\) sujeto a:
+      guidedExample: md`Maximiza \(Z=2x+3y\) sujeto a:
 
 $$
 x+y\le 4,\quad x\le 3,\quad y\le 2,\quad x,y\ge0
@@ -318,15 +360,15 @@ $$
 El máximo se alcanza en \((2,2)\).`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `Los vértices principales son \((0,0)\), \((4,0)\), \((4,2)\), \((1,5)\), \((0,5)\). Los valores son \(0,12,16,13,10\); máximo en \((4,2)\).`,
+      referenceSolution: md`Los vértices principales son \((0,0)\), \((4,0)\), \((4,2)\), \((1,5)\), \((0,5)\). Los valores son \(0,12,16,13,10\); máximo en \((4,2)\).`,
       ...defaults,
     }
   }
 
   if (item.topicSlug.includes('intervalos') || item.topicSlug.includes('contrastes')) {
-    const practice = `Con \(\hat p=0.62\), \(n=400\) y \(z_{0.975}=1.96\), calcula el margen de error de un intervalo al 95%.`
+    const practice = md`Con \(\hat p=0.62\), \(n=400\) y \(z_{0.975}=1.96\), calcula el margen de error de un intervalo al 95%.`
     return {
-      guidedExample: `Para una proporción muestral \(\hat p=0.60\), \(n=100\) y \(z_{0.975}=1.96\):
+      guidedExample: md`Para una proporción muestral \(\hat p=0.60\), \(n=100\) y \(z_{0.975}=1.96\):
 
 $$
 E=z\sqrt{\frac{\hat p(1-\hat p)}{n}}
@@ -337,16 +379,16 @@ $$
 El intervalo es aproximadamente \((0.504,0.696)\).`,
       practicePrompt: practice,
       appliedExercise: practice,
-      referenceSolution: `\(E=1.96\sqrt{\frac{0.62\cdot0.38}{400}}\approx0.0476\).`,
+      referenceSolution: md`\(E=1.96\sqrt{\frac{0.62\cdot0.38}{400}}\approx0.0476\).`,
       ...defaults,
     }
   }
 
   return {
-    guidedExample: `Resuelve \(2x+3=7\). Restamos \(3\) en ambos lados y queda \(2x=4\); después dividimos entre \(2\), luego \(x=2\).`,
-    practicePrompt: `Resuelve \(3x-5=10\) justificando cada transformación algebraica.`,
-    appliedExercise: `Resuelve \(3x-5=10\) justificando cada transformación algebraica.`,
-    referenceSolution: `\(3x-5=10 \Rightarrow 3x=15 \Rightarrow x=5\).`,
+    guidedExample: md`Resuelve \(2x+3=7\). Restamos \(3\) en ambos lados y queda \(2x=4\); después dividimos entre \(2\), luego \(x=2\).`,
+    practicePrompt: md`Resuelve \(3x-5=10\) justificando cada transformación algebraica.`,
+    appliedExercise: md`Resuelve \(3x-5=10\) justificando cada transformación algebraica.`,
+    referenceSolution: md`\(3x-5=10 \Rightarrow 3x=15 \Rightarrow x=5\).`,
     ...defaults,
   }
 }
@@ -446,6 +488,7 @@ function compactLesson(item: TopicInput) {
   return {
     explanation: [
       `Qué es: ${item.title} es una unidad de ${item.blockTitle} que debes reconocer antes de pasar a práctica PAU.`,
+      `Teoría rápida: ${theoryText(item)}`,
       `Para qué sirve: te ayuda a resolver ejercicios donde aparecen ${tags}.`,
       `Cuándo se usa en PAU/EVAU: cuando el enunciado pide explicar, calcular, justificar o redactar una respuesta del bloque ${item.blockTitle}.`,
       `Error típico: aprender el nombre del tema sin conectar el procedimiento con el tipo de pregunta.`,

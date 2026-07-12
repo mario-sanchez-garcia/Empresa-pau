@@ -41,7 +41,9 @@
 - [ ] Historia y Lengua renderizan tablas y listas de forma legible.
 - [ ] Las tablas Markdown rotas o compactadas se normalizan antes de mostrarse.
 - [ ] Los ejemplos guiados usan contenido real del tema, no frases comodín.
+- [ ] Las lecciones incluyen teoría conceptual antes del ejemplo guiado.
 - [ ] Matemáticas muestra fórmulas, matrices o cálculos reales en el ejemplo guiado.
+- [ ] Las matrices y fórmulas se renderizan correctamente con LaTeX/KaTeX.
 - [ ] Practica tú usa ejercicios corregibles reales.
 - [ ] Las soluciones de referencia existen para orientar la corrección.
 - [ ] Si existe contenido estructurado, no se usa el fallback genérico.

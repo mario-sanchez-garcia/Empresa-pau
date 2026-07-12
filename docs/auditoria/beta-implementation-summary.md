@@ -60,6 +60,10 @@ El contenido se sigue renderizando con `MathMarkdown` para conservar LaTeX/KaTeX
 
 Lengua e Historia usan títulos y pasos adaptados a respuesta escrita, comentario, contexto, causas y consecuencias, evitando una plantilla matemática rígida.
 
+La barra de símbolos del editor de entrega inserta plantillas completas para límites, integrales, derivadas, fracciones, matrices y sistemas. La toolbar matemática queda limitada a Matemáticas II, Matemáticas CCSS, Física y Química; Lengua e Historia mantienen el editor básico.
+
+El render de lecciones normaliza tablas Markdown compactadas o mal partidas y las muestra como tablas responsive, evitando que Historia o Lengua enseñen filas con `|` como texto plano.
+
 ## Corrección de progresión semanal
 
 Las semanas podían repetirse porque el generador local de calendario inicializaba la rotación de temas desde cero cada vez que se generaba una semana. Además, el calendario persistido no guardaba siempre el `topicSlug` canónico, por lo que podía reconstruir enlaces desde el título.

@@ -291,8 +291,12 @@ assert(
     mathAnswerToolbar.includes('setSelectionRange(cursor, cursor)') &&
     mathAnswerToolbar.includes('document.createTextNode(snippet.latex)') &&
     mathAnswerToolbar.includes('onChange(editor.innerText)') &&
-    mathAnswerToolbar.includes('\\\\frac{}{}') &&
-    mathAnswerToolbar.includes('\\\\int_{}^{}  \\\\, dx') &&
+    mathAnswerToolbar.includes('\\\\frac{a}{b}') &&
+    mathAnswerToolbar.includes('\\\\lim_{x \\\\to a} f(x)') &&
+    mathAnswerToolbar.includes('\\\\int f(x)\\\\,dx') &&
+    mathAnswerToolbar.includes('\\\\int_{a}^{b} f(x)\\\\,dx') &&
+    mathAnswerToolbar.includes('\\\\frac{d}{dx}\\\\left(f(x)\\\\right)') &&
+    !mathAnswerToolbar.includes('\\\\lim_{x \\\\to }') &&
     mathAnswerToolbar.includes('\\\\begin{pmatrix}') &&
     mathAnswerToolbar.includes('\\\\begin{cases}') &&
     mathAnswerToolbar.includes('F = G\\\\frac{m_1m_2}{r^2}') &&
@@ -575,6 +579,9 @@ assert(
 assert(
   'Camino course lessons use visual structured layout and hide empty video blocks',
   caminoTopic.includes('function StructuredLesson') &&
+    caminoTopic.includes('function LessonMarkdown') &&
+    caminoTopic.includes('function normalizeLessonMarkdown') &&
+    caminoTopic.includes('function LessonMarkdownTable') &&
     caminoTopic.includes('Idea clave') &&
     caminoTopic.includes('Cómo se trabaja') &&
     caminoTopic.includes('function GuidedExamplePanel') &&
@@ -583,6 +590,16 @@ assert(
     caminoTopic.includes("{videoId && (") &&
     !caminoTopic.includes('Qué es, para qué sirve, cuándo se usa en PAU') &&
     !caminoTopic.includes('{videoId ? (')
+)
+
+assert(
+  'Camino lesson markdown normalizes compact tables before rendering',
+  caminoTopic.includes("value.replace(/(\\|[^\\n]+?\\|)[ \\t]+(?=\\|)/g, '$1\\n')") &&
+    caminoTopic.includes('splitMarkdownTableRow') &&
+    caminoTopic.includes('isMarkdownTableSeparator') &&
+    caminoTopic.includes('overflow-x-auto rounded-2xl border border-blue-100') &&
+    caminoTopic.includes('<LessonMarkdown text={card.concept_markdown} format="raw" />') &&
+    caminoTopic.includes('<LessonMarkdown text={section.body} format="raw" />')
 )
 
 assert(

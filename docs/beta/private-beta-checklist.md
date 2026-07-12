@@ -36,6 +36,10 @@
 - [ ] El layout muestra mini clase visual: idea clave, cómo se trabaja, ejemplo, alerta y práctica.
 - [ ] El bloque `Vídeo explicativo` solo aparece si hay `videoId` real.
 - [ ] Lengua e Historia usan tono de mini clase propio, no una plantilla rígida de Matemáticas.
+- [ ] La barra de símbolos inserta plantillas completas, sin límites/integrales/derivadas incompletas.
+- [ ] La toolbar matemática solo aparece en asignaturas donde tiene sentido.
+- [ ] Historia y Lengua renderizan tablas y listas de forma legible.
+- [ ] Las tablas Markdown rotas o compactadas se normalizan antes de mostrarse.
 - [ ] El alumno puede entregar texto.
 - [ ] El alumno puede subir imagen si el flujo lo permite.
 - [ ] La corrección con Pausia funciona.

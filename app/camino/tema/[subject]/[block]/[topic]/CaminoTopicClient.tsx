@@ -69,6 +69,14 @@ type CurriculumV2Card = {
   practice_prompt: string | null
   video_id: string | null
 }
+type LessonMarkdownProps = {
+  text?: string | null
+  className?: string
+  format?: boolean | 'raw'
+}
+type LessonSegment =
+  | { type: 'markdown'; text: string }
+  | { type: 'table'; headers: string[]; rows: string[][] }
 
 function loadJson<T>(key: string, fallback: T): T {
   try {
@@ -104,6 +112,118 @@ function scoreFromCorrection(data: unknown, maxScore: number) {
   const numeric = Number(raw)
   if (!Number.isFinite(numeric)) return null
   return Math.min(maxScore, Math.max(0, numeric))
+}
+
+function normalizeLessonMarkdown(text?: string | null): string {
+  const value = dedentContent(text ?? '').replace(/\r\n?/g, '\n').trim()
+  if (!value.includes('|---') && !value.includes('| ---')) return value
+
+  return value.replace(/(\|[^\n]+?\|)[ \t]+(?=\|)/g, '$1\n')
+}
+
+function splitMarkdownTableRow(line: string): string[] | null {
+  const trimmed = line.trim()
+  if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) return null
+  const cells = trimmed
+    .slice(1, -1)
+    .split('|')
+    .map(cell => cell.trim())
+  return cells.length >= 2 ? cells : null
+}
+
+function isMarkdownTableSeparator(cells: string[]) {
+  return cells.every(cell => /^:?-{3,}:?$/.test(cell.replace(/\s+/g, '')))
+}
+
+function parseLessonMarkdownSegments(text?: string | null): LessonSegment[] {
+  const normalized = normalizeLessonMarkdown(text)
+  if (!normalized) return []
+
+  const lines = normalized.split('\n')
+  const segments: LessonSegment[] = []
+  const buffer: string[] = []
+
+  const flushBuffer = () => {
+    const body = buffer.join('\n').trim()
+    if (body) segments.push({ type: 'markdown', text: body })
+    buffer.length = 0
+  }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const header = splitMarkdownTableRow(lines[index])
+    const separator = splitMarkdownTableRow(lines[index + 1] ?? '')
+    if (header && separator && isMarkdownTableSeparator(separator)) {
+      const rows: string[][] = []
+      let rowIndex = index + 2
+      while (rowIndex < lines.length) {
+        const row = splitMarkdownTableRow(lines[rowIndex])
+        if (!row || row.length !== header.length) break
+        rows.push(row)
+        rowIndex += 1
+      }
+
+      if (rows.length) {
+        flushBuffer()
+        segments.push({ type: 'table', headers: header, rows })
+        index = rowIndex - 1
+        continue
+      }
+    }
+
+    buffer.push(lines[index])
+  }
+
+  flushBuffer()
+  return segments
+}
+
+function LessonMarkdown({ text, className = '', format = 'raw' }: LessonMarkdownProps) {
+  const normalized = normalizeLessonMarkdown(text)
+  const segments = useMemo(() => parseLessonMarkdownSegments(normalized), [normalized])
+
+  if (!segments.some(segment => segment.type === 'table')) {
+    return <MathMarkdown text={normalized} className={className} format={format} />
+  }
+
+  return (
+    <div className={className}>
+      {segments.map((segment, index) => {
+        if (segment.type === 'markdown') {
+          return <MathMarkdown key={index} text={segment.text} format={format} />
+        }
+        return <LessonMarkdownTable key={index} headers={segment.headers} rows={segment.rows} />
+      })}
+    </div>
+  )
+}
+
+function LessonMarkdownTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
+  return (
+    <div className="my-5 overflow-x-auto rounded-2xl border border-blue-100 bg-white shadow-sm">
+      <table className="w-full min-w-[520px] border-collapse text-left text-sm">
+        <thead className="bg-blue-50 text-blue-900">
+          <tr>
+            {headers.map((header, index) => (
+              <th key={`${header}-${index}`} className="border-b border-blue-100 px-4 py-3 font-black align-top">
+                <LessonMarkdown text={header} format="raw" />
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {rows.map((row, rowIndex) => (
+            <tr key={rowIndex} className="align-top">
+              {row.map((cell, cellIndex) => (
+                <td key={`${rowIndex}-${cellIndex}`} className="px-4 py-3 font-semibold leading-7 text-slate-700">
+                  <LessonMarkdown text={cell} format="raw" />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 }
 
 export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTopic | null }) {
@@ -633,11 +753,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <>
                     <LearningCard title="Idea clave">
                       {selectedV2Card.concept_markdown
-                        ? <MathMarkdown text={selectedV2Card.concept_markdown} format="raw" />
+                        ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
                         : <EmptyContent />}
                       {selectedV2Card.alert_markdown && (
                         <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                          <MathMarkdown text={selectedV2Card.alert_markdown} format="raw" />
+                          <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
                         </div>
                       )}
                     </LearningCard>
@@ -645,7 +765,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                       <LearningCard title="Caso práctico resuelto">
                         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
                           <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                            <MathMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
+                            <LessonMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
                           </div>
                         </div>
                       </LearningCard>
@@ -666,7 +786,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     )}
                     {selectedV2Card.practice_prompt && (
                       <LearningCard title="Inténtalo tú">
-                        <MathMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                        <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
                       </LearningCard>
                     )}
                   </>
@@ -756,7 +876,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
                       <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-blue-700">Ahora inténtalo tú</p>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <MathMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                        <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
                       </div>
                     </div>
                   )}
@@ -898,7 +1018,7 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
             >
               <span className="flex items-center gap-2 text-sm font-black leading-snug text-slate-800">
                 <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-blue-500">#{i + 1}</span>
-                <span className="[&_p]:m-0 [&_p]:inline"><MathMarkdown text={card.title} format="raw" /></span>
+                <span className="[&_p]:m-0 [&_p]:inline"><LessonMarkdown text={card.title} format="raw" /></span>
               </span>
               <ChevronDown size={16} className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -907,18 +1027,18 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
                 <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
                   {card.concept_markdown && (
                     <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                      <MathMarkdown text={card.concept_markdown} format="raw" />
+                      <LessonMarkdown text={card.concept_markdown} format="raw" />
                     </div>
                   )}
                   {card.alert_markdown && (
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                      <MathMarkdown text={card.alert_markdown} format="raw" />
+                      <LessonMarkdown text={card.alert_markdown} format="raw" />
                     </div>
                   )}
                   {card.worked_example_markdown && (
                     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <MathMarkdown text={card.worked_example_markdown} format="raw" />
+                        <LessonMarkdown text={card.worked_example_markdown} format="raw" />
                       </div>
                     </div>
                   )}
@@ -956,7 +1076,7 @@ function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: Curric
             >
               <span className={'mb-1 block text-[10px] font-black uppercase tracking-[0.12em] ' + (isActive ? 'text-blue-700' : 'text-slate-400')}>Mini-misión {index + 1}</span>
               <span className={'block text-sm font-black leading-snug ' + (isActive ? 'text-blue-950' : 'text-slate-700') + ' [&_p]:m-0 [&_p]:inline'}>
-                <MathMarkdown text={card.title} format="raw" />
+                <LessonMarkdown text={card.title} format="raw" />
               </span>
             </button>
           )
@@ -1005,7 +1125,7 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
   const sections = useMemo(() => parseSections(markdown), [markdown])
   const [openIdx, setOpenIdx] = useState<number | null>(0)
 
-  if (!sections.length) return <MathMarkdown text={markdown} />
+  if (!sections.length) return <LessonMarkdown text={markdown} />
 
   return (
     <div className="flex flex-col gap-2">
@@ -1019,7 +1139,7 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
               className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
             >
               <span className="text-sm font-black leading-snug text-slate-800 [&_p]:inline [&_p]:m-0">
-                <MathMarkdown text={section.title} format="raw" />
+                <LessonMarkdown text={section.title} format="raw" />
               </span>
               <ChevronDown
                 size={16}
@@ -1037,13 +1157,13 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
                 <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
                   {section.body && (
                     <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                      <MathMarkdown text={section.body} format="raw" />
+                      <LessonMarkdown text={section.body} format="raw" />
                     </div>
                   )}
                   {section.caseStudy && (
                     <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <MathMarkdown text={section.caseStudy} format="raw" />
+                        <LessonMarkdown text={section.caseStudy} format="raw" />
                       </div>
                     </div>
                   )}
@@ -1181,7 +1301,7 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
         <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">Idea clave</p>
-        <MathMarkdown text={idea} />
+        <LessonMarkdown text={idea} />
       </div>
       {(use || pau || tags.length > 0) && (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -1215,7 +1335,7 @@ function InfoTile({ label, text }: { label: string; text: string }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
       <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
-      <MathMarkdown text={text} />
+      <LessonMarkdown text={text} />
     </div>
   )
 }
@@ -1224,7 +1344,7 @@ function GuidedExamplePanel({ text }: { text: string }) {
   return (
     <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
       <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Ejemplo guiado</p>
-      <MathMarkdown text={text} />
+      <LessonMarkdown text={text} />
     </div>
   )
 }
@@ -1233,7 +1353,7 @@ function PracticePromptPanel({ text }: { text: string }) {
   return (
     <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
       <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Ejercicio corregible</p>
-      <MathMarkdown text={text} />
+      <LessonMarkdown text={text} />
     </div>
   )
 }

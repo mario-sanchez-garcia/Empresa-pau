@@ -123,6 +123,13 @@ function normalizeLessonMarkdown(text?: string | null): string {
     .replace(/\u000bec/g, '\\vec')
     .replace(/(^|[^\\])end\{(pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)\}/g, '$1\\end{$2}')
     .replace(/(^|[^\\])det\(/g, '$1\\det(')
+    .replace(/\(\s*(m\\times\s*n)\s*\)/g, '\\($1\\)')
+    .replace(/\(\s*([mn])\s*\)(?=\s+(?:filas|columnas)\b)/gi, '\\($1\\)')
+    .replace(/\(\(\s*A\+B\s*\)\{ij\}=a\{ij\}\+b_\{ij\}\)/g, '\\((A+B)_{ij}=a_{ij}+b_{ij}\\)')
+    .replace(/([A-Za-z])\{ij\}/g, '$1_{ij}')
+    .replace(/\(A\+B\)\{ij\}/g, '(A+B)_{ij}')
+    .replace(/M_\{2\s+imes\s+2\}/g, '\\(M_{2 \\times 2}\\)')
+    .replace(/(^|\n)(\\begin\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)\}[\s\S]*?\\end\{(?:pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)\})(?=\n|$)/g, (_match, prefix, body) => `${prefix}\\[\n${body}\n\\]`)
   if (!repaired.includes('|---') && !repaired.includes('| ---')) return repaired
 
   return repaired.replace(/(\|[^\n]+?\|)[ \t]+(?=\|)/g, '$1\n')

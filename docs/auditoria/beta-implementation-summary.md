@@ -60,13 +60,13 @@ El contenido se sigue renderizando con `MathMarkdown` para conservar LaTeX/KaTeX
 
 Lengua e Historia usan títulos y pasos adaptados a respuesta escrita, comentario, contexto, causas y consecuencias, evitando una plantilla matemática rígida.
 
-La barra de símbolos del editor de entrega inserta plantillas completas para límites, integrales, derivadas, fracciones, matrices y sistemas. La toolbar matemática queda limitada a Matemáticas II, Matemáticas CCSS, Física y Química; Lengua e Historia mantienen el editor básico.
+La barra de símbolos del editor de entrega inserta plantillas completas para límites, integrales, derivadas, fracciones, matrices y sistemas. Las fórmulas inline se insertan con delimitadores `\(...\)` y las matrices/sistemas con `\[...\]`, acompañadas de una ayuda visual breve. La toolbar matemática queda limitada a Matemáticas II, Matemáticas CCSS, Física y Química; Lengua e Historia mantienen el editor básico.
 
 El render de lecciones normaliza tablas Markdown compactadas o mal partidas y las muestra como tablas responsive, evitando que Historia o Lengua enseñen filas con `|` como texto plano.
 
 Los bloques `Ejemplo guiado paso a paso` y `Practica tú` ya no dependen de texto comodín. La secuencia beta aporta ejemplos reales por tema: Matemáticas usa matrices, determinantes, sistemas, derivadas, integrales, probabilidad o programación lineal; Lengua incluye respuesta modelo; Historia incluye respuesta modelo y práctica concreta. La solución de referencia queda asociada al tema para orientar la corrección sin mostrarse como enunciado de práctica.
 
-Las lecciones incluyen ahora una sección de teoría conceptual antes del ejemplo guiado. El contenido matemático se guarda con `String.raw` para conservar `\begin`, `\times`, `\frac` y el resto de comandos LaTeX; además, el render de lecciones repara de forma defensiva escapes antiguos dañados solo dentro de contenido de curso.
+Las lecciones incluyen ahora una sección de teoría conceptual antes del ejemplo guiado. El contenido matemático se guarda con `String.raw` para conservar `\begin`, `\times`, `\frac` y el resto de comandos LaTeX; además, el render de lecciones repara de forma defensiva escapes antiguos dañados solo dentro de contenido de curso. La normalización de curso corrige patrones acotados como `(m\times n)`, `(A+B){ij}` y `M_{2 imes 2}` sin tocar correcciones, historial, chat ni exámenes.
 
 ## Corrección de progresión semanal
 

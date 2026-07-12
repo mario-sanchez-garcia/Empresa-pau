@@ -609,8 +609,27 @@ assert(
     caminoTopic.includes('u0009imes') &&
     caminoTopic.includes('u000crac') &&
     caminoTopic.includes('u000bec') &&
+    caminoTopic.includes('m\\\\times\\s*n') &&
+    caminoTopic.includes('([A-Za-z])\\{ij\\}') &&
+    caminoTopic.includes('M_\\{2\\s+imes\\s+2\\}') &&
+    caminoTopic.includes('\\\\(M_{2 \\\\times 2}\\\\)') &&
     caminoTopic.includes('end\\{(pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)') &&
     !caminoTopic.includes('□egin')
+)
+
+assert(
+  'Math answer toolbar inserts complete delimited templates only for STEM subjects',
+  mathAnswerToolbar.includes('const MATH_SUBJECTS = new Set(["mates", "matematicas", "matematicas_ii", "matematicas_ccss", "matematicas_sociales", "fisica", "quimica"])') &&
+    mathAnswerToolbar.includes('\\\\(\\\\lim_{x \\\\to a} f(x)\\\\)') &&
+    mathAnswerToolbar.includes('\\\\(\\\\int f(x)\\\\,dx\\\\)') &&
+    mathAnswerToolbar.includes('\\\\(\\\\int_{a}^{b} f(x)\\\\,dx\\\\)') &&
+    mathAnswerToolbar.includes('\\\\(\\\\frac{d}{dx}\\\\left(f(x)\\\\right)\\\\)') &&
+    mathAnswerToolbar.includes('\\\\(\\\\frac{a}{b}\\\\)') &&
+    mathAnswerToolbar.includes('\\\\[\\n\\\\begin{pmatrix}') &&
+    mathAnswerToolbar.includes('Puedes usar formato matemático') &&
+    !mathAnswerToolbar.includes('\\\\lim_{x \\\\to a} f(x)"') &&
+    !mathAnswerToolbar.includes('\\\\int f(x)\\\\,dx"') &&
+    !mathAnswerToolbar.includes('\\\\frac{a}{b}"')
 )
 
 assert(

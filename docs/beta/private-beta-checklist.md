@@ -44,6 +44,8 @@
 - [ ] Las lecciones incluyen teoría conceptual antes del ejemplo guiado.
 - [ ] Matemáticas muestra fórmulas, matrices o cálculos reales en el ejemplo guiado.
 - [ ] Las matrices y fórmulas se renderizan correctamente con LaTeX/KaTeX.
+- [ ] Las lecciones renderizan LaTeX inline y display correctamente tras normalización acotada de curso.
+- [ ] No aparecen escapes rotos como `□egin`, `M_{2 imes 2}` o `{ij}` sin subíndice en Matemáticas.
 - [ ] Practica tú usa ejercicios corregibles reales.
 - [ ] Las soluciones de referencia existen para orientar la corrección.
 - [ ] Si existe contenido estructurado, no se usa el fallback genérico.

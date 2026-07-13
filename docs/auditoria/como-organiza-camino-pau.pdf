@@ -1,0 +1,707 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 5130 >>
+stream
+0.92 0.96 1 rg 0 0 595 842 re f
+0.10 0.30 0.80 rg 0 812 595 30 re f
+BT
+0.02 0.04 0.12 rg
+/F2 22 Tf 54 780 Td (Cómo organiza Camino PAU los contenidos) Tj -54 -780 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 744 Td () Tj -54 -744 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 729 Td (1. Resumen ejecutivo) Tj -54 -729 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 701 Td () Tj -54 -701 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 686 Td (Camino PAU no funciona hoy como una IA pedagógica generativa que decide libremente qué) Tj -54 -686 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 671 Td (estudiar. Funciona como un motor mixto de reglas, secuencia curricular, cola de) Tj -54 -671 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 656 Td (aprendizaje, calendario persistido, estado del usuario y algunos ajustes reactivos.) Tj -54 -656 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 641 Td () Tj -54 -641 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 626 Td (La parte fuerte es que ya existe una base ordenada por asignatura, se guardan misiones) Tj -54 -626 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 611 Td (en calendario y se evita regenerar todo sin control cuando hay datos persistidos. La) Tj -54 -611 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 596 Td (parte débil es que la personalización por errores reales todavía es parcial: la) Tj -54 -596 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 581 Td (corrección puede guardar nota, XP y áreas débiles, pero no hay todavía un modelo robusto) Tj -54 -581 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 566 Td (que reprograme el curso entero según patrones de error.) Tj -54 -566 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 551 Td () Tj -54 -551 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 536 Td (Valor educativo actual: Medio. Sirve para beta porque da orden, constancia y práctica) Tj -54 -536 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 521 Td (progresiva. Todavía no es suficiente como "tutor IA completo" de curso anual.) Tj -54 -521 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 506 Td () Tj -54 -506 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 491 Td (2. ¿Hay una IA organizando o un motor de reglas?) Tj -54 -491 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 463 Td () Tj -54 -463 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 448 Td (Actualmente es principalmente un motor de reglas.) Tj -54 -448 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 433 Td () Tj -54 -433 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 418 Td (Elemento | Estado | Comentario) Tj -54 -418 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 406 Td (IA generativa decidiendo el plan | [NO] | No se ve un LLM generando la planificación semanal.) Tj -54 -406 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 394 Td (Reglas hardcodeadas | [OK] | Hay reglas de días hábiles, rotación de asignaturas, límites de) Tj -54 -394 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 382 Td (plan, parciales, rescate y prioridades.) Tj -54 -382 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 370 Td (Secuencia curricular | [OK] | `PRIVATE_BETA_CURRICULUM_TOPICS` y `CAMINO_CURRICULUM_TOPICS`) Tj -54 -370 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 358 Td (ordenan temas.) Tj -54 -358 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 346 Td (Supabase | [OK] | Guarda cola, calendario, XP, feedback escolar y estado.) Tj -54 -346 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 334 Td (JSON/TS local | [OK] | Hay seed local y currículum beta en TypeScript.) Tj -54 -334 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 322 Td (Cola de aprendizaje | [OK] | `user_learning_queue` ordena temas pendientes por usuario.) Tj -54 -322 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 310 Td (Calendario persistido | [OK] | `camino_calendar` guarda misiones por fecha.) Tj -54 -310 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 298 Td (Progreso del usuario | [PARCIAL] | XP y completados influyen; dominio fino por habilidad) Tj -54 -298 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 286 Td (todavía no.) Tj -54 -286 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 274 Td (Historial de correcciones | [PARCIAL] | Se guarda y se usa parcialmente como áreas débiles) Tj -54 -274 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 262 Td (locales.) Tj -54 -262 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 250 Td (Fallbacks | [OK] | Hay fallback curricular local y fallback PAU/EVAU por asignatura si no hay) Tj -54 -250 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 238 Td (match exacto.) Tj -54 -238 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 226 Td () Tj -54 -226 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 211 Td (Conclusión: Camino PAU parece "inteligente" porque combina datos, pero la inteligencia) Tj -54 -211 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 196 Td (actual es procedimental, no generativa.) Tj -54 -196 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 181 Td () Tj -54 -181 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 166 Td (3. Fuentes de datos que usa Camino PAU) Tj -54 -166 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 138 Td () Tj -54 -138 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 123 Td (Dato | Estado | Uso real) Tj -54 -123 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 111 Td (Asignaturas seleccionadas | [OK] | Filtran la beta y determinan qué materias entran en) Tj -54 -111 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 99 Td (calendario.) Tj -54 -99 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 87 Td (Comunidad | [PARCIAL] | Se guarda y afecta ranking/feedback; no organiza profundamente el) Tj -54 -87 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 75 Td (temario.) Tj -54 -75 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 1/7) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 5296 >>
+stream
+BT
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 780 Td (Temario oficial | [PARCIAL] | Está representado por secuencias internas, no como motor oficial) Tj -54 -780 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 768 Td (completo.) Tj -54 -768 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 756 Td (`curriculum_content_v2` | [OK] | Se usa para cola/contenido cuando hay filas.) Tj -54 -756 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 744 Td (`PRIVATE_BETA_CURRICULUM_TOPICS` | [OK] | Fallback principal por asignatura beta.) Tj -54 -744 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 732 Td (`CAMINO_CURRICULUM_TOPICS` | [OK] | Une seed local y secuencia beta.) Tj -54 -732 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 720 Td (`curriculum_topics` | [PARCIAL] | Existe como tabla curricular, pero el flujo central usa sobre) Tj -54 -720 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 708 Td (todo TS/local y `curriculum_content_v2`.) Tj -54 -708 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 696 Td (`mission_templates` | [PARCIAL] | Existe, pero no parece dirigir el calendario principal.) Tj -54 -696 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 684 Td (`user_learning_queue` | [OK] | Fuente persistida de temas) Tj -54 -684 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 672 Td (pendientes/scheduled/postponed/completed.) Tj -54 -672 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 660 Td (`camino_calendar` | [OK] | Fuente de misiones mostradas.) Tj -54 -660 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 648 Td (`camino_user_progress` | [OK] | XP total/racha/estado visible.) Tj -54 -648 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 636 Td (`camino_xp_events` | [OK] | Ledger de XP.) Tj -54 -636 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 624 Td (Historial de correcciones | [PARCIAL] | Se guarda en `historial_examenes`; su efecto en Camino) Tj -54 -624 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 612 Td (es limitado.) Tj -54 -612 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 600 Td (Notas anteriores | [PARCIAL] | Nota baja puede guardar weak area local; no reordena todo el) Tj -54 -600 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 588 Td (plan en servidor.) Tj -54 -588 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 576 Td (Errores del alumno | [NO] | No hay taxonomía fuerte de errores que reprograme.) Tj -54 -576 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 564 Td (Parciales añadidos | [OK] | Inyectan misiones cercanas al parcial.) Tj -54 -564 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 552 Td ("Aún no lo he dado" | [OK] | Guarda feedback y puede postponar cola/calendario.) Tj -54 -552 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 540 Td (Fecha actual | [OK] | Se usa con zona Europe/Madrid.) Tj -54 -540 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 528 Td (Semana seleccionada | [OK] | Cliente puede mostrar/generar semana según `weekStart`.) Tj -54 -528 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 516 Td (Límites de plan | [OK] | Limitan días, correcciones, fotos, simulacros y bonus.) Tj -54 -516 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 504 Td () Tj -54 -504 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 489 Td (4. Flujo real: cómo decide qué toca hoy) Tj -54 -489 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 461 Td () Tj -54 -461 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 446 Td (Flujo principal de servidor:) Tj -54 -446 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 431 Td () Tj -54 -431 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 416 Td (1. Lee usuario autenticado.) Tj -54 -416 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 401 Td (2. Recibe asignaturas seleccionadas.) Tj -54 -401 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 386 Td (3. Normaliza y limita a la beta privada: Matemáticas II, Matemáticas CCSS, Lengua e) Tj -54 -386 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 371 Td (Historia de España.) Tj -54 -371 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 356 Td (4. Busca contenido en `curriculum_content_v2`.) Tj -54 -356 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 341 Td (5. Si no hay contenido suficiente, usa `PRIVATE_BETA_CURRICULUM_TOPICS`.) Tj -54 -341 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 326 Td (6. Crea filas en `user_learning_queue` con `subject`, bloque, orden y) Tj -54 -326 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 311 Td (`metadata.topic_slug`.) Tj -54 -311 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 296 Td (7. Genera 14 días hábiles desde hoy.) Tj -54 -296 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 281 Td (8. Reparte asignaturas por día con una rotación simple.) Tj -54 -281 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 266 Td (9. Inserta misiones en `camino_calendar`.) Tj -54 -266 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 251 Td (10. Marca los elementos de cola como `scheduled`.) Tj -54 -251 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 236 Td () Tj -54 -236 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 221 Td (Flujo de mantenimiento:) Tj -54 -221 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 206 Td () Tj -54 -206 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 191 Td (1. `ensureCaminoCalendar` marca misiones pasadas como `missed`.) Tj -54 -191 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 176 Td (2. Devuelve a `pending` elementos asociados a misiones perdidas.) Tj -54 -176 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 161 Td (3. Comprueba cuántos días futuros hay.) Tj -54 -161 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 146 Td (4. Si faltan días, rellena hasta un horizonte de 14 días.) Tj -54 -146 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 131 Td (5. Si queda demasiado contenido para los días hasta PAU, activa modo rescate y prioriza) Tj -54 -131 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 116 Td (bloques.) Tj -54 -116 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 101 Td () Tj -54 -101 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 2/7) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 4190 >>
+stream
+BT
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 780 Td (No hay una IA leyendo el perfil y escribiendo un plan desde cero. Hay reglas bastante) Tj -54 -780 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 765 Td (claras.) Tj -54 -765 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 750 Td () Tj -54 -750 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 735 Td (5. Cómo organiza una semana) Tj -54 -735 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 707 Td () Tj -54 -707 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 692 Td (En servidor se mantiene un horizonte de 14 días hábiles, no una semana aislada. En) Tj -54 -692 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 677 Td (cliente, la vista trabaja por semana.) Tj -54 -677 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 662 Td () Tj -54 -662 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 647 Td (Comportamiento real:) Tj -54 -647 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 632 Td () Tj -54 -632 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 617 Td (- Genera misiones en días hábiles.) Tj -54 -617 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 602 Td (- Evita fines de semana y festivos definidos en código.) Tj -54 -602 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 587 Td (- Reparte asignaturas con rotación por día.) Tj -54 -587 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 572 Td (- Puede crear 1 o 2 misiones al día según modo y presión de calendario.) Tj -54 -572 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 557 Td (- Si hay calendario en Supabase, lo reutiliza antes que inventar uno nuevo.) Tj -54 -557 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 542 Td (- Si el cliente genera una semana local, la cachea en `localStorage`.) Tj -54 -542 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 527 Td (- Misma semana + mismo usuario tiende a mantenerse estable si hay calendario persistido) Tj -54 -527 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 512 Td (o caché.) Tj -54 -512 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 497 Td (- Puede cambiar si se añaden parciales, se marca "no dado", se pierde una misión o falta) Tj -54 -497 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 482 Td (calendario futuro.) Tj -54 -482 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 467 Td () Tj -54 -467 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 452 Td (La organización semanal es útil, pero todavía no es una planificación pedagógica fina.) Tj -54 -452 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 437 Td (Es una agenda con reglas de avance y algunas adaptaciones.) Tj -54 -437 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 422 Td () Tj -54 -422 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 407 Td (6. Cómo organiza el curso completo) Tj -54 -407 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 379 Td () Tj -54 -379 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 364 Td (Hay visión de curso parcial, no completa.) Tj -54 -364 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 349 Td () Tj -54 -349 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 334 Td (Lo que sí existe:) Tj -54 -334 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 319 Td () Tj -54 -319 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 304 Td (- Secuencia ordenada por asignatura.) Tj -54 -304 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 289 Td (- Horizonte móvil de 14 días hábiles.) Tj -54 -289 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 274 Td (- Cálculo de días hasta la PAU 2027-06-07.) Tj -54 -274 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 259 Td (- Modo rescate si quedan demasiados temas para el tiempo disponible.) Tj -54 -259 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 244 Td (- Reglas de parciales.) Tj -54 -244 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 229 Td (- Comentario histórico periódico en Historia.) Tj -54 -229 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 214 Td () Tj -54 -214 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 199 Td (Lo que no existe todavía de forma completa:) Tj -54 -199 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 184 Td () Tj -54 -184 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 169 Td (- Plan anual de 38 semanas cerrado.) Tj -54 -169 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 154 Td (- Fases explícitas de inicio, desarrollo, repaso, simulacros y PAU.) Tj -54 -154 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 139 Td (- Replanificación global por dominio real.) Tj -54 -139 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 124 Td (- Mapa completo de prerequisitos usado por el motor.) Tj -54 -124 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 109 Td (- Revisión acumulada de errores por habilidad.) Tj -54 -109 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 94 Td () Tj -54 -94 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 3/7) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 5242 >>
+stream
+BT
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 780 Td (En la práctica, Camino organiza una cola larga y va rellenando el calendario próximo. No) Tj -54 -780 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 765 Td (parece tener una planificación anual completa con checkpoints pedagógicos fuertes.) Tj -54 -765 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 750 Td () Tj -54 -750 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 735 Td (7. Cómo avanza entre temas) Tj -54 -735 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 707 Td () Tj -54 -707 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 692 Td (El avance depende de `subject_position`, `orderIndex`, `v2_sort_order` y el estado de) Tj -54 -692 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 677 Td (cola/calendario.) Tj -54 -677 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 662 Td () Tj -54 -662 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 647 Td (Capacidad | Estado | Comentario) Tj -54 -647 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 635 Td (Saber qué tema viene después | [OK] | Lo sabe por orden de secuencia/cola.) Tj -54 -635 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 623 Td (Usar prerequisitos | [PARCIAL] | Hay `prerequisites` en temas, pero no parecen gobernar fuerte) Tj -54 -623 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 611 Td (la planificación.) Tj -54 -611 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 599 Td (Tema visto | [PARCIAL] | Abrir/usar curso puede marcar progreso local, pero el estado fuerte) Tj -54 -599 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 587 Td (llega con corrección/completado.) Tj -54 -587 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 575 Td (Tema practicado | [PARCIAL] | Se infiere por práctica/corrección; no hay dominio granular) Tj -54 -575 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 563 Td (universal.) Tj -54 -563 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 551 Td (Tema completado | [OK] | `complete-mission` y calendario completado lo registran.) Tj -54 -551 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 539 Td (Tema dominado | [NO] | No hay criterio robusto y estable de dominio por tema/habilidad.) Tj -54 -539 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 527 Td (Toca repaso | [PARCIAL] | Hay weak areas locales y modo review, pero no algoritmo sólido de) Tj -54 -527 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 515 Td (repaso espaciado.) Tj -54 -515 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 503 Td (Toca PAU/EVAU | [OK] | Después de curso o cerca de parcial puede mandar a práctica PAU/EVAU.) Tj -54 -503 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 491 Td () Tj -54 -491 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 476 Td (8. Cómo influyen correcciones, errores y XP) Tj -54 -476 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 448 Td () Tj -54 -448 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 433 Td (Señal | Influencia | Realidad) Tj -54 -433 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 421 Td (Corrección con nota | [OK] | Si hay nota, asigna XP y puede completar misión.) Tj -54 -421 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 409 Td (XP | [OK] | Actualiza progreso visible, ranking y racha.) Tj -54 -409 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 397 Td (Historial en `historial_examenes` | [PARCIAL] | Se guarda, pero no parece alimentar de forma) Tj -54 -397 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 385 Td (fuerte el plan servidor.) Tj -54 -385 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 373 Td (Nota baja | [PARCIAL] | Guarda `weakAreas` en localStorage y puede priorizar refuerzo en) Tj -54 -373 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 361 Td (generación local.) Tj -54 -361 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 349 Td (Error específico de cálculo/redacción | [NO] | No se clasifica de forma estructurada para) Tj -54 -349 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 337 Td (planificar.) Tj -54 -337 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 325 Td (Buena nota | [PARCIAL] | Completa misión/tema, pero no hay promoción pedagógica sofisticada.) Tj -54 -325 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 313 Td (Repetición por fallo | [PARCIAL] | Puede aparecer por weak area local; no es un sistema robusto) Tj -54 -313 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 301 Td (de recuperación.) Tj -54 -301 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 289 Td () Tj -54 -289 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 274 Td (Respuesta honesta: si el alumno falla matrices, puede haber refuerzo parcial si la nota) Tj -54 -274 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 259 Td (baja queda en weak areas locales. Pero no hay todavía un motor central que lea todos los) Tj -54 -259 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 244 Td (errores y reprograme automáticamente varias semanas.) Tj -54 -244 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 229 Td () Tj -54 -229 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 214 Td (9. Cómo influyen parciales y "Aún no lo he dado") Tj -54 -214 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 186 Td () Tj -54 -186 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 171 Td (Parciales:) Tj -54 -171 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 156 Td () Tj -54 -156 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 141 Td (- [OK] Se guardan en perfil/local.) Tj -54 -141 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 126 Td (- [OK] Si el parcial está cerca, se inyectan misiones específicas.) Tj -54 -126 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 111 Td (- [OK] Se usan días laborables antes del examen.) Tj -54 -111 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 96 Td (- [OK] Se prioriza bloque/tema del parcial.) Tj -54 -96 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 81 Td (- [OK] Puede meter práctica EVAU, mini-simulacro y simulacro final.) Tj -54 -81 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 4/7) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 5048 >>
+stream
+BT
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 780 Td (- [OK] Si ya había misión normal, puede bajarla a bonus.) Tj -54 -780 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 765 Td (- [PARCIAL] Solo actúa fuerte cuando el parcial está dentro de una ventana cercana.) Tj -54 -765 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 750 Td () Tj -54 -750 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 735 Td ("Aún no lo he dado":) Tj -54 -735 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 720 Td () Tj -54 -720 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 705 Td (- [OK] Guarda feedback local.) Tj -54 -705 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 690 Td (- [OK] Envía feedback a `/api/camino/school-topic-feedback`.) Tj -54 -690 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 675 Td (- [OK] Puede marcar `school_topic_status` como `not_seen` o `delayed_for_school`.) Tj -54 -675 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 660 Td (- [OK] Llama a `/api/camino/postpone-mission`.) Tj -54 -660 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 645 Td (- [OK] Marca cola como `postponed`.) Tj -54 -645 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 630 Td (- [OK] Marca misiones pendientes como `postponed`.) Tj -54 -630 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 615 Td (- [PARCIAL] Sustituye por una base previa si encuentra alternativa.) Tj -54 -615 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 600 Td (- [NO] No es todavía una coordinación completa con programación real de cada colegio.) Tj -54 -600 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 585 Td () Tj -54 -585 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 570 Td (10. Estado por asignatura beta) Tj -54 -570 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 542 Td () Tj -54 -542 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 527 Td (Asignatura | Secuencia | Lecciones | Ejercicios | PAU/EVAU por tema | Riesgo) Tj -54 -527 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 515 Td (Matemáticas II | [OK] 11 temas beta + seed | [OK] Con contenido local/LaTeX y v2 cuando existe) Tj -54 -515 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 503 Td (| [OK] Ejercicios de curso | [PARCIAL] Match por tema/bloque/keywords y fallback | Medio) Tj -54 -503 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 491 Td (Matemáticas CCSS | [OK] 6 temas beta | [OK] Con contenido local | [OK] Ejercicios de curso |) Tj -54 -491 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 479 Td ([PARCIAL] Datos Madrid conectados, matching no siempre exacto | Medio) Tj -54 -479 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 467 Td (Lengua Castellana | [OK] 8 temas beta | [OK] Lecciones adaptadas a respuesta escrita | [OK]) Tj -54 -467 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 455 Td (Prácticas de curso | [PARCIAL] Puede abrir ejercicios por asignatura/keywords | Medio-alto) Tj -54 -455 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 443 Td (Historia de España | [OK] 10 temas beta | [OK] Lecciones de contexto/respuesta | [OK] Prácticas) Tj -54 -443 Td
+0.15 0.20 0.30 rg
+/F1 8 Tf 54 431 Td (de curso + comentario periódico | [PARCIAL] PAU/EVAU por tema menos fino | Medio-alto) Tj -54 -431 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 419 Td () Tj -54 -419 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 404 Td (Matemáticas está más cerca de funcionar como secuencia curricular sólida. Lengua e) Tj -54 -404 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 389 Td (Historia tienen valor beta, pero necesitan más mapeo a ejercicios reales y criterios por) Tj -54 -389 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 374 Td (tema.) Tj -54 -374 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 359 Td () Tj -54 -359 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 344 Td (11. Problemas detectados) Tj -54 -344 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 316 Td () Tj -54 -316 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 301 Td (1. No hay IA generativa organizando el curso; hay reglas.) Tj -54 -301 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 286 Td (2. La personalización por errores es local/parcial.) Tj -54 -286 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 271 Td (3. No hay dominio granular por habilidad.) Tj -54 -271 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 256 Td (4. Los prerequisitos existen en datos, pero no gobiernan claramente el algoritmo.) Tj -54 -256 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 241 Td (5. El horizonte fuerte es 14 días, no 38 semanas.) Tj -54 -241 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 226 Td (6. PAU/EVAU por tema funciona por matching aproximado y fallback.) Tj -54 -226 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 211 Td (7. La planificación depende de varias fuentes: Supabase, TS local, localStorage y) Tj -54 -211 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 196 Td (perfil.) Tj -54 -196 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 181 Td (8. Puede haber diferencias entre calendario servidor y semana generada localmente.) Tj -54 -181 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 166 Td (9. "Aún no lo he dado" postponea, pero no modela la programación real de cada clase.) Tj -54 -166 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 151 Td (10. Historia/Lengua tienen más riesgo de contenido genérico que Matemáticas.) Tj -54 -151 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 136 Td () Tj -54 -136 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 121 Td (12. Valor educativo actual) Tj -54 -121 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 93 Td () Tj -54 -93 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 78 Td (Valor: Medio.) Tj -54 -78 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 5/7) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Length 4166 >>
+stream
+BT
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 780 Td () Tj -54 -780 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 765 Td (Tiene sentido pedagógico porque:) Tj -54 -765 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 750 Td () Tj -54 -750 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 735 Td (- Ordena temas por asignatura.) Tj -54 -735 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 720 Td (- Crea hábito diario/semanal.) Tj -54 -720 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 705 Td (- Separa curso, práctica y PAU/EVAU.) Tj -54 -705 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 690 Td (- Respeta parcialmente parciales.) Tj -54 -690 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 675 Td (- Evita que todo sea flashcards o tareas sueltas.) Tj -54 -675 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 660 Td (- Guarda calendario y progreso.) Tj -54 -660 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 645 Td () Tj -54 -645 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 630 Td (Todavía no es personalización alta porque:) Tj -54 -630 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 615 Td () Tj -54 -615 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 600 Td (- No analiza errores de forma estructurada.) Tj -54 -600 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 585 Td (- No tiene modelo fuerte de dominio.) Tj -54 -585 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 570 Td (- No replanifica el curso completo.) Tj -54 -570 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 555 Td (- No diferencia con suficiente profundidad "sé teoría", "sé aplicar", "fallo cálculo",) Tj -54 -555 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 540 Td ("fallo redacción".) Tj -54 -540 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 525 Td (- No hay aún un mapa PAU/EVAU exacto para todos los temas.) Tj -54 -525 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 510 Td () Tj -54 -510 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 495 Td (Para septiembre, sirve como beta si se comunica como Camino guiado y progresivo. No) Tj -54 -495 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 480 Td (conviene venderlo como tutor IA plenamente adaptativo.) Tj -54 -480 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 465 Td () Tj -54 -465 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 450 Td (13. Qué haría falta para que tenga más valor) Tj -54 -450 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 422 Td () Tj -54 -422 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 407 Td (Prioridades breves:) Tj -54 -407 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 392 Td () Tj -54 -392 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 377 Td (1. Definir estados reales: visto, practicado, completado y dominado.) Tj -54 -377 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 362 Td (2. Guardar errores de corrección en categorías: concepto, procedimiento, cálculo,) Tj -54 -362 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 347 Td (redacción, tiempo.) Tj -54 -347 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 332 Td (3. Usar esas categorías para meter repasos automáticos.) Tj -54 -332 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 317 Td (4. Convertir prerequisitos en reglas reales de desbloqueo o recomendación.) Tj -54 -317 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 302 Td (5. Crear planificación de 38 semanas con fases: base, desarrollo, práctica, repaso,) Tj -54 -302 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 287 Td (simulacros.) Tj -54 -287 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 272 Td (6. Mapear ejercicios PAU/EVAU a tema exacto.) Tj -54 -272 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 257 Td (7. Unificar servidor/localStorage para evitar dobles motores.) Tj -54 -257 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 242 Td (8. Mejorar programación por colegio usando agregados de "no dado".) Tj -54 -242 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 227 Td (9. Evitar fallbacks genéricos cuando hay tema específico.) Tj -54 -227 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 212 Td (10. Crear informes de avance por bloque y asignatura.) Tj -54 -212 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 197 Td () Tj -54 -197 Td
+0.10 0.25 0.70 rg
+/F2 15 Tf 54 182 Td (14. Conclusión clara) Tj -54 -182 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 154 Td () Tj -54 -154 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 139 Td (Camino PAU ya tiene una base educativa real: secuencia, calendario, cola, persistencia,) Tj -54 -139 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 124 Td (XP, parciales y feedback de "no dado". No es solo una lista decorativa.) Tj -54 -124 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 109 Td () Tj -54 -109 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 6/7) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 13 0 R >>
+endobj
+15 0 obj
+<< /Length 1198 >>
+stream
+BT
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 780 Td (Pero tampoco es todavía una IA pedagógica completa. Es un motor de planificación por) Tj -54 -780 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 765 Td (reglas con algunos datos personalizados. Su valor actual está en dar orden y constancia;) Tj -54 -765 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 750 Td (su siguiente salto debe ser usar correcciones y errores para decidir repasos, ritmo y) Tj -54 -750 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 735 Td (prioridad de temas.) Tj -54 -735 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 720 Td () Tj -54 -720 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 705 Td (La frase honesta sería: Camino PAU organiza el estudio mediante un motor de reglas) Tj -54 -705 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 690 Td (apoyado en secuencias curriculares y calendario persistido; empieza a personalizar por) Tj -54 -690 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 675 Td (progreso, parciales y feedback, pero todavía no aprende de forma profunda de los errores) Tj -54 -675 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 660 Td (del alumno.) Tj -54 -660 Td
+0.12 0.16 0.24 rg
+/F1 10 Tf 54 645 Td () Tj -54 -645 Td
+ET
+BT /F1 8 Tf 0.45 0.50 0.60 rg 54 32 Td (Pausia - Auditoria Camino PAU - pagina 7/7) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 17 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 15 0 R >>
+endobj
+17 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R] /Count 7 >>
+endobj
+18 0 obj
+<< /Type /Catalog /Pages 17 0 R >>
+endobj
+xref
+0 19
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000005342 00000 n 
+0000005479 00000 n 
+0000010827 00000 n 
+0000010964 00000 n 
+0000015206 00000 n 
+0000015343 00000 n 
+0000020637 00000 n 
+0000020775 00000 n 
+0000025876 00000 n 
+0000026015 00000 n 
+0000030234 00000 n 
+0000030373 00000 n 
+0000031624 00000 n 
+0000031763 00000 n 
+0000031861 00000 n 
+trailer
+<< /Size 19 /Root 18 0 R >>
+startxref
+31912
+%%EOF

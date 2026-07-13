@@ -142,15 +142,25 @@ export function sanitizeSlugSource(value?: string | null) {
 }
 
 const TOPIC_ALIASES: Record<string, string> = {
+  'matematicas_ii:algebra:matrices-y-operaciones-basicas': 'matrices-operaciones',
+  'matematicas_ii:algebra:dimension-de-una-matriz': 'matrices-operaciones',
+  'matematicas_ii:algebra:suma-y-resta-de-matrices': 'matrices-operaciones',
+  'matematicas_ii:algebra:producto-por-un-escalar': 'producto-por-un-escalar',
+  'matematicas_ii:algebra:producto-por-un-escalar-numero-matriz': 'producto-por-un-escalar',
+  'matematicas_ii:algebra:producto-por-un-escalar-numero-cdot-matriz': 'producto-por-un-escalar',
+  'matematicas_ii:algebra:multiplicacion-de-matrices': 'multiplicacion-de-matrices',
+  'matematicas_ii:algebra:multiplicacion-de-matrices-a-b': 'multiplicacion-de-matrices',
+  'matematicas_ii:algebra:multiplicacion-de-matrices-a-cdot-b': 'multiplicacion-de-matrices',
   'matematicas_ii:algebra-lineal:matrices-operaciones': 'matrices-operaciones',
+  'matematicas_ii:algebra-lineal:matrices-y-operaciones-basicas': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:dimension-de-una-matriz': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:suma-y-resta-de-matrices': 'matrices-operaciones',
-  'matematicas_ii:algebra-lineal:producto-por-un-escalar': 'matrices-operaciones',
-  'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-matriz': 'matrices-operaciones',
-  'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-cdot-matriz': 'matrices-operaciones',
-  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices': 'matrices-operaciones',
-  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-b': 'matrices-operaciones',
-  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-cdot-b': 'matrices-operaciones',
+  'matematicas_ii:algebra-lineal:producto-por-un-escalar': 'producto-por-un-escalar',
+  'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-matriz': 'producto-por-un-escalar',
+  'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-cdot-matriz': 'producto-por-un-escalar',
+  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices': 'multiplicacion-de-matrices',
+  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-b': 'multiplicacion-de-matrices',
+  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-cdot-b': 'multiplicacion-de-matrices',
   'matematicas_ii:algebra-lineal:matriz-inversa-por-gauss-jordan': 'determinantes-inversa-rango',
   'matematicas_ii:algebra-lineal:determinantes-inversa-rango': 'determinantes-inversa-rango',
   'matematicas_ii:algebra-lineal:rango-de-una-matriz-metodo-de-gauss': 'determinantes-inversa-rango',
@@ -162,10 +172,6 @@ const TOPIC_ALIASES: Record<string, string> = {
   'matematicas_ccss:algebra-lineal:sistemas-gauss': 'matrices-sistemas-gauss',
 }
 
-function hasLocalLessonContent(topic: CaminoCurriculumTopic) {
-  return Boolean(topic.explanation || topic.guidedExample || topic.practicePrompt || topic.rawLatex)
-}
-
 function aliasTopicSlug(subjectSlug: string, blockSlug: string, topicSlug: string) {
   const key = `${subjectSlug}:${blockSlug}:${topicSlug}`
   return TOPIC_ALIASES[key] ?? TOPIC_ALIASES[`${subjectSlug}:${blockSlug}:${normalizeTopicSlug(topicSlug)}`] ?? null
@@ -173,6 +179,28 @@ function aliasTopicSlug(subjectSlug: string, blockSlug: string, topicSlug: strin
 
 export function resolveTopicSlugAlias(subjectSlug: string, blockSlug: string, topicSlug: string) {
   return aliasTopicSlug(normalizeSubjectSlug(subjectSlug), normalizeTopicSlug(blockSlug), normalizeTopicSlug(topicSlug)) ?? normalizeTopicSlug(topicSlug)
+}
+
+export function resolveCaminoTopic(input: { subjectSlug: string; blockSlug: string; topicSlug: string }) {
+  const subjectSlug = SUBJECT_LABELS[input.subjectSlug] ? input.subjectSlug : subjectSlugFromLabel(input.subjectSlug)
+  const normalizedBlockSlug = normalizeTopicSlug(input.blockSlug)
+  const normalizedTopicSlug = normalizeTopicSlug(input.topicSlug)
+  const inSubjectBlock = CAMINO_CURRICULUM_TOPICS.filter(t =>
+    t.subject === subjectSlug && normalizeTopicSlug(t.blockSlug) === normalizedBlockSlug
+  )
+
+  const exact = inSubjectBlock.find(t => normalizeTopicSlug(t.topicSlug) === normalizedTopicSlug)
+  if (exact) return { topic: exact, matchedBy: 'exact' as const, resolvedTopicSlug: exact.topicSlug }
+
+  const aliasedSlug = aliasTopicSlug(subjectSlug, normalizedBlockSlug, normalizedTopicSlug)
+  if (aliasedSlug) {
+    const aliased = CAMINO_CURRICULUM_TOPICS.find(t =>
+      t.subject === subjectSlug && normalizeTopicSlug(t.topicSlug) === normalizeTopicSlug(aliasedSlug)
+    )
+    if (aliased) return { topic: aliased, matchedBy: 'alias' as const, resolvedTopicSlug: aliased.topicSlug }
+  }
+
+  return { topic: null, matchedBy: 'missing' as const, resolvedTopicSlug: normalizedTopicSlug }
 }
 
 export function getCurriculumForSubject(subject: string) {
@@ -194,39 +222,7 @@ export function getCurriculumForSubjects(subjectLabels: string[]) {
 }
 
 export function getTopic(subject: string, blockSlug: string, topicSlug: string) {
-  const subjectSlug = SUBJECT_LABELS[subject] ? subject : subjectSlugFromLabel(subject)
-  const normalizedBlockSlug = normalizeTopicSlug(blockSlug)
-  const normalizedTopicSlug = normalizeTopicSlug(topicSlug)
-  const inSubjectBlock = CAMINO_CURRICULUM_TOPICS.filter(t =>
-    t.subject === subjectSlug && normalizeTopicSlug(t.blockSlug) === normalizedBlockSlug
-  )
-  // Exact match first
-  const exact = inSubjectBlock.find(t => normalizeTopicSlug(t.topicSlug) === normalizedTopicSlug)
-  if (exact && hasLocalLessonContent(exact)) return exact
-
-  const aliasedSlug = aliasTopicSlug(subjectSlug, normalizedBlockSlug, normalizedTopicSlug)
-  if (aliasedSlug) {
-    const aliased = CAMINO_CURRICULUM_TOPICS.find(t =>
-      t.subject === subjectSlug && normalizeTopicSlug(t.topicSlug) === normalizeTopicSlug(aliasedSlug)
-    )
-    if (aliased && hasLocalLessonContent(aliased)) {
-      return {
-        ...aliased,
-        title: sanitizeLessonTitle(exact?.title ?? aliased.title),
-        orderIndex: exact?.orderIndex ?? aliased.orderIndex,
-        v2SortOrder: exact?.v2SortOrder ?? aliased.v2SortOrder,
-      }
-    }
-  }
-
-  if (exact) return exact
-  // Bidirectional prefix fallback: handles legacy chapter_title slugs (url shorter than seed)
-  // and full textSlug urls (url longer than truncated seed slug). Min 12 chars avoids false positives.
-  return inSubjectBlock.find(t => {
-    const candidate = normalizeTopicSlug(t.topicSlug)
-    const minLen = Math.min(candidate.length, normalizedTopicSlug.length)
-    return minLen >= 12 && (candidate.startsWith(normalizedTopicSlug) || normalizedTopicSlug.startsWith(candidate))
-  }) ?? null
+  return resolveCaminoTopic({ subjectSlug: subject, blockSlug, topicSlug }).topic
 }
 
 export function buildTopicHref(topic: Pick<CaminoCurriculumTopic, 'subject' | 'blockSlug' | 'topicSlug'>) {

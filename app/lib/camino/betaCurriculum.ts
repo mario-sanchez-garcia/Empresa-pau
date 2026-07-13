@@ -36,6 +36,12 @@ type TopicLessonContent = {
 const md = String.raw
 
 function theoryText(item: TopicInput) {
+  if (item.topicSlug.includes('producto-por-un-escalar')) {
+    return md`Multiplicar una matriz por un número significa multiplicar cada entrada por ese número. Si \(A=(a_{ij})\), entonces \((kA)_{ij}=k\cdot a_{ij}\). La dimensión de la matriz no cambia.`
+  }
+  if (item.topicSlug.includes('multiplicacion-de-matrices')) {
+    return md`El producto \(A\cdot B\) solo existe si el número de columnas de \(A\) coincide con el número de filas de \(B\). Si \(A\in M_{m\times n}\) y \(B\in M_{n\times p}\), entonces \(AB\in M_{m\times p}\). Cada entrada se obtiene multiplicando una fila por una columna.`
+  }
   if (item.topicSlug.includes('matrices-operaciones') || item.topicSlug.includes('matrices-sistemas')) {
     return md`Una matriz es una tabla ordenada de números colocados en filas y columnas. Su dimensión se escribe \(m\times n\): \(m\) filas y \(n\) columnas. Dos matrices solo se suman si tienen la misma dimensión, y la regla es sumar posición a posición: \((A+B)_{ij}=a_{ij}+b_{ij}\).`
   }
@@ -124,6 +130,98 @@ A+B=\begin{pmatrix}3 & 3\\-2 & 8\end{pmatrix}
 $$
 
 Se puede realizar porque ambas matrices son \(2\times 2\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('producto-por-un-escalar')) {
+    const practice = md`Dada
+
+$$
+A=\begin{pmatrix}2 & -1\\0 & 3\end{pmatrix}
+$$
+
+calcula \(3A\) y explica qué ocurre con la dimensión de la matriz.`
+    return {
+      guidedExample: md`Dada la matriz
+
+$$
+A=\begin{pmatrix}1 & -2\\3 & 0\end{pmatrix}
+$$
+
+calcula \(2A\).
+
+**Paso 1.** Multiplica cada entrada de \(A\) por \(2\):
+
+$$
+2A=\begin{pmatrix}2\cdot1 & 2\cdot(-2)\\2\cdot3 & 2\cdot0\end{pmatrix}
+$$
+
+**Paso 2.** Opera cada elemento:
+
+$$
+2A=\begin{pmatrix}2 & -4\\6 & 0\end{pmatrix}
+$$
+
+**Conclusión.** La dimensión sigue siendo \(2\times2\); solo cambian los valores de las entradas.`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: md`Se multiplica cada entrada por \(3\):
+
+$$
+3A=\begin{pmatrix}6 & -3\\0 & 9\end{pmatrix}
+$$
+
+La dimensión no cambia: sigue siendo \(2\times2\).`,
+      ...defaults,
+    }
+  }
+
+  if (item.topicSlug.includes('multiplicacion-de-matrices')) {
+    const practice = md`Dadas
+
+$$
+A=\begin{pmatrix}1 & 0 & 2\\-1 & 3 & 1\end{pmatrix},
+\qquad
+B=\begin{pmatrix}2 & 1\\0 & -1\\4 & 3\end{pmatrix}
+$$
+
+calcula \(AB\) y justifica por qué el producto existe.`
+    return {
+      guidedExample: md`Dadas las matrices
+
+$$
+A=\begin{pmatrix}1 & 2\\3 & 4\end{pmatrix},
+\qquad
+B=\begin{pmatrix}2 & 0\\1 & -1\end{pmatrix}
+$$
+
+calcula \(AB\).
+
+**Paso 1.** Comprueba dimensiones: \(A\in M_{2\times2}\) y \(B\in M_{2\times2}\). El producto existe porque las columnas de \(A\) coinciden con las filas de \(B\).
+
+**Paso 2.** Multiplica filas por columnas:
+
+$$
+AB=\begin{pmatrix}
+1\cdot2+2\cdot1 & 1\cdot0+2\cdot(-1)\\
+3\cdot2+4\cdot1 & 3\cdot0+4\cdot(-1)
+\end{pmatrix}
+=\begin{pmatrix}4 & -2\\10 & -4\end{pmatrix}
+$$
+
+**Conclusión.** El resultado es una matriz \(2\times2\).`,
+      practicePrompt: practice,
+      appliedExercise: practice,
+      referenceSolution: md`El producto existe porque \(A\) es \(2\times3\) y \(B\) es \(3\times2\). Por tanto, \(AB\) será \(2\times2\).
+
+$$
+AB=\begin{pmatrix}
+1\cdot2+0\cdot0+2\cdot4 & 1\cdot1+0\cdot(-1)+2\cdot3\\
+(-1)\cdot2+3\cdot0+1\cdot4 & (-1)\cdot1+3\cdot(-1)+1\cdot3
+\end{pmatrix}
+=\begin{pmatrix}10 & 7\\2 & -1\end{pmatrix}
+$$`,
       ...defaults,
     }
   }
@@ -529,14 +627,16 @@ function topic(input: TopicInput): CaminoCurriculumTopic {
 
 export const PRIVATE_BETA_CURRICULUM_TOPICS: CaminoCurriculumTopic[] = [
   topic({ subject: 'matematicas_ii', orderIndex: 1, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'matrices-operaciones', title: 'Matrices y operaciones básicas', tags: ['matrices', 'operaciones', 'producto', 'inversa'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 2, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'determinantes-inversa-rango', title: 'Determinantes, inversa y rango', tags: ['determinantes', 'Sarrus', 'inversa', 'rango'], prerequisites: ['matrices-operaciones'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 3, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'sistemas-gauss-rouche', title: 'Sistemas, Gauss y Rouché-Frobenius', tags: ['sistemas', 'Gauss', 'Rouché-Frobenius', 'parámetros'], prerequisites: ['determinantes-inversa-rango'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 4, blockSlug: 'geometria-3d', blockTitle: 'Geometría', topicSlug: 'vectores-productos', title: 'Vectores, producto escalar y vectorial', tags: ['vectores', 'producto escalar', 'producto vectorial', 'perpendicularidad'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 5, blockSlug: 'geometria-3d', blockTitle: 'Geometría', topicSlug: 'rectas-planos-posiciones', title: 'Rectas, planos y posiciones relativas', tags: ['rectas', 'planos', 'intersección', 'posición relativa'], prerequisites: ['vectores-productos'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 6, blockSlug: 'analisis', blockTitle: 'Análisis', topicSlug: 'limites-continuidad-asintotas', title: 'Límites, continuidad y asíntotas', tags: ['límites', 'continuidad', 'asíntotas', 'indeterminaciones'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 7, blockSlug: 'analisis', blockTitle: 'Análisis', topicSlug: 'derivadas-tangente-optimizacion', title: 'Derivadas, tangente y optimización', tags: ['derivadas', 'recta tangente', 'Rolle', 'optimización'], prerequisites: ['limites-continuidad-asintotas'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 8, blockSlug: 'integrales', blockTitle: 'Integrales', topicSlug: 'primitivas-barrow-areas', title: 'Primitivas, Barrow y áreas', tags: ['integrales', 'primitivas', 'Barrow', 'áreas'], prerequisites: ['derivadas-tangente-optimizacion'] }),
-  topic({ subject: 'matematicas_ii', orderIndex: 9, blockSlug: 'probabilidad', blockTitle: 'Probabilidad', topicSlug: 'condicionada-total-bayes-binomial-normal', title: 'Condicionada, total, Bayes, binomial y normal', tags: ['condicionada', 'total', 'Bayes', 'binomial', 'normal'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 2, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'producto-por-un-escalar', title: 'Producto por un Escalar', tags: ['matrices', 'producto escalar', 'número por matriz'], prerequisites: ['matrices-operaciones'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 3, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'multiplicacion-de-matrices', title: 'Multiplicación de Matrices (A · B)', tags: ['matrices', 'producto', 'filas por columnas', 'dimensiones'], prerequisites: ['producto-por-un-escalar'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 4, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'determinantes-inversa-rango', title: 'Determinantes, inversa y rango', tags: ['determinantes', 'Sarrus', 'inversa', 'rango'], prerequisites: ['multiplicacion-de-matrices'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 5, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'sistemas-gauss-rouche', title: 'Sistemas, Gauss y Rouché-Frobenius', tags: ['sistemas', 'Gauss', 'Rouché-Frobenius', 'parámetros'], prerequisites: ['determinantes-inversa-rango'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 6, blockSlug: 'geometria-3d', blockTitle: 'Geometría', topicSlug: 'vectores-productos', title: 'Vectores, producto escalar y vectorial', tags: ['vectores', 'producto escalar', 'producto vectorial', 'perpendicularidad'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 7, blockSlug: 'geometria-3d', blockTitle: 'Geometría', topicSlug: 'rectas-planos-posiciones', title: 'Rectas, planos y posiciones relativas', tags: ['rectas', 'planos', 'intersección', 'posición relativa'], prerequisites: ['vectores-productos'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 8, blockSlug: 'analisis', blockTitle: 'Análisis', topicSlug: 'limites-continuidad-asintotas', title: 'Límites, continuidad y asíntotas', tags: ['límites', 'continuidad', 'asíntotas', 'indeterminaciones'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 9, blockSlug: 'analisis', blockTitle: 'Análisis', topicSlug: 'derivadas-tangente-optimizacion', title: 'Derivadas, tangente y optimización', tags: ['derivadas', 'recta tangente', 'Rolle', 'optimización'], prerequisites: ['limites-continuidad-asintotas'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 10, blockSlug: 'integrales', blockTitle: 'Integrales', topicSlug: 'primitivas-barrow-areas', title: 'Primitivas, Barrow y áreas', tags: ['integrales', 'primitivas', 'Barrow', 'áreas'], prerequisites: ['derivadas-tangente-optimizacion'] }),
+  topic({ subject: 'matematicas_ii', orderIndex: 11, blockSlug: 'probabilidad', blockTitle: 'Probabilidad', topicSlug: 'condicionada-total-bayes-binomial-normal', title: 'Condicionada, total, Bayes, binomial y normal', tags: ['condicionada', 'total', 'Bayes', 'binomial', 'normal'] }),
 
   topic({ subject: 'matematicas_ccss', orderIndex: 1, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'matrices-sistemas-gauss', title: 'Matrices, sistemas y Gauss', tags: ['matrices', 'sistemas', 'Gauss', 'inversa'] }),
   topic({ subject: 'matematicas_ccss', orderIndex: 2, blockSlug: 'algebra', blockTitle: 'Álgebra', topicSlug: 'programacion-lineal', title: 'Programación lineal', tags: ['restricciones', 'región factible', 'función objetivo', 'optimización'] }),

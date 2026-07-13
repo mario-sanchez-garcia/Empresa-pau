@@ -29,7 +29,11 @@
 
 - [ ] El curso/tema abre bien desde Camino.
 - [ ] Las misiones de Camino usan slugs canonicos (`metadata.topic_slug`) y no slugs derivados del titulo visible.
+- [ ] El titulo visible de la mision coincide con el titulo de la leccion que se abre.
+- [ ] La ruta de curso se construye desde `subjectSlug`, `blockSlug` y `topicSlug` canonicos.
+- [ ] El loader busca primero tema exacto, despues alias controlado y nunca abre el primer tema por fallback silencioso.
 - [ ] Las rutas antiguas con `cdot` o titulos LaTeX resuelven por alias al tema correcto.
+- [ ] `Multiplicacion de Matrices` y `Producto por un Escalar` abren sus propias lecciones, no `Matrices y operaciones basicas`.
 - [ ] Un tema con contenido local/LaTeX no muestra el fallback de apunte pendiente.
 - [ ] `Dimensión de una Matriz` carga contenido útil mediante alias a la secuencia beta.
 - [ ] La explicación tiene valor: qué es, uso PAU, reconocimiento y error típico.
@@ -111,6 +115,9 @@
 - El contenido local se presenta como mini clase visual y se renderiza con `MathMarkdown`.
 - El bloque de vídeo no se pinta si no hay `videoId` real.
 - La cola/calendario guarda `metadata.topic_slug` para que el enlace use el slug canónico, no el título convertido a slug.
+- Las misiones guardan slugs canonicos y el titulo de la mision debe coincidir con la leccion abierta.
+- El loader de curso ya no hace fallback silencioso al primer tema del bloque: exacto, alias controlado o `Tema no encontrado`.
+- Los aliases antiguos de matrices resuelven de forma controlada: producto por escalar y multiplicacion de matrices ya no caen en la introduccion general.
 - Las semanas generadas localmente arrancan desde un offset por `weekDelta`, de modo que semana siguiente avanza en la secuencia.
 - La vista cliente reutiliza la semana persistida o cacheada antes de generar una nueva; si genera una semana local, la fusiona con el calendario existente en vez de reemplazarlo.
 - Las rutas legacy con `cdot`/LaTeX en el slug se resuelven mediante alias controlados en `caminoCurriculumPlan.ts`.

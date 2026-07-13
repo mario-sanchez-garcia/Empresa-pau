@@ -45,7 +45,10 @@ La solución actual:
 - Los titulos visibles se limpian con `sanitizeLessonTitle` para no mostrar LaTeX crudo como `\cdot` o `$A \cdot B$`.
 - Los slugs se normalizan desde una fuente segura y las rutas antiguas con `cdot` resuelven por alias controlado.
 - Se añadieron alias controlados para slugs legacy como `dimension-de-una-matriz` hacia contenido beta local como `matrices-operaciones`.
-- Si el tema exacto legacy no tiene contenido local, pero existe alias con explicación/ejemplo/ejercicio, el curso usa ese contenido sin mostrar fallback.
+- `producto-por-un-escalar` y `multiplicacion-de-matrices` pasan a ser lecciones propias de Matemáticas II, con teoría, ejemplo, práctica y solución orientativa específicas.
+- Los aliases legacy de `producto-por-un-escalar-numero-cdot-matriz` y `multiplicacion-de-matrices-a-cdot-b` resuelven a esas lecciones específicas, no a `matrices-operaciones`.
+- El loader de curso resuelve en orden estricto: tema exacto, alias controlado o `Tema no encontrado`. Ya no abre silenciosamente el primer tema parecido del bloque.
+- Si el tema exacto legacy no existe, pero existe alias controlado con explicación/ejemplo/ejercicio, el curso usa ese contenido sin mostrar fallback.
 - El fallback queda reservado para temas realmente incompletos y usa un texto menos alarmante.
 
 ## Recuperación visual de cursos
@@ -81,6 +84,8 @@ La solución actual:
 - `/api/onboarding/generate` guarda `metadata.topic_slug` y `block_slug` canónico al crear la cola.
 - `ensureCaminoCalendar` recalcula `topic_slug` canónico si la cola viene de datos legacy.
 - `CaminoCalendarClient` lee `metadata.topic_slug` para construir el enlace del curso.
+- La ruta de una misión de curso se construye desde `subjectSlug`, `blockSlug` y `topicSlug` canonicos.
+- El titulo visible de la misión debe coincidir con la lección abierta; por ejemplo, `Multiplicación de Matrices (A · B)` abre su propia lección y no la introducción de matrices.
 - `CaminoCalendarClient` reutiliza la semana persistida/cacheada antes de generar una nueva.
 - Cuando se genera una semana local, se fusiona con el calendario actual en vez de reemplazarlo completo.
 - La generación local de semanas usa `weekDelta` para desplazar `subjectRotation` y `topicRotationBySubject`.

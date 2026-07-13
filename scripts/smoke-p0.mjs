@@ -564,8 +564,12 @@ assert(
     betaCurriculum.includes('PRIVATE_BETA_CURRICULUM_TOPICS') &&
     caminoPlan.includes('normalizeTopicSlug') &&
     caminoPlan.includes("'matematicas_ii:algebra-lineal:dimension-de-una-matriz': 'matrices-operaciones'") &&
-    caminoPlan.includes("'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-cdot-matriz': 'matrices-operaciones'") &&
-    caminoPlan.includes("'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-cdot-b': 'matrices-operaciones'") &&
+    caminoPlan.includes("'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-cdot-matriz': 'producto-por-un-escalar'") &&
+    caminoPlan.includes("'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-cdot-b': 'multiplicacion-de-matrices'") &&
+    betaCurriculum.includes("topicSlug: 'producto-por-un-escalar'") &&
+    betaCurriculum.includes("title: 'Producto por un Escalar'") &&
+    betaCurriculum.includes("topicSlug: 'multiplicacion-de-matrices'") &&
+    betaCurriculum.includes("title: 'Multiplicación de Matrices (A · B)'") &&
     caminoPlan.includes('sanitizeLessonTitle') &&
     betaCurriculum.includes("'lengua'") &&
     betaCurriculum.includes("'historia_espana'") &&
@@ -577,10 +581,18 @@ assert(
 )
 
 assert(
-  'Camino beta content loading maps legacy mission slugs to local LaTeX lessons',
+  'Camino beta content loading maps mission slugs to exact lessons before controlled aliases',
   caminoCourseTopic.includes('getTopic(subject, block, topic)') &&
-    caminoPlan.includes('hasLocalLessonContent(exact)') &&
+    caminoPlan.includes('function resolveCaminoTopic') &&
+    caminoPlan.includes("matchedBy: 'exact'") &&
+    caminoPlan.includes("matchedBy: 'alias'") &&
+    caminoPlan.includes("matchedBy: 'missing'") &&
     caminoPlan.includes('aliasTopicSlug(subjectSlug, normalizedBlockSlug, normalizedTopicSlug)') &&
+    !caminoPlan.includes('candidate.startsWith(normalizedTopicSlug)') &&
+    !caminoPlan.includes("producto-por-un-escalar-numero-cdot-matriz': 'matrices-operaciones'") &&
+    !caminoPlan.includes("multiplicacion-de-matrices-a-cdot-b': 'matrices-operaciones'") &&
+    betaCurriculum.includes('El producto \\(A\\cdot B\\) solo existe') &&
+    betaCurriculum.includes('Multiplica cada entrada') &&
     caminoTopic.includes('Este tema aún necesita contenido completo') &&
     caminoTopic.includes('Errores típicos y criterio de avance') &&
     !caminoTopic.includes('Todavía no hay apunte LaTeX estructurado para este tema')

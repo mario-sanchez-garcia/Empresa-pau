@@ -48,6 +48,9 @@
 - [ ] Matemáticas muestra fórmulas, matrices o cálculos reales en el ejemplo guiado.
 - [ ] Las matrices y fórmulas se renderizan correctamente con LaTeX/KaTeX.
 - [ ] Las lecciones renderizan LaTeX inline y display correctamente tras normalización acotada de curso.
+- [ ] Teoría rápida usa renderer matemático y no texto plano.
+- [ ] La normalización de LaTeX se aplica solo a lecciones/cursos.
+- [ ] La ayuda de símbolos no muestra LaTeX crudo confuso.
 - [ ] Los titulos visibles de calendario, admin preview y curso no muestran LaTeX crudo.
 - [ ] No aparecen escapes rotos como `□egin`, `M_{2 imes 2}` o `{ij}` sin subíndice en Matemáticas.
 - [ ] Practica tú usa ejercicios corregibles reales.

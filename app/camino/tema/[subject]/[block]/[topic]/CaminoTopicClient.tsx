@@ -114,7 +114,7 @@ function scoreFromCorrection(data: unknown, maxScore: number) {
   return Math.min(maxScore, Math.max(0, numeric))
 }
 
-function normalizeLessonLatex(text: string): string {
+function normalizeLessonMathText(text: string): string {
   return text
     .replace(/\u0008egin\{/g, '\\begin{')
     .replace(/\u0009imes/g, '\\times')
@@ -123,7 +123,7 @@ function normalizeLessonLatex(text: string): string {
     .replace(/(^|[^\\])end\{(pmatrix|bmatrix|vmatrix|matrix|cases|array|aligned)\}/g, '$1\\end{$2}')
     .replace(/(^|[^\\])det\(/g, '$1\\det(')
     .replace(/\\times(?!\s)/g, '\\times ')
-    .replace(/(^|[^\\])\(\s*(m\\times\s*n)\s*\)/g, '$1\\($2\\)')
+    .replace(/(^|[^\\])\(\s*(m)\\times\s*(n)\s*\)/g, '$1\\($2 \\times $3\\)')
     .replace(/(^|[^\\])\(\s*([mn])\s*\)(?=\s+(?:filas|columnas)\b)/gi, '$1\\($2\\)')
     .replace(/\(\(\s*A\+B\s*\)\{ij\}=a\{ij\}\+b_\{ij\}\)/g, '\\[(A+B)_{ij}=a_{ij}+b_{ij}\\]')
     .replace(/([A-Za-z])\{ij\}/g, '$1_{ij}')
@@ -136,7 +136,7 @@ function normalizeLessonLatex(text: string): string {
 
 function normalizeLessonMarkdown(text?: string | null): string {
   const value = dedentContent(text ?? '').replace(/\r\n?/g, '\n').trim()
-  const repaired = normalizeLessonLatex(value)
+  const repaired = normalizeLessonMathText(value)
   if (!repaired.includes('|---') && !repaired.includes('| ---')) return repaired
 
   return repaired.replace(/(\|[^\n]+?\|)[ \t]+(?=\|)/g, '$1\n')

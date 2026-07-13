@@ -615,12 +615,12 @@ assert(
 
 assert(
   'Camino lesson markdown repairs damaged lesson-only LaTeX escapes',
-  caminoTopic.includes('function normalizeLessonLatex') &&
+  caminoTopic.includes('function normalizeLessonMathText') &&
     caminoTopic.includes('u0008egin') &&
     caminoTopic.includes('u0009imes') &&
     caminoTopic.includes('u000crac') &&
     caminoTopic.includes('u000bec') &&
-    caminoTopic.includes('m\\\\times\\s*n') &&
+    caminoTopic.includes('(m)\\\\times\\s*(n)') &&
     caminoTopic.includes('([A-Za-z])\\{ij\\}') &&
     caminoTopic.includes('M_\\{2\\s+imes\\s+2\\}') &&
     caminoTopic.includes('\\\\(M_{2 \\\\times 2}\\\\)') &&
@@ -629,10 +629,13 @@ assert(
 
 assert(
   'Camino quick theory renders lesson LaTeX instead of raw delimiters',
-  caminoTopic.includes(String.raw`.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g`) &&
+    caminoTopic.includes(String.raw`.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g`) &&
     caminoTopic.includes(String.raw`.replace(/\\\(\s*([\s\S]*?)\s*\\\)/g`) &&
     caminoTopic.includes('`$${body.trim()}$`') &&
     caminoTopic.includes('\\\\[(A+B)_{ij}=a_{ij}+b_{ij}\\\\]') &&
+    caminoTopic.includes('<LessonMarkdown text={theory} />') &&
+    !caminoTopic.includes('<p>{theory}</p>') &&
+    !caminoTopic.includes('<div>{theory}</div>') &&
     betaCurriculum.includes(String.raw`Su dimensión se escribe \(m\times n\)`) &&
     betaCurriculum.includes(String.raw`\((A+B)_{ij}=a_{ij}+b_{ij}\)`) &&
     !caminoTopic.includes('\\\\((A+B)_{ij}=a_{ij}+b_{ij}\\\\)') &&
@@ -649,6 +652,8 @@ assert(
     mathAnswerToolbar.includes('\\\\(\\\\frac{a}{b}\\\\)') &&
     mathAnswerToolbar.includes('\\\\[\\n\\\\begin{pmatrix}') &&
     mathAnswerToolbar.includes('Puedes usar formato matemático') &&
+    mathAnswerToolbar.includes('límite de f(x) cuando x tiende a a') &&
+    !mathAnswerToolbar.includes("<span className=\"font-mono\">{'\\\\\\\\(\\\\\\\\lim_{x \\\\to a} f(x)\\\\\\\\)'}</span>") &&
     !mathAnswerToolbar.includes('\\\\lim_{x \\\\to a} f(x)"') &&
     !mathAnswerToolbar.includes('\\\\int f(x)\\\\,dx"') &&
     !mathAnswerToolbar.includes('\\\\frac{a}{b}"')

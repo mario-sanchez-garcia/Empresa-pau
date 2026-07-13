@@ -70,6 +70,8 @@ Los bloques `Ejemplo guiado paso a paso` y `Practica tú` ya no dependen de text
 
 Las lecciones incluyen ahora una sección de teoría conceptual antes del ejemplo guiado. El contenido matemático se guarda con `String.raw` para conservar `\begin`, `\times`, `\frac` y el resto de comandos LaTeX; además, el render de lecciones repara de forma defensiva escapes antiguos dañados solo dentro de contenido de curso. La normalización de curso corrige patrones acotados como `(m\times n)`, `(A+B){ij}` y `M_{2 imes 2}` sin tocar correcciones, historial, chat ni exámenes.
 
+La sección `Teoría rápida` pasa por el mismo `LessonMarkdown`/`MathMarkdown` que el resto de contenido de curso. La normalización de LaTeX queda acotada a lecciones mediante `normalizeLessonMathText`, y la ayuda de símbolos del editor ya no muestra LaTeX crudo como ejemplo visual.
+
 ## Corrección de progresión semanal
 
 Las semanas podían repetirse porque el generador local de calendario inicializaba la rotación de temas desde cero cada vez que se generaba una semana. Además, el calendario persistido no guardaba siempre el `topicSlug` canónico, por lo que podía reconstruir enlaces desde el título.

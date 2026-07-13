@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import { normalizeCaminoSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
@@ -38,11 +39,7 @@ type LoadState =
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function textSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeCaminoSlug(title)
 }
 
 function Indicator({ ok, label }: { ok: boolean; label: string }) {
@@ -125,14 +122,15 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                 </thead>
                 <tbody>
                   {blockRows.map((row, i) => {
-                    const href = `/camino-pau/curso/${row.subject}/${row.block_slug}/${textSlug(row.title)}`
+                    const topicSlug = resolveTopicSlugAlias(row.subject, row.block_slug, textSlug(sanitizeLessonTitle(row.title)))
+                    const href = `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
                     return (
                       <tr key={row.sort_order} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
                         <td style={{ padding: '9px 14px', color: C.muted, fontWeight: 700, fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>
                           {row.sort_order}
                         </td>
                         <td style={{ padding: '9px 14px', color: C.ink, fontWeight: 600, fontSize: 12, borderBottom: `1px solid ${C.border}`, minWidth: 220 }}>
-                          {row.title}
+                          {sanitizeLessonTitle(row.title)}
                         </td>
                         <td style={{ padding: '9px 14px', borderBottom: `1px solid ${C.border}` }}>
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>

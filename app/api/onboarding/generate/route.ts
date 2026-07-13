@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
-import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,9 +72,11 @@ function queueTopicMeta(item: QueueSourceItem) {
     candidate.subject === subject &&
     normalizeTopicSlug(candidate.title) === normalizeTopicSlug(item.title)
   )
+  const blockSlug = item.block_slug ?? topic?.blockSlug ?? null
+  const rawTopicSlug = item.topic_slug ?? topic?.topicSlug ?? normalizeTopicSlug(item.title)
   return {
-    blockSlug: item.block_slug ?? topic?.blockSlug ?? null,
-    topicSlug: item.topic_slug ?? topic?.topicSlug ?? normalizeTopicSlug(item.title),
+    blockSlug,
+    topicSlug: blockSlug ? resolveTopicSlugAlias(subject, blockSlug, rawTopicSlug) : normalizeTopicSlug(rawTopicSlug),
   }
 }
 
@@ -207,7 +209,7 @@ export async function POST(request: NextRequest) {
             block_key: fc.block_key,
             block_slug: topicMeta.blockSlug,
             v2_sort_order: fc.sort_order,
-            title: fc.title,
+            title: sanitizeLessonTitle(fc.title),
             subject_position: i + 1,
             queue_status: 'pending',
             metadata,
@@ -278,17 +280,25 @@ export async function POST(request: NextRequest) {
         cursors[subject] = cursor + 1
 
         const itemMeta = (item.metadata as Record<string, unknown> | null) ?? {}
+        const topicMeta = queueTopicMeta({
+          sort_order: item.v2_sort_order,
+          title: item.title,
+          block_key: item.block_key,
+          block_slug: item.block_slug,
+          subject: item.subject,
+          topic_slug: typeof itemMeta.topic_slug === 'string' ? itemMeta.topic_slug : null,
+        })
         const missionType = (itemMeta.mission_type as string) ?? 'concept'
-        const calMetadata = itemMeta.express ? { express: true, topic_slug: itemMeta.topic_slug } : { topic_slug: itemMeta.topic_slug }
+        const calMetadata = itemMeta.express ? { express: true, topic_slug: topicMeta.topicSlug } : { topic_slug: topicMeta.topicSlug }
 
         calRows.push({
           user_id: user.id,
           scheduled_date: dateStr,
           subject: item.subject,
           v2_sort_order: item.v2_sort_order,
-          title: item.title,
+          title: sanitizeLessonTitle(item.title),
           block_key: item.block_key,
-          block_slug: item.block_slug,
+          block_slug: topicMeta.blockSlug,
           mission_type: missionType,
           is_main: true,
           is_bonus: false,

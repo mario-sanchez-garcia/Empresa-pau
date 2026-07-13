@@ -10,7 +10,7 @@ import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
-import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeSubjectSlug, normalizeTopicSlug, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
@@ -66,6 +66,7 @@ const EXAMS_KEY = 'pausia_camino_student_exams_v1'
 const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
 const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
 const CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'
+const CALENDAR_WEEK_CACHE_KEY = 'pausia_camino_week_cache_v2'
 const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
 const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
 const BETA_FEEDBACK_URL = process.env.NEXT_PUBLIC_BETA_FEEDBACK_URL
@@ -85,9 +86,9 @@ const seedTopicToCurriculumItem = (topic: CaminoCurriculumTopic): CurriculumItem
   subjectSlug: topic.subject,
   block: topic.blockTitle,
   blockSlug: topic.blockSlug,
-  topic: topic.title,
+  topic: sanitizeLessonTitle(topic.title),
   topicSlug: topic.topicSlug,
-  title: topic.title,
+  title: sanitizeLessonTitle(topic.title),
   sortOrder: topic.orderIndex,
   contentStatus: topic.contentStatus,
   source: 'seed',
@@ -132,7 +133,7 @@ function normalizeOnboardingSubjects(subjects: string[]) {
     return true
   }).map(({ label }) => label)
 }
-function textSlug(value: string) { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }
+function textSlug(value: string) { return normalizeCaminoSlug(value) }
 function calendarDayLabel(dateISO: string) { return new Date(`${dateISO}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) }
 function weekRangeLabel(weekStartISO: string) {
   const start = dateFromISO(weekStartISO)
@@ -151,6 +152,35 @@ function buildWeekDays(weekStartISO: string, sourceDays: DayPlan[] = []) {
     const source = byDate.get(dateISO)
     return { date: dateISO, label: calendarDayLabel(dateISO), isToday: isRealToday(dateISO), missions: source?.missions ?? [] }
   })
+}
+function weekStartForDate(dateISO: string) {
+  return toISO(mondayOf(dateFromISO(dateISO)))
+}
+function cloneWeek(days: DayPlan[]) {
+  return days.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) }))
+}
+function mergeWeekIntoCalendar(current: DayPlan[], weekStartISO: string, weekDays: DayPlan[]) {
+  const weekEndISO = toISO(addDays(dateFromISO(weekStartISO), 6))
+  const outsideWeek = current.filter(day => day.date < weekStartISO || day.date > weekEndISO)
+  return [...outsideWeek, ...cloneWeek(weekDays)].sort((a, b) => a.date.localeCompare(b.date))
+}
+function saveWeekCache(weekStartISO: string, weekDays: DayPlan[]) {
+  const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
+  saveJson(CALENDAR_WEEK_CACHE_KEY, { ...cache, [weekStartISO]: cloneWeek(weekDays) })
+}
+function saveCalendarWeeksToCache(days: DayPlan[]) {
+  const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
+  const next = { ...cache }
+  const grouped = new Map<string, DayPlan[]>()
+  for (const day of days) {
+    const weekStart = weekStartForDate(day.date)
+    if (!grouped.has(weekStart)) grouped.set(weekStart, [])
+    grouped.get(weekStart)!.push(day)
+  }
+  for (const [weekStart, weekDays] of grouped) {
+    next[weekStart] = buildWeekDays(weekStart, weekDays)
+  }
+  saveJson(CALENDAR_WEEK_CACHE_KEY, next)
 }
 function getSimulationLimitForPlan(planId: CaminoPlanId) {
   return getCaminoPlanLimits(planId).fullMocksPerMonth
@@ -174,7 +204,11 @@ function getMissionTarget(kind: MissionKind, subject: string, topic?: string, bl
   const blockParam = block ? `&block=${encodeURIComponent(textSlug(block))}` : ''
   if (kind === 'mock_exam') return { href: `/simulacros?subject=${s}${blockParam}${topicParam}&source=camino_pau`, fallback: '', autoCompletable: false }
   if (kind === 'evau_practice' || kind === 'exam_focus') return { href: `/?subject=${s}${blockParam}${topicParam}&mode=random&source=camino`, fallback: '', autoCompletable: false }
-  if ((kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') && block && topic) return { href: `/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}`, fallback: '', autoCompletable: false }
+  if ((kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') && block && topic) {
+    const blockSlug = textSlug(block)
+    const topicSlug = resolveTopicSlugAlias(s, blockSlug, textSlug(topic))
+    return { href: `/camino-pau/curso/${s}/${blockSlug}/${topicSlug}`, fallback: '', autoCompletable: false }
+  }
   if (kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') return { href: '', fallback: 'Este tema necesita bloque y tema para abrir una página de curso.', autoCompletable: true }
   return { href: '', fallback: 'Esta misión todavía no tiene pantalla propia. Puedes marcarla como hecha cuando la termines fuera de Pausia.', autoCompletable: true }
 }
@@ -246,12 +280,14 @@ type CaminoCalRow = {
 function calRowToMission(row: CaminoCalRow): Mission {
   const subjectLabel = subjectLabelFromSlug(row.subject)
   const blockSlug = row.block_slug ?? (row.block_key ? textSlug(row.block_key) : '')
-  const topicSlug = typeof row.metadata?.topic_slug === 'string'
+  const rawTopicSlug = typeof row.metadata?.topic_slug === 'string'
     ? normalizeTopicSlug(row.metadata.topic_slug)
-    : textSlug(row.title)
+    : normalizeTopicSlug(sanitizeLessonTitle(row.title))
+  const topicSlug = resolveTopicSlugAlias(row.subject, blockSlug, rawTopicSlug)
   const href = blockSlug
     ? `/camino-pau/curso/${row.subject}/${blockSlug}/${topicSlug}`
     : ''
+  const cleanTitle = sanitizeLessonTitle(row.title)
   return {
     id: row.id,
     calendarRowId: row.id,
@@ -259,8 +295,8 @@ function calRowToMission(row: CaminoCalRow): Mission {
     kind: 'concept_explanation',
     subject: subjectLabel,
     block: row.block_key ?? subjectLabel,
-    topic: row.title,
-    title: row.title,
+    topic: cleanTitle,
+    title: cleanTitle,
     reason: row.block_key ? `${row.block_key} · misión de tu Camino PAU.` : 'Misión de tu Camino PAU.',
     href,
     target: href,
@@ -316,14 +352,16 @@ async function fetchCurriculumItems(subjects: string[]): Promise<CurriculumItem[
 
   const flashcardItems = data.map(row => {
     const subject = subjectLabelFromSlug(row.subject)
+    const blockSlug = textSlug(row.block_key)
+    const rawTopicSlug = textSlug(row.chapter_title)
     return {
       subject,
       subjectSlug: normalizeSubjectSlug(row.subject),
-      block: row.block_key,
-      blockSlug: textSlug(row.block_key),
-      topic: row.chapter_title,
-      topicSlug: textSlug(row.chapter_title),
-      title: row.title,
+      block: sanitizeLessonTitle(row.block_key),
+      blockSlug,
+      topic: sanitizeLessonTitle(row.chapter_title),
+      topicSlug: resolveTopicSlugAlias(row.subject, blockSlug, rawTopicSlug),
+      title: sanitizeLessonTitle(row.title),
       sortOrder: row.sort_order,
       contentStatus: 'latex_notes',
       source: 'supabase' as const,
@@ -465,6 +503,9 @@ function buildMission(input: {
   minutes: number
   xp: number
 }): Mission {
+  const subjectSlugValue = input.item?.subjectSlug ?? subjectSlug(input.subject)
+  const blockSlugValue = input.item?.blockSlug ?? (input.item?.block ? textSlug(input.item.block) : undefined)
+  const topicSlugValue = input.item?.topicSlug ?? (input.item?.topic && blockSlugValue ? resolveTopicSlugAlias(subjectSlugValue, blockSlugValue, textSlug(input.item.topic)) : undefined)
   return {
     id: `${input.dateISO}-${input.slot}`,
     role: input.role,
@@ -478,6 +519,9 @@ function buildMission(input: {
     estimatedMinutes: input.minutes,
     baseXP: input.xp,
     status: 'pending',
+    metadata: topicSlugValue ? { topic_slug: topicSlugValue } : undefined,
+    subjectSlug: subjectSlugValue,
+    blockKey: input.item?.block,
   }
 }
 
@@ -513,7 +557,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     Object.values(weekCache)
       .flat()
       .flatMap(day => day.missions)
-      .map(mission => `${subjectSlug(mission.subject)}:${mission.block ?? ''}:${mission.topic ?? ''}`)
+      .map(mission => `${subjectSlug(mission.subject)}:${mission.block ? textSlug(mission.block) : ''}:${typeof mission.metadata?.topic_slug === 'string' ? mission.metadata.topic_slug : mission.topic ? textSlug(mission.topic) : ''}`)
       .filter(Boolean),
   )
   let plannedSimulationsThisRun = 0
@@ -523,7 +567,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     for (let attempt = 0; attempt < Math.max(rows.length, 1); attempt += 1) {
       const rotation = startRotation + attempt
       const item = pickCurriculumItem(subject, rotation, curriculum)
-      const recentKey = item ? `${subjectSlug(subject)}:${item.block}:${item.topic}` : ''
+      const recentKey = item ? `${subjectSlug(subject)}:${item.blockSlug}:${item.topicSlug}` : ''
       if (!item || (!recentTopicKeys.has(recentKey) && !findAdjustmentForItem(item, subject, onboarding, schoolAdjustments))) {
         topicRotationBySubject.set(subject, rotation + 1)
         return item
@@ -752,6 +796,7 @@ export default function CaminoCalendarClient() {
       if (cancelled) return
       if (calDays && calDays.length > 0) {
         setCalendar(calDays)
+        saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
         const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -796,6 +841,7 @@ export default function CaminoCalendarClient() {
       if (cancelled) return
       if (calDays && calDays.length > 0) {
         setCalendar(calDays)
+        saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
       } else {
@@ -963,6 +1009,7 @@ export default function CaminoCalendarClient() {
         const calDays = await fetchCaminoCalendar(session.user.id)
         if (calDays && calDays.length > 0) {
           setCalendar(calDays)
+          saveCalendarWeeksToCache(calDays)
           setSupabaseCalLoaded(true)
           setCaminoReadyStatus('ready')
         }
@@ -972,7 +1019,9 @@ export default function CaminoCalendarClient() {
   }
 
   function persist(nextCalendar: DayPlan[], nextExams = exams) {
-    setCalendar(nextCalendar)
+    const weekStart = weekStartForDate(nextCalendar[0]?.date ?? selectedWeekStart)
+    saveWeekCache(weekStart, nextCalendar)
+    setCalendar(current => nextCalendar.length <= 7 ? mergeWeekIntoCalendar(current, weekStart, nextCalendar) : nextCalendar)
     setExams(nextExams)
     saveJson(EXAMS_KEY, nextExams)
     supabase.auth.getSession().then(({ data: sessionData }) => {
@@ -987,10 +1036,26 @@ export default function CaminoCalendarClient() {
   }
   function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
     if (!onboarding) return []
+    const weekEndISO = toISO(addDays(dateFromISO(weekStartISO), 6))
+    const existingWeek = buildWeekDays(weekStartISO, calendar.filter(day => day.date >= weekStartISO && day.date <= weekEndISO))
+    if (existingWeek.some(day => day.missions.length > 0)) {
+      setSelectedWeekStart(weekStartISO)
+      saveWeekCache(weekStartISO, existingWeek)
+      return existingWeek
+    }
+    const cachedWeek = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})[weekStartISO]
+    if (cachedWeek) {
+      const stableWeek = buildWeekDays(weekStartISO, cachedWeek)
+      setSelectedWeekStart(weekStartISO)
+      setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, stableWeek))
+      return stableWeek
+    }
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, {})
+    const weekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
+    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache)
     setSelectedWeekStart(weekStartISO)
-    setCalendar(nextCalendar)
+    saveWeekCache(weekStartISO, nextCalendar)
+    setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))
     return nextCalendar
   }
   function goToWeek(weekStartISO: string) {

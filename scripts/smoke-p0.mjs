@@ -26,6 +26,7 @@ const landing = read('app/landing/page.tsx')
 const loginPage = read('app/login/page.tsx')
 const sidebar = read('app/components/Sidebar.tsx')
 const caminoCalendar = read('app/components/camino/CaminoCalendarClient.tsx')
+const adminCaminoPreview = read('app/admin/camino-preview/page.tsx')
 const onboardingFlow = read('app/components/onboarding/OnboardingFlow.tsx')
 const onboardingGenerateRoute = read('app/api/onboarding/generate/route.ts')
 const ensureCaminoCalendar = read('app/lib/ensureCaminoCalendar.ts')
@@ -424,7 +425,9 @@ assert(
     caminoCalendar.includes('Siguiente') &&
     caminoCalendar.includes('Esta semana') &&
     caminoCalendar.includes('setSelectedWeekStart(weekStartISO)') &&
-    caminoCalendar.includes('generateCalendar(onboarding, nextExams, source, planId, weekStartISO, {})')
+    caminoCalendar.includes('loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})[weekStartISO]') &&
+    caminoCalendar.includes('generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache)') &&
+    caminoCalendar.includes('setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))')
 )
 
 assert(
@@ -506,8 +509,12 @@ assert(
     caminoCalendar.includes('selectedBlock') &&
     caminoCalendar.includes('activeBlock') &&
     caminoCalendar.includes('courseHrefForItem') &&
-    caminoCalendar.includes('/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}') &&
+    caminoCalendar.includes('resolveTopicSlugAlias(s, blockSlug, textSlug(topic))') &&
+    caminoCalendar.includes('CALENDAR_WEEK_CACHE_KEY') &&
+    caminoCalendar.includes('mergeWeekIntoCalendar') &&
+    caminoCalendar.includes('saveWeekCache(weekStartISO, existingWeek)') &&
     caminoCalendar.includes('href={courseHrefForItem(item)}') &&
+    !caminoCalendar.includes('/camino-pau/curso/${s}/${textSlug(block)}/${textSlug(topic)}') &&
     !caminoCalendar.includes('href: `/camino?subject=${s}${blockParam}${topicParam}`')
 )
 
@@ -557,6 +564,9 @@ assert(
     betaCurriculum.includes('PRIVATE_BETA_CURRICULUM_TOPICS') &&
     caminoPlan.includes('normalizeTopicSlug') &&
     caminoPlan.includes("'matematicas_ii:algebra-lineal:dimension-de-una-matriz': 'matrices-operaciones'") &&
+    caminoPlan.includes("'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-cdot-matriz': 'matrices-operaciones'") &&
+    caminoPlan.includes("'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-cdot-b': 'matrices-operaciones'") &&
+    caminoPlan.includes('sanitizeLessonTitle') &&
     betaCurriculum.includes("'lengua'") &&
     betaCurriculum.includes("'historia_espana'") &&
     caminoPlan.includes('buildEvauHref') &&
@@ -657,10 +667,25 @@ assert(
   'Camino weekly generation advances by week and keeps canonical topic slugs',
   onboardingGenerateRoute.includes('topic_slug: topicMeta.topicSlug') &&
     ensureCaminoCalendar.includes('calMetadata.topic_slug = topicMeta.topicSlug') &&
+    onboardingGenerateRoute.includes('resolveTopicSlugAlias(subject, blockSlug, rawTopicSlug)') &&
+    ensureCaminoCalendar.includes('resolveTopicSlugAlias(subject, blockSlug, rawTopicSlug)') &&
     caminoCalendar.includes('row.metadata?.topic_slug') &&
     caminoCalendar.includes('weekDelta * topicStepPerWeek') &&
     caminoCalendar.includes('let subjectRotation = weekDelta * weeklyDays') &&
     caminoCalendar.includes('!recentTopicKeys.has(recentKey)')
+)
+
+assert(
+  'Camino visible titles and route slugs never derive from raw LaTeX titles',
+  caminoPlan.includes('normalizeCaminoSlug') &&
+    caminoPlan.includes('sanitizeSlugSource') &&
+    caminoPlan.includes("replace(/\\\\cdot|cdot/g, '·')") &&
+    caminoCalendar.includes('sanitizeLessonTitle(row.title)') &&
+    caminoCalendar.includes('sanitizeLessonTitle(topic.title)') &&
+    adminCaminoPreview.includes('resolveTopicSlugAlias(row.subject, row.block_slug, textSlug(sanitizeLessonTitle(row.title)))') &&
+    adminCaminoPreview.includes('sanitizeLessonTitle(row.title)') &&
+    !caminoCalendar.includes('textSlug(row.title)') &&
+    !adminCaminoPreview.includes('/${textSlug(row.title)}')
 )
 
 assert(

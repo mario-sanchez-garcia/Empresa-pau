@@ -113,16 +113,46 @@ export function normalizeTopicSlug(value?: string | null) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\$\\cdot\$/g, ' ')
+    .replace(/\$([^$]+)\$/g, '$1')
+    .replace(/\\cdot|cdot|[·∙⋅×]/g, ' ')
+    .replace(/\\times|times/g, ' ')
+    .replace(/\\[a-z]+/g, ' ')
+    .replace(/[{}]/g, ' ')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 
+export function normalizeCaminoSlug(value?: string | null) {
+  return normalizeTopicSlug(value)
+}
+
+export function sanitizeLessonTitle(value?: string | null) {
+  return (value ?? '')
+    .replace(/\$\\cdot\$/g, '·')
+    .replace(/\$([^$]*?)\\cdot([^$]*?)\$/g, (_match, left, right) => `${left.trim()} · ${right.trim()}`.trim())
+    .replace(/\\cdot|cdot/g, '·')
+    .replace(/\\times|times/g, '×')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+export function sanitizeSlugSource(value?: string | null) {
+  return sanitizeLessonTitle(value)
+}
+
 const TOPIC_ALIASES: Record<string, string> = {
+  'matematicas_ii:algebra-lineal:matrices-operaciones': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:dimension-de-una-matriz': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:suma-y-resta-de-matrices': 'matrices-operaciones',
+  'matematicas_ii:algebra-lineal:producto-por-un-escalar': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-matriz': 'matrices-operaciones',
+  'matematicas_ii:algebra-lineal:producto-por-un-escalar-numero-cdot-matriz': 'matrices-operaciones',
+  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-b': 'matrices-operaciones',
+  'matematicas_ii:algebra-lineal:multiplicacion-de-matrices-a-cdot-b': 'matrices-operaciones',
   'matematicas_ii:algebra-lineal:matriz-inversa-por-gauss-jordan': 'determinantes-inversa-rango',
+  'matematicas_ii:algebra-lineal:determinantes-inversa-rango': 'determinantes-inversa-rango',
   'matematicas_ii:algebra-lineal:rango-de-una-matriz-metodo-de-gauss': 'determinantes-inversa-rango',
   'matematicas_ii:algebra-lineal:sistemas-gauss': 'sistemas-gauss-rouche',
   'matematicas_ii:analisis:limites-continuidad': 'limites-continuidad-asintotas',
@@ -139,6 +169,10 @@ function hasLocalLessonContent(topic: CaminoCurriculumTopic) {
 function aliasTopicSlug(subjectSlug: string, blockSlug: string, topicSlug: string) {
   const key = `${subjectSlug}:${blockSlug}:${topicSlug}`
   return TOPIC_ALIASES[key] ?? TOPIC_ALIASES[`${subjectSlug}:${blockSlug}:${normalizeTopicSlug(topicSlug)}`] ?? null
+}
+
+export function resolveTopicSlugAlias(subjectSlug: string, blockSlug: string, topicSlug: string) {
+  return aliasTopicSlug(normalizeSubjectSlug(subjectSlug), normalizeTopicSlug(blockSlug), normalizeTopicSlug(topicSlug)) ?? normalizeTopicSlug(topicSlug)
 }
 
 export function getCurriculumForSubject(subject: string) {
@@ -178,9 +212,7 @@ export function getTopic(subject: string, blockSlug: string, topicSlug: string) 
     if (aliased && hasLocalLessonContent(aliased)) {
       return {
         ...aliased,
-        blockSlug,
-        topicSlug,
-        title: exact?.title ?? aliased.title,
+        title: sanitizeLessonTitle(exact?.title ?? aliased.title),
         orderIndex: exact?.orderIndex ?? aliased.orderIndex,
         v2SortOrder: exact?.v2SortOrder ?? aliased.v2SortOrder,
       }

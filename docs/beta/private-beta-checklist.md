@@ -22,11 +22,14 @@
 - [ ] Las misiones bonus aparecen debajo y son opcionales.
 - [ ] Semana siguiente avanza a temas posteriores de la secuencia.
 - [ ] Misma semana recargada mantiene las misiones guardadas.
+- [ ] La semana ya persistida no se regenera al cambiar de dia, navegar o recargar sesion.
 - [ ] No se repite el mismo `topicSlug` en semanas consecutivas salvo repaso explícito.
 
 ## Curso, corrección y XP
 
 - [ ] El curso/tema abre bien desde Camino.
+- [ ] Las misiones de Camino usan slugs canonicos (`metadata.topic_slug`) y no slugs derivados del titulo visible.
+- [ ] Las rutas antiguas con `cdot` o titulos LaTeX resuelven por alias al tema correcto.
 - [ ] Un tema con contenido local/LaTeX no muestra el fallback de apunte pendiente.
 - [ ] `Dimensión de una Matriz` carga contenido útil mediante alias a la secuencia beta.
 - [ ] La explicación tiene valor: qué es, uso PAU, reconocimiento y error típico.
@@ -45,6 +48,7 @@
 - [ ] Matemáticas muestra fórmulas, matrices o cálculos reales en el ejemplo guiado.
 - [ ] Las matrices y fórmulas se renderizan correctamente con LaTeX/KaTeX.
 - [ ] Las lecciones renderizan LaTeX inline y display correctamente tras normalización acotada de curso.
+- [ ] Los titulos visibles de calendario, admin preview y curso no muestran LaTeX crudo.
 - [ ] No aparecen escapes rotos como `□egin`, `M_{2 imes 2}` o `{ij}` sin subíndice en Matemáticas.
 - [ ] Practica tú usa ejercicios corregibles reales.
 - [ ] Las soluciones de referencia existen para orientar la corrección.
@@ -105,3 +109,5 @@
 - El bloque de vídeo no se pinta si no hay `videoId` real.
 - La cola/calendario guarda `metadata.topic_slug` para que el enlace use el slug canónico, no el título convertido a slug.
 - Las semanas generadas localmente arrancan desde un offset por `weekDelta`, de modo que semana siguiente avanza en la secuencia.
+- La vista cliente reutiliza la semana persistida o cacheada antes de generar una nueva; si genera una semana local, la fusiona con el calendario existente en vez de reemplazarlo.
+- Las rutas legacy con `cdot`/LaTeX en el slug se resuelven mediante alias controlados en `caminoCurriculumPlan.ts`.

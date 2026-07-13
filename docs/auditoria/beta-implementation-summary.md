@@ -42,6 +42,8 @@ La solución actual:
 
 - `caminoCurriculumPlan.ts` expone `normalizeTopicSlug`.
 - `getTopic` normaliza `subject`, `blockSlug` y `topicSlug`.
+- Los titulos visibles se limpian con `sanitizeLessonTitle` para no mostrar LaTeX crudo como `\cdot` o `$A \cdot B$`.
+- Los slugs se normalizan desde una fuente segura y las rutas antiguas con `cdot` resuelven por alias controlado.
 - Se añadieron alias controlados para slugs legacy como `dimension-de-una-matriz` hacia contenido beta local como `matrices-operaciones`.
 - Si el tema exacto legacy no tiene contenido local, pero existe alias con explicación/ejemplo/ejercicio, el curso usa ese contenido sin mostrar fallback.
 - El fallback queda reservado para temas realmente incompletos y usa un texto menos alarmante.
@@ -77,6 +79,8 @@ La solución actual:
 - `/api/onboarding/generate` guarda `metadata.topic_slug` y `block_slug` canónico al crear la cola.
 - `ensureCaminoCalendar` recalcula `topic_slug` canónico si la cola viene de datos legacy.
 - `CaminoCalendarClient` lee `metadata.topic_slug` para construir el enlace del curso.
+- `CaminoCalendarClient` reutiliza la semana persistida/cacheada antes de generar una nueva.
+- Cuando se genera una semana local, se fusiona con el calendario actual en vez de reemplazarlo completo.
 - La generación local de semanas usa `weekDelta` para desplazar `subjectRotation` y `topicRotationBySubject`.
 - Se evita repetir temas recientes desde la caché semanal cuando hay alternativa.
 

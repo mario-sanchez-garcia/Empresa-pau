@@ -1,7 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
-import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug } from './camino/caminoCurriculumPlan'
+import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 
 const HOLIDAYS = new Set([
   '2026-10-12', '2026-11-01', '2026-11-02',
@@ -78,9 +78,11 @@ function queueTopicMeta(item: QueueItem) {
     candidate.subject === subject &&
     normalizeTopicSlug(candidate.title) === normalizeTopicSlug(item.title)
   )
+  const blockSlug = item.block_slug ?? topic?.blockSlug ?? null
+  const rawTopicSlug = fromMetadata ?? topic?.topicSlug ?? normalizeTopicSlug(item.title)
   return {
-    blockSlug: item.block_slug ?? topic?.blockSlug ?? null,
-    topicSlug: fromMetadata ?? topic?.topicSlug ?? normalizeTopicSlug(item.title),
+    blockSlug,
+    topicSlug: blockSlug ? resolveTopicSlugAlias(subject, blockSlug, rawTopicSlug) : normalizeTopicSlug(rawTopicSlug),
   }
 }
 
@@ -351,7 +353,7 @@ export async function ensureCaminoCalendar(
         scheduled_date: dateStr,
         subject: item.subject,
         v2_sort_order: item.v2_sort_order,
-        title: item.title,
+        title: sanitizeLessonTitle(item.title),
         block_key: item.block_key,
         block_slug: topicMeta.blockSlug,
         mission_type: missionType,

@@ -28,8 +28,11 @@ export function normalizeExamStatement(input?: string | null) {
   if (!input) return ''
 
   let text = normalizePdfGlyphs(input)
+  text = stripSourceAttribution(text)
   text = normalizeAiLatexBlocks(text)
   text = normalizeExistingMath(text)
+  text = convertPlainTextMatrices(text)
+  text = convertPlainTextEquationSystems(text)
   text = mapOutsideMath(text, repairLostLatex)
   text = mapOutsideMath(text, wrapLatexEnvironments)
   text = formatBrokenMathBlocks(text)
@@ -381,6 +384,49 @@ function wrapOrphanLatexFragments(text: string) {
     .replace(orphanFragment, match => `$${match.trim()}$`)
     .replace(/\b([A-Z]\s*=\s*[A-Z]\^\{-?1\}\s*[A-Za-z])(?=\s|[.,;:]|$)/g, match => `$${match.replace(/\s+/g, ' ')}$`)
     .replace(/\b([A-Z]\^\{-?1\}\s*[A-Za-z])(?=\s|[.,;:]|$)/g, match => `$${match.replace(/\s+/g, ' ')}$`)
+}
+
+function stripSourceAttribution(text: string) {
+  return text
+    .replace(/\n+Fuente:\s+[^\n]+\[?www\.[^\]\n]*\]?[^\n]*\.pdf\.?[ \t]*\n*/gi, '\n')
+    .replace(/^Fuente:\s+[^\n]+\.pdf\.?[ \t]*\n*/i, '')
+}
+
+function convertPlainTextMatrices(text: string) {
+  // Detect plain-text matrix blocks like: A =\n\n -a 1 1\n0 -1 1\na 1 1\n\n
+  // Only converts rows where every whitespace-separated token is a simple element
+  const SIMPLE_EL = /^[-−]?[a-zA-Z0-9]+$/
+  return text.replace(
+    /\b([A-Z])\s*=\s*\n\n((?:[ \t]*[^\n]{1,50}\n)+(?:[ \t]*[^\n]{1,50}))[ \t]*\n\n/g,
+    (match, name, body) => {
+      const rows = body.split('\n').map((r: string) => r.trim()).filter(Boolean)
+      if (rows.length < 1 || rows.length > 8) return match
+      const parsed = rows.map((r: string) => r.split(/\s+/))
+      const isMatrix = parsed.every((els: string[]) =>
+        els.length >= 1 && els.length <= 6 && els.every((el: string) => SIMPLE_EL.test(el))
+      )
+      if (!isMatrix) return match
+      const latexRows = parsed.map((els: string[]) => els.map((el: string) => el.replace(/−/g, '-')).join(' & '))
+      return `\n\n$$\n${name} = \\begin{pmatrix}\n${latexRows.join(' \\\\\n')}\n\\end{pmatrix}\n$$\n\n`
+    }
+  )
+}
+
+function convertPlainTextEquationSystems(text: string) {
+  // Detect plain-text equation/inequality systems after a colon:
+  //   :\nx + ay + z = 2\nx − az = 0\nx + y + z = 2\n\n
+  return text.replace(
+    /([:：]\s*\n)((?:[ \t]*[^\n]{3,80}[=<>≤≥][^\n]*\n){2,})(?=\n)/g,
+    (match, colon, body) => {
+      const lines = body.split('\n').map((l: string) => l.trim()).filter(Boolean)
+      const isSystem = lines.every((l: string) => /[=<>≤≥]/.test(l) && l.length < 80)
+      if (!isSystem) return match
+      const latexLines = lines.map((l: string) =>
+        l.replace(/−/g, '-').replace(/≤/g, '\\leq').replace(/≥/g, '\\geq')
+      )
+      return `${colon}\n\n$$\n\\begin{cases}\n${latexLines.join(' \\\\\n')}\n\\end{cases}\n$$\n\n`
+    }
+  )
 }
 
 function normalizePdfGlyphs(text: string) {

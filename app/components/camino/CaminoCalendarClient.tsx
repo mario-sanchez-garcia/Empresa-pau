@@ -972,12 +972,40 @@ export default function CaminoCalendarClient() {
 
   const userSubjectSlugs = new Set(onboardingSubjects.map(s => subjectSlug(s)))
   const filteredProjection = projection?.filter(p => userSubjectSlugs.has(p.asignatura)) ?? null
+  const isShareWindow = (() => {
+    const dow = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' })
+    return dow === 'Fri' || dow === 'Sat' || dow === 'Sun'
+  })()
   const heroAsignatura = (() => {
     if (!filteredProjection?.length) return null
     const nextPartialSlug = upcomingPartial ? subjectSlug(upcomingPartial.subject) : null
     if (nextPartialSlug && filteredProjection.some(p => p.asignatura === nextPartialSlug)) return nextPartialSlug
     return [...filteredProjection].sort((a, b) => b.recent_entries - a.recent_entries)[0]?.asignatura ?? null
   })()
+
+  async function shareInforme() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    try {
+      const res = await fetch('/api/informe/link', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (!res.ok) { setToast('No se pudo generar el enlace'); return }
+      const { url } = await res.json() as { url?: string }
+      if (!url) { setToast('No se pudo generar el enlace'); return }
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent)
+      if (isMobile) {
+        const msg = encodeURIComponent(`Mira mi progreso de esta semana en Pausia: ${url}`)
+        window.open(`https://wa.me/?text=${msg}`, '_blank')
+      } else {
+        await navigator.clipboard.writeText(url)
+        setToast('Enlace copiado')
+      }
+    } catch {
+      setToast('No se pudo generar el enlace')
+    }
+  }
 
   async function createLiga(nombre: string): Promise<{ error?: string }> {
     const { data: { session } } = await supabase.auth.getSession()
@@ -1342,6 +1370,22 @@ export default function CaminoCalendarClient() {
           </section>
         )}
         {filteredProjection && filteredProjection.length > 0 && <NotaProyectadaCard projections={filteredProjection} heroAsignatura={heroAsignatura} />}
+        {filteredProjection && filteredProjection.length > 0 && isShareWindow && (
+          <section className="mb-5 rounded-[28px] border border-blue-100 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(37,99,235,0.06)]">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-black text-slate-800">¿Quieres compartir tu progreso?</p>
+                <p className="mt-0.5 text-xs font-semibold text-slate-400">Comparte un resumen semanal con tus padres</p>
+              </div>
+              <button
+                onClick={shareInforme}
+                className="shrink-0 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-blue-700 active:scale-[0.97]"
+              >
+                Compartir
+              </button>
+            </div>
+          </section>
+        )}
 
         <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3">

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       .eq('estado', 'completado')
       .order('created_at', { ascending: false }),
     db.from('historial_examenes')
-      .select('asignatura, nota, nota_maxima, created_at')
+      .select('asignatura, nota, nota_maxima, bloque, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false }),
   ])

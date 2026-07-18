@@ -741,7 +741,7 @@ export default function CaminoCalendarClient() {
   const [daysSinceReg, setDaysSinceReg] = useState<number | null>(null)
   const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
   const [isGenerating, setIsGenerating] = useState(false)
-  const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null }> | null>(null)
+  const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> | null>(null)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -875,7 +875,7 @@ export default function CaminoCalendarClient() {
       try {
         const res = await fetch('/api/proyeccion', { headers: { Authorization: `Bearer ${token}` } })
         if (!res.ok || cancelled) return
-        const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null }> }
+        const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> }
         if (!cancelled) setProjection(json.projections ?? [])
       } catch { /* silently ignore */ }
     }).catch(() => undefined)
@@ -1385,20 +1385,35 @@ export default function CaminoCalendarClient() {
 
 function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
 
-type ProjectionEntry = { asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null }
+type BlockEntry = { bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }
+type ProjectionEntry = { asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: BlockEntry[] }
 
 function gradeColors(nota: number, confidence: 'low' | 'medium' | 'high'): { text: string; bar: string; bg: string } {
   if (confidence === 'low') return { text: '#64748b', bar: '#94a3b8', bg: '#f8fafc' }
   if (nota >= 7) return { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
   if (nota >= 5) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
-  if (nota >= 4) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
-  return { text: '#be123c', bar: '#e11d48', bg: '#fff1f2' }
+  if (nota >= 4) return { text: '#92400e', bar: '#d97706', bg: '#fffbeb' }
+  // nota < 4 with medium/high confidence: neutral dark, plan-first layout handles color
+  return { text: '#1e293b', bar: '#94a3b8', bg: '#f8fafc' }
 }
 
-function planLine(nota: number): string {
-  if (nota < 5) return `Estás a ${(5 - nota).toFixed(1)} puntos del aprobado — practica los ejercicios más flojos`
-  if (nota < 7) return 'Vas camino del aprobado — sigue practicando para asegurar la nota'
-  return 'Buena proyección — mantén el ritmo y consolida los bloques más difíciles'
+function planLine(nota: number, bloques: BlockEntry[]): string {
+  const weak = bloques.filter(b => b.num_entries >= 1)
+  const weakName = weak[0]?.bloque ?? null
+  if (nota < 5) {
+    const gap = (5 - nota).toFixed(1)
+    return weakName
+      ? `Estás a ${gap} del aprobado — ${weakName} es donde más puntos puedes recuperar`
+      : `Estás a ${gap} puntos del aprobado — practica los ejercicios más flojos`
+  }
+  if (nota < 7) {
+    return weakName
+      ? `Vas camino del aprobado — asegura subiendo ${weakName}`
+      : 'Vas camino del aprobado — sigue practicando para asegurar la nota'
+  }
+  return weakName
+    ? `Buena proyección — consolida ${weakName} para asegurar la nota`
+    : 'Buena proyección — mantén el ritmo y consolida los bloques más difíciles'
 }
 
 function NotaProyectadaCard({ projections, heroAsignatura }: { projections: ProjectionEntry[]; heroAsignatura: string | null }) {
@@ -1409,7 +1424,17 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
   if (!hero) return null
 
   const heroNota = hero.nota_proyectada
+  const heroBloques = hero.bloques ?? []
+  const isLowScore = heroNota !== null && hero.confidence !== 'low' && heroNota < 4
   const heroC = heroNota !== null ? gradeColors(heroNota, hero.confidence) : null
+
+  // Steps for plan-first layout (nota < 4)
+  const weakSteps = heroBloques.filter(b => b.num_entries >= 1).slice(0, 2)
+  const planSteps: string[] = weakSteps.map((b, i) => {
+    const pts = b.avg_max_pts !== null ? ` — vale ${b.avg_max_pts.toFixed(1)} pts del examen` : ''
+    return `${i + 1}. ${i === 0 ? 'Refuerza' : 'Practica'} ${b.bloque}${pts}`
+  })
+  planSteps.push(`${planSteps.length + 1}. Mantén tu ritmo de misiones diarias`)
 
   return (
     <section className="mb-5 rounded-[28px] border border-emerald-100 bg-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.07)]">
@@ -1425,6 +1450,7 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
       {/* Hero: priority subject */}
       <div className="mb-3 rounded-2xl border border-slate-100 px-5 py-4" style={{ background: heroC?.bg ?? '#f8fafc' }}>
         <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{subjectLabelFromSlug(hero.asignatura)}</p>
+
         {hero.confidence === 'low' ? (
           <>
             <p className="text-sm font-black text-slate-500">Aún afinando</p>
@@ -1432,9 +1458,32 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
               Resuelve {Math.max(1, 3 - hero.recent_entries)} ejercicio{3 - hero.recent_entries !== 1 ? 's' : ''} más para ver tu proyección
             </p>
           </>
-        ) : heroNota !== null && heroC ? (
+        ) : isLowScore && heroNota !== null ? (
+          /* Plan-first layout for nota < 4 */
           <>
-            <div className="flex items-end gap-3 flex-wrap">
+            <p className="text-base font-black text-slate-800">Tu plan para llegar al 5</p>
+            <p className="mt-0.5 text-xs font-semibold text-slate-400">Proyección actual: <span className="font-black text-slate-600">{heroNota.toFixed(1)}/10</span></p>
+            <ul className="mt-3 grid gap-1.5">
+              {planSteps.map((step, i) => (
+                <li key={i} className="text-xs font-semibold text-slate-600">{step}</li>
+              ))}
+            </ul>
+            {/* Neutral bar with aprobado marker */}
+            <div className="relative mt-4 h-2 overflow-visible rounded-full bg-slate-200">
+              <div className="h-full rounded-full bg-slate-400 transition-all duration-700" style={{ width: `${Math.min(100, (heroNota / 10) * 100)}%` }} />
+              {/* aprobado marker at 50% */}
+              <div className="absolute top-1/2 -translate-y-1/2" style={{ left: '50%' }}>
+                <div className="h-4 w-0.5 -translate-y-[2px] rounded-full bg-slate-500" />
+              </div>
+            </div>
+            <div className="relative mt-1 h-3">
+              <span className="absolute text-[10px] font-black text-slate-400" style={{ left: '50%', transform: 'translateX(-50%)' }}>Aprobado (5)</span>
+            </div>
+          </>
+        ) : heroNota !== null && heroC ? (
+          /* Normal layout for nota >= 4 */
+          <>
+            <div className="flex flex-wrap items-end gap-3">
               <span className="text-5xl font-black leading-none" style={{ color: heroC.text }}>{heroNota.toFixed(1)}</span>
               <span className="mb-1 text-xl font-semibold text-slate-400">/10</span>
               {hero.trend_7d !== null && Math.abs(hero.trend_7d) >= 0.1 && (
@@ -1446,7 +1495,7 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
               <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (heroNota / 10) * 100)}%`, background: heroC.bar }} />
             </div>
-            <p className="mt-3 text-xs font-semibold text-slate-500">{planLine(heroNota)}</p>
+            <p className="mt-3 text-xs font-semibold text-slate-500">{planLine(heroNota, heroBloques)}</p>
           </>
         ) : null}
       </div>

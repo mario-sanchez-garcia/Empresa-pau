@@ -741,7 +741,7 @@ export default function CaminoCalendarClient() {
   const [daysSinceReg, setDaysSinceReg] = useState<number | null>(null)
   const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
   const [isGenerating, setIsGenerating] = useState(false)
-  const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number }> | null>(null)
+  const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null }> | null>(null)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -875,7 +875,7 @@ export default function CaminoCalendarClient() {
       try {
         const res = await fetch('/api/proyeccion', { headers: { Authorization: `Bearer ${token}` } })
         if (!res.ok || cancelled) return
-        const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number }> }
+        const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null }> }
         if (!cancelled) setProjection(json.projections ?? [])
       } catch { /* silently ignore */ }
     }).catch(() => undefined)
@@ -968,6 +968,15 @@ export default function CaminoCalendarClient() {
     return exams
       .filter(e => e.date >= realToday && e.date <= horizon)
       .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null
+  })()
+
+  const userSubjectSlugs = new Set(onboardingSubjects.map(s => subjectSlug(s)))
+  const filteredProjection = projection?.filter(p => userSubjectSlugs.has(p.asignatura)) ?? null
+  const heroAsignatura = (() => {
+    if (!filteredProjection?.length) return null
+    const nextPartialSlug = upcomingPartial ? subjectSlug(upcomingPartial.subject) : null
+    if (nextPartialSlug && filteredProjection.some(p => p.asignatura === nextPartialSlug)) return nextPartialSlug
+    return [...filteredProjection].sort((a, b) => b.recent_entries - a.recent_entries)[0]?.asignatura ?? null
   })()
 
   async function createLiga(nombre: string): Promise<{ error?: string }> {
@@ -1332,7 +1341,7 @@ export default function CaminoCalendarClient() {
             </div>
           </section>
         )}
-        {projection && projection.length > 0 && <NotaProyectadaCard projections={projection} />}
+        {filteredProjection && filteredProjection.length > 0 && <NotaProyectadaCard projections={filteredProjection} heroAsignatura={heroAsignatura} />}
 
         <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1376,18 +1385,31 @@ export default function CaminoCalendarClient() {
 
 function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
 
-function NotaProyectadaCard({ projections }: { projections: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number }> }) {
-  const labeled = projections.map(p => ({
-    ...p,
-    label: subjectLabelFromSlug(p.asignatura),
-  }))
+type ProjectionEntry = { asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null }
+
+function gradeColors(nota: number, confidence: 'low' | 'medium' | 'high'): { text: string; bar: string; bg: string } {
+  if (confidence === 'low') return { text: '#64748b', bar: '#94a3b8', bg: '#f8fafc' }
+  if (nota >= 7) return { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
+  if (nota >= 5) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
+  if (nota >= 4) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
+  return { text: '#be123c', bar: '#e11d48', bg: '#fff1f2' }
+}
+
+function planLine(nota: number): string {
+  if (nota < 5) return `Estás a ${(5 - nota).toFixed(1)} puntos del aprobado — practica los ejercicios más flojos`
+  if (nota < 7) return 'Vas camino del aprobado — sigue practicando para asegurar la nota'
+  return 'Buena proyección — mantén el ritmo y consolida los bloques más difíciles'
+}
+
+function NotaProyectadaCard({ projections, heroAsignatura }: { projections: ProjectionEntry[]; heroAsignatura: string | null }) {
+  const hero = projections.find(p => p.asignatura === heroAsignatura) ?? projections[0] ?? null
+  const rest = projections.filter(p => p !== hero)
   const totalEntries = projections.reduce((s, p) => s + p.num_entries, 0)
 
-  function gradeColor(nota: number): { text: string; bar: string; bg: string } {
-    if (nota >= 7) return { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
-    if (nota >= 5) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
-    return { text: '#be123c', bar: '#e11d48', bg: '#fff1f2' }
-  }
+  if (!hero) return null
+
+  const heroNota = hero.nota_proyectada
+  const heroC = heroNota !== null ? gradeColors(heroNota, hero.confidence) : null
 
   return (
     <section className="mb-5 rounded-[28px] border border-emerald-100 bg-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.07)]">
@@ -1395,32 +1417,59 @@ function NotaProyectadaCard({ projections }: { projections: Array<{ asignatura: 
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">Proyección PAU</p>
           <h2 className="text-lg font-black text-slate-950">Nota proyectada</h2>
-          <p className="mt-0.5 text-xs font-semibold text-slate-400">Estimación basada en {totalEntries} corrección{totalEntries !== 1 ? 'es' : ''} · se actualiza con cada práctica</p>
+          <p className="mt-0.5 text-xs font-semibold text-slate-400">Basada en {totalEntries} corrección{totalEntries !== 1 ? 'es' : ''} · se actualiza con cada práctica</p>
         </div>
         <BarChart3 size={20} className="shrink-0 text-emerald-400" />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {labeled.map(p => {
-          const nota = p.nota_proyectada
-          const colors = nota !== null ? gradeColor(nota) : null
-          return (
-            <div key={p.asignatura} className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-              <p className="text-xs font-black text-slate-700 truncate">{p.label}</p>
-              {nota !== null && colors ? (
-                <>
-                  <p className="mt-1 text-2xl font-black" style={{ color: colors.text }}>{nota.toFixed(1)}<span className="text-sm font-semibold text-slate-400">/10</span></p>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (nota / 10) * 100)}%`, background: colors.bar }} />
-                  </div>
-                  <p className="mt-1.5 text-[10px] font-semibold text-slate-400">{p.num_entries} entrada{p.num_entries !== 1 ? 's' : ''}</p>
-                </>
-              ) : (
-                <p className="mt-2 text-xs font-semibold text-slate-400">Sin datos aún</p>
+
+      {/* Hero: priority subject */}
+      <div className="mb-3 rounded-2xl border border-slate-100 px-5 py-4" style={{ background: heroC?.bg ?? '#f8fafc' }}>
+        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{subjectLabelFromSlug(hero.asignatura)}</p>
+        {hero.confidence === 'low' ? (
+          <>
+            <p className="text-sm font-black text-slate-500">Aún afinando</p>
+            <p className="mt-1 text-xs font-semibold text-slate-400">
+              Resuelve {Math.max(1, 3 - hero.recent_entries)} ejercicio{3 - hero.recent_entries !== 1 ? 's' : ''} más para ver tu proyección
+            </p>
+          </>
+        ) : heroNota !== null && heroC ? (
+          <>
+            <div className="flex items-end gap-3 flex-wrap">
+              <span className="text-5xl font-black leading-none" style={{ color: heroC.text }}>{heroNota.toFixed(1)}</span>
+              <span className="mb-1 text-xl font-semibold text-slate-400">/10</span>
+              {hero.trend_7d !== null && Math.abs(hero.trend_7d) >= 0.1 && (
+                <span className={`mb-1 text-sm font-black ${hero.trend_7d > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                  {hero.trend_7d > 0 ? '▲' : '▼'} {hero.trend_7d > 0 ? '+' : ''}{hero.trend_7d.toFixed(1)} esta semana
+                </span>
               )}
             </div>
-          )
-        })}
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (heroNota / 10) * 100)}%`, background: heroC.bar }} />
+            </div>
+            <p className="mt-3 text-xs font-semibold text-slate-500">{planLine(heroNota)}</p>
+          </>
+        ) : null}
       </div>
+
+      {/* Compact chips for remaining subjects */}
+      {rest.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {rest.map(p => {
+            const nota = p.nota_proyectada
+            const colors = nota !== null && p.confidence !== 'low' ? gradeColors(nota, p.confidence) : null
+            return (
+              <div key={p.asignatura} className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                <span className="text-xs font-black text-slate-600">{subjectLabelFromSlug(p.asignatura)}</span>
+                {p.confidence === 'low' ? (
+                  <span className="text-[11px] font-semibold text-slate-400">Afinando</span>
+                ) : nota !== null && colors ? (
+                  <span className="text-[11px] font-black" style={{ color: colors.text }}>{nota.toFixed(1)}/10</span>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </section>
   )
 }

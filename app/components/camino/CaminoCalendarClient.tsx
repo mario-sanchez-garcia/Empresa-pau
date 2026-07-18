@@ -791,7 +791,7 @@ export default function CaminoCalendarClient() {
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'lengua'),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
         supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
-        supabase.from('camino_xp_events').select('xp').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
+        supabase.from('camino_xp_events').select('xp_amount').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
         supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       ])
       if (cancelled) return
@@ -824,7 +824,7 @@ export default function CaminoCalendarClient() {
         historia_espana: historiaCount.count ?? 0,
       })
       setXpTotal(Number(progressRow.data?.xp_total) || 0)
-      setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp: number }>).reduce((sum, r) => sum + (Number(r.xp) || 0), 0))
+      setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
@@ -920,6 +920,21 @@ export default function CaminoCalendarClient() {
   const courseGroups = courseTopicsForSubjects(onboardingSubjects, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
   const caminoPlanLimits = getCaminoPlanLimits(caminoPlanId)
   const hasOnboardingSubjects = Boolean(onboarding?.subjects.length)
+  const microMission = (todayMain.length > 0 || !hasOnboardingSubjects || caminoReadyStatus !== 'ready')
+    ? null
+    : (() => {
+      const topEntry = Object.entries(subjectProgress).filter(([, c]) => c > 0).sort((a, b) => b[1] - a[1])[0]
+      const topSlug = topEntry?.[0] ?? (onboardingSubjects[0] ? subjectSlug(onboardingSubjects[0]) : null)
+      if (!topSlug) return null
+      const subjectLabel = subjectLabelFromSlug(topSlug)
+      const items = (curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
+        .filter(item => (item.subjectSlug === topSlug || subjectSlug(item.subject) === topSlug) && item.planTopic)
+      const item = items[0] ?? null
+      const href = item?.planTopic
+        ? `${buildTopicHref(item.planTopic)}?start=exercise&source=repaso_express`
+        : `/?subject=${encodeURIComponent(topSlug)}&mode=random&source=repaso_express`
+      return { subject: subjectLabel, subjectSlug: topSlug, topic: item?.topic ?? subjectLabel, href, hasCompletedItems: Boolean(topEntry) }
+    })()
   const isRescueMode = calendar.some(day => day.missions.some(m => m.metadata?.plan_mode === 'rescue'))
   const selectedWeekLabel = weekRangeLabel(selectedWeekStart)
   const selectedIsCurrentWeek = selectedWeekStart === currentWeekStartISO()
@@ -1226,6 +1241,7 @@ export default function CaminoCalendarClient() {
                 onMarkNotSeen={markNotSeenHero}
                 hasOnboardingSubjects={hasOnboardingSubjects}
                 nextMissionTitle={nextMissionInCalendar?.title ?? null}
+                microMission={microMission}
               />
             </div>
             {todayBonus.length > 0 && (
@@ -1250,9 +1266,16 @@ export default function CaminoCalendarClient() {
                     <li className="text-xs font-semibold text-slate-600">• Avanzar en <span className="font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
                   </ul>
                 </>
-              ) : (
-                <p className="mt-2 text-xs font-semibold text-slate-500">Cuando llegue tu misión, aquí verás qué ganarás al completarla.</p>
-              )}
+              ) : microMission ? (
+                <>
+                  <p className="mt-2 text-xs font-black text-slate-700">Reto exprés de hoy:</p>
+                  <ul className="mt-1.5 grid gap-1">
+                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-blue-600">5 tarjetas · 3 min</span></li>
+                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-slate-800">{microMission.subject}</span></li>
+                    <li className="text-xs font-semibold text-slate-600">• Sin tocar tu plan de mañana</li>
+                  </ul>
+                </>
+              ) : null}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
                 <span className="text-[11px] font-semibold text-slate-400">División</span>
                 <span className="rounded-xl px-2 py-0.5 text-[11px] font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
@@ -1668,7 +1691,7 @@ function heroReason(mission: Mission, blockCompleted: number, nextMissionTitle?:
   return `Sigues avanzando en ${blockName}. Llevas ${blockCompleted} misión${blockCompleted !== 1 ? 'es' : ''} completada${blockCompleted !== 1 ? 's' : ''} en este bloque.`
 }
 
-function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, totalThisWeek, weeklyXP, onPostpone, onMarkNotSeen, hasOnboardingSubjects, nextMissionTitle }: {
+function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, totalThisWeek, weeklyXP, onPostpone, onMarkNotSeen, hasOnboardingSubjects, nextMissionTitle, microMission }: {
   mission: Mission | null
   blockCompleted: number
   streak: number
@@ -1679,8 +1702,10 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   onMarkNotSeen: () => void
   hasOnboardingSubjects: boolean
   nextMissionTitle?: string | null
+  microMission?: { subject: string; subjectSlug: string; topic: string; href: string; hasCompletedItems: boolean } | null
 }) {
   const [showNotSeenConfirm, setShowNotSeenConfirm] = useState(false)
+  const [microDone, setMicroDone] = useState(false)
   const theme = mission ? themeFor(mission.subject) : { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
   const subjectUpper = (mission?.subject ?? '').toUpperCase()
   const blockLabel = formatBlockLabel(mission?.blockKey).toUpperCase()
@@ -1725,10 +1750,57 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
             </div>
           )}
         </>
+      ) : hasOnboardingSubjects && microMission ? (
+        <div className="mt-4">
+          {microDone ? (
+            <>
+              <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <Check size={16} className="text-emerald-600" />
+                <p className="text-sm font-black text-emerald-800">¡Reto completado! Vuelve mañana para tu próxima misión.</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-black text-slate-950">Reto exprés de hoy</h2>
+              <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <span>{microMission.subject}</span>
+                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-black text-blue-700">5 tarjetas · 3 min</span>
+              </p>
+              {microMission.hasCompletedItems && (
+                <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-slate-600">Repaso de contenido que ya has visto. Sin afectar tu plan de mañana.</p>
+                </div>
+              )}
+              <div className="mt-5">
+                <a
+                  href={microMission.href}
+                  onClick={() => setMicroDone(true)}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
+                >
+                  Empezar reto <ArrowRight size={15} />
+                </a>
+              </div>
+            </>
+          )}
+        </div>
       ) : (
         <div className="mt-4">
-          <h2 className="text-xl font-black text-slate-400">{hasOnboardingSubjects ? 'No hay misión asignada hoy' : 'Completa tu onboarding para empezar'}</h2>
-          <p className="mt-1 text-sm font-semibold text-slate-400">{hasOnboardingSubjects ? 'Puedes revisar el calendario o descansar.' : 'Configura tu perfil y construiremos tu Camino PAU.'}</p>
+          {hasOnboardingSubjects ? (
+            <>
+              <h2 className="text-xl font-black text-slate-950">Explora tu primer tema</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-400">Tu plan aún está generándose. Mientras tanto, empieza a explorar.</p>
+              <div className="mt-5">
+                <a href="#explorar" className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700">
+                  Ver temas disponibles <ArrowRight size={15} />
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-black text-slate-400">Completa tu onboarding para empezar</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-400">Configura tu perfil y construiremos tu Camino PAU.</p>
+            </>
+          )}
         </div>
       )}
 
@@ -1842,7 +1914,7 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
         const main = day.missions.filter(m => m.role === 'main')
         const done = main.length > 0 && main.every(m => m.status === 'done')
         const subjects = [...new Set(main.map(m => m.subject))]
-        const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : 'Sin misión'
+        const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : 'Repaso libre'
         const missionCount = main.length
         const isExpanded = expandedDate === day.date
         const isToday = day.isToday
@@ -1862,7 +1934,7 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
                 <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>
               )}
               <span className={`shrink-0 text-xs font-bold ${done ? 'text-emerald-600' : missionCount === 0 ? 'text-slate-300' : 'text-slate-400'}`}>
-                {done ? '✅ Hecho' : missionCount === 0 ? 'Libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
+                {done ? '✅ Hecho' : missionCount === 0 ? 'Repaso libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
               </span>
               <ChevronDown size={13} className={`shrink-0 text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>

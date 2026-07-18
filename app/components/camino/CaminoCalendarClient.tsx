@@ -741,6 +741,7 @@ export default function CaminoCalendarClient() {
   const [daysSinceReg, setDaysSinceReg] = useState<number | null>(null)
   const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number }> | null>(null)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -865,6 +866,21 @@ export default function CaminoCalendarClient() {
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [onboarding?.community])
+
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      if (!token || cancelled) return
+      try {
+        const res = await fetch('/api/proyeccion', { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok || cancelled) return
+        const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number }> }
+        if (!cancelled) setProjection(json.projections ?? [])
+      } catch { /* silently ignore */ }
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!onboarding?.completedAt) return
@@ -1316,6 +1332,8 @@ export default function CaminoCalendarClient() {
             </div>
           </section>
         )}
+        {projection && projection.length > 0 && <NotaProyectadaCard projections={projection} />}
+
         <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1357,6 +1375,55 @@ export default function CaminoCalendarClient() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
+
+function NotaProyectadaCard({ projections }: { projections: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number }> }) {
+  const labeled = projections.map(p => ({
+    ...p,
+    label: subjectLabelFromSlug(p.asignatura),
+  }))
+  const totalEntries = projections.reduce((s, p) => s + p.num_entries, 0)
+
+  function gradeColor(nota: number): { text: string; bar: string; bg: string } {
+    if (nota >= 7) return { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
+    if (nota >= 5) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
+    return { text: '#be123c', bar: '#e11d48', bg: '#fff1f2' }
+  }
+
+  return (
+    <section className="mb-5 rounded-[28px] border border-emerald-100 bg-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.07)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">Proyección PAU</p>
+          <h2 className="text-lg font-black text-slate-950">Nota proyectada</h2>
+          <p className="mt-0.5 text-xs font-semibold text-slate-400">Estimación basada en {totalEntries} corrección{totalEntries !== 1 ? 'es' : ''} · se actualiza con cada práctica</p>
+        </div>
+        <BarChart3 size={20} className="shrink-0 text-emerald-400" />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {labeled.map(p => {
+          const nota = p.nota_proyectada
+          const colors = nota !== null ? gradeColor(nota) : null
+          return (
+            <div key={p.asignatura} className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+              <p className="text-xs font-black text-slate-700 truncate">{p.label}</p>
+              {nota !== null && colors ? (
+                <>
+                  <p className="mt-1 text-2xl font-black" style={{ color: colors.text }}>{nota.toFixed(1)}<span className="text-sm font-semibold text-slate-400">/10</span></p>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (nota / 10) * 100)}%`, background: colors.bar }} />
+                  </div>
+                  <p className="mt-1.5 text-[10px] font-semibold text-slate-400">{p.num_entries} entrada{p.num_entries !== 1 ? 's' : ''}</p>
+                </>
+              ) : (
+                <p className="mt-2 text-xs font-semibold text-slate-400">Sin datos aún</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
 
 function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: Array<{ block: string; items: CurriculumItem[] }> }> }) {
   const [open, setOpen] = useState(false)

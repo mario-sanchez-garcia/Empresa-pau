@@ -225,6 +225,14 @@ export function getTopic(subject: string, blockSlug: string, topicSlug: string) 
   return resolveCaminoTopic({ subjectSlug: subject, blockSlug, topicSlug }).topic
 }
 
+export function getTopicByV2SortOrder(subject: string, sortOrder?: number | null) {
+  if (sortOrder == null) return null
+  const subjectSlug = normalizeSubjectSlug(subject)
+  return CAMINO_CURRICULUM_TOPICS.find(topic =>
+    topic.subject === subjectSlug && topic.v2SortOrder === sortOrder
+  ) ?? null
+}
+
 export function buildTopicHref(topic: Pick<CaminoCurriculumTopic, 'subject' | 'blockSlug' | 'topicSlug'>) {
   return `/camino-pau/curso/${topic.subject}/${topic.blockSlug}/${topic.topicSlug}`
 }

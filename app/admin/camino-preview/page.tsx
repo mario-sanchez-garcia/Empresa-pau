@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
-import { normalizeCaminoSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildTopicHref, getTopicByV2SortOrder, normalizeCaminoSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
@@ -122,8 +122,9 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                 </thead>
                 <tbody>
                   {blockRows.map((row, i) => {
+                    const linkedTopic = getTopicByV2SortOrder(row.subject, row.sort_order)
                     const topicSlug = resolveTopicSlugAlias(row.subject, row.block_slug, textSlug(sanitizeLessonTitle(row.title)))
-                    const href = `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
+                    const href = linkedTopic ? buildTopicHref(linkedTopic) : `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
                     return (
                       <tr key={row.sort_order} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
                         <td style={{ padding: '9px 14px', color: C.muted, fontWeight: 700, fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>

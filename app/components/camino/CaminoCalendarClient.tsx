@@ -10,7 +10,7 @@ import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
-import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
@@ -280,11 +280,12 @@ type CaminoCalRow = {
 function calRowToMission(row: CaminoCalRow): Mission {
   const subjectLabel = subjectLabelFromSlug(row.subject)
   const blockSlug = row.block_slug ?? (row.block_key ? textSlug(row.block_key) : '')
+  const linkedTopic = getTopicByV2SortOrder(row.subject, row.v2_sort_order)
   const rawTopicSlug = typeof row.metadata?.topic_slug === 'string'
     ? normalizeTopicSlug(row.metadata.topic_slug)
     : normalizeTopicSlug(sanitizeLessonTitle(row.title))
   const topicSlug = resolveTopicSlugAlias(row.subject, blockSlug, rawTopicSlug)
-  const href = blockSlug
+  const href = linkedTopic ? buildTopicHref(linkedTopic) : blockSlug
     ? `/camino-pau/curso/${row.subject}/${blockSlug}/${topicSlug}`
     : ''
   const cleanTitle = sanitizeLessonTitle(row.title)

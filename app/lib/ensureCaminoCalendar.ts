@@ -178,7 +178,7 @@ async function maybeInjectCommentText(
   }
   if (!candidate) return
 
-  await supabase.from('camino_calendar').insert({
+  await supabase.from('camino_calendar').upsert({
     user_id: userId,
     scheduled_date: candidate,
     subject: 'historia_espana',
@@ -190,7 +190,7 @@ async function maybeInjectCommentText(
     status: 'pending',
     source: 'algorithm',
     generated_by: 'algorithm_v1',
-  })
+  }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order', ignoreDuplicates: true })
 }
 
 export async function ensureCaminoCalendar(
@@ -372,7 +372,10 @@ export async function ensureCaminoCalendar(
   }
 
   if (calendarRows.length > 0) {
-    await supabase.from('camino_calendar').insert(calendarRows)
+    await supabase.from('camino_calendar').upsert(calendarRows, {
+      onConflict: 'user_id,scheduled_date,subject,v2_sort_order',
+      ignoreDuplicates: true,
+    })
   }
 
   if (scheduledQueueIds.length > 0) {

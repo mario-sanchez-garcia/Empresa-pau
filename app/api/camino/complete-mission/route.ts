@@ -71,18 +71,16 @@ export async function POST(request: NextRequest) {
       .eq('v2_sort_order', v2SortOrder)
 
     // PASO 2c — Registrar XP event
-    await db.from('camino_xp_events').insert({
+    const { error: xpError } = await db.from('camino_xp_events').insert({
       user_id: user.id,
-      xp,
-      source: 'camino_mission',
-      metadata: {
-        mission_id: updated[0].id,
-        subject,
-        v2_sort_order: v2SortOrder,
-        mission_type: missionType,
-        title,
-      },
+      xp_amount: xp,
+      source_type: 'camino_mission',
+      source_id: String(updated[0].id),
+      mission_date: new Date().toISOString().slice(0, 10),
     })
+    if (xpError) {
+      console.error('[camino/complete-mission] xp_event insert failed', xpError)
+    }
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,
       v2_sort_order: v2SortOrder,

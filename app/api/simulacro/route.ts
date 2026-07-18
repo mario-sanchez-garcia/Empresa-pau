@@ -44,6 +44,10 @@ const SUBJECT_LABELS: Record<string, string> = {
 }
 
 export async function POST(request: NextRequest) {
+  let capturedSimulacroId: string | undefined
+  let capturedSupabase: SupabaseClient | undefined
+  let capturedUserId: string | undefined
+
   try {
     const authContext = await getAuthContext(request)
     if ('response' in authContext) return authContext.response
@@ -51,6 +55,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { bloques, asignatura, comunidad, opcion, tiempo_empleado, simulacro_id } = body
     const elapsed = Number(tiempo_empleado ?? 0)
+
+    capturedSimulacroId = typeof simulacro_id === 'string' ? simulacro_id : undefined
+    capturedSupabase = authContext.supabase
+    capturedUserId = authContext.user.id
 
     if (!simulacro_id) {
       return NextResponse.json(createCorrectionError({
@@ -371,11 +379,20 @@ export async function POST(request: NextRequest) {
     const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorName = (error as any)?.name ?? (error as any)?.constructor?.name ?? 'Error'
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    console.error('SIMULACRO_CORRECTION_ERROR', { errorCode, errorName, message: (error as any)?.message?.slice(0, 120) })
+    console.error('SIMULACRO_CORRECTION_ERROR', {
+      simulacroId: capturedSimulacroId,
+      errorCode,
+      errorName,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      message: (error as any)?.message?.slice(0, 120)
+    })
     const errorResult = createCorrectionError({
+      simulacroId: capturedSimulacroId,
       message: 'No hemos podido corregir este simulacro ahora mismo. Tus respuestas siguen guardadas.'
     })
+    if (capturedSimulacroId && capturedSupabase && capturedUserId) {
+      await updateSimulacroError(capturedSupabase, capturedSimulacroId, capturedUserId, errorResult, 0)
+    }
     return NextResponse.json(errorResult, { status: 500 })
   }
 }
@@ -459,7 +476,8 @@ async function updateSimulacroError(supabase: SupabaseClient, id: string, userId
     .from('historial_simulacros')
     .update({
       resultado_json: result,
-      tiempo_empleado: tiempo,
+      estado: 'completado',
+      tiempo_empleado: tiempo > 0 ? tiempo : undefined,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)

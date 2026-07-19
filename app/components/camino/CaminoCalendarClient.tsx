@@ -724,6 +724,7 @@ export default function CaminoCalendarClient() {
   const [exams, setExams] = useState<StudentExam[]>([])
   const [xpTotal, setXpTotal] = useState(0)
   const [weeklyXP, setWeeklyXP] = useState(0)
+  const [weeklySimsCompleted, setWeeklySimsCompleted] = useState(0)
   const [rankingOpen, setRankingOpen] = useState(false)
   const [rankingTab, setRankingTab] = useState<'global' | 'community'>('global')
   const [showExamForm, setShowExamForm] = useState(false)
@@ -793,7 +794,8 @@ export default function CaminoCalendarClient() {
       await ensureCaminoCalendar(userId, supabase)
       if (cancelled) return
       const weekStart = currentWeekStartISO()
-      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, progressRow, weeklyXpRows, queueResult] = await Promise.all([
+      const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
+      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
@@ -803,6 +805,7 @@ export default function CaminoCalendarClient() {
         supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
         supabase.from('camino_xp_events').select('xp_amount').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
         supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
       ])
       if (cancelled) return
       if (calDays && calDays.length > 0) {
@@ -835,6 +838,7 @@ export default function CaminoCalendarClient() {
       })
       setXpTotal(Number(progressRow.data?.xp_total) || 0)
       setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
+      setWeeklySimsCompleted((simsWeekResult as { count: number | null }).count ?? 0)
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
@@ -961,6 +965,13 @@ export default function CaminoCalendarClient() {
   const allMissions = visibleCalendar.flatMap(day => day.missions)
   const totalMain = allMissions.filter(mission => mission.role === 'main').length
   const completedMain = allMissions.filter(mission => mission.role === 'main' && mission.status === 'done').length
+  const thisWeekStart = currentWeekStartISO()
+  const thisWeekEnd = toISO(addDays(dateFromISO(thisWeekStart), 6))
+  const weeklyMissionsCompleted = visibleCalendar
+    .filter(d => d.date >= thisWeekStart && d.date <= thisWeekEnd)
+    .flatMap(d => d.missions)
+    .filter(m => m.status === 'done')
+    .length
   const todayMain = today?.missions.filter(mission => mission.role === 'main') ?? []
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
@@ -1477,7 +1488,7 @@ export default function CaminoCalendarClient() {
           </section>
         )}
         {filteredProjection && filteredProjection.length > 0 && <NotaProyectadaCard projections={filteredProjection} heroAsignatura={heroAsignatura} />}
-        {filteredProjection && filteredProjection.length > 0 && isShareWindow && weeklyXP > 0 && (
+        {filteredProjection && filteredProjection.length > 0 && isShareWindow && (weeklyXP > 0 || weeklyMissionsCompleted > 0 || weeklySimsCompleted > 0) && (
           <section className="mb-5 rounded-[28px] border border-blue-100 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(37,99,235,0.06)]">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">

@@ -742,6 +742,7 @@ export default function CaminoCalendarClient() {
   const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
   const [isGenerating, setIsGenerating] = useState(false)
   const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> | null>(null)
+  const [centroPulso, setCentroPulso] = useState<{ enoughData: true; centroDisplay: string; subject: string; topicName: string; position: 'ahead' | 'same' | 'behind'; delta: number; peers: number } | null>(null)
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -877,6 +878,23 @@ export default function CaminoCalendarClient() {
         if (!res.ok || cancelled) return
         const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> }
         if (!cancelled) setProjection(json.projections ?? [])
+      } catch { /* silently ignore */ }
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      if (!token || cancelled) return
+      try {
+        const res = await fetch('/api/centro/pulso', { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok || cancelled) return
+        const json = await res.json() as { enoughData: boolean; centroDisplay?: string; subject?: string; topicName?: string; position?: 'ahead' | 'same' | 'behind'; delta?: number; peers?: number }
+        if (!cancelled && json.enoughData && json.centroDisplay && json.subject && json.topicName && json.position !== undefined && json.delta !== undefined && json.peers !== undefined) {
+          setCentroPulso({ enoughData: true, centroDisplay: json.centroDisplay, subject: json.subject, topicName: json.topicName, position: json.position, delta: json.delta, peers: json.peers })
+        }
       } catch { /* silently ignore */ }
     }).catch(() => undefined)
     return () => { cancelled = true }
@@ -1384,6 +1402,22 @@ export default function CaminoCalendarClient() {
                 Compartir
               </button>
             </div>
+          </section>
+        )}
+        {centroPulso && (
+          <section className="mb-5 rounded-[28px] border border-slate-100 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(37,99,235,0.05)]">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Tu instituto</p>
+            <p className="mt-1 text-sm font-black text-slate-800">
+              Los alumnos de {centroPulso.centroDisplay} van por{' '}
+              <span className="text-blue-700">{centroPulso.topicName}</span>
+            </p>
+            <p className="mt-1 text-xs font-semibold text-slate-500">
+              {centroPulso.position === 'ahead'
+                ? `Vas ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} por delante — mantén el ritmo`
+                : centroPulso.position === 'same'
+                  ? 'Vas al ritmo de tu clase'
+                  : `Estás a ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} — tu Camino ya lo tiene en cuenta`}
+            </p>
           </section>
         )}
 

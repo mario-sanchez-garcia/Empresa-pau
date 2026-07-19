@@ -16,6 +16,7 @@ import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type 
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
+import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
@@ -1076,7 +1077,7 @@ export default function CaminoCalendarClient() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify({
         subject: sundayMockSimSubject,
-        block: sundayMockBlock,
+        block: normalizeBlockKey(sundayMockBlock),
         comunidad: onboarding?.community ?? 'Madrid',
         numQuestions: 3,
         source: 'sunday_mock',
@@ -1245,16 +1246,7 @@ export default function CaminoCalendarClient() {
   function openEditExam(exam: StudentExam) { setEditingExamId(exam.id); setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, name: exam.name, priority: exam.priority }); setShowExamForm(true) }
   function saveExam() {
     if (!examDraft.subject || !examDraft.date) return
-    const BLOCK_NORMALIZE: Record<string, string> = {
-      'álgebra': 'Algebra', 'algebra': 'Algebra',
-      'análisis': 'Analisis', 'analisis': 'Analisis',
-      'análisis matemático': 'Analisis',
-      'geometría': 'Geometria', 'geometria': 'Geometria',
-      'probabilidad': 'Probabilidad',
-      'probabilidad y estadística': 'Probabilidad',
-    }
-    const rawBlock = examDraft.block?.toLowerCase().trim() ?? ''
-    const normalizedBlock = BLOCK_NORMALIZE[rawBlock] ?? examDraft.block
+    const normalizedBlock = normalizeBlockKey(examDraft.block ?? '')
     const draft = { ...examDraft, block: normalizedBlock }
     const currentEditingId = editingExamId
     const nextExams = currentEditingId

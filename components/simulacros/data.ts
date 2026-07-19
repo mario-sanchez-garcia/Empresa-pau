@@ -11,6 +11,7 @@ import { examenesLenguaCataluna } from '@/app/data/lengua_cataluna'
 import { examenesCataluna } from '@/app/data/examenes_cataluna'
 import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from '@/app/data/matematicas_ccss_madrid'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
+import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroSubject } from './types'
 
 type SimulacroYearSelection = 'all' | SimulacroDifficulty
@@ -497,9 +498,24 @@ export function generatePracticeSession(
   comunidad: string,
   numQuestions: number = 3,
 ): PracticeSession | null {
-  const pool = normalizeQuestions(subject, comunidad).filter(
-    item => normalizeTheme(subject, item.rawTheme) === blockFilter && !isIncompleteOfficialExercise(item.block),
+  const normalizedFilter = normalizeBlockKey(blockFilter)
+  const allQuestions = normalizeQuestions(subject, comunidad)
+  let pool = allQuestions.filter(
+    item => normalizeTheme(subject, item.rawTheme) === normalizedFilter && !isIncompleteOfficialExercise(item.block),
   )
+  let usedBlock = normalizedFilter
+  // Subject-level fallback: if no questions for the requested block, use any available block
+  if (pool.length === 0) {
+    const themes = [...new Set(allQuestions.map(item => normalizeTheme(subject, item.rawTheme)))]
+    const fallbackTheme = themes.find(t =>
+      allQuestions.some(item => normalizeTheme(subject, item.rawTheme) === t && !isIncompleteOfficialExercise(item.block))
+    )
+    if (!fallbackTheme) return null
+    pool = allQuestions.filter(
+      item => normalizeTheme(subject, item.rawTheme) === fallbackTheme && !isIncompleteOfficialExercise(item.block),
+    )
+    usedBlock = fallbackTheme
+  }
   if (pool.length === 0) return null
 
   const shuffled = shuffle(pool)
@@ -529,7 +545,7 @@ export function generatePracticeSession(
   return {
     id: crypto.randomUUID(),
     subject,
-    block: blockFilter,
+    block: usedBlock,
     comunidad,
     questions: withCommunity(selected, comunidad),
     type: 'practice_session',

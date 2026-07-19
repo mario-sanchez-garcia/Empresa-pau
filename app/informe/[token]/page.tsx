@@ -106,54 +106,87 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
           <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>{weekLabel}</p>
         </div>
 
-        {/* Key stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
-          {[
-            { label: 'Misiones', value: String(report.missionsCompleted), icon: '✅' },
-            { label: 'Racha', value: `${report.streakDays}d`, icon: '🔥' },
-            { label: 'Simulacros', value: String(report.simulacrosCount), icon: '📝' },
-          ].map(stat => (
-            <div key={stat.label} style={{ background: '#fff', borderRadius: 16, padding: '14px 10px', textAlign: 'center', boxShadow: '0 2px 8px rgba(37,99,235,0.06)' }}>
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{stat.value}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
+        {/* Key stats — hidden for empty weeks */}
+        {(report.missionsCompleted > 0 || report.simulacrosCount > 0) ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
+            {[
+              { label: 'Misiones', value: String(report.missionsCompleted), icon: '✅' },
+              { label: 'Racha', value: `${report.streakDays}d`, icon: '🔥' },
+              { label: 'Simulacros', value: String(report.simulacrosCount), icon: '📝' },
+            ].map(stat => (
+              <div key={stat.label} style={{ background: '#fff', borderRadius: 16, padding: '14px 10px', textAlign: 'center', boxShadow: '0 2px 8px rgba(37,99,235,0.06)' }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{stat.value}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 16, padding: '14px 16px', marginBottom: 20 }}>
+            <p style={{ margin: 0, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
+              Semana de arranque — el progreso aparecerá aquí a partir de la próxima.
+            </p>
+          </div>
+        )}
 
         {/* Subject projections */}
         {report.subjects.length > 0 && (
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(37,99,235,0.06)' }}>
             <h2 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nota proyectada PAU</h2>
-            <div style={{ display: 'grid', gap: 14 }}>
+            <div style={{ display: 'grid', gap: 16 }}>
               {report.subjects.map(s => {
                 const nota = s.projection
-                const color = nota !== null && s.confidence !== 'low' ? gradeColor(nota) : '#64748b'
-                const bar = nota !== null && s.confidence !== 'low' ? gradeBar(nota) : '#cbd5e1'
+                const isLow = nota !== null && s.confidence !== 'low' && nota < 4
+                const color = nota !== null && s.confidence !== 'low' && !isLow ? gradeColor(nota) : '#64748b'
+                const bar = nota !== null && s.confidence !== 'low' && !isLow ? gradeBar(nota) : '#cbd5e1'
                 const pct = nota !== null ? Math.min(100, (nota / 10) * 100) : 0
                 return (
                   <div key={s.name}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 5 }}>
-                      <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{s.name}</span>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                        {s.confidence === 'low' ? (
-                          <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Aún con pocos datos</span>
-                        ) : nota !== null ? (
-                          <>
-                            <span style={{ fontSize: 18, fontWeight: 900, color }}>{nota.toFixed(1)}</span>
-                            <span style={{ fontSize: 12, color: '#94a3b8' }}>/10</span>
-                            {s.trend7d !== null && Math.abs(s.trend7d) >= 0.1 && (
-                              <span style={{ fontSize: 12, fontWeight: 800, color: s.trend7d > 0 ? '#16a34a' : '#dc2626' }}>
-                                {s.trend7d > 0 ? '▲' : '▼'} {s.trend7d > 0 ? '+' : ''}{s.trend7d.toFixed(1)}
-                              </span>
-                            )}
-                          </>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div style={{ height: 6, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: bar, borderRadius: 99, transition: 'width 0.5s ease' }} />
-                    </div>
+                    {isLow ? (
+                      // Low-score framing: no big red number, neutral bar with aprobado marker
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+                          <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{s.name}</span>
+                          <span style={{ fontSize: 11, color: '#94a3b8' }}>{nota!.toFixed(1)}/10</span>
+                        </div>
+                        <p style={{ margin: '0 0 5px', fontSize: 12, fontWeight: 700, color: '#475569' }}>
+                          Trabajando para llegar al 5
+                          {s.weakestBlock ? ` · Reforzando: ${s.weakestBlock}` : ''}
+                        </p>
+                        <div style={{ position: 'relative', height: 6, background: '#f1f5f9', borderRadius: 99, overflow: 'visible', marginBottom: 2 }}>
+                          <div style={{ height: '100%', width: `${pct}%`, background: '#94a3b8', borderRadius: 99 }} />
+                          {/* aprobado marker at 50% */}
+                          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 2, height: 12, background: '#64748b', borderRadius: 2 }} />
+                        </div>
+                        <div style={{ position: 'relative', height: 12 }}>
+                          <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>5</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 5 }}>
+                          <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{s.name}</span>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                            {s.confidence === 'low' ? (
+                              <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Aún con pocos datos</span>
+                            ) : nota !== null ? (
+                              <>
+                                <span style={{ fontSize: 18, fontWeight: 900, color }}>{nota.toFixed(1)}</span>
+                                <span style={{ fontSize: 12, color: '#94a3b8' }}>/10</span>
+                                {s.trend7d !== null && Math.abs(s.trend7d) >= 0.1 && (
+                                  <span style={{ fontSize: 12, fontWeight: 800, color: s.trend7d > 0 ? '#16a34a' : '#dc2626' }}>
+                                    {s.trend7d > 0 ? '▲' : '▼'} {s.trend7d > 0 ? '+' : ''}{s.trend7d.toFixed(1)}
+                                  </span>
+                                )}
+                              </>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div style={{ height: 6, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pct}%`, background: bar, borderRadius: 99, transition: 'width 0.5s ease' }} />
+                        </div>
+                      </>
+                    )}
                   </div>
                 )
               })}

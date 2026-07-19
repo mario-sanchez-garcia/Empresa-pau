@@ -1485,7 +1485,7 @@ export default function CaminoCalendarClient() {
           </section>
         )}
         {filteredProjection && filteredProjection.length > 0 && <NotaProyectadaCard projections={filteredProjection} heroAsignatura={heroAsignatura} />}
-        {filteredProjection && filteredProjection.length > 0 && isShareWindow && (
+        {filteredProjection && filteredProjection.length > 0 && isShareWindow && weeklyXP > 0 && (
           <section className="mb-5 rounded-[28px] border border-blue-100 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(37,99,235,0.06)]">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">

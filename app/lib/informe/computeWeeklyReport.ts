@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeProjection } from '@/app/lib/proyeccion/computeProjection'
 import { calcularRacha } from '@/app/lib/calcularRacha'
-import { subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { subjectLabelFromSlug, normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 
 export interface WeeklyReport {
   weekStart: string
@@ -12,6 +12,7 @@ export interface WeeklyReport {
     projection: number | null
     trend7d: number | null
     confidence: 'low' | 'medium' | 'high'
+    weakestBlock: string | null
   }>
   missionsCompleted: number
   streakDays: number
@@ -46,6 +47,7 @@ export async function computeWeeklyReport(
     streakResult,
     simsWeekResult,
     userResult,
+    onboardingResult,
   ] = await Promise.all([
     db.from('historial_simulacros')
       .select('asignatura, nota_final, resultado_json, created_at')
@@ -69,6 +71,13 @@ export async function computeWeeklyReport(
       .lte('created_at', weekEnd + 'T23:59:59Z'),
     // Fetch first name from auth user metadata (service-role only)
     db.auth.admin.getUserById(userId).catch(() => ({ data: { user: null }, error: null })),
+    // Fetch user's onboarding subjects to filter projections (same source as /camino)
+    db.from('billing_events')
+      .select('payload')
+      .eq('user_id', userId)
+      .eq('event_type', 'onboarding_completed')
+      .order('created_at', { ascending: false })
+      .limit(1),
   ])
 
   // Extract first name
@@ -79,15 +88,25 @@ export async function computeWeeklyReport(
     ''
   const firstName = fullName.split(' ')[0]?.trim() || 'Estudiante'
 
+  // Build allowed subject slug set from onboarding (same filter as /camino Nota Proyectada)
+  const onboardingPayload = (onboardingResult.data?.[0]?.payload ?? {}) as Record<string, unknown>
+  const onboardingSubjectSlugs: Set<string> | null = Array.isArray(onboardingPayload.subjects)
+    ? new Set((onboardingPayload.subjects as string[]).map(s => normalizeSubjectSlug(s)).filter(Boolean))
+    : null
+
   const projections = computeProjection(simsResult.data ?? [], examResult.data ?? [])
 
   const subjects = projections
-    .filter(p => p.confidence !== 'low' || p.num_entries > 0)
+    .filter(p => {
+      if (onboardingSubjectSlugs && !onboardingSubjectSlugs.has(p.asignatura)) return false
+      return p.confidence !== 'low' || p.num_entries > 0
+    })
     .map(p => ({
       name: subjectLabelFromSlug(p.asignatura),
       projection: p.nota_proyectada,
       trend7d: p.trend_7d,
       confidence: p.confidence,
+      weakestBlock: p.bloques[0]?.bloque ?? null,
     }))
 
   // Best block: highest-scoring block from the subject with most total entries

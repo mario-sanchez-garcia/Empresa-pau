@@ -15,9 +15,10 @@ export async function GET(request: NextRequest) {
   }
 
   const dow = new Date().getUTCDay()
-  if (dow === 0 || dow === 6) {
-    return NextResponse.json({ sent: 0, skipped: 0, reason: 'weekend' })
+  if (dow === 6) {
+    return NextResponse.json({ sent: 0, skipped: 0, reason: 'saturday' })
   }
+  const isSunday = dow === 0
 
   const db = createServiceClient()
   const today = getMadridToday()
@@ -88,7 +89,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: 0, skipped: candidateIds.length })
   }
 
-  const html = `
+  const emailSubject = isSunday
+    ? 'Tu simulacro semanal te espera — 20 minutos que mueven tu nota'
+    : 'Tu misión de hoy en Pausia te espera 📚'
+
+  const html = isSunday ? `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f7fb;font-family:system-ui,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
+    <tr><td align="center">
+      <table width="100%" style="max-width:480px;background:#ffffff;border-radius:24px;padding:36px;box-shadow:0 4px 24px rgba(37,99,235,0.08)">
+        <tr><td>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#2563eb">Simulacro del Domingo</p>
+          <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:#0f172a;line-height:1.3">El momento de la semana que más mueve tu Nota Proyectada.</h1>
+          <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
+            Son solo 3 ejercicios del bloque donde más puedes crecer — unos 20 minutos.<br>
+            El domingo es tu mejor oportunidad de la semana para mover la nota.
+          </p>
+          <a href="https://empresa-pau.vercel.app/camino"
+             style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:900;text-decoration:none;padding:14px 32px;border-radius:14px">
+            Empezar simulacro →
+          </a>
+          <p style="margin:28px 0 0;font-size:12px;color:#94a3b8">
+            Recibes este email porque tienes Camino PAU activo.
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>` : `
 <!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -124,7 +156,7 @@ export async function GET(request: NextRequest) {
     try {
       await sendEmail({
         to: user.email!,
-        subject: 'Tu misión de hoy en Pausia te espera 📚',
+        subject: emailSubject,
         html,
         userId: user.id,
       })

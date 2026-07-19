@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
   const block = String(body.block ?? '')
   const comunidad = String(body.comunidad ?? 'Madrid')
   const numQuestions = typeof body.numQuestions === 'number' ? body.numQuestions : 3
+  const source = typeof body.source === 'string' ? body.source.slice(0, 64) : null
+  const weekStart = typeof body.weekStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.weekStart) ? body.weekStart : null
 
   if (!VALID_SUBJECTS.has(subject)) {
     return NextResponse.json({ error: 'Asignatura no válida' }, { status: 400 })
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
       dificultad_real: dificultadReal,
       bloques: session.questions,
       estado: 'en_progreso',
-      resultado_json: { __practice_session: true, block, subject, comunidad },
+      resultado_json: { __practice_session: true, block, subject, comunidad, ...(source ? { source } : {}), ...(weekStart ? { week_start: weekStart } : {}) },
       created_at: session.created_at,
       updated_at: session.created_at,
     })

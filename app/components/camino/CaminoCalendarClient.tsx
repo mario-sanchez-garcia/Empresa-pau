@@ -101,6 +101,11 @@ const SUBJECT_COLORS: Record<string, { bg: string; text: string; border: string 
   'Historia de España': { bg: '#fff8f1', text: '#78350f', border: '#fed7aa' }, 'Historia de la Filosofía': { bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
   'Lengua Castellana': { bg: '#e0f2fe', text: '#0369a1', border: '#bae6fd' }, 'Inglés': { bg: '#ecfeff', text: '#0e7490', border: '#a5f3fc' }, 'Biología': { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' }
 }
+const CAMINO_TO_SIM_SUBJECT: Record<string, string> = {
+  matematicas_ii: 'mates', matematicas_ccss: 'matematicas_ccss',
+  fisica: 'fisica', quimica: 'quimica', biologia: 'biologia',
+  ingles: 'ingles', lengua: 'lengua', historia_espana: 'historia',
+}
 const DIVISIONS = [
   { name: 'Bronce', min: 0, max: 499, bg: '#fff7ed', text: '#92400e', bar: '#b45309' },
   { name: 'Plata', min: 500, max: 1499, bg: '#f8fafc', text: '#475569', bar: '#94a3b8' },
@@ -743,6 +748,8 @@ export default function CaminoCalendarClient() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> | null>(null)
   const [centroPulso, setCentroPulso] = useState<{ enoughData: true; centroDisplay: string; subject: string; topicName: string; position: 'ahead' | 'same' | 'behind'; delta: number; peers: number } | null>(null)
+  const [sundayMockSession, setSundayMockSession] = useState<{ id: string; nota_final: number | null } | null | undefined>(undefined)
+  const isSunday = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' }) === 'Sun'
 
   useEffect(() => {
     const loadedOnboarding = loadOnboarding()
@@ -901,6 +908,25 @@ export default function CaminoCalendarClient() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!isSunday) { setSundayMockSession(null); return }
+    const weekStart = currentWeekStartISO()
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session || cancelled) return
+      const { data: rows } = await supabase
+        .from('historial_simulacros')
+        .select('id, nota_final, estado')
+        .contains('resultado_json', { source: 'sunday_mock', week_start: weekStart })
+        .eq('estado', 'completado')
+        .limit(1)
+      if (cancelled) return
+      const done = rows?.[0] ?? null
+      setSundayMockSession(done ? { id: String(done.id), nota_final: done.nota_final != null ? Number(done.nota_final) : null } : null)
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, [isSunday]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (!onboarding?.completedAt) return
     let cancelled = false
     supabase.auth.getSession().then(async ({ data }) => {
@@ -1001,6 +1027,21 @@ export default function CaminoCalendarClient() {
     return [...filteredProjection].sort((a, b) => b.recent_entries - a.recent_entries)[0]?.asignatura ?? null
   })()
 
+  const sundayMockSimSubject = heroAsignatura ? (CAMINO_TO_SIM_SUBJECT[heroAsignatura] ?? null) : null
+  const sundayMockBlock = (() => {
+    if (!heroAsignatura) return null
+    const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
+    if (heroProj?.bloques.length) return heroProj.bloques[0].bloque
+    // Fallback: block with fewest completed missions for the hero subject
+    const counts = new Map<string, number>()
+    for (const m of allMissions.filter(m => m.subjectSlug === heroAsignatura && m.blockKey)) {
+      const k = m.blockKey!
+      counts.set(k, (counts.get(k) ?? 0) + (m.status === 'done' ? 1 : 0))
+    }
+    if (!counts.size) return null
+    return [...counts.entries()].sort((a, b) => a[1] - b[1])[0][0]
+  })()
+
   async function shareInforme() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
@@ -1023,6 +1064,28 @@ export default function CaminoCalendarClient() {
     } catch {
       setToast('No se pudo generar el enlace')
     }
+  }
+
+  async function startSundayMock() {
+    if (!sundayMockSimSubject || !sundayMockBlock) { setToast('No hay datos suficientes aún'); return }
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    const weekStart = currentWeekStartISO()
+    const res = await fetch('/api/practica-parcial', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({
+        subject: sundayMockSimSubject,
+        block: sundayMockBlock,
+        comunidad: onboarding?.community ?? 'Madrid',
+        numQuestions: 3,
+        source: 'sunday_mock',
+        weekStart,
+      }),
+    })
+    if (!res.ok) { setToast('No hay ejercicios para ese bloque aún'); return }
+    const { id } = await res.json() as { id: string }
+    router.push(`/simulacros/practica/${id}`)
   }
 
   async function createLiga(nombre: string): Promise<{ error?: string }> {
@@ -1299,6 +1362,40 @@ export default function CaminoCalendarClient() {
         {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid items-stretch gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="flex flex-col gap-4">
+            {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (
+              sundayMockSession !== null ? (
+                <div className="rounded-[20px] border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-600">Simulacro del Domingo</p>
+                  <p className="mt-1 text-sm font-black text-slate-800">Simulacro del Domingo hecho ✓</p>
+                  {(() => {
+                    const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
+                    const nota = sundayMockSession.nota_final
+                    const proj = heroProj?.nota_proyectada ?? null
+                    if (nota == null) return null
+                    if (proj != null && heroProj?.confidence !== 'low') {
+                      const delta = Math.round((nota - proj) * 10) / 10
+                      const sign = delta >= 0 ? '+' : ''
+                      return <p className="mt-0.5 text-xs font-semibold text-blue-700">{sign}{delta.toFixed(1).replace('.', ',')} respecto a tu proyección · {nota.toFixed(1)}/10 esta sesión</p>
+                    }
+                    return <p className="mt-0.5 text-xs font-semibold text-blue-700">Sacaste {nota.toFixed(1)}/10 esta semana</p>
+                  })()}
+                </div>
+              ) : (
+                <div className="rounded-[20px] border border-blue-200 bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-5 text-white shadow-[0_8px_24px_rgba(37,99,235,0.25)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-200">Simulacro del Domingo</p>
+                  <p className="mt-1.5 text-base font-black leading-snug">
+                    3 ejercicios de {sundayMockBlock} · ~20 min
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-blue-100">El momento de la semana que más mueve tu Nota Proyectada.</p>
+                  <button
+                    onClick={startSundayMock}
+                    className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-blue-700 transition hover:bg-blue-50 active:scale-[0.97]"
+                  >
+                    Empezar simulacro →
+                  </button>
+                </div>
+              )
+            )}
             {upcomingPartial && <PartialExamBanner exam={upcomingPartial} today={realToday} />}
             <div className="flex-1 min-h-0">
               <HeroMissionCard

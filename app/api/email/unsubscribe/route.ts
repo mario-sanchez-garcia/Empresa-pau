@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { verifyUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,14 +36,8 @@ export async function GET(request: NextRequest) {
     return htmlPage('Error', '<p style="color:#dc2626;font-weight:700">Token inválido.</p>')
   }
 
-  let userId: string
-  try {
-    userId = Buffer.from(token, 'base64').toString('utf-8')
-  } catch {
-    return htmlPage('Error', '<p style="color:#dc2626;font-weight:700">Token inválido.</p>')
-  }
-
-  if (!userId || userId.length < 10) {
+  const userId = verifyUnsubscribeToken(token)
+  if (!userId) {
     return htmlPage('Error', '<p style="color:#dc2626;font-weight:700">Token inválido.</p>')
   }
 

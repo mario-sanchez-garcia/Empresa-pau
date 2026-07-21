@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServiceSupabase, createUserSupabase, getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 
@@ -28,6 +29,11 @@ function safeName(value: unknown) {
 
 function displayName(profile: Record<string, unknown> | undefined, fallback: string) {
   return safeName(profile?.display_name) || safeName(profile?.displayName) || safeName(profile?.nombre) || safeName(profile?.name) || fallback
+}
+
+// Returns a stable 16-char hex ID that doesn't expose the real UUID.
+function publicId(userId: string): string {
+  return createHash('sha256').update(userId).digest('hex').slice(0, 16)
 }
 
 function sortEntries(entries: Array<Omit<LeaderboardEntry, 'rank'>>) {
@@ -60,10 +66,10 @@ async function getCommunityMap(db: SupabaseClient, userIds: string[]): Promise<M
   return communities
 }
 
-function buildPayload(entries: LeaderboardEntry[], currentUserId: string, community: string) {
-  const currentGlobal = entries.find(entry => entry.id === currentUserId) ?? null
+function buildPayload(entries: LeaderboardEntry[], community: string) {
+  const currentGlobal = entries.find(entry => entry.isCurrentUser) ?? null
   const communityEntries = sortEntries(entries.filter(entry => entry.community === community).map(({ rank: _rank, ...entry }) => entry))
-  const currentCommunity = communityEntries.find(entry => entry.id === currentUserId) ?? null
+  const currentCommunity = communityEntries.find(entry => entry.isCurrentUser) ?? null
 
   return {
     global: {
@@ -97,14 +103,14 @@ export async function GET(request: NextRequest) {
       .maybeSingle()
 
     const entries = sortEntries([{
-      id: user.id,
+      id: publicId(user.id),
       name: 'Tú',
       community: requestedCommunity,
       xp: Number(currentProgress?.xp_total ?? 0),
       isCurrentUser: true,
     }])
 
-    return NextResponse.json(buildPayload(entries, user.id, requestedCommunity))
+    return NextResponse.json(buildPayload(entries, requestedCommunity))
   }
 
   const { data: progressRows } = await serviceDb
@@ -129,7 +135,7 @@ export async function GET(request: NextRequest) {
     const userId = String(row.user_id)
     const isCurrentUser = userId === user.id
     return {
-      id: userId,
+      id: publicId(userId),
       name: isCurrentUser ? 'Tú' : displayName(profiles.get(userId), 'Alumno PAU'),
       community: isCurrentUser
         ? cleanCommunity(communities.get(userId) ?? requestedCommunity)
@@ -139,7 +145,7 @@ export async function GET(request: NextRequest) {
     }
   }))
 
-  return NextResponse.json(buildPayload(entries, user.id, cleanCommunity(communities.get(user.id) ?? requestedCommunity ?? currentProfile?.community)))
+  return NextResponse.json(buildPayload(entries, cleanCommunity(communities.get(user.id) ?? requestedCommunity ?? currentProfile?.community)))
 }
 
 export async function POST(request: NextRequest) {

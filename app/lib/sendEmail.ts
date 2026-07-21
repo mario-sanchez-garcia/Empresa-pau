@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { generateUnsubscribeToken } from './unsubscribeToken'
 
 const APP_URL = 'https://empresa-pau.vercel.app'
 
@@ -18,7 +19,7 @@ export async function sendEmail({
   userId?: string
 }) {
   const unsubscribeFooter = userId
-    ? `<p style="font-size:12px;color:#999;margin-top:24px;text-align:center">¿No quieres recibir estos recordatorios? <a href="${APP_URL}/api/email/unsubscribe?token=${Buffer.from(userId).toString('base64')}" style="color:#999">Darse de baja</a></p>`
+    ? `<p style="font-size:12px;color:#999;margin-top:24px;text-align:center">¿No quieres recibir estos recordatorios? <a href="${APP_URL}/api/email/unsubscribe?token=${generateUnsubscribeToken(userId)}" style="color:#999">Darse de baja</a></p>`
     : ''
 
   const finalHtml = unsubscribeFooter

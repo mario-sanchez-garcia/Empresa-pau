@@ -127,17 +127,28 @@ function daysBetween(fromISO: string, toDateISO: string) { return Math.ceil((dat
 function monthKey(dateISO: string) { return dateISO.slice(0, 7) }
 function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
 function missionKindLabel(kind: string, missionType?: string): string {
-  const key = missionType ?? kind
-  switch (key) {
-    case 'concept_explanation': return 'Teoría'
-    case 'guided_example': case 'guided_practice': return 'Práctica'
-    case 'evau_practice': return 'Ejercicio PAU'
-    case 'exam_focus': return 'Repaso'
-    case 'mock_exam': case 'block_mock': return 'Simulacro'
-    case 'partial_practice': return 'Prep. parcial'
-    case 'manual': return 'Manual'
-    default: return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  const lookup = (key: string): string | null => {
+    switch (key) {
+      case 'concept': case 'concept_explanation': return 'Teoría'
+      case 'guided': case 'guided_example': case 'guided_practice': return 'Práctica'
+      case 'evau': case 'evau_practice': return 'Ejercicio PAU'
+      case 'review': case 'exam_focus': return 'Repaso'
+      case 'mock': case 'mock_exam': case 'block_mock': return 'Simulacro'
+      case 'partial': case 'partial_practice': return 'Prep. parcial'
+      case 'manual': return 'Manual'
+      default: return null
+    }
   }
+  return (missionType ? lookup(missionType) : null) ?? lookup(kind) ?? kind.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+const SUBJECT_ABBR: Record<string, string> = {
+  'Matemáticas II': 'MAT II', 'Matemáticas CCSS': 'MAT CCSS',
+  'Física': 'FIS', 'Química': 'QUI', 'Biología': 'BIO',
+  'Historia de España': 'HIST', 'Historia de la Filosofía': 'FILOS',
+  'Lengua Castellana': 'LEN', 'Inglés': 'ING',
+}
+function subjectAbbr(subject: string): string {
+  return SUBJECT_ABBR[subject] ?? subject.split(' ')[0].slice(0, 5).toUpperCase()
 }
 function subjectSlug(subject: string) { return normalizeSubjectSlug(SUBJECT_SLUGS[subject] ?? subject) }
 function normalizeOnboardingSubjects(subjects: string[]) {
@@ -1950,7 +1961,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                           <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="group min-w-0 rounded-2xl border bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: theme.border }}>
                             <div className="flex items-center gap-1.5">
                               <button type="button" aria-label="Arrastrar para mover" className="shrink-0 cursor-grab rounded-lg p-1 text-slate-300 hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"><GripVertical size={12} /></button>
-                              <span className="min-w-0 flex-1 truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
+                              <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{subjectAbbr(mission.subject)}</span>
                               <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-violet-50 hover:text-violet-500"><Bookmark size={12} /></button>
                               <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
                             </div>

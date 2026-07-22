@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, isValidRouteId } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
+import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,9 +46,25 @@ export async function POST(request: NextRequest) {
 
   const entryDate = new Date().toISOString().slice(0, 10)
 
-  try {
-    const serviceDb = createServiceClient()
-    await recordBetaMetric(serviceDb, user.id, 'onboarding_completed', {
+  const serviceDb = (() => {
+    try { return createServiceClient() } catch { return null }
+  })()
+
+  if (serviceDb) {
+    try {
+      await ensureUserInstituteMembership(serviceDb, {
+        userId: user.id,
+        community,
+        schoolName,
+        schoolSource,
+        membershipSource: 'onboarding',
+      })
+    } catch { /* institute membership is non-critical during rollout */ }
+  }
+
+  if (serviceDb) {
+    try {
+      await recordBetaMetric(serviceDb, user.id, 'onboarding_completed', {
         community,
         school_name: schoolName,
         school_source: schoolSource,
@@ -59,8 +76,9 @@ export async function POST(request: NextRequest) {
         weekly_study_days_value: weeklyStudyDaysValue,
         route_id: routeId,
         onboarding_completed: true,
-    })
-  } catch { /* non-critical */ }
+      })
+    } catch { /* non-critical */ }
+  }
 
   return NextResponse.json({ ok: true, routeId, entryDate })
 }

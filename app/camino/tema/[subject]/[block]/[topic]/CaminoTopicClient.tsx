@@ -463,14 +463,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       item.block === currentTopic.blockSlug &&
       item.topic === currentTopic.topicSlug
     ).length
-    let adjustment: SchoolAdjustment = {
+    const adjustment: SchoolAdjustment = {
       schoolName: onboarding.schoolName,
       community: onboarding.community,
       subject: currentTopic.subject,
       blockSlug: currentTopic.blockSlug,
       topicSlug: currentTopic.topicSlug,
       feedbackType: 'not_seen_in_class',
-      status: localCount >= 2 ? 'delayed_for_school' : 'not_seen',
+      status: localCount >= 3 ? 'delayed_for_school' : 'not_seen',
       notSeenCount: localCount,
       date: now,
     }
@@ -488,36 +488,33 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     saveJson(CALENDAR_REFRESH_KEY, true)
     window.localStorage.removeItem(CALENDAR_KEY)
     window.dispatchEvent(new CustomEvent('pausia:school-topic-feedback', { detail: adjustment }))
-    setToast('Tema postponado. Lo verás más adelante.')
+    setToast('Entendido. Ajustando tu Camino...')
 
     try {
       const { data } = await supabase.auth.getSession()
       const token = data.session?.access_token
       if (!token) { router.push('/camino'); return }
 
-      // Sync school feedback (best-effort)
-      const response = await fetch('/api/camino/school-topic-feedback', {
+      // Sync institute pace signal (best-effort). The server resolves institute membership.
+      const response = await fetch('/api/camino/pace-signal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(adjustment),
+        body: JSON.stringify({
+          subject: currentTopic.subject,
+          blockSlug: currentTopic.blockSlug,
+          topicSlug: currentTopic.topicSlug,
+          v2SortOrder: currentTopic.v2SortOrder,
+          signalType: 'not_taught_yet',
+          source: 'topic_page',
+        }),
       })
       if (response.ok) {
-        const remote = await response.json() as { status?: 'not_seen' | 'delayed_for_school'; notSeenCount?: number }
-        adjustment = {
-          ...adjustment,
-          status: remote.status ?? adjustment.status,
-          notSeenCount: remote.notSeenCount ?? adjustment.notSeenCount,
-        }
-        saveJson(SCHOOL_ADJUSTMENTS_KEY, [
-          adjustment,
-          ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
-            !(item.schoolName === adjustment.schoolName &&
-              item.subject === adjustment.subject &&
-              item.blockSlug === adjustment.blockSlug &&
-              item.topicSlug === adjustment.topicSlug)
-          )
-        ].slice(0, 80))
-        saveJson(CALENDAR_REFRESH_KEY, true)
+        const remote = await response.json() as { individualOnly?: boolean }
+        setToast(remote.individualOnly
+          ? 'Entendido. Ajustamos tu Camino para no priorizar este tema por ahora.'
+          : 'Entendido. Ajustamos tu Camino y tendremos en cuenta el ritmo de tu instituto.')
+      } else {
+        setToast('Entendido. Ajustamos tu Camino para no priorizar este tema por ahora.')
       }
 
       // Persist postpone to Supabase queue + calendar

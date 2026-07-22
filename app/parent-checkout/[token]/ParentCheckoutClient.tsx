@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { BookOpen, CheckCircle2, Lock, Shield, Target, Zap } from 'lucide-react'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 
 interface Props {
   token: string
@@ -114,7 +114,7 @@ export default function ParentCheckoutClient({
       {/* ── 1. HEADER ──────────────────────────────────────────── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 100, background: C.white, borderBottom: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 600, margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <PausiaBrand subtitle={null} size="sm" />
+          <KairoBrand subtitle={null} size="sm" />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.greenLight, border: `1px solid ${C.greenBorder}`, borderRadius: 999, padding: '6px 12px' }}>
             <Lock size={12} style={{ color: C.green }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>Pago seguro</span>
@@ -278,7 +278,7 @@ export default function ParentCheckoutClient({
           <p style={{ fontSize: 15, color: '#166534', lineHeight: 1.7, margin: '0 auto', maxWidth: 420 }}>
             Si en los primeros 7 días no estás satisfecho, te devolvemos el dinero completo sin preguntas.
             Escríbenos a{' '}
-            <a href="mailto:legal@pausia.es" style={{ color: C.green, fontWeight: 700 }}>legal@pausia.es</a>.
+            <a href="mailto:legal@kairo.es" style={{ color: C.green, fontWeight: 700 }}>legal@kairo.es</a>.
             {' '}Ver{' '}
             <a href="/legal/reembolsos" style={{ color: C.green, fontWeight: 700 }}>política de reembolsos</a>.
           </p>
@@ -291,7 +291,7 @@ export default function ParentCheckoutClient({
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 18px', marginBottom: 14 }}>
             {[
               { label: '© 2026 Kairo', href: null },
-              { label: 'legal@pausia.es', href: 'mailto:legal@pausia.es' },
+              { label: 'legal@kairo.es', href: 'mailto:legal@kairo.es' },
               { label: 'Términos', href: '/legal/terminos' },
               { label: 'Privacidad', href: '/legal/privacidad' },
             ].map(({ label, href }) =>

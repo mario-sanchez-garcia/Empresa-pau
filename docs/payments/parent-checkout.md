@@ -2,9 +2,9 @@
 
 ## Qué hace este MVP
 
-Un alumno autenticado genera un enlace seguro desde `/camino`. El enlace lleva al padre a una página pública de Pausia donde puede pagar el Pack Curso PAU con tarjeta a través de Stripe. Cuando Stripe confirma el pago mediante webhook, se activa un `user_entitlement` para el alumno.
+Un alumno autenticado genera un enlace seguro desde `/camino`. El enlace lleva al padre a una página pública de Kairo donde puede pagar el Pack Curso PAU con tarjeta a través de Stripe. Cuando Stripe confirma el pago mediante webhook, se activa un `user_entitlement` para el alumno.
 
-**El padre no necesita tener cuenta en Pausia.**
+**El padre no necesita tener cuenta en Kairo.**
 
 ---
 
@@ -82,7 +82,7 @@ STRIPE_SECRET_KEY=sk_live_...        # o sk_test_... para pruebas
 STRIPE_WEBHOOK_SECRET=whsec_...      # Stripe Dashboard → Webhooks → Signing secret
 
 # App URL (para success_url y cancel_url de Stripe)
-NEXT_PUBLIC_APP_URL=https://pausia.es
+NEXT_PUBLIC_APP_URL=https://kairo.es
 
 # Opcional: fecha límite del precio fundador (default: 2026-09-01)
 FOUNDING_DEADLINE_DATE=2026-09-01
@@ -96,7 +96,7 @@ FOUNDING_DEADLINE_DATE=2026-09-01
 
 ### Webhook endpoint
 En Stripe Dashboard → Developers → Webhooks → Add endpoint:
-- URL: `https://pausia.es/api/stripe/webhook`
+- URL: `https://kairo.es/api/stripe/webhook`
 - Eventos a escuchar:
   - `checkout.session.completed`
   - `checkout.session.expired`

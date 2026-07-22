@@ -11,7 +11,7 @@ import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
 const CAT_UI = {
@@ -212,7 +212,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           style={{ background: `linear-gradient(135deg, ${CAT_UI.color}, ${CAT_UI.accent})`, boxShadow: `0 16px 34px ${CAT_UI.accent}33` }}
           type="button"
         >
-          {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
+          {cargando ? <KairoLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
         </button>
       </section>
 

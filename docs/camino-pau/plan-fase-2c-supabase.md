@@ -62,7 +62,7 @@ create index camino_user_progress_user_idx
   on public.camino_user_progress (user_id);
 ```
 
-**Guarda:** totales en tiempo real, calculados por el API al completar tareas/misiones.  
+**Guarda:** totales en tiempo real, calculados por el API al completar tareas/misiones.
 **No guarda:** historial de XP (eso va en `camino_xp_events`), route (en `camino_route_settings`), detalle de tareas completadas (en `camino_task_completions`).
 
 ---
@@ -89,7 +89,7 @@ create index camino_daily_missions_user_date_idx
   on public.camino_daily_missions (user_id, mission_date desc);
 ```
 
-**Guarda:** qué tareas se asignaron ese día (`task_ids`), si la misión se completó y cuándo.  
+**Guarda:** qué tareas se asignaron ese día (`task_ids`), si la misión se completó y cuándo.
 **No guarda:** contenido de las tareas (derivado de `caminoData.ts`), XP de la misión (en `camino_xp_events`).
 
 **Nota:** `week_number` permite en Fase 2D saber qué semana del currículum de 38 semanas corresponde a cada misión.
@@ -120,7 +120,7 @@ create index camino_task_completions_user_at_idx
   on public.camino_task_completions (user_id, completed_at desc);
 ```
 
-**Guarda:** qué tarea, qué tipo, qué asignatura, cuánto XP ganó, cuándo.  
+**Guarda:** qué tarea, qué tipo, qué asignatura, cuánto XP ganó, cuándo.
 **No guarda:** título ni detalle de la tarea (derivado del código), action hrefs.
 
 ---
@@ -143,7 +143,7 @@ create table public.camino_route_settings (
 );
 ```
 
-**Guarda:** ruta activa, fecha real de entrada a Pausia, fecha estimada de PAU.  
+**Guarda:** ruta activa, fecha real de entrada a Kairo, fecha estimada de PAU.
 **No guarda:** historial de cambios de ruta (auditoría futura si se necesita), preferences de asignaturas (Fase 2D).
 
 **Nota:** se hace UPSERT en cada cambio de ruta. Si se quiere historial, añadir tabla `camino_route_history` en Fase 2D.
@@ -171,7 +171,7 @@ create index camino_xp_events_user_at_idx
   on public.camino_xp_events (user_id, created_at desc);
 ```
 
-**Guarda:** fuente del XP (`task_completion`, `mission_completion`, `streak_bonus`), referencia al origen (`source_id` = `task_id` o `mission_date`), cuánto XP.  
+**Guarda:** fuente del XP (`task_completion`, `mission_completion`, `streak_bonus`), referencia al origen (`source_id` = `task_id` o `mission_date`), cuánto XP.
 **No guarda:** tokens de IA (eso va en `ai_usage_events`), metadatos de corrección.
 
 ---

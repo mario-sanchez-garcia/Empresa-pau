@@ -17,7 +17,7 @@
 ## 2. Onboarding (`/onboarding`)
 
 - [ ] El flujo completo (comunidad → asignaturas → tiempo → modo → generando → primera misión → tiny win) funciona sin errores.
-- [ ] `localStorage` guarda correctamente `pausia_onboarding_v1` con los datos del wizard.
+- [ ] `localStorage` guarda correctamente `kairo_onboarding_v1` con los datos del wizard.
 - [ ] La pantalla "Ya tienes tu Camino PAU creado" aparece si `isOnboardingComplete()` devuelve true.
 - [ ] Las 3 tareas de activación muestran checkmark al completarse.
 - [ ] El XP solo se suma visualmente si la API `/api/camino/complete-task` confirma la tarea (usuario autenticado).
@@ -49,7 +49,7 @@
 - [ ] Tras el pago, la página de éxito (`/parent-checkout/success`) no activa ningún entitlement por sí sola.
 - [ ] El webhook de Stripe crea el `user_entitlement` correctamente.
 - [ ] Si el webhook falla, Stripe reintenta (status 500 retornado correctamente).
-- [ ] La página de success tiene el enlace a `hola@pausia.es` y links legales.
+- [ ] La página de success tiene el enlace a `hola@kairo.es` y links legales.
 - [ ] El footer legal (Privacidad, Términos, Reembolsos, Uso de IA, Contacto) está presente en la página de checkout.
 
 ---
@@ -111,7 +111,7 @@ Secuencia de pasos para un usuario nuevo:
 ### 1. Usuario no puede completar onboarding
 
 - Pregunta si ve algún mensaje de error en pantalla.
-- Si el flujo se queda bloqueado: el estado se guarda en `localStorage` (`pausia_onboarding_v1`) — el usuario puede refrescar y continuar desde donde dejó.
+- Si el flujo se queda bloqueado: el estado se guarda en `localStorage` (`kairo_onboarding_v1`) — el usuario puede refrescar y continuar desde donde dejó.
 - Si persiste: el usuario puede acceder directamente a `/camino` sin completar onboarding (el Camino funciona sin él).
 - Revisa logs de Vercel para errores en `/api/onboarding/setup`.
 

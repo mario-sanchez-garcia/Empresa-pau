@@ -235,7 +235,7 @@ export default function MathAnswerToolbar({
 
   return (
     <div
-      data-pausia-math-toolbar="true"
+      data-kairo-math-toolbar="true"
       className="pau-math-answer-toolbar"
       style={{
         borderLeft: `1.5px solid ${borderColor}`,

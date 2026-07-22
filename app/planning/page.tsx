@@ -8,8 +8,8 @@ import GradePredictionCard from '@/components/grade/GradePredictionCard'
 import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { useCCAA } from '@/app/hooks/useCCAA'
-import PausiaBrand from '@/components/shared/PausiaBrand'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoBrand from '@/components/shared/KairoBrand'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
 type PlanningTask = {
   id?: string
@@ -406,7 +406,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
       <header className="px-6 py-4" style={{ background: 'rgba(255, 255, 255, 0.78)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(219, 231, 251, 0.9)' }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <PausiaBrand subtitle="Mi Plan" size="md" />
+            <KairoBrand subtitle="Mi Plan" size="md" />
           </div>
           <button onClick={() => router.push('/')} className="campus-hover text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>Exámenes</button>
         </div>
@@ -683,7 +683,7 @@ function PlanLoadingCard() {
   return (
     <section className="rounded-3xl p-8" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
       <div className="flex items-center gap-3 rounded-2xl border border-[#dbe7fb] bg-[#f8fbff] px-4 py-4" style={{ color: config.bg }}>
-        <PausiaLoadingDot className="h-5 w-5" />
+        <KairoLoadingDot className="h-5 w-5" />
         <div>
           <p className="text-sm font-black" style={{ color: config.ink }}>Cargando tu plan...</p>
           <p className="text-xs font-semibold" style={{ color: config.muted }}>Preparando tu planning semanal sin bloquear el resto de Kairo.</p>

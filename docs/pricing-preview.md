@@ -1,6 +1,6 @@
 # Pricing Preview
 
-Pausia incluye una primera pagina de pricing en `/pricing` para validar interes en Premium antes de activar pagos reales.
+Kairo incluye una primera pagina de pricing en `/pricing` para validar interes en Premium antes de activar pagos reales.
 
 ## Que se ha creado
 

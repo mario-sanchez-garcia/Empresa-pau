@@ -1,4 +1,4 @@
-# Auditoría completa de Pausia
+# Auditoría completa de Kairo
 
 > Fecha: 2026-06-11 — Build: ✅ passed — Rama: main — Commit: e07d07b
 
@@ -6,7 +6,7 @@
 
 ## 1. Resumen ejecutivo
 
-Pausia es un MVP funcional con una base técnica sólida y una propuesta de valor clara: practicar exámenes oficiales de la EBAU con corrección IA. El build pasa, las rutas principales funcionan, los límites de IA están implementados y el LaTeX se renderiza correctamente tras las últimas correcciones.
+Kairo es un MVP funcional con una base técnica sólida y una propuesta de valor clara: practicar exámenes oficiales de la EBAU con corrección IA. El build pasa, las rutas principales funcionan, los límites de IA están implementados y el LaTeX se renderiza correctamente tras las últimas correcciones.
 
 **Está cerca de beta privada** con 4–5 días de trabajo enfocado. No está lista para beta pública por problemas de cobertura de datos, un bug crítico de datos no migrados, UX incompleta en móvil y ausencia de onboarding.
 
@@ -54,165 +54,165 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 ## 3. Top 15 prioridades
 
 ### P1 — Crear migración para `historial_examenes`
-**Problema:** La tabla `historial_examenes` es la más usada del producto (exámenes, historial, Mi Plan), pero NO tiene migración en `supabase/migrations/`. Existe en producción pero fue creada manualmente.  
-**Impacto:** Si la BD se recrea o se migra, todos los historiales de correcciones se pierden sin posibilidad de recuperación estructurada.  
-**Archivos:** `supabase/migrations/` — crear nuevo archivo  
-**Dificultad:** Baja  
-**Riesgo:** Alto  
-**Recomendación:** Hacer `SELECT * FROM information_schema.columns WHERE table_name='historial_examenes'` en producción y crear la migración inmediatamente.  
+**Problema:** La tabla `historial_examenes` es la más usada del producto (exámenes, historial, Mi Plan), pero NO tiene migración en `supabase/migrations/`. Existe en producción pero fue creada manualmente.
+**Impacto:** Si la BD se recrea o se migra, todos los historiales de correcciones se pierden sin posibilidad de recuperación estructurada.
+**Archivos:** `supabase/migrations/` — crear nuevo archivo
+**Dificultad:** Baja
+**Riesgo:** Alto
+**Recomendación:** Hacer `SELECT * FROM information_schema.columns WHERE table_name='historial_examenes'` en producción y crear la migración inmediatamente.
 **Validación:** `npm run build` + verificar que el archivo describe fielmente la tabla real
 
 ---
 
 ### P2 — "Mi Plan" en home usa el límite equivocado
-**Problema:** `generarPlan()` en `app/page.tsx:1329` llama a `/api/chat`, no a `/api/planning`. El límite de `/api/chat` es 20/día para texto; el de `/api/planning` es 1/semana. Los usuarios pueden generar planes ilimitados desde home.  
-**Impacto:** Coste IA descontrolado; incoherencia de UX (el usuario llega a planning page y ve "ya usaste tu plan" pero en home puede generar otro).  
-**Archivos:** `app/page.tsx:1329`  
-**Dificultad:** Baja (cambiar endpoint)  
-**Riesgo:** Medio  
-**Recomendación:** Mover `generarPlan()` a `/api/planning` o eliminar el generador de plan de home y redirigir a `/planning`.  
+**Problema:** `generarPlan()` en `app/page.tsx:1329` llama a `/api/chat`, no a `/api/planning`. El límite de `/api/chat` es 20/día para texto; el de `/api/planning` es 1/semana. Los usuarios pueden generar planes ilimitados desde home.
+**Impacto:** Coste IA descontrolado; incoherencia de UX (el usuario llega a planning page y ve "ya usaste tu plan" pero en home puede generar otro).
+**Archivos:** `app/page.tsx:1329`
+**Dificultad:** Baja (cambiar endpoint)
+**Riesgo:** Medio
+**Recomendación:** Mover `generarPlan()` a `/api/planning` o eliminar el generador de plan de home y redirigir a `/planning`.
 **Validación:** Generar un plan en home y verificar que se cuenta en el mismo límite que en `/planning`
 
 ---
 
 ### P3 — Sidebar dice "EBAU Madrid" siempre
-**Problema:** `app/components/Sidebar.tsx:116` tiene hardcodeado "EBAU Madrid · practica mejor" independientemente de si el usuario usa Cataluña. Además `app/page.tsx:1915` muestra "EBAU Madrid {año}" en el header del ejercicio activo, incluso en asignaturas Madrid cuando el usuario tiene CCAA=Cataluña seleccionada.  
-**Impacto:** Riesgo de confianza para estudiantes de Cataluña que ven "EBAU Madrid" en sus exámenes PAU Catalunya.  
-**Archivos:** `app/components/Sidebar.tsx:116`, `app/page.tsx:1915`  
-**Dificultad:** Baja  
-**Riesgo:** Bajo-Medio  
-**Recomendación:** Usar `useCCAA()` en Sidebar para mostrar "EBAU Madrid" o "PAU Catalunya". En page.tsx adaptar el label del header al ccaa activo.  
+**Problema:** `app/components/Sidebar.tsx:116` tiene hardcodeado "EBAU Madrid · practica mejor" independientemente de si el usuario usa Cataluña. Además `app/page.tsx:1915` muestra "EBAU Madrid {año}" en el header del ejercicio activo, incluso en asignaturas Madrid cuando el usuario tiene CCAA=Cataluña seleccionada.
+**Impacto:** Riesgo de confianza para estudiantes de Cataluña que ven "EBAU Madrid" en sus exámenes PAU Catalunya.
+**Archivos:** `app/components/Sidebar.tsx:116`, `app/page.tsx:1915`
+**Dificultad:** Baja
+**Riesgo:** Bajo-Medio
+**Recomendación:** Usar `useCCAA()` en Sidebar para mostrar "EBAU Madrid" o "PAU Catalunya". En page.tsx adaptar el label del header al ccaa activo.
 **Validación:** Cambiar a Cataluña → revisar sidebar y header de ejercicio
 
 ---
 
 ### P4 — `requiereRevision: true` sin warning en UI
-**Problema:** `app/data/fisica_cataluna.ts` (3 ejercicios) y `app/data/quimica_cataluna.ts` (2 ejercicios) tienen `requiereRevision: true`, indicando que los enunciados necesitan revisión. Sin embargo el flag no se usa en ningún componente UI: los ejercicios aparecen exactamente igual que los validados.  
-**Impacto:** Estudiantes podrían practicar con enunciados potencialmente incorrectos o incompletos sin saberlo.  
-**Archivos:** `app/components/CatFisicaEjercicioCard.tsx`, `app/components/CatEjercicioCard.tsx`  
-**Dificultad:** Baja  
-**Riesgo:** Medio  
-**Recomendación:** Mostrar un banner "Este ejercicio está pendiente de revisión editorial" cuando `requiereRevision === true`.  
+**Problema:** `app/data/fisica_cataluna.ts` (3 ejercicios) y `app/data/quimica_cataluna.ts` (2 ejercicios) tienen `requiereRevision: true`, indicando que los enunciados necesitan revisión. Sin embargo el flag no se usa en ningún componente UI: los ejercicios aparecen exactamente igual que los validados.
+**Impacto:** Estudiantes podrían practicar con enunciados potencialmente incorrectos o incompletos sin saberlo.
+**Archivos:** `app/components/CatFisicaEjercicioCard.tsx`, `app/components/CatEjercicioCard.tsx`
+**Dificultad:** Baja
+**Riesgo:** Medio
+**Recomendación:** Mostrar un banner "Este ejercicio está pendiente de revisión editorial" cuando `requiereRevision === true`.
 **Validación:** Física Cataluña 2021 → ver si los ejercicios marcados muestran el banner
 
 ---
 
 ### P5 — `enunciado` y `respuesta` truncados en historial
-**Problema:** `app/page.tsx:1247-1248` guarda `enunciado: enunciadoActivo?.substring(0, 500)` y `respuesta: respuesta?.substring(0, 1000)`. Para exámenes con enunciados largos (Inglés reading, Lengua texto) se almacenan truncados. El historial modal (línea 2233) muestra este enunciado incompleto.  
-**Impacto:** El historial muestra enunciados cortados sin indicar que están incompletos. El contexto de chat sobre correcciones (línea 1288) también usa datos truncados.  
-**Archivos:** `app/page.tsx:1247-1248`  
-**Dificultad:** Baja  
-**Riesgo:** Medio  
-**Recomendación:** Ampliar los límites a 2000/4000 chars o guardar sin límite usando TEXT en Supabase. Si la columna es TEXT ya, el límite es innecesario.  
+**Problema:** `app/page.tsx:1247-1248` guarda `enunciado: enunciadoActivo?.substring(0, 500)` y `respuesta: respuesta?.substring(0, 1000)`. Para exámenes con enunciados largos (Inglés reading, Lengua texto) se almacenan truncados. El historial modal (línea 2233) muestra este enunciado incompleto.
+**Impacto:** El historial muestra enunciados cortados sin indicar que están incompletos. El contexto de chat sobre correcciones (línea 1288) también usa datos truncados.
+**Archivos:** `app/page.tsx:1247-1248`
+**Dificultad:** Baja
+**Riesgo:** Medio
+**Recomendación:** Ampliar los límites a 2000/4000 chars o guardar sin límite usando TEXT en Supabase. Si la columna es TEXT ya, el límite es innecesario.
 **Validación:** Corregir un ejercicio de Inglés → ver historial → enunciado completo
 
 ---
 
 ### P6 — Física Madrid sin datos 2015-2017
-**Problema:** `app/data/fisica.ts` contiene años 2018-2024 (Ordinaria) y 2022-2024 (Extraordinaria). Faltan 2015, 2016, 2017.  
-**Impacto:** Dificultad "Fácil" en simulacros (`years: [2015, 2016, 2017, 2018]`) puede no encontrar suficientes preguntas y el simulacro puede fallar o tener menos bloques de lo esperado.  
-**Archivos:** `app/data/fisica.ts`, `components/simulacros/data.ts:25`  
-**Dificultad:** Alta (datos)  
-**Riesgo:** Medio  
-**Recomendación:** Añadir exámenes 2015-2017 de Física Madrid o ajustar los rangos de años del nivel "Fácil" para reflejar la cobertura real.  
+**Problema:** `app/data/fisica.ts` contiene años 2018-2024 (Ordinaria) y 2022-2024 (Extraordinaria). Faltan 2015, 2016, 2017.
+**Impacto:** Dificultad "Fácil" en simulacros (`years: [2015, 2016, 2017, 2018]`) puede no encontrar suficientes preguntas y el simulacro puede fallar o tener menos bloques de lo esperado.
+**Archivos:** `app/data/fisica.ts`, `components/simulacros/data.ts:25`
+**Dificultad:** Alta (datos)
+**Riesgo:** Medio
+**Recomendación:** Añadir exámenes 2015-2017 de Física Madrid o ajustar los rangos de años del nivel "Fácil" para reflejar la cobertura real.
 **Validación:** Simulacro Física Fácil Madrid → recibe 4 bloques sin error
 
 ---
 
 ### P7 — Inglés texto_fuente con normalización incorrecta
-**Problema:** `app/page.tsx:1946` y `:1954` usan `<MathMarkdown text={texto_fuente} />` sin `format={false}`, aplicando `normalizeExamStatement` (que incluye `normalizeSoftLineBreaks`). `normalizeSoftLineBreaks` une párrafos separados por un solo newline, lo que destruye los saltos de párrafo de los textos de lectura de Inglés.  
-**Impacto:** Los textos de Inglés (Q1, Q2) pueden aparecer como un bloque continuo de texto sin separación de párrafos, haciendo difícil la lectura.  
-**Archivos:** `app/page.tsx:1946, 1954`  
-**Dificultad:** Baja  
-**Riesgo:** Medio  
-**Recomendación:** Añadir `format={false}` a esas dos instancias de MathMarkdown para textos de Inglés.  
+**Problema:** `app/page.tsx:1946` y `:1954` usan `<MathMarkdown text={texto_fuente} />` sin `format={false}`, aplicando `normalizeExamStatement` (que incluye `normalizeSoftLineBreaks`). `normalizeSoftLineBreaks` une párrafos separados por un solo newline, lo que destruye los saltos de párrafo de los textos de lectura de Inglés.
+**Impacto:** Los textos de Inglés (Q1, Q2) pueden aparecer como un bloque continuo de texto sin separación de párrafos, haciendo difícil la lectura.
+**Archivos:** `app/page.tsx:1946, 1954`
+**Dificultad:** Baja
+**Riesgo:** Medio
+**Recomendación:** Añadir `format={false}` a esas dos instancias de MathMarkdown para textos de Inglés.
 **Validación:** Abrir Q1 Inglés 2024 → texto fuente con párrafos correctamente separados
 
 ---
 
 ### P8 — `historial_examenes` se escribe desde cliente sin ruta server
-**Problema:** La escritura a `historial_examenes` se hace directamente con `supabase.from('historial_examenes').insert(...)` desde componentes cliente, usando la anon key. Sin server route, la validación de `user_id` depende únicamente de RLS.  
-**Impacto:** Sin RLS correcta, un usuario podría escribir registros con el user_id de otro. Si la política RLS tiene un bug, hay exposición.  
-**Archivos:** `app/page.tsx:1243`, `app/components/CatPreguntaCard.tsx:112`, etc.  
-**Dificultad:** Media  
-**Riesgo:** Medio  
-**Recomendación:** Verificar que la RLS tiene `WITH CHECK (auth.uid() = user_id)` para INSERT. Si no, añadir policy. A largo plazo considerar server route.  
+**Problema:** La escritura a `historial_examenes` se hace directamente con `supabase.from('historial_examenes').insert(...)` desde componentes cliente, usando la anon key. Sin server route, la validación de `user_id` depende únicamente de RLS.
+**Impacto:** Sin RLS correcta, un usuario podría escribir registros con el user_id de otro. Si la política RLS tiene un bug, hay exposición.
+**Archivos:** `app/page.tsx:1243`, `app/components/CatPreguntaCard.tsx:112`, etc.
+**Dificultad:** Media
+**Riesgo:** Medio
+**Recomendación:** Verificar que la RLS tiene `WITH CHECK (auth.uid() = user_id)` para INSERT. Si no, añadir policy. A largo plazo considerar server route.
 **Validación:** Intentar insertar con un user_id distinto al autenticado → Supabase debe rechazar
 
 ---
 
 ### P9 — Pricing no guarda emails de interés
-**Problema:** `app/pricing/page.tsx:71-73` el botón "Quiero acceso premium" llama a `registerInterest(planName)` que solo actualiza estado local con un mensaje. No hay ninguna llamada a API, no se guarda el email en ninguna base de datos ni servicio externo.  
-**Impacto:** Los usuarios interesados en Premium no quedan registrados. No hay lista de espera real.  
-**Archivos:** `app/pricing/page.tsx:71-73`  
-**Dificultad:** Baja-Media  
-**Riesgo:** Bajo (pero oportunidad perdida)  
-**Recomendación:** Guardar el email del usuario autenticado + timestamp en una tabla `premium_interest` de Supabase, o integrar un servicio como Resend/Mailchimp.  
+**Problema:** `app/pricing/page.tsx:71-73` el botón "Quiero acceso premium" llama a `registerInterest(planName)` que solo actualiza estado local con un mensaje. No hay ninguna llamada a API, no se guarda el email en ninguna base de datos ni servicio externo.
+**Impacto:** Los usuarios interesados en Premium no quedan registrados. No hay lista de espera real.
+**Archivos:** `app/pricing/page.tsx:71-73`
+**Dificultad:** Baja-Media
+**Riesgo:** Bajo (pero oportunidad perdida)
+**Recomendación:** Guardar el email del usuario autenticado + timestamp en una tabla `premium_interest` de Supabase, o integrar un servicio como Resend/Mailchimp.
 **Validación:** Click "Quiero acceso premium" → email guardado en BD
 
 ---
 
 ### P10 — Duplicate `calcMedia` en `app/page.tsx`
-**Problema:** `calcMedia` se define dos veces: a nivel de módulo (línea 454) con lógica simple, y dentro del componente Home (línea 1358) con lógica diferente. La definición interna shadowa la externa. Ambas producen resultados distintos para datos nulos.  
-**Impacto:** Bug potencial silencioso. La función externa no se usa (dead code). La interna puede producir resultados ligeramente diferentes.  
-**Archivos:** `app/page.tsx:454` y `app/page.tsx:1358`  
-**Dificultad:** Baja  
-**Riesgo:** Bajo  
-**Recomendación:** Eliminar la definición externa (línea 454) o unificarlas.  
+**Problema:** `calcMedia` se define dos veces: a nivel de módulo (línea 454) con lógica simple, y dentro del componente Home (línea 1358) con lógica diferente. La definición interna shadowa la externa. Ambas producen resultados distintos para datos nulos.
+**Impacto:** Bug potencial silencioso. La función externa no se usa (dead code). La interna puede producir resultados ligeramente diferentes.
+**Archivos:** `app/page.tsx:454` y `app/page.tsx:1358`
+**Dificultad:** Baja
+**Riesgo:** Bajo
+**Recomendación:** Eliminar la definición externa (línea 454) o unificarlas.
 **Validación:** No hay cambio de comportamiento visible pero el código queda limpio
 
 ---
 
 ### P11 — `historia_filosofia` no tiene flashcards permitidas en BD
-**Problema:** La última migración de flashcards (`allow_ingles_flashcards.sql`) permite: `mates, fisica, quimica, biologia, ingles, lengua, historia`. No incluye `historia_filosofia`. Si algún componente intenta insertar flashcards de `historia_filosofia`, la constraint de BD rechazará el insert.  
-**Archivos:** `supabase/migrations/20260610020000_allow_ingles_flashcards.sql`  
-**Dificultad:** Baja  
-**Riesgo:** Bajo  
-**Recomendación:** Nueva migración para añadir `historia_filosofia` al CHECK. Verificar si hay intento de crear flashcards de filosofía.  
+**Problema:** La última migración de flashcards (`allow_ingles_flashcards.sql`) permite: `mates, fisica, quimica, biologia, ingles, lengua, historia`. No incluye `historia_filosofia`. Si algún componente intenta insertar flashcards de `historia_filosofia`, la constraint de BD rechazará el insert.
+**Archivos:** `supabase/migrations/20260610020000_allow_ingles_flashcards.sql`
+**Dificultad:** Baja
+**Riesgo:** Bajo
+**Recomendación:** Nueva migración para añadir `historia_filosofia` al CHECK. Verificar si hay intento de crear flashcards de filosofía.
 **Validación:** Zona con filosofía → crear flashcard → no error
 
 ---
 
 ### P12 — Chat system prompt hardcodea "EBAU Madrid"
-**Problema:** `app/page.tsx:1271` el prompt del chat dice "Eres Pausia, tutor EBAU Madrid" y `app/page.tsx:1306` el prompt de planificación dice "EBAU Madrid". Para usuarios de Cataluña, Pausia se presenta como tutor EBAU Madrid.  
-**Impacto:** Respuestas del chat podrían dar criterios incorrectos (Madrid vs Cataluña) para preguntas sobre exámenes.  
-**Archivos:** `app/page.tsx:1271, 1306`  
-**Dificultad:** Baja  
-**Riesgo:** Medio  
-**Recomendación:** Incluir `ccaa` en el system prompt: "Eres Pausia, tutor EBAU ${ccaa === 'Cataluña' ? 'PAU Catalunya' : 'Madrid'}."  
+**Problema:** `app/page.tsx:1271` el prompt del chat dice "Eres Kairo, tutor EBAU Madrid" y `app/page.tsx:1306` el prompt de planificación dice "EBAU Madrid". Para usuarios de Cataluña, Kairo se presenta como tutor EBAU Madrid.
+**Impacto:** Respuestas del chat podrían dar criterios incorrectos (Madrid vs Cataluña) para preguntas sobre exámenes.
+**Archivos:** `app/page.tsx:1271, 1306`
+**Dificultad:** Baja
+**Riesgo:** Medio
+**Recomendación:** Incluir `ccaa` en el system prompt: "Eres Kairo, tutor EBAU ${ccaa === 'Cataluña' ? 'PAU Catalunya' : 'Madrid'}."
 **Validación:** Cataluña → chat → pregunta sobre criterios → responde según Cataluña
 
 ---
 
 ### P13 — Zona Canvas no tiene navegación en Sidebar
-**Problema:** `/zona/canvas` existe y es funcional, pero el Sidebar no tiene enlace directo. Solo se puede llegar desde la propia página `/zona`.  
-**Impacto:** UX degradada. Los usuarios no descubren el canvas.  
-**Archivos:** `app/components/Sidebar.tsx`  
-**Dificultad:** Baja  
-**Riesgo:** Bajo  
-**Recomendación:** Añadir sub-enlace "Canvas" en "La Zona" del sidebar, o añadir botón de acceso directo en la página de zona.  
+**Problema:** `/zona/canvas` existe y es funcional, pero el Sidebar no tiene enlace directo. Solo se puede llegar desde la propia página `/zona`.
+**Impacto:** UX degradada. Los usuarios no descubren el canvas.
+**Archivos:** `app/components/Sidebar.tsx`
+**Dificultad:** Baja
+**Riesgo:** Bajo
+**Recomendación:** Añadir sub-enlace "Canvas" en "La Zona" del sidebar, o añadir botón de acceso directo en la página de zona.
 **Validación:** Ver canvas desde sidebar sin pasar por /zona
 
 ---
 
 ### P14 — Sin onboarding ni selección de CCAA inicial
-**Problema:** Un usuario nuevo que inicia sesión llega directamente a Exámenes > Matemáticas II > Madrid sin ninguna configuración. Si es de Cataluña, ve exámenes Madrid hasta que descubra el selector en el sidebar.  
-**Impacto:** Confusion en primer uso, posibles correcciones aplicando criterios equivocados.  
-**Archivos:** `app/page.tsx`, `app/login/page.tsx`  
-**Dificultad:** Media  
-**Riesgo:** Medio  
-**Recomendación:** Modal de onboarding al primer login: "¿Qué CCAA vas a examinar?" + asignatura principal.  
+**Problema:** Un usuario nuevo que inicia sesión llega directamente a Exámenes > Matemáticas II > Madrid sin ninguna configuración. Si es de Cataluña, ve exámenes Madrid hasta que descubra el selector en el sidebar.
+**Impacto:** Confusion en primer uso, posibles correcciones aplicando criterios equivocados.
+**Archivos:** `app/page.tsx`, `app/login/page.tsx`
+**Dificultad:** Media
+**Riesgo:** Medio
+**Recomendación:** Modal de onboarding al primer login: "¿Qué CCAA vas a examinar?" + asignatura principal.
 **Validación:** Primer login → modal → selección persistida en localStorage
 
 ---
 
 ### P15 — `app/page.tsx` es un monolito de 2258 líneas
-**Problema:** Todo el estado, filtros, lógica de corrección, historial, chat, planning y renderizado de 8 asignaturas está en un único archivo. Hay funciones duplicadas, componentes inline y props drilling masivo.  
-**Impacto:** Muy alta dificultad para mantener y añadir funcionalidades. Mayor riesgo de regresiones al tocar código.  
-**Archivos:** `app/page.tsx`  
-**Dificultad:** Alta  
-**Riesgo:** Alto si no se aborda  
-**Recomendación:** No refactorizar ahora (beta privada primero). Marcar como deuda técnica para después de beta privada.  
+**Problema:** Todo el estado, filtros, lógica de corrección, historial, chat, planning y renderizado de 8 asignaturas está en un único archivo. Hay funciones duplicadas, componentes inline y props drilling masivo.
+**Impacto:** Muy alta dificultad para mantener y añadir funcionalidades. Mayor riesgo de regresiones al tocar código.
+**Archivos:** `app/page.tsx`
+**Dificultad:** Alta
+**Riesgo:** Alto si no se aborda
+**Recomendación:** No refactorizar ahora (beta privada primero). Marcar como deuda técnica para después de beta privada.
 **Validación:** No aplica aún
 
 ---
@@ -227,7 +227,7 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 | B4 | `requiereRevision` sin indicador en UI | `CatFisicaEjercicioCard`, `CatEjercicioCard` | Ejercicios pendientes de verificar sin aviso |
 | B5 | Inglés texto_fuente sin `format={false}` | `page.tsx:1946,1954` | Párrafos del reading unidos en un bloque |
 | B6 | Mi Plan home usa límite de chat (20/día) no de planning (1/semana) | `page.tsx:1329` | Incoherencia de límites; costes descontrolados |
-| B7 | Chat prompt dice "EBAU Madrid" para todos | `page.tsx:1271,1306` | Pausia responde con criterios Madrid a usuarios de Cataluña |
+| B7 | Chat prompt dice "EBAU Madrid" para todos | `page.tsx:1271,1306` | Kairo responde con criterios Madrid a usuarios de Cataluña |
 | B8 | `calcMedia` definida dos veces (shadow) | `page.tsx:454,1358` | Comportamiento inconsistente en notas medias |
 | B9 | Pricing no guarda emails de interés | `pricing/page.tsx:71` | Lista de espera perdida |
 | B10 | Canvas sin enlace en sidebar | `Sidebar.tsx` | Feature descubierta accidentalmente |
@@ -347,7 +347,7 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 - **Rango:** min/max calculados del confidence level. No puede salir de [0,10].
 - **Riesgo NaN:** `clampGrade` protege. `getScore10` devuelve null si el score es inválido. Robusto.
 
-### Chat con Pausia
+### Chat con Kairo
 - **Endpoint:** `/api/chat` con claude-sonnet-4-6, max_tokens=4000.
 - **Límites:** 5/día imagen, 20/día texto.
 - **Contexto:** Historial de mensajes de la sesión (solo sesión actual, no persiste).
@@ -427,7 +427,7 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 
 **Límites beta razonables:**
 - Chat texto: 20/día ✅ (actual)
-- Chat imagen (corrección ejercicio): 5/día ✅ (actual)  
+- Chat imagen (corrección ejercicio): 5/día ✅ (actual)
 - Simulacro: 1/día ✅ (actual)
 - Planning: 1/semana ✅ (actual)
 - Mi Plan (home): debería usar /api/planning (1/semana) no chat
@@ -615,11 +615,11 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 
 ## 15. Ideas de futuro 10/10
 
-1. **Predicción de nota avanzada** — Modelo propio con datos históricos de Pausia, percentiles reales de EBAU vs nota del alumno
+1. **Predicción de nota avanzada** — Modelo propio con datos históricos de Kairo, percentiles reales de EBAU vs nota del alumno
 2. **Plan diario inteligente** — Hoy toca tal ejercicio según calendario de PAU y rendimiento. Notificación push.
 3. **Mapa de puntos débiles visual** — Heatmap: cuáles bloques el alumno falla más, en qué años
-4. **Ranking anónimo** — Ver cómo estás respecto a otros alumnos de Pausia (sin identificación)
-5. **Percentiles por asignatura** — "Tu nota en Química te sitúa en el percentil 72 de los usuarios de Pausia"
+4. **Ranking anónimo** — Ver cómo estás respecto a otros alumnos de Kairo (sin identificación)
+5. **Percentiles por asignatura** — "Tu nota en Química te sitúa en el percentil 72 de los usuarios de Kairo"
 6. **Mapa de temas más frecuentes** — Por año y convocatoria: qué ha salido más en cada asignatura
 7. **Panel de profesor** — Un profesor puede ver el progreso de sus alumnos
 8. **Informes semanales PDF** — Resumen de progreso de la semana exportable
@@ -630,7 +630,7 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 
 ## 16. Conclusión
 
-### ¿Qué tan cerca está Pausia de beta privada?
+### ¿Qué tan cerca está Kairo de beta privada?
 **A 4-5 días de trabajo enfocado.** Los bloqueantes son conocidos, acotados y ninguno requiere rediseño arquitectural.
 
 ### ¿Qué bloquea beta privada?
@@ -644,7 +644,7 @@ Pausia es un MVP funcional con una base técnica sólida y una propuesta de valo
 Crear la migración de `historial_examenes` hoy mismo — es el único riesgo que puede hacer perder datos permanentemente de usuarios reales. Lo demás son bugs de UX solucionables en horas.
 
 ### ¿Cuál es el mayor riesgo?
-La pérdida de datos de `historial_examenes` si la BD necesita ser recreada o migrada. Seguido de la desconfianza que genera "EBAU Madrid" para alumnos de Cataluña, que es el público que Pausia ha invertido más en servir.
+La pérdida de datos de `historial_examenes` si la BD necesita ser recreada o migrada. Seguido de la desconfianza que genera "EBAU Madrid" para alumnos de Cataluña, que es el público que Kairo ha invertido más en servir.
 
 ### ¿Cuál es la mayor oportunidad?
-El sistema de simulacros + corrección IA es genuinamente bueno. La fórmula "examen oficial + corrección con criterios reales + historial" no existe en el mercado español con este nivel de calidad técnica. Si se completan los datos de Física y Biología y se arregla la UX móvil, Pausia puede captar rápidamente estudiantes en la recta final de la PAU (mayo-julio).
+El sistema de simulacros + corrección IA es genuinamente bueno. La fórmula "examen oficial + corrección con criterios reales + historial" no existe en el mercado español con este nivel de calidad técnica. Si se completan los datos de Física y Biología y se arregla la UX móvil, Kairo puede captar rápidamente estudiantes en la recta final de la PAU (mayo-julio).

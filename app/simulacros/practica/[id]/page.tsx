@@ -12,7 +12,7 @@ import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
 function PracticaPageInner() {
   const params = useParams<{ id: string }>()
@@ -250,7 +250,7 @@ function PracticaPageInner() {
             </>
           ) : (
             <div className="flex flex-col items-center gap-4">
-              <PausiaLoadingDot />
+              <KairoLoadingDot />
               <p className="text-sm font-semibold text-slate-500">Generando preguntas de tu bloque...</p>
             </div>
           )}
@@ -566,7 +566,7 @@ function PracticaPageInner() {
             </div>
             {submitting && (
               <div className="mt-4 flex items-center gap-2 text-sm font-black" style={{ color: cfg.color }}>
-                <PausiaLoadingDot />
+                <KairoLoadingDot />
                 {submitStage || 'Preparando entrega...'}
               </div>
             )}

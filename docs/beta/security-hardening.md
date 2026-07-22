@@ -1,4 +1,4 @@
-# Pausia beta security hardening
+# Kairo beta security hardening
 
 This document tracks the security controls required before inviting beta users.
 
@@ -37,7 +37,7 @@ This document tracks the security controls required before inviting beta users.
 - Auth email/password protection is enabled:
   - Supabase Auth rate limits are active.
   - CAPTCHA or Turnstile is configured for signup/login if public signup is enabled.
-  - Site URL and redirect URLs only include Pausia production and trusted preview/local URLs.
+  - Site URL and redirect URLs only include Kairo production and trusted preview/local URLs.
 - Storage bucket policies are scoped to the authenticated owner, especially `zona-images`.
 
 ## Must verify in Vercel before beta

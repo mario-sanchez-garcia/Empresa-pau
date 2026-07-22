@@ -1,15 +1,15 @@
-# Pau — Mascota oficial de Pausia
+# Pau — Mascota oficial de Kairo
 
 > **Estado actual:** Pau está guardado como asset de marca, pero no se muestra en la plataforma hasta nueva decisión de producto. El componente `app/components/PauMascot.tsx` y todos los assets están listos para reactivarse.
 
-Pau es la mascota oficial de Pausia.
+Pau es la mascota oficial de Kairo.
 
 Es un lince ibérico estilizado, diseñado como acompañante visual del alumno durante el Camino PAU.
 
 ## Identidad visual
 
 - Especie: lince ibérico estilizado.
-- Rol: guía, acompañante y refuerzo emocional dentro de Pausia.
+- Rol: guía, acompañante y refuerzo emocional dentro de Kairo.
 - Estilo: cute-premium, limpio, moderno y usable en una app educativa.
 - Paleta: crema, verdes suaves, verde oscuro y ojos carmesí-violeta.
 - Personalidad: curioso, optimista, tranquilo, inteligente y cercano.
@@ -46,7 +46,7 @@ Pau debe acompañar, no distraer.
 - No cambiar estilo.
 - No usar versiones mezcladas con otro diseño.
 - No hacerlo más infantil.
-- No sustituir el logo principal de Pausia sin una decisión de marca.
+- No sustituir el logo principal de Kairo sin una decisión de marca.
 - Mantener consistencia entre variantes.
 
 ## Assets

@@ -1,4 +1,4 @@
-# Pausia Beta Readiness Report
+# Kairo Beta Readiness Report
 
 Informe interno de preparación para beta cerrada, estabilidad técnica, monetización y próximos pasos.
 
@@ -10,7 +10,7 @@ Resultado lint: failed
 
 ## Resumen para el equipo
 
-- Pausia está cerca de una beta cerrada.
+- Kairo está cerca de una beta cerrada.
 - No está todavía lista para cobrar.
 - La prioridad no es añadir features, sino estabilizar.
 - Los principales riesgos son lint, CSP, RLS real en producción, pricing inconsistente, datos oficiales y costes IA.
@@ -18,7 +18,7 @@ Resultado lint: failed
 
 ## 1. Estado ejecutivo
 
-Pausia ya tiene muchísimo producto real: Exámenes, Simulacros, Chat, Planning, Camino PAU, Onboarding, Pricing, Admin, Stripe y Supabase. Para beta cerrada está cerca. Para beta pública todavía hay riesgos claros.
+Kairo ya tiene muchísimo producto real: Exámenes, Simulacros, Chat, Planning, Camino PAU, Onboarding, Pricing, Admin, Stripe y Supabase. Para beta cerrada está cerca. Para beta pública todavía hay riesgos claros.
 
 Veredicto corto: beta cerrada sí, usuarios de pago todavía no.
 
@@ -131,7 +131,7 @@ Las capturas mencionan:
 - Secrets pusheados.
 - CORS demasiado abierto.
 
-Estado Pausia:
+Estado Kairo:
 
 - API keys privadas: parcialmente bien. Anthropic/Stripe secret están server-side. Supabase anon key sí está en cliente y eso es normal, pero requiere RLS correcto.
 - Rate limiting: bastante mejorado en APIs IA y checkout.
@@ -335,7 +335,7 @@ Semana 3:
 
 ## 21. Veredicto final
 
-Pausia tiene potencial real y ya parece mucho más que un prototipo. Pero ahora mismo la prioridad no es añadir más asignaturas ni más pantallas: es cerrar seguridad, estabilidad, coherencia de pricing y deuda técnica.
+Kairo tiene potencial real y ya parece mucho más que un prototipo. Pero ahora mismo la prioridad no es añadir más asignaturas ni más pantallas: es cerrar seguridad, estabilidad, coherencia de pricing y deuda técnica.
 
 Recomendación directa: lanza una beta cerrada, no cobres todavía. Antes de cobrar, arregla lint, CSP, pricing, RLS audit real y tracking de costes IA.
 

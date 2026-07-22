@@ -1,4 +1,4 @@
-# Pausia · Rehearsal Final Beta Privada
+# Kairo · Rehearsal Final Beta Privada
 
 > Ejecutado: 14 junio 2026 — noche anterior a primeros usuarios reales  
 > Autor: Claude Code (rehearsal autónoma)
@@ -71,7 +71,7 @@ Todas presentes y compilando:
 
 ### Legal / copy
 - 4 páginas legales completas y enlazadas entre sí ✓
-- Página de contacto con 5 canales a hola@pausia.es ✓
+- Página de contacto con 5 canales a hola@kairo.es ✓
 - Pricing con disclaimer "pagos no activos aún" ✓
 - Copy revisado: sin "ilimitadas", sin "garantizado", sin "aprobar seguro" ✓
 
@@ -158,6 +158,6 @@ Ninguno detectado. Los dos bugs de loading infinito han sido corregidos.
 
 **GO WITH CAVEATS**
 
-Pausia está lista para enseñar a 2-3 usuarios reales en sesión controlada. Los bugs de loading infinito en las correcciones han sido corregidos esta noche. El build pasa limpio. Los flujos críticos (onboarding → camino → parent checkout) están sólidos. Las páginas legales están completas y enlazadas. El copy no hace promesas peligrosas.
+Kairo está lista para enseñar a 2-3 usuarios reales en sesión controlada. Los bugs de loading infinito en las correcciones han sido corregidos esta noche. El build pasa limpio. Los flujos críticos (onboarding → camino → parent checkout) están sólidos. Las páginas legales están completas y enlazadas. El copy no hace promesas peligrosas.
 
 Las caveats son: usar Stripe en test mode, no activar cobro real, preparar al usuario para que la corrección de simulacros puede tardar 15-30 segundos, y monitorizar los logs en Vercel durante la sesión.

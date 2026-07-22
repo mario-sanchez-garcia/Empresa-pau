@@ -1,4 +1,4 @@
-# Auditoría de Estado — Pausia
+# Auditoría de Estado — Kairo
 
 Fecha de revisión: 2026-07-05  
 Repo revisado: `C:\Users\ZEROCITY\Documents\GitHub\Empresa-pau`  
@@ -6,7 +6,7 @@ Repo revisado: `C:\Users\ZEROCITY\Documents\GitHub\Empresa-pau`
 
 ## 1. Resumen ejecutivo
 
-Pausia ya tiene una base de producto real: login, onboarding, Camino PAU, cursos por tema, ejercicios PAU/EVAU, corrección IA, historial, simulacros, Chat, La Zona, Stripe test mode, Supabase y smoke tests P0. El producto ha avanzado mucho desde la auditoría de junio: Camino PAU ya es la pantalla principal tras login, usa fecha real, permite navegación semanal, incorpora parciales y tiene una capa nueva de calendario/cola en Supabase.
+Kairo ya tiene una base de producto real: login, onboarding, Camino PAU, cursos por tema, ejercicios PAU/EVAU, corrección IA, historial, simulacros, Chat, La Zona, Stripe test mode, Supabase y smoke tests P0. El producto ha avanzado mucho desde la auditoría de junio: Camino PAU ya es la pantalla principal tras login, usa fecha real, permite navegación semanal, incorpora parciales y tiene una capa nueva de calendario/cola en Supabase.
 
 El estado no es todavía "beta pública lista". La razón principal no es falta de pantallas, sino consistencia y QA: Camino tiene dos lógicas conviviendo (cliente/local y Supabase), el mapeo EVAU por tema funciona con heurísticas y fallbacks, los límites de plan existen pero no están cerrados como sistema único de billing/uso, y quedan validaciones manuales críticas de correcciones IA, simulacros, onboarding real y Stripe live.
 
@@ -24,7 +24,7 @@ Recomendación corta: sí se puede preparar una beta cerrada controlada con 3-5 
 | Corrección IA | ✅ Funciona | Texto e imagen pasan por `/api/chat`, con auth, rate limit, streaming/truncation y MathMarkdown. Requiere QA manual amplia. |
 | Historial | ✅ Funciona | Guarda correcciones completas y evita guardar truncadas según smoke P0. |
 | Simulacros | 🟡 Parcial | Simulacros y práctica por parcial existen; la corrección por bloques reduce riesgo de timeout, pero requiere QA manual. |
-| Chat con Pausia | ✅ Funciona | Chat autenticado, con imagen, rate limit y reglas de formato/LaTeX. Contexto por tema existe desde curso. |
+| Chat con Kairo | ✅ Funciona | Chat autenticado, con imagen, rate limit y reglas de formato/LaTeX. Contexto por tema existe desde curso. |
 | La Zona | ✅ Funciona | Flashcards/canvas existen; no es el motor principal de Camino. |
 | Stripe / pagos | 🟡 Parcial | Parent checkout test mode está documentado como OK; falta live mode, legal definitivo y unificar pricing/copy. |
 | Supabase / migraciones | 🟡 Parcial | Hay migraciones para historial, simulacros, Camino, billing, curriculum, signup y Why; falta validar policies reales en producción. |
@@ -36,7 +36,7 @@ Recomendación corta: sí se puede preparar una beta cerrada controlada con 3-5 
 - El calendario ya no depende de fechas demo de junio: usa fecha real, semana actual y navegación semanal.
 - Camino filtra misiones por asignaturas del onboarding y evita tareas visibles tipo flashcards o "corrige un error" como misión principal.
 - Las misiones de curso abren páginas reales tipo `/camino/tema/[subject]/[block]/[topic]`.
-- Las páginas de curso usan `MathMarkdown`, muestran explicación, ejemplo, práctica y permiten corregir con Pausia.
+- Las páginas de curso usan `MathMarkdown`, muestran explicación, ejemplo, práctica y permiten corregir con Kairo.
 - El XP no se concede por leer: se vincula a completar/corregir misiones.
 - Las misiones EVAU usan `getRandomEvauExerciseForMission`, con asignatura normalizada, keywords por tema y lista reciente para evitar repetir.
 - La corrección IA por texto e imagen funciona con auth, rate limit, truncation sentinel, logging de uso y normalización LaTeX.
@@ -207,7 +207,7 @@ No abrir beta pública hasta que:
 3. EVAU abra ejercicios del subject/topic correcto o muestre fallback transparente.
 4. "No lo he dado en clase" se pruebe con al menos un centro real.
 5. Stripe test mode siga OK y live mode/legal estén cerrados si se va a cobrar.
-6. 3-5 alumnos reales hayan usado Pausia una semana y exista señal de retorno.
+6. 3-5 alumnos reales hayan usado Kairo una semana y exista señal de retorno.
 
 Orden recomendado:
 

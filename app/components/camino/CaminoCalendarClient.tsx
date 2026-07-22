@@ -63,13 +63,13 @@ type LegacySchoolFeedback = { schoolName: string | null; community: string | nul
 type CalendarWeekCache = Record<string, DayPlan[]>
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 
-const EXAMS_KEY = 'pausia_camino_student_exams_v1'
-const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
-const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
-const CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'
-const CALENDAR_WEEK_CACHE_KEY = 'pausia_camino_week_cache_v2'
-const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
-const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
+const EXAMS_KEY = 'kairo_camino_student_exams_v1'
+const WEAK_AREAS_KEY = 'kairo_camino_weak_areas_v1'
+const TOPIC_PROGRESS_KEY = 'kairo_camino_topic_progress_v1'
+const CALENDAR_VISIBILITY_KEY = 'kairo_camino_calendar_expanded_v1'
+const CALENDAR_WEEK_CACHE_KEY = 'kairo_camino_week_cache_v2'
+const SCHOOL_FEEDBACK_KEY = 'kairo_school_topic_feedback_v1'
+const SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'
 const BETA_FEEDBACK_URL = process.env.NEXT_PUBLIC_BETA_FEEDBACK_URL
 
 const SUBJECT_SLUGS: Record<string, string> = {
@@ -795,7 +795,7 @@ export default function CaminoCalendarClient() {
     setCalendarExpanded(loadedCalendarExpanded)
     setSelectedWeekStart(currentWeekStartISO())
     setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
-    if (!window.localStorage.getItem('pausia_camino_onboarding_done')) setShowOnboarding(true)
+    if (!window.localStorage.getItem('kairo_camino_onboarding_done')) setShowOnboarding(true)
     fetchCurriculumItems(loadedOnboarding.subjects)
       .then(items => setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM))
       .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
@@ -1630,7 +1630,7 @@ export default function CaminoCalendarClient() {
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
       <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={weekCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
-      <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
+      <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('kairo_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>
     </Shell>
   )

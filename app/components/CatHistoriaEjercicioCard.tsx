@@ -11,7 +11,7 @@ import { supabase } from '@/app/lib/supabase'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
 
@@ -296,7 +296,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
             </div>
           )}
           <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>
-            {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />} {cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
+            {cargando ? <KairoLoadingDot /> : <WandSparkles size={17} />} {cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
           </button>
         </div>}
         {!contenidoIncompleto && <RespuestaIA contenido={correccion} officialMaxScore={puntuacion} />}

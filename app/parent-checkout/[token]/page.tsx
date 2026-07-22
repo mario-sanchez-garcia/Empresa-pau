@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { hashToken } from '@/app/lib/billing/tokens'
 import { getPlan } from '@/app/lib/billing/plans'
 import ParentCheckoutClient from './ParentCheckoutClient'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 import { CheckCircle2 } from 'lucide-react'
 
 // In Next.js App Router (v15+), params is a Promise — must be awaited.
@@ -127,7 +127,7 @@ function SuccessStaticPage({ name }: { name: string | null }) {
 
 function Logo() {
   return (
-    <PausiaBrand subtitle={null} size="md" style={{ marginBottom: 8 }} />
+    <KairoBrand subtitle={null} size="md" style={{ marginBottom: 8 }} />
   )
 }
 

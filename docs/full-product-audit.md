@@ -1,18 +1,18 @@
-# Auditoria completa de Pausia
+# Auditoria completa de Kairo
 
-Fecha: 2026-06-10  
-Alcance: auditoria de producto, UX, arquitectura, datos, IA, costes y riesgos antes de beta.  
+Fecha: 2026-06-10
+Alcance: auditoria de producto, UX, arquitectura, datos, IA, costes y riesgos antes de beta.
 Regla de trabajo: solo se modifica este documento. No se toca codigo de produccion, datos oficiales, Supabase, package.json, prompts ni LaTeX.
 
 ## 1. Resumen ejecutivo
 
-Pausia esta bastante mas cerca de una beta privada de lo que suele estar una app en esta fase. Ya no es una maqueta: tiene login, sidebar, asignaturas, banco de examenes, correccion con IA, simulacros, historial, plan de estudio, planning, flashcards y un canvas de estudio. Ademas, se ha avanzado mucho en la cobertura de asignaturas: Matematicas II, Fisica, Quimica, Biologia, Ingles, Lengua e Historia.
+Kairo esta bastante mas cerca de una beta privada de lo que suele estar una app en esta fase. Ya no es una maqueta: tiene login, sidebar, asignaturas, banco de examenes, correccion con IA, simulacros, historial, plan de estudio, planning, flashcards y un canvas de estudio. Ademas, se ha avanzado mucho en la cobertura de asignaturas: Matematicas II, Fisica, Quimica, Biologia, Ingles, Lengua e Historia.
 
 Lo mejor del producto es que la propuesta se entiende rapido: el alumno entra, elige una asignatura, practica con ejercicios oficiales y recibe feedback. Eso es exactamente el nucleo de valor para EBAU/PAU. Tambien es muy positivo que ya exista separacion entre practica normal y simulacros, porque son dos modos de estudio distintos: uno para aprender y otro para ponerse a prueba.
 
 La parte peligrosa no es la idea ni el diseno. La parte peligrosa es la fiabilidad operativa. Hay muchas funciones criticas apoyadas en IA, Supabase y datos oficiales, pero todavia faltan limites de uso, protecciones de coste, validacion fuerte en endpoints, estados de error consistentes y pruebas manuales ordenadas por asignatura/comunidad. Si se abre a muchos usuarios sin limites, el riesgo principal es gastar demasiado en IA o que un alumno se encuentre una experiencia rota justo despues de dedicar tiempo a un simulacro.
 
-Mi conclusion: Pausia si esta cerca de beta privada, pero no la abriria todavia como beta publica ni como producto de pago. Para ensenarla a alumnos reales hace falta cerrar los P0: limites IA, seguridad de simulacros, verificacion de flujos basicos Madrid/Cataluna, landing honesta, y estados de error claros. Para cobrar, ademas hacen falta cuotas, observabilidad, billing/planes y una politica clara de uso.
+Mi conclusion: Kairo si esta cerca de beta privada, pero no la abriria todavia como beta publica ni como producto de pago. Para ensenarla a alumnos reales hace falta cerrar los P0: limites IA, seguridad de simulacros, verificacion de flujos basicos Madrid/Cataluna, landing honesta, y estados de error claros. Para cobrar, ademas hacen falta cuotas, observabilidad, billing/planes y una politica clara de uso.
 
 ## 2. Que esta bien
 
@@ -22,9 +22,9 @@ Mi conclusion: Pausia si esta cerca de beta privada, pero no la abriria todavia 
 - **Madrid/Cataluna:** el selector de comunidad ya existe y se usa en examenes y simulacros. Es una buena base para escalar por comunidades sin mezclar todo.
 - **Ingles:** esta integrado como asignatura real, con readings, preguntas, opciones y sesiones. Es importante porque no es una asignatura numerica y prueba que el sistema soporta formatos distintos.
 - **IA:** hay correccion de ejercicios, chat tutor, plan de estudio y correccion de simulacros. La app ya aprovecha IA en varios puntos de valor.
-- **Historial:** guardar correcciones permite progreso, estadisticas y contexto para chat. Es clave para que Pausia no sea solo un corrector suelto.
+- **Historial:** guardar correcciones permite progreso, estadisticas y contexto para chat. Es clave para que Kairo no sea solo un corrector suelto.
 - **Mi Plan / Planning:** hay dos vias de planificacion. Aunque deben simplificarse, muestran una intencion clara de convertir errores en estudio accionable.
-- **La Zona:** flashcards y canvas hacen que Pausia no dependa solo de "hacer examenes"; aporta espacio de repaso y organizacion visual.
+- **La Zona:** flashcards y canvas hacen que Kairo no dependa solo de "hacer examenes"; aporta espacio de repaso y organizacion visual.
 - **Estructura tecnica:** Next.js App Router, TypeScript, Supabase, migraciones recientes, KaTeX/MathMarkdown y componentes separados en algunas areas nuevas.
 - **Build:** el build de produccion pasa en el estado auditado, lo cual es una senal importante de salud tecnica.
 
@@ -49,7 +49,7 @@ Mi conclusion: Pausia si esta cerca de beta privada, pero no la abriria todavia 
 
 ### Examenes
 
-Funciona como la pantalla principal del producto. Permite elegir asignatura, ano, convocatoria, bloque, opcion y comunidad. Tambien permite escribir respuesta, subir imagen y pedir correccion con Pausia.
+Funciona como la pantalla principal del producto. Permite elegir asignatura, ano, convocatoria, bloque, opcion y comunidad. Tambien permite escribir respuesta, subir imagen y pedir correccion con Kairo.
 
 Lo bueno es que concentra el valor principal: practicar con examenes oficiales. Ademas, el render con `MathMarkdown` y KaTeX ya hace que las formulas se vean mucho mejor que texto plano.
 
@@ -79,7 +79,7 @@ Archivos probables: `app/simulacros/page.tsx`, `app/simulacros/[id]/page.tsx`, `
 
 ### Historial
 
-El historial es clave para que Pausia tenga memoria. En Examenes se usa `historial_examenes`; en Simulacros se usa `historial_simulacros`. Esto permite ver correcciones pasadas y generar contexto para chat/plan.
+El historial es clave para que Kairo tenga memoria. En Examenes se usa `historial_examenes`; en Simulacros se usa `historial_simulacros`. Esto permite ver correcciones pasadas y generar contexto para chat/plan.
 
 El riesgo es que hay dos historiales con formas distintas. Para beta esta bien, pero antes de cobrar conviene unificar lectura de historial o crear una capa de servicio que normalice datos. Tambien hay que asegurar que todas las asignaturas nuevas se muestran con nombre correcto, nota correcta y puntuacion maxima correcta.
 
@@ -105,7 +105,7 @@ Lo que falta es contenido real inicial. Si no hay flashcards precargadas ni gene
 
 Archivos probables: `app/zona/page.tsx`, `components/zona/Flashcards.tsx`, `components/zona/types.ts`, migraciones de flashcards.
 
-### Chat con Pausia
+### Chat con Kairo
 
 El chat es potente porque puede resolver dudas y usar contexto de correcciones. Tambien puede recibir imagenes a traves de `/api/chat`.
 
@@ -380,16 +380,16 @@ Que bloquear:
 
 ## 10. Conclusion clara
 
-**Esta Pausia cerca de beta privada?**  
+**Esta Kairo cerca de beta privada?**
 Si. Esta cerca de una beta privada controlada. Tiene suficiente producto real para que un grupo pequeno de alumnos pruebe examenes, simulacros, feedback, historial y zona de estudio.
 
-**Que falta para beta privada?**  
+**Que falta para beta privada?**
 Faltan pruebas manuales guiadas, limites IA basicos, errores claros, seguridad del endpoint de simulacros y confirmar que los flujos de Madrid/Cataluna no se rompen. Tambien conviene limpiar cualquier promesa exagerada de landing.
 
-**Que falta para beta publica?**  
+**Que falta para beta publica?**
 Faltan cuotas por plan, tracking de costes, billing o estrategia premium, observabilidad, schema Supabase bien versionado, soporte de errores serio y una decision clara sobre Mi Plan/Planning.
 
-**Que haria primero?**  
+**Que haria primero?**
 Primero pondria limites IA y seguridad en simulacros. Despues persistiria timer/autosave. Luego haria una ronda de QA manual por asignatura/comunidad. Solo despues pensaria en mas features o refactors grandes.
 
 ## Comandos ejecutados

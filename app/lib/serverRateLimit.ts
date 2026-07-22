@@ -18,7 +18,7 @@ export type ServerRateLimitResult = {
   retryAfterSeconds?: number
 }
 
-const STORE_KEY = '__pausia_server_rate_limits__'
+const STORE_KEY = '__kairo_server_rate_limits__'
 
 export function checkServerRateLimit(args: ServerRateLimitArgs): ServerRateLimitResult {
   const now = Date.now()

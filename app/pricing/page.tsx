@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 
 type Plan = {
   name: string
@@ -116,7 +116,7 @@ export default function PricingPage() {
       {/* Header */}
       <header className="sticky top-0 z-40 flex h-[72px] items-center justify-between border-b border-border/60 bg-white/80 px-6 backdrop-blur-xl lg:px-12">
         <Link href="/landing" className="flex items-center gap-3 no-underline">
-          <PausiaBrand subtitle={null} size="md" />
+          <KairoBrand subtitle={null} size="md" />
         </Link>
         <div className="flex items-center gap-3">
           <Button asChild variant="outline" size="sm">

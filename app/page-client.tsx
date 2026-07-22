@@ -34,8 +34,8 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import WhyExplanation from '@/components/shared/WhyExplanation'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
+import KairoBrand from '@/components/shared/KairoBrand'
 import RichTextArea from '@/components/shared/RichTextArea'
 import {
   ArrowUpRight,
@@ -92,7 +92,7 @@ const WARM = {
   shadow: '0 24px 70px rgba(37, 99, 235, 0.09)'
 }
 
-const STREAM_TRUNCATION_SENTINEL = '[[PAUSIA_TRUNCATED_7f3a9b2c]]'
+const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 
 function readSafeStreamText(rawText: string) {
   const sentinelIndex = rawText.indexOf(STREAM_TRUNCATION_SENTINEL)
@@ -182,7 +182,7 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
     <div style={{ display: 'grid', gap: 18 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '18px', borderRadius: 18, background: 'rgba(255,255,255,0.74)', border: '1px solid rgba(124,58,237,0.16)' }}>
         <div style={{ width: 38, height: 38, borderRadius: 14, background: 'linear-gradient(135deg, #6d28d9, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-          <PausiaLoadingDot />
+          <KairoLoadingDot />
         </div>
         <div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>
@@ -207,11 +207,11 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
           </div>
         ))}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#312e81', fontSize: 13.5, fontWeight: 850 }}>
-          <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#ede9fe', color: '#7c3aed', boxShadow: '0 0 0 6px rgba(124,58,237,0.1)' }}><PausiaLoadingDot /></span>
+          <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#ede9fe', color: '#7c3aed', boxShadow: '0 0 0 6px rgba(124,58,237,0.1)' }}><KairoLoadingDot /></span>
           {currentStep}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13, fontWeight: 700 }}>
-          <PausiaLoadingDot />
+          <KairoLoadingDot />
           {progressPct >= 86 ? 'Últimos detalles...' : safePreviewAvailable ? 'Redactando explicación segura...' : 'Kairo está preparando esta parte...'}
         </div>
         {pendingSteps.map((step) => (
@@ -430,13 +430,13 @@ function formatEnunciado(enunciado?: string | null) {
 type Asignatura = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
-interface MensajeChat { rol: 'usuario' | 'pausia'; texto: string }
+interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'matematicas_ccss', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
-const PINNED_SUBJECTS_STORAGE_KEY = 'pausia:pinned-subjects'
-const PROFILE_PREFERENCES_STORAGE_KEY = 'pausia_profile_preferences'
+const PINNED_SUBJECTS_STORAGE_KEY = 'kairo:pinned-subjects'
+const PROFILE_PREFERENCES_STORAGE_KEY = 'kairo_profile_preferences'
 const MAX_PINNED = 4
 
 function readHomeSectionFromUrl(): Seccion | null {
@@ -810,7 +810,7 @@ export default function Home() {
       const label = [subject, block, topic].filter(Boolean).join(' · ')
       setContextoChat(`Camino PAU curso: ${label}. Ayuda al alumno con este tema sin inventar datos ni copiar apuntes.`)
       if (question) setInputChat(question)
-      setMensajes(current => current.length ? current : [{ rol: 'pausia', texto: `Estoy contigo en este tema de Camino PAU${label ? `: ${label}` : ''}. Pregúntame la duda concreta y la trabajamos paso a paso.` }])
+      setMensajes(current => current.length ? current : [{ rol: 'kairo', texto: `Estoy contigo en este tema de Camino PAU${label ? `: ${label}` : ''}. Pregúntame la duda concreta y la trabajamos paso a paso.` }])
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1436,7 +1436,7 @@ useEffect(() => {
 
   if (mode !== 'random') return
 
-  const recentStorageKey = 'pausia_recent_evau_exercises_v1'
+  const recentStorageKey = 'kairo_recent_evau_exercises_v1'
   let recentExerciseIds: string[] = []
   try {
     const stored = window.localStorage.getItem(recentStorageKey)
@@ -2023,11 +2023,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     setCargandoChat(true)
     const accessToken = await getChatAccessToken()
     if (!accessToken) {
-      setMensajes(prev => [...prev, { rol: 'pausia', texto: 'Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.' }])
+      setMensajes(prev => [...prev, { rol: 'kairo', texto: 'Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.' }])
       setCargandoChat(false)
       return
     }
-    setMensajes(prev => [...prev, { rol: 'pausia', texto: '' }])
+    setMensajes(prev => [...prev, { rol: 'kairo', texto: '' }])
     try {
       const res = await fetch('/api/chat?stream=1', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
@@ -2041,7 +2041,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       })
       if (!res.ok) {
         const data = await res.json()
-        setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.') }])
+        setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.') }])
       } else {
         const reader = res.body!.getReader()
         const decoder = new TextDecoder()
@@ -2051,7 +2051,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           if (done) break
           accumulated += decoder.decode(value, { stream: true })
           const safeStream = readSafeStreamText(accumulated)
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: safeStream.visibleText }])
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: safeStream.visibleText }])
         }
         accumulated += decoder.decode()
         const completedStream = readSafeStreamText(accumulated)
@@ -2059,13 +2059,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           ? `${completedStream.visibleText}\n\n> Respuesta incompleta: se ha alcanzado el límite de longitud. Puedes pedirme que continúe.`
           : accumulated
         if (!finalText) {
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
         } else {
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: finalText }])
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: finalText }])
         }
       }
     } catch {
-      setMensajes(prev => [...prev.slice(0, -1), { rol: 'pausia', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
+      setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
     } finally {
       setCargandoChat(false)
     }
@@ -2080,7 +2080,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       'Corrección: ' + correctionPayloadToMarkdown(item.correccion || '') + '\n\n' +
       'El estudiante quiere entender mejor su nota. Ayúdale de forma clara y motivadora.'
     setContextoChat(ctx)
-    setMensajes([{ rol: 'pausia', texto: '¡Hola! Veo que tienes dudas sobre tu corrección de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. ¿Qué parte no te queda clara? Pregúntame lo que quieras.' }])
+    setMensajes([{ rol: 'kairo', texto: '¡Hola! Veo que tienes dudas sobre tu corrección de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. ¿Qué parte no te queda clara? Pregúntame lo que quieras.' }])
     setItemSeleccionado(null)
     navegarASeccion('chat')
   }
@@ -2509,7 +2509,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   if (!usuario) return null
 
   return (
-    <div className="pausia-app-shell pausia-premium-shell" style={{
+    <div className="kairo-app-shell kairo-premium-shell" style={{
   display: 'flex',
   minHeight: '100vh',
 }}>
@@ -3074,13 +3074,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         @media (max-width: 1024px) {
-          .pausia-app-shell {
+          .kairo-app-shell {
             display: block !important;
           }
         }
 
         @media (max-width: 640px) {
-          .pausia-app-header {
+          .kairo-app-header {
             padding: 14px 16px !important;
           }
 
@@ -3202,7 +3202,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         onLogout={cerrarSesion}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? 'radial-gradient(circle at 14% 8%, rgba(219,234,254,0.95), transparent 30%), radial-gradient(circle at 86% 18%, rgba(224,231,255,0.72), transparent 32%), linear-gradient(180deg, #fbfdff 0%, #f8fbff 45%, #eff6ff 100%)' : undefined, transition: 'background 300ms ease' }}>
-       <header className="pausia-app-header pausia-topbar" style={{
+       <header className="kairo-app-header kairo-topbar" style={{
   borderBottom: seccion === 'chat' ? '1px solid rgba(219,231,251,0.88)' : '1px solid rgba(219,231,251,0.78)',
   background: seccion === 'chat' ? 'rgba(255,255,255,0.76)' : undefined,
   backdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
@@ -3944,7 +3944,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 </div>
               )}
               <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
-                {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con IA'}
+                {cargando ? <KairoLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con IA'}
               </button>
             </div>}
 
@@ -4087,8 +4087,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
               {mensajes.length === 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
-                  <div className="chat-avatar-pulse" style={{ width: 92, height: 104, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
-                    <img src="/brand/pausia-lockup.png" alt="Kairo" width={82} height={92} style={{ width: 82, height: 92, objectFit: 'contain', display: 'block' }} />
+                  <div className="chat-avatar-pulse" style={{ width: 174, height: 82, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
+                    <KairoBrand subtitle={null} size="lg" />
                   </div>
                   <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
                     Hola, soy{' '}
@@ -4109,12 +4109,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               )}
 
               {mensajes.map((msg, i) => (
-                msg.rol === 'pausia' ? (
+                msg.rol === 'kairo' ? (
                   /* Kairo — full-width editorial card */
                   <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '16px 0' }}>
                     <div style={{ borderRadius: 28, padding: '22px 22px 24px', background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(219,231,251,0.92)', boxShadow: '0 20px 52px rgba(37,99,235,0.09)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                        <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
+                        <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kairo</div>
                         {(() => {
@@ -4147,7 +4147,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
                 <div className="chat-msg-ai" style={{ padding: '24px 0' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
+                    <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
                       <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
                       <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
@@ -4166,7 +4166,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <div className="chat-input-wrap">
                   <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 56, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '15px 4px 15px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' }} />
                   <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
-                    {cargandoChat ? <PausiaLoadingDot /> : <SendHorizontal size={15} />}
+                    {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
                     {cargandoChat ? 'Pensando...' : 'Enviar'}
                   </button>
                 </div>
@@ -4268,7 +4268,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>
               <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Kairo mira tus correcciones y te monta una semana realista para remontar puntos débiles</div>
               <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.22)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
-                {cargandoPlan ? <PausiaLoadingDot /> : <BrainCircuit size={17} />}
+                {cargandoPlan ? <KairoLoadingDot /> : <BrainCircuit size={17} />}
                 {cargandoPlan ? 'Generando...' : 'Abrir Mi Plan'}
               </button>
             </div>

@@ -1,6 +1,6 @@
 # Nota estimada
 
-La seccion "Nota estimada" muestra una estimacion orientativa por asignatura basada en la practica reciente del alumno en Pausia.
+La seccion "Nota estimada" muestra una estimacion orientativa por asignatura basada en la practica reciente del alumno en Kairo.
 
 No usa IA, no llama a ningun modelo y no promete una nota oficial. Es una ayuda de producto para que el alumno entienda su progreso aproximado.
 

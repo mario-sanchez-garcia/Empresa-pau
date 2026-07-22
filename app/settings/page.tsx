@@ -7,8 +7,8 @@ import Sidebar from '@/app/components/Sidebar'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
 
-const STORAGE_KEY = 'pausia_profile_preferences'
-const CHANGE_EVENT = 'pausia_profile_preferences_change'
+const STORAGE_KEY = 'kairo_profile_preferences'
+const CHANGE_EVENT = 'kairo_profile_preferences_change'
 
 type Preferences = {
   displayName: string

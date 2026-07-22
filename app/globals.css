@@ -83,7 +83,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* shadcn/ui design tokens → Pausia brand */
+  /* shadcn/ui design tokens → Kairo brand */
   --color-card: #ffffff;
   --color-card-foreground: var(--pau-ink);
   --color-primary: var(--pau-blue);
@@ -284,7 +284,7 @@ button:active:not(:disabled),
 }
 
 /* ─── Stitch-inspired chrome ────────────────────────────────────── */
-.pausia-premium-shell {
+.kairo-premium-shell {
   background:
     radial-gradient(circle at 13% 10%, rgba(219,234,254,0.62), transparent 30%),
     radial-gradient(circle at 86% 6%, rgba(237,233,254,0.54), transparent 28%),
@@ -292,7 +292,7 @@ button:active:not(:disabled),
     linear-gradient(135deg, #fbfdff 0%, #f8fbff 46%, #f1f6ff 100%);
 }
 
-.pausia-glass-card {
+.kairo-glass-card {
   background: rgba(255,255,255,0.78);
   backdrop-filter: blur(18px) saturate(1.18);
   -webkit-backdrop-filter: blur(18px) saturate(1.18);
@@ -300,13 +300,13 @@ button:active:not(:disabled),
   box-shadow: 0 18px 48px rgba(37,99,235,0.08), 0 2px 8px rgba(37,99,235,0.05);
 }
 
-.pausia-stitch-card {
+.kairo-stitch-card {
   background: rgba(255,255,255,0.9);
   border: 1px solid rgba(219,231,251,0.82);
   box-shadow: 0 14px 38px rgba(37,99,235,0.07), 0 1px 4px rgba(15,23,42,0.03);
 }
 
-.pausia-topbar {
+.kairo-topbar {
   background: rgba(255,255,255,0.76);
   backdrop-filter: blur(22px) saturate(1.25);
   -webkit-backdrop-filter: blur(22px) saturate(1.25);
@@ -314,7 +314,7 @@ button:active:not(:disabled),
   box-shadow: 0 8px 28px rgba(37,99,235,0.05);
 }
 
-.pausia-pill {
+.kairo-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -326,17 +326,17 @@ button:active:not(:disabled),
   box-shadow: 0 8px 20px rgba(37,99,235,0.05);
 }
 
-.pausia-page-container {
+.kairo-page-container {
   width: min(100%, 1160px);
   margin-inline: auto;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .pausia-stitch-card,
-  .pausia-glass-card {
+  .kairo-stitch-card,
+  .kairo-glass-card {
     transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
   }
-  .pausia-stitch-card:hover {
+  .kairo-stitch-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 52px rgba(37,99,235,0.1), 0 2px 8px rgba(15,23,42,0.04);
   }
@@ -742,7 +742,7 @@ button:active:not(:disabled),
   background: color-mix(in srgb, var(--statement-accent) 24%, #ffffff);
 }
 
-.exam-statement-body .math-markdown mark.pausia-highlight {
+.exam-statement-body .math-markdown mark.kairo-highlight {
   background: linear-gradient(180deg, transparent 8%, rgba(254, 240, 138, 0.72) 8%, rgba(254, 240, 138, 0.72) 88%, transparent 88%);
   border-bottom: 1px solid rgba(202, 138, 4, 0.42);
   border-radius: 0.28rem;
@@ -752,7 +752,7 @@ button:active:not(:disabled),
   cursor: pointer;
 }
 
-.exam-statement-body .math-markdown mark.pausia-highlight:hover {
+.exam-statement-body .math-markdown mark.kairo-highlight:hover {
   outline: 2px solid color-mix(in srgb, var(--statement-accent) 32%, transparent);
   outline-offset: 1px;
 }

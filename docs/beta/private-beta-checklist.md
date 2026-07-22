@@ -1,4 +1,4 @@
-# Checklist beta privada — Pausia
+# Checklist beta privada — Kairo
 
 ## Alcance activo
 
@@ -62,7 +62,7 @@
 - [ ] Si existe contenido estructurado, no se usa el fallback genérico.
 - [ ] El alumno puede entregar texto.
 - [ ] El alumno puede subir imagen si el flujo lo permite.
-- [ ] La corrección con Pausia funciona.
+- [ ] La corrección con Kairo funciona.
 - [ ] La corrección se guarda en historial.
 - [ ] XP se asigna solo tras corrección.
 - [ ] XP no se duplica al recargar o repetir.

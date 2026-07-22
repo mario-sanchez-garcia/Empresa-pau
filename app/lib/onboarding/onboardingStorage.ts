@@ -19,7 +19,7 @@ export interface OnboardingData {
   completedAt: string | null
 }
 
-const KEY = 'pausia_onboarding_v1'
+const KEY = 'kairo_onboarding_v1'
 
 export const DEFAULT_SUBJECTS: string[] = []
 

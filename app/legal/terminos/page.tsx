@@ -25,7 +25,7 @@ export default function TerminosPage() {
             <li style={li}>Marco Martínez Mira</li>
             <li style={li}>Diego García Verdugo</li>
           </ul>
-          <p style={p}>Contacto: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a></p>
+          <p style={p}>Contacto: <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a></p>
         </Section>
 
         <Section title="2. Descripción del servicio">
@@ -64,7 +64,7 @@ export default function TerminosPage() {
 
         <Section title="7. Planes y precios">
           <p style={p}>
-            Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
+            Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a>
           </p>
         </Section>
 
@@ -94,7 +94,7 @@ export default function TerminosPage() {
 
         <Section title="12. Contacto">
           <p style={p}>
-            <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
+            <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a>
           </p>
         </Section>
 

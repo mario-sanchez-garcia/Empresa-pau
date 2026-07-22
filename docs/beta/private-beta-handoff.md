@@ -1,11 +1,11 @@
-# Pausia · Private Beta Handoff
+# Kairo · Private Beta Handoff
 
 > Estado: lista para beta privada controlada (2-3 usuarios reales)  
 > Fecha: junio 2026 · Rehearsal final: 14 junio 2026
 
 ---
 
-## Qué es Pausia ahora
+## Qué es Kairo ahora
 
 Una app web para preparar la PAU con estructura y progresión real. El alumno hace onboarding una vez, recibe misiones diarias organizadas por currículum (38 semanas), puede corregir ejercicios con IA, hacer simulacros cronometrados con corrección automática, y enviar un enlace a sus padres para que paguen el Pack Curso PAU.
 
@@ -14,7 +14,7 @@ Una app web para preparar la PAU con estructura y progresión real. El alumno ha
 /onboarding → primera misión → /camino → enviar enlace a padres
 ```
 
-**El alumno nunca decide qué estudiar** — Pausia lo decide por él según su ruta y semana del currículum.
+**El alumno nunca decide qué estudiar** — Kairo lo decide por él según su ruta y semana del currículum.
 
 ---
 
@@ -40,7 +40,7 @@ Webhook hardeneado: crea entitlement ANTES de marcar link como `paid`. Si falla 
 - `/legal/terminos` — términos de uso
 - `/legal/reembolsos` — política de reembolsos + garantía 7 días
 - `/legal/ia` — uso de IA y carácter orientativo de correcciones
-- `/contacto` — 5 canales de contacto con `hola@pausia.es`
+- `/contacto` — 5 canales de contacto con `hola@kairo.es`
 - Footers legales en checkout, success page y pricing
 - Copy revisado: sin "ilimitado/ilimitadas", sin "sin preguntas", sin promesas de nota
 
@@ -107,7 +107,7 @@ Paso a paso:
 ## Qué observar durante la sesión
 
 ### Con el alumno
-- ¿Entiende qué es Pausia sin que le expliques nada?
+- ¿Entiende qué es Kairo sin que le expliques nada?
 - ¿Completa el onboarding sin ayuda?
 - ¿Entiende qué son las misiones?
 - ¿Vuelve a `/camino` de forma natural?
@@ -124,7 +124,7 @@ Paso a paso:
 
 ## Preguntas para alumno
 
-1. ¿Qué crees que hace Pausia?
+1. ¿Qué crees que hace Kairo?
 2. ¿Qué harías mañana al volver?
 3. ¿Qué parte te ha dado más confianza?
 4. ¿Qué parte parecía falsa o rara?
@@ -145,7 +145,7 @@ Paso a paso:
 
 - Completan onboarding sin ayuda en menos de 5 minutos.
 - Entienden qué es Camino y qué deben hacer mañana.
-- Piden seguir usando Pausia después de la sesión.
+- Piden seguir usando Kairo después de la sesión.
 - El padre/madre entiende el checkout y confía en el proceso.
 - No hay bugs que interrumpan el flujo principal.
 - El móvil se ve bien.

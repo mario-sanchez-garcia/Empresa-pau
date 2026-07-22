@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { CheckCircle2 } from 'lucide-react'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 
 export const metadata: Metadata = {
   title: 'Pago recibido · Kairo',
@@ -15,7 +15,7 @@ export default function ParentCheckoutSuccess() {
       <div style={styles.card}>
         {/* Logo */}
         <div style={styles.logoRow}>
-          <PausiaBrand subtitle={null} size="md" />
+          <KairoBrand subtitle={null} size="md" />
         </div>
 
         <div style={styles.successIcon}><CheckCircle2 size={34} strokeWidth={2.4} /></div>
@@ -35,7 +35,7 @@ export default function ParentCheckoutSuccess() {
         <div style={styles.infoBox}>
           <p style={styles.infoText}>
             Si el acceso no aparece en 10 minutos, escríbenos a{' '}
-            <a href="mailto:hola@pausia.es" style={{ color: '#1e40af', fontWeight: 700 }}>hola@pausia.es</a> con el número de pedido que Stripe
+            <a href="mailto:hola@kairo.es" style={{ color: '#1e40af', fontWeight: 700 }}>hola@kairo.es</a> con el número de pedido que Stripe
             te ha enviado por email.
           </p>
         </div>

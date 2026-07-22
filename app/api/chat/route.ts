@@ -8,7 +8,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
-const STREAM_TRUNCATION_SENTINEL = '[[PAUSIA_TRUNCATED_7f3a9b2c]]'
+const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - Usa Markdown claro con titulos, parrafos cortos y listas separadas por saltos de linea.
 - No juntes listas como "1. ...2. ..." ni titulos con texto como "Definir las variablesAsignamos".

@@ -19,7 +19,7 @@ export default function PrivacidadPage() {
           <p style={p}>
             Mario Sánchez García, Alejandro Amigo Granja, Marco Martínez Mira y Diego García Verdugo.
           </p>
-          <p style={p}>Contacto: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a></p>
+          <p style={p}>Contacto: <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a></p>
         </Section>
 
         <Section title="2. Datos que recogemos">
@@ -50,7 +50,7 @@ export default function PrivacidadPage() {
 
         <Section title="5. Protección de datos de menores">
           <p style={p}>
-            Kairo está dirigido a usuarios de 14 a 18 años. No compartimos datos de menores con terceros con fines publicitarios. Los padres o tutores pueden solicitar acceso, rectificación o eliminación de datos de sus hijos en <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>.
+            Kairo está dirigido a usuarios de 14 a 18 años. No compartimos datos de menores con terceros con fines publicitarios. Los padres o tutores pueden solicitar acceso, rectificación o eliminación de datos de sus hijos en <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a>.
           </p>
         </Section>
 
@@ -72,7 +72,7 @@ export default function PrivacidadPage() {
 
         <Section title="8. Sus derechos">
           <p style={p}>
-            Acceso, rectificación, supresión, limitación, portabilidad y oposición. Contacto: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>. Respuesta en máximo 30 días. Puede reclamar ante la AEPD en <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" style={aStyle}>www.aepd.es</a>.
+            Acceso, rectificación, supresión, limitación, portabilidad y oposición. Contacto: <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a>. Respuesta en máximo 30 días. Puede reclamar ante la AEPD en <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" style={aStyle}>www.aepd.es</a>.
           </p>
         </Section>
 
@@ -90,7 +90,7 @@ export default function PrivacidadPage() {
 
         <Section title="11. Contacto">
           <p style={p}>
-            <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
+            <a href="mailto:legal@kairo.es" style={aStyle}>legal@kairo.es</a>
           </p>
         </Section>
 

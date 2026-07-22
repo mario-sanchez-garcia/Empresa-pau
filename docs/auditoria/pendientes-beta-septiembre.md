@@ -1,8 +1,8 @@
-# Pendientes Pausia — Beta privada y septiembre
+# Pendientes Kairo — Beta privada y septiembre
 
 ## 1. Resumen ejecutivo
 
-Pausia está cerca de una beta privada controlada con 3-5 alumnos si el foco se mantiene en Matemáticas II y Matemáticas CCSS. Ya existen onboarding limitado, Camino PAU, calendario, cursos por tema, corrección IA, XP, historial, ejercicios PAU/EVAU, simulacros, Stripe test mode, legal básico y smoke tests.
+Kairo está cerca de una beta privada controlada con 3-5 alumnos si el foco se mantiene en Matemáticas II y Matemáticas CCSS. Ya existen onboarding limitado, Camino PAU, calendario, cursos por tema, corrección IA, XP, historial, ejercicios PAU/EVAU, simulacros, Stripe test mode, legal básico y smoke tests.
 
 Lo que falta para que la beta no parezca una demo es cerrar el corazón del método: una progresión real por asignatura, explicaciones de curso con más valor, ejercicio aplicado corregible, XP solo tras corrección y EVAU del mismo tema sin repeticiones raras. Para septiembre, además, hay que cerrar métricas, QA académico, pricing/legal/Stripe live si se cobra y decidir qué asignaturas se prometen públicamente.
 

@@ -1,8 +1,8 @@
-# Auditoría de cambios de Pausia — 2026-06-11
+# Auditoría de cambios de Kairo — 2026-06-11
 
 ## 1. Resumen ejecutivo
 
-* **Estado general:** Pausia está mejor que ayer para beta privada: el build pasa, hay menos JSON crudo, las correcciones se guardan completas y se ha añadido un panel interno útil. Aun así, no está lista para beta pública ni para cobrar.
+* **Estado general:** Kairo está mejor que ayer para beta privada: el build pasa, hay menos JSON crudo, las correcciones se guardan completas y se ha añadido un panel interno útil. Aun así, no está lista para beta pública ni para cobrar.
 * **Build:** `npm run build` pasado el 2026-06-11. Next compiló correctamente en 4.7s y TypeScript terminó en 6.2s.
 * **Riesgo global:** 🟡 Medio-alto. El producto ha avanzado, pero quedan dos riesgos estructurales: `historial_examenes` sigue sin migración/RLS versionada y `app/page.tsx` sigue siendo un monolito frágil de 2320 líneas.
 * **Comparación con ayer:** Mejor en correcciones, admin, simulacros, render de enunciados y navegación de La Zona. Igual o peor en deuda de Supabase, duplicación interna y cobertura móvil.

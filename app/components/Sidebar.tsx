@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 
 export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'settings'
 
@@ -71,14 +71,14 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
 
   useEffect(() => {
     function readProfile() {
-      try { setProfile(JSON.parse(window.localStorage.getItem('pausia_profile_preferences') ?? '{}')) }
+      try { setProfile(JSON.parse(window.localStorage.getItem('kairo_profile_preferences') ?? '{}')) }
       catch { setProfile({}) }
     }
     readProfile()
-    window.addEventListener('pausia_profile_preferences_change', readProfile)
+    window.addEventListener('kairo_profile_preferences_change', readProfile)
     window.addEventListener('storage', readProfile)
     return () => {
-      window.removeEventListener('pausia_profile_preferences_change', readProfile)
+      window.removeEventListener('kairo_profile_preferences_change', readProfile)
       window.removeEventListener('storage', readProfile)
     }
   }, [])
@@ -93,7 +93,7 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
 
   return (
     <aside
-      className="pausia-sidebar max-lg:relative max-lg:h-auto max-lg:w-full"
+      className="kairo-sidebar max-lg:relative max-lg:h-auto max-lg:w-full"
       style={{
         position: 'sticky', top: 0,
         zIndex: 'var(--z-sticky)' as never,
@@ -109,7 +109,7 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
       {/* ── Logo ──────────────────────────────────────────────────── */}
       <div style={{ padding: '22px 16px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <PausiaBrand subtitle={ccaa === 'Cataluña' ? 'PAU Catalunya' : 'PAU Madrid'} size="md" />
+          <KairoBrand subtitle={ccaa === 'Cataluña' ? 'PAU Catalunya' : 'PAU Madrid'} size="md" />
           <span style={{
             marginLeft: 'auto',
             fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
@@ -330,7 +330,7 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
         }
         select:focus { border-color: #93c5fd !important; box-shadow: 0 0 0 3px rgba(147,197,253,0.2) !important; }
         @media (max-width: 1024px) {
-          .pausia-sidebar {
+          .kairo-sidebar {
             width: 100% !important;
             height: auto !important;
             position: relative !important;

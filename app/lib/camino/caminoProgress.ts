@@ -1,6 +1,6 @@
 import type { CaminoRouteId, DailyCaminoTask } from './caminoData'
 
-export const CAMINO_PROGRESS_STORAGE_KEY = 'pausia_camino_progress_v1'
+export const CAMINO_PROGRESS_STORAGE_KEY = 'kairo_camino_progress_v1'
 
 export interface CaminoProgress {
   xpTotal: number

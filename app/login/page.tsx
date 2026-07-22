@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -220,7 +220,7 @@ export default function Login() {
           position: 'absolute', top: 36, left: 40,
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <PausiaBrand variant="inverse" subtitle="EBAU Madrid" size="md" />
+          <KairoBrand variant="inverse" subtitle="EBAU Madrid" size="md" />
         </div>
 
         {/* Center: tagline */}
@@ -275,7 +275,7 @@ export default function Login() {
           <div className="lg-mobile-logo lg-up" style={{
             alignItems: 'center', gap: 10, marginBottom: 32,
           }}>
-            <PausiaBrand subtitle="EBAU Madrid" size="sm" />
+            <KairoBrand subtitle="EBAU Madrid" size="sm" />
           </div>
 
           {/* Heading */}

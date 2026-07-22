@@ -18,7 +18,7 @@ import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
 const TOPIC_VIDEO_MAP: Record<string, string> = {
   'matematicas_ii:algebra-lineal:matrices-operaciones':      'wMEHXzOvln0',
@@ -43,13 +43,13 @@ const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
   'matematicas_ii:probabilidad:normal-tipificacion':       { min: 55, max: 60 },
 }
 
-const TOPIC_PROGRESS_KEY = 'pausia_camino_topic_progress_v1'
-const SCHOOL_FEEDBACK_KEY = 'pausia_school_topic_feedback_v1'
-const SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'
-const CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'
-const CALENDAR_KEY = 'pausia_camino_calendar_v2'
-const XP_KEY = 'pausia_camino_xp_events_v1'
-const WEAK_AREAS_KEY = 'pausia_camino_weak_areas_v1'
+const TOPIC_PROGRESS_KEY = 'kairo_camino_topic_progress_v1'
+const SCHOOL_FEEDBACK_KEY = 'kairo_school_topic_feedback_v1'
+const SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'
+const CALENDAR_REFRESH_KEY = 'kairo_camino_calendar_needs_refresh_v1'
+const CALENDAR_KEY = 'kairo_camino_calendar_v2'
+const XP_KEY = 'kairo_camino_xp_events_v1'
+const WEAK_AREAS_KEY = 'kairo_camino_weak_areas_v1'
 
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 type SchoolFeedback = Array<{ schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }>
@@ -487,7 +487,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     ].slice(0, 80))
     saveJson(CALENDAR_REFRESH_KEY, true)
     window.localStorage.removeItem(CALENDAR_KEY)
-    window.dispatchEvent(new CustomEvent('pausia:school-topic-feedback', { detail: adjustment }))
+    window.dispatchEvent(new CustomEvent('kairo:school-topic-feedback', { detail: adjustment }))
     setToast('Entendido. Ajustando tu Camino...')
 
     try {
@@ -939,7 +939,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   </div>
                 )}
                 <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
-                  {correcting ? <><PausiaLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={16} /></>}
+                  {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={16} /></>}
                 </button>
                 {score != null && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800">Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}</p>}
                 {correction && <div className="mt-4"><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}

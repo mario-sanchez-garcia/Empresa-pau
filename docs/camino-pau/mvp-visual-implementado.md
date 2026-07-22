@@ -21,7 +21,7 @@ Incluye:
 
 Esta primera versión no usa Supabase ni IA. El estado se guarda en `localStorage` con la clave:
 
-`pausia_camino_progress_v1`
+`kairo_camino_progress_v1`
 
 El progreso inicial de demo es:
 
@@ -142,7 +142,7 @@ Los bloques reales en los datos de examen son: `Algebra`, `Analisis`, `Geometria
 
 - `app/lib/camino/caminoActions.ts` — nuevo archivo con `CaminoAction`, `CAMINO_ACTION_DEFAULTS`, `buildCaminoAction`.
 - `app/lib/camino/caminoData.ts` — importa `buildCaminoAction`, usa helper local `taskAction()` para poblar `actionLabel`/`actionHref`. Removido `CaminoActionType`. Añadido `subjectKey` a `DailyCaminoTask`.
-- `app/components/camino/CaminoPauClient.tsx` — microcopy actualizado: "Las tareas ya te llevan a las zonas reales de Pausia."
+- `app/components/camino/CaminoPauClient.tsx` — microcopy actualizado: "Las tareas ya te llevan a las zonas reales de Kairo."
 - `app/page.tsx` — **no tocado**. Los params existentes funcionan como están.
 
 ### Nota sobre ID de tarea renombrado
@@ -196,7 +196,7 @@ Implementado en `chore: clarify camino pau preview state`.
 
 - Badge cambiado de `MVP interno` a `Beta interna` — más honesto, menos técnico.
 - Botón "Reset progreso" movido de la cabecera a una zona discreta "Opciones de demo" al final de la página. Texto: "Reiniciar demo local". Microcopy: "Solo para pruebas internas".
-- Microcopy del aviso inferior actualizado: "Las tareas te **acercan** a las zonas reales de Pausia" (no "ya te llevan"). Añadida nota explícita: "Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo."
+- Microcopy del aviso inferior actualizado: "Las tareas te **acercan** a las zonas reales de Kairo" (no "ya te llevan"). Añadida nota explícita: "Vista previa interna: XP, racha y tareas se guardan localmente en este dispositivo."
 - Tildes corregidas en strings de rutas y tipos de tarea visibles en la UI: `hábito`, `presión`, `día`, `rápido`, `Diagnóstico`, `más`, `teoría básica`.
 
 ### Por qué no se debe vender todavía como personalización real

@@ -22,19 +22,19 @@
 
 La mayoría de los alumnos de Bachillerato dejan la preparación de la PAU para mayo. Llegan al último mes sin base, sin hábito y con una presión enorme. El resultado es predecible: estudian de manera caótica, no saben qué les falla realmente, y la predicción de nota que ofrece cualquier app se siente completamente desconectada de lo que han trabajado.
 
-Pausia lleva tiempo siendo una herramienta de práctica de exámenes. Es útil. Pero un alumno que empieza a usarla en abril llega tarde.
+Kairo lleva tiempo siendo una herramienta de práctica de exámenes. Es útil. Pero un alumno que empieza a usarla en abril llega tarde.
 
 ### La oportunidad
 
-Si un alumno llega a Pausia en septiembre y entrena 20-30 minutos al día durante 38 semanas, su preparación cambia por completo. No necesita un curso masivo. Necesita un entrenador que le diga qué hacer hoy.
+Si un alumno llega a Kairo en septiembre y entrena 20-30 minutos al día durante 38 semanas, su preparación cambia por completo. No necesita un curso masivo. Necesita un entrenador que le diga qué hacer hoy.
 
 ### La frase central del producto
 
-> **"Pausia es el entrenador personal que te dice qué estudiar cada día para llegar preparado a la PAU."**
+> **"Kairo es el entrenador personal que te dice qué estudiar cada día para llegar preparado a la PAU."**
 
 ### Qué es Camino PAU
 
-Camino PAU es un modo anual dentro de Pausia, inspirado en la mecánica de hábito de Duolingo pero adaptado a la naturaleza seria y exigente de preparar la Selectividad:
+Camino PAU es un modo anual dentro de Kairo, inspirado en la mecánica de hábito de Duolingo pero adaptado a la naturaleza seria y exigente de preparar la Selectividad:
 
 - **Misión diaria:** cada día, el alumno recibe una misión concreta de 20-30 minutos.
 - **Racha y XP:** mantener la racha refuerza el hábito. El XP mide el progreso visible.
@@ -42,7 +42,7 @@ Camino PAU es un modo anual dentro de Pausia, inspirado en la mecánica de hábi
 - **Predicción de nota:** a medida que avanza, la predicción se ajusta a su historial real.
 - **Calendario septiembre-junio:** 38 semanas estructuradas, con un ritmo que sube de intensidad conforme se acerca la PAU.
 
-Camino PAU no sustituye los exámenes ni los simulacros actuales de Pausia. Los integra en una secuencia coherente.
+Camino PAU no sustituye los exámenes ni los simulacros actuales de Kairo. Los integra en una secuencia coherente.
 
 ---
 
@@ -75,7 +75,7 @@ Física, Química, Biología, Lengua castellana e Historia de la Filosofía se i
 - Ejercicios por bloque individual.
 - Sin presión de examen completo.
 - Predicción de nota en fase inicial (poca fiabilidad, se comunica así).
-- El alumno aprende a usar Pausia diariamente.
+- El alumno aprende a usar Kairo diariamente.
 
 ### Fase 2 — Enero a marzo (semanas 17-28)
 
@@ -255,7 +255,7 @@ Esta sección existe para evitar el scope creep durante el desarrollo del MVP.
 - No generación completa del plan de estudio mediante IA (la IA corrige respuestas, no genera el currículum).
 - No asignaturas adicionales hasta validar hábito con Matemáticas II, Historia e Inglés.
 - No integración con Stripe en esta fase de documentación.
-- No rediseño completo de la interfaz de Pausia.
+- No rediseño completo de la interfaz de Kairo.
 - No modificar la lógica actual de exámenes, simulacros ni correcciones.
 - No sistema de notificaciones push todavía.
 - No modo colaborativo ni estudio en grupo.
@@ -291,7 +291,7 @@ Antes de pasar al diseño técnico, el equipo debe responder estas preguntas:
 - [ ] ¿Qué métricas medimos en beta? Propuesta: DAU, rachas mantenidas, tareas completadas, correcciones enviadas, simulacros iniciados y completados.
 - [ ] ¿Cuántos usuarios beta necesitamos para validar la mecánica de hábito?
 - [ ] ¿Hacemos beta privada o abrimos directamente?
-- [ ] ¿Cómo comunica Pausia el valor de empezar en septiembre vs en mayo?
+- [ ] ¿Cómo comunica Kairo el valor de empezar en septiembre vs en mayo?
 
 ---
 
@@ -331,7 +331,7 @@ La tabla completa está en `docs/camino-pau/rutas-entrada.tsv`. Resumen:
 4. **La misión de reactivación** (10 min) aplica a cualquier ruta si el alumno lleva 2+ días sin entrar.
 5. **La predicción de nota** solo se muestra cuando hay suficiente historial. En rutas cortas puede ser poco fiable al principio — comunicarlo claramente.
 
-> **Revisión del equipo:** ¿Cómo se detecta la fecha de inicio del alumno? ¿Por registro en Pausia, por pregunta explícita en onboarding, o por primera misión completada? Definir antes de implementar el sistema de rutas.
+> **Revisión del equipo:** ¿Cómo se detecta la fecha de inicio del alumno? ¿Por registro en Kairo, por pregunta explícita en onboarding, o por primera misión completada? Definir antes de implementar el sistema de rutas.
 
 ---
 

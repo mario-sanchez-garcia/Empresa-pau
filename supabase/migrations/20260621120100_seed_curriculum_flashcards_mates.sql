@@ -1,4 +1,4 @@
--- Seed: curriculum_flashcards — Matemáticas II · 60 tarjetas editoriales Pausia
+-- Seed: curriculum_flashcards — Matemáticas II · 60 tarjetas editoriales Kairo
 -- Generado desde la tabla real de Supabase (project: xgpzedqdlebtruuuommj).
 -- Ordenado por sort_order. Safe ante duplicados via ON CONFLICT.
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Bug, CreditCard, FlaskConical, Mail, Shield, type LucideIcon } from 'lucide-react'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 
 export const metadata: Metadata = {
   title: 'Contacto · Kairo',
@@ -13,7 +13,7 @@ export default function ContactoPage() {
     <main className="pau-bg-atmosphere" style={page}>
       <div style={container}>
         <div style={logoRow}>
-          <PausiaBrand subtitle={null} size="md" />
+          <KairoBrand subtitle={null} size="md" />
         </div>
 
         <h1 style={h1}>Contacto</h1>
@@ -24,35 +24,35 @@ export default function ContactoPage() {
             icon={Mail}
             title="Soporte general"
             description="Preguntas sobre el producto, bugs, sugerencias o dudas de uso."
-            email="hola@pausia.es"
+            email="hola@kairo.es"
             subject="Soporte"
           />
           <ContactCard
             icon={Shield}
             title="Privacidad y datos"
             description="Solicitudes de acceso, rectificación o eliminación de tus datos."
-            email="hola@pausia.es"
+            email="hola@kairo.es"
             subject="Privacidad"
           />
           <ContactCard
             icon={CreditCard}
             title="Reembolsos y pagos"
             description="Solicitudes de reembolso o problemas con el pago del Pack Curso PAU."
-            email="hola@pausia.es"
+            email="hola@kairo.es"
             subject="Reembolso"
           />
           <ContactCard
             icon={Bug}
             title="Problema técnico"
             description="Si algo no funciona correctamente o encuentras un error."
-            email="hola@pausia.es"
+            email="hola@kairo.es"
             subject="Problema técnico"
           />
           <ContactCard
             icon={FlaskConical}
             title="Beta privada"
             description="Feedback sobre tu experiencia, ideas o preguntas sobre la fase beta."
-            email="hola@pausia.es"
+            email="hola@kairo.es"
             subject="Beta privada"
           />
         </div>

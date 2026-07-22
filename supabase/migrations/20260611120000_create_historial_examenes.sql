@@ -88,6 +88,6 @@ create index if not exists historial_examenes_user_asignatura_created_idx
   on public.historial_examenes (user_id, asignatura, created_at desc);
 
 comment on table public.historial_examenes is
-  'Critical Pausia exam correction history. Used by Examenes, Historial, Mi Plan, grade prediction and metrics.';
+  'Critical Kairo exam correction history. Used by Examenes, Historial, Mi Plan, grade prediction and metrics.';
 comment on column public.historial_examenes.correccion is
   'Do not truncate full correction: History modal needs complete feedback.';

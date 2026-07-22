@@ -7,7 +7,7 @@ product
 Spanish high school students (17-18) preparing for the PAU (university entrance exam). Used daily as a study habit tool, primarily during at-home study sessions. Parents are secondary users who track progress via a shared link.
 
 ## Product Purpose
-Pausia generates daily study missions, provides AI corrections for exercises, and runs full PAU exam simulations. Goal: make PAU preparation structured, trackable, and habit-forming.
+Kairo generates daily study missions, provides AI corrections for exercises, and runs full PAU exam simulations. Goal: make PAU preparation structured, trackable, and habit-forming.
 
 ## Brand Personality
 Calm, structured, trustworthy. "Compañero de estudio serio." Not a gamified edtech toy — closer to Linear than Duolingo.

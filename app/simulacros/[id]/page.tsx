@@ -12,7 +12,7 @@ import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
 const DEFAULT_DURATION_MINUTES = 90
 const TOTAL_SECONDS = DEFAULT_DURATION_MINUTES * 60
@@ -767,7 +767,7 @@ export default function SimulacroActivoPage() {
 
             {submitting && (
               <div className="mt-4 flex items-center gap-2 text-sm font-black" style={{ color: cfg.color }}>
-                <PausiaLoadingDot />
+                <KairoLoadingDot />
                 {submitStage || 'Preparando entrega...'}
               </div>
             )}
@@ -872,11 +872,11 @@ function getDurationSeconds(record: SimulacroRecord) {
 }
 
 function startKey(id: string) {
-  return `pausia:simulacro:${id}:startedAt`
+  return `kairo:simulacro:${id}:startedAt`
 }
 
 function reviewKey(id: string) {
-  return `pausia:simulacro:${id}:reviewMarked`
+  return `kairo:simulacro:${id}:reviewMarked`
 }
 
 function readStartedAt(id: string) {

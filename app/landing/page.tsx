@@ -22,7 +22,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import PausiaBrand from '@/components/shared/PausiaBrand'
+import KairoBrand from '@/components/shared/KairoBrand'
 import HeroCardsAnimator from '@/app/landing/HeroCardsAnimator'
 import { ZoomParallax } from '@/components/ui/zoom-parallax'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT } from '@/app/lib/platformStats'
@@ -130,13 +130,13 @@ const SUBJECTS = [
 ]
 
 const COMPARE_ROWS = [
-  { label: 'Exámenes reales EBAU Madrid',    pausia: true,   academia: true,  solo: true  },
-  { label: 'Corrección instantánea por IA',  pausia: true,   academia: false, solo: false },
-  { label: 'Desglose por apartado/criterio', pausia: true,   academia: false, solo: false },
-  { label: 'Plan de estudio personalizado',  pausia: true,   academia: false, solo: false },
-  { label: 'Disponible 24 horas al día',     pausia: true,   academia: false, solo: true  },
-  { label: 'Chat con tutor IA',              pausia: true,   academia: false, solo: false },
-  { label: 'Historial de progreso',          pausia: true,   academia: false, solo: false },
+  { label: 'Exámenes reales EBAU Madrid',    kairo: true,   academia: true,  solo: true  },
+  { label: 'Corrección instantánea por IA',  kairo: true,   academia: false, solo: false },
+  { label: 'Desglose por apartado/criterio', kairo: true,   academia: false, solo: false },
+  { label: 'Plan de estudio personalizado',  kairo: true,   academia: false, solo: false },
+  { label: 'Disponible 24 horas al día',     kairo: true,   academia: false, solo: true  },
+  { label: 'Chat con tutor IA',              kairo: true,   academia: false, solo: false },
+  { label: 'Historial de progreso',          kairo: true,   academia: false, solo: false },
   { label: 'Precio mensual',                 pText: 'Free / 9,99€', aText: '100–200€', sText: 'Gratis' },
 ]
 
@@ -243,7 +243,7 @@ function ScreenExam() {
   return (
     <div style={{ background: '#fff', minHeight: 330 }}>
       <div style={{ padding: '10px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>pausia</span>
+        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>kairo</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {([56, 36] as const).map((w, i) => <div key={i} style={{ height: 22, width: w, borderRadius: 6, background: C.bgMuted }} />)}
         </div>
@@ -283,7 +283,7 @@ function ScreenCorrection() {
   return (
     <div style={{ background: '#fff', minHeight: 330 }}>
       <div style={{ padding: '10px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>pausia</span>
+        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>kairo</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {([56, 36] as const).map((w, i) => <div key={i} style={{ height: 22, width: w, borderRadius: 6, background: C.bgMuted }} />)}
         </div>
@@ -331,7 +331,7 @@ function ScreenPlan() {
   return (
     <div style={{ background: '#fff', minHeight: 330 }}>
       <div style={{ padding: '10px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>pausia</span>
+        <span style={{ fontSize: 13, fontWeight: 900, color: C.blue, letterSpacing: '-0.03em' }}>kairo</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {([56, 36] as const).map((w, i) => <div key={i} style={{ height: 22, width: w, borderRadius: 6, background: C.bgMuted }} />)}
         </div>
@@ -665,12 +665,12 @@ export default function LandingPage() {
           animation-range: entry 12% cover 38%;
         }
         .lp-hero-section {
-          view-timeline-name: --pausia-hero;
+          view-timeline-name: --kairo-hero;
           view-timeline-axis: block;
         }
         .lp-hero-grid {
           animation: lp-hero-depth 1s linear both;
-          animation-timeline: --pausia-hero;
+          animation-timeline: --kairo-hero;
           animation-range: exit 0% exit 82%;
           transform-origin: center top;
           will-change: transform, opacity;
@@ -691,7 +691,7 @@ export default function LandingPage() {
             radial-gradient(circle at 32% 72%, rgba(224,231,255,0.52), transparent 62%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 36px 90px rgba(37,99,235,0.10);
           animation: lp-hero-cloud-open 1s linear both;
-          animation-timeline: --pausia-hero;
+          animation-timeline: --kairo-hero;
           animation-range: exit 0% exit 88%;
           will-change: transform, opacity, filter;
         }
@@ -745,7 +745,7 @@ export default function LandingPage() {
           background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,0.72), rgba(219,234,254,0.40), rgba(255,255,255,0));
           filter: blur(18px);
           animation: lp-hero-vapor-open 1s linear both;
-          animation-timeline: --pausia-hero;
+          animation-timeline: --kairo-hero;
           animation-range: exit 6% exit 86%;
           will-change: transform, opacity;
         }
@@ -935,7 +935,7 @@ export default function LandingPage() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <PausiaBrand subtitle={null} size="lg" />
+          <KairoBrand subtitle={null} size="lg" />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Link href="/pricing" className="lp-nav-link" style={{ padding: '8px 14px', fontSize: 13, fontWeight: 600, color: C.muted, textDecoration: 'none' }}>
@@ -975,7 +975,7 @@ export default function LandingPage() {
         ]}
         centerReveal={
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <img src="/brand/pausia-lockup.png" alt="Kairo" style={{ width: 'clamp(180px,28vw,360px)', height: 'auto', filter: 'brightness(0) invert(1)' }} />
+            <img src="/brand/kairo-logo.png" alt="Kairo" style={{ width: 'clamp(190px,26vw,380px)', height: 'auto', filter: 'drop-shadow(0 16px 28px rgba(2,8,23,0.18))' }} />
             <p style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', color: '#ffffff', fontWeight: 600, opacity: 0.85, letterSpacing: '-0.02em' }}>
               Prepara la PAU con claridad.
             </p>
@@ -1171,9 +1171,9 @@ export default function LandingPage() {
           </div>
           <div className="lp-screens-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
             {([
-              { label: 'Examen oficial', url: 'pausia.es/examenes/mates-ii', screen: <ScreenExam /> },
-              { label: 'Corrección IA',  url: 'pausia.es/examenes/correccion', screen: <ScreenCorrection /> },
-              { label: 'Plan diario',    url: 'pausia.es/camino', screen: <ScreenPlan /> },
+              { label: 'Examen oficial', url: 'kairo.es/examenes/mates-ii', screen: <ScreenExam /> },
+              { label: 'Corrección IA',  url: 'kairo.es/examenes/correccion', screen: <ScreenCorrection /> },
+              { label: 'Plan diario',    url: 'kairo.es/camino', screen: <ScreenPlan /> },
             ] as const).map(({ label, url, screen }) => (
               <div key={label}>
                 <p style={{ textAlign: 'center', fontSize: 11.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.01em', marginBottom: 10 }}>{label}</p>
@@ -1398,7 +1398,7 @@ export default function LandingPage() {
                 }}>
                   {'pText' in row
                     ? <span style={{ fontSize: 12, fontWeight: 800, color: C.blue }}>{row.pText}</span>
-                    : row.pausia
+                    : row.kairo
                     ? <Check size={16} style={{ color: C.green }} />
                     : <X size={14} style={{ color: C.soft }} />
                   }
@@ -1698,7 +1698,7 @@ export default function LandingPage() {
         <div className="lp-footer-grid" style={{ maxWidth: 1040, margin: '0 auto', padding: 'clamp(36px,5vw,52px) clamp(20px,5vw,48px) clamp(24px,4vw,36px)', display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 32 }}>
           {/* Brand */}
           <div>
-            <PausiaBrand subtitle={null} size="sm" />
+            <KairoBrand subtitle={null} size="sm" />
             <p style={{ margin: '12px 0 0', fontSize: 12.5, color: C.soft, lineHeight: 1.7, maxWidth: 210 }}>
               Prepara la PAU con exámenes reales, corrección IA y un plan diario personalizado.
             </p>

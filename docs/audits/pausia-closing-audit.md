@@ -1,4 +1,4 @@
-# Auditoría técnica de cierre — Pausia
+# Auditoría técnica de cierre — Kairo
 
 **Fecha:** 2026-06-13  
 **Sprints auditados:** Magic Parent Checkout · Camino PAU · Onboarding Day 1 / First Mission Activation  
@@ -105,7 +105,7 @@ f1ae667 Add theory toggle to AI corrections
 - `billing_events`: `event_type = 'onboarding_completed'` con payload `{community, daily_minutes, start_mode, route_id}`
 - Las 3 tareas de activación se completan via `POST /api/camino/complete-task` exactamente igual que misiones normales (con idempotencia incluida)
 
-**Qué se guarda solo en localStorage (`pausia_onboarding_v1`):**
+**Qué se guarda solo en localStorage (`kairo_onboarding_v1`):**
 - `community`, `subjects`, `dailyMinutes`, `startMode`, `completedAt`
 
 **Reutilización de Magic Parent Checkout:** Correcto. `ParentLinkModule` se importa sin modificaciones desde `app/components/camino/ParentLinkModule.tsx`. Recibe `billing` de `useBillingStatus()`. El flujo completo de link → Stripe → webhook es idéntico al de `/camino`.

@@ -255,7 +255,7 @@ assert(
     caminoCalendar.includes('missionId=${encodeURIComponent(mission.id)}') &&
     caminoCalendar.includes('source=camino_pau') &&
     caminoCalendar.includes('const subjects = normalizeOnboardingSubjects(onboarding.subjects)') &&
-    caminoCalendar.includes('Completa tu perfil para que Pausia cree tu Camino PAU') &&
+    caminoCalendar.includes('Completa tu perfil para que Kairo cree tu Camino PAU') &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']") &&
     !caminoCalendar.includes('MATH_SUBJECTS') &&
     !caminoCalendar.includes('Marcar sin XP') &&
@@ -266,7 +266,7 @@ assert(
 
 assert(
   'math answer toolbar appears only for math and science answer boxes',
-  mathAnswerToolbar.includes('data-pausia-math-toolbar="true"') &&
+  mathAnswerToolbar.includes('data-kairo-math-toolbar="true"') &&
     mathAnswerToolbar.includes('export function shouldShowMathToolbar') &&
     mathAnswerToolbar.includes('"matematicas_ii"') &&
     mathAnswerToolbar.includes('"matematicas_ccss"') &&
@@ -330,7 +330,7 @@ assert(
 
 assert(
   'Camino PAU keeps calendar visibility and generated week persistent',
-  caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'pausia_camino_calendar_expanded_v1'") &&
+  caminoCalendar.includes("CALENDAR_VISIBILITY_KEY = 'kairo_camino_calendar_expanded_v1'") &&
     caminoCalendar.includes('loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)') &&
     caminoCalendar.includes('calendarMatchesOnboarding') &&
     caminoCalendar.includes('calendarStartsWeek') &&
@@ -363,7 +363,7 @@ assert(
     caminoCalendar.includes('missionBelongsToSubjects') &&
     caminoCalendar.includes('normalizeSubjectSlug(mission.subject)') &&
     caminoCalendar.includes('visibleCalendarForOnboarding') &&
-    caminoCalendar.includes('Completa tu perfil para que Pausia cree tu Camino PAU') &&
+    caminoCalendar.includes('Completa tu perfil para que Kairo cree tu Camino PAU') &&
     caminoCalendar.includes('const PRIVATE_BETA_SUBJECT_SLUGS = new Set<string>(PRIVATE_BETA_SUBJECTS)') &&
     !caminoCalendar.includes("['Matemáticas II', 'Historia de España', 'Inglés']")
 )
@@ -377,7 +377,7 @@ assert(
     onboardingFlow.includes("badge: 'Próximamente'") &&
     onboardingFlow.includes('PRIVATE_BETA_LOCKED_SUBJECTS.map') &&
     onboardingFlow.includes('disabled title="Esta asignatura estará disponible próximamente') &&
-    onboardingFlow.includes('De momento puedes probar Pausia con Matemáticas II, Matemáticas CCSS, Lengua e Historia') &&
+    onboardingFlow.includes('De momento puedes probar Kairo con Matemáticas II, Matemáticas CCSS, Lengua e Historia') &&
     onboardingFlow.includes('Selecciona al menos una asignatura disponible') &&
     onboardingFlow.includes("'Matemáticas CCSS': 'matematicas_ccss'") &&
     onboardingFlow.includes("'Lengua Castellana': 'lengua'") &&
@@ -767,16 +767,16 @@ assert(
 assert(
   'Camino topic page shows explanation, guided practice, EVAU/correction links, central chat and not-seen feedback',
   caminoTopic.includes('No lo he dado en clase') &&
-    caminoTopic.includes('Preguntar a Pausia sobre este tema') &&
+    caminoTopic.includes('Preguntar a Kairo sobre este tema') &&
     caminoTopic.includes('Hacer ejercicio PAU de este tema') &&
-    caminoTopic.includes('Corregir con Pausia') &&
+    caminoTopic.includes('Corregir con Kairo') &&
     caminoTopic.includes('Escribir respuesta') &&
     caminoTopic.includes('Subir foto') &&
     caminoTopic.includes('compressImageToBase64') &&
     caminoTopic.includes('buildCorrectionPrompt') &&
     caminoTopic.includes('CorrectionResultCard') &&
     caminoTopic.includes('from: \'camino_course\'') &&
-    caminoTopic.includes('Abrir Chat con Pausia') &&
+    caminoTopic.includes('Abrir Chat con Kairo') &&
     caminoTopic.includes('Ahora inténtalo tú') &&
     caminoTopic.includes('Subpágina de aprendizaje') &&
     caminoTopic.includes('SCHOOL_FEEDBACK_KEY') &&
@@ -800,10 +800,10 @@ assert(
 
 assert(
   'P0 not-seen feedback persists locally, syncs to Supabase and refreshes calendar',
-  caminoTopic.includes("SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'") &&
-    caminoTopic.includes("CALENDAR_REFRESH_KEY = 'pausia_camino_calendar_needs_refresh_v1'") &&
+  caminoTopic.includes("SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'") &&
+    caminoTopic.includes("CALENDAR_REFRESH_KEY = 'kairo_camino_calendar_needs_refresh_v1'") &&
     caminoTopic.includes('saveJson(CALENDAR_REFRESH_KEY, true)') &&
-    caminoTopic.includes("window.dispatchEvent(new CustomEvent('pausia:school-topic-feedback'") &&
+    caminoTopic.includes("window.dispatchEvent(new CustomEvent('kairo:school-topic-feedback'") &&
     caminoTopic.includes("fetch('/api/camino/school-topic-feedback'") &&
     caminoTopic.includes('No lo he dado en clase') &&
     caminoSchoolFeedbackRoute.includes("reason: 'not_seen_in_class'") &&
@@ -814,7 +814,7 @@ assert(
 
 assert(
   'P0 Camino calendar lowers priority for not-seen school topics',
-  caminoCalendar.includes("SCHOOL_ADJUSTMENTS_KEY = 'pausia_camino_school_adjustments_v1'") &&
+  caminoCalendar.includes("SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'") &&
     caminoCalendar.includes('loadSchoolAdjustments') &&
     caminoCalendar.includes('findAdjustmentForItem') &&
     caminoCalendar.includes('findReplacementItem') &&

@@ -252,7 +252,7 @@ export default function OnboardingFlow() {
           if (!genRes.ok) {
             setSavingError(
               generateRetriesRef.current >= 2
-                ? 'Algo fue mal. Contacta con soporte en hola@pausia.es'
+                ? 'Algo fue mal. Contacta con soporte en hola@kairo.es'
                 : 'No pudimos generar tu plan. Inténtalo de nuevo.'
             )
             return
@@ -261,7 +261,7 @@ export default function OnboardingFlow() {
           if (!genJson.success) {
             setSavingError(
               generateRetriesRef.current >= 2
-                ? 'Algo fue mal. Contacta con soporte en hola@pausia.es'
+                ? 'Algo fue mal. Contacta con soporte en hola@kairo.es'
                 : 'No pudimos generar tu plan. Inténtalo de nuevo.'
             )
             return
@@ -273,7 +273,7 @@ export default function OnboardingFlow() {
     } catch {
       setSavingError(
         generateRetriesRef.current >= 2
-          ? 'Algo fue mal. Contacta con soporte en hola@pausia.es'
+          ? 'Algo fue mal. Contacta con soporte en hola@kairo.es'
           : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.'
       )
     }
@@ -288,7 +288,7 @@ export default function OnboardingFlow() {
 
       <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4">
-          <img src="/brand/pausia-lockup.png" alt="Kairo" className="h-7 shrink-0 object-contain" />
+          <img src="/brand/kairo-logo.png" alt="Kairo" className="h-9 shrink-0 object-contain" />
           <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-slate-500 sm:flex">
             <span>Preparación PAU</span>
             <span className="h-1 w-1 rounded-full bg-slate-300" />

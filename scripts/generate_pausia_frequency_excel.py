@@ -1,15 +1,15 @@
 """
-Genera PAUSIA_mapa_frecuencia_atomico_completo_final.xlsx a partir de PDFs reales.
+Genera KAIRO_mapa_frecuencia_atomico_completo_final.xlsx a partir de PDFs reales.
 
 Requisitos previstos:
-  python scripts/generate_pausia_frequency_excel.py
+  python scripts/generate_kairo_frequency_excel.py
 
 Dependencias recomendadas:
   pandas openpyxl pdfplumber pypdf
 
 Nota de entorno: este repositorio puede no tener Python instalado en la maquina
 local. En ese caso, use el runner equivalente:
-  node scripts/generate_pausia_frequency_excel.mjs
+  node scripts/generate_kairo_frequency_excel.mjs
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from typing import Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "PAUSIA_mapa_frecuencia_atomico_completo_final.xlsx"
+OUTPUT = ROOT / "KAIRO_mapa_frecuencia_atomico_completo_final.xlsx"
 COMMUNITIES = ["Madrid", "Cataluña"]
 
 
@@ -194,15 +194,15 @@ def main() -> None:
             "Concept ID": concept["concept_id"], "Comunidad": concept["comunidad"], "Materia": concept["materia"],
             "Bloque": concept["bloque"], "Microconcepto atómico": concept["microconcepto"],
             "Apariciones": hits, "N Exámenes Base Materia": denom, "Probabilidad Empírica %": prob,
-            "Nivel PAUSIA": level(prob), "Peso Estratégico Producto": concept["peso_producto"],
-            "Ajuste Temario": concept["ajuste_temario"], "Score PAUSIA": score,
+            "Nivel KAIRO": level(prob), "Peso Estratégico Producto": concept["peso_producto"],
+            "Ajuste Temario": concept["ajuste_temario"], "Score KAIRO": score,
             "Sinónimos / patrones": "; ".join(concept["sinonimos"]),
         })
 
-    ranking_df = pd.DataFrame(ranking).sort_values(["Score PAUSIA", "Probabilidad Empírica %"], ascending=False)
+    ranking_df = pd.DataFrame(ranking).sort_values(["Score KAIRO", "Probabilidad Empírica %"], ascending=False)
     base_df = pd.DataFrame(base_rows)
     audit_df = pd.DataFrame(audit + [{"tipo": "ENTORNO", "ruta": "", "detalle": "Si no hay documento oficial de temario adjunto, se usa temario controlado del prompt y docs/camino-pau."}])
-    temario_df = ranking_df[["Concept ID", "Comunidad", "Materia", "Bloque", "Microconcepto atómico", "Nivel PAUSIA"]].copy()
+    temario_df = ranking_df[["Concept ID", "Comunidad", "Materia", "Bloque", "Microconcepto atómico", "Nivel KAIRO"]].copy()
 
     panel_df = pd.DataFrame([
         ["Generado", dt.datetime.now().isoformat(timespec="seconds")],
@@ -222,12 +222,12 @@ def main() -> None:
     cambios_df = pd.DataFrame(exams)[["materia", "comunidad", "año", "convocatoria", "variante", "pdf"]].drop_duplicates() if exams else pd.DataFrame()
     if not cambios_df.empty:
         cambios_df["Cambio formato detectado"] = cambios_df["variante"].apply(lambda v: "Variante/día explícito" if v else "Revisión manual")
-    prioridad_df = ranking_df.head(40)[["Comunidad", "Materia", "Bloque", "Microconcepto atómico", "Score PAUSIA", "Nivel PAUSIA"]].copy()
+    prioridad_df = ranking_df.head(40)[["Comunidad", "Materia", "Bloque", "Microconcepto atómico", "Score KAIRO", "Nivel KAIRO"]].copy()
     prioridad_df["Prioridad MVP"] = range(1, len(prioridad_df) + 1)
 
     with pd.ExcelWriter(OUTPUT, engine="openpyxl") as writer:
         panel_df.to_excel(writer, "00_PANEL", index=False)
-        ranking_df.to_excel(writer, "01_RANKING_PAUSIA", index=False)
+        ranking_df.to_excel(writer, "01_RANKING_KAIRO", index=False)
         base_df.to_excel(writer, "02_BASE_EXAMENES", index=False)
         temario_df.to_excel(writer, "03_TEMARIO_MAPA", index=False)
         teoria_df.to_excel(writer, "04_TEORIA_DESPLEGABLE", index=False)

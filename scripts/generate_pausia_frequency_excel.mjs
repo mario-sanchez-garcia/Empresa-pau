@@ -3,7 +3,7 @@ import path from "node:path";
 import { PDFParse } from "pdf-parse";
 
 const ROOT = path.resolve(".");
-const OUTPUT = path.join(ROOT, "PAUSIA_mapa_frecuencia_atomico_completo_final.xlsx");
+const OUTPUT = path.join(ROOT, "KAIRO_mapa_frecuencia_atomico_completo_final.xlsx");
 const COMMUNITIES = ["Madrid", "Cataluña"];
 
 function norm(value) {
@@ -289,13 +289,13 @@ const ranking = concepts.map((concept) => {
     "Apariciones": hits,
     "N Exámenes Base Materia": denom,
     "Probabilidad Empírica %": probability,
-    "Nivel PAUSIA": level(probability),
+    "Nivel KAIRO": level(probability),
     "Peso Estratégico Producto": concept.pesoProducto,
     "Ajuste Temario": concept.ajusteTemario,
-    "Score PAUSIA": score,
+    "Score KAIRO": score,
     "Sinónimos / patrones": concept.sinonimos.join("; "),
   };
-}).sort((a, b) => b["Score PAUSIA"] - a["Score PAUSIA"] || b["Probabilidad Empírica %"] - a["Probabilidad Empírica %"]);
+}).sort((a, b) => b["Score KAIRO"] - a["Score KAIRO"] || b["Probabilidad Empírica %"] - a["Probabilidad Empírica %"]);
 
 const panel = [
   { "Métrica": "Generado", "Valor": new Date().toISOString() },
@@ -306,7 +306,7 @@ const panel = [
   { "Métrica": "Escala", "Valor": "Crítica >=70; Muy Alta 50-69.9; Alta 30-49.9; Media 15-29.9; Baja 5-14.9; Marginal >0<5; No Detectada 0" },
   { "Métrica": "Regla score", "Valor": "60% probabilidad + 25% peso estratégico + 15% ajuste temario" },
 ];
-const temario = ranking.map((r) => ({ "Concept ID": r["Concept ID"], "Comunidad": r.Comunidad, "Materia": r.Materia, "Bloque": r.Bloque, "Microconcepto atómico": r["Microconcepto atómico"], "Nivel PAUSIA": r["Nivel PAUSIA"], "Cobertura histórica": r.Apariciones > 0 ? "Detectada" : "No detectada / sin base PDF" }));
+const temario = ranking.map((r) => ({ "Concept ID": r["Concept ID"], "Comunidad": r.Comunidad, "Materia": r.Materia, "Bloque": r.Bloque, "Microconcepto atómico": r["Microconcepto atómico"], "Nivel KAIRO": r["Nivel KAIRO"], "Cobertura histórica": r.Apariciones > 0 ? "Detectada" : "No detectada / sin base PDF" }));
 const teoria = temario.map((r) => ({ ...r, "Trigger": "Desplegar teoría si probabilidad >= 15% o score >= 65", "Secuencia": "Definición -> ejemplo PAU -> plantilla -> práctica" }));
 const plantillas = [
   { "Plantilla": "Comentario histórico", "Criterio operativo": "Identificar fuente, contexto, idea principal, desarrollo y conclusión." },
@@ -315,13 +315,13 @@ const plantillas = [
   { "Plantilla": "Filosofía", "Criterio operativo": "Tesis del autor, conceptos clave, relación con sistema y valoración crítica." },
 ];
 const cambios = exams.map((e) => ({ "Materia": e.materia, "Comunidad": e.comunidad, "Año": e.año, "Convocatoria": e.convocatoria, "Variante": e.variante, "PDF": e.PDF, "Cambio formato detectado": e.variante ? "Variante/día explícito" : "Revisión manual" }));
-const prioridad = ranking.slice(0, 40).map((r, i) => ({ "Prioridad MVP": i + 1, "Comunidad": r.Comunidad, "Materia": r.Materia, "Bloque": r.Bloque, "Microconcepto atómico": r["Microconcepto atómico"], "Score PAUSIA": r["Score PAUSIA"], "Nivel PAUSIA": r["Nivel PAUSIA"] }));
-audit.push({ "Tipo": "ENTORNO", "Ruta": "scripts/generate_pausia_frequency_excel.py", "Detalle": "Python no estaba disponible en PATH; se generó este XLSX con runner Node equivalente y se conserva el script Python solicitado." });
+const prioridad = ranking.slice(0, 40).map((r, i) => ({ "Prioridad MVP": i + 1, "Comunidad": r.Comunidad, "Materia": r.Materia, "Bloque": r.Bloque, "Microconcepto atómico": r["Microconcepto atómico"], "Score KAIRO": r["Score KAIRO"], "Nivel KAIRO": r["Nivel KAIRO"] }));
+audit.push({ "Tipo": "ENTORNO", "Ruta": "scripts/generate_kairo_frequency_excel.py", "Detalle": "Python no estaba disponible en PATH; se generó este XLSX con runner Node equivalente y se conserva el script Python solicitado." });
 audit.push({ "Tipo": "FUENTE_TEMARIO", "Ruta": "docs/camino-pau/camino-pau-curriculum-revisado.xlsx", "Detalle": "Documento curricular interno localizado; no se adjuntó documento oficial externo de temario. Se usa temario atómico controlado y se deja todo concepto sin PDF con 0%." });
 
 await writeXlsx({
   "00_PANEL": rowsFromObjects(panel),
-  "01_RANKING_PAUSIA": rowsFromObjects(ranking),
+  "01_RANKING_KAIRO": rowsFromObjects(ranking),
   "02_BASE_EXAMENES": rowsFromObjects(baseRows),
   "03_TEMARIO_MAPA": rowsFromObjects(temario),
   "04_TEORIA_DESPLEGABLE": rowsFromObjects(teoria),

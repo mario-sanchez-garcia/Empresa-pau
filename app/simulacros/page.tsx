@@ -8,7 +8,7 @@ import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
-import PausiaLoadingDot from '@/components/shared/PausiaLoadingDot'
+import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
 type SimulacroMode = 'normal' | 'errores' | 'tipicos' | 'personalizado'
 type YearChoice = 'all' | 'recent' | 'middle' | 'classic'
@@ -217,7 +217,7 @@ function SimulacrosPage() {
       actions={
         <button
           onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}
-          className="pausia-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+          className="kairo-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
         >
           {historyOpen ? <EyeOff size={15} /> : <Eye size={15} />}
           {historyOpen ? 'Ocultar historial' : 'Mis simulacros'}
@@ -635,7 +635,7 @@ function SimulacrosPage() {
           className="campus-primary"
           style={{ width: '100%', borderRadius: 16, padding: '16px 24px', fontSize: 16, gap: 10 }}
         >
-          {loading ? <PausiaLoadingDot /> : <PlayCircle size={20} />}
+          {loading ? <KairoLoadingDot /> : <PlayCircle size={20} />}
           {loading
             ? 'Generando simulacro...'
             : !SUBJECTS[subject].available
@@ -652,7 +652,7 @@ function SimulacrosPage() {
 function StatCard({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
     <div
-      className="pausia-stitch-card rounded-2xl p-4"
+      className="kairo-stitch-card rounded-2xl p-4"
       style={accent ? { background: 'linear-gradient(145deg, #eff6ff, #dbeafe)', borderColor: '#bfdbfe' } : undefined}
     >
       <p className="text-[11px] font-black uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>

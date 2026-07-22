@@ -34,7 +34,7 @@ export default function IaPage() {
           <ul style={ul}>
             <li style={li}>Contrasta con tu libro de texto, apuntes o profesor.</li>
             <li style={li}>Revisa los criterios oficiales de corrección publicados por tu comunidad autónoma.</li>
-            <li style={li}>Si detectas un error claro, puedes reportarlo en <a href="mailto:hola@pausia.es" style={aStyle}>hola@pausia.es</a>.</li>
+            <li style={li}>Si detectas un error claro, puedes reportarlo en <a href="mailto:hola@kairo.es" style={aStyle}>hola@kairo.es</a>.</li>
           </ul>
         </Section>
 

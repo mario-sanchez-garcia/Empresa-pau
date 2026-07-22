@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 export const CCAA_OPTIONS = ['Madrid', 'Cataluña'] as const
 export type CCAA = typeof CCAA_OPTIONS[number]
 
-const STORAGE_KEY = 'pausia_ccaa'
-const CHANGE_EVENT = 'pausia_ccaa_change'
+const STORAGE_KEY = 'kairo_ccaa'
+const CHANGE_EVENT = 'kairo_ccaa_change'
 
 function isCCAA(value: string | null): value is CCAA {
   return CCAA_OPTIONS.includes(value as CCAA)

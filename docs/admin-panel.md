@@ -1,6 +1,6 @@
 # Panel interno /admin
 
-Panel privado para control de la beta de Pausia. Solo accesible para usuarios en `INTERNAL_USER_EMAILS`.
+Panel privado para control de la beta de Kairo. Solo accesible para usuarios en `INTERNAL_USER_EMAILS`.
 
 ## Cómo acceder
 
@@ -77,7 +77,7 @@ Generados automáticamente a partir de los datos (sin IA):
 
 ### Uso por acción (7 días)
 Tabla con ruta + acción como unidad, con etiqueta legible:
-- "Chat con Pausia" → `/api/chat` + `chat`
+- "Chat con Kairo" → `/api/chat` + `chat`
 - "Corrección imagen" → `/api/chat` + `image_correction`
 - "Mi Plan" → `/api/planning` + `planning_generation`
 - "Simulacro" → `/api/simulacro` + `simulacro_correction`

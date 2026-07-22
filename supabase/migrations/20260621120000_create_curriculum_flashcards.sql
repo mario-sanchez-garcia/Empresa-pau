@@ -1,5 +1,5 @@
 -- Migration: create curriculum_flashcards table
--- Tabla editorial Pausia — contenido curricular para Camino PAU.
+-- Tabla editorial Kairo — contenido curricular para Camino PAU.
 -- Regiones: madrid, cataluna, ambas.
 
 create table if not exists public.curriculum_flashcards (

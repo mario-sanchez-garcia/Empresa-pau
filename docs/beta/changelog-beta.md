@@ -1,4 +1,4 @@
-# Changelog · Beta Privada Pausia
+# Changelog · Beta Privada Kairo
 
 > Historial de cambios y sprints desde el inicio del desarrollo hasta la beta privada.  
 > Formato: `[SPRINT] · Fecha aproximada · Descripción`
@@ -64,7 +64,7 @@
 - Pantalla "Creando tu Camino PAU…" con 3 checks animados
 - Primera misión: 3 tareas de activación (flashcard, test, correccion_ia)
 - Tiny win screen: XP celebration + diagnóstico soft + Parent Link Module
-- Persistencia en `localStorage` via `pausia_onboarding_v1`
+- Persistencia en `localStorage` via `kairo_onboarding_v1`
 - POST a `/api/onboarding/setup` → upsert en `camino_route_settings`
 
 ### Arquitectura

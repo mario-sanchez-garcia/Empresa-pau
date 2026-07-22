@@ -13,13 +13,13 @@ El resto de asignaturas queda visible como Próximamente en onboarding y no debe
 
 ## Fuentes usadas
 
-- `pausia_latex_beta_pack.zip`: temas beta de Matemáticas II y Matemáticas CCSS.
-- `pausia_lengua_latex_beta_pack.zip`: secuencia beta de Lengua y guía de ingesta.
-- `pausia_historia_latex_beta_pack.zip`: secuencia beta de Historia y guía de ingesta.
+- `kairo_latex_beta_pack.zip`: temas beta de Matemáticas II y Matemáticas CCSS.
+- `kairo_lengua_latex_beta_pack.zip`: secuencia beta de Lengua y guía de ingesta.
+- `kairo_historia_latex_beta_pack.zip`: secuencia beta de Historia y guía de ingesta.
 - `Cronologia_asignaturas_2_Bachillerato_Madrid.docx`: referencia de orden académico.
 - `pendientes-beta-septiembre.pdf`: prioridades beta/septiembre.
 - `base-planificacion-camino-pau.docx`: diagnóstico de planificación.
-- `Pausia_pricing_definitivo_v4 (1).pdf`: precios y límites comerciales.
+- `Kairo_pricing_definitivo_v4 (1).pdf`: precios y límites comerciales.
 
 ## Cambios funcionales principales
 
@@ -95,7 +95,7 @@ La solución actual:
 
 - Tema visto: el alumno abre la explicación del curso.
 - Tema practicado: el alumno entrega el ejercicio aplicado.
-- Tema completado: el ejercicio aplicado queda corregido con Pausia.
+- Tema completado: el ejercicio aplicado queda corregido con Kairo.
 - Tema dominado: ejercicio aplicado y PAU/EVAU del mismo tema con nota suficiente.
 
 En esta iteración, la regla crítica implementada es que el XP del curso se dispara desde corrección/complete-mission, no por abrir teoría.

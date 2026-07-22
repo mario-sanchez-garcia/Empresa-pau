@@ -53,7 +53,7 @@ export default function ExamStatement({
   const [highlights, setHighlights] = useState<HighlightRange[]>([])
   const [selectedHighlight, setSelectedHighlight] = useState<SelectedHighlight | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
-  const safeStorageKey = useMemo(() => storageKey ? `pausia:statement-highlights:${storageKey}` : '', [storageKey])
+  const safeStorageKey = useMemo(() => storageKey ? `kairo:statement-highlights:${storageKey}` : '', [storageKey])
 
   useEffect(() => {
     if (!safeStorageKey || typeof window === 'undefined') return
@@ -132,13 +132,13 @@ export default function ExamStatement({
 
   function selectHighlight(event: ReactMouseEvent<HTMLDivElement>) {
     const target = event.target as Element
-    const mark = target.closest<HTMLElement>('mark[data-pausia-highlight="true"]')
+    const mark = target.closest<HTMLElement>('mark[data-kairo-highlight="true"]')
     if (!mark || !bodyRef.current?.contains(mark)) {
       setSelectedHighlight(null)
       return
     }
 
-    const highlight = highlights.find(item => item.id === mark.dataset.pausiaHighlightId)
+    const highlight = highlights.find(item => item.id === mark.dataset.kairoHighlightId)
     const statement = statementRef.current
     if (!highlight || !statement) return
     const statementRect = statement.getBoundingClientRect()
@@ -256,7 +256,7 @@ function applyHighlights(root: HTMLElement, highlights: HighlightRange[]) {
 }
 
 function unwrapHighlights(root: HTMLElement) {
-  root.querySelectorAll('mark[data-pausia-highlight="true"]').forEach(mark => {
+  root.querySelectorAll('mark[data-kairo-highlight="true"]').forEach(mark => {
     const parent = mark.parentNode
     if (!parent) return
     while (mark.firstChild) parent.insertBefore(mark.firstChild, mark)
@@ -271,9 +271,9 @@ function highlightRange(root: HTMLElement, highlight: HighlightRange) {
     const selected = part.node.splitText(part.start)
     selected.splitText(part.length)
     const mark = document.createElement('mark')
-    mark.className = 'pausia-highlight'
-    mark.dataset.pausiaHighlight = 'true'
-    mark.dataset.pausiaHighlightId = highlight.id
+    mark.className = 'kairo-highlight'
+    mark.dataset.kairoHighlight = 'true'
+    mark.dataset.kairoHighlightId = highlight.id
     selected.parentNode?.replaceChild(mark, selected)
     mark.appendChild(selected)
   }
@@ -326,7 +326,7 @@ function collectTextNodes(root: HTMLElement, options: { includeExistingHighlight
       if (!text?.trim() || !parent) return NodeFilter.FILTER_REJECT
       const excluded = options.includeExistingHighlights
         ? '.katex, .katex-display, script, style, textarea, button'
-        : '.katex, .katex-display, mark[data-pausia-highlight="true"], script, style, textarea, button'
+        : '.katex, .katex-display, mark[data-kairo-highlight="true"], script, style, textarea, button'
       if (parent.closest(excluded)) {
         return NodeFilter.FILTER_REJECT
       }

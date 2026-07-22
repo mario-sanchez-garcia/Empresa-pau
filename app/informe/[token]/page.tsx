@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const metadata: Metadata = {
-  title: 'Informe semanal · Pausia',
+  title: 'Informe semanal · Kairo',
   robots: { index: false, follow: false },
 }
 
@@ -62,7 +62,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow" />
-        <title>Informe semanal · Pausia</title>
+        <title>Informe semanal · Kairo</title>
       </head>
       <body style={{ margin: 0, padding: 0, background: '#f4f7fb', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a' }}>
         {children}
@@ -79,7 +79,7 @@ function ErrorPage({ title, body }: { title: string; body: string }) {
           <div style={{ width: 56, height: 56, background: '#fff1f2', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 24 }}>⏰</div>
           <h1 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{title}</h1>
           <p style={{ margin: '0 0 24px', fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>{body}</p>
-          <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>Puedes pedir al alumno que comparta un enlace nuevo desde su cuenta de Pausia.</p>
+          <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>Puedes pedir al alumno que comparta un enlace nuevo desde su cuenta de Kairo.</p>
         </div>
       </div>
     </Layout>
@@ -98,7 +98,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
             <div style={{ width: 32, height: 32, background: '#2563eb', borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ color: '#fff', fontSize: 16, fontWeight: 900 }}>P</span>
             </div>
-            <span style={{ fontSize: 17, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>Pausia</span>
+            <span style={{ fontSize: 17, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>Kairo</span>
           </div>
           <h1 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
             Informe semanal de {report.firstName}
@@ -212,7 +212,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
         <div style={{ textAlign: 'center', paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
           {isPremium ? (
             <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>
-              Informe generado por <strong style={{ color: '#2563eb' }}>Pausia</strong> · Preparación PAU
+              Informe generado por <strong style={{ color: '#2563eb' }}>Kairo</strong> · Preparación PAU
             </p>
           ) : (
             <div>
@@ -230,7 +230,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                 Conoce el Pack Curso PAU →
               </a>
               <p style={{ margin: '12px 0 0', fontSize: 11, color: '#94a3b8' }}>
-                Generado por <strong>Pausia</strong>
+                Generado por <strong>Kairo</strong>
               </p>
             </div>
           )}

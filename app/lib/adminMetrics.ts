@@ -22,7 +22,7 @@ export function estimateCostEur(
 
 // Human-readable labels for route+action combinations
 const ROUTE_ACTION_LABELS: Record<string, string> = {
-  '/api/chat|chat': 'Chat con Pausia',
+  '/api/chat|chat': 'Chat con Kairo',
   '/api/chat|image_correction': 'Corrección imagen',
   '/api/chat|correction': 'Corrección texto',
   '/api/planning|planning_generation': 'Mi Plan',

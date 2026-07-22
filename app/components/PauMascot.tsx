@@ -54,7 +54,7 @@ export default function PauMascot({
 }: PauMascotProps) {
   const px     = SIZE_PX[size]
   const src    = VARIANT_SRC[variant]
-  const label  = alt ?? 'Pau, mascota de Pausia'
+  const label  = alt ?? 'Pau, mascota de Kairo'
   const haloR  = Math.round(px * 0.35)
 
   const imgEl = (

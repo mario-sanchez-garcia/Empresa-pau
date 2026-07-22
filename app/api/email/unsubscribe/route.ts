@@ -11,7 +11,7 @@ function htmlPage(title: string, body: string): NextResponse {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${title} — Pausia</title>
+  <title>${title} — Kairo</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f7fb;font-family:system-ui,sans-serif">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:60px 20px">
@@ -56,11 +56,11 @@ export async function GET(request: NextRequest) {
     `<div style="width:56px;height:56px;background:#f0fdf4;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:26px;line-height:1">✓</div>
     <h1 style="margin:0 0 12px;font-size:20px;font-weight:900;color:#0f172a">Baja confirmada</h1>
     <p style="margin:0 0 28px;font-size:14px;color:#475569;line-height:1.6">
-      Te has dado de baja de los recordatorios de Pausia.<br>Ya no recibirás más emails.
+      Te has dado de baja de los recordatorios de Kairo.<br>Ya no recibirás más emails.
     </p>
     <a href="https://empresa-pau.vercel.app/camino"
        style="display:inline-block;background:#2563eb;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:12px">
-      Volver a Pausia →
+      Volver a Kairo →
     </a>
     <p style="margin:24px 0 0;font-size:12px;color:#94a3b8">
       Puedes reactivar los recordatorios desde

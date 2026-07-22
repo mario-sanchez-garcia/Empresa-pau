@@ -31,7 +31,7 @@ export default function PausiaBrand({
   const mark = (
     <span
       aria-hidden={variant === 'mark' ? undefined : 'true'}
-      aria-label={variant === 'mark' ? 'Pausia' : undefined}
+      aria-label={variant === 'mark' ? 'Kairo' : undefined}
       className={variant === 'mark' ? className : undefined}
       style={{
         width: s.mark,
@@ -89,7 +89,7 @@ export default function PausiaBrand({
       >
         <img
           src={stacked ? '/brand/pausia-lockup.png' : '/brand/pausia-logo.svg'}
-          alt="Pausia"
+          alt="Kairo"
           width={stacked ? s.stackW : s.logoW}
           height={stacked ? s.stackH : s.logoH}
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}

@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Términos y Condiciones · Pausia',
-  description: 'Términos y Condiciones de Uso de Pausia.',
+  title: 'Términos y Condiciones · Kairo',
+  description: 'Términos y Condiciones de Uso de Kairo.',
 }
 
 export default function TerminosPage() {
@@ -17,7 +17,7 @@ export default function TerminosPage() {
 
         <Section title="1. Información del responsable">
           <p style={p}>
-            El presente servicio es ofrecido por los responsables del proyecto Pausia:
+            El presente servicio es ofrecido por los responsables del proyecto Kairo:
           </p>
           <ul style={ul}>
             <li style={li}>Mario Sánchez García</li>
@@ -30,7 +30,7 @@ export default function TerminosPage() {
 
         <Section title="2. Descripción del servicio">
           <p style={p}>
-            Pausia es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado (Camino PAU), chat educativo con asistente IA e historial de correcciones y progreso.
+            Kairo es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado (Camino PAU), chat educativo con asistente IA e historial de correcciones y progreso.
           </p>
         </Section>
 
@@ -58,31 +58,31 @@ export default function TerminosPage() {
 
         <Section title="6. Contenido educativo">
           <p style={p}>
-            Los exámenes están basados en pruebas oficiales de la PAU/EVAU de acceso público. Las correcciones son generadas por inteligencia artificial y tienen carácter orientativo. Las correcciones de Pausia no garantizan ninguna nota en la PAU/EVAU real.
+            Los exámenes están basados en pruebas oficiales de la PAU/EVAU de acceso público. Las correcciones son generadas por inteligencia artificial y tienen carácter orientativo. Las correcciones de Kairo no garantizan ninguna nota en la PAU/EVAU real.
           </p>
         </Section>
 
         <Section title="7. Planes y precios">
           <p style={p}>
-            Los pagos son procesados por Stripe. Pausia no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
+            Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>
           </p>
         </Section>
 
         <Section title="8. Propiedad intelectual">
           <p style={p}>
-            Todos los contenidos originales de Pausia son propiedad de los responsables del proyecto y están protegidos por la legislación española e internacional sobre propiedad intelectual.
+            Todos los contenidos originales de Kairo son propiedad de los responsables del proyecto y están protegidos por la legislación española e internacional sobre propiedad intelectual.
           </p>
         </Section>
 
         <Section title="9. Limitación de responsabilidad">
           <p style={p}>
-            Pausia no garantiza la disponibilidad ininterrumpida del Servicio, que las correcciones IA sean equivalentes a las de un docente, ni resultados académicos específicos.
+            Kairo no garantiza la disponibilidad ininterrumpida del Servicio, que las correcciones IA sean equivalentes a las de un docente, ni resultados académicos específicos.
           </p>
         </Section>
 
         <Section title="10. Modificación de los términos">
           <p style={p}>
-            Pausia se reserva el derecho a modificar estos Términos. Los cambios serán notificados por correo electrónico con al menos 15 días de antelación.
+            Kairo se reserva el derecho a modificar estos Términos. Los cambios serán notificados por correo electrónico con al menos 15 días de antelación.
           </p>
         </Section>
 

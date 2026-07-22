@@ -3,7 +3,7 @@ import { CheckCircle2 } from 'lucide-react'
 import PausiaBrand from '@/components/shared/PausiaBrand'
 
 export const metadata: Metadata = {
-  title: 'Pago recibido · Pausia',
+  title: 'Pago recibido · Kairo',
   description: 'Tu pago ha sido recibido. Estamos activando el Pack Curso PAU.',
 }
 
@@ -28,7 +28,7 @@ export default function ParentCheckoutSuccess() {
         </p>
 
         <p style={styles.body}>
-          El alumno recibirá acceso completo al Camino PAU en su cuenta de Pausia.
+          El alumno recibirá acceso completo al Camino PAU en su cuenta de Kairo.
           No es necesario hacer nada más.
         </p>
 

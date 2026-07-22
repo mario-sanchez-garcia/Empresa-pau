@@ -285,7 +285,7 @@ export default function Login() {
             </h1>
             <p style={{ fontSize: 14, color: C.muted, margin: '8px 0 0', fontWeight: 400, lineHeight: 1.6 }}>
               {modo === 'login'
-                ? 'Entra en tu cuenta de Pausia para continuar'
+                ? 'Entra en tu cuenta de Kairo para continuar'
                 : 'Empieza gratis a preparar tu EBAU con IA'}
             </p>
           </div>
@@ -419,7 +419,7 @@ export default function Login() {
                 <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, fontWeight: 700, textDecoration: 'none' }}>Términos y Condiciones</a>
                 {' '}y la{' '}
                 <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, fontWeight: 700, textDecoration: 'none' }}>Política de Privacidad</a>
-                {' '}de Pausia. Si tengo entre 14 y 17 años, mis padres o tutores conocen y aceptan el uso del Servicio.
+                {' '}de Kairo. Si tengo entre 14 y 17 años, mis padres o tutores conocen y aceptan el uso del Servicio.
               </span>
             </label>
           )}
@@ -440,7 +440,7 @@ export default function Login() {
                     borderTopColor: '#fff', borderRadius: '50%',
                   }} aria-label="Cargando..." />
                 : <>
-                    {modo === 'login' ? 'Entrar a Pausia' : 'Crear cuenta'}
+                    {modo === 'login' ? 'Entrar a Kairo' : 'Crear cuenta'}
                     <ArrowRight size={16} />
                   </>
               }

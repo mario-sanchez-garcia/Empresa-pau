@@ -918,7 +918,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h2 className="text-lg font-black text-slate-950">Entrega tu ejercicio</h2>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">El XP se asigna sólo después de corregir con Pausia y depende de la nota obtenida.</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-500">El XP se asigna sólo después de corregir con Kairo y depende de la nota obtenida.</p>
                   </div>
                   {missionId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Misión conectada</span>}
                 </div>
@@ -942,7 +942,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   </div>
                 )}
                 <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
-                  {correcting ? <><PausiaLoadingDot /> Corrigiendo con Pausia...</> : <>Corregir con Pausia <Check size={16} /></>}
+                  {correcting ? <><PausiaLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={16} /></>}
                 </button>
                 {score != null && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800">Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}</p>}
                 {correction && <div className="mt-4"><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
@@ -977,10 +977,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <a href="#course-exercise" className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-700">Corregir ejercicio del curso <Check size={16} /></a>
               </div>
               <div className="rounded-3xl border border-violet-100 bg-white p-4">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Pausia sobre este tema</p>
-                <p className="mt-2 text-sm font-semibold text-slate-600">Abre el Chat con Pausia con esta asignatura, bloque y tema como contexto.</p>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Kairo sobre este tema</p>
+                <p className="mt-2 text-sm font-semibold text-slate-600">Abre el Chat con Kairo con esta asignatura, bloque y tema como contexto.</p>
                 <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => <Link key={item} href={chatHref(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</Link>)}</div>
-                <Link href={chatHref()} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Abrir Chat con Pausia <MessageCircle size={16} /></Link>
+                <Link href={chatHref()} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Abrir Chat con Kairo <MessageCircle size={16} /></Link>
               </div>
               <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4">
                 <p className="text-sm font-black text-emerald-900">{current.xp ?? 0} XP en este tema</p>

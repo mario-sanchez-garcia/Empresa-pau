@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
 
   const emailSubject = isSunday
     ? 'Tu simulacro semanal te espera — 20 minutos que mueven tu nota'
-    : 'Tu misión de hoy en Pausia te espera 📚'
+    : 'Tu misión de hoy en Kairo te espera 📚'
 
   const html = isSunday ? `
 <!DOCTYPE html>

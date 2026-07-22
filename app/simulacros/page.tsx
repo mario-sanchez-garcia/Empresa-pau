@@ -29,7 +29,7 @@ interface ExamHistoryRow {
 }
 
 const YEAR_CHOICES: Array<{ id: YearChoice; label: string; description: string }> = [
-  { id: 'all', label: 'Todos los años', description: 'Pausia mezcla ejercicios oficiales disponibles.' },
+  { id: 'all', label: 'Todos los años', description: 'Kairo mezcla ejercicios oficiales disponibles.' },
   { id: 'recent', label: 'Años recientes', description: 'Entrena con convocatorias más actuales.' },
   { id: 'middle', label: 'Años intermedios', description: 'Práctica equilibrada con exámenes estándar.' },
   { id: 'classic', label: 'Años clásicos', description: 'Base sólida con ejercicios más directos.' },
@@ -592,7 +592,7 @@ function SimulacrosPage() {
                 </div>
               ) : (
                 <div className="rounded-2xl border p-4 text-sm font-semibold leading-6" style={{ borderColor: `${cfg.color}24`, background: `${cfg.color}0f`, color: '#475569' }}>
-                  Lengua se genera como examen oficial coherente. Pausia elige automáticamente la versión compatible con el banco de ejercicios.
+                  Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
                 </div>
               )}
             </div>
@@ -719,8 +719,8 @@ function autoModeInfo(mode: SimulacroMode, weakCandidateCount: number) {
     return {
       title: weakCandidateCount > 0 ? 'Repaso dirigido por tus notas' : 'Necesita correcciones previas',
       description: weakCandidateCount > 0
-        ? `Pausia usará primero ${weakCandidateCount} ejercicio${weakCandidateCount === 1 ? '' : 's'} donde tu porcentaje fue más bajo y completará el examen si hace falta.`
-        : 'Completa alguna corrección o simulacro de esta asignatura para que Pausia pueda detectar tus puntos débiles.'
+        ? `Kairo usará primero ${weakCandidateCount} ejercicio${weakCandidateCount === 1 ? '' : 's'} donde tu porcentaje fue más bajo y completará el examen si hace falta.`
+        : 'Completa alguna corrección o simulacro de esta asignatura para que Kairo pueda detectar tus puntos débiles.'
     }
   }
   if (mode === 'tipicos') {

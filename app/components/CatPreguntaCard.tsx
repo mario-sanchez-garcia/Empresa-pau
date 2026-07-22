@@ -212,7 +212,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           style={{ background: `linear-gradient(135deg, ${CAT_UI.color}, ${CAT_UI.accent})`, boxShadow: `0 16px 34px ${CAT_UI.accent}33` }}
           type="button"
         >
-          {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Pausia...' : 'Corregir con Pausia'}
+          {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
         </button>
       </section>
 
@@ -220,7 +220,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         <section className="border-t-2" style={{ borderColor: CAT_UI.color }}>
           <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: CAT_UI.color }}>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20"><WandSparkles size={16} /></span>
-            CORRECCIÓN DE PAUSIA
+            CORRECCIÓN DE KAIRO
           </div>
           <CorrectionResultCard correction={correccion} officialMaxScore={pregunta.puntuacion} className="p-6 text-[0.925rem] leading-7" />
         </section>

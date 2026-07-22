@@ -52,7 +52,7 @@ export function correctionPayloadToMarkdown(input: unknown, options: { officialM
       if (recovered) return recovered
       return 'No hemos podido formatear esta corrección automáticamente, pero tus datos están guardados. Vuelve a intentarlo para regenerar una corrección limpia.'
     }
-    return text && !/^#{1,6}\s/m.test(text) ? `# Corrección de Pausia\n\n${text}` : text
+    return text && !/^#{1,6}\s/m.test(text) ? `# Corrección de Kairo\n\n${text}` : text
   }
 
   return ''
@@ -103,7 +103,7 @@ function recoverMalformedCorrectionMarkdown(value: string) {
   const hasUsefulContent = Boolean(feedback || strengths.length || errors.length || detail || modelAnswer || advice || theory || why)
 
   const sections = [
-    feedback ? `# Corrección de Pausia\n\n${feedback}` : '# Corrección de Pausia',
+    feedback ? `# Corrección de Kairo\n\n${feedback}` : '# Corrección de Kairo',
     strengths.length ? `## Lo que está bien\n\n${strengths.map(item => `- ${item}`).join('\n')}` : '',
     errors.length ? `## Errores o mejoras\n\n${errors.map(item => `- ${item}`).join('\n')}` : '',
     detail ? `## Corrección paso a paso\n\n${detail}` : '',

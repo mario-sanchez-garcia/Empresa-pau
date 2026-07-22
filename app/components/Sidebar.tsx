@@ -32,7 +32,7 @@ const NAV_ITEMS = [
   { id: 'examenes',     label: 'Exámenes',        desc: 'Practica y corrige', href: '/?view=examenes', icon: ClipboardList },
   { id: 'simulacros',   label: 'Simulacros',      desc: 'Condiciones reales', href: '/simulacros',     icon: TimerReset },
   { id: 'zona',         label: 'La Zona',         desc: 'Estudia a tu manera',href: '/zona',           icon: BrainCircuit },
-  { id: 'chat',         label: 'Chat con Pausia', desc: 'Resuelve dudas',     href: '/?view=chat',     icon: MessageCircle },
+  { id: 'chat',         label: 'Chat con Kairo', desc: 'Resuelve dudas',     href: '/?view=chat',     icon: MessageCircle },
   { id: 'historial',    label: 'Historial',       desc: 'Tus correcciones',   href: '/?view=historial',icon: BarChart3 },
 ] as const
 

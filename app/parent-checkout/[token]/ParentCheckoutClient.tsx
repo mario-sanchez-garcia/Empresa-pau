@@ -138,7 +138,7 @@ export default function ParentCheckoutClient({
 
           {/* Sub */}
           <p style={{ fontSize: 17, color: C.textSub, lineHeight: 1.65, margin: '0 auto 40px', maxWidth: 460 }}>
-            Pausia corrige sus ejercicios con las rúbricas oficiales — igual que un profesor, en segundos. Plan completo de septiembre a junio.
+            Kairo corrige sus ejercicios con las rúbricas oficiales — igual que un profesor, en segundos. Plan completo de septiembre a junio.
           </p>
 
           {/* Stats */}
@@ -160,7 +160,7 @@ export default function ParentCheckoutClient({
       <section style={{ background: C.white, padding: '56px 0' }}>
         <div style={container}>
           <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', color: C.blue, textTransform: 'uppercase', margin: '0 0 8px' }}>Cómo funciona</p>
-          <h2 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, color: C.text, margin: '0 0 28px', lineHeight: 1.2 }}>¿Cómo ayuda Pausia a tu hijo/a?</h2>
+          <h2 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, color: C.text, margin: '0 0 28px', lineHeight: 1.2 }}>¿Cómo ayuda Kairo a tu hijo/a?</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {STEPS.map(step => (
               <div key={step.num} style={{ display: 'flex', gap: 18, alignItems: 'flex-start', background: C.bg, borderRadius: 18, padding: '20px', border: `1px solid ${C.border}` }}>
@@ -217,7 +217,7 @@ export default function ParentCheckoutClient({
 
           {/* Comparison */}
           <p style={{ fontSize: 13, color: C.textSub, margin: '0 auto 32px', maxWidth: 380, lineHeight: 1.55, background: C.bg, borderRadius: 12, padding: '12px 16px', border: `1px solid ${C.border}` }}>
-            Las academias cobran <strong>200 €/mes</strong>. Pausia cuesta{' '}
+            Las academias cobran <strong>200 €/mes</strong>. Kairo cuesta{' '}
             <strong style={{ color: C.blue }}>{price} todo el curso</strong>.
           </p>
 
@@ -250,7 +250,7 @@ export default function ParentCheckoutClient({
             }}
           >
             <Lock size={18} />
-            {loading ? 'Redirigiendo al pago…' : `Desbloquear Pausia para ${name ?? 'tu hijo/a'}`}
+            {loading ? 'Redirigiendo al pago…' : `Desbloquear Kairo para ${name ?? 'tu hijo/a'}`}
           </button>
 
           {/* Security */}
@@ -290,7 +290,7 @@ export default function ParentCheckoutClient({
         <div style={{ ...container, textAlign: 'center' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 18px', marginBottom: 14 }}>
             {[
-              { label: '© 2026 Pausia', href: null },
+              { label: '© 2026 Kairo', href: null },
               { label: 'legal@pausia.es', href: 'mailto:legal@pausia.es' },
               { label: 'Términos', href: '/legal/terminos' },
               { label: 'Privacidad', href: '/legal/privacidad' },

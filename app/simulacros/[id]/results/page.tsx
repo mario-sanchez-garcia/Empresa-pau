@@ -159,8 +159,8 @@ export default function SimulacroResultsPage() {
   async function share() {
     await navigator.clipboard.writeText(
       hasGrade
-        ? `He sacado un ${nota.toFixed(1)} en un simulacro de ${cfg.label} en Pausia.`
-        : `He completado un simulacro de ${cfg.label} en Pausia.`
+        ? `He sacado un ${nota.toFixed(1)} en un simulacro de ${cfg.label} en Kairo.`
+        : `He completado un simulacro de ${cfg.label} en Kairo.`
     )
     setCopyMessage('Resultado copiado al portapapeles.')
     window.setTimeout(() => setCopyMessage(''), 2200)
@@ -492,7 +492,7 @@ export default function SimulacroResultsPage() {
               href="/"
               className="pau-button-secondary no-underline"
             >
-              <MessageCircle size={15} />Preguntar a Pausia
+              <MessageCircle size={15} />Preguntar a Kairo
             </Link>
             {copyMessage && (
               <span
@@ -591,7 +591,7 @@ function normalizePlan(result: any, detail: ReturnType<typeof normalizeDetail>, 
       tema: item.tema || `Prioridad ${index + 1}`,
       accion: item.accion || 'Revisa este punto y repite un ejercicio parecido.',
       tiempo_recomendado: item.tiempo_recomendado || '20 min',
-      recurso_sugerido: item.recurso_sugerido || 'Vuelve al banco de exámenes de Pausia.'
+      recurso_sugerido: item.recurso_sugerido || 'Vuelve al banco de exámenes de Kairo.'
     }))
   }
 
@@ -607,7 +607,7 @@ function normalizePlan(result: any, detail: ReturnType<typeof normalizeDetail>, 
       tema: block.tema,
       accion: `Rehaz ${block.numero_bloque} centrándote en: ${block.que_faltaba}`,
       tiempo_recomendado: block.porcentaje_logrado < 50 ? '30 min' : '20 min',
-      recurso_sugerido: 'Practica otro bloque del mismo tema en Pausia.'
+      recurso_sugerido: 'Practica otro bloque del mismo tema en Kairo.'
     }))
 }
 

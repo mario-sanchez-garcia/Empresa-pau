@@ -106,7 +106,7 @@ export function RespuestaIA({ contenido, officialMaxScore }: { contenido: string
   return (
     <section className="overflow-hidden rounded-[22px] border-2" style={{ borderColor: UI.color }}>
       <div className="flex items-center gap-2 px-6 py-4 text-sm font-black text-white" style={{ backgroundColor: UI.color }}>
-        <WandSparkles size={17} /> CORRECCIÓN DE PAUSIA
+        <WandSparkles size={17} /> CORRECCIÓN DE KAIRO
       </div>
       <CorrectionResultCard correction={contenido} officialMaxScore={officialMaxScore} className="p-6 text-sm leading-7" />
     </section>
@@ -296,7 +296,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
             </div>
           )}
           <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>
-            {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />} {cargando ? 'Corrigiendo con Pausia...' : 'Corregir con Pausia'}
+            {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />} {cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
           </button>
         </div>}
         {!contenidoIncompleto && <RespuestaIA contenido={correccion} officialMaxScore={puntuacion} />}

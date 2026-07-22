@@ -52,7 +52,7 @@ export default function GradePredictionCard({ predictions, loading, error }: Gra
         )}
 
         <p className="mt-4 text-xs font-semibold text-slate-400">
-          No es una predicción oficial. Mejora cuanto más practicas en Pausia.
+          No es una predicción oficial. Mejora cuanto más practicas en Kairo.
         </p>
       </div>
     </section>

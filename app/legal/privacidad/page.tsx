@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidad · Pausia',
-  description: 'Política de Privacidad de Pausia.',
+  title: 'Política de Privacidad · Kairo',
+  description: 'Política de Privacidad de Kairo.',
 }
 
 export default function PrivacidadPage() {
@@ -26,7 +26,7 @@ export default function PrivacidadPage() {
           <ul style={ul}>
             <li style={li}><strong>Datos de registro:</strong> correo electrónico, contraseña cifrada, centro escolar, comunidad autónoma y asignaturas.</li>
             <li style={li}><strong>Datos de uso:</strong> respuestas a ejercicios, correcciones IA, historial de progreso, XP y misiones completadas.</li>
-            <li style={li}><strong>Datos de pago:</strong> correo del padre/madre/tutor que paga. Los datos de tarjeta son procesados por Stripe y nunca son accesibles para Pausia.</li>
+            <li style={li}><strong>Datos de pago:</strong> correo del padre/madre/tutor que paga. Los datos de tarjeta son procesados por Stripe y nunca son accesibles para Kairo.</li>
             <li style={li}><strong>Datos técnicos:</strong> dirección IP para prevención de abuso.</li>
           </ul>
         </Section>
@@ -50,7 +50,7 @@ export default function PrivacidadPage() {
 
         <Section title="5. Protección de datos de menores">
           <p style={p}>
-            Pausia está dirigido a usuarios de 14 a 18 años. No compartimos datos de menores con terceros con fines publicitarios. Los padres o tutores pueden solicitar acceso, rectificación o eliminación de datos de sus hijos en <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>.
+            Kairo está dirigido a usuarios de 14 a 18 años. No compartimos datos de menores con terceros con fines publicitarios. Los padres o tutores pueden solicitar acceso, rectificación o eliminación de datos de sus hijos en <a href="mailto:legal@pausia.es" style={aStyle}>legal@pausia.es</a>.
           </p>
         </Section>
 
@@ -78,7 +78,7 @@ export default function PrivacidadPage() {
 
         <Section title="9. Seguridad">
           <p style={p}>
-            Contraseñas con hash seguro, HTTPS/TLS, Row Level Security en base de datos, rate limiting y datos de pago nunca accesibles para Pausia.
+            Contraseñas con hash seguro, HTTPS/TLS, Row Level Security en base de datos, rate limiting y datos de pago nunca accesibles para Kairo.
           </p>
         </Section>
 

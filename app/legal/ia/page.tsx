@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Uso de Inteligencia Artificial · Pausia',
-  description: 'Cómo usa Pausia la inteligencia artificial en correcciones y simulacros.',
+  title: 'Uso de Inteligencia Artificial · Kairo',
+  description: 'Cómo usa Kairo la inteligencia artificial en correcciones y simulacros.',
 }
 
 export default function IaPage() {
@@ -15,9 +15,9 @@ export default function IaPage() {
         <h1 style={h1}>Uso de Inteligencia Artificial</h1>
         <p style={meta}>Última actualización: junio 2026 · Versión beta privada</p>
 
-        <Section title="1. Qué hace la IA en Pausia">
+        <Section title="1. Qué hace la IA en Kairo">
           <p style={p}>
-            Pausia usa modelos de inteligencia artificial para generar correcciones de respuestas abiertas, feedback de simulacros y orientación sobre errores de estudio.
+            Kairo usa modelos de inteligencia artificial para generar correcciones de respuestas abiertas, feedback de simulacros y orientación sobre errores de estudio.
           </p>
         </Section>
 
@@ -49,7 +49,7 @@ export default function IaPage() {
 
         <Section title="5. Límites de uso razonable">
           <p style={p}>
-            Para proteger la calidad del servicio y los costes operativos, puede haber límites en el número de correcciones o simulacros disponibles según el plan. Pausia muestra un aviso cuando se alcanzan estos límites. Si tienes el Pack Curso PAU activo, los límites están ampliados para un uso normal de estudio diario.
+            Para proteger la calidad del servicio y los costes operativos, puede haber límites en el número de correcciones o simulacros disponibles según el plan. Kairo muestra un aviso cuando se alcanzan estos límites. Si tienes el Pack Curso PAU activo, los límites están ampliados para un uso normal de estudio diario.
           </p>
         </Section>
 

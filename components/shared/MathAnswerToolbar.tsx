@@ -309,7 +309,7 @@ export default function MathAnswerToolbar({
         </div>
       )}
       <p className="px-3 pb-2 text-[11px] font-semibold leading-5 text-slate-500">
-        Puedes usar formato matemático. Ejemplo: límite de f(x) cuando x tiende a a. Pausia lo entenderá.
+        Puedes usar formato matemático. Ejemplo: límite de f(x) cuando x tiende a a. Kairo lo entenderá.
       </p>
     </div>
   )

@@ -121,7 +121,7 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-4xl">
           <header className="mb-8">
             <div className="text-xs font-black uppercase tracking-[0.08em] text-blue-600">Ajustes / Perfil</div>
-            <h1 className="mt-2 text-3xl font-black">Tu espacio en Pausia</h1>
+            <h1 className="mt-2 text-3xl font-black">Tu espacio en Kairo</h1>
             <p className="mt-2 text-sm text-slate-500">Identidad, comunidad por defecto y preferencias de estudio.</p>
           </header>
 
@@ -159,7 +159,7 @@ export default function SettingsPage() {
                 <div className="flex cursor-pointer items-center justify-between gap-4 py-4">
                   <span>
                     <strong className="block text-sm">Recibir recordatorios diarios por email</strong>
-                    <small className="mt-1 block text-xs text-slate-500">Pausia te avisará cuando tengas misiones pendientes en Camino PAU.{emailNotifSaving ? ' Guardando…' : ''}</small>
+                    <small className="mt-1 block text-xs text-slate-500">Kairo te avisará cuando tengas misiones pendientes en Camino PAU.{emailNotifSaving ? ' Guardando…' : ''}</small>
                   </span>
                   <input
                     type="checkbox"

@@ -76,7 +76,7 @@ export default function LigaPublicPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <Users size={14} color="#2563eb" />
-          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: '#2563eb', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Liga Pausia</p>
+          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: '#2563eb', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Liga Kairo</p>
         </div>
         <h1 style={{ margin: '4px 0 4px', fontSize: 24, fontWeight: 900, color: '#111827', letterSpacing: '-0.025em' }}>{liga.nombre}</h1>
         <p style={{ margin: '0 0 20px', fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>

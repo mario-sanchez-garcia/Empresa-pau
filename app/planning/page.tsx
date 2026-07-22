@@ -421,7 +421,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
             <div className="text-center mb-8">
               <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 62, height: 62, borderRadius: 24, background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', boxShadow: '0 18px 42px rgba(37, 99, 235, 0.22)' }}><CalendarDays size={30} /></div>
               <h1 className="text-2xl font-bold" style={{ color: config.ink }}>Mi Plan</h1>
-              <p className="text-sm mt-2" style={{ color: config.muted }}>Dinos tres cosas y Pausia te monta un plan día a día</p>
+              <p className="text-sm mt-2" style={{ color: config.muted }}>Dinos tres cosas y Kairo te monta un plan día a día</p>
             </div>
 
             <div className="flex flex-col gap-6 max-w-lg mx-auto">
@@ -577,7 +577,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
             {generando ? (
               <div className="rounded-3xl p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
                 <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: 58, height: 58, borderRadius: 22, background: config.light, color: config.bg, border: '1px solid #dbeafe' }}><Bot size={28} /></div>
-                <p className="font-semibold" style={{ color: config.ink }}>Pausia está montando tu plan...</p>
+                <p className="font-semibold" style={{ color: config.ink }}>Kairo está montando tu plan...</p>
                 <p className="text-sm mt-2" style={{ color: config.softText }}>Analizando tu progreso y redistribuyendo tareas pendientes</p>
               </div>
             ) : planning.length > 0 ? (
@@ -657,7 +657,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
               ) : activeTab === 'ajustes' ? (
                 <div className="rounded-3xl p-6" style={{ background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(219, 231, 251, 0.95)', boxShadow: config.shadow }}>
                   <h2 className="mb-2 text-lg font-bold" style={{ color: config.ink }}>Ajustes del plan</h2>
-                  <p className="mb-5 text-sm" style={{ color: config.muted }}>Cambia tu objetivo, disponibilidad o asignaturas flojas y Pausia recalcula la semana.</p>
+                  <p className="mb-5 text-sm" style={{ color: config.muted }}>Cambia tu objetivo, disponibilidad o asignaturas flojas y Kairo recalcula la semana.</p>
                   <div className="flex flex-wrap gap-3">
                     <button onClick={() => setPaso('onboarding')} className="campus-hover rounded-2xl px-4 py-2 text-sm font-bold" style={{ ...hoverVars(config.bg, config.light, config.accent), background: '#fff', color: config.bg, border: '1px solid #dbe7fb' }}><PenLine size={14} /> Editar datos</button>
                     <button onClick={() => perfil && usuario && cargarTareasYPlanning(perfil, usuario.id)} className="campus-primary rounded-2xl px-4 py-2 text-sm font-bold text-white" style={{ ...hoverVars(config.bg, config.light, config.accent), background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)' }}><RefreshCw size={14} /> Regenerar plan</button>
@@ -686,7 +686,7 @@ function PlanLoadingCard() {
         <PausiaLoadingDot className="h-5 w-5" />
         <div>
           <p className="text-sm font-black" style={{ color: config.ink }}>Cargando tu plan...</p>
-          <p className="text-xs font-semibold" style={{ color: config.muted }}>Preparando tu planning semanal sin bloquear el resto de Pausia.</p>
+          <p className="text-xs font-semibold" style={{ color: config.muted }}>Preparando tu planning semanal sin bloquear el resto de Kairo.</p>
         </div>
       </div>
     </section>

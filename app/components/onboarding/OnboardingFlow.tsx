@@ -70,7 +70,7 @@ const WEEKLY_DAY_OPTS = [
 const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   welcome: {
     title: 'Crea tu Camino PAU',
-    help: 'Te haremos unas preguntas rápidas para adaptar Pausia a tu comunidad, centro y ritmo real.',
+    help: 'Te haremos unas preguntas rápidas para adaptar Kairo a tu comunidad, centro y ritmo real.',
   },
   community: {
     title: '¿Dónde haces la PAU?',
@@ -89,15 +89,15 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
     help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.',
   },
   'daily-time': {
-    title: '¿Cuánto tiempo podrías estudiar al día con Pausia?',
+    title: '¿Cuánto tiempo podrías estudiar al día con Kairo?',
     help: 'Lo ajustaremos mejor más adelante según tu ritmo.',
   },
   'weekly-days': {
     title: '¿Cuántos días a la semana te gustaría estudiar?',
-    help: 'En el futuro, Pausia adaptará el plan a tu ritmo y preferencias.',
+    help: 'En el futuro, Kairo adaptará el plan a tu ritmo y preferencias.',
   },
   confirm: {
-    title: 'Perfecto. Con esto Pausia puede empezar a construir tu Camino PAU.',
+    title: 'Perfecto. Con esto Kairo puede empezar a construir tu Camino PAU.',
     help: 'Revisa el resumen y empieza cuando lo tengas claro.',
   },
   saving: {
@@ -106,7 +106,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   },
   done: {
     title: 'Tu Camino PAU está listo',
-    help: 'Pausia ya tiene lo necesario para empezar a ayudarte.',
+    help: 'Kairo ya tiene lo necesario para empezar a ayudarte.',
   },
 }
 
@@ -288,7 +288,7 @@ export default function OnboardingFlow() {
 
       <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4">
-          <img src="/brand/pausia-lockup.png" alt="Pausia" className="h-7 shrink-0 object-contain" />
+          <img src="/brand/pausia-lockup.png" alt="Kairo" className="h-7 shrink-0 object-contain" />
           <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-slate-500 sm:flex">
             <span>Preparación PAU</span>
             <span className="h-1 w-1 rounded-full bg-slate-300" />
@@ -367,7 +367,7 @@ export default function OnboardingFlow() {
 
   function renderStep() {
     if (step === 'welcome') {
-      return <PrimaryButton onClick={goNext}>Empezar con Pausia <ArrowRight size={16} /></PrimaryButton>
+      return <PrimaryButton onClick={goNext}>Empezar con Kairo <ArrowRight size={16} /></PrimaryButton>
     }
 
     if (step === 'community') {
@@ -423,7 +423,7 @@ export default function OnboardingFlow() {
         <div className="space-y-4">
           <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
             <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Beta privada</p>
-            <p className="mt-1 text-sm font-bold leading-5 text-blue-900">De momento puedes probar Pausia con Matemáticas II, Matemáticas CCSS, Lengua e Historia. El resto de asignaturas se irán abriendo próximamente.</p>
+            <p className="mt-1 text-sm font-bold leading-5 text-blue-900">De momento puedes probar Kairo con Matemáticas II, Matemáticas CCSS, Lengua e Historia. El resto de asignaturas se irán abriendo próximamente.</p>
           </div>
           <div>
             <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Disponibles en beta privada</p>

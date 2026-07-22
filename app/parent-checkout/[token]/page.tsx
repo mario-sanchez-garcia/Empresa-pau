@@ -38,12 +38,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = link?.student_display_name
 
   return {
-    title: name ? `Plan de Estudio PAU de ${name}` : 'Plan de Estudio PAU · Pausia',
+    title: name ? `Plan de Estudio PAU de ${name}` : 'Plan de Estudio PAU · Kairo',
     description: 'Ruta personalizada para preparar la PAU con misiones diarias, correcciones IA y simulacros.',
     openGraph: {
-      title: name ? `Plan de Estudio PAU de ${name}` : 'Plan de Estudio PAU · Pausia',
+      title: name ? `Plan de Estudio PAU de ${name}` : 'Plan de Estudio PAU · Kairo',
       description: 'Ruta personalizada para preparar la PAU con misiones diarias, correcciones IA y simulacros.',
-      siteName: 'Pausia',
+      siteName: 'Kairo',
     },
   }
 }
@@ -118,7 +118,7 @@ function SuccessStaticPage({ name }: { name: string | null }) {
         <p style={styles.successTitle}>Pack ya activado</p>
         <p style={styles.bodyText}>
           {name ? `El Pack Curso PAU de ${name} ya está activado.` : 'Este Pack Curso PAU ya está activado.'}
-          {' '}Accede a Pausia para comenzar.
+          {' '}Accede a Kairo para comenzar.
         </p>
       </div>
     </main>

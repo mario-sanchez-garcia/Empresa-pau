@@ -614,7 +614,7 @@ function topic(input: TopicInput): CaminoCurriculumTopic {
     progressCriteria: {
       seen: 'El alumno abre la explicación del curso.',
       practiced: 'El alumno entrega el ejercicio aplicado.',
-      completed: 'El ejercicio aplicado queda corregido con Pausia.',
+      completed: 'El ejercicio aplicado queda corregido con Kairo.',
       mastered: 'El alumno completa ejercicio aplicado y PAU/EVAU del mismo tema con nota suficiente.',
     },
     examTags: input.tags,

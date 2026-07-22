@@ -1,10 +1,10 @@
 export type RateLimitAction = 'chat' | 'image_correction' | 'simulacro_correction' | 'planning_generation'
 
 export const RATE_LIMIT_CODE = 'RATE_LIMIT_EXCEEDED'
-export const RATE_LIMIT_BETA_NOTICE = 'Estamos usando límites durante la beta para mantener Pausia estable mientras seguimos mejorando.'
+export const RATE_LIMIT_BETA_NOTICE = 'Estamos usando límites durante la beta para mantener Kairo estable mientras seguimos mejorando.'
 
 const RATE_LIMIT_MESSAGES: Record<RateLimitAction, string> = {
-  chat: 'Has alcanzado el límite de mensajes de hoy. Vuelve mañana para seguir usando el chat de Pausia.',
+  chat: 'Has alcanzado el límite de mensajes de hoy. Vuelve mañana para seguir usando el chat de Kairo.',
   image_correction: 'Has usado tus correcciones disponibles por hoy. Vuelve mañana para seguir practicando con feedback.',
   simulacro_correction: 'Ya has completado el simulacro disponible de hoy. Vuelve mañana para hacer otro.',
   planning_generation: 'Ya has generado tu plan de esta semana. Puedes seguir usando el plan actual y volver a generarlo la próxima semana.'

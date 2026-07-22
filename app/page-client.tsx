@@ -186,7 +186,7 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
         </div>
         <div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>
-            {isContinuing ? 'Pausia está completando la corrección' : 'Pausia está corrigiendo tu ejercicio'}
+            {isContinuing ? 'Kairo está completando la corrección' : 'Kairo está corrigiendo tu ejercicio'}
           </p>
           <p style={{ margin: '5px 0 0', fontSize: 13.5, color: '#64748b', lineHeight: 1.5 }}>
             {isContinuing
@@ -212,7 +212,7 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13, fontWeight: 700 }}>
           <PausiaLoadingDot />
-          {progressPct >= 86 ? 'Últimos detalles...' : safePreviewAvailable ? 'Redactando explicación segura...' : 'Pausia está preparando esta parte...'}
+          {progressPct >= 86 ? 'Últimos detalles...' : safePreviewAvailable ? 'Redactando explicación segura...' : 'Kairo está preparando esta parte...'}
         </div>
         {pendingSteps.map((step) => (
           <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
@@ -1892,7 +1892,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       ? `\n\n> Nota: No se pudo completar ${failedOptional.join(', ')}. La corrección principal sí está completa.`
       : ''
     return {
-      markdown: `# Corrección de Pausia\n\n${completed.join('\n\n')}${optionalNote}`.trim(),
+      markdown: `# Corrección de Kairo\n\n${completed.join('\n\n')}${optionalNote}`.trim(),
       truncated: false,
       blocksCompleted: completed.length,
       failedBlock: ''
@@ -2032,11 +2032,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       const res = await fetch('/api/chat?stream=1', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: `Eres Pausia, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
-            'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Pausia. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n' +
+          pregunta: `Eres Kairo, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
+            'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Kairo. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n' +
             (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
-            hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Pausia') + ': ' + m.texto).join('\n') +
-            '\nResponde solo como Pausia.'
+            hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Kairo') + ': ' + m.texto).join('\n') +
+            '\nResponde solo como Kairo.'
         })
       })
       if (!res.ok) {
@@ -3231,7 +3231,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             )}
             <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', transition: 'color 300ms ease', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.25 }}>
               {seccion === 'examenes' && cfg.label}
-              {seccion === 'chat' && 'Chat con Pausia'}
+              {seccion === 'chat' && 'Chat con Kairo'}
               {seccion === 'historial' && 'Historial de correcciones'}
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
@@ -3944,7 +3944,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 </div>
               )}
               <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
-                {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Pausia...' : 'Corregir con IA'}
+                {cargando ? <PausiaLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con IA'}
               </button>
             </div>}
 
@@ -3952,7 +3952,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
                 <div style={{ padding: '14px 22px', background: 'linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
-                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Pausia</span>
+                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
                   {!correccion && (streamText || cargando) ? (
@@ -3985,7 +3985,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             )}
               </div>
 
-              <aside className="exams-ai-panel" aria-label="Panel de feedback de Pausia">
+              <aside className="exams-ai-panel" aria-label="Panel de feedback de Kairo">
                 <div className="exams-side-card">
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
                     <div>
@@ -4002,7 +4002,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         )
                       })()}
                       <p className="exams-side-text" style={{ marginTop: 8 }}>
-                        {correccion ? `Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts` : cargando ? 'Calculando con la rúbrica oficial...' : 'Resuelve el ejercicio y Pausia te dará feedback.'}
+                        {correccion ? `Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts` : cargando ? 'Calculando con la rúbrica oficial...' : 'Resuelve el ejercicio y Kairo te dará feedback.'}
                       </p>
                     </div>
                     <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }}>
@@ -4017,7 +4017,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         <div className="exams-side-label" style={{ color: '#15803d' }}>Puntos fuertes</div>
                       </div>
                       <p className="exams-side-text">
-                        {correccion ? 'Disponibles en la corrección detallada generada por Pausia.' : cargando ? 'Analizando lo que sí suma puntos...' : 'Aquí aparecerán tus puntos fuertes.'}
+                        {correccion ? 'Disponibles en la corrección detallada generada por Kairo.' : cargando ? 'Analizando lo que sí suma puntos...' : 'Aquí aparecerán tus puntos fuertes.'}
                       </p>
                     </div>
                     <div className="exams-side-section">
@@ -4060,7 +4060,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
             <footer className="exams-footer">
               <div>
-                <strong style={{ color: '#111827' }}>Pausia</strong>
+                <strong style={{ color: '#111827' }}>Kairo</strong>
                 <span style={{ marginLeft: 8 }}>Preparación EBAU de alto rendimiento.</span>
               </div>
               <div className="exams-footer-links" aria-label="Enlaces informativos">
@@ -4088,11 +4088,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               {mensajes.length === 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
                   <div className="chat-avatar-pulse" style={{ width: 92, height: 104, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
-                    <img src="/brand/pausia-lockup.png" alt="Pausia" width={82} height={92} style={{ width: 82, height: 92, objectFit: 'contain', display: 'block' }} />
+                    <img src="/brand/pausia-lockup.png" alt="Kairo" width={82} height={92} style={{ width: 82, height: 92, objectFit: 'contain', display: 'block' }} />
                   </div>
                   <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
                     Hola, soy{' '}
-                    <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pausia</span>
+                    <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Kairo</span>
                   </h2>
                   <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 430, lineHeight: 1.6, fontWeight: 520 }}>
                     Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
@@ -4110,13 +4110,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
               {mensajes.map((msg, i) => (
                 msg.rol === 'pausia' ? (
-                  /* Pausia — full-width editorial card */
+                  /* Kairo — full-width editorial card */
                   <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '16px 0' }}>
                     <div style={{ borderRadius: 28, padding: '22px 22px 24px', background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(219,231,251,0.92)', boxShadow: '0 20px 52px rgba(37,99,235,0.09)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                         <PausiaBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Pausia</div>
+                        <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kairo</div>
                         {(() => {
                           const isStreamingMessage = cargandoChat && i === mensajes.length - 1
                           if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
@@ -4164,7 +4164,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             <div style={{ padding: '10px 32px 18px', maxWidth: 820, width: '100%', margin: '0 auto', flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, boxSizing: 'border-box', background: 'linear-gradient(180deg, rgba(248,251,255,0), rgba(248,251,255,0.94) 22%, rgba(248,251,255,0.98))' }}>
               <div style={{ borderTop: '1px solid rgba(219,231,251,0.84)', paddingTop: 16 }}>
                 <div className="chat-input-wrap">
-                  <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Pausia..." rows={1} style={{ flex: 1, minHeight: 56, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '15px 4px 15px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' }} />
+                  <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 56, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '15px 4px 15px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' }} />
                   <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
                     {cargandoChat ? <PausiaLoadingDot /> : <SendHorizontal size={15} />}
                     {cargandoChat ? 'Pensando...' : 'Enviar'}
@@ -4266,7 +4266,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>
-              <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Pausia mira tus correcciones y te monta una semana realista para remontar puntos débiles</div>
+              <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Kairo mira tus correcciones y te monta una semana realista para remontar puntos débiles</div>
               <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.22)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
                 {cargandoPlan ? <PausiaLoadingDot /> : <BrainCircuit size={17} />}
                 {cargandoPlan ? 'Generando...' : 'Abrir Mi Plan'}
@@ -4276,7 +4276,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', overflow: 'hidden', boxShadow: WARM.shadow }}>
                 <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><BrainCircuit size={17} /></div>
-                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · PAUSIA</span>
+                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · KAIRO</span>
                 </div>
                 <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #eff6ff)' }}>
                   <MathMarkdown text={planIA} format={false} components={planMdComponents} />
@@ -4301,7 +4301,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       <span style={{ fontSize: '13px', color: WARM.softText }}>/{itemSeleccionado.nota_maxima}</span>
                     </div>
                   )}
-                  <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Pausia</button>
+                  <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>
                   <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #dbe7fb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
                 </div>
               </div>
@@ -4327,7 +4327,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 )}
                 {itemSeleccionado.correccion && (
                   <div style={{ padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #dbe7fb', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Corrección de Pausia</div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Corrección de Kairo</div>
                     <CorrectionResultCard correction={itemSeleccionado.correccion} officialMaxScore={itemSeleccionado.nota_maxima} components={mdComponents} />
                   </div>
                 )}

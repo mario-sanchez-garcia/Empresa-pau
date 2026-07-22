@@ -25,7 +25,7 @@ const plans: Plan[] = [
     name: 'Free',
     price: '0 €',
     period: 'sin tarjeta',
-    description: 'Para probar Pausia y empezar a entrenar.',
+    description: 'Para probar Kairo y empezar a entrenar.',
     features: [
       { text: '25 correcciones/mes', included: true },
       { text: '3 fotos/mes', included: true },

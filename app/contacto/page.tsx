@@ -4,8 +4,8 @@ import { Bug, CreditCard, FlaskConical, Mail, Shield, type LucideIcon } from 'lu
 import PausiaBrand from '@/components/shared/PausiaBrand'
 
 export const metadata: Metadata = {
-  title: 'Contacto · Pausia',
-  description: 'Contacta con el equipo de Pausia para soporte, privacidad, reembolsos o preguntas sobre la beta.',
+  title: 'Contacto · Kairo',
+  description: 'Contacta con el equipo de Kairo para soporte, privacidad, reembolsos o preguntas sobre la beta.',
 }
 
 export default function ContactoPage() {
@@ -88,7 +88,7 @@ function ContactCard({
         <p style={cardTitle}>{title}</p>
         <p style={cardDesc}>{description}</p>
         <a
-          href={`mailto:${email}?subject=${encodeURIComponent(subject + ' — Pausia')}`}
+          href={`mailto:${email}?subject=${encodeURIComponent(subject + ' — Kairo')}`}
           style={cardLink}
         >
           {email}

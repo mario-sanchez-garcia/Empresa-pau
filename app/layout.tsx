@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pausia — Prepara tu EBAU",
+  title: "Kairo — Prepara tu EBAU",
   description: "Prepara la EBAU Madrid con exámenes oficiales reales y corrección con IA",
 };
 

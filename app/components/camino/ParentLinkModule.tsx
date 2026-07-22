@@ -11,7 +11,7 @@ interface Props {
   daysSinceReg?: number | null
 }
 
-const SHARE_TEXT = 'Hola, he creado mi Camino PAU en Pausia. Me organiza cada día qué estudiar, corrige mis ejercicios y me ayuda a llegar preparado/a al examen. Puedes ver el plan aquí: '
+const SHARE_TEXT = 'Hola, he creado mi Camino PAU en Kairo. Me organiza cada día qué estudiar, corrige mis ejercicios y me ayuda a llegar preparado/a al examen. Puedes ver el plan aquí: '
 
 const PARENT_BENEFITS = [
   'Qué tiene que estudiar cada semana',

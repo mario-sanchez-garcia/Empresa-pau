@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Política de Reembolsos · Pausia',
+  title: 'Política de Reembolsos · Kairo',
   description: 'Condiciones de reembolso del Pack Curso PAU.',
 }
 
@@ -20,7 +20,7 @@ export default function ReembolsosPage() {
             Si adquiriste el <strong>Pack Curso PAU</strong> y no estás satisfecho, puedes solicitar un reembolso completo dentro de los <strong>7 días naturales</strong> desde la fecha de pago.
           </p>
           <p style={p}>
-            Esta garantía existe para que puedas probar Pausia sin riesgo. No necesitas justificar la solicitud.
+            Esta garantía existe para que puedas probar Kairo sin riesgo. No necesitas justificar la solicitud.
           </p>
         </Section>
 
@@ -39,13 +39,13 @@ export default function ReembolsosPage() {
 
         <Section title="3. Pagos procesados por Stripe">
           <p style={p}>
-            Todos los pagos son procesados por <strong>Stripe</strong>, plataforma de pagos certificada PCI-DSS. Pausia no almacena datos de tarjeta. El reembolso se realiza a la misma tarjeta o método de pago original.
+            Todos los pagos son procesados por <strong>Stripe</strong>, plataforma de pagos certificada PCI-DSS. Kairo no almacena datos de tarjeta. El reembolso se realiza a la misma tarjeta o método de pago original.
           </p>
         </Section>
 
         <Section title="4. Uso razonable durante el periodo de garantía">
           <p style={p}>
-            La garantía está pensada para usuarios que prueban Pausia de buena fe. En caso de uso abusivo (automatización, scraping, acceso fraudulento o solicitud repetida de reembolsos), Pausia se reserva el derecho a no emitir el reembolso o a limitar el acceso.
+            La garantía está pensada para usuarios que prueban Kairo de buena fe. En caso de uso abusivo (automatización, scraping, acceso fraudulento o solicitud repetida de reembolsos), Kairo se reserva el derecho a no emitir el reembolso o a limitar el acceso.
           </p>
         </Section>
 

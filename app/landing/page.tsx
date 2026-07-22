@@ -112,9 +112,9 @@ const FEATURES = [
   { icon: TimerReset,   title: 'Simulacros con tiempo real',      desc: 'Cronómetro integrado para que practiques exactamente como en la PAU.',                              color: C.blue,  bg: C.bgBlue  },
   { icon: WandSparkles, title: 'Corrección IA paso a paso',       desc: 'Nota al instante con desglose detallado de cada apartado y criterio de corrección.',                color: '#7c3aed', bg: '#f5f3ff' },
   { icon: BarChart3,    title: 'Historial de progreso',           desc: 'Todas tus correcciones guardadas para que veas tu evolución semana a semana.',                      color: '#0891b2', bg: '#ecfeff' },
-  { icon: BrainCircuit, title: 'Plan de estudio personalizado',   desc: 'Pausia analiza tus errores y genera un plan semanal concreto y accionable.',                        color: '#059669', bg: '#ecfdf5' },
+  { icon: BrainCircuit, title: 'Plan de estudio personalizado',   desc: 'Kairo analiza tus errores y genera un plan semanal concreto y accionable.',                        color: '#059669', bg: '#ecfdf5' },
   { icon: Sparkles,     title: 'Flashcards y zona de repaso',     desc: 'Repasa conceptos clave con flashcards y un canvas libre para tus esquemas.',                        color: C.amber, bg: C.amberBg },
-  { icon: MessageCircle,title: 'Chat con Pausia',                 desc: 'Tutor IA disponible 24/7 para resolver cualquier duda de Matemáticas, Física, Historia y más.',    color: '#db2777', bg: '#fdf2f8' },
+  { icon: MessageCircle,title: 'Chat con Kairo',                 desc: 'Tutor IA disponible 24/7 para resolver cualquier duda de Matemáticas, Física, Historia y más.',    color: '#db2777', bg: '#fdf2f8' },
 ]
 
 const FEATURE_SPANS = [2, 1, 1, 2, 1, 2]
@@ -146,7 +146,7 @@ const LANDING_PRICING = [
     price: '0 €',
     period: 'Para empezar',
     badge: 'Prueba',
-    description: 'Para probar Pausia y empezar a entrenar.',
+    description: 'Para probar Kairo y empezar a entrenar.',
     bullets: ['25 correcciones/mes', '3 fotos/mes', '1 parcial/mes', 'Camino PAU limitado', 'Preview de ranking'],
     cta: 'Empezar gratis',
     featured: false,
@@ -202,7 +202,7 @@ const TESTIMONIALS = [
   {
     name: 'Carlos M.',      city: 'Alcalá de Henares, 17 años',
     score: '9,2 en Historia', prev: 'Sin academia',
-    quote: 'Sin dinero para academia. Solo Pausia y la biblioteca municipal. 9,2 en Historia de España. El plan semanal me dijo qué estudiar cada día.',
+    quote: 'Sin dinero para academia. Solo Kairo y la biblioteca municipal. 9,2 en Historia de España. El plan semanal me dijo qué estudiar cada día.',
   },
   {
     name: 'Lucía P.',       city: 'Leganés, 18 años',
@@ -967,7 +967,7 @@ export default function LandingPage() {
         images={[
           { src: '/brand/hero-student.jpg',         alt: 'Estudiante preparando la PAU' },
           { src: '/brand/scene-exam.jpg',            alt: 'Examen oficial EBAU' },
-          { src: '/brand/scene-laptop.jpg',          alt: 'Preparando con Pausia' },
+          { src: '/brand/scene-laptop.jpg',          alt: 'Preparando con Kairo' },
           { src: '/brand/scene-books.jpg',           alt: 'Libros de estudio PAU' },
           { src: '/brand/fa-barboza-NWoaoMgMiVY-unsplash.jpg', alt: 'Estudiando' },
           { src: '/brand/scene-exam.jpg',            alt: 'Simulacro PAU' },
@@ -975,7 +975,7 @@ export default function LandingPage() {
         ]}
         centerReveal={
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <img src="/brand/pausia-lockup.png" alt="Pausia" style={{ width: 'clamp(180px,28vw,360px)', height: 'auto', filter: 'brightness(0) invert(1)' }} />
+            <img src="/brand/pausia-lockup.png" alt="Kairo" style={{ width: 'clamp(180px,28vw,360px)', height: 'auto', filter: 'brightness(0) invert(1)' }} />
             <p style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', color: '#ffffff', fontWeight: 600, opacity: 0.85, letterSpacing: '-0.02em' }}>
               Prepara la PAU con claridad.
             </p>
@@ -1103,7 +1103,7 @@ export default function LandingPage() {
             }}>
               <img
                 src="/brand/hero-student.jpg"
-                alt="Estudiante preparando la PAU con Pausia"
+                alt="Estudiante preparando la PAU con Kairo"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
               {/* floating correction card */}
@@ -1163,7 +1163,7 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center', marginBottom: 'clamp(32px,5vw,52px)' }}>
             <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 10 }}>La app</p>
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 900, color: '#f8fafc', margin: '0 0 12px', letterSpacing: '-0.05em', lineHeight: 1.05, textWrap: 'balance' as never }}>
-              Así se ve Pausia por dentro.
+              Así se ve Kairo por dentro.
             </h2>
             <p style={{ fontSize: 'clamp(0.93rem,1.8vw,1.03rem)', color: '#64748b', lineHeight: 1.8, maxWidth: 420, margin: '0 auto' }}>
               Del examen real a la nota y el siguiente paso — todo en el mismo sitio.
@@ -1207,7 +1207,7 @@ export default function LandingPage() {
             Un scroll, cuatro momentos clave.
           </h2>
           <p style={{ fontSize: 'clamp(0.98rem,2vw,1.08rem)', color: C.muted, lineHeight: 1.8, margin: 0, maxWidth: 600 }}>
-            Pausia no solo corrige: organiza el proceso completo desde el examen real hasta el siguiente paso de estudio.
+            Kairo no solo corrige: organiza el proceso completo desde el examen real hasta el siguiente paso de estudio.
           </p>
         </div>
 
@@ -1353,10 +1353,10 @@ export default function LandingPage() {
       <section style={{ background: C.bgSub, padding: 'clamp(40px,5.5vw,68px) clamp(20px,5vw,40px)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.blue, marginBottom: 10 }}>
-            Por qué Pausia
+            Por qué Kairo
           </p>
           <h2 style={{ fontSize: 'clamp(1.8rem,4vw,2.4rem)', fontWeight: 900, color: C.ink, margin: '0 0 44px', letterSpacing: '-0.03em', lineHeight: 1.15, textWrap: 'balance' as never }}>
-            Pausia vs cómo estudias ahora
+            Kairo vs cómo estudias ahora
           </h2>
 
           <div style={{ borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden', background: C.bg, boxShadow: '0 2px 8px rgba(15,23,42,0.04)' }}>
@@ -1364,7 +1364,7 @@ export default function LandingPage() {
             <div className="lp-compare-table" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', borderBottom: `1px solid ${C.border}`, background: C.bgSub }}>
               <div style={{ padding: '14px 20px', fontSize: 12, fontWeight: 700, color: C.soft }}>Funcionalidad</div>
               {[
-                { label: 'Pausia', accent: true  },
+                { label: 'Kairo', accent: true  },
                 { label: 'Academia presencial', accent: false },
                 { label: 'Por tu cuenta', accent: false },
               ].map((col) => (
@@ -1390,7 +1390,7 @@ export default function LandingPage() {
                 <div style={{ padding: '13px 20px', fontSize: 13, fontWeight: 600, color: C.ink2, display: 'flex', alignItems: 'center' }}>
                   {row.label}
                 </div>
-                {/* Pausia */}
+                {/* Kairo */}
                 <div style={{
                   padding: '13px 16px', borderLeft: `1px solid ${C.border}`,
                   background: C.bgBlue,
@@ -1677,7 +1677,7 @@ export default function LandingPage() {
             color: 'rgba(255,255,255,0.75)', lineHeight: 1.8,
             maxWidth: 460, margin: '0 auto 32px', fontWeight: 400,
           }}>
-            Pausia te dice exactamente qué fallas, cuánto sacarías hoy y qué repasar mañana.
+            Kairo te dice exactamente qué fallas, cuánto sacarías hoy y qué repasar mañana.
           </p>
           <Link href="/login" className="lp-btn-primary" style={{
             position: 'relative',
@@ -1738,7 +1738,7 @@ export default function LandingPage() {
         </div>
         {/* Copyright bar */}
         <div style={{ borderTop: `1px solid ${C.border}`, padding: '13px clamp(20px,5vw,48px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 11, color: C.soft }}>© 2026 Pausia · Preparación PAU · 2º Bachillerato</span>
+          <span style={{ fontSize: 11, color: C.soft }}>© 2026 Kairo · Preparación PAU · 2º Bachillerato</span>
           <span style={{ fontSize: 11, color: C.soft }}>Madrid y Cataluña · Beta privada</span>
         </div>
       </footer>

@@ -1,3 +1,3 @@
-// Tabla canvases / bucket zona-images no existen en producción todavía.
-// Cambiar a true cuando se aplique la migración 20260608143000.
+// Canvas está habilitado cuando producción tiene las tablas `canvases`,
+// `canvas_images` y el bucket privado `zona-images` aplicados.
 export const CANVAS_ENABLED = true

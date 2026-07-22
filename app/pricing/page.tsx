@@ -240,7 +240,7 @@ export default function PricingPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Los precios incluyen IVA. Curso PAU Early: 59 €. Precio normal: 79 €. TODO: actualizar price IDs cuando se pase a Stripe live.
+            Los precios incluyen IVA. Curso PAU Early: 59 €. Precio normal: 79 €. Precio de lanzamiento para preparar la PAU con práctica constante.
           </p>
         </div>
       </section>

@@ -95,8 +95,7 @@ export function normalizeSubjectSlug(subject?: string | null) {
   if (slug === 'quimica') return 'quimica'
   if (slug === 'biologia') return 'biologia'
   if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_y_literatura' || slug === 'lengua_castellana_literatura') return 'lengua'
-  if (slug === 'historia') return 'historia'
-  if (slug === 'historia_de_espana' || slug === 'historia_espana') return 'historia_espana'
+  if (slug === 'historia' || slug === 'historia_de_espana' || slug === 'historia_espana') return 'historia_espana'
   if (slug === 'filosofia' || slug === 'historia_filosofia' || slug === 'historia_de_la_filosofia') return 'historia_filosofia'
   if (slug === 'ingles' || slug === 'english') return 'ingles'
   if (slug === 'llengua_catalana') return 'llengua_catalana'
@@ -182,7 +181,7 @@ export function resolveTopicSlugAlias(subjectSlug: string, blockSlug: string, to
 }
 
 export function resolveCaminoTopic(input: { subjectSlug: string; blockSlug: string; topicSlug: string }) {
-  const subjectSlug = SUBJECT_LABELS[input.subjectSlug] ? input.subjectSlug : subjectSlugFromLabel(input.subjectSlug)
+  const subjectSlug = normalizeSubjectSlug(input.subjectSlug)
   const normalizedBlockSlug = normalizeTopicSlug(input.blockSlug)
   const normalizedTopicSlug = normalizeTopicSlug(input.topicSlug)
   const inSubjectBlock = CAMINO_CURRICULUM_TOPICS.filter(t =>
@@ -204,7 +203,7 @@ export function resolveCaminoTopic(input: { subjectSlug: string; blockSlug: stri
 }
 
 export function getCurriculumForSubject(subject: string) {
-  const subjectSlug = SUBJECT_LABELS[subject] ? subject : subjectSlugFromLabel(subject)
+  const subjectSlug = normalizeSubjectSlug(subject)
   return CAMINO_CURRICULUM_TOPICS
     .filter(topic => topic.subject === subjectSlug || topic.compatibleSubjects.includes(subjectSlug))
     .filter(topic => subjectSlug !== 'matematicas_ccss' || topic.blockSlug !== 'geometria-3d')

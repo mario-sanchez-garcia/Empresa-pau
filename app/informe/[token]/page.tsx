@@ -217,7 +217,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
           ) : (
             <div>
               <p style={{ margin: '0 0 12px', fontSize: 13, color: '#475569', lineHeight: 1.5 }}>
-                ¿Quieres apoyar su preparación con correcciones IA ilimitadas y simulacros completos?
+                ¿Quieres apoyar su preparación con correcciones IA con uso responsable y simulacros completos?
               </p>
               <a
                 href={`${appUrl}/pricing`}

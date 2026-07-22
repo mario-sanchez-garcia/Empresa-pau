@@ -29,7 +29,7 @@ export async function sendEmail({
     : html
 
   return getClient().emails.send({
-    from: 'Pausia <onboarding@resend.dev>',
+    from: 'Pausia <noreply@kairo-pau.com>',
     to,
     subject,
     html: finalHtml,

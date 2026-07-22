@@ -169,6 +169,19 @@ const TOPIC_ALIASES: Record<string, string> = {
   'matematicas_ii:integrales:areas-integrales': 'primitivas-barrow-areas',
   'matematicas_ccss:algebra-lineal:dimension-de-una-matriz': 'matrices-sistemas-gauss',
   'matematicas_ccss:algebra-lineal:sistemas-gauss': 'matrices-sistemas-gauss',
+  'historia_espana:prehistoria-y-edad-antigua:prehistoria-y-edad-antigua': 'origenes-reino-visigodo',
+  'historia_espana:al-andalus:al-andalus': 'edad-media-peninsular',
+  'historia_espana:reinos-medievales-cristianos:reinos-medievales-cristianos': 'edad-media-peninsular',
+  'historia_espana:los-reyes-catolicos:los-reyes-catolicos': 'edad-moderna',
+  'historia_espana:el-imperio-de-los-austrias:el-imperio-de-los-austrias': 'edad-moderna',
+  'historia_espana:el-siglo-xviii-los-borbones:el-siglo-xviii-los-borbones': 'edad-moderna',
+  'historia_espana:crisis-del-antiguo-regimen-y-liberalismo:crisis-del-antiguo-regimen-y-liberalismo': 'crisis-antiguo-regimen',
+  'historia_espana:la-restauracion:la-restauracion': 'restauracion',
+  'historia_espana:crisis-de-la-restauracion-y-la-dictadura:crisis-de-la-restauracion-y-la-dictadura': 'restauracion',
+  'historia_espana:la-segunda-republica:la-segunda-republica': 'segunda-republica',
+  'historia_espana:la-guerra-civil:la-guerra-civil': 'guerra-civil',
+  'historia_espana:la-dictadura-franquista:la-dictadura-franquista': 'franquismo',
+  'historia_espana:la-transicion-y-la-democracia:la-transicion-y-la-democracia': 'transicion-democracia',
 }
 
 function aliasTopicSlug(subjectSlug: string, blockSlug: string, topicSlug: string) {
@@ -198,6 +211,25 @@ export function resolveCaminoTopic(input: { subjectSlug: string; blockSlug: stri
     )
     if (aliased) return { topic: aliased, matchedBy: 'alias' as const, resolvedTopicSlug: aliased.topicSlug }
   }
+
+  const inSubject = CAMINO_CURRICULUM_TOPICS.filter(t => t.subject === subjectSlug)
+  const topicMatch = inSubject.find(t =>
+    normalizeTopicSlug(t.topicSlug) === normalizedTopicSlug ||
+    normalizeTopicSlug(t.title) === normalizedTopicSlug
+  )
+  if (topicMatch) return { topic: topicMatch, matchedBy: 'topic' as const, resolvedTopicSlug: topicMatch.topicSlug }
+
+  const blockAsTopic = inSubject.find(t =>
+    normalizeTopicSlug(t.topicSlug) === normalizedBlockSlug ||
+    normalizeTopicSlug(t.title) === normalizedBlockSlug
+  )
+  if (blockAsTopic) return { topic: blockAsTopic, matchedBy: 'block-as-topic' as const, resolvedTopicSlug: blockAsTopic.topicSlug }
+
+  const blockFallback = inSubject.find(t =>
+    normalizeTopicSlug(t.blockSlug) === normalizedBlockSlug ||
+    normalizeTopicSlug(t.blockTitle) === normalizedBlockSlug
+  )
+  if (blockFallback) return { topic: blockFallback, matchedBy: 'block' as const, resolvedTopicSlug: blockFallback.topicSlug }
 
   return { topic: null, matchedBy: 'missing' as const, resolvedTopicSlug: normalizedTopicSlug }
 }

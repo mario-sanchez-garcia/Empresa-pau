@@ -10,7 +10,7 @@ import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
-import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
+import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
@@ -223,9 +223,17 @@ function getMonthlySimulationUsage(_userId: string | null, month: string, cache:
 function canScheduleSimulation(_userId: string | null, planId: CaminoPlanId, dateISO: string, cache: CalendarWeekCache, plannedThisRun = 0) {
   return getMonthlySimulationUsage(_userId, monthKey(dateISO), cache) + plannedThisRun < getSimulationLimitForPlan(planId)
 }
+function resolveCourseHref(subjectValue: string, blockValue?: string | null, topicValue?: string | null) {
+  const subjectValueSlug = normalizeSubjectSlug(subjectValue)
+  const blockSlug = textSlug(blockValue ?? '')
+  if (!blockSlug) return ''
+  const topicSlug = resolveTopicSlugAlias(subjectValueSlug, blockSlug, textSlug(topicValue ?? blockSlug))
+  const resolved = resolveCaminoTopic({ subjectSlug: subjectValueSlug, blockSlug, topicSlug }).topic
+  return resolved ? buildTopicHref(resolved) : ''
+}
 function courseHrefForItem(item: CurriculumItem) {
   if (item.planTopic) return buildTopicHref(item.planTopic)
-  return `/camino-pau/curso/${item.subjectSlug || subjectSlug(item.subject)}/${item.blockSlug || textSlug(item.block)}/${item.topicSlug || textSlug(item.topic)}`
+  return resolveCourseHref(item.subjectSlug || item.subject, item.blockSlug || item.block, item.topicSlug || item.topic)
 }
 function getMissionTarget(kind: MissionKind, subject: string, topic?: string, block?: string, planTopic?: CaminoCurriculumTopic) {
   const s = subjectSlug(subject)
@@ -235,9 +243,9 @@ function getMissionTarget(kind: MissionKind, subject: string, topic?: string, bl
   if (kind === 'mock_exam') return { href: `/simulacros?subject=${s}${blockParam}${topicParam}&source=camino_pau`, fallback: '', autoCompletable: false }
   if (kind === 'evau_practice' || kind === 'exam_focus') return { href: `/?subject=${s}${blockParam}${topicParam}&mode=random&source=camino`, fallback: '', autoCompletable: false }
   if ((kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') && block && topic) {
-    const blockSlug = textSlug(block)
-    const topicSlug = resolveTopicSlugAlias(s, blockSlug, textSlug(topic))
-    return { href: `/camino-pau/curso/${s}/${blockSlug}/${topicSlug}`, fallback: '', autoCompletable: false }
+    const href = resolveCourseHref(s, block, topic)
+    if (href) return { href, fallback: '', autoCompletable: false }
+    return { href: '', fallback: 'Este tema todavía no está conectado al itinerario de Camino PAU.', autoCompletable: true }
   }
   if (kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') return { href: '', fallback: 'Este tema necesita bloque y tema para abrir una página de curso.', autoCompletable: true }
   return { href: '', fallback: 'Esta misión todavía no tiene pantalla propia. Puedes marcarla como hecha cuando la termines fuera de Kairo.', autoCompletable: true }
@@ -309,15 +317,14 @@ type CaminoCalRow = {
 
 function calRowToMission(row: CaminoCalRow): Mission {
   const subjectLabel = subjectLabelFromSlug(row.subject)
+  const rowSubjectSlug = normalizeSubjectSlug(row.subject)
   const blockSlug = row.block_slug ?? (row.block_key ? textSlug(row.block_key) : '')
   const linkedTopic = getTopicByV2SortOrder(row.subject, row.v2_sort_order)
   const rawTopicSlug = typeof row.metadata?.topic_slug === 'string'
     ? normalizeTopicSlug(row.metadata.topic_slug)
     : normalizeTopicSlug(sanitizeLessonTitle(row.title))
   const topicSlug = resolveTopicSlugAlias(row.subject, blockSlug, rawTopicSlug)
-  const href = linkedTopic ? buildTopicHref(linkedTopic) : blockSlug
-    ? `/camino-pau/curso/${row.subject}/${blockSlug}/${topicSlug}`
-    : ''
+  const href = linkedTopic ? buildTopicHref(linkedTopic) : resolveCourseHref(rowSubjectSlug, blockSlug, topicSlug)
   const cleanTitle = sanitizeLessonTitle(row.title)
   return {
     id: row.id,
@@ -337,7 +344,7 @@ function calRowToMission(row: CaminoCalRow): Mission {
     baseXP: 20,
     status: row.status === 'completed' ? 'done' : 'pending',
     metadata: row.metadata ?? undefined,
-    subjectSlug: row.subject,
+    subjectSlug: rowSubjectSlug,
     v2SortOrder: row.v2_sort_order ?? undefined,
     blockKey: row.block_key ?? undefined,
     missionType: row.mission_type,
@@ -1811,12 +1818,21 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
               {activeBlock && <div className="mt-3 rounded-2xl border border-white bg-white p-3">
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{activeBlock.block}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {activeBlock.items.map(item => (
-                    <a key={`${item.subjectSlug}-${item.blockSlug}-${item.topicSlug}`} href={courseHrefForItem(item)} className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-black transition hover:-translate-y-0.5" style={{ borderColor: themeFor(item.subject).border, background: themeFor(item.subject).bg, color: themeFor(item.subject).text }}>
-                      {item.topic}
-                      <ArrowRight size={12} />
-                    </a>
-                  ))}
+                  {activeBlock.items.map(item => {
+                    const href = courseHrefForItem(item)
+                    const className = 'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-black transition'
+                    const style = { borderColor: themeFor(item.subject).border, background: themeFor(item.subject).bg, color: themeFor(item.subject).text }
+                    return href ? (
+                      <a key={`${item.subjectSlug}-${item.blockSlug}-${item.topicSlug}`} href={href} className={`${className} hover:-translate-y-0.5`} style={style}>
+                        {item.topic}
+                        <ArrowRight size={12} />
+                      </a>
+                    ) : (
+                      <span key={`${item.subjectSlug}-${item.blockSlug}-${item.topicSlug}`} className={`${className} cursor-not-allowed opacity-60`} style={style}>
+                        {item.topic}
+                      </span>
+                    )
+                  })}
                 </div>
               </div>}
             </article>

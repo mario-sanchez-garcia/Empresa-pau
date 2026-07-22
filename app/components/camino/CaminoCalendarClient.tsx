@@ -5,11 +5,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, Bookmark, BookOpen, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, GripVertical, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, Bookmark, BookOpen, BookPlus, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, GripVertical, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
-import { loadOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
+import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
@@ -758,6 +758,8 @@ export default function CaminoCalendarClient() {
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
   const [calendarEditorOpen, setCalendarEditorOpen] = useState(false)
+  const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
+  const [addSubjectLoading, setAddSubjectLoading] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
@@ -1309,6 +1311,47 @@ export default function CaminoCalendarClient() {
     }, () => undefined)
   }
 
+  async function addSubject(subjectLabel: string) {
+    const SUBJECT_TO_SLUG: Record<string, string> = {
+      'Matemáticas II': 'matematicas_ii',
+      'Matemáticas CCSS': 'matematicas_ccss',
+      'Lengua Castellana': 'lengua',
+      'Historia de España': 'historia_espana',
+    }
+    const slug = SUBJECT_TO_SLUG[subjectLabel]
+    if (!slug) return
+    setAddSubjectLoading(true)
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      if (!token) return
+      const res = await fetch('/api/camino/add-subject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ subject: slug }),
+      })
+      if (!res.ok) {
+        setToast('Error al añadir la asignatura. Inténtalo de nuevo.')
+        return
+      }
+      // Update localStorage and local state so Nota Proyectada picks it up immediately
+      const currentOnboarding = loadOnboarding()
+      const updatedSubjects = [...currentOnboarding.subjects.filter(s => s !== subjectLabel), subjectLabel]
+      saveOnboarding({ subjects: updatedSubjects })
+      setOnboarding(prev => prev ? { ...prev, subjects: updatedSubjects } : prev)
+      setShowAddSubjectModal(false)
+      setToast(`¡${subjectLabel} añadida! Verás sus misiones en tu Camino a partir de mañana.`)
+      // Refresh calendar so new missions appear
+      const userId = sessionData.session?.user.id
+      if (userId) {
+        const calDays = await fetchCaminoCalendar(userId)
+        if (calDays) { setCalendar(calDays); saveCalendarWeeksToCache(calDays) }
+      }
+    } finally {
+      setAddSubjectLoading(false)
+    }
+  }
+
   async function markNotSeenHero() {
     const mission = todayMain[0]
     if (!mission?.subjectSlug || mission.v2SortOrder == null) return
@@ -1372,7 +1415,7 @@ export default function CaminoCalendarClient() {
 
   return (
     <Shell>
-      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button></div></div></header>
+      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button><button onClick={() => setShowAddSubjectModal(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-700 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-emerald-100 transition"><BookPlus size={16} /> Añadir asignatura</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1581,6 +1624,7 @@ export default function CaminoCalendarClient() {
       <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={weekCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('pausia_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
+      <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>
     </Shell>
   )
 }
@@ -2553,6 +2597,59 @@ function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
         <button onClick={onClose} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-6 py-4 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:shadow-[0_16px_36px_rgba(37,99,235,0.32)]">
           Empezar
         </button>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+const ADDABLE_SUBJECT_OPTS = [
+  { id: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff' },
+  { id: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
+  { id: 'Lengua Castellana', color: '#0891b2', bg: '#ecfeff' },
+  { id: 'Historia de España', color: '#b45309', bg: '#fff7ed' },
+]
+
+function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
+  currentSubjects: string[]
+  onClose: () => void
+  onAdd: (subject: string) => void
+  loading: boolean
+}) {
+  const [selected, setSelected] = useState<string | null>(null)
+  const available = ADDABLE_SUBJECT_OPTS.filter(s => !currentSubjects.includes(s.id))
+
+  if (available.length === 0) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
+        <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+          <h2 className="text-xl font-black text-slate-950">Todas las asignaturas añadidas</h2>
+          <p className="mt-2 text-sm font-semibold text-slate-500">Ya tienes todas las asignaturas disponibles en tu Camino PAU.</p>
+          <div className="mt-6 flex justify-end"><button onClick={onClose} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">Cerrar</button></div>
+        </motion.div>
+      </motion.div>
+    )
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
+      <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+        <h2 className="text-xl font-black text-slate-950">Añadir asignatura</h2>
+        <p className="mt-1 text-sm font-semibold text-slate-500">Selecciona una asignatura para añadir a tu Camino PAU. Las misiones aparecerán a partir de mañana.</p>
+        <div className="mt-5 grid gap-2">
+          {available.map(subj => (
+            <button key={subj.id} onClick={() => setSelected(subj.id)} className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition ${selected === subj.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50 hover:border-blue-200'}`}>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black" style={{ background: subj.bg, color: subj.color }}>{subj.id.slice(0, 2)}</span>
+              <span className="text-sm font-black text-slate-800">{subj.id}</span>
+              {selected === subj.id && <Check size={16} className="ml-auto text-blue-600" />}
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button>
+          <button onClick={() => selected && onAdd(selected)} disabled={!selected || loading} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white disabled:opacity-60">
+            {loading ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />Añadiendo...</> : 'Añadir asignatura'}
+          </button>
+        </div>
       </motion.div>
     </motion.div>
   )

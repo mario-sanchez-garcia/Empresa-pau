@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Lock, Search } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
+import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import {
   loadOnboarding,
   markOnboardingComplete,
@@ -118,17 +119,43 @@ export default function OnboardingFlow() {
   const [savingMsgIdx, setSavingMsgIdx] = useState(0)
   const [schoolQuery, setSchoolQuery] = useState('')
   const [schoolOpen, setSchoolOpen] = useState(false)
+  const [dbInstitutes, setDbInstitutes] = useState<string[]>([])
   const generateRetriesRef = useRef(0)
 
   const centers = useMemo(
     () => data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : [],
     [data.community]
   )
+
+  // Fetch matching institutes from DB as the user types (debounced 250ms).
+  // DB institutes are shown FIRST; static CENTROS fill remaining slots.
+  const fetchDbInstitutes = useCallback(async (query: string, community: string) => {
+    const normalizedQuery = normalizeInstituteName(query)
+    if (normalizedQuery.length < 2) { setDbInstitutes([]); return }
+    try {
+      let req = supabase.from('institutes').select('name')
+      if (community === 'Madrid' || community === 'Cataluña') req = req.eq('community', community)
+      req = req.ilike('normalized_name', `%${normalizedQuery}%`).order('name').limit(8)
+      const { data: rows } = await req
+      setDbInstitutes((rows ?? []).map((r: { name: string }) => r.name))
+    } catch { setDbInstitutes([]) }
+  }, [])
+
+  useEffect(() => {
+    if (schoolQuery.length < 2) { setDbInstitutes([]); return }
+    const timer = setTimeout(() => fetchDbInstitutes(schoolQuery, data.community ?? ''), 250)
+    return () => clearTimeout(timer)
+  }, [schoolQuery, data.community, fetchDbInstitutes])
+
   const filteredCenters = useMemo(() => {
     const q = normalizeSearch(schoolQuery)
     if (q.length < 2) return []
-    return centers.filter(c => normalizeSearch(c).includes(q)).slice(0, 10)
-  }, [centers, schoolQuery])
+    // DB results first (already limited to 8 by the query).
+    const dbSet = new Set(dbInstitutes.map(s => normalizeSearch(s)))
+    // Static centers that aren't already represented by a DB result.
+    const staticExtra = centers.filter(c => normalizeSearch(c).includes(q) && !dbSet.has(normalizeSearch(c)))
+    return [...dbInstitutes.filter(s => normalizeSearch(s).includes(q)), ...staticExtra].slice(0, 10)
+  }, [dbInstitutes, centers, schoolQuery])
 
   const savingMessages = useMemo(() => {
     const msgs: string[] = []

@@ -1,6 +1,10 @@
 import 'server-only'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { normalizeInstituteName, canPersistInstituteName } from './instituteNormalize'
+
+// Re-export so existing callers that import from institutePace keep working.
+export { normalizeInstituteName, canPersistInstituteName }
 
 type InstituteSource = 'manual' | 'official' | 'admin'
 type MembershipSource = 'onboarding' | 'manual' | 'admin'
@@ -8,27 +12,6 @@ type MembershipSource = 'onboarding' | 'manual' | 'admin'
 export type InstituteMembership = {
   instituteId: string
   community: string
-}
-
-const PLACEHOLDER_SCHOOL_NAMES = new Set([
-  'mi centro no aparece',
-  'sin centro',
-  'no aparece',
-])
-
-export function normalizeInstituteName(value?: string | null) {
-  return (value ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-export function canPersistInstituteName(value?: string | null) {
-  const normalized = normalizeInstituteName(value)
-  return normalized.length >= 3 && !PLACEHOLDER_SCHOOL_NAMES.has(normalized)
 }
 
 export async function ensureUserInstituteMembership(

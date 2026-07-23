@@ -9,13 +9,32 @@ function getMadridToday(): string {
 }
 
 export async function GET(request: NextRequest) {
+  const startedAt = new Date().toISOString()
+  const userAgent = request.headers.get('user-agent') ?? 'unknown'
+  console.log('[daily-reminder] cron started', {
+    startedAt,
+    method: request.method,
+    userAgent,
+    hasCronSecret: Boolean(process.env.CRON_SECRET),
+  })
+
+  if (!process.env.CRON_SECRET) {
+    console.error('[daily-reminder] CRON_SECRET is not configured')
+    return NextResponse.json({ error: 'Cron not configured' }, { status: 500 })
+  }
+
   const auth = request.headers.get('Authorization')
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.warn('[daily-reminder] unauthorized request', {
+      hasAuthorization: Boolean(auth),
+      userAgent,
+    })
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const dow = new Date().getUTCDay()
   if (dow === 6) {
+    console.log('[daily-reminder] cron finished', { sent: 0, skipped: 0, reason: 'saturday' })
     return NextResponse.json({ sent: 0, skipped: 0, reason: 'saturday' })
   }
   const isSunday = dow === 0
@@ -38,7 +57,13 @@ export async function GET(request: NextRequest) {
 
   // Distinct user_ids with pending missions
   const candidateIds = [...new Set((candidates ?? []).map(r => r.user_id as string))]
+  console.log('[daily-reminder] eligible users candidate count', {
+    pendingMissionRows: candidates?.length ?? 0,
+    candidateUsers: candidateIds.length,
+    today,
+  })
   if (candidateIds.length === 0) {
+    console.log('[daily-reminder] cron finished', { sent: 0, skipped: 0, reason: 'no_candidates' })
     return NextResponse.json({ sent: 0, skipped: 0 })
   }
 
@@ -54,7 +79,12 @@ export async function GET(request: NextRequest) {
 
   // Filter out users who already studied today
   const toNotify = candidateIds.filter(id => !completedTodaySet.has(id))
+  console.log('[daily-reminder] users after completed-today filter', {
+    completedToday: completedTodaySet.size,
+    toNotify: toNotify.length,
+  })
   if (toNotify.length === 0) {
+    console.log('[daily-reminder] cron finished', { sent: 0, skipped: candidateIds.length, reason: 'all_completed_today' })
     return NextResponse.json({ sent: 0, skipped: candidateIds.length })
   }
 
@@ -73,6 +103,10 @@ export async function GET(request: NextRequest) {
     u.email &&
     u.created_at <= cutoff
   )
+  console.log('[daily-reminder] users after account age/email filter', {
+    listedUsers: usersData?.users?.length ?? 0,
+    targets: targets.length,
+  })
 
   // Filter users who opted out of email notifications
   const { data: profileRows } = await db
@@ -85,7 +119,12 @@ export async function GET(request: NextRequest) {
       .map((p: { id: string }) => p.id),
   )
   const finalTargets = targets.filter(u => !optedOutSet.has(u.id))
+  console.log('[daily-reminder] users after opt-out filter', {
+    optedOut: optedOutSet.size,
+    finalTargets: finalTargets.length,
+  })
   if (finalTargets.length === 0) {
+    console.log('[daily-reminder] cron finished', { sent: 0, skipped: candidateIds.length, reason: 'no_final_targets' })
     return NextResponse.json({ sent: 0, skipped: candidateIds.length })
   }
 
@@ -168,6 +207,6 @@ export async function GET(request: NextRequest) {
   }
 
   const skipped = candidateIds.length - toNotify.length + optedOutSet.size
-  console.log(`[daily-reminder] sent=${sent} failed=${failed} skipped=${skipped}`)
+  console.log('[daily-reminder] cron finished', { sent, failed, skipped })
   return NextResponse.json({ sent, failed, skipped })
 }

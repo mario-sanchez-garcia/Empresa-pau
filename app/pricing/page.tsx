@@ -25,15 +25,14 @@ const plans: Plan[] = [
     name: 'Free',
     price: '0 €',
     period: 'sin tarjeta',
-    description: 'Para probar Kairo y empezar a entrenar.',
+    description: 'Para probar Kairo y vivir el momento mágico de tu primera corrección.',
     features: [
       { text: '25 correcciones/mes', included: true },
       { text: '3 fotos/mes', included: true },
       { text: '1 parcial/mes', included: true },
+      { text: '10 msgs de Chat con Kairo', included: true },
       { text: 'Camino PAU limitado', included: true },
-      { text: 'Misión diaria, racha y XP propios', included: true },
-      { text: 'Preview de ranking', included: true },
-      { text: 'Calendario completo editable', included: false },
+      { text: 'Ranking completo', included: false },
     ],
     cta: 'Empezar gratis',
     href: '/login',
@@ -46,10 +45,10 @@ const plans: Plan[] = [
     features: [
       { text: '200 correcciones/mes', included: true },
       { text: '80 fotos/mes', included: true },
-      { text: '5 simulacros completos/mes', included: true },
+      { text: '5 simulacros/mes', included: true },
+      { text: '100 msgs de Chat con Kairo', included: true },
       { text: 'Camino PAU completo', included: true },
       { text: 'Ranking completo', included: true },
-      { text: 'Recomendaciones completas por asignatura', included: true },
     ],
     cta: 'Probar Premium',
     href: '/login',
@@ -58,54 +57,18 @@ const plans: Plan[] = [
   },
   {
     name: 'Curso PAU',
-    price: 'Desde 59 €',
-    priceStrike: '79 €',
-    period: 'pago único',
-    description: 'Pago único para preparar la PAU con Camino completo. Early: 59 €. Normal: 79 €.',
+    price: '79 €',
+    period: 'pago único · early bird',
+    description: 'Acceso completo de septiembre a junio. Precio de lanzamiento hasta el 30 de septiembre.',
     features: [
-      { text: 'Igual que Premium', included: true },
+      { text: '200 correcciones/mes', included: true },
       { text: '80 fotos/mes', included: true },
       { text: '5 simulacros/mes', included: true },
+      { text: '100 msgs de Chat con Kairo', included: true },
       { text: 'Camino PAU completo', included: true },
       { text: 'Ranking completo', included: true },
-      { text: 'Sin renovación mensual', included: true },
     ],
     cta: 'Reservar Curso PAU',
-    href: '/login',
-    popularAmber: true,
-  },
-  {
-    name: 'Intensivo PAU',
-    price: '19,99 €',
-    period: '/ 3 meses',
-    description: 'Para el sprint final antes de la PAU.',
-    features: [
-      { text: '150 correcciones/mes', included: true },
-      { text: '60 fotos/mes', included: true },
-      { text: '6 simulacros completos/mes', included: true },
-      { text: 'Camino PAU intensivo', included: true },
-      { text: 'Ranking completo', included: true },
-    ],
-    cta: 'Preparar sprint final',
-    href: '/login',
-    popular: true,
-    popularLabel: 'Sprint PAU',
-    popularAmber: true,
-  },
-  {
-    name: 'Superpremium',
-    price: '17,99 €',
-    period: '/mes',
-    description: 'Para alumnos que quieren entrenar mucho más sin ansiedad de límites.',
-    features: [
-      { text: '600 correcciones/mes', included: true },
-      { text: '200 fotos/mes', included: true },
-      { text: '20 simulacros completos/mes', included: true },
-      { text: 'Camino PAU avanzado', included: true },
-      { text: 'Ranking avanzado', included: true },
-      { text: 'Uso intensivo con política de uso razonable', included: true },
-    ],
-    cta: 'Entrenar al máximo',
     href: '/login',
   },
 ]
@@ -240,7 +203,7 @@ export default function PricingPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Los precios incluyen IVA. Curso PAU Early: 59 €. Precio normal: 79 €. Precio de lanzamiento para preparar la PAU con práctica constante.
+            Los precios incluyen IVA. Curso PAU early bird 79 € hasta el 30 de septiembre, después 99 €.
           </p>
         </div>
       </section>

@@ -25,18 +25,20 @@ export default function CursorGridHero() {
           holdTime={400}
           fadeDuration={900}
           lineWidth={1}
-          maxOpacity={0.75}
+          maxOpacity={0.85}
           fillOpacity={0}
-          gridOpacity={0.055}
+          gridOpacity={0.12}
           cellRadius={0}
           clickPulse={true}
           pulseSpeed={600}
         />
       </div>
+      {/* pointerEvents: none so mouse events pass through to the canvas below */}
       <div style={{
         position: 'relative',
         zIndex: 1,
         height: '100%',
+        pointerEvents: 'none',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -88,6 +90,7 @@ export default function CursorGridHero() {
           boxShadow: '0 12px 32px rgba(37,99,235,0.25)',
           letterSpacing: '-0.01em',
           marginTop: 8,
+          pointerEvents: 'auto',
         }}>
           Empezar gratis
           <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

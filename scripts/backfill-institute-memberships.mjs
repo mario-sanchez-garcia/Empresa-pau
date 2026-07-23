@@ -17,10 +17,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // ---------------------------------------------------------------------------
-// normalizeInstituteName — imported logic from app/lib/camino/instituteNormalize.ts
-// This file cannot use tsx/import chains due to 'server-only' in institutePace.ts.
-// The function below MUST be kept identical to instituteNormalize.ts.
-// If you change normalizeInstituteName there, change it here too.
+// Normalization — mirrors app/lib/camino/instituteNormalize.ts (cannot import
+// due to 'server-only' in institutePace.ts; keep in sync manually).
 // ---------------------------------------------------------------------------
 const PLACEHOLDER_SCHOOL_NAMES = new Set([
   'mi centro no aparece',
@@ -39,6 +37,11 @@ const STRIP_PREFIXES = [
   'cp',
 ]
 
+/**
+ * New (canonical) normalization: lowercase + remove diacritics + collapse
+ * punctuation + strip known school-type prefixes.
+ * This is the form we want going forward.
+ */
 function normalizeInstituteName(value) {
   const base = (value ?? '')
     .toLowerCase()
@@ -58,6 +61,21 @@ function normalizeInstituteName(value) {
   }
 
   return base
+}
+
+/**
+ * Legacy normalization (Phase 1, before prefix stripping was added).
+ * Institutes created before this backfill have normalized_name computed by
+ * this function, NOT the new one above.
+ */
+function normalizeInstituteNameLegacy(value) {
+  return (value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function canPersistInstituteName(value) {
@@ -131,26 +149,62 @@ async function main() {
     try {
       const name = schoolName.trim().slice(0, 160)
       const comm = community.trim().slice(0, 80) || 'Otra'
-      const normalizedName = normalizeInstituteName(name)
+      const normalizedNameNew = normalizeInstituteName(name)      // new canonical (prefix-stripped)
+      const normalizedNameLegacy = normalizeInstituteNameLegacy(name)  // old form (no strip)
+      const formsAreIdentical = normalizedNameNew === normalizedNameLegacy
 
-      // 4. Find or create institute (unique on community + normalized_name).
-      const { data: existing } = await db
+      // 4. Find or create institute, tolerating both legacy and new normalized_name.
+      //    Institutes created before this backfill have the legacy form in the DB.
+      //    We look for either form so we don't create duplicates.
+
+      // 4a. Try the new canonical form first.
+      let { data: existing } = await db
         .from('institutes')
-        .select('id, community')
+        .select('id, normalized_name')
         .eq('community', comm)
-        .eq('normalized_name', normalizedName)
+        .eq('normalized_name', normalizedNameNew)
         .maybeSingle()
+
+      let foundByLegacy = false
+      // 4b. If not found and the two forms differ, try the legacy form.
+      if (!existing && !formsAreIdentical) {
+        const { data: legacyMatch } = await db
+          .from('institutes')
+          .select('id, normalized_name')
+          .eq('community', comm)
+          .eq('normalized_name', normalizedNameLegacy)
+          .maybeSingle()
+        if (legacyMatch) {
+          existing = legacyMatch
+          foundByLegacy = true
+        }
+      }
 
       let instituteId
       if (existing) {
         instituteId = existing.id
+        // 4c. If we matched on the legacy form, migrate the row to the new canonical
+        //     normalized_name so future lookups use the canonical form.
+        if (foundByLegacy) {
+          const { error: updateErr } = await db
+            .from('institutes')
+            .update({ normalized_name: normalizedNameNew })
+            .eq('id', instituteId)
+          if (updateErr) {
+            // The new form might already exist (another row). Don't abort — just log.
+            console.warn(`    [warn] could not migrate normalized_name for ${instituteId}: ${updateErr.message}`)
+          } else {
+            console.log(`    [migrated] ${normalizedNameLegacy} → ${normalizedNameNew}`)
+          }
+        }
       } else {
+        // 4d. No existing institute in either form — create with the new canonical name.
         const { data: inserted, error: insertErr } = await db
           .from('institutes')
           .insert({
             community: comm,
             name,
-            normalized_name: normalizedName,
+            normalized_name: normalizedNameNew,
             source: 'manual',
             verified: false,
             created_by: userId,
@@ -159,13 +213,12 @@ async function main() {
           .single()
 
         if (insertErr) {
-          // Race condition: another insert may have won the unique constraint.
-          // Retry the lookup.
+          // Race condition: another insert won the unique constraint. Retry lookup.
           const { data: retry } = await db
             .from('institutes')
             .select('id')
             .eq('community', comm)
-            .eq('normalized_name', normalizedName)
+            .eq('normalized_name', normalizedNameNew)
             .maybeSingle()
 
           if (!retry) throw new Error(`institute insert failed: ${insertErr.message}`)

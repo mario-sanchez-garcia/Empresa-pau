@@ -137,7 +137,7 @@ const COMPARE_ROWS = [
   { label: 'Disponible 24 horas al día',     kairo: true,   academia: false, solo: true  },
   { label: 'Chat con tutor IA',              kairo: true,   academia: false, solo: false },
   { label: 'Historial de progreso',          kairo: true,   academia: false, solo: false },
-  { label: 'Precio mensual',                 pText: 'Free / 9,99€', aText: '100–200€', sText: 'Gratis' },
+  { label: 'Precio mensual',                 pText: 'Free / 9,99€ / 79€ curso', aText: '100–200€', sText: 'Gratis' },
 ]
 
 const LANDING_PRICING = [
@@ -146,50 +146,50 @@ const LANDING_PRICING = [
     price: '0 €',
     period: 'Para empezar',
     badge: 'Prueba',
-    description: 'Para probar Kairo y empezar a entrenar.',
-    bullets: ['25 correcciones/mes', '3 fotos/mes', '1 parcial/mes', 'Camino PAU limitado', 'Preview de ranking'],
-    cta: 'Empezar gratis',
     featured: false,
+    description: 'Para probar Kairo y vivir el momento mágico de tu primera corrección.',
+    bullets: [
+      '25 correcciones/mes',
+      '3 fotos/mes',
+      '1 parcial/mes',
+      '10 msgs de Chat con Kairo',
+      'Camino PAU limitado',
+    ],
+    cta: 'Empezar gratis',
   },
   {
     name: 'Premium',
-    price: '9,99 €/mes',
-    period: 'Plan principal',
+    price: '9,99 €',
+    period: '/mes',
     badge: 'Recomendado',
-    description: 'El plan principal para preparar la PAU durante el curso.',
-    bullets: ['200 correcciones/mes', '80 fotos/mes', '5 simulacros completos/mes', 'Camino PAU completo', 'Ranking completo'],
-    cta: 'Probar Premium',
     featured: true,
-  },
-  {
-    name: 'Intensivo PAU',
-    price: '19,99 € / 3 meses',
-    period: 'Sprint final',
-    badge: 'Sprint PAU',
-    description: 'Para el sprint final antes de la PAU.',
-    bullets: ['150 correcciones/mes', '60 fotos/mes', '6 simulacros completos/mes', 'Camino PAU intensivo', 'Ranking completo'],
-    cta: 'Preparar sprint final',
-    featured: false,
-  },
-  {
-    name: 'Superpremium',
-    price: '17,99 €/mes',
-    period: 'Uso intensivo',
-    badge: 'Avanzado',
-    description: 'Para alumnos que quieren entrenar mucho más sin ansiedad de límites.',
-    bullets: ['600 correcciones/mes', '200 fotos/mes', '20 simulacros completos/mes', 'Camino PAU avanzado', 'Uso intensivo con política razonable'],
-    cta: 'Entrenar al máximo',
-    featured: false,
+    description: 'El plan principal para preparar la PAU durante el curso.',
+    bullets: [
+      '200 correcciones/mes',
+      '80 fotos/mes',
+      '5 simulacros/mes',
+      '100 msgs de Chat con Kairo',
+      'Camino PAU completo',
+      'Ranking completo',
+    ],
+    cta: 'Probar Premium',
   },
   {
     name: 'Curso PAU',
-    price: 'Desde 59 €',
-    period: 'Pago único',
+    price: '79 €',
+    period: 'pago único · early bird',
     badge: 'Curso completo',
-    description: 'Pago único para preparar la PAU con Camino completo.',
-    bullets: ['Early: 59 €', 'Normal: 79 €', '80 fotos/mes', '5 simulacros/mes', 'Ranking completo'],
-    cta: 'Reservar Curso PAU',
     featured: false,
+    description: 'Acceso completo de septiembre a junio. Precio de lanzamiento hasta el 30 de septiembre.',
+    bullets: [
+      '200 correcciones/mes',
+      '80 fotos/mes',
+      '5 simulacros/mes',
+      '100 msgs de Chat con Kairo',
+      'Camino PAU completo',
+      'Ranking completo',
+    ],
+    cta: 'Reservar Curso PAU',
   },
 ]
 
@@ -1531,7 +1531,7 @@ export default function LandingPage() {
         <p style={{ maxWidth: 680, margin: '-28px auto 28px', color: C.muted, fontSize: 15, lineHeight: 1.7, textAlign: 'center' }}>
           Menos que una clase particular al mes. Beta privada: de momento probamos Matemáticas II y Matemáticas CCSS.
         </p>
-        <div className="lp-plan-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,minmax(0,1fr))', gap: 14, maxWidth: 1040, margin: '0 auto' }}>
+        <div className="lp-plan-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 14, maxWidth: 1040, margin: '0 auto' }}>
           {LANDING_PRICING.map((plan) => (
             <div key={plan.name} className="lp-card" style={{
               background: plan.featured ? C.blue : C.bg,

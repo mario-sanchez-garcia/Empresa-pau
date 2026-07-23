@@ -74,3 +74,26 @@ export function canPersistInstituteName(value?: string | null): boolean {
   const normalized = normalizeInstituteName(value)
   return normalized.length >= 3 && !PLACEHOLDER_SCHOOL_NAMES.has(normalized)
 }
+
+/**
+ * Legacy normalization used before Fase 1.5 (before prefix stripping was added).
+ *
+ * Institutes created by onboarding before the Fase 1.5 deploy have
+ * normalized_name computed by THIS function — e.g. "ies beatriz galindo"
+ * instead of the canonical "beatriz galindo".
+ *
+ * This function is exported so that ensureUserInstituteMembership and the
+ * backfill script can search by BOTH forms before deciding to create a new
+ * row, preventing duplicate institutes.
+ *
+ * Do NOT use this for new writes — always write with normalizeInstituteName.
+ */
+export function normalizeInstituteNameLegacy(value?: string | null): string {
+  return (value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}

@@ -64,9 +64,13 @@ function normalizeInstituteName(value) {
 }
 
 /**
- * Legacy normalization (Phase 1, before prefix stripping was added).
- * Institutes created before this backfill have normalized_name computed by
- * this function, NOT the new one above.
+ * Legacy normalization — mirrors normalizeInstituteNameLegacy in
+ * app/lib/camino/instituteNormalize.ts (cannot import from .mjs due to
+ * 'server-only' in the import chain; keep in sync manually).
+ *
+ * Institutes created before Fase 1.5 have normalized_name stored without
+ * prefix stripping, e.g. "ies beatriz galindo" instead of "beatriz galindo".
+ * We search by BOTH forms before creating, to avoid duplicates.
  */
 function normalizeInstituteNameLegacy(value) {
   return (value ?? '')

@@ -8,6 +8,13 @@ function getMadridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
 }
 
+function maskEmail(email: string): string {
+  const [name = '', domain = ''] = email.split('@')
+  const visibleName = name.slice(0, 2)
+  const visibleDomain = domain ? domain.replace(/^(.).*(\..+)$/, '$1***$2') : ''
+  return `${visibleName}***@${visibleDomain || '***'}`
+}
+
 export async function GET(request: NextRequest) {
   const startedAt = new Date().toISOString()
   const userAgent = request.headers.get('user-agent') ?? 'unknown'
@@ -193,15 +200,22 @@ export async function GET(request: NextRequest) {
 
   for (const user of finalTargets) {
     try {
-      await sendEmail({
+      const result = await sendEmail({
         to: user.email!,
         subject: emailSubject,
         html,
         userId: user.id,
       })
+      console.log('[daily-reminder] resend accepted email', {
+        to: maskEmail(user.email!),
+        resendMessageId: result.id,
+      })
       sent++
     } catch (err) {
-      console.error('[daily-reminder] failed to send to', user.email, err)
+      console.error('[daily-reminder] failed to send email', {
+        to: maskEmail(user.email!),
+        error: err instanceof Error ? err.message : String(err),
+      })
       failed++
     }
   }

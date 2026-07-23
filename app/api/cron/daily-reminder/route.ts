@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { sendEmail } from '@/app/lib/sendEmail'
+import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const today = getMadridToday()
 
-  // Users registered >= 1 day ago with at least 1 pending mission (today or overdue)
+  // Users registered >= 2 hours ago with at least 1 pending mission (today or overdue)
   const { data: candidates, error: candidatesError } = await db
     .from('camino_calendar')
     .select('user_id')
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
   }
 
   const notifySet = new Set(toNotify)
-  const cutoff = new Date(Date.now() - 86400000).toISOString() // >= 1 day ago
+  const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // >= 2 hours ago
 
   const targets = (usersData?.users ?? []).filter(u =>
     notifySet.has(u.id) &&
@@ -197,8 +198,22 @@ export async function GET(request: NextRequest) {
 
   let sent = 0
   let failed = 0
+  let skippedDedup = 0
 
   for (const user of finalTargets) {
+    // Dedup: try inserting a 'skipped' lock row for today.
+    // If it fails (unique constraint) this user was already handled today — skip.
+    const isNew = await logEmailEvent({
+      userId: user.id,
+      emailType: 'daily_reminder',
+      dedupeKey: today,
+      status: 'skipped',
+    })
+    if (!isNew) {
+      skippedDedup++
+      continue
+    }
+
     try {
       const result = await sendEmail({
         to: user.email!,
@@ -210,17 +225,32 @@ export async function GET(request: NextRequest) {
         to: maskEmail(user.email!),
         resendMessageId: result.id,
       })
+      await logEmailEvent({
+        userId: user.id,
+        emailType: 'daily_reminder',
+        dedupeKey: today,
+        status: 'sent',
+        resendMessageId: result.id,
+      })
       sent++
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
       console.error('[daily-reminder] failed to send email', {
         to: maskEmail(user.email!),
-        error: err instanceof Error ? err.message : String(err),
+        error: errorMessage,
+      })
+      await logEmailEvent({
+        userId: user.id,
+        emailType: 'daily_reminder',
+        dedupeKey: today,
+        status: 'failed',
+        metadata: { error: errorMessage },
       })
       failed++
     }
   }
 
-  const skipped = candidateIds.length - toNotify.length + optedOutSet.size
-  console.log('[daily-reminder] cron finished', { sent, failed, skipped })
-  return NextResponse.json({ sent, failed, skipped })
+  const skipped = candidateIds.length - toNotify.length + optedOutSet.size + skippedDedup
+  console.log('[daily-reminder] cron finished', { sent, failed, skipped, skippedDedup })
+  return NextResponse.json({ sent, failed, skipped, skippedDedup })
 }

@@ -3,6 +3,8 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
+import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 
 export const dynamic = 'force-dynamic'
 
@@ -327,6 +329,24 @@ export async function POST(request: NextRequest) {
 
     // ── PASO 4: Response ────────────────────────────────────────────────────
     const first = calRows[0] as { title: string; subject: string; scheduled_date: string } | undefined
+
+    // Email de bienvenida — fail-safe, nunca bloquea el onboarding
+    try {
+      const userEmail = user.email
+      if (userEmail) {
+        await sendWelcomeEmail({
+          userId: user.id,
+          userEmail,
+          userName: (user.user_metadata?.full_name as string | undefined) ?? user.email?.split('@')[0] ?? 'estudiante',
+          missionCount: calRows.length,
+          firstSubject: first?.title ?? first?.subject ?? 'tu primera asignatura',
+          unsubscribeToken: generateUnsubscribeToken(user.id),
+        })
+      }
+    } catch (err) {
+      console.error('[onboarding] welcome email failed silently:', err)
+    }
+
     return NextResponse.json({
       success: true,
       daysGenerated: calRows.length,

@@ -36,10 +36,27 @@ export default function Login() {
 
   // ── UI-only state ────────────────────────────────────────────────────────────
   const [showPwd, setShowPwd]         = useState(false)
-  const [googleMsg, setGoogleMsg]     = useState(false)
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const isError   = !!mensaje && !mensaje.includes('confirmar')
   const isSuccess = !!mensaje && mensaje.includes('confirmar')
+
+  // ── Google OAuth handler ─────────────────────────────────────────────────────
+  const handleGoogleLogin = async () => {
+    setCargando(true)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        // redirectTo apunta a /auth/callback (no a /camino) porque el flujo
+        // PKCE requiere exchangeCodeForSession en el cliente (acceso a localStorage).
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) {
+      setMensaje('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
+      setCargando(false)
+    }
+    // Sin error: el navegador redirige a Google automáticamente.
+  }
 
   // ── Auth handler (preserved exactly) ────────────────────────────────────────
   async function handleSubmit() {
@@ -295,7 +312,8 @@ export default function Login() {
             <button
               type="button"
               className="lg-btn-google"
-              onClick={() => { setGoogleMsg(true); setTimeout(() => setGoogleMsg(false), 3000) }}
+              onClick={handleGoogleLogin}
+              disabled={cargando}
               aria-label="Continúa con Google"
             >
               {/* Google G logo */}
@@ -307,11 +325,6 @@ export default function Login() {
               </svg>
               Continúa con Google
             </button>
-            {googleMsg && (
-              <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', marginTop: 6 }}>
-                Próximamente disponible
-              </p>
-            )}
           </div>
 
           {/* Divider */}

@@ -974,9 +974,36 @@ export default function LandingPage() {
           { src: '/brand/hero-student.jpg',          alt: 'Preparación PAU' },
         ]}
         centerReveal={
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <img src="/brand/kairo-logo.png" alt="Kairo" style={{ width: 'clamp(190px,26vw,380px)', height: 'auto', filter: 'drop-shadow(0 16px 28px rgba(2,8,23,0.18))' }} />
-            <p style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', color: '#ffffff', fontWeight: 600, opacity: 0.85, letterSpacing: '-0.02em' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+            {/* CSS wordmark — crisp on any background, no image artifacts */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px,2vw,20px)' }}>
+              {/* Brand mark in frosted white pill */}
+              <span style={{
+                width: 'clamp(52px,7vw,80px)',
+                height: 'clamp(52px,7vw,80px)',
+                borderRadius: 'clamp(14px,2vw,22px)',
+                flexShrink: 0,
+                display: 'grid',
+                placeItems: 'center',
+                background: 'rgba(255,255,255,0.95)',
+                border: '1px solid rgba(255,255,255,0.60)',
+                boxShadow: '0 20px 60px rgba(2,8,23,0.45), 0 4px 16px rgba(2,8,23,0.25)',
+              }}>
+                <img src="/brand/kairo-mark.svg" alt="" style={{ width: '80%', height: '80%', objectFit: 'contain', display: 'block' }} />
+              </span>
+              {/* Wordmark in white */}
+              <span style={{
+                fontSize: 'clamp(40px,8vw,88px)',
+                fontWeight: 900,
+                color: '#ffffff',
+                letterSpacing: '-0.04em',
+                lineHeight: 1,
+                textShadow: '0 4px 32px rgba(2,8,23,0.50)',
+              }}>
+                Kairo
+              </span>
+            </div>
+            <p style={{ fontSize: 'clamp(0.95rem,1.8vw,1.25rem)', color: '#ffffff', fontWeight: 600, opacity: 0.82, letterSpacing: '-0.02em', margin: 0 }}>
               Prepara la PAU con claridad.
             </p>
           </div>

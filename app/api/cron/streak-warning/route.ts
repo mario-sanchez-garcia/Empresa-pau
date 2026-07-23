@@ -66,10 +66,10 @@ export async function GET(request: NextRequest) {
   const qualifiedByStreak: Array<{ userId: string; streakDays: number }> = []
   for (const userId of candidates) {
     const streak = await calcularRacha(userId, db)
-    if (streak >= 3) qualifiedByStreak.push({ userId, streakDays: streak })
+    if (streak >= 1) qualifiedByStreak.push({ userId, streakDays: streak })
   }
 
-  if (qualifiedByStreak.length === 0) return NextResponse.json({ sent: 0, skipped: 0, reason: 'no_streak_gte_3' })
+  if (qualifiedByStreak.length === 0) return NextResponse.json({ sent: 0, skipped: 0, reason: 'no_streak_gte_1' })
 
   const qualifiedIds = qualifiedByStreak.map(u => u.userId)
 

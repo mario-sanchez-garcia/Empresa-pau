@@ -137,7 +137,7 @@ const COMPARE_ROWS = [
   { label: 'Disponible 24 horas al día',     kairo: true,   academia: false, solo: true  },
   { label: 'Chat con tutor IA',              kairo: true,   academia: false, solo: false },
   { label: 'Historial de progreso',          kairo: true,   academia: false, solo: false },
-  { label: 'Precio mensual',                 pText: 'Free / 9,99€ / 79€ curso', aText: '100–200€', sText: 'Gratis' },
+  { label: 'Precio mensual',                 pText: 'Free / 9,99€ / 59€ curso', aText: '100–200€', sText: 'Gratis' },
 ]
 
 const LANDING_PRICING = [
@@ -176,11 +176,11 @@ const LANDING_PRICING = [
   },
   {
     name: 'Curso PAU',
-    price: '79 €',
+    price: '59 €',
     period: 'pago único · early bird',
     badge: 'Curso completo',
     featured: false,
-    description: 'Acceso completo de septiembre a junio. Precio de lanzamiento hasta el 30 de septiembre.',
+    description: 'Acceso de septiembre a junio. Ahorra 30 € frente al mensual. Early bird hasta el 30 de septiembre.',
     bullets: [
       '200 correcciones/mes',
       '80 fotos/mes',
@@ -1531,7 +1531,7 @@ export default function LandingPage() {
         <p style={{ maxWidth: 680, margin: '-28px auto 28px', color: C.muted, fontSize: 15, lineHeight: 1.7, textAlign: 'center' }}>
           Menos que una clase particular al mes. Beta privada: de momento probamos Matemáticas II y Matemáticas CCSS.
         </p>
-        <div className="lp-plan-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 14, maxWidth: 1040, margin: '0 auto' }}>
+        <div className="lp-plan-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,340px))', gap: 14, maxWidth: 1040, margin: '0 auto', justifyContent: 'center' }}>
           {LANDING_PRICING.map((plan) => (
             <div key={plan.name} className="lp-card" style={{
               background: plan.featured ? C.blue : C.bg,

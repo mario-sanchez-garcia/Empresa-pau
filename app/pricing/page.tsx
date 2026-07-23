@@ -57,9 +57,9 @@ const plans: Plan[] = [
   },
   {
     name: 'Curso PAU',
-    price: '79 €',
+    price: '59 €',
     period: 'pago único · early bird',
-    description: 'Acceso completo de septiembre a junio. Precio de lanzamiento hasta el 30 de septiembre.',
+    description: 'Acceso completo de septiembre a junio. Ahorra 30 € frente al plan mensual. Precio de lanzamiento hasta el 30 de septiembre.',
     features: [
       { text: '200 correcciones/mes', included: true },
       { text: '80 fotos/mes', included: true },
@@ -108,7 +108,7 @@ export default function PricingPage() {
           </div>
 
           {/* Cards grid */}
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-16 xl:grid-cols-5">
+          <div className="mt-10 grid gap-5 lg:mt-16" style={{ gridTemplateColumns: 'repeat(3,minmax(0,340px))', justifyContent: 'center' }}>
             {plans.map((plan) => (
               <Card
                 key={plan.name}
@@ -203,7 +203,7 @@ export default function PricingPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Los precios incluyen IVA. Curso PAU early bird 79 € hasta el 30 de septiembre, después 99 €.
+            Los precios incluyen IVA. Curso PAU early bird 59 € hasta el 30 de septiembre, después 69 €.
           </p>
         </div>
       </section>

@@ -76,7 +76,7 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
   } = useCanvas(userId, initialCanvases)
 
   return (
-    <div className="relative flex h-[calc(100vh-78px)] min-h-[680px] overflow-hidden rounded-[8px] border border-[#e8e8e8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-md:block">
+    <div className="relative flex h-[calc(100vh-78px)] min-h-[680px] overflow-hidden rounded-3xl border border-[#dbe7fb] bg-white shadow-[0_24px_70px_rgba(37,99,235,0.12)] max-md:block">
       <CanvasToolbar
         canvases={canvases}
         activeId={activeId}

@@ -29,9 +29,9 @@ export default function MissionCard({
   return (
     <section
       style={{
-        borderRadius: 8, background: '#fff',
-        border: '1px solid #e8e8e8',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+        borderRadius: 20, background: '#fff',
+        border: '1.5px solid rgba(219,231,248,0.85)',
+        boxShadow: '0 2px 14px rgba(37,99,235,0.06)',
         padding: '26px 28px',
         display: 'flex', alignItems: 'center', gap: 24,
         overflow: 'hidden', position: 'relative',
@@ -97,7 +97,7 @@ export default function MissionCard({
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
             <CheckCircle2 size={13} aria-hidden /> {completedCount}/{totalTasks} tareas
           </span>
-          <span style={{ fontSize: 12.5, fontWeight: 900, color: '#1c1c1c', letterSpacing: '-0.01em' }}>
+          <span style={{ fontSize: 12.5, fontWeight: 900, color: '#7c3aed', letterSpacing: '-0.01em' }}>
             +250 XP
           </span>
         </div>
@@ -115,12 +115,12 @@ export default function MissionCard({
             padding: '11px 22px', borderRadius: 12, border: 'none', cursor: 'pointer',
             background: missionCompleted
               ? 'linear-gradient(135deg, #059669, #10b981)'
-              : '#1c1c1c',
+              : 'linear-gradient(135deg, #6d28d9, #7c3aed)',
             color: '#fff',
             fontSize: 13.5, fontWeight: 800, letterSpacing: '-0.01em',
             boxShadow: missionCompleted
               ? '0 5px 18px rgba(5,150,105,0.30)'
-              : '0 2px 8px rgba(0,0,0,0.10)',
+              : '0 5px 18px rgba(109,40,217,0.35)',
           }}
         >
           {cta}
@@ -142,7 +142,7 @@ export default function MissionCard({
           <motion.circle
             cx="50" cy="50" r={R}
             fill="none"
-            stroke={missionCompleted ? '#10b981' : '#1c1c1c'}
+            stroke={missionCompleted ? '#10b981' : '#7c3aed'}
             strokeWidth="7.5"
             strokeLinecap="round"
             strokeDasharray={CIRC}

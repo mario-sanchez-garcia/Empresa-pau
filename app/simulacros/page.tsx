@@ -217,7 +217,7 @@ function SimulacrosPage() {
       actions={
         <button
           onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}
-          className="kairo-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-[#ccc] hover:bg-[#f5f5f5] hover:text-[#1c1c1c]"
+          className="kairo-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
         >
           {historyOpen ? <EyeOff size={15} /> : <Eye size={15} />}
           {historyOpen ? 'Ocultar historial' : 'Mis simulacros'}
@@ -228,7 +228,7 @@ function SimulacrosPage() {
 
         {/* Camino parcial banner */}
         {isCaminoPartial && caminoBlock && (
-          <div className="pau-reveal flex items-center gap-3 rounded-[6px] border p-4 text-sm font-semibold" style={{ borderColor: '#e0e0e0', background: '#f5f5f5', color: '#1c1c1c' }}>
+          <div className="pau-reveal flex items-center gap-3 rounded-2xl border p-4 text-sm font-semibold" style={{ borderColor: '#bfdbfe', background: '#eff6ff', color: '#1e40af' }}>
             <PlayCircle size={16} className="shrink-0" />
             Simulacro enfocado en <strong className="ml-1">{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
             <span className="ml-1 font-normal" style={{ color: '#3b82f6' }}>— generando para tu parcial...</span>
@@ -258,7 +258,7 @@ function SimulacrosPage() {
             <div className="mt-3 flex items-center gap-2">
               <span
                 className="rounded-full px-3 py-1 text-xs font-black"
-                style={{ background: '#f5f5f5', color: '#1c1c1c', border: '1px solid #e0e0e0' }}
+                style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
               >
                 Último: {SUBJECTS[stats.lastCompleted.asignatura]?.label ?? stats.lastCompleted.asignatura} · {formatScore(stats.lastCompleted.nota_final)}/10
               </span>
@@ -273,7 +273,7 @@ function SimulacrosPage() {
               <h2 className="text-base font-black" style={{ color: '#0f172a' }}>Mis simulacros anteriores</h2>
               <span
                 className="rounded-full px-3 py-1 text-xs font-black"
-                style={{ background: '#f5f5f5', color: '#1c1c1c', border: '1px solid #e0e0e0' }}
+                style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
               >
                 {history.length} total
               </span>
@@ -286,18 +286,18 @@ function SimulacrosPage() {
                   <a
                     key={item.id}
                     href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
-                    className="flex items-center justify-between rounded-[4px] border p-3 no-underline transition hover:-translate-y-0.5 hover:shadow-sm"
+                    className="flex items-center justify-between rounded-xl border p-3 no-underline transition hover:-translate-y-0.5 hover:shadow-sm"
                     style={{
-                      borderColor: '#e0e0e0',
-                      background: '#f9f9f9',
+                      borderColor: '#dbe7fb',
+                      background: '#f8fbff',
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = '#999'
-                      ;(e.currentTarget as HTMLElement).style.background = '#f5f5f5'
+                      (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'
+                      ;(e.currentTarget as HTMLElement).style.background = '#eff6ff'
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = '#e0e0e0'
-                      ;(e.currentTarget as HTMLElement).style.background = '#f9f9f9'
+                      (e.currentTarget as HTMLElement).style.borderColor = '#dbe7fb'
+                      ;(e.currentTarget as HTMLElement).style.background = '#f8fbff'
                     }}
                   >
                     <div className="min-w-0">
@@ -348,7 +348,7 @@ function SimulacrosPage() {
                   key={key}
                   disabled={!available}
                   onClick={() => available && setSubject(key)}
-                  className="pau-subject-card relative overflow-hidden rounded-[6px] border p-5 text-left"
+                  className="pau-subject-card relative overflow-hidden rounded-2xl border p-5 text-left"
                   style={{
                     borderColor: isActive ? s.color : 'rgba(219,231,251,0.82)',
                     background: isActive
@@ -356,7 +356,7 @@ function SimulacrosPage() {
                       : 'rgba(255,255,255,0.82)',
                     boxShadow: isActive
                       ? `0 0 0 2.5px ${s.color}28, 0 14px 36px ${s.color}18`
-                      : '0 2px 8px rgba(0,0,0,0.03)',
+                      : '0 2px 8px rgba(37,99,235,0.05)',
                     cursor: available ? 'pointer' : 'not-allowed',
                     opacity: available ? 1 : 0.6,
                   }}
@@ -369,7 +369,7 @@ function SimulacrosPage() {
                   />
                   {/* Icon badge */}
                   <div
-                    className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-[4px]"
+                    className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl"
                     style={{
                       background: isActive ? s.color : s.light,
                       color: isActive ? '#fff' : s.color,
@@ -409,7 +409,7 @@ function SimulacrosPage() {
           <div className="pau-stagger grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
             <button
               onClick={() => setMode('normal')}
-              className="group rounded-[6px] border p-5 text-left transition hover:-translate-y-0.5"
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
               style={{
                 borderColor: mode === 'normal' ? cfg.color : 'rgba(219,231,251,0.82)',
                 background: mode === 'normal'
@@ -417,12 +417,12 @@ function SimulacrosPage() {
                   : 'rgba(255,255,255,0.84)',
                 boxShadow: mode === 'normal'
                   ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(0,0,0,0.02)',
+                  : '0 2px 8px rgba(37,99,235,0.04)',
               }}
             >
               <div className="mb-4 flex items-center justify-between gap-4">
                 <span
-                  className="flex h-12 w-12 items-center justify-center rounded-[6px] text-white transition group-hover:scale-105"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl text-white transition group-hover:scale-105"
                   style={{ background: cfg.color, boxShadow: `0 10px 24px ${cfg.color}2b` }}
                 >
                   <Shuffle size={22} />
@@ -439,7 +439,7 @@ function SimulacrosPage() {
 
             <button
               onClick={() => setMode('errores')}
-              className="group rounded-[6px] border p-5 text-left transition hover:-translate-y-0.5"
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
               style={{
                 borderColor: mode === 'errores' ? cfg.color : 'rgba(219,231,251,0.82)',
                 background: mode === 'errores'
@@ -447,12 +447,12 @@ function SimulacrosPage() {
                   : 'rgba(255,255,255,0.84)',
                 boxShadow: mode === 'errores'
                   ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(0,0,0,0.02)',
+                  : '0 2px 8px rgba(37,99,235,0.04)',
               }}
             >
               <div className="mb-4 flex items-center justify-between gap-4">
                 <span
-                  className="flex h-12 w-12 items-center justify-center rounded-[6px] transition group-hover:scale-105"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
                   style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
                 >
                   <TrendingDown size={22} />
@@ -469,7 +469,7 @@ function SimulacrosPage() {
 
             <button
               onClick={() => setMode('tipicos')}
-              className="group rounded-[6px] border p-5 text-left transition hover:-translate-y-0.5"
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
               style={{
                 borderColor: mode === 'tipicos' ? cfg.color : 'rgba(219,231,251,0.82)',
                 background: mode === 'tipicos'
@@ -477,12 +477,12 @@ function SimulacrosPage() {
                   : 'rgba(255,255,255,0.84)',
                 boxShadow: mode === 'tipicos'
                   ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(0,0,0,0.02)',
+                  : '0 2px 8px rgba(37,99,235,0.04)',
               }}
             >
               <div className="mb-4 flex items-center justify-between gap-4">
                 <span
-                  className="flex h-12 w-12 items-center justify-center rounded-[6px] transition group-hover:scale-105"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
                   style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
                 >
                   <Target size={22} />
@@ -499,7 +499,7 @@ function SimulacrosPage() {
 
             <button
               onClick={() => setMode('personalizado')}
-              className="group rounded-[6px] border p-5 text-left transition hover:-translate-y-0.5"
+              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
               style={{
                 borderColor: mode === 'personalizado' ? cfg.color : 'rgba(219,231,251,0.82)',
                 background: mode === 'personalizado'
@@ -507,17 +507,17 @@ function SimulacrosPage() {
                   : 'rgba(255,255,255,0.84)',
                 boxShadow: mode === 'personalizado'
                   ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(0,0,0,0.02)',
+                  : '0 2px 8px rgba(37,99,235,0.04)',
               }}
             >
               <div className="mb-4 flex items-center justify-between gap-4">
                 <span
-                  className="flex h-12 w-12 items-center justify-center rounded-[6px] transition group-hover:scale-105"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
                   style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
                 >
                   <Settings2 size={22} />
                 </span>
-                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f9f9f9', color: '#64748b', border: '1px solid #e0e0e0' }}>
+                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f8fbff', color: '#64748b', border: '1px solid #dbe7fb' }}>
                   Ajustable
                 </span>
               </div>
@@ -535,7 +535,7 @@ function SimulacrosPage() {
             <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
               Paso 3 · Ajustes personalizados
             </p>
-            <div className="grid gap-5 rounded-[8px] border bg-white/80 p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] backdrop-blur-xl" style={{ borderColor: '#e0e0e0' }}>
+            <div className="grid gap-5 rounded-[26px] border bg-white/80 p-5 shadow-[0_18px_46px_rgba(37,99,235,0.06)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
               <div>
                 <div className="mb-3 flex items-center gap-2">
                   <ListChecks size={16} style={{ color: cfg.color }} />
@@ -548,10 +548,10 @@ function SimulacrosPage() {
                       <button
                         key={item.id}
                         onClick={() => setYearChoice(item.id)}
-                        className="rounded-[6px] border p-4 text-left transition hover:-translate-y-0.5"
+                        className="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5"
                         style={{
-                          borderColor: isActive ? cfg.color : '#e0e0e0',
-                          background: isActive ? `${cfg.color}10` : '#f9f9f9',
+                          borderColor: isActive ? cfg.color : '#dbe7fb',
+                          background: isActive ? `${cfg.color}10` : '#f8fbff',
                           boxShadow: isActive ? `0 0 0 2px ${cfg.color}18` : 'none',
                         }}
                       >
@@ -576,10 +576,10 @@ function SimulacrosPage() {
                         <button
                           key={item.id}
                           onClick={() => setOptionChoice(item.id)}
-                          className="rounded-[6px] border p-4 text-left transition hover:-translate-y-0.5"
+                          className="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5"
                           style={{
-                            borderColor: isActive ? cfg.color : '#e0e0e0',
-                            background: isActive ? `${cfg.color}10` : '#f9f9f9',
+                            borderColor: isActive ? cfg.color : '#dbe7fb',
+                            background: isActive ? `${cfg.color}10` : '#f8fbff',
                             boxShadow: isActive ? `0 0 0 2px ${cfg.color}18` : 'none',
                           }}
                         >
@@ -591,7 +591,7 @@ function SimulacrosPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-[6px] border p-4 text-sm font-semibold leading-6" style={{ borderColor: `${cfg.color}24`, background: `${cfg.color}0f`, color: '#475569' }}>
+                <div className="rounded-2xl border p-4 text-sm font-semibold leading-6" style={{ borderColor: `${cfg.color}24`, background: `${cfg.color}0f`, color: '#475569' }}>
                   Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
                 </div>
               )}
@@ -599,8 +599,8 @@ function SimulacrosPage() {
           </section>
         ) : (
           <section className="pau-reveal pau-reveal-delay-3">
-            <div className="flex flex-wrap items-center gap-3 rounded-[6px] border p-5" style={{ background: `${cfg.color}0d`, borderColor: `${cfg.color}22` }}>
-              <span className="flex h-10 w-10 items-center justify-center rounded-[6px]" style={{ background: '#fff', color: cfg.color, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
+            <div className="flex flex-wrap items-center gap-3 rounded-[24px] border p-5" style={{ background: `${cfg.color}0d`, borderColor: `${cfg.color}22` }}>
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: '#fff', color: cfg.color, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
                 <AutoInfoIcon size={18} />
               </span>
               <div className="min-w-0">
@@ -615,7 +615,7 @@ function SimulacrosPage() {
 
         {/* Summary */}
         <section className="pau-reveal pau-reveal-delay-3">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[6px] border bg-white/82 p-5 shadow-[0_16px_42px_rgba(0,0,0,0.03)]" style={{ borderColor: '#e0e0e0' }}>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border bg-white/82 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.06)]" style={{ borderColor: '#dbe7fb' }}>
             <div>
               <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>Listo para crear</p>
               <p className="mt-1 text-base font-black" style={{ color: '#0f172a' }}>
@@ -652,8 +652,8 @@ function SimulacrosPage() {
 function StatCard({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
     <div
-      className="kairo-stitch-card rounded-[6px] p-4"
-      style={accent ? { background: 'linear-gradient(145deg, #f5f5f5, #e8e8e8)', borderColor: '#e0e0e0' } : undefined}
+      className="kairo-stitch-card rounded-2xl p-4"
+      style={accent ? { background: 'linear-gradient(145deg, #eff6ff, #dbeafe)', borderColor: '#bfdbfe' } : undefined}
     >
       <p className="text-[11px] font-black uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>
       <p className="mt-2 text-2xl font-black" style={{ color: '#0f172a' }}>{value}</p>

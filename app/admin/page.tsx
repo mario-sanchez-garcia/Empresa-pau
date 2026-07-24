@@ -6,16 +6,16 @@ import type { AdminMetrics, RangeSummary } from '@/app/lib/adminMetrics'
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-  bg: '#1c1c1c',
-  bgDark: '#1c1c1c',
-  light: '#f5f5f5',
+  bg: '#2563eb',
+  bgDark: '#1d4ed8',
+  light: '#eff6ff',
   accent: '#60a5fa',
   ink: '#111827',
   muted: '#64748b',
-  border: '#e0e0e0',
+  border: '#dbe7fb',
   surface: '#ffffff',
-  shadow: '0 1px 4px rgba(0,0,0,0.06)',
-  shadowMd: '0 2px_8px_rgba(0,0,0,0.08)'
+  shadow: '0 4px 24px rgba(37,99,235,0.07)',
+  shadowMd: '0 8px 32px rgba(37,99,235,0.10)'
 }
 
 // ─── Formatters ─────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ function StatCard({
   accent?: boolean; warn?: boolean; danger?: boolean
 }) {
   const bg = danger ? '#fef2f2' : warn ? '#fffbeb' : accent ? C.light : C.surface
-  const border = danger ? '#fecaca' : warn ? '#fde68a' : accent ? '#e0e0e0' : C.border
+  const border = danger ? '#fecaca' : warn ? '#fde68a' : accent ? '#bfdbfe' : C.border
   const valColor = danger ? '#dc2626' : warn ? '#b45309' : C.ink
   return (
     <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: '18px 20px', boxShadow: C.shadow }}>
@@ -127,7 +127,7 @@ function Table({ cols, rows, emptyMsg = 'Sin datos' }: {
           <tr>
             {cols.map(col => (
               <th key={col} style={{
-                textAlign: 'left', padding: '9px 14px', background: '#f9f9f9',
+                textAlign: 'left', padding: '9px 14px', background: '#f8faff',
                 color: C.muted, fontWeight: 700, fontSize: 10, textTransform: 'uppercase',
                 letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap'
               }}>{col}</th>
@@ -299,8 +299,8 @@ function InsightsPanel({ insights }: { insights: string[] }) {
     <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
       {insights.map((ins, i) => (
         <div key={i} style={{
-          background: C.light, border: `1px solid #e0e0e0`, borderRadius: 10,
-          padding: '10px 14px', fontSize: 13, color: '#1c1c1c', fontWeight: 500, lineHeight: 1.5
+          background: C.light, border: `1px solid #bfdbfe`, borderRadius: 10,
+          padding: '10px 14px', fontSize: 13, color: '#1e40af', fontWeight: 500, lineHeight: 1.5
         }}>
           {ins}
         </div>
@@ -675,13 +675,13 @@ export default function AdminPage() {
   const updatedAt = isLoaded ? fmtDate(state.metrics.calculatedAt) : null
 
   return (
-    <div style={{ minHeight: '100vh', background: C.light }}>
+    <div style={{ minHeight: '100vh', background: `linear-gradient(160deg, ${C.light} 0%, #f8faff 100%)` }}>
       {/* ── Header ── */}
-      <div style={{ background: `linear-gradient(135deg, ${C.bgDark} 0%, ${C.bg} 100%)`, padding: '0 32px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.bgDark} 0%, ${C.bg} 100%)`, padding: '0 32px', boxShadow: '0 2px 20px rgba(37,99,235,0.2)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <Link href="/" style={{ color: '#999', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
+              <Link href="/" style={{ color: '#93c5fd', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
                 ← Volver a Kairo
               </Link>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>·</span>
@@ -692,25 +692,25 @@ export default function AdminPage() {
             <h1 style={{ color: '#ffffff', fontSize: 20, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
               Panel interno
             </h1>
-            <p style={{ color: '#999', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
+            <p style={{ color: '#93c5fd', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
               Métricas básicas para controlar la beta de Kairo.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <Link
               href="/admin/camino-preview"
-              style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
+              style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
             >
               Preview Camino PAU
             </Link>
             <Link
               href="/admin/camino-status"
-              style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
+              style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
             >
               Estado por usuario
             </Link>
             {updatedAt && (
-              <span style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 500 }}>
+              <span style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 500 }}>
                 Actualizado: {updatedAt}
               </span>
             )}

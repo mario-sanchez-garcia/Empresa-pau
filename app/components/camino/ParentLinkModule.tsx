@@ -35,7 +35,7 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
   // Pack already active — show minimal badge
   if (billing.hasActivePack) {
     return (
-      <section className="flex items-center gap-3 rounded-[6px] border border-emerald-100 bg-emerald-50 px-4 py-3">
+      <section className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
         <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
         <div>
           <p className="text-sm font-black text-emerald-900">Pack Curso PAU activo</p>
@@ -102,10 +102,10 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
   }
 
   return (
-    <section className="rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
+    <section className="rounded-[16px] border border-blue-100 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.06)]">
       {/* Header */}
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] text-[#1c1c1c]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
           <Send size={18} />
         </div>
         <div className="min-w-0">
@@ -115,7 +115,7 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
       </div>
 
       {/* Benefits */}
-      <div className="mb-4 rounded-[4px] border border-slate-100 bg-slate-50 px-4 py-3">
+      <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
         <p className="mb-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Tus padres podrán ver</p>
         <ul className="grid gap-1.5">
           {PARENT_BENEFITS.map(b => (
@@ -137,7 +137,7 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
 
       {/* Pending checkout notice */}
       {billing.pendingParentCheckout && ui.phase === 'idle' && (
-        <div className="mb-3 flex items-center gap-2 rounded-[4px] border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
           <Sparkles size={13} />
           Tienes un enlace pendiente que aún no ha sido pagado.
         </div>
@@ -155,7 +155,7 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
       )}
 
       {ui.phase === 'loading' && (
-        <div className="flex items-center justify-center gap-2 rounded-[4px] border border-[#e8e8e8] bg-[#f5f5f5] px-5 py-3 text-sm font-bold text-[#1c1c1c]">
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700">
           <span className="animate-spin">⟳</span> Generando enlace…
         </div>
       )}
@@ -163,21 +163,21 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
       {ui.phase === 'ready' && (
         <div className="flex flex-col gap-3">
           <p className="text-xs font-semibold text-slate-500">Comparte este enlace con tus padres. Caduca en 7 días.</p>
-          <div className="rounded-[4px] border border-slate-100 bg-slate-50 p-3">
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
             <p className="mb-2 text-xs font-bold text-slate-400">Mensaje sugerido</p>
             <p className="select-all text-xs font-semibold leading-5 text-slate-600">
-              {SHARE_TEXT}<span className="text-[#1c1c1c]">{ui.url}</span>
+              {SHARE_TEXT}<span className="text-blue-600">{ui.url}</span>
             </p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => handleCopy(ui.url)} className="flex flex-1 items-center justify-center gap-1.5 rounded-[4px] border border-[#e8e8e8] bg-[#f5f5f5] px-3 py-2 text-xs font-bold text-[#1c1c1c] transition hover:border-[#999]">
+            <button type="button" onClick={() => handleCopy(ui.url)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 transition hover:border-blue-300">
               {ui.copied ? <CheckCircle2 size={13} /> : <Copy size={13} />}
               {ui.copied ? 'Copiado' : 'Copiar enlace'}
             </button>
-            <a href={ui.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-[4px] border border-slate-100 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-slate-300">
+            <a href={ui.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-slate-300">
               <ExternalLink size={13} /> Ver enlace
             </a>
-            <button type="button" onClick={handleReset} className="flex items-center gap-1.5 rounded-[4px] border border-slate-100 bg-white px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-slate-300">
+            <button type="button" onClick={handleReset} className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-white px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-slate-300">
               <X size={13} />
             </button>
           </div>
@@ -185,7 +185,7 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
       )}
 
       {ui.phase === 'shared' && (
-        <div className="flex items-center gap-2 rounded-[4px] border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
           <CheckCircle2 size={16} />
           Enlace compartido. Cuando tus padres paguen, tu Pack se activará automáticamente.
           <button type="button" onClick={handleReset} className="ml-auto text-emerald-500 hover:text-emerald-700"><X size={14} /></button>
@@ -193,7 +193,7 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
       )}
 
       {ui.phase === 'error' && (
-        <div className="flex items-start gap-2 rounded-[4px] border border-red-100 bg-red-50 px-4 py-3">
+        <div className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
           <p className="flex-1 text-sm font-semibold text-red-700">{ui.message}</p>
           <button type="button" onClick={handleReset} className="shrink-0 text-red-400 hover:text-red-600"><X size={14} /></button>
         </div>

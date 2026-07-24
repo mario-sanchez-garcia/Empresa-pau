@@ -17,14 +17,14 @@ const NODE_CFG: Record<NodeStatus, {
     pillBg: '#dcfce7', pillText: '#166534', label: 'Completado', dotColor: '#4ade80',
   },
   current: {
-    circleBg: '#1c1c1c',
-    circleColor: '#fff', circleBorder: '#555',
-    circleShadow: '0 4px 12px rgba(0,0,0,0.18)',
-    pillBg: '#f5f5f5', pillText: '#1c1c1c', label: 'Actual', dotColor: '#1c1c1c',
+    circleBg: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+    circleColor: '#fff', circleBorder: '#60a5fa',
+    circleShadow: '0 6px 20px rgba(37,99,235,0.32)',
+    pillBg: '#dbeafe', pillText: '#1e40af', label: 'Actual', dotColor: '#3b82f6',
   },
   next: {
     circleBg: '#fff',
-    circleColor: '#1c1c1c', circleBorder: '#e0e0e0',
+    circleColor: '#2563eb', circleBorder: '#dbeafe',
     circleShadow: '0 2px 8px rgba(0,0,0,0.06)',
     pillBg: '#f1f5f9', pillText: '#475569', label: 'Próximo', dotColor: '#e2e8f0',
   },
@@ -48,9 +48,9 @@ export default function ProgressPath() {
   return (
     <section
       style={{
-        borderRadius: 8, background: '#fff',
-        border: '1px solid #e8e8e8',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+        borderRadius: 20, background: '#fff',
+        border: '1.5px solid rgba(219,231,248,0.85)',
+        boxShadow: '0 2px 10px rgba(37,99,235,0.05)',
         padding: '22px 24px',
       }}
     >
@@ -73,7 +73,7 @@ export default function ProgressPath() {
           style={{
             position: 'absolute', top: 26, left: 26, right: 26, height: 2, zIndex: 0,
             borderRadius: 99,
-            background: 'linear-gradient(90deg, #4ade80 0%, #4ade80 20%, #1c1c1c 40%, #e2e8f0 60%, #e2e8f0 100%)',
+            background: 'linear-gradient(90deg, #4ade80 0%, #4ade80 20%, #93c5fd 40%, #e2e8f0 60%, #e2e8f0 100%)',
           }}
         />
 

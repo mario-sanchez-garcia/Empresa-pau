@@ -220,12 +220,12 @@ function LessonMarkdown({ text, className = '', format = 'raw' }: LessonMarkdown
 
 function LessonMarkdownTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <div className="my-5 overflow-x-auto rounded-[6px] border border-[#e8e8e8] bg-white shadow-sm">
+    <div className="my-5 overflow-x-auto rounded-2xl border border-blue-100 bg-white shadow-sm">
       <table className="w-full min-w-[520px] border-collapse text-left text-sm">
-        <thead className="bg-[#f5f5f5] text-[#1c1c1c]">
+        <thead className="bg-blue-50 text-blue-900">
           <tr>
             {headers.map((header, index) => (
-              <th key={`${header}-${index}`} className="border-b border-[#e8e8e8] px-4 py-3 font-black align-top">
+              <th key={`${header}-${index}`} className="border-b border-blue-100 px-4 py-3 font-black align-top">
                 <LessonMarkdown text={header} format="raw" />
               </th>
             ))}
@@ -421,7 +421,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [])
 
   if (!topic) {
-    return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[8px] border border-[#e8e8e8] bg-white p-8 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-[6px] bg-[#1c1c1c] px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
+    return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[28px] border border-blue-100 bg-white p-8 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
   }
 
   const currentTopic = topic
@@ -745,21 +745,21 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   return (
     <Shell>
       <main className="mx-auto max-w-6xl px-5 py-6">
-        <Link href="/camino" className="mb-4 inline-flex items-center gap-2 text-sm font-black text-[#1c1c1c]"><ArrowLeft size={16} /> Volver a Camino PAU</Link>
-        <section className="rounded-[8px] border border-[#e8e8e8] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+        <Link href="/camino" className="mb-4 inline-flex items-center gap-2 text-sm font-black text-blue-700"><ArrowLeft size={16} /> Volver a Camino PAU</Link>
+        <section className="rounded-[30px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#1c1c1c]">Camino PAU → {subjectLabelFromSlug(currentTopic.subject)} → {currentTopic.blockTitle}</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU → {subjectLabelFromSlug(currentTopic.subject)} → {currentTopic.blockTitle}</p>
               <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{currentTopic.title}</h1>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-[#f5f5f5] px-3 py-1 text-xs font-black text-[#1c1c1c]">{selectedV2Card ? 'Mini-misión 25 min' : '25 min'}</span>
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{selectedV2Card ? 'Mini-misión 25 min' : '25 min'}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
                 <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">{selectedV2Card ? `Misión ${selectedV2Card.sort_order} de 60` : 'Subpágina de aprendizaje'}</span>
                 {selectedV2Number && <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700">Mini-misión {selectedV2Number} de {v2Cards.length}</span>}
               </div>
               <p className="mt-3 text-sm font-semibold text-slate-500">Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.</p>
             </div>
-            <button onClick={markNotSeen} className="inline-flex items-center gap-2 rounded-[6px] border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700"><School size={16} /> No lo he dado en clase</button>
+            <button onClick={markNotSeen} className="inline-flex items-center gap-2 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700"><School size={16} /> No lo he dado en clase</button>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4">
@@ -774,14 +774,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                         ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
                         : <EmptyContent />}
                       {selectedV2Card.alert_markdown && (
-                        <div className="mt-4 rounded-[6px] border border-amber-200 bg-amber-50 px-4 py-3">
+                        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
                           <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
                         </div>
                       )}
                     </LearningCard>
                     {selectedV2Card.worked_example_markdown && (
                       <LearningCard title="Caso práctico resuelto">
-                        <div className="rounded-[6px] border border-emerald-200 bg-emerald-50 px-4 py-4">
+                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
                           <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                             <LessonMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
                           </div>
@@ -794,7 +794,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                           🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                         </button>
                         {videoOpen && (
-                          <div className="mt-3 overflow-hidden rounded-[6px] border border-gray-100 shadow-sm">
+                          <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
                             <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                               <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
                             </div>
@@ -835,7 +835,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                           🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                         </button>
                         {videoOpen && (
-                          <div className="mt-3 overflow-hidden rounded-[6px] border border-gray-100 shadow-sm">
+                          <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
                             <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                               <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo de apoyo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
                             </div>
@@ -859,10 +859,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                       ) : null}
                       {currentTopic.progressCriteria && (
                         <div className="mt-4 grid gap-2 text-sm font-semibold text-slate-700 sm:grid-cols-2">
-                          <p><span className="font-black text-[#1c1c1c]">Visto:</span> {currentTopic.progressCriteria.seen}</p>
-                          <p><span className="font-black text-[#1c1c1c]">Practicado:</span> {currentTopic.progressCriteria.practiced}</p>
-                          <p><span className="font-black text-[#1c1c1c]">Completado:</span> {currentTopic.progressCriteria.completed}</p>
-                          <p><span className="font-black text-[#1c1c1c]">Dominado:</span> {currentTopic.progressCriteria.mastered}</p>
+                          <p><span className="font-black text-blue-700">Visto:</span> {currentTopic.progressCriteria.seen}</p>
+                          <p><span className="font-black text-blue-700">Practicado:</span> {currentTopic.progressCriteria.practiced}</p>
+                          <p><span className="font-black text-blue-700">Completado:</span> {currentTopic.progressCriteria.completed}</p>
+                          <p><span className="font-black text-blue-700">Dominado:</span> {currentTopic.progressCriteria.mastered}</p>
                         </div>
                       )}
                     </LearningCard>
@@ -871,18 +871,18 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               )}
               {/* 2. Tu misión de hoy: selector + vídeo + práctica + navegación */}
               {v2Cards.length > 0 && (
-                <article className="rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-sm">
+                <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
                   <h2 className="text-lg font-black text-slate-950">🎯 Tu misión de hoy</h2>
                   <p className="mt-1 mb-4 text-sm font-semibold text-slate-500">Elige una mini-misión y pon en práctica lo que has aprendido arriba.</p>
                   <V2MiniMissionSelector cards={v2Cards} activeIndex={activeV2Index} onSelect={selectV2Card} />
                   {videoId && (
                     <div className="mt-4">
-                      <p className="mb-2 rounded-[6px] bg-[#f5f5f5] px-4 py-3 text-sm font-bold text-[#1c1c1c]">{videoSupportCopy}</p>
+                      <p className="mb-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">{videoSupportCopy}</p>
                       <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
                         🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                       </button>
                       {videoOpen && (
-                        <div className="mt-3 overflow-hidden rounded-[6px] border border-gray-100 shadow-sm">
+                        <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
                           <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                             <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
                           </div>
@@ -891,18 +891,18 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     </div>
                   )}
                   {selectedV2Card?.practice_prompt && (
-                    <div className="mt-4 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] p-4">
-                      <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#1c1c1c]">Ahora inténtalo tú</p>
+                    <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                      <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-blue-700">Ahora inténtalo tú</p>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
                       </div>
                     </div>
                   )}
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                    <button type="button" onClick={() => selectV2Card(activeV2Index - 1)} disabled={activeV2Index === 0} className="inline-flex items-center gap-2 rounded-[6px] border border-[#e8e8e8] bg-white px-4 py-2 text-xs font-black text-[#1c1c1c] disabled:cursor-not-allowed disabled:opacity-40">
+                    <button type="button" onClick={() => selectV2Card(activeV2Index - 1)} disabled={activeV2Index === 0} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-xs font-black text-blue-700 disabled:cursor-not-allowed disabled:opacity-40">
                       <ArrowLeft size={14} /> Misión anterior
                     </button>
-                    <button type="button" onClick={() => selectV2Card(activeV2Index + 1)} disabled={activeV2Index >= v2Cards.length - 1} className="inline-flex items-center gap-2 rounded-[6px] bg-[#1c1c1c] px-4 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40">
+                    <button type="button" onClick={() => selectV2Card(activeV2Index + 1)} disabled={activeV2Index >= v2Cards.length - 1} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40">
                       Siguiente misión <ArrowRight size={14} />
                     </button>
                   </div>
@@ -911,45 +911,45 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               </>
               )}
               {/* Entrega y corrección IA */}
-              <article ref={exerciseRef} id="course-exercise" className="rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-sm">
+              <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h2 className="text-lg font-black text-slate-950">Entrega tu ejercicio</h2>
                     <p className="mt-1 text-sm font-semibold text-slate-500">El XP se asigna sólo después de corregir con Kairo y depende de la nota obtenida.</p>
                   </div>
-                  {missionId && <span className="rounded-full bg-[#f5f5f5] px-3 py-1 text-xs font-black text-[#1c1c1c]">Misión conectada</span>}
+                  {missionId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Misión conectada</span>}
                 </div>
                 <div className="mb-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setAnswerMode('texto')} className={`inline-flex items-center gap-2 rounded-[6px] px-3 py-2 text-xs font-black ${answerMode === 'texto' ? 'bg-[#1c1c1c] text-white' : 'border border-[#e8e8e8] bg-[#f5f5f5] text-[#1c1c1c]'}`}><PenLine size={14} /> Escribir respuesta</button>
-                  <button type="button" onClick={() => setAnswerMode('imagen')} className={`inline-flex items-center gap-2 rounded-[6px] px-3 py-2 text-xs font-black ${answerMode === 'imagen' ? 'bg-[#1c1c1c] text-white' : 'border border-[#e8e8e8] bg-[#f5f5f5] text-[#1c1c1c]'}`}><Camera size={14} /> Subir foto</button>
+                  <button type="button" onClick={() => setAnswerMode('texto')} className={`inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black ${answerMode === 'texto' ? 'bg-blue-600 text-white' : 'border border-blue-100 bg-blue-50 text-blue-700'}`}><PenLine size={14} /> Escribir respuesta</button>
+                  <button type="button" onClick={() => setAnswerMode('imagen')} className={`inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black ${answerMode === 'imagen' ? 'bg-blue-600 text-white' : 'border border-blue-100 bg-blue-50 text-blue-700'}`}><Camera size={14} /> Subir foto</button>
                 </div>
                 {answerMode === 'texto' ? (
-                  <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#1c1c1c" mathSubject={currentTopic.subject} />
+                  <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" mathSubject={currentTopic.subject} />
                 ) : (
-                  <div className="rounded-[6px] border border-dashed border-[#e0e0e0] bg-[#f5f5f5] p-4">
+                  <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 p-4">
                     <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} className="hidden" />
                     {image ? (
                       <div className="grid gap-3">
-                        <img src={image.preview} alt="Respuesta subida" className="max-h-72 rounded-[6px] border border-[#e8e8e8] object-contain" />
-                        <button type="button" onClick={clearImage} className="inline-flex w-fit items-center gap-2 rounded-[4px] border border-red-100 bg-white px-3 py-2 text-xs font-black text-red-600"><X size={14} /> Quitar foto</button>
+                        <img src={image.preview} alt="Respuesta subida" className="max-h-72 rounded-2xl border border-blue-100 object-contain" />
+                        <button type="button" onClick={clearImage} className="inline-flex w-fit items-center gap-2 rounded-xl border border-red-100 bg-white px-3 py-2 text-xs font-black text-red-600"><X size={14} /> Quitar foto</button>
                       </div>
                     ) : (
-                      <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-[6px] bg-white px-4 py-3 text-sm font-black text-[#1c1c1c] shadow-sm"><UploadCloud size={16} /> Elegir foto de mi respuesta</button>
+                      <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-blue-700 shadow-sm"><UploadCloud size={16} /> Elegir foto de mi respuesta</button>
                     )}
                   </div>
                 )}
-                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
                   {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={16} /></>}
                 </button>
-                {score != null && <p className="mt-3 rounded-[6px] bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800">Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}</p>}
+                {score != null && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800">Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}</p>}
                 {correction && <div className="mt-4"><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
               </article>
             </div>
             <aside className="grid content-start gap-4">
-              <div className="rounded-[6px] border border-slate-100 bg-white p-3 shadow-sm">
+              <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="shrink-0 text-center">
-                    <p className="text-xl font-black leading-none text-[#1c1c1c]">{streak}</p>
+                    <p className="text-xl font-black leading-none text-blue-600">{streak}</p>
                     <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">días racha</p>
                   </div>
                   <div className="h-8 w-px shrink-0 bg-slate-100" />
@@ -962,34 +962,34 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                         <p className="text-[10px] font-semibold text-slate-400">#{myLigaEntry.rank} en liga · {myLigaEntry.weekly_xp} XP sem.</p>
                       </>
                     ) : (
-                      <Link href="/camino" className="text-xs font-black text-[#1c1c1c] hover:underline">Crear liga con amigos →</Link>
+                      <Link href="/camino" className="text-xs font-black text-blue-600 hover:underline">Crear liga con amigos →</Link>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="rounded-[8px] border border-[#e8e8e8] bg-[#f5f5f5] p-4">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#1c1c1c]">Práctica PAU/EVAU</p>
+              <div className="rounded-3xl border border-blue-100 bg-blue-50 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Práctica PAU/EVAU</p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
-                <Link href={buildEvauHref(currentTopic)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-4 py-3 text-sm font-black text-white">Hacer ejercicio PAU de este tema <ArrowRight size={16} /></Link>
-                <a href="#course-exercise" className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-[6px] border border-[#e0e0e0] bg-white px-4 py-3 text-sm font-black text-[#1c1c1c]">Corregir ejercicio del curso <Check size={16} /></a>
+                <Link href={buildEvauHref(currentTopic)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Hacer ejercicio PAU de este tema <ArrowRight size={16} /></Link>
+                <a href="#course-exercise" className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-700">Corregir ejercicio del curso <Check size={16} /></a>
               </div>
-              <div className="rounded-[8px] border border-violet-100 bg-white p-4">
+              <div className="rounded-3xl border border-violet-100 bg-white p-4">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Kairo sobre este tema</p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">Abre el Chat con Kairo con esta asignatura, bloque y tema como contexto.</p>
                 <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => <Link key={item} href={chatHref(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</Link>)}</div>
-                <Link href={chatHref()} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[6px] bg-violet-600 px-4 py-3 text-sm font-black text-white">Abrir Chat con Kairo <MessageCircle size={16} /></Link>
+                <Link href={chatHref()} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Abrir Chat con Kairo <MessageCircle size={16} /></Link>
               </div>
-              <div className="rounded-[8px] border border-emerald-100 bg-emerald-50 p-4">
+              <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4">
                 <p className="text-sm font-black text-emerald-900">{current.xp ?? 0} XP en este tema</p>
                 <p className="mt-1 text-xs font-bold text-emerald-700">{topicCompleted ? 'Tema completado con corrección.' : 'El XP se asigna solo después de corregir el ejercicio final.'}</p>
               </div>
             </aside>
           </div>
         </section>
-        {toast && <div className="fixed bottom-6 right-6 z-50 rounded-[6px] bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
+        {toast && <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
         {showPaywall && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-sm rounded-[8px] bg-white p-6 shadow-2xl">
+            <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
               <div className="mb-5 flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-black text-slate-950">Tu plan gratuito ha terminado</h2>
@@ -998,7 +998,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <button type="button" onClick={() => setShowPaywall(false)} className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
               </div>
               <ParentLinkModule billing={billing} />
-              <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-[#1c1c1c] hover:underline">Ver planes</Link>
+              <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
             </div>
           </div>
         )}
@@ -1028,17 +1028,17 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
       {cards.map((card, i) => {
         const isOpen = openIdx === i
         return (
-          <div key={card.sort_order} className="overflow-hidden rounded-[6px] border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div key={card.sort_order} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
             <button
               type="button"
               onClick={() => setOpenIdx(isOpen ? -1 : i)}
               className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
             >
               <span className="flex items-center gap-2 text-sm font-black leading-snug text-slate-800">
-                <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-[#888]">#{i + 1}</span>
+                <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-blue-500">#{i + 1}</span>
                 <span className="[&_p]:m-0 [&_p]:inline"><LessonMarkdown text={card.title} format="raw" /></span>
               </span>
-              <ChevronDown size={16} className={`shrink-0 text-[#888] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={16} className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             <div style={{ display: 'grid', gridTemplateRows: isOpen ? '1fr' : '0fr', transition: 'grid-template-rows 280ms ease' }}>
               <div className="overflow-hidden">
@@ -1049,12 +1049,12 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
                     </div>
                   )}
                   {card.alert_markdown && (
-                    <div className="rounded-[6px] border border-amber-200 bg-amber-50 px-4 py-3">
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
                       <LessonMarkdown text={card.alert_markdown} format="raw" />
                     </div>
                   )}
                   {card.worked_example_markdown && (
-                    <div className="rounded-[6px] border border-emerald-200 bg-emerald-50 px-4 py-4">
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={card.worked_example_markdown} format="raw" />
                       </div>
@@ -1074,13 +1074,13 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
 
 function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: CurriculumV2Card[]; activeIndex: number; onSelect: (index: number) => void }) {
   return (
-    <section className="rounded-[8px] border border-[#e8e8e8] bg-white p-4 shadow-sm">
+    <section className="rounded-3xl border border-blue-100 bg-white p-4 shadow-sm">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#1c1c1c]">Misiones de este tema</p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Misiones de este tema</p>
           <p className="mt-1 text-sm font-semibold text-slate-500">Cada tarjeta es una mini-misión independiente.</p>
         </div>
-        <span className="rounded-full bg-[#f5f5f5] px-3 py-1 text-xs font-black text-[#1c1c1c]">{cards.length} mini-misiones</span>
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{cards.length} mini-misiones</span>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         {cards.map((card, index) => {
@@ -1090,10 +1090,10 @@ function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: Curric
               key={card.sort_order}
               type="button"
               onClick={() => onSelect(index)}
-              className={'rounded-[6px] border px-4 py-3 text-left transition-all ' + (isActive ? 'border-[#ccc] bg-[#f5f5f5] shadow-sm' : 'border-slate-100 bg-slate-50 hover:border-[#e0e0e0] hover:bg-white')}
+              className={'rounded-2xl border px-4 py-3 text-left transition-all ' + (isActive ? 'border-blue-300 bg-blue-50 shadow-sm' : 'border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-white')}
             >
-              <span className={'mb-1 block text-[10px] font-black uppercase tracking-[0.12em] ' + (isActive ? 'text-[#1c1c1c]' : 'text-slate-400')}>Mini-misión {index + 1}</span>
-              <span className={'block text-sm font-black leading-snug ' + (isActive ? 'text-[#1c1c1c]' : 'text-slate-700') + ' [&_p]:m-0 [&_p]:inline'}>
+              <span className={'mb-1 block text-[10px] font-black uppercase tracking-[0.12em] ' + (isActive ? 'text-blue-700' : 'text-slate-400')}>Mini-misión {index + 1}</span>
+              <span className={'block text-sm font-black leading-snug ' + (isActive ? 'text-blue-950' : 'text-slate-700') + ' [&_p]:m-0 [&_p]:inline'}>
                 <LessonMarkdown text={card.title} format="raw" />
               </span>
             </button>
@@ -1150,7 +1150,7 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
       {sections.map((section, i) => {
         const isOpen = openIdx === i
         return (
-          <div key={i} className="overflow-hidden rounded-[6px] border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div key={i} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
             <button
               type="button"
               onClick={() => setOpenIdx(isOpen ? null : i)}
@@ -1161,7 +1161,7 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
               </span>
               <ChevronDown
                 size={16}
-                className={`shrink-0 text-[#888] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
               />
             </button>
             <div
@@ -1179,7 +1179,7 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
                     </div>
                   )}
                   {section.caseStudy && (
-                    <div className="rounded-[6px] border border-emerald-100 bg-emerald-50 px-4 py-4">
+                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={section.caseStudy} format="raw" />
                       </div>
@@ -1217,7 +1217,7 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="relative w-full max-w-sm rounded-[8px] bg-white p-7 shadow-[0_32px_80px_rgba(0,0,0,0.18)]">
+      <div className="relative w-full max-w-sm rounded-[28px] bg-white p-7 shadow-[0_32px_80px_rgba(0,0,0,0.18)]">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100"
@@ -1229,9 +1229,9 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
         <div className="text-center text-5xl leading-none">🎉</div>
         <h2 className="mt-3 text-center text-2xl font-black text-slate-950">¡Misión completada!</h2>
 
-        <div className="mt-5 flex divide-x divide-slate-100 overflow-hidden rounded-[6px] border border-slate-100 bg-slate-50">
+        <div className="mt-5 flex divide-x divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
           <div className="flex-1 py-3 text-center">
-            <p className="text-base font-black text-[#1c1c1c]">+{xp} XP</p>
+            <p className="text-base font-black text-blue-600">+{xp} XP</p>
             <p className="mt-0.5 text-[10px] font-semibold text-slate-400">ganados</p>
           </div>
           <div className="flex-1 py-3 text-center">
@@ -1249,22 +1249,22 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
         <p className="mt-4 text-center text-sm font-semibold text-slate-600">{motivationalPhrase(score)}</p>
 
         {nextMissionTitle && (
-          <div className="mt-4 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-4 py-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#999]">Mañana toca</p>
-            <p className="mt-1 text-sm font-black text-[#1c1c1c] leading-snug">{nextMissionTitle}</p>
+          <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-400">Mañana toca</p>
+            <p className="mt-1 text-sm font-black text-blue-900 leading-snug">{nextMissionTitle}</p>
           </div>
         )}
 
         <div className="mt-5 grid gap-2">
           <button
             onClick={onViewWeek}
-            className="flex items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-5 py-3.5 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition hover:bg-[#111]"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
           >
             Ver mi semana <ArrowRight size={15} />
           </button>
           <button
             onClick={onDoBonus}
-            className="flex items-center justify-center gap-2 rounded-[6px] border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-600 transition hover:bg-slate-50"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-600 transition hover:bg-slate-50"
           >
             Hacer bonus
           </button>
@@ -1318,12 +1318,12 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-4 py-4">
-        <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#1c1c1c]">Idea clave</p>
+      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
+        <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">Idea clave</p>
         <LessonMarkdown text={idea} />
       </div>
       {theory && (
-        <div className="rounded-[6px] border border-indigo-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 shadow-sm">
           <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-indigo-600">Teoría rápida</p>
           <LessonMarkdown text={theory} />
         </div>
@@ -1335,19 +1335,19 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
           {tags.length > 0 && <InfoTile label="Etiquetas PAU" text={tags.join(' · ')} />}
         </div>
       )}
-      <div className="rounded-[6px] border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
         <p className="mb-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Cómo se trabaja</p>
         <ol className="space-y-2">
           {lessonStepsFor(topic).map((step, index) => (
             <li key={step} className="flex gap-3 text-sm font-semibold leading-6 text-slate-700">
-              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1c1c1c] text-[11px] font-black text-white">{index + 1}</span>
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-black text-white">{index + 1}</span>
               <span>{step}</span>
             </li>
           ))}
         </ol>
       </div>
       {alert && (
-        <div className="rounded-[6px] border border-amber-200 bg-amber-50 px-4 py-3">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
           <p className="text-sm font-black text-amber-800">Error típico</p>
           <p className="mt-1 text-sm font-semibold leading-6 text-amber-900">{alert}</p>
         </div>
@@ -1358,7 +1358,7 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
 
 function InfoTile({ label, text }: { label: string; text: string }) {
   return (
-    <div className="rounded-[6px] border border-slate-100 bg-slate-50 px-4 py-3">
+    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
       <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
       <LessonMarkdown text={text} />
     </div>
@@ -1367,7 +1367,7 @@ function InfoTile({ label, text }: { label: string; text: string }) {
 
 function GuidedExamplePanel({ text }: { text: string }) {
   return (
-    <div className="rounded-[6px] border border-emerald-100 bg-emerald-50 px-4 py-4">
+    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
       <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Ejemplo guiado</p>
       <LessonMarkdown text={text} />
     </div>
@@ -1376,8 +1376,8 @@ function GuidedExamplePanel({ text }: { text: string }) {
 
 function PracticePromptPanel({ text }: { text: string }) {
   return (
-    <div className="rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-4 py-4">
-      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#1c1c1c]">Ejercicio corregible</p>
+    <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
+      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Ejercicio corregible</p>
       <LessonMarkdown text={text} />
     </div>
   )
@@ -1387,7 +1387,7 @@ function EmptyContent({ compact = false }: { compact?: boolean }) {
   const copy = compact
     ? 'Este bloque aún necesita contenido completo.'
     : 'Este tema aún necesita contenido completo. Puedes practicar con ejercicios disponibles.'
-  return <p className="rounded-[6px] border border-dashed border-[#e0e0e0] bg-[#f5f5f5] px-4 py-3 text-sm font-bold text-[#1c1c1c]">{copy}</p>
+  return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{copy}</p>
 }
 
 function ContentSkeleton() {
@@ -1401,5 +1401,5 @@ function ContentSkeleton() {
 }
 
 function LearningCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return <article className="rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-black text-slate-950">{title}</h2><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">Paso de lectura</span></div><div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div></article>
+  return <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-black text-slate-950">{title}</h2><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">Paso de lectura</span></div><div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div></article>
 }

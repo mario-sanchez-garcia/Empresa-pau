@@ -1,6 +1,4 @@
-import dynamic from 'next/dynamic'
-
-const ExamPage = dynamic(() => import('@/app/page-client'), { ssr: false, loading: () => null })
+import ExamPage from '@/app/page-client'
 
 export default function Page() {
   return <ExamPage />

@@ -94,50 +94,50 @@ export function CanvasToolbar(props: CanvasToolbarProps) {
 
   return (
     <>
-      <aside className="w-56 shrink-0 overflow-hidden border-r border-[#dbe7fb] bg-white/95 p-3 max-md:w-full max-md:border-b max-md:border-r-0">
+      <aside className="w-56 shrink-0 overflow-hidden border-r border-[#e8e8e8] bg-white/95 p-3 max-md:w-full max-md:border-b max-md:border-r-0">
         <div className="mb-3 text-xs font-bold text-slate-400">Mis espacios</div>
-        <button type="button" onClick={() => props.createCanvas('Nuevo canvas')} className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-3 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)] transition hover:-translate-y-0.5"><Plus size={15} />Nuevo</button>
+        <button type="button" onClick={() => props.createCanvas('Nuevo canvas')} className="mb-3 flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-3 py-2 text-sm font-black text-white shadow-[0_1px_4px_rgba(0,0,0,0.08)] transition hover:-translate-y-0.5"><Plus size={15} />Nuevo</button>
         <div className="space-y-2">
           {props.canvases.map(canvas => (
-            <div key={canvas.id} className={`flex items-center gap-1 rounded-2xl border p-1 transition ${canvas.id === props.activeId ? 'border-blue-200 bg-blue-50' : 'border-[#dbe7fb] bg-white hover:border-blue-300 hover:bg-blue-50/60'}`}>
+            <div key={canvas.id} className={`flex items-center gap-1 rounded-[6px] border p-1 transition ${canvas.id === props.activeId ? 'border-[#d0d0d0] bg-[#f5f5f5]' : 'border-[#e8e8e8] bg-white hover:border-[#bbb] hover:bg-[#f9f9f9]'}`}>
               <button type="button" onClick={() => props.setActiveId(canvas.id)} className="min-w-0 flex-1 px-2 py-1 text-left">
                 <strong className="block truncate text-sm text-[#172033]">{canvas.name}</strong>
                 <small className="text-xs text-slate-400">{canvas.updated_at ? new Date(canvas.updated_at).toLocaleDateString('es-ES') : 'Nuevo'}</small>
               </button>
-              {props.canvases.length > 1 && <button type="button" onClick={() => props.deleteCanvas(canvas)} className="rounded-xl p-2 text-blue-700 transition hover:bg-blue-100"><Trash2 size={14} /></button>}
+              {props.canvases.length > 1 && <button type="button" onClick={() => props.deleteCanvas(canvas)} className="rounded-[6px] p-2 text-[#666] transition hover:bg-[#eee] hover:text-[#1c1c1c]"><Trash2 size={14} /></button>}
             </div>
           ))}
         </div>
       </aside>
 
-      <div className="absolute left-60 right-4 top-4 z-30 flex flex-wrap items-center gap-2 rounded-2xl border border-[#dbe7fb] bg-white/95 p-2 shadow-[0_18px_45px_rgba(37,99,235,0.12)] max-md:left-3">
-        <div className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-2 text-sm font-black text-blue-700"><CurrentIcon size={16} />{currentTool.label}</div>
-        <input className="min-w-36 flex-1 rounded-xl border border-[#dbe7fb] bg-white px-3 py-2 text-sm font-black text-[#172033] outline-none transition focus:border-blue-300 focus:shadow-[0_0_0_4px_rgba(96,165,250,0.14)]" value={props.canvasName} onChange={event => props.renameCanvas(event.target.value)} />
+      <div className="absolute left-60 right-4 top-4 z-30 flex flex-wrap items-center gap-2 rounded-[8px] border border-[#e8e8e8] bg-white/95 p-2 shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-md:left-3">
+        <div className="flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-2 text-sm font-black text-[#1c1c1c]"><CurrentIcon size={16} />{currentTool.label}</div>
+        <input className="min-w-36 flex-1 rounded-[6px] border border-[#e8e8e8] bg-white px-3 py-2 text-sm font-black text-[#172033] outline-none transition focus:border-[#999]" value={props.canvasName} onChange={event => props.renameCanvas(event.target.value)} />
         <ToolbarButton onClick={props.undo} disabled={!props.pastCount}><Undo2 size={16} /></ToolbarButton>
         <ToolbarButton onClick={props.redo} disabled={!props.futureCount}><Redo2 size={16} /></ToolbarButton>
-        <button type="button" onClick={props.exportPng} className="flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-sm font-black text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)] transition hover:-translate-y-0.5"><Download size={16} />PNG</button>
+        <button type="button" onClick={props.exportPng} className="flex items-center gap-2 rounded-[6px] bg-[#1c1c1c] px-3 py-2 text-sm font-black text-white shadow-[0_1px_4px_rgba(0,0,0,0.08)] transition hover:-translate-y-0.5"><Download size={16} />PNG</button>
         <div className="ml-auto flex items-center gap-1 text-xs font-black text-slate-500"><Save size={14} />{props.saveStatus}</div>
       </div>
 
-      <div className="absolute left-60 top-24 z-30 grid grid-cols-1 gap-2 rounded-2xl border border-[#dbe7fb] bg-white/95 p-2 shadow-[0_18px_45px_rgba(37,99,235,0.12)] max-md:bottom-3 max-md:left-3 max-md:right-3 max-md:top-auto max-md:grid-cols-7">
+      <div className="absolute left-60 top-24 z-30 grid grid-cols-1 gap-2 rounded-[8px] border border-[#e8e8e8] bg-white/95 p-2 shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-md:bottom-3 max-md:left-3 max-md:right-3 max-md:top-auto max-md:grid-cols-7">
         {TOOL_ITEMS.map(item => {
           const Icon = item.icon
-          return <button key={item.id} type="button" title={item.label} onClick={() => props.setTool(item.id)} className={`flex h-11 w-11 items-center justify-center rounded-2xl transition hover:-translate-y-0.5 ${props.tool === item.id ? 'bg-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]' : 'bg-[#f8fbff] text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}><Icon size={18} /></button>
+          return <button key={item.id} type="button" title={item.label} onClick={() => props.setTool(item.id)} className={`flex h-11 w-11 items-center justify-center rounded-[6px] transition hover:-translate-y-0.5 ${props.tool === item.id ? 'bg-[#1c1c1c] text-white shadow-[0_1px_4px_rgba(0,0,0,0.08)]' : 'bg-[#f5f5f5] text-slate-600 hover:bg-[#eee] hover:text-[#1c1c1c]'}`}><Icon size={18} /></button>
         })}
       </div>
 
-      <div className="absolute left-80 top-24 z-30 flex max-w-[calc(100%-22rem)] flex-wrap items-center gap-2 rounded-2xl border border-[#dbe7fb] bg-white/95 p-2 shadow-[0_18px_45px_rgba(37,99,235,0.12)] max-md:left-3 max-md:right-3 max-md:top-28 max-md:max-w-none">
+      <div className="absolute left-80 top-24 z-30 flex max-w-[calc(100%-22rem)] flex-wrap items-center gap-2 rounded-[8px] border border-[#e8e8e8] bg-white/95 p-2 shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-md:left-3 max-md:right-3 max-md:top-28 max-md:max-w-none">
         {(props.tool === 'pen' || props.tool === 'eraser') && <DrawTool color={props.drawColor} width={props.strokeWidth} setColor={props.setDrawColor} setWidth={props.setStrokeWidth} />}
         {props.tool === 'text' && <TextTool color={props.textColor} fontSize={props.fontSize} bold={props.textBold} italic={props.textItalic} setColor={props.setTextColor} setFontSize={props.setFontSize} setBold={props.setTextBold} setItalic={props.setTextItalic} />}
         {props.tool === 'sticky' && <StickyNoteTool color={props.stickyColor} setColor={props.setStickyColor} />}
         {['rect', 'circle', 'triangle', 'arrow'].includes(props.tool) && <ShapeTool fill={props.fillColor} border={props.borderColor} setFill={props.setFillColor} setBorder={props.setBorderColor} />}
         {props.tool === 'connector' && <ArrowTool curved={props.connectorCurved} arrowHead={props.arrowHead} connectorFrom={props.connectorFrom} setCurved={props.setConnectorCurved} setArrowHead={props.setArrowHead} />}
-        <button type="button" onClick={props.selectAll} className="rounded-xl border border-[#dbe7fb] bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Seleccionar todo</button>
+        <button type="button" onClick={props.selectAll} className="rounded-[6px] border border-[#e8e8e8] bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:border-[#bbb] hover:bg-[#f5f5f5] hover:text-[#1c1c1c]">Seleccionar todo</button>
       </div>
     </>
   )
 }
 
 function ToolbarButton({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick: () => void }) {
-  return <button type="button" disabled={disabled} onClick={onClick} className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#dbe7fb] bg-white text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-35">{children}</button>
+  return <button type="button" disabled={disabled} onClick={onClick} className="flex h-9 w-9 items-center justify-center rounded-[6px] border border-[#e8e8e8] bg-white text-slate-600 transition hover:border-[#bbb] hover:bg-[#f5f5f5] hover:text-[#1c1c1c] disabled:opacity-35">{children}</button>
 }

@@ -16,7 +16,7 @@ interface CanvasElementViewProps {
 export function CanvasElementView({ element, selected, onPointerDown, startResize, updateElement }: CanvasElementViewProps) {
   return (
     <div
-      className={`absolute touch-none ${selected ? 'outline outline-2 outline-dashed outline-[#2563eb]' : ''}`}
+      className={`absolute touch-none ${selected ? 'outline outline-2 outline-dashed outline-[#1c1c1c]' : ''}`}
       onPointerDown={event => onPointerDown(event, element)}
       style={{ left: element.x, top: element.y, width: element.width, height: element.height, transform: `rotate(${element.rotation ?? 0}deg)` }}
     >
@@ -25,7 +25,7 @@ export function CanvasElementView({ element, selected, onPointerDown, startResiz
         <span
           key={handle}
           onPointerDown={event => startResize(event, handle)}
-          className={`absolute h-3 w-3 rounded-full border-2 border-white bg-[#2563eb] shadow ${handleClass(handle)}`}
+          className={`absolute h-3 w-3 rounded-full border-2 border-white bg-[#1c1c1c] shadow ${handleClass(handle)}`}
         />
       ))}
     </div>
@@ -44,14 +44,14 @@ export function ConnectorElement({ connector, elements, selected, onSelect, upda
 
   return (
     <g onPointerDown={event => { event.stopPropagation(); onSelect() }} className="cursor-pointer">
-      <path d={line.d} fill="none" stroke={selected ? '#1d4ed8' : '#2563eb'} strokeWidth={selected ? 4 : 3} strokeDasharray={selected ? '8 6' : undefined} markerEnd={connector.arrowHead === 'arrow' ? 'url(#zona-arrowhead)' : undefined} />
-      {connector.arrowHead === 'dot' && <circle cx={line.b.x} cy={line.b.y} r={7} fill="#2563eb" />}
+      <path d={line.d} fill="none" stroke={selected ? '#333' : '#1c1c1c'} strokeWidth={selected ? 4 : 3} strokeDasharray={selected ? '8 6' : undefined} markerEnd={connector.arrowHead === 'arrow' ? 'url(#zona-arrowhead)' : undefined} />
+      {connector.arrowHead === 'dot' && <circle cx={line.b.x} cy={line.b.y} r={7} fill="#1c1c1c" />}
       <foreignObject x={(line.a.x + line.b.x) / 2 - 72} y={(line.a.y + line.b.y) / 2 - 18} width={144} height={42}>
         <div
           contentEditable
           suppressContentEditableWarning
           onBlur={event => updateElement(connector.id, { label: event.currentTarget.innerText }, true)}
-          className="rounded-full border border-[#dbe7fb] bg-white/90 px-3 py-1 text-center text-xs font-black text-[#172033] outline-none"
+          className="rounded-full border border-[#e8e8e8] bg-white/90 px-3 py-1 text-center text-xs font-black text-[#172033] outline-none"
         >
           {connector.label ?? ''}
         </div>
@@ -75,7 +75,7 @@ function renderElementContent(element: CanvasItem, updateElement: CanvasElementV
   if (element.type === 'mind') {
     const radius = element.nodeStyle === 'pill' ? 'rounded-full' : element.nodeStyle === 'square' ? 'rounded' : 'rounded-2xl'
     return (
-      <div contentEditable suppressContentEditableWarning onBlur={event => updateElement(element.id, { text: event.currentTarget.innerText }, true)} className={`flex h-full w-full items-center justify-center border-2 border-[#2563eb] bg-white px-3 text-center font-black text-[#172033] shadow-lg outline-none ${radius}`}>
+      <div contentEditable suppressContentEditableWarning onBlur={event => updateElement(element.id, { text: event.currentTarget.innerText }, true)} className={`flex h-full w-full items-center justify-center border-2 border-[#1c1c1c] bg-white px-3 text-center font-black text-[#172033] shadow-lg outline-none ${radius}`}>
         {element.text}
       </div>
     )

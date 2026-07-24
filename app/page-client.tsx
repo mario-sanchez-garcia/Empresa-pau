@@ -870,14 +870,16 @@ export default function Home() {
   }, [seccion])
 
   function syncHomeUrl(nextSection: Seccion, nextSubject = asignatura) {
-    if (typeof window === 'undefined' || window.location.pathname !== '/') return
+    if (typeof window === 'undefined') return
+    const pathname = window.location.pathname
+    if (pathname !== '/' && pathname !== '/examenes') return
     const params = new URLSearchParams(window.location.search)
     if (nextSection === 'examenes') params.delete('view')
     else params.set('view', nextSection)
     if (nextSection === 'examenes') params.set('subject', nextSubject)
     else params.delete('subject')
     const query = params.toString()
-    window.history.replaceState(null, '', query ? `/?${query}` : '/')
+    window.history.replaceState(null, '', query ? `${pathname}?${query}` : pathname)
   }
 
   function navegarASeccion(nextSection: Seccion) {

@@ -24,14 +24,14 @@ interface GenerateSimulacroSettings {
 }
 
 export const SUBJECTS = {
-  mates: { label: 'Matemáticas II', short: 'Mates', color: '#2563eb', light: '#eff6ff', icon: Sigma, available: true },
-  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', color: '#7c3aed', light: '#f5f3ff', icon: BarChart3, available: false },
-  fisica: { label: 'Física', short: 'Física', color: '#CA8A04', light: '#FEFCE8', icon: Atom, available: true },
-  quimica: { label: 'Química', short: 'Química', color: '#ea580c', light: '#fff7ed', icon: FlaskConical, available: true },
-  biologia: { label: 'Biología', short: 'Bio', color: '#4d7c0f', light: '#f7fee7', icon: Dna, available: true },
-  ingles: { label: 'Inglés', short: 'Inglés', color: '#0891B2', light: '#CFFAFE', icon: Globe, available: true },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#0284C7', light: '#E0F2FE', icon: BookOpen, available: true },
-  historia: { label: 'Historia de España', short: 'Historia', color: '#2f6f4e', light: '#f0fdf4', icon: Landmark, available: true }
+  mates: { label: 'Matemáticas II', short: 'Mates', color: '#1c1c1c', light: '#f5f5f5', icon: Sigma, available: true },
+  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', color: '#1c1c1c', light: '#f5f5f5', icon: BarChart3, available: false },
+  fisica: { label: 'Física', short: 'Física', color: '#1c1c1c', light: '#f5f5f5', icon: Atom, available: true },
+  quimica: { label: 'Química', short: 'Química', color: '#1c1c1c', light: '#f5f5f5', icon: FlaskConical, available: true },
+  biologia: { label: 'Biología', short: 'Bio', color: '#1c1c1c', light: '#f5f5f5', icon: Dna, available: true },
+  ingles: { label: 'Inglés', short: 'Inglés', color: '#1c1c1c', light: '#f5f5f5', icon: Globe, available: true },
+  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', color: '#1c1c1c', light: '#f5f5f5', icon: BookOpen, available: true },
+  historia: { label: 'Historia de España', short: 'Historia', color: '#1c1c1c', light: '#f5f5f5', icon: Landmark, available: true }
 } as const
 
 export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [

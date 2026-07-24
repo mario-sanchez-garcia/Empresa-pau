@@ -203,6 +203,34 @@ export default function LandingPage() {
         /* ── Footer links ── */
         .v4c-footer-link:hover { color: #fff !important; }
 
+        /* ── Nav scroll-aware (dark ↔ light) ── */
+        #v4c-nav {
+          transition: background 300ms cubic-bezier(0.23,1,0.32,1),
+                      border-bottom-color 300ms cubic-bezier(0.23,1,0.32,1);
+          border-bottom: 1px solid transparent;
+        }
+        #v4c-nav.v4c-on-light {
+          background: rgba(249,249,249,0.88) !important;
+          border-bottom-color: #e8e8e8;
+        }
+        #v4c-nav-logo {
+          transition: filter 300ms cubic-bezier(0.23,1,0.32,1);
+        }
+        #v4c-nav.v4c-on-light #v4c-nav-logo { filter: invert(1); }
+        #v4c-nav.v4c-on-light .v4c-nav-link { color: rgba(28,28,28,.5) !important; }
+        #v4c-nav.v4c-on-light .v4c-nav-link:hover { color: #1c1c1c !important; }
+        #v4c-nav.v4c-on-light .v4c-btn-nav {
+          border-color: rgba(28,28,28,.3) !important;
+          color: #1c1c1c !important;
+        }
+        #v4c-nav.v4c-on-light .v4c-btn-nav:hover {
+          background: rgba(0,0,0,.06) !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          #v4c-nav, #v4c-nav-logo { transition: none !important; }
+        }
+
         /* ── Responsive ── */
         @media (max-width: 900px) {
           .v4c-block      { grid-template-columns: 1fr; }
@@ -233,7 +261,7 @@ export default function LandingPage() {
       `}</style>
 
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
-      <nav style={{
+      <nav id="v4c-nav" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 40px', height: 54,
@@ -243,7 +271,7 @@ export default function LandingPage() {
       }}>
         <Link href="/" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 32, width: 'auto', mixBlendMode: 'lighten', display: 'block' }} />
+          <img id="v4c-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 32, width: 'auto', display: 'block' }} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Link href="/pricing" className="v4c-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
@@ -312,7 +340,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Block 1: El problema (light) ─────────────────────────────────────── */}
-      <div className="v4c-block v4c-light" style={{ background: '#f9f9f9' }}>
+      <div data-theme="light" className="v4c-block v4c-light" style={{ background: '#f9f9f9' }}>
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>El problema</span>
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 20 }}>
@@ -361,7 +389,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── Block 3: La corrección (light) ───────────────────────────────────── */}
-      <div className="v4c-block v4c-light" style={{ background: '#f9f9f9' }}>
+      <div data-theme="light" className="v4c-block v4c-light" style={{ background: '#f9f9f9' }}>
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>La corrección</span>
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 20 }}>
@@ -442,7 +470,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── Comparison table (light, full-width) ─────────────────────────────── */}
-      <section className="v4c-full" style={{ background: '#f9f9f9' }}>
+      <section data-theme="light" className="v4c-full" style={{ background: '#f9f9f9' }}>
         <div className="v4c-full-inner">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 16, display: 'block' }}>Por qué Kairo</span>
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 40 }}>
@@ -537,7 +565,7 @@ export default function LandingPage() {
 
       {/* ── CTA split block ───────────────────────────────────────────────────── */}
       <div className="v4c-cta-split">
-        <div className="v4c-cta-left">
+        <div data-theme="light" className="v4c-cta-left">
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4.5vw, 60px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 16 }}>
             Sin academia.<br />Sin horario.<br />Sin excusas.
           </h2>
@@ -557,7 +585,7 @@ export default function LandingPage() {
       <footer style={{ background: '#111', padding: '32px 72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, borderTop: '1px solid rgba(255,255,255,.07)' }}>
         <Link href="/" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 28, width: 'auto', mixBlendMode: 'lighten', display: 'block' }} />
+          <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
         </Link>
         <ul style={{ display: 'flex', gap: 20, listStyle: 'none', flexWrap: 'wrap', padding: 0, margin: 0 }}>
           {[
@@ -577,6 +605,26 @@ export default function LandingPage() {
         </ul>
         <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.18)' }}>© 2026 KAIRO · Beta privada · Madrid y Cataluña</span>
       </footer>
+
+      {/* ── Nav scroll script ────────────────────────────────────────────────── */}
+      <script dangerouslySetInnerHTML={{ __html: `
+(function(){
+  var nav = document.getElementById('v4c-nav');
+  if (!nav) return;
+  var NAV_H = 54;
+  function check() {
+    var els = document.querySelectorAll('[data-theme="light"]');
+    var onLight = false;
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.top < NAV_H && r.bottom > 0) { onLight = true; break; }
+    }
+    nav.classList.toggle('v4c-on-light', onLight);
+  }
+  window.addEventListener('scroll', check, { passive: true });
+  check();
+})();
+      `}} />
 
     </div>
   )

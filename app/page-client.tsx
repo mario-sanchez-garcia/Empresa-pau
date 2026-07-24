@@ -67,29 +67,29 @@ import {
   X
 } from 'lucide-react'
 const ASIGNATURAS = {
-  mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
-  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', icon: BarChart3, color: '#7c3aed', light: '#f5f3ff', accent: '#a78bfa', soft: '#ddd6fe' },
-  fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', soft: '#FEF08A' },
-  quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
-  biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
-  lengua: { label: 'Lengua Castellana y Literatura II', short: 'Lengua', icon: BookOpen, color: '#0284C7', light: '#E0F2FE', accent: '#38BDF8', soft: '#BAE6FD' },
-  historia: { label: 'Historia de España', short: 'Historia', icon: Landmark, color: '#2f6f4e', light: '#f0fdf4', accent: '#86c89a', soft: '#dcfce7' },
-  historia_filosofia: { label: 'Historia de la Filosofía', short: 'Filosofía', icon: BrainCircuit, color: '#64748B', light: '#F8FAFC', accent: '#94A3B8', soft: '#E2E8F0' },
-  ingles: { label: 'Inglés', short: 'Inglés', icon: Globe, color: '#0891B2', light: '#CFFAFE', accent: '#06B6D4', soft: '#CFFAFE' }
+  mates:             { label: 'Matemáticas II',                     short: 'Mates',            icon: Sigma,       color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  matematicas_ccss:  { label: MATEMATICAS_CCSS_LABEL,              short: 'Matemáticas CCSS', icon: BarChart3,   color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  fisica:            { label: 'Física',                             short: 'Física',           icon: Atom,        color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  quimica:           { label: 'Química',                            short: 'Química',          icon: FlaskConical,color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  biologia:          { label: 'Biología',                           short: 'Bio',              icon: Dna,         color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  lengua:            { label: 'Lengua Castellana y Literatura II',  short: 'Lengua',           icon: BookOpen,    color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  historia:          { label: 'Historia de España',                 short: 'Historia',         icon: Landmark,    color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  historia_filosofia:{ label: 'Historia de la Filosofía',          short: 'Filosofía',        icon: BrainCircuit,color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
+  ingles:            { label: 'Inglés',                             short: 'Inglés',           icon: Globe,       color: '#1c1c1c', light: '#f3f3f3', accent: '#888', soft: '#e8e8e8' },
 }
 
 const WARM = {
-  ink: '#111827',
-  muted: '#64748b',
-  softText: '#94a3b8',
+  ink: '#1c1c1c',
+  muted: '#5a5a5a',
+  softText: '#999',
   surface: '#ffffff',
-  field: '#fafafa',
-  wash: '#eff6ff',
-  border: '#dbe7fb',
-  amber: '#2563eb',
-  coral: '#60a5fa',
-  blue: '#2563eb',
-  shadow: '0 24px 70px rgba(37, 99, 235, 0.09)'
+  field: '#f9f9f9',
+  wash: '#f3f3f3',
+  border: '#e0e0e0',
+  amber: '#1c1c1c',
+  coral: '#666',
+  blue: '#1c1c1c',
+  shadow: '0 4px 20px rgba(0,0,0,.06)'
 }
 
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
@@ -3201,14 +3201,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         onNavigate={(item) => navegarASeccion(item as Seccion)}
         onLogout={cerrarSesion}
       />
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? 'radial-gradient(circle at 14% 8%, rgba(219,234,254,0.95), transparent 30%), radial-gradient(circle at 86% 18%, rgba(224,231,255,0.72), transparent 32%), linear-gradient(180deg, #fbfdff 0%, #f8fbff 45%, #eff6ff 100%)' : undefined, transition: 'background 300ms ease' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f9f9f9' }}>
        <header className="kairo-app-header kairo-topbar" style={{
-  borderBottom: seccion === 'chat' ? '1px solid rgba(219,231,251,0.88)' : '1px solid rgba(219,231,251,0.78)',
-  background: seccion === 'chat' ? 'rgba(255,255,255,0.76)' : undefined,
-  backdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
-  WebkitBackdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
-  padding: '10px 32px',
-  minHeight: '64px',
+  padding: '0 32px',
+  minHeight: '56px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -3216,26 +3212,17 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   position: seccion === 'examenes' ? 'relative' : 'sticky',
   top: seccion === 'examenes' ? undefined : 0,
   zIndex: 40,
-  transition: 'background 300ms ease, border-color 300ms ease',
 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 auto', flexWrap: 'wrap' }}>
-            {seccion === 'examenes' && (
-              <div style={{ width: 30, height: 30, borderRadius: 10, background: cfg.light, border: '1px solid ' + cfg.soft, color: cfg.color, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <cfg.icon size={16} />
-              </div>
-            )}
-            {seccion === 'chat' && (
-              <div style={{ width: 30, height: 30, borderRadius: 10, background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 8px 18px rgba(37,99,235,0.22)' }}>
-                <MessageCircle size={15} color="#fff" />
-              </div>
-            )}
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', transition: 'color 300ms ease', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.25 }}>
+            {seccion === 'examenes' && <cfg.icon size={15} style={{ flexShrink: 0, color: '#999' }} />}
+            {seccion === 'chat' && <MessageCircle size={15} style={{ flexShrink: 0, color: '#999' }} />}
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#1c1c1c', letterSpacing: '-0.01em', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.25 }}>
               {seccion === 'examenes' && cfg.label}
               {seccion === 'chat' && 'Chat con Kairo'}
               {seccion === 'historial' && 'Historial de correcciones'}
               {seccion === 'planning' && 'Mi plan de estudio'}
             </div>
-            <div style={{ fontSize: 12, color: seccion === 'chat' ? '#64748b' : '#94a3b8', fontWeight: 500, transition: 'color 300ms ease', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: 12, color: '#bbb', fontWeight: 400, whiteSpace: 'nowrap' }}>
               {seccion === 'examenes' && `· ${examSystemLabel(ccaa)}`}
               {seccion === 'chat' && '· Tutor inteligente'}
               {seccion === 'historial' && '· Correcciones guardadas'}

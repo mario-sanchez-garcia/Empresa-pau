@@ -2,49 +2,49 @@
 
 /* ─── Brand tokens ──────────────────────────────────────────────── */
 :root {
-  --background: #f5f8fe;
-  --foreground: #0d1424;
-  --warm-bg: #f5f8fe;
+  --background: #f9f9f9;
+  --foreground: #1c1c1c;
+  --warm-bg: #f9f9f9;
   --warm-surface: #ffffff;
-  --warm-border: #dbe7fb;
-  --warm-muted: #64748b;
-  --warm-ink: #0d1424;
-  --warm-blue: #2563eb;
-  --warm-amber: #2563eb;
-  --warm-coral: #60a5fa;
+  --warm-border: #e0e0e0;
+  --warm-muted: #5a5a5a;
+  --warm-ink: #1c1c1c;
+  --warm-blue: #1c1c1c;
+  --warm-amber: #1c1c1c;
+  --warm-coral: #666;
 
   /* Design system */
-  --pau-blue: #2563eb;
-  --pau-blue-deep: #1d4ed8;
-  --pau-blue-sky: #38bdf8;
-  --pau-blue-50: #eff6ff;
-  --pau-border: #dde8f8;
-  --pau-border-strong: #c0d4f5;
-  --pau-ink: #0d1424;
-  --pau-ink-2: #1e293b;
-  --pau-muted: #5a6b82;
-  --pau-soft: #8fa3bc;
+  --pau-blue: #1c1c1c;
+  --pau-blue-deep: #111;
+  --pau-blue-sky: #666;
+  --pau-blue-50: #f3f3f3;
+  --pau-border: #e0e0e0;
+  --pau-border-strong: #c8c8c8;
+  --pau-ink: #1c1c1c;
+  --pau-ink-2: #3a3a3a;
+  --pau-muted: #5a5a5a;
+  --pau-soft: #999;
 
   /* Surface tiers */
   --pau-surface-0: #ffffff;
-  --pau-surface-1: #f8fbff;
-  --pau-surface-2: #f0f6ff;
+  --pau-surface-1: #f9f9f9;
+  --pau-surface-2: #f3f3f3;
 
-  /* Radius scale — Impeccable: cards cap at 14px, no 24/28/32px on cards */
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 12px;
-  --r-xl: 14px;
-  --r-2xl: 16px;
+  /* Radius scale */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 10px;
+  --r-2xl: 12px;
   --r-pill: 999px;
 
-  /* Shadow tiers — colored blue, no pure-black (redesign-skill) */
-  --shadow-xs: 0 1px 4px rgba(37,99,235,0.04), 0 2px 8px rgba(37,99,235,0.04);
-  --shadow-sm: 0 2px 8px rgba(37,99,235,0.05), 0 4px 20px rgba(37,99,235,0.06);
-  --shadow-md: 0 4px 16px rgba(37,99,235,0.07), 0 8px 32px rgba(37,99,235,0.08);
-  --shadow-lg: 0 8px 28px rgba(37,99,235,0.09), 0 16px 52px rgba(37,99,235,0.10);
-  --shadow-xl: 0 16px 48px rgba(37,99,235,0.12), 0 32px 80px rgba(37,99,235,0.12);
-  --shadow-glow: 0 0 0 3px rgba(37,99,235,0.12), 0 8px 28px rgba(37,99,235,0.18);
+  /* Shadow tiers — neutral */
+  --shadow-xs: 0 1px 4px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.03);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.05), 0 4px 20px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.06), 0 8px 32px rgba(0,0,0,.05);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,.08), 0 16px 52px rgba(0,0,0,.06);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,.10), 0 32px 80px rgba(0,0,0,.08);
+  --shadow-glow: 0 0 0 3px rgba(0,0,0,.06), 0 8px 28px rgba(0,0,0,.10);
 
   /* Easing curves (Emil Kowalski) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -86,20 +86,20 @@
   /* shadcn/ui design tokens → Kairo brand */
   --color-card: #ffffff;
   --color-card-foreground: var(--pau-ink);
-  --color-primary: var(--pau-blue);
+  --color-primary: #111;
   --color-primary-foreground: #ffffff;
-  --color-secondary: var(--pau-blue-50);
-  --color-secondary-foreground: var(--pau-blue);
+  --color-secondary: var(--pau-surface-2);
+  --color-secondary-foreground: var(--pau-ink);
   --color-muted: var(--pau-surface-1);
   --color-muted-foreground: var(--pau-muted);
-  --color-accent: var(--pau-blue-50);
-  --color-accent-foreground: var(--pau-blue);
-  --color-destructive: #ef4444;
+  --color-accent: var(--pau-surface-2);
+  --color-accent-foreground: var(--pau-ink);
+  --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
   --color-border: var(--pau-border);
   --color-input: var(--pau-border);
-  --color-ring: var(--pau-blue);
-  --radius: 12px;
+  --color-ring: #1c1c1c;
+  --radius: 6px;
 }
 
 /* ─── Base ──────────────────────────────────────────────────────── */
@@ -116,11 +116,7 @@ p, li { max-width: 72ch; }
 
 /* ─── Atmospheric page background ───────────────────────────────── */
 .pau-bg-atmosphere {
-  background:
-    radial-gradient(ellipse 90% 60% at -5% -5%, rgba(219,234,254,0.55) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 105% -10%, rgba(224,231,255,0.42) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 70% at 50% 110%, rgba(239,246,255,0.35) 0%, transparent 60%),
-    linear-gradient(165deg, #f7faff 0%, #f0f5fe 60%, #edf2fd 100%);
+  background: #f9f9f9;
 }
 
 /* ─── Focus ─────────────────────────────────────────────────────── */
@@ -132,15 +128,15 @@ p, li { max-width: 72ch; }
 
 /* ─── Selection ─────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(37, 99, 235, 0.14);
-  color: #0f172a;
+  background: rgba(0,0,0,.12);
+  color: #111;
 }
 
 /* ─── Scrollbar (subtle) ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.18); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(37, 99, 235, 0.32); }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.28); }
 
 /* ─── Button feedback (Emil Kowalski: scale on :active) ─────────── */
 button:active:not(:disabled),
@@ -293,25 +289,18 @@ button:active:not(:disabled),
 }
 
 .kairo-glass-card {
-  background: rgba(255,255,255,0.78);
-  backdrop-filter: blur(18px) saturate(1.18);
-  -webkit-backdrop-filter: blur(18px) saturate(1.18);
-  border: 1px solid rgba(219,231,251,0.82);
-  box-shadow: 0 18px 48px rgba(37,99,235,0.08), 0 2px 8px rgba(37,99,235,0.05);
+  background: #fff;
+  border: 1px solid #e8e8e8;
 }
 
 .kairo-stitch-card {
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(219,231,251,0.82);
-  box-shadow: 0 14px 38px rgba(37,99,235,0.07), 0 1px 4px rgba(15,23,42,0.03);
+  background: #fff;
+  border: 1px solid #e8e8e8;
 }
 
 .kairo-topbar {
-  background: rgba(255,255,255,0.76);
-  backdrop-filter: blur(22px) saturate(1.25);
-  -webkit-backdrop-filter: blur(22px) saturate(1.25);
-  border-bottom: 1px solid rgba(219,231,251,0.78);
-  box-shadow: 0 8px 28px rgba(37,99,235,0.05);
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .kairo-pill {
@@ -319,11 +308,10 @@ button:active:not(:disabled),
   align-items: center;
   gap: 0.45rem;
   border-radius: var(--r-pill);
-  border: 1px solid rgba(219,231,251,0.86);
-  background: rgba(255,255,255,0.82);
+  border: 1px solid #e0e0e0;
+  background: #fff;
   color: var(--pau-muted);
-  font-weight: 850;
-  box-shadow: 0 8px 20px rgba(37,99,235,0.05);
+  font-weight: 600;
 }
 
 .kairo-page-container {
@@ -337,8 +325,8 @@ button:active:not(:disabled),
     transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
   }
   .kairo-stitch-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 52px rgba(37,99,235,0.1), 0 2px 8px rgba(15,23,42,0.04);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
   }
 }
 
@@ -349,35 +337,24 @@ button:active:not(:disabled),
   justify-content: center;
   gap: 8px;
   padding: 13px 22px;
-  border-radius: var(--r-pill);
   border: none;
-  background: linear-gradient(135deg, #1a43cc 0%, #2563eb 50%, #3b7cf8 100%);
+  background: #111;
   color: #fff;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .02em;
   cursor: pointer;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 8px 24px rgba(37,99,235,0.24), 0 2px 6px rgba(37,99,235,0.18);
-  transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
-  position: relative;
-  overflow: hidden;
+  transition: transform 150ms var(--ease-out), opacity 150ms;
 }
-.campus-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 60%);
-  pointer-events: none;
-}
+.campus-primary::after { display: none; }
 @media (hover: hover) and (pointer: fine) {
   .campus-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 16px 40px rgba(37,99,235,0.30), 0 4px 10px rgba(37,99,235,0.20);
+    transform: translateY(-1px);
+    opacity: .9;
   }
 }
 .campus-primary:active:not(:disabled) {
   transform: scale(0.97) !important;
-  box-shadow: 0 4px 14px rgba(37,99,235,0.20);
 }
 .campus-primary:disabled {
   opacity: 0.5;
@@ -391,20 +368,18 @@ button:active:not(:disabled),
   justify-content: center;
   gap: 7px;
   padding: 10px 18px;
-  border-radius: var(--r-pill);
-  border: 1.5px solid var(--pau-border-strong);
+  border: 1px solid #e0e0e0;
   background: #fff;
-  color: var(--pau-ink-2);
-  font-size: 14px;
-  font-weight: 700;
+  color: var(--pau-ink);
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: transform 150ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  transition: transform 150ms var(--ease-out), border-color 150ms;
 }
 @media (hover: hover) and (pointer: fine) {
   .pau-button-secondary:hover:not(:disabled) {
-    background: var(--pau-surface-2);
-    border-color: #a0b8e8;
-    box-shadow: var(--shadow-xs);
+    border-color: #c8c8c8;
+    background: #f9f9f9;
   }
 }
 .pau-button-secondary:active:not(:disabled) { transform: scale(0.97); }
@@ -422,9 +397,9 @@ button:active:not(:disabled),
   letter-spacing: 0.03em;
   line-height: 1;
 }
-.pau-badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-.pau-badge-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.pau-badge-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+.pau-badge-blue  { background: #f3f3f3; color: #1c1c1c; border: 1px solid #e0e0e0; }
+.pau-badge-green { background: #f3f3f3; color: #1c1c1c; border: 1px solid #e0e0e0; }
+.pau-badge-amber { background: #f3f3f3; color: #1c1c1c; border: 1px solid #e0e0e0; }
 
 /* ─── Alert / info strip ─────────────────────────────────────────── */
 .pau-info {
@@ -432,24 +407,19 @@ button:active:not(:disabled),
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
-  border-radius: var(--r-lg);
-  border: 1px solid #bfdbfe;
-  background: rgba(239, 246, 255, 0.92);
-  color: #1e40af;
+  border: 1px solid #e0e0e0;
+  background: #f9f9f9;
+  color: #3a3a3a;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.6;
 }
 
 /* ─── Section card ───────────────────────────────────────────────── */
 .pau-card-section {
-  border-radius: var(--r-xl);
-  background: rgba(255,255,255,0.84);
-  border: 1px solid rgba(219,231,251,0.82);
+  background: #fff;
+  border: 1px solid #e8e8e8;
   padding: 20px;
-  box-shadow: 0 14px 36px rgba(37,99,235,0.07), 0 1px 4px rgba(15,23,42,0.03);
-  backdrop-filter: blur(14px) saturate(1.12);
-  -webkit-backdrop-filter: blur(14px) saturate(1.12);
 }
 
 /* ─── Metric card — used in Camino for stats ─────────────────────── */
@@ -470,7 +440,7 @@ button:active:not(:disabled),
   margin: 0;
 }
 
-/* ─── Empty state — teaches (UI UX Pro Max: empty-states rule) ────── */
+/* ─── Empty state ────────────────────────────────────────────────── */
 .pau-empty {
   display: flex;
   flex-direction: column;
@@ -478,13 +448,12 @@ button:active:not(:disabled),
   justify-content: center;
   gap: 12px;
   padding: 44px 28px;
-  border-radius: var(--r-xl);
-  background: linear-gradient(145deg, rgba(239,246,255,0.7), rgba(224,236,255,0.4));
-  border: 1.5px dashed rgba(147,185,245,0.7);
-  color: #1d4ed8;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  color: #5a5a5a;
   text-align: center;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.6;
 }
 
@@ -814,15 +783,14 @@ button:active:not(:disabled),
 
 /* ─── Stitch: Subject card glass treatment ───────────────────────── */
 .pau-subject-card {
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), background 200ms var(--ease-out);
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  transition: transform 200ms var(--ease-out), border-color 200ms;
 }
 @media (hover: hover) and (pointer: fine) {
   .pau-subject-card:hover {
-    background: rgba(255,255,255,0.96);
-    transform: translateY(-4px);
+    transform: translateY(-2px);
+    border-color: #c8c8c8;
   }
 }
 

@@ -197,7 +197,7 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
         </div>
       </div>
       <div style={{ height: 8, borderRadius: 999, overflow: 'hidden', background: '#ede9fe' }}>
-        <div style={{ width: `${progressPct}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #2563eb, #7c3aed, #8b5cf6)', transition: 'width 420ms ease' }} />
+        <div style={{ width: `${progressPct}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #1c1c1c, #7c3aed, #8b5cf6)', transition: 'width 420ms ease' }} />
       </div>
       <div style={{ display: 'grid', gap: 9 }}>
         {completedSteps.map(step => (
@@ -283,17 +283,17 @@ const SUBJECT_CARDS = {
 }
 
 const mdComponents: Partial<Components> = {
-  h1: ({children}) => <h1 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '1.2rem 0 0.65rem', borderBottom: '2px solid #e5edf9', paddingBottom: '0.35rem', color: '#111827' }}>{children}</h1>,
+  h1: ({children}) => <h1 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '1.2rem 0 0.65rem', borderBottom: '2px solid #e0e0e0', paddingBottom: '0.35rem', color: '#111827' }}>{children}</h1>,
   h2: ({children}) => <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: '1.05rem 0 0.5rem', color: '#111827' }}>{children}</h2>,
   h3: ({children}) => <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1f2937', margin: '0.95rem 0 0.4rem' }}>{children}</h3>,
   strong: ({children}) => <strong style={{ fontWeight: 850, color: '#111827' }}>{children}</strong>,
   p: ({children}) => <p style={{ margin: '0.72rem 0', color: '#374151', lineHeight: 1.85 }}>{children}</p>,
   li: ({children}) => <li style={{ margin: '0.38rem 0', color: '#374151', lineHeight: 1.8 }}>{children}</li>,
-  blockquote: ({children}) => <blockquote style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #93c5fd', borderRadius: '16px', padding: '1rem', margin: '1rem 0', color: '#475569', background: '#ffffff', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
+  blockquote: ({children}) => <blockquote style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #999', borderRadius: '6px', padding: '1rem', margin: '1rem 0', color: '#475569', background: '#ffffff', boxShadow: '0 10px 24px rgba(0,0,0,0.03)' }}>{children}</blockquote>,
 }
 
 const darkMdComponents: Partial<Components> = {
-  h1: ({children}) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #dbe7fb', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
+  h1: ({children}) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #e0e0e0', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
   h2: ({children}) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#1e3a8a', letterSpacing: '-0.01em' }}>{children}</h2>,
   h3: ({children}) => <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#334155', margin: '0.85rem 0 0.35rem' }}>{children}</h3>,
   strong: ({children}) => <strong style={{ fontWeight: 850, color: '#0f172a' }}>{children}</strong>,
@@ -301,7 +301,7 @@ const darkMdComponents: Partial<Components> = {
   li: ({children}) => <li style={{ margin: '0.32rem 0', color: '#334155', lineHeight: 1.78 }}>{children}</li>,
   ul: ({children}) => <ul style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ul>,
   ol: ({children}) => <ol style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ol>,
-  blockquote: ({children}) => <blockquote style={{ border: '1px solid #dbe7fb', borderLeft: '4px solid #60a5fa', borderRadius: '16px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#475569', background: 'linear-gradient(135deg, #ffffff, #f8fbff)', boxShadow: '0 12px 26px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
+  blockquote: ({children}) => <blockquote style={{ border: '1px solid #e0e0e0', borderLeft: '4px solid #999', borderRadius: '6px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#475569', background: 'linear-gradient(135deg, #ffffff, #f9f9f9)', boxShadow: '0 12px 26px rgba(0,0,0,0.03)' }}>{children}</blockquote>,
 }
 
 const planMdComponents: Partial<Components> = {
@@ -309,7 +309,7 @@ const planMdComponents: Partial<Components> = {
     <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: WARM.ink, margin: '0 0 18px', lineHeight: 1.2 }}>{children}</h1>
   ),
   h2: ({children}) => (
-    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '18px', background: 'linear-gradient(135deg, #eff6ff, #eef2ff)', border: '1px solid #dbe7fb', color: WARM.blue, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 28px rgba(37,99,235,0.08)' }}>
+    <h2 style={{ margin: '22px 0 12px', padding: '14px 16px', borderRadius: '6px', background: '#f9f9f9', border: '1px solid #e0e0e0', color: WARM.blue, fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 28px rgba(0,0,0,0.04)' }}>
       <Target size={17} />{children}
     </h2>
   ),
@@ -323,12 +323,12 @@ const planMdComponents: Partial<Components> = {
   ul: ({children}) => <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ul>,
   ol: ({children}) => <ol style={{ paddingLeft: '1.2rem', margin: '10px 0 16px', display: 'grid', gap: '8px' }}>{children}</ol>,
   li: ({children}) => (
-    <li style={{ background: WARM.surface, border: '1px solid #dbe7fb', borderRadius: '14px', padding: '10px 12px', color: WARM.ink, lineHeight: 1.6, boxShadow: '0 8px 20px rgba(37, 99, 235, 0.045)' }}>
+    <li style={{ background: WARM.surface, border: '1px solid #e0e0e0', borderRadius: '14px', padding: '10px 12px', color: WARM.ink, lineHeight: 1.6, boxShadow: '0 8px 20px rgba(37, 99, 235, 0.045)' }}>
       {children}
     </li>
   ),
   blockquote: ({children}) => (
-    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '16px', background: WARM.wash, border: '1px solid #dbeafe', color: WARM.blue, fontWeight: 700 }}>
+    <blockquote style={{ margin: '14px 0', padding: '14px 16px', borderRadius: '6px', background: WARM.wash, border: '1px solid #e8e8e8', color: WARM.blue, fontWeight: 700 }}>
       {children}
     </blockquote>
   ),
@@ -666,7 +666,7 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
 
   return (
     <div style={{ background: 'rgba(255, 255, 255, 0.96)', borderRadius: '28px', border: '1px solid rgba(219, 231, 251, 0.95)', padding: '34px', marginBottom: '22px', boxShadow: WARM.shadow, textAlign: 'center' }}>
-      <div style={{ width: '66px', height: '66px', borderRadius: '23px', background: config.light, color: config.color, border: '1px solid ' + config.soft, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.08)' }}>
+      <div style={{ width: '66px', height: '66px', borderRadius: '6px', background: config.light, color: config.color, border: '1px solid ' + config.soft, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(0,0,0,0.04)' }}>
         <SearchX size={30} />
       </div>
       <div style={{ fontSize: '20px', fontWeight: 850, color: WARM.ink, marginBottom: '8px' }}>
@@ -2524,9 +2524,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .campus-hover:hover {
           transform: translateY(-2px);
-          border-color: var(--hover-border, #60a5fa) !important;
-          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #eff6ff)) !important;
-          color: var(--hover-color, #2563eb) !important;
+          border-color: var(--hover-border, #999) !important;
+          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #f5f5f5)) !important;
+          color: var(--hover-color, #1c1c1c) !important;
           box-shadow: 0 16px 34px var(--hover-shadow, rgba(96, 165, 250, 0.2)) !important;
         }
 
@@ -2550,7 +2550,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .campus-subject-card:hover .campus-arrow {
           transform: rotate(8deg) scale(1.05);
-          background: var(--hover-color, #2563eb) !important;
+          background: var(--hover-color, #1c1c1c) !important;
           color: #ffffff !important;
         }
 
@@ -2602,14 +2602,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .exams-subject-strip > .pau-subject-card.is-active {
-          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #eff6ff)) !important;
+          background: linear-gradient(135deg, #ffffff, var(--hover-bg, #f5f5f5)) !important;
           border-color: var(--hover-border, #4f46e5) !important;
           box-shadow: 0 14px 34px var(--hover-shadow, rgba(79, 70, 229, 0.12)) !important;
         }
 
         .exams-subject-strip > .pau-subject-card:hover {
           transform: translateY(-2px) !important;
-          border-color: var(--hover-border, #60a5fa) !important;
+          border-color: var(--hover-border, #999) !important;
           box-shadow: 0 16px 36px var(--hover-shadow, rgba(15, 23, 42, 0.1)) !important;
         }
 
@@ -2807,7 +2807,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           height: 4px;
           transform: translateX(-50%);
           border-radius: 999px 999px 0 0;
-          background: #2563eb;
+          background: #1c1c1c;
           box-shadow: 0 0 18px rgba(37, 99, 235, 0.34), 0 8px 20px rgba(37, 99, 235, 0.14);
           pointer-events: none;
           z-index: 1;
@@ -2888,7 +2888,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .exam-filter-option.is-active {
-          background: #eff6ff;
+          background: #f5f5f5;
           color: #1d4ed8;
           box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
         }
@@ -2936,7 +2936,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .exam-option-button.is-active {
           border-color: rgba(37, 99, 235, 0.14);
-          background: #eff6ff;
+          background: #f5f5f5;
           color: #1d4ed8;
           box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08), 0 10px 24px rgba(37, 99, 235, 0.12);
         }
@@ -2978,8 +2978,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .exams-side-section {
           border-radius: 18px;
-          border: 1px solid #e5edf9;
-          background: #f8fbff;
+          border: 1px solid #e0e0e0;
+          background: #f9f9f9;
           padding: 13px 14px;
         }
 
@@ -3114,8 +3114,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           40% { transform: translateY(-8px); opacity: 1; }
         }
         @keyframes chat-avatar-pulse {
-          0%, 100% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(37,99,235,0), 0 24px 58px rgba(37,99,235,0.16); }
-          50%       { transform: translateY(-4px); box-shadow: 0 0 0 11px rgba(96,165,250,0.10), 0 28px 68px rgba(37,99,235,0.22); }
+          0%, 100% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(0,0,0,0), 0 24px 58px rgba(0,0,0,0.08); }
+          50%       { transform: translateY(-4px); box-shadow: 0 0 0 11px rgba(0,0,0,0.06), 0 28px 68px rgba(0,0,0,0.11); }
         }
 
         .chat-msg-ai   { animation: chat-msg-ai   380ms cubic-bezier(0.23,1,0.32,1) both; }
@@ -3133,15 +3133,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           display: flex;
           gap: 10px;
           align-items: flex-end;
-          box-shadow: 0 18px 46px rgba(37,99,235,0.10), inset 0 1px 0 rgba(255,255,255,0.88);
+          box-shadow: 0 18px 46px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.88);
           backdrop-filter: blur(20px) saturate(1.14);
           -webkit-backdrop-filter: blur(20px) saturate(1.14);
           transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
         }
         .chat-input-wrap:focus-within {
           background: rgba(255,255,255,0.96);
-          border-color: rgba(96,165,250,0.92);
-          box-shadow: 0 0 0 4px rgba(96,165,250,0.18), 0 24px 56px rgba(37,99,235,0.16);
+          border-color: rgba(0,0,0,0.06);
+          box-shadow: 0 0 0 4px rgba(0,0,0,0.06), 0 24px 56px rgba(0,0,0,0.08);
         }
 
         .chat-send-btn {
@@ -3149,7 +3149,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           border-radius: 16px;
           border: none;
           cursor: pointer;
-          background: linear-gradient(135deg, #1d4ed8, #2563eb 58%, #60a5fa);
+          background: linear-gradient(135deg, #1d4ed8, #1c1c1c 58%, #999);
           color: #fff;
           font-size: 13px;
           font-weight: 850;
@@ -3158,17 +3158,17 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           align-items: center;
           gap: 7px;
           transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
-          box-shadow: 0 12px 28px rgba(37,99,235,0.28);
+          box-shadow: 0 12px 28px rgba(0,0,0,0.14);
         }
         .chat-send-btn:not(:disabled):hover {
           transform: translateY(-2px);
-          box-shadow: 0 18px 36px rgba(37,99,235,0.34);
+          box-shadow: 0 18px 36px rgba(0,0,0,0.17);
         }
         .chat-send-btn:disabled {
           opacity: 0.42;
           cursor: not-allowed;
           box-shadow: none;
-          background: #dbe7fb;
+          background: #e0e0e0;
           color: #64748b;
         }
 
@@ -3177,20 +3177,20 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           border-radius: 40px;
           background: rgba(255,255,255,0.76);
           border: 1px solid rgba(191,219,254,0.92);
-          color: #1e40af;
+          color: #1c1c1c;
           font-size: 13px;
           font-weight: 800;
           cursor: pointer;
           transition: background 160ms ease, border-color 160ms ease, transform 130ms ease, color 160ms ease;
           white-space: nowrap;
           font-family: inherit;
-          box-shadow: 0 10px 24px rgba(37,99,235,0.07);
+          box-shadow: 0 10px 24px rgba(0,0,0,0.04);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
         }
         .chat-chip:hover {
-          background: #eff6ff;
-          border-color: rgba(96,165,250,0.92);
+          background: #f5f5f5;
+          border-color: rgba(0,0,0,0.06);
           color: #1d4ed8;
           transform: translateY(-2px);
         }
@@ -3301,7 +3301,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <button
                   className="campus-hover"
                   onClick={() => setShowAllSubjects(value => !value)}
-                  style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), border: '1px solid #dbe7fb', borderRadius: '999px', background: '#ffffff', color: WARM.blue, padding: '9px 14px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 850, cursor: 'pointer', boxShadow: '0 12px 24px rgba(37,99,235,0.06)' } as CSSProperties}
+                  style={{ ...hoverVars(WARM.blue, WARM.wash, '#999'), border: '1px solid #e0e0e0', borderRadius: '999px', background: '#ffffff', color: WARM.blue, padding: '9px 14px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 850, cursor: 'pointer', boxShadow: '0 12px 24px rgba(0,0,0,0.03)' } as CSSProperties}
                   type="button"
                 >
                   {showAllSubjects ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -3352,7 +3352,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       textAlign: 'left',
                       minHeight: '104px',
                       padding: '16px',
-                      borderRadius: '20px',
+                      borderRadius: '6px',
                       border: active ? '1px solid ' + val.accent : '1px solid rgba(219,231,251,0.95)',
                       background: active ? 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 100%)' : 'rgba(255,255,255,0.9)',
                       cursor: 'pointer',
@@ -3369,13 +3369,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         event.stopPropagation()
                         togglePinnedSubject(key)
                       }}
-                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '14px', top: '14px', width: '34px', height: '34px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as CSSProperties}
+                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '14px', top: '14px', width: '34px', height: '34px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#e0e0e0'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(0,0,0,0.04)' } as CSSProperties}
                       type="button"
                     >
                       <Pin size={16} fill={pinned ? 'currentColor' : 'none'} />
                     </button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '13px', paddingRight: '34px', position: 'relative', zIndex: 2 }}>
-                      <div style={{ width: '46px', height: '46px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : val.light, color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)', flex: '0 0 auto' }}>
+                      <div style={{ width: '46px', height: '46px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : val.light, color: val.color, boxShadow: '0 12px 28px rgba(0,0,0,0.04)', flex: '0 0 auto' }}>
                         <Icon size={22} strokeWidth={2.1} />
                       </div>
                       <div style={{ minWidth: 0 }}>
@@ -3397,7 +3397,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   border: '1px solid rgba(219, 231, 251, 0.85)',
   padding: '20px',
   marginBottom: '22px',
-  boxShadow: '0 20px 50px rgba(37,99,235,0.08)',
+  boxShadow: '0 20px 50px rgba(0,0,0,0.04)',
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)'
 }}>
@@ -3406,7 +3406,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Filtros del examen · {cfg.short}</div>
               </div>
               {caminoExerciseNotice && (
-                <div style={{ marginBottom: '14px', borderRadius: '14px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', padding: '10px 12px', fontSize: '12px', fontWeight: 760, lineHeight: 1.45 }}>
+                <div style={{ marginBottom: '14px', borderRadius: '14px', border: '1px solid #e0e0e0', background: '#f5f5f5', color: '#1c1c1c', padding: '10px 12px', fontSize: '12px', fontWeight: 760, lineHeight: 1.45 }}>
                   {caminoExerciseNotice}
                 </div>
               )}
@@ -3463,7 +3463,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
                 {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
-                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as CSSProperties}>
+                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #e0e0e0' } as CSSProperties}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
                       {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
                       {t}
@@ -3496,7 +3496,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       fontWeight: 700,
       background: examenIdx === i ? cfg.color : WARM.field,
       color: examenIdx === i ? '#fff' : WARM.ink,
-      border: examenIdx === i ? 'none' : '1px solid #dbe7fb'
+      border: examenIdx === i ? 'none' : '1px solid #e0e0e0'
     } as CSSProperties}
   >
     {anio}
@@ -3523,7 +3523,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                           fontWeight: 700,
                           background: catEjercicioIdx === i ? cfg.color : WARM.field,
                           color: catEjercicioIdx === i ? '#fff' : WARM.muted,
-                          border: catEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                          border: catEjercicioIdx === i ? 'none' : '1px solid #e0e0e0'
                         } as CSSProperties}
                       >
                         {label}
@@ -3548,7 +3548,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         fontWeight: 700,
                         background: catFisicaEjercicioIdx === i ? cfg.color : WARM.field,
                         color: catFisicaEjercicioIdx === i ? '#fff' : WARM.muted,
-                        border: catFisicaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                        border: catFisicaEjercicioIdx === i ? 'none' : '1px solid #e0e0e0'
                       } as CSSProperties}
                     >
                       Ejercicio {ejercicio.numero} · {ejercicio.bloque ?? ejercicio.titulo}
@@ -3572,7 +3572,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         fontWeight: 700,
                         background: catAsignaturaEjercicioIdx === i ? cfg.color : WARM.field,
                         color: catAsignaturaEjercicioIdx === i ? '#fff' : WARM.muted,
-                        border: catAsignaturaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                        border: catAsignaturaEjercicioIdx === i ? 'none' : '1px solid #e0e0e0'
                       } as CSSProperties}
                     >
                       {ejercicio.titulo}
@@ -3604,7 +3604,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                           fontWeight: 700,
                           background: catHistoriaEjercicioIdx === i ? cfg.color : WARM.field,
                           color: catHistoriaEjercicioIdx === i ? '#fff' : WARM.muted,
-                          border: catHistoriaEjercicioIdx === i ? 'none' : '1px solid #dbe7fb'
+                          border: catHistoriaEjercicioIdx === i ? 'none' : '1px solid #e0e0e0'
                         } as CSSProperties}
                       >
                         Ejercicio {ejercicio.numero}{label ? ` · ${label}` : ''}
@@ -3635,7 +3635,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         fontWeight: 700,
                         background: diaHistoriaIdx === i ? cfg.color : WARM.field,
                         color: diaHistoriaIdx === i ? '#fff' : WARM.muted,
-                        border: diaHistoriaIdx === i ? 'none' : '1px solid #dbe7fb'
+                        border: diaHistoriaIdx === i ? 'none' : '1px solid #e0e0e0'
                       } as CSSProperties}
                     >
                       {version}
@@ -3645,16 +3645,16 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               )}
               {!isCatalunaExam && <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                 {isMadridMathStyle ? bloquesMates.map((bloque: string, i: number) => (
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => cambiarBloqueMates(i, bloque)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e0e0e0' } as CSSProperties}>{i + 1}. {bloque} · {puntosBloqueMates(bloque)}pts</button>
                 )) : (asignatura === 'fisica' ? TIPOS_FISICA : asignatura === 'quimica' ? bloquesQuimica : asignatura === 'biologia' ? bloquesBiologia : asignatura === 'lengua' ? bloquesLengua : asignatura === 'ingles' ? bloquesIngles : bloquesHistoria).map((t: any, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #dbe7fb' } as CSSProperties}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button> // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+                  <button className={bloqueIdx === i ? 'campus-primary' : 'campus-hover'} key={i} onClick={() => { asignatura === 'fisica' ? cambiarBloqueFisica(i, t.tipo) : asignatura === 'quimica' ? cambiarBloqueQuimica(i, t.tipo) : asignatura === 'biologia' ? cambiarBloqueBiologia(i, t.tipo) : setBloqueIdx(i); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '6px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, background: bloqueIdx === i ? cfg.light : WARM.field, color: bloqueIdx === i ? cfg.color : WARM.muted, border: bloqueIdx === i ? '1.5px solid ' + cfg.accent : '1px solid #e0e0e0' } as CSSProperties}>{t.label} · {asignatura === 'fisica' ? puntosBloqueFisica(t.tipo) : asignatura === 'quimica' ? puntosBloqueQuimica(t.tipo) : asignatura === 'biologia' ? puntosBloqueBiologia(t.tipo) : (t as any).pts}pts</button> // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                 ))}
               </div>}
               {!isCatalunaExam && opcionesDisponibles.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '13px', color: WARM.muted, fontWeight: 700 }}>Opción:</span>
                   {opcionesDisponibles.map(op => (
-                    <button className={opcion === op ? 'campus-primary' : 'campus-hover'} key={op} onClick={() => { setOpcion(op); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #dbe7fb' } as CSSProperties}>{op === 0 ? 'A' : 'B'}</button>
+                    <button className={opcion === op ? 'campus-primary' : 'campus-hover'} key={op} onClick={() => { setOpcion(op); reset() }} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), width: '38px', height: '38px', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '14px', background: opcion === op ? cfg.color : WARM.field, color: opcion === op ? '#fff' : WARM.ink, border: opcion === op ? 'none' : '1px solid #e0e0e0' } as CSSProperties}>{op === 0 ? 'A' : 'B'}</button>
                   ))}
                 </div>
               )}
@@ -3669,7 +3669,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div className="mb-6 grid gap-5">
                 {(examenQuimicaCatalunaActivo || examenLenguaCatalunaActivo) && ejercicioAsignaturaCatalunaActivo ? (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '24px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '6px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(0,0,0,0.03)' }}>
                       <ClipboardList size={18} />
                       {(examenQuimicaCatalunaActivo ?? examenLenguaCatalunaActivo)?.instrucciones}
                     </div>
@@ -3692,7 +3692,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div className="mb-6 grid gap-5">
                 {examenFisicaCatalunaActivo && ejercicioFisicaCatalunaActivo ? (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '24px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '6px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(0,0,0,0.03)' }}>
                       <ClipboardList size={18} />
                       {examenFisicaCatalunaActivo.instrucciones}
                     </div>
@@ -3712,7 +3712,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div className="mb-6 grid gap-5">
                 {examenCatalunaActivo ? (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '24px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(37,99,235,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '6px', border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, padding: '16px 18px', fontSize: '14px', fontWeight: 800, boxShadow: '0 12px 28px rgba(0,0,0,0.03)' }}>
                       <ClipboardList size={18} />
                       Selecciona un ejercicio para practicarlo individualmente.
                     </div>
@@ -3748,11 +3748,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             {!isCatalunaExam && preguntaActiva && (
              <div className="exams-question-card" key={preguntaActivaKey} style={{
   background: 'rgba(255, 255, 255, 0.82)',
-  borderRadius: '24px',
+  borderRadius: '6px',
   border: '1px solid rgba(219, 231, 251, 0.80)',
   overflow: 'clip',
   marginBottom: '22px',
-  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02)',
   backdropFilter: 'blur(14px)',
   WebkitBackdropFilter: 'blur(14px)'
 }}>
@@ -3760,19 +3760,19 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
                     {asignatura === 'historia' && diaHistoriaSeleccionado && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{diaHistoriaSeleccionado}</span>
+                      <span style={{ padding: '2px 10px', borderRadius: '6px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{diaHistoriaSeleccionado}</span>
                     )}
                     {asignatura === 'lengua' && versionExamenSeleccionada && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
+                      <span style={{ padding: '2px 10px', borderRadius: '6px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
                     )}
                     {asignatura === 'ingles' && versionExamenSeleccionada && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
+                      <span style={{ padding: '2px 10px', borderRadius: '6px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
                     )}
                     {asignatura === 'biologia' && versionExamenSeleccionada && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
+                      <span style={{ padding: '2px 10px', borderRadius: '6px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
                     )}
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión / opción' : 'Opción'} {opcionMostrada}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '6px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
+                    <span style={{ padding: '2px 10px', borderRadius: '6px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión / opción' : 'Opción'} {opcionMostrada}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{formatPts(puntuacionPreguntaActiva)}</span>
@@ -3781,7 +3781,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 </div>
                 <div style={{ padding: '24px', overflowY: 'auto' }}>
                   {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 12px 30px rgba(0,0,0,0.03)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Text</div>
                       <ExamStatement
                         key={`${preguntaActivaKey}-texto`}
@@ -3796,7 +3796,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     </div>
                   )}
                   {asignatura === 'ingles' && (
-                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)', marginBottom: '18px' }}>
+                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 14px 34px rgba(0,0,0,0.04)', marginBottom: '18px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Question</div>
                       <ExamStatement
                         key={`${preguntaActivaKey}-enunciado`}
@@ -3811,7 +3811,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     </div>
                   )}
                   {!preguntaActivaIncompleta && (asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 12px 30px rgba(0,0,0,0.03)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
                       <ExamStatement
                         text={(preguntaActiva as any).texto_fuente} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
@@ -3824,17 +3824,17 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     </div>
                   )}
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagen_url && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 12px 30px rgba(0,0,0,0.03)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Documento visual</div>
                       <img
                         src={(preguntaActiva as any).imagen_url} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         alt="Fuente histórica"
-                        className="max-w-full rounded-2xl border border-slate-200 shadow-sm"
+                        className="max-w-full rounded-[6px] border border-slate-200 shadow-sm"
                       />
                     </div>
                   )}
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagenFuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 12px 30px rgba(0,0,0,0.03)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Fuente histórica oficial</div>
                       <img src={(preguntaActiva as { imagenFuente?: string }).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
                     </div>
@@ -3849,22 +3849,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', display: 'grid', gap: '12px' }}>
                       {(preguntaActiva as any).imagenes.map((src: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '18px', border: '1px solid #e5edf9', background: '#fff' }} />
+                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '6px', border: '1px solid #e0e0e0', background: '#fff' }} />
                       ))}
                     </div>
                   )}
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).conceptos && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {(preguntaActiva as any).conceptos.map((c: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                        <span key={i} style={{ padding: '4px 12px', borderRadius: '20px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.accent, fontSize: '12px', fontWeight: 600 }}>{c}</span>
+                        <span key={i} style={{ padding: '4px 12px', borderRadius: '6px', background: cfg.light, color: cfg.color, border: '1px solid ' + cfg.accent, fontSize: '12px', fontWeight: 600 }}>{c}</span>
                       ))}
                     </div>
                   )}
                   {asignatura !== 'ingles' && (
-                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
+                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 14px 34px rgba(0,0,0,0.04)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado</div>
                       {preguntaActivaIncompleta ? (
-                        <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
+                        <div style={{ padding: '22px', borderRadius: '6px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
                           <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
                           <div style={{ fontSize: '15px', lineHeight: 1.6, fontWeight: 650 }}>Estamos terminando de adaptar este contenido.</div>
                           <div style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.5, color: '#64748b', fontWeight: 650 }}>Prueba otro ejercicio mientras tanto.</div>
@@ -3888,11 +3888,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
            {!isCatalunaExam && preguntaActiva && <div className="exams-answer-card" style={{
   background: 'rgba(255, 255, 255, 0.82)',
-  borderRadius: '24px',
+  borderRadius: '6px',
   border: '1px solid rgba(219, 231, 251, 0.80)',
   padding: '26px',
   marginBottom: '22px',
-  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02)',
   backdropFilter: 'blur(14px)',
   WebkitBackdropFilter: 'blur(14px)'
 }}>
@@ -3918,11 +3918,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
                   {imagenPreview ? (
                     <div style={{ position: 'relative' }}>
-                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '16px', border: '1.5px solid #dbe7fb' }} />
+                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '6px', border: '1.5px solid #e0e0e0' }} />
                       <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
                     </div>
                   ) : (
-                    <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: '180px', borderRadius: '18px', border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
+                    <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: '180px', borderRadius: '6px', border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
                       <UploadCloud size={34} color={cfg.color} />
                       <p style={{ fontSize: '14px', fontWeight: 600, color: cfg.color, margin: '8px 0 4px' }}>Haz clic para subir una foto</p>
                       <p style={{ fontSize: '12px', color: cfg.accent, margin: '0' }}>Fotografía tu respuesta manuscrita</p>
@@ -3930,13 +3930,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   )}
                 </div>
               )}
-              <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
+              <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '6px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
                 {cargando ? <KairoLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con IA'}
               </button>
             </div>}
 
             {!isCatalunaExam && (correccion || streamText || cargando) && (
-              <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
+              <div style={{ borderRadius: '6px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
                 <div style={{ padding: '14px 22px', background: 'linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
@@ -4079,7 +4079,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
                   <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
                     Hola, soy{' '}
-                    <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Kairo</span>
+                    <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #1c1c1c 58%, #999 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Kairo</span>
                   </h2>
                   <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 430, lineHeight: 1.6, fontWeight: 520 }}>
                     Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
@@ -4099,11 +4099,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 msg.rol === 'kairo' ? (
                   /* Kairo — full-width editorial card */
                   <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '16px 0' }}>
-                    <div style={{ borderRadius: 28, padding: '22px 22px 24px', background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(219,231,251,0.92)', boxShadow: '0 20px 52px rgba(37,99,235,0.09)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
+                    <div style={{ borderRadius: 28, padding: '22px 22px 24px', background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(219,231,251,0.92)', boxShadow: '0 20px 52px rgba(0,0,0,0.04)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                        <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
+                        <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kairo</div>
+                        <div style={{ fontSize: 11, fontWeight: 850, color: '#1c1c1c', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kairo</div>
                         {(() => {
                           const isStreamingMessage = cargandoChat && i === mensajes.length - 1
                           if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
@@ -4124,7 +4124,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 ) : (
                   /* Usuario — compact bubble right */
                   <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 0' }}>
-                    <div style={{ maxWidth: '70%', padding: '14px 20px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #60a5fa 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 650, boxShadow: '0 12px 30px rgba(37,99,235,0.24)' }}>
+                    <div style={{ maxWidth: '70%', padding: '14px 20px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8 0%, #1c1c1c 58%, #999 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 650, boxShadow: '0 12px 30px rgba(0,0,0,0.12)' }}>
                       {msg.texto}
                     </div>
                   </div>
@@ -4134,11 +4134,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
                 <div className="chat-msg-ai" style={{ padding: '24px 0' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
+                    <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
-                      <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                      <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                      <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                      <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#1c1c1c' }} />
+                      <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#1c1c1c' }} />
+                      <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#1c1c1c' }} />
                     </div>
                   </div>
                 </div>
@@ -4169,7 +4169,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div style={{ textAlign: 'center', padding: '60px', color: WARM.muted }}>Cargando historial...</div>
             ) : historial.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px' }}>
-                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: WARM.wash, color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.14)', border: '1px solid #dbeafe' }}><BarChart3 size={28} /></div>
+                <div style={{ width: '58px', height: '58px', borderRadius: '6px', background: WARM.wash, color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(0,0,0,0.07)', border: '1px solid #e8e8e8' }}><BarChart3 size={28} /></div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Sin correcciones aún</div>
                 <div style={{ fontSize: '14px', color: WARM.muted }}>Haz tu primera corrección en Exámenes</div>
               </div>
@@ -4188,13 +4188,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   ]
                   return (
                     <div className="pau-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '28px' }}>
-                      <div style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(37,99,235,0.06)' }}>
+                      <div style={{ background: '#ffffff', borderRadius: '6px', border: '1px solid #e0e0e0', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(0,0,0,0.03)' }}>
                         <div style={{ fontSize: '10px', fontWeight: 800, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Total</div>
                         <div style={{ fontSize: '34px', fontWeight: 820, color: WARM.ink, letterSpacing: '-0.02em' }}>{historial.length}</div>
                         <div style={{ fontSize: '11px', color: WARM.softText, marginTop: '4px' }}>correcciones</div>
                       </div>
                       {statItems.map(({ label, media, cfg: sCfg }) => (
-                        <div key={label} style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(37,99,235,0.06)', position: 'relative', overflow: 'hidden' }}>
+                        <div key={label} style={{ background: '#ffffff', borderRadius: '6px', border: '1px solid #e0e0e0', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden' }}>
                           {media && (
                             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: sCfg.soft }}>
                               <div style={{ height: '100%', width: `${Math.min(parseFloat(media) * 10, 100)}%`, background: colorNota(parseFloat(media)), borderRadius: 999, transition: 'width 800ms var(--ease-out)' }} />
@@ -4218,16 +4218,16 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     const itemCfg = ASIGNATURAS[item.asignatura as Asignatura] ?? ASIGNATURAS.historia
                     const ItemIcon = itemCfg.icon
                     return (
-                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(itemCfg.color, itemCfg.light, itemCfg.accent), background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px 20px', cursor: 'pointer', boxShadow: '0 6px 20px rgba(37,99,235,0.05)', borderLeft: '4px solid ' + itemCfg.color, display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(itemCfg.color, itemCfg.light, itemCfg.accent), background: '#ffffff', borderRadius: '6px', border: '1px solid #e0e0e0', padding: '18px 20px', cursor: 'pointer', boxShadow: '0 6px 20px rgba(0,0,0,0.03)', borderLeft: '4px solid ' + itemCfg.color, display: 'flex', alignItems: 'center', gap: '16px' }}>
                       <div style={{ width: 40, height: 40, borderRadius: 14, background: itemCfg.light, color: itemCfg.color, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                         <ItemIcon size={18} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
                           <span style={{ fontSize: '13px', fontWeight: 750, color: '#111827' }}>{nombreAsignatura(item.asignatura)}</span>
-                          <span style={{ padding: '1px 8px', borderRadius: '20px', background: itemCfg.light, color: itemCfg.color, fontSize: '11px', fontWeight: 700, border: '1px solid ' + itemCfg.soft }}>{item.tipo}</span>
-                          <span style={{ padding: '1px 8px', borderRadius: '20px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.año}</span>
-                          {item.bloque && <span style={{ padding: '1px 8px', borderRadius: '20px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.bloque}</span>}
+                          <span style={{ padding: '1px 8px', borderRadius: '6px', background: itemCfg.light, color: itemCfg.color, fontSize: '11px', fontWeight: 700, border: '1px solid ' + itemCfg.soft }}>{item.tipo}</span>
+                          <span style={{ padding: '1px 8px', borderRadius: '6px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.año}</span>
+                          {item.bloque && <span style={{ padding: '1px 8px', borderRadius: '6px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.bloque}</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: WARM.softText }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
                       </div>
@@ -4250,22 +4250,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         {seccion === 'planning' && (
           <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
-            <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
+            <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #e0e0e0', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #1d4ed8, #1c1c1c 52%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>
               <div style={{ fontSize: '14px', color: WARM.muted, marginBottom: '20px' }}>Kairo mira tus correcciones y te monta una semana realista para remontar puntos débiles</div>
-              <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(37,99,235,0.22)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
+              <button className="campus-primary" onClick={generarPlan} disabled={cargandoPlan} style={{ ...hoverVars(WARM.blue, WARM.wash, '#999'), padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: cargandoPlan ? 'not-allowed' : 'pointer', background: cargandoPlan ? '#cbd5e1' : 'linear-gradient(135deg, #1d4ed8, #999)', color: '#fff', fontSize: '15px', fontWeight: 700, boxShadow: cargandoPlan ? 'none' : '0 16px 34px rgba(0,0,0,0.11)', display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
                 {cargandoPlan ? <KairoLoadingDot /> : <BrainCircuit size={17} />}
                 {cargandoPlan ? 'Generando...' : 'Abrir Mi Plan'}
               </button>
             </div>
             {planIA && (
-              <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', overflow: 'hidden', boxShadow: WARM.shadow }}>
-                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #e0e0e0', overflow: 'hidden', boxShadow: WARM.shadow }}>
+                <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #1d4ed8, #999)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><BrainCircuit size={17} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>TU PLAN SEMANAL · KAIRO</span>
                 </div>
-                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #eff6ff)' }}>
+                <div style={{ padding: '26px', fontSize: '0.94rem', lineHeight: '1.75', background: 'linear-gradient(180deg, #ffffff, #f5f5f5)' }}>
                   <MathMarkdown text={planIA} format={false} components={planMdComponents} />
                 </div>
               </div>
@@ -4275,8 +4275,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         {itemSeleccionado && (
           <div onClick={() => setItemSeleccionado(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: WARM.surface, borderRadius: '22px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto', border: '1px solid #dbe7fb', boxShadow: '0 28px 80px rgba(37,99,235,0.18)' }}>
-              <div style={{ padding: '20px 24px', borderBottom: '1px solid #dbe7fb', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#ffffff', zIndex: 50 }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: WARM.surface, borderRadius: '22px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto', border: '1px solid #e0e0e0', boxShadow: '0 28px 80px rgba(0,0,0,0.09)' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#ffffff', zIndex: 50 }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '16px', color: WARM.ink }}>{nombreAsignatura(itemSeleccionado.asignatura)} · {itemSeleccionado.año} · {itemSeleccionado.bloque}</div>
                   <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
@@ -4288,13 +4288,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       <span style={{ fontSize: '13px', color: WARM.softText }}>/{itemSeleccionado.nota_maxima}</span>
                     </div>
                   )}
-                  <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>
-                  <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #dbe7fb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
+                  <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#999'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #999)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>
+                  <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#999'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #e0e0e0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
                 </div>
               </div>
               <div style={{ padding: '24px' }}>
                 {itemSeleccionado.enunciado && (
-                  <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                  <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 12px 30px rgba(0,0,0,0.03)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.blue, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Enunciado oficial</div>
                     <ExamStatement
                       text={itemSeleccionado.enunciado}
@@ -4307,13 +4307,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
                 )}
                 {itemSeleccionado.respuesta && (
-                  <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '20px', background: '#f8fbff', border: '1px solid #dbe7fb' }}>
+                  <div style={{ marginBottom: '20px', padding: '18px 20px', borderRadius: '6px', background: '#f9f9f9', border: '1px solid #e0e0e0' }}>
                     <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.blue, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Respuesta del alumno</div>
                     <MathMarkdown text={itemSeleccionado.respuesta} components={mdComponents} />
                   </div>
                 )}
                 {itemSeleccionado.correccion && (
-                  <div style={{ padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #dbe7fb', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                  <div style={{ padding: '18px 20px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 12px 30px rgba(0,0,0,0.03)' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Corrección de Kairo</div>
                     <CorrectionResultCard correction={itemSeleccionado.correccion} officialMaxScore={itemSeleccionado.nota_maxima} components={mdComponents} />
                   </div>

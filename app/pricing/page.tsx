@@ -1,230 +1,356 @@
-'use client'
-
 import Link from 'next/link'
+import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Check, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import KairoBrand from '@/components/shared/KairoBrand'
 
-type Plan = {
-  name: string
-  price: string
-  priceStrike?: string
-  period: string
-  description: string
-  features: Array<{ text: string; included: boolean }>
-  cta: string
-  href: string
-  popular?: boolean
-  popularLabel?: string
-  popularAmber?: boolean
-}
+const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
-const plans: Plan[] = [
+const PLANS = [
   {
     name: 'Free',
     price: '0 €',
-    period: 'sin tarjeta',
+    period: 'sin tarjeta de crédito',
     description: 'Para probar Kairo y vivir el momento mágico de tu primera corrección.',
     features: [
-      { text: '25 correcciones/mes', included: true },
-      { text: '3 fotos/mes', included: true },
-      { text: '1 parcial/mes', included: true },
-      { text: '10 msgs de Chat con Kairo', included: true },
-      { text: 'Camino PAU limitado', included: true },
-      { text: 'Ranking completo', included: false },
+      { text: '25 correcciones/mes',     included: true  },
+      { text: '3 fotos/mes',             included: true  },
+      { text: '1 simulacro/mes',         included: true  },
+      { text: '10 msgs Chat con Kairo',  included: true  },
+      { text: 'Camino PAU limitado',     included: true  },
+      { text: 'Ranking completo',        included: false },
     ],
-    cta: 'Empezar gratis',
+    cta: 'Empezar gratis →',
     href: '/login',
+    dark: false,
+    badge: null,
   },
   {
     name: 'Premium',
     price: '9,99 €',
-    period: '/mes',
-    description: 'El plan principal para preparar la PAU durante el curso.',
+    period: '/mes · cancela cuando quieras',
+    description: 'El plan principal para preparar la PAU durante todo el curso.',
     features: [
-      { text: '200 correcciones/mes', included: true },
-      { text: '80 fotos/mes', included: true },
-      { text: '5 simulacros/mes', included: true },
-      { text: '100 msgs de Chat con Kairo', included: true },
-      { text: 'Camino PAU completo', included: true },
-      { text: 'Ranking completo', included: true },
+      { text: '200 correcciones/mes',    included: true },
+      { text: '80 fotos/mes',            included: true },
+      { text: '5 simulacros/mes',        included: true },
+      { text: '100 msgs Chat con Kairo', included: true },
+      { text: 'Camino PAU completo',     included: true },
+      { text: 'Ranking completo',        included: true },
     ],
-    cta: 'Probar Premium',
+    cta: 'Probar Premium →',
     href: '/login',
-    popular: true,
-    popularLabel: 'Recomendado',
+    dark: true,
+    badge: 'Recomendado',
   },
   {
     name: 'Curso PAU',
     price: '59 €',
-    period: 'pago único · early bird',
-    description: 'Acceso completo de septiembre a junio. Ahorra 30 € frente al plan mensual. Precio de lanzamiento hasta el 30 de septiembre.',
+    period: 'pago único · sept → junio',
+    description: 'Acceso completo hasta junio. Ahorra 30 € frente al mensual. Precio de lanzamiento.',
     features: [
-      { text: '200 correcciones/mes', included: true },
-      { text: '80 fotos/mes', included: true },
-      { text: '5 simulacros/mes', included: true },
-      { text: '100 msgs de Chat con Kairo', included: true },
-      { text: 'Camino PAU completo', included: true },
-      { text: 'Ranking completo', included: true },
+      { text: '200 correcciones/mes',    included: true },
+      { text: '80 fotos/mes',            included: true },
+      { text: '5 simulacros/mes',        included: true },
+      { text: '100 msgs Chat con Kairo', included: true },
+      { text: 'Camino PAU completo',     included: true },
+      { text: 'Ranking completo',        included: true },
     ],
-    cta: 'Reservar Curso PAU',
+    cta: 'Reservar →',
     href: '/login',
+    dark: false,
+    badge: 'Early Bird',
   },
 ]
 
 export default function PricingPage() {
+  const B = bebas.style.fontFamily
+  const M = dmMono.style.fontFamily
+
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-40 flex h-[72px] items-center justify-between border-b border-border/60 bg-white/80 px-6 backdrop-blur-xl lg:px-12">
-        <Link href="/landing" className="flex items-center gap-3 no-underline">
-          <KairoBrand subtitle={null} size="md" />
+    <div style={{ fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)', background: '#111', color: '#fff', minHeight: '100dvh' }}>
+
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; }
+
+        /* ── Nav scroll-aware ── */
+        #pr-nav {
+          transition: background 300ms cubic-bezier(0.23,1,0.32,1),
+                      border-bottom-color 300ms cubic-bezier(0.23,1,0.32,1);
+          border-bottom: 1px solid transparent;
+        }
+        #pr-nav.v4c-on-light {
+          background: rgba(249,249,249,0.88) !important;
+          border-bottom-color: #e8e8e8;
+        }
+        #pr-nav-logo {
+          transition: filter 300ms cubic-bezier(0.23,1,0.32,1);
+        }
+        #pr-nav.v4c-on-light #pr-nav-logo { filter: invert(1); }
+        #pr-nav.v4c-on-light .pr-nav-link { color: rgba(28,28,28,.5) !important; }
+        #pr-nav.v4c-on-light .pr-nav-link:hover { color: #1c1c1c !important; }
+        #pr-nav.v4c-on-light .pr-nav-btn {
+          border-color: rgba(28,28,28,.3) !important;
+          color: #1c1c1c !important;
+        }
+        #pr-nav.v4c-on-light .pr-nav-btn:hover { background: rgba(0,0,0,.06) !important; }
+
+        .pr-nav-link { transition: color 140ms; }
+        .pr-nav-btn  { transition: background 140ms, border-color 140ms, color 140ms; }
+        .pr-nav-btn:hover { background: rgba(255,255,255,.1) !important; }
+
+        /* ── Plan columns ── */
+        .pr-plans {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          border-top: 1px solid #e0e0e0;
+        }
+        .pr-col {
+          padding: 48px 40px 56px;
+          display: flex;
+          flex-direction: column;
+          border-right: 1px solid #e0e0e0;
+        }
+        .pr-col:last-child { border-right: none; }
+        .pr-col-dark { background: #111; border-color: rgba(255,255,255,.08); }
+        .pr-col-dark + .pr-col { border-left: none; }
+
+        .pr-btn-light {
+          display: block; width: 100%; padding: 14px 0; text-align: center;
+          border: 1px solid #1c1c1c; color: #1c1c1c; text-decoration: none;
+          font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+          transition: background 140ms, color 140ms;
+        }
+        .pr-btn-light:hover { background: #1c1c1c; color: #f9f9f9; }
+
+        .pr-btn-dark {
+          display: block; width: 100%; padding: 14px 0; text-align: center;
+          background: #fff; color: #111; text-decoration: none;
+          font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+          transition: opacity 140ms, transform 140ms cubic-bezier(0.23,1,0.32,1);
+        }
+        .pr-btn-dark:hover { opacity: .88; transform: translateY(-1px); }
+
+        /* ── Features list ── */
+        .pr-feature { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
+        .pr-feature + .pr-feature { border-top: 1px solid #e0e0e0; }
+        .pr-col-dark .pr-feature + .pr-feature { border-top-color: rgba(255,255,255,.07); }
+
+        /* ── Responsive ── */
+        @media (max-width: 860px) {
+          .pr-plans { grid-template-columns: 1fr; }
+          .pr-col { border-right: none; border-bottom: 1px solid #e0e0e0; padding: 40px 28px 48px; }
+          .pr-col:last-child { border-bottom: none; }
+          .pr-col-dark + .pr-col { border-left: none; }
+          #pr-nav { padding: 0 20px !important; }
+          .pr-hero { padding: 108px 28px 64px !important; }
+          .pr-plans-wrap { padding: 0 !important; }
+          .pr-note { padding: 40px 28px !important; }
+          footer { padding: 28px 24px !important; flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          #pr-nav, #pr-nav-logo { transition: none !important; }
+          .pr-btn-dark, .pr-btn-light { transition: none !important; }
+        }
+      `}</style>
+
+      {/* ── Nav ──────────────────────────────────────────────────────────────── */}
+      <nav id="pr-nav" style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 40px', height: 54,
+        background: 'rgba(17,17,17,0.82)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      }}>
+        <Link href="/" aria-label="Inicio">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img id="pr-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 32, width: 'auto', display: 'block' }} />
         </Link>
-        <div className="flex items-center gap-3">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/landing">Volver</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/login">Entrar</Link>
-          </Button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <Link href="/" className="pr-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+            Inicio
+          </Link>
+          <Link href="/login" className="pr-nav-btn" style={{ padding: '7px 16px', border: '1px solid rgba(255,255,255,.3)', fontSize: 11, color: '#fff', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase' }}>
+            Entrar →
+          </Link>
         </div>
-      </header>
+      </nav>
 
-      {/* Hero */}
-      <section className="py-16 md:py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mx-auto max-w-2xl space-y-5 text-center">
-            <span className="inline-flex items-center rounded-full border border-border bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
-              Precios definitivos
-            </span>
-            <h1 className="text-4xl font-black tracking-tight lg:text-5xl" style={{ letterSpacing: '-0.025em' }}>
-              Elige tu plan PAU
-            </h1>
-            <p className="text-base text-muted-foreground" style={{ maxWidth: 'none' }}>
-              Exámenes oficiales, correcciones con foto y un Camino PAU diario{' '}
-              <span className="font-semibold text-foreground">por menos que una clase particular al mes.</span>
-            </p>
-          </div>
-
-          {/* Cards grid */}
-          <div className="mt-10 grid gap-5 lg:mt-16" style={{ gridTemplateColumns: 'repeat(3,minmax(0,340px))', justifyContent: 'center' }}>
-            {plans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={[
-                  'relative flex flex-col transition-all duration-200 hover:-translate-y-1',
-                  plan.popular && !plan.popularAmber
-                    ? 'border-primary/40 bg-blue-50/60 shadow-md'
-                    : plan.popularAmber
-                    ? 'border-amber-300/60 bg-amber-50/40'
-                    : '',
-                ].join(' ')}
-              >
-                {/* Badge */}
-                {plan.popular && (
-                  <span
-                    className={[
-                      'absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full px-3 py-1 text-[10px] font-black ring-1 ring-inset ring-white/20 ring-offset-1',
-                      plan.popularAmber
-                        ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-amber-950 ring-offset-amber-50/30'
-                        : 'bg-gradient-to-r from-blue-600 to-sky-400 text-white ring-offset-blue-50/30',
-                    ].join(' ')}
-                  >
-                    {plan.popularLabel}
-                  </span>
-                )}
-
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-black">{plan.name}</CardTitle>
-
-                  {/* Price */}
-                  <div className="mt-3 flex items-end gap-2">
-                    <span
-                      className={[
-                        'text-3xl font-black leading-none',
-                        plan.popular && !plan.popularAmber ? 'text-primary' : '',
-                      ].join(' ')}
-                    >
-                      {plan.price}
-                    </span>
-                    {plan.priceStrike && (
-                      <span className="pb-0.5 text-lg font-semibold text-muted-foreground line-through">
-                        {plan.priceStrike}
-                      </span>
-                    )}
-                  </div>
-
-                  <CardDescription className="mt-1 text-xs font-semibold">
-                    {plan.period}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="flex-1 space-y-4">
-                  <p className="text-xs leading-relaxed text-muted-foreground">{plan.description}</p>
-                  <hr className="border-dashed border-border" />
-                  <ul className="space-y-2.5">
-                    {plan.features.map((f) => (
-                      <li key={f.text} className="flex items-start gap-2 text-xs font-medium">
-                        {f.included ? (
-                          <Check
-                            className={[
-                              'mt-0.5 size-3.5 shrink-0',
-                              plan.popular && !plan.popularAmber ? 'text-primary' : 'text-emerald-600',
-                            ].join(' ')}
-                          />
-                        ) : (
-                          <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/40" />
-                        )}
-                        <span className={f.included ? 'text-foreground/80' : 'text-muted-foreground/50'}>
-                          {f.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-
-                <CardFooter className="mt-auto pt-2">
-                  <Button
-                    asChild
-                    variant={plan.popular && !plan.popularAmber ? 'default' : plan.popularAmber ? 'default' : 'outline'}
-                    className={[
-                      'w-full text-xs',
-                      plan.popularAmber
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-400 text-white hover:brightness-105'
-                        : '',
-                    ].join(' ')}
-                  >
-                    <Link href={plan.href}>{plan.cta}</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-
-          <p className="mt-8 text-center text-xs text-muted-foreground">
-            Los precios incluyen IVA. Curso PAU early bird 59 € hasta el 30 de septiembre, después 69 €.
+      {/* ── Hero (dark) ───────────────────────────────────────────────────────── */}
+      <section className="pr-hero" style={{ background: '#111', padding: '120px 72px 80px' }}>
+        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
+          <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 20 }}>
+            Precios · Beta privada 2026
+          </p>
+          <h1 style={{ fontFamily: B, fontSize: 'clamp(56px, 9vw, 120px)', lineHeight: .9, letterSpacing: '.01em', color: '#fff', marginBottom: 24 }}>
+            Elige tu plan.
+          </h1>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,.45)', maxWidth: '52ch', lineHeight: 1.7 }}>
+            Exámenes oficiales, corrección con foto por IA y un Camino PAU personalizado —{' '}
+            <span style={{ color: 'rgba(255,255,255,.8)' }}>por menos que una clase particular al mes.</span>
           </p>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="flex flex-wrap justify-center gap-4 pb-10 text-xs text-muted-foreground">
-        {[
-          { href: '/legal/privacidad', label: 'Privacidad' },
-          { href: '/legal/terminos', label: 'Términos' },
-          { href: '/legal/reembolsos', label: 'Reembolsos' },
-          { href: '/legal/ia', label: 'Uso de IA' },
-          { href: '/contacto', label: 'Contacto' },
-        ].map((l, i, arr) => (
-          <span key={l.href} className="flex items-center gap-4">
-            <Link href={l.href} className="transition-colors hover:text-foreground">
-              {l.label}
-            </Link>
-            {i < arr.length - 1 && <span className="text-border">·</span>}
-          </span>
-        ))}
+      {/* ── Plans (light) ─────────────────────────────────────────────────────── */}
+      <section data-theme="light" style={{ background: '#f9f9f9', color: '#1c1c1c' }}>
+        <div className="pr-plans-wrap" style={{ maxWidth: 1040, margin: '0 auto', padding: '0 0' }}>
+          <div className="pr-plans">
+            {PLANS.map((plan) => (
+              <div key={plan.name} className={`pr-col${plan.dark ? ' pr-col-dark' : ''}`}>
+
+                {/* Badge */}
+                {plan.badge && (
+                  <p style={{
+                    fontFamily: M, fontSize: 9, fontWeight: 500,
+                    color: plan.dark ? 'rgba(255,255,255,.4)' : 'rgba(28,28,28,.4)',
+                    letterSpacing: '.18em', textTransform: 'uppercase',
+                    marginBottom: 20,
+                  }}>
+                    ● {plan.badge}
+                  </p>
+                )}
+                {!plan.badge && <div style={{ marginBottom: 20, height: 17 }} />}
+
+                {/* Plan name */}
+                <p style={{
+                  fontFamily: M, fontSize: 10, fontWeight: 500,
+                  color: plan.dark ? 'rgba(255,255,255,.35)' : '#999',
+                  letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 12,
+                }}>
+                  {plan.name}
+                </p>
+
+                {/* Price */}
+                <p style={{
+                  fontFamily: B,
+                  fontSize: 'clamp(48px, 5vw, 68px)',
+                  lineHeight: .9, letterSpacing: '.01em',
+                  color: plan.dark ? '#fff' : '#1c1c1c',
+                  marginBottom: 8,
+                }}>
+                  {plan.price}
+                </p>
+
+                {/* Period */}
+                <p style={{
+                  fontFamily: M, fontSize: 10,
+                  color: plan.dark ? 'rgba(255,255,255,.3)' : '#aaa',
+                  letterSpacing: '.06em', marginBottom: 20,
+                }}>
+                  {plan.period}
+                </p>
+
+                {/* Description */}
+                <p style={{
+                  fontSize: 13, lineHeight: 1.7,
+                  color: plan.dark ? 'rgba(255,255,255,.5)' : '#5a5a5a',
+                  marginBottom: 28,
+                }}>
+                  {plan.description}
+                </p>
+
+                {/* Features */}
+                <div style={{ flex: 1, marginBottom: 32 }}>
+                  {plan.features.map((f) => (
+                    <div key={f.text} className="pr-feature">
+                      {f.included
+                        ? <Check size={13} style={{ flexShrink: 0, color: plan.dark ? '#fff' : '#1c1c1c', opacity: .8 }} />
+                        : <X size={13} style={{ flexShrink: 0, color: plan.dark ? 'rgba(255,255,255,.2)' : '#ccc' }} />
+                      }
+                      <span style={{
+                        fontFamily: M, fontSize: 11,
+                        color: f.included
+                          ? (plan.dark ? 'rgba(255,255,255,.75)' : '#3a3a3a')
+                          : (plan.dark ? 'rgba(255,255,255,.2)' : '#bbb'),
+                        letterSpacing: '.02em',
+                      }}>
+                        {f.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <Link href={plan.href} className={plan.dark ? 'pr-btn-dark' : 'pr-btn-light'}>
+                  {plan.cta}
+                </Link>
+
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Note strip (dark) ─────────────────────────────────────────────────── */}
+      <section className="pr-note" style={{ background: '#111', padding: '40px 72px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
+        <div style={{ maxWidth: 1040, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.25)', letterSpacing: '.04em', lineHeight: 1.7 }}>
+            Los precios incluyen IVA. Curso PAU early bird 59 € hasta el 30 de septiembre, después 69 €.
+          </p>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {[
+              { href: '/legal/privacidad', label: 'Privacidad' },
+              { href: '/legal/terminos',   label: 'Términos'   },
+              { href: '/legal/reembolsos', label: 'Reembolsos' },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} style={{
+                fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.2)',
+                textDecoration: 'none', letterSpacing: '.1em', textTransform: 'uppercase',
+                transition: 'color 140ms',
+              }}>
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────────────────── */}
+      <footer style={{ background: '#111', padding: '32px 72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, borderTop: '1px solid rgba(255,255,255,.07)' }}>
+        <Link href="/" aria-label="Inicio">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
+        </Link>
+        <ul style={{ display: 'flex', gap: 20, listStyle: 'none', flexWrap: 'wrap', padding: 0, margin: 0 }}>
+          {[
+            { label: 'Exámenes',   href: '/examenes'         },
+            { label: 'Camino PAU', href: '/camino'           },
+            { label: 'Simulacros', href: '/simulacros'       },
+            { label: 'Privacidad', href: '/legal/privacidad' },
+            { label: 'Términos',   href: '/legal/terminos'   },
+          ].map(({ label, href }) => (
+            <li key={label}>
+              <Link href={href} style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase', transition: 'color 140ms' }}>
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.18)' }}>© 2026 KAIRO · Madrid y Cataluña</span>
       </footer>
+
+      {/* ── Scroll-aware nav script ───────────────────────────────────────────── */}
+      <script dangerouslySetInnerHTML={{ __html: `
+(function(){
+  var nav = document.getElementById('pr-nav');
+  if (!nav) return;
+  var NAV_H = 54;
+  function check() {
+    var els = document.querySelectorAll('[data-theme="light"]');
+    var onLight = false;
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.top < NAV_H && r.bottom > 0) { onLight = true; break; }
+    }
+    nav.classList.toggle('v4c-on-light', onLight);
+  }
+  window.addEventListener('scroll', check, { passive: true });
+  check();
+})();
+      `}} />
+
     </div>
   )
 }

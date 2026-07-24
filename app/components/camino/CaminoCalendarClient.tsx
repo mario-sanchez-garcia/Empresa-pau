@@ -97,10 +97,10 @@ const seedTopicToCurriculumItem = (topic: CaminoCurriculumTopic): CurriculumItem
 })
 const FALLBACK_CURRICULUM: CurriculumItem[] = getCurriculumForSubjects(Object.keys(SUBJECT_SLUGS)).map(seedTopicToCurriculumItem)
 const SUBJECT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  'Matemáticas II': { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }, 'Matemáticas CCSS': { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' },
-  'Física': { bg: '#fefce8', text: '#a16207', border: '#fef08a' }, 'Química': { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
-  'Historia de España': { bg: '#fff8f1', text: '#78350f', border: '#fed7aa' }, 'Historia de la Filosofía': { bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
-  'Lengua Castellana': { bg: '#e0f2fe', text: '#0369a1', border: '#bae6fd' }, 'Inglés': { bg: '#ecfeff', text: '#0e7490', border: '#a5f3fc' }, 'Biología': { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' }
+  'Matemáticas II': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }, 'Matemáticas CCSS': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' },
+  'Física': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }, 'Química': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' },
+  'Historia de España': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }, 'Historia de la Filosofía': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' },
+  'Lengua Castellana': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }, 'Inglés': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }, 'Biología': { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }
 }
 const CAMINO_TO_SIM_SUBJECT: Record<string, string> = {
   matematicas_ii: 'mates', matematicas_ccss: 'matematicas_ccss',
@@ -108,12 +108,12 @@ const CAMINO_TO_SIM_SUBJECT: Record<string, string> = {
   ingles: 'ingles', lengua: 'lengua', historia_espana: 'historia',
 }
 const DIVISIONS = [
-  { name: 'Bronce', min: 0, max: 499, bg: '#fff7ed', text: '#92400e', bar: '#b45309' },
-  { name: 'Plata', min: 500, max: 1499, bg: '#f8fafc', text: '#475569', bar: '#94a3b8' },
-  { name: 'Oro', min: 1500, max: 3499, bg: '#fefce8', text: '#a16207', bar: '#eab308' },
-  { name: 'Platino', min: 3500, max: 6999, bg: '#f0f9ff', text: '#0369a1', bar: '#38bdf8' },
-  { name: 'Diamante', min: 7000, max: 12999, bg: '#eff6ff', text: '#1d4ed8', bar: '#2563eb' },
-  { name: 'Élite PAU', min: 13000, max: Infinity, bg: '#f5f3ff', text: '#6d28d9', bar: '#7c3aed' },
+  { name: 'Bronce', min: 0, max: 499, bg: '#f5f5f5', text: '#666', bar: '#999' },
+  { name: 'Plata', min: 500, max: 1499, bg: '#f0f0f0', text: '#555', bar: '#888' },
+  { name: 'Oro', min: 1500, max: 3499, bg: '#faf6e8', text: '#7a5c00', bar: '#c8a820' },
+  { name: 'Platino', min: 3500, max: 6999, bg: '#f0f4f8', text: '#2a5070', bar: '#5a8ab0' },
+  { name: 'Diamante', min: 7000, max: 12999, bg: '#eff4ff', text: '#1a3a6a', bar: '#3060cc' },
+  { name: 'Élite PAU', min: 13000, max: Infinity, bg: '#1c1c1c', text: '#fff', bar: '#fff' },
 ]
 
 function toISO(date: Date) { return date.toISOString().slice(0, 10) }
@@ -125,7 +125,7 @@ function mondayOf(date: Date) { const d = new Date(date); const day = d.getUTCDa
 function currentWeekStartISO() { return toISO(mondayOf(dateFromISO(todayMadrid()))) }
 function daysBetween(fromISO: string, toDateISO: string) { return Math.ceil((dateFromISO(toDateISO).getTime() - dateFromISO(fromISO).getTime()) / 86400000) }
 function monthKey(dateISO: string) { return dateISO.slice(0, 7) }
-function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' } }
+function themeFor(subject: string) { return SUBJECT_COLORS[subject] ?? { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' } }
 function missionKindLabel(kind: string, missionType?: string): string {
   const lookup = (key: string): string | null => {
     switch (key) {
@@ -1382,14 +1382,14 @@ export default function CaminoCalendarClient() {
   }
 
   if (!hasProfile) return (
-    <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-700"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Kairo cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
+    <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[8px] border border-[#e8e8e8] bg-white p-8 text-center shadow-[0_2px_8px_rgba(0,0,0,0.06)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[8px] bg-[#f5f5f5] text-[#1c1c1c]"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Kairo cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-6 py-3 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
   )
 
   if (caminoReadyStatus === 'no_queue') return (
     <Shell>
       <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
-        <section className="w-full rounded-[32px] border border-amber-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
+        <section className="w-full rounded-[8px] border border-amber-100 bg-white p-8 text-center shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[8px] bg-amber-50 text-amber-600">
             <RotateCcw size={30} />
           </div>
           <h1 className="text-3xl font-black tracking-tight text-slate-950">Tu Camino PAU aún no está listo</h1>
@@ -1397,7 +1397,7 @@ export default function CaminoCalendarClient() {
           <button
             onClick={generateCamino}
             disabled={isGenerating}
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] disabled:opacity-60"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-6 py-3 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] disabled:opacity-60"
           >
             {isGenerating
               ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Generando...</>
@@ -1411,8 +1411,8 @@ export default function CaminoCalendarClient() {
   if (caminoReadyStatus === 'no_future') return (
     <Shell>
       <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
-        <section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
-          <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+        <section className="w-full rounded-[8px] border border-[#e8e8e8] bg-white p-8 text-center shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+          <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-[#e8e8e8] border-t-[#1c1c1c]" />
           <h1 className="text-2xl font-black tracking-tight text-slate-950">Preparando tus próximas misiones...</h1>
           <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Esto solo tarda un momento.</p>
         </section>
@@ -1422,27 +1422,27 @@ export default function CaminoCalendarClient() {
 
   return (
     <Shell>
-      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button><button onClick={() => setShowAddSubjectModal(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-700 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-emerald-100 transition"><BookPlus size={16} /> Añadir asignatura</button></div></div></header>
+      <header className="sticky top-0 z-30 border-b border-[#e8e8e8] bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-[#1c1c1c]">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-[6px] border border-[#e8e8e8] bg-white px-5 py-3 text-sm font-black text-[#1c1c1c] shadow-[0_1px_4px_rgba(0,0,0,0.04)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-[6px] border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button><button onClick={() => setShowAddSubjectModal(true)} className="inline-flex items-center justify-center gap-2 rounded-[6px] border border-[#e8e8e8] bg-white px-5 py-3 text-sm font-black text-[#1c1c1c] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:bg-[#f5f5f5] transition"><BookPlus size={16} /> Añadir asignatura</button></div></div></header>
       <main className="mx-auto max-w-7xl px-5 py-6">
-        <section className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
+        <section className="mb-5 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-bold leading-6 text-blue-900">
+            <p className="text-sm font-bold leading-6 text-[#1c1c1c]">
               Estás en la beta privada de Kairo. De momento estamos probando Matemáticas II, Matemáticas CCSS, Lengua e Historia. Tu feedback nos ayuda a mejorar el Camino PAU.
             </p>
             {BETA_FEEDBACK_URL && (
-              <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-xs font-black text-blue-700 shadow-sm">
+              <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[4px] bg-white px-4 py-2 text-xs font-black text-[#1c1c1c] shadow-sm">
                 Dar feedback
               </a>
             )}
           </div>
         </section>
-        {isRescueMode && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
+        {isRescueMode && <div className="mb-5 rounded-[6px] border border-amber-200 bg-amber-50 px-5 py-4"><p className="text-sm font-black text-amber-800">⚠️ Modo Rescate PAU activado — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
         <section className="mb-5 grid items-stretch gap-4 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="flex flex-col gap-4">
             {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (
               sundayMockSession !== null ? (
-                <div className="rounded-[20px] border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-600">Simulacro del Domingo</p>
+                <div className="rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-5 py-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#1c1c1c]">Simulacro del Domingo</p>
                   <p className="mt-1 text-sm font-black text-slate-800">Simulacro del Domingo hecho ✓</p>
                   {(() => {
                     const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
@@ -1452,21 +1452,21 @@ export default function CaminoCalendarClient() {
                     if (proj != null && heroProj?.confidence !== 'low') {
                       const delta = Math.round((nota - proj) * 10) / 10
                       const sign = delta >= 0 ? '+' : ''
-                      return <p className="mt-0.5 text-xs font-semibold text-blue-700">{sign}{delta.toFixed(1).replace('.', ',')} respecto a tu proyección · {nota.toFixed(1)}/10 esta sesión</p>
+                      return <p className="mt-0.5 text-xs font-semibold text-[#1c1c1c]">{sign}{delta.toFixed(1).replace('.', ',')} respecto a tu proyección · {nota.toFixed(1)}/10 esta sesión</p>
                     }
-                    return <p className="mt-0.5 text-xs font-semibold text-blue-700">Sacaste {nota.toFixed(1)}/10 esta semana</p>
+                    return <p className="mt-0.5 text-xs font-semibold text-[#1c1c1c]">Sacaste {nota.toFixed(1)}/10 esta semana</p>
                   })()}
                 </div>
               ) : (
-                <div className="rounded-[20px] border border-blue-200 bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-5 text-white shadow-[0_8px_24px_rgba(37,99,235,0.25)]">
-                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-200">Simulacro del Domingo</p>
+                <div className="rounded-[6px] border border-[#e0e0e0] bg-[#1c1c1c] px-5 py-5 text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#999]">Simulacro del Domingo</p>
                   <p className="mt-1.5 text-base font-black leading-snug">
                     3 ejercicios de {sundayMockBlock} · ~20 min
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-blue-100">El momento de la semana que más mueve tu Nota Proyectada.</p>
+                  <p className="mt-1 text-xs font-semibold text-[#aaa]">El momento de la semana que más mueve tu Nota Proyectada.</p>
                   <button
                     onClick={startSundayMock}
-                    className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-blue-700 transition hover:bg-blue-50 active:scale-[0.97]"
+                    className="mt-4 inline-flex items-center gap-2 rounded-[6px] bg-white px-5 py-2.5 text-sm font-black text-[#1c1c1c] transition hover:bg-[#f5f5f5] active:scale-[0.97]"
                   >
                     Empezar simulacro →
                   </button>
@@ -1490,7 +1490,7 @@ export default function CaminoCalendarClient() {
               />
             </div>
             {todayBonus.length > 0 && (
-              <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+              <div className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Extras opcionales</p>
                 <p className="mt-1 text-sm font-semibold text-slate-500">Haz primero la misión principal. Los extras son opcionales.</p>
                 <div className="mt-3 grid gap-2">
@@ -1500,13 +1500,13 @@ export default function CaminoCalendarClient() {
             )}
           </div>
           <div className="flex flex-col gap-3">
-            <div className="rounded-[28px] border border-blue-100 bg-white px-4 py-4 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+            <div className="rounded-[8px] border border-[#e8e8e8] bg-white px-4 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Tu objetivo de hoy</p>
               {todayMain[0] ? (
                 <>
                   <p className="mt-2 text-xs font-black text-slate-700">Completa esta misión para:</p>
                   <ul className="mt-1.5 grid gap-1">
-                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-blue-600">+{todayMain[0].baseXP} XP</span></li>
+                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-[#1c1c1c]">+{todayMain[0].baseXP} XP</span></li>
                     <li className="text-xs font-semibold text-slate-600">• {streak > 0 ? 'Mantener tu racha' : 'Empezar una racha'}</li>
                     <li className="text-xs font-semibold text-slate-600">• Avanzar en <span className="font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
                   </ul>
@@ -1515,7 +1515,7 @@ export default function CaminoCalendarClient() {
                 <>
                   <p className="mt-2 text-xs font-black text-slate-700">Reto exprés de hoy:</p>
                   <ul className="mt-1.5 grid gap-1">
-                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-blue-600">5 tarjetas · 3 min</span></li>
+                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-[#1c1c1c]">5 tarjetas · 3 min</span></li>
                     <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-slate-800">{microMission.subject}</span></li>
                     <li className="text-xs font-semibold text-slate-600">• Sin tocar tu plan de mañana</li>
                   </ul>
@@ -1523,9 +1523,9 @@ export default function CaminoCalendarClient() {
               ) : null}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
                 <span className="text-[11px] font-semibold text-slate-400">División</span>
-                <span className="rounded-xl px-2 py-0.5 text-[11px] font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
+                <span className="rounded-[4px] px-2 py-0.5 text-[11px] font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
                 {caminoPlanId === 'free' && daysSinceReg !== null && (
-                  <p className="w-full rounded-xl bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
+                  <p className="w-full rounded-[4px] bg-[#f5f5f5] px-2 py-1 text-[10px] font-bold text-[#1c1c1c]">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
                 )}
               </div>
             </div>
@@ -1534,14 +1534,14 @@ export default function CaminoCalendarClient() {
         </section>
 
         {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null) && (
-          <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+          <section className="mb-5 rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
             <p className="mb-4 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu avance</p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {([
-                { subject: 'matematicas_ii', label: 'Matemáticas II', total: 9, color: '#2563eb' },
-                { subject: 'matematicas_ccss', label: 'Matemáticas CCSS', total: 6, color: '#7c3aed' },
-                { subject: 'lengua', label: 'Lengua', total: 8, color: '#0891b2' },
-                { subject: 'historia_espana', label: 'Historia', total: 10, color: '#b45309' },
+                { subject: 'matematicas_ii', label: 'Matemáticas II', total: 9, color: '#1c1c1c' },
+                { subject: 'matematicas_ccss', label: 'Matemáticas CCSS', total: 6, color: '#1c1c1c' },
+                { subject: 'lengua', label: 'Lengua', total: 8, color: '#1c1c1c' },
+                { subject: 'historia_espana', label: 'Historia', total: 10, color: '#1c1c1c' },
               ] as const).map(({ subject, label, total, color }) => {
                 const done = subjectProgress[subject] ?? 0
                 const pct = Math.min(100, Math.round((done / total) * 100))
@@ -1563,7 +1563,7 @@ export default function CaminoCalendarClient() {
         )}
         {filteredProjection && filteredProjection.length > 0 && <NotaProyectadaCard projections={filteredProjection} heroAsignatura={heroAsignatura} />}
         {filteredProjection && filteredProjection.length > 0 && isShareWindow && (weeklyXP > 0 || weeklyMissionsCompleted > 0 || weeklySimsCompleted > 0) && (
-          <section className="mb-5 rounded-[28px] border border-blue-100 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(37,99,235,0.06)]">
+          <section className="mb-5 rounded-[8px] border border-[#e8e8e8] bg-white px-5 py-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-sm font-black text-slate-800">¿Quieres compartir tu progreso?</p>
@@ -1571,7 +1571,7 @@ export default function CaminoCalendarClient() {
               </div>
               <button
                 onClick={shareInforme}
-                className="shrink-0 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-blue-700 active:scale-[0.97]"
+                className="shrink-0 rounded-[6px] bg-[#1c1c1c] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#111] active:scale-[0.97]"
               >
                 Compartir
               </button>
@@ -1579,11 +1579,11 @@ export default function CaminoCalendarClient() {
           </section>
         )}
         {centroPulso && (
-          <section className="mb-5 rounded-[28px] border border-slate-100 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(37,99,235,0.05)]">
+          <section className="mb-5 rounded-[8px] border border-slate-100 bg-white px-5 py-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
             <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Tu instituto</p>
             <p className="mt-1 text-sm font-black text-slate-800">
               Los alumnos de {centroPulso.centroDisplay} van por{' '}
-              <span className="text-blue-700">{centroPulso.topicName}</span>
+              <span className="text-[#1c1c1c]">{centroPulso.topicName}</span>
             </p>
             <p className="mt-1 text-xs font-semibold text-slate-500">
               {centroPulso.position === 'ahead'
@@ -1595,7 +1595,7 @@ export default function CaminoCalendarClient() {
           </section>
         )}
 
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+        <section className="mb-5 rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu semana</p>
@@ -1603,15 +1603,15 @@ export default function CaminoCalendarClient() {
               <p className="mt-1 text-xs font-bold text-slate-400">{completedMain} de {totalMain} misiones completadas</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar</button>
+              <button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-4 py-2 text-sm font-black text-[#1c1c1c]"><Pencil size={15} /> Editar</button>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Anterior</button>
-            <button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3 py-2 text-xs font-black text-white transition hover:bg-blue-700">Esta semana</button>
-            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Siguiente <ArrowRight size={14} /></button>
+            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#e8e8e8] bg-white px-3 py-2 text-xs font-black text-[#1c1c1c] transition hover:bg-[#f5f5f5]"><ChevronLeft size={14} /> Anterior</button>
+            <button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#1c1c1c] px-3 py-2 text-xs font-black text-white transition hover:bg-[#111]">Esta semana</button>
+            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#e8e8e8] bg-white px-3 py-2 text-xs font-black text-[#1c1c1c] transition hover:bg-[#f5f5f5]">Siguiente <ArrowRight size={14} /></button>
           </div>
-          <button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100">
+          <button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-3 py-2 text-xs font-black text-[#1c1c1c] transition hover:bg-[#e8e8e8]">
             <ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />
             {calendarExpanded ? 'Ocultar' : 'Ver semana'}
           </button>
@@ -1619,7 +1619,7 @@ export default function CaminoCalendarClient() {
         </section>
 
         <section className="grid gap-5 lg:grid-cols-2">
-          <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Kairo ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{activeExams.length ? activeExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-xl p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-700" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Empieza añadiendo tu próximo examen del instituto.</p>}{pastExams.length > 0 && <div className="mt-2"><button onClick={() => setShowPastExams(v => !v)} className="flex w-full items-center gap-2 py-1.5 text-xs font-black text-slate-400 hover:text-slate-600"><ChevronDown size={13} className={`transition-transform${showPastExams ? ' rotate-180' : ''}`} />Exámenes pasados ({pastExams.length})</button>{showPastExams && <div className="mt-1 grid gap-1">{pastExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 opacity-60"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-600">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)}</p></div><button onClick={() => deleteExam(exam.id)} className="rounded-xl p-2 text-slate-300 hover:bg-red-50 hover:text-red-500" aria-label="Eliminar examen pasado"><Trash2 size={15} /></button></div>)}</div>}</div>}</div></div>
+          <div className="rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Exámenes parciales</h2><p className="text-sm font-semibold text-slate-500">Añade tus próximos exámenes para que Kairo ajuste tu semana.</p></div><button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-4 py-2 text-sm font-black text-[#1c1c1c]"><Plus size={15} /> Añadir examen</button></div><div className="grid gap-2">{activeExams.length ? activeExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-slate-100 bg-slate-50 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-800">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)} · prioridad {priorityLabel(exam.priority)}</p></div><div className="flex shrink-0 gap-1"><button onClick={() => openEditExam(exam)} className="rounded-[4px] p-2 text-slate-400 hover:bg-[#f5f5f5] hover:text-[#1c1c1c]" aria-label="Editar examen"><Pencil size={16} /></button><button onClick={() => deleteExam(exam.id)} className="rounded-[4px] p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar examen"><Trash2 size={16} /></button></div></div>) : <p className="rounded-[6px] border border-dashed border-[#e0e0e0] bg-[#f5f5f5] px-4 py-4 text-sm font-bold text-[#1c1c1c]">Empieza añadiendo tu próximo examen del instituto.</p>}{pastExams.length > 0 && <div className="mt-2"><button onClick={() => setShowPastExams(v => !v)} className="flex w-full items-center gap-2 py-1.5 text-xs font-black text-slate-400 hover:text-slate-600"><ChevronDown size={13} className={`transition-transform${showPastExams ? ' rotate-180' : ''}`} />Exámenes pasados ({pastExams.length})</button>{showPastExams && <div className="mt-1 grid gap-1">{pastExams.map(exam => <div key={exam.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-slate-100 bg-slate-50/60 px-4 py-3 opacity-60"><div className="min-w-0"><p className="truncate text-sm font-black text-slate-600">{exam.subject} · {exam.topic || exam.name || 'Parcial'}</p><p className="text-xs font-bold text-slate-400">{formatDate(exam.date)}</p></div><button onClick={() => deleteExam(exam.id)} className="rounded-[4px] p-2 text-slate-300 hover:bg-red-50 hover:text-red-500" aria-label="Eliminar examen pasado"><Trash2 size={15} /></button></div>)}</div>}</div>}</div></div>
           <CourseDirectory groups={courseGroups} />
         </section>
 
@@ -1629,14 +1629,14 @@ export default function CaminoCalendarClient() {
       </main>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
       <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={weekCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
-      <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
+      <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-[6px] bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('kairo_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>
     </Shell>
   )
 }
 
-function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
+function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f9f9f9] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
 
 type BlockEntry = { bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }
 type ProjectionEntry = { asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: BlockEntry[] }
@@ -1690,18 +1690,18 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
   planSteps.push(`${planSteps.length + 1}. Mantén tu ritmo de misiones diarias`)
 
   return (
-    <section className="mb-5 rounded-[28px] border border-emerald-100 bg-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.07)]">
+    <section className="mb-5 rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">Proyección PAU</p>
           <h2 className="text-lg font-black text-slate-950">Nota proyectada</h2>
           <p className="mt-0.5 text-xs font-semibold text-slate-400">Basada en {totalEntries} corrección{totalEntries !== 1 ? 'es' : ''} · se actualiza con cada práctica</p>
         </div>
-        <BarChart3 size={20} className="shrink-0 text-emerald-400" />
+        <BarChart3 size={20} className="shrink-0 text-[#888]" />
       </div>
 
       {/* Hero: priority subject */}
-      <div className="mb-3 rounded-2xl border border-slate-100 px-5 py-4" style={{ background: heroC?.bg ?? '#f8fafc' }}>
+      <div className="mb-3 rounded-[6px] border border-slate-100 px-5 py-4" style={{ background: heroC?.bg ?? '#f8fafc' }}>
         <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{subjectLabelFromSlug(hero.asignatura)}</p>
 
         {hero.confidence === 'low' ? (
@@ -1760,7 +1760,7 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
             const nota = p.nota_proyectada
             const colors = nota !== null && p.confidence !== 'low' ? gradeColors(nota, p.confidence) : null
             return (
-              <div key={p.asignatura} className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+              <div key={p.asignatura} className="flex items-center gap-2 rounded-[6px] border border-slate-100 bg-slate-50 px-3 py-2">
                 <span className="text-xs font-black text-slate-600">{subjectLabelFromSlug(p.asignatura)}</span>
                 {p.confidence === 'low' ? (
                   <span className="text-[11px] font-semibold text-slate-400">Afinando</span>
@@ -1783,14 +1783,14 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
   const activeGroup = groups.find(group => group.subject === selectedSubject) ?? groups[0]
   const activeBlock = activeGroup?.blocks.find(block => block.block === selectedBlock) ?? activeGroup?.blocks[0]
   return (
-    <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <section className="mb-5 rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Temario guiado</p>
           <h2 className="text-xl font-black text-slate-950">Explorar temas</h2>
           <p className="mt-1 text-sm font-semibold text-slate-500">Elige asignatura, bloque y tema cuando quieras entrar manualmente a una ruta de aprendizaje.</p>
         </div>
-        <button onClick={() => setOpen(value => !value)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> {open ? 'Cerrar cursos' : 'Ver cursos'}</button>
+        <button onClick={() => setOpen(value => !value)} className="inline-flex items-center gap-2 rounded-[6px] bg-[#f5f5f5] px-4 py-2 text-sm font-black text-[#1c1c1c]"><BookOpen size={16} /> {open ? 'Cerrar cursos' : 'Ver cursos'}</button>
       </div>
       {groups.length ? (
         <div>
@@ -1801,21 +1801,21 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
               </button>
             ))}
           </div>
-          {!open && <p className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Tu calendario ya te lleva al tema que toca. Abre cursos sólo cuando quieras buscar manualmente un bloque concreto.</p>}
+          {!open && <p className="mt-4 rounded-[6px] border border-dashed border-[#e0e0e0] bg-[#f5f5f5] px-4 py-4 text-sm font-bold text-[#1c1c1c]">Tu calendario ya te lleva al tema que toca. Abre cursos sólo cuando quieras buscar manualmente un bloque concreto.</p>}
           {open && activeGroup && (
-            <article className="mt-4 rounded-3xl border border-slate-100 bg-slate-50 p-4">
+            <article className="mt-4 rounded-[8px] border border-slate-100 bg-slate-50 p-4">
               <div className="mb-3 flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: themeFor(activeGroup.subject).text }} />
                 <h3 className="text-base font-black text-slate-900">{activeGroup.subject}</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {activeGroup.blocks.map(block => (
-                  <button key={`${activeGroup.subject}-${block.block}`} onClick={() => setSelectedBlock(block.block)} className="rounded-2xl border border-white bg-white px-3 py-2 text-xs font-black text-slate-600 shadow-sm transition hover:-translate-y-0.5" style={{ borderColor: activeBlock?.block === block.block ? themeFor(activeGroup.subject).border : '#ffffff' }}>
+                  <button key={`${activeGroup.subject}-${block.block}`} onClick={() => setSelectedBlock(block.block)} className="rounded-[6px] border border-white bg-white px-3 py-2 text-xs font-black text-slate-600 shadow-sm transition hover:-translate-y-0.5" style={{ borderColor: activeBlock?.block === block.block ? themeFor(activeGroup.subject).border : '#ffffff' }}>
                     {block.block}
                   </button>
                 ))}
               </div>
-              {activeBlock && <div className="mt-3 rounded-2xl border border-white bg-white p-3">
+              {activeBlock && <div className="mt-3 rounded-[6px] border border-white bg-white p-3">
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{activeBlock.block}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {activeBlock.items.map(item => {
@@ -1839,7 +1839,7 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
           )}
         </div>
       ) : (
-        <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Completa tus asignaturas para ver el temario guiado.</p>
+        <p className="rounded-[6px] border border-dashed border-[#e0e0e0] bg-[#f5f5f5] px-4 py-4 text-sm font-bold text-[#1c1c1c]">Completa tus asignaturas para ver el temario guiado.</p>
       )}
     </section>
   )
@@ -1955,35 +1955,35 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-3 backdrop-blur-sm max-lg:left-0 sm:p-4 lg:left-[248px]">
-      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
-        <header className="shrink-0 border-b border-blue-100 px-4 py-4 sm:px-5">
+      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-7xl flex-col overflow-hidden rounded-[8px] border border-[#e8e8e8] bg-white shadow-2xl">
+        <header className="shrink-0 border-b border-[#e8e8e8] px-4 py-4 sm:px-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Editar calendario</p>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#1c1c1c]">Editar calendario</p>
               <h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2>
               <p className="mt-1 text-sm font-semibold text-slate-500">Mueve misiones entre días. Kairo respetará tus cambios manuales al guardar.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button>
-              <button onClick={() => setMissionPanelOpen(current => !current)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_6px_18px_rgba(37,99,235,0.18)]"><Plus size={15} /> Añadir misión</button>
+              <button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] px-4 py-2 text-sm font-black text-[#1c1c1c]"><Plus size={15} /> Añadir parcial</button>
+              <button onClick={() => setMissionPanelOpen(current => !current)} className="inline-flex items-center gap-2 rounded-[6px] bg-[#1c1c1c] px-4 py-2 text-sm font-black text-white shadow-[0_1px_4px_rgba(0,0,0,0.06)]"><Plus size={15} /> Añadir misión</button>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Semana anterior</button>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black text-slate-700">{weekRangeLabel(editorWeekStart)}</div>
-            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-900 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"><RotateCcw size={14} /> Hoy</button>
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Semana siguiente <ArrowRight size={14} /></button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#e8e8e8] bg-white px-3 py-2 text-xs font-black text-[#1c1c1c] transition hover:bg-[#f5f5f5]"><ChevronLeft size={14} /> Semana anterior</button>
+            <div className="rounded-[6px] border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black text-slate-700">{weekRangeLabel(editorWeekStart)}</div>
+            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-[6px] bg-slate-900 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"><RotateCcw size={14} /> Hoy</button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-[6px] border border-[#e8e8e8] bg-white px-3 py-2 text-xs font-black text-[#1c1c1c] transition hover:bg-[#f5f5f5]">Semana siguiente <ArrowRight size={14} /></button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-white to-blue-50/40 p-4 sm:p-5">
-          {editorNotice && <p className="mb-4 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white p-4 sm:p-5">
+          {editorNotice && <p className="mb-4 rounded-[6px] border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
 
           {missionPanelOpen && (
-            <aside className="mb-4 rounded-3xl border border-blue-100 bg-white p-4 shadow-[0_12px_34px_rgba(37,99,235,0.08)]">
+            <aside className="mb-4 rounded-[8px] border border-[#e8e8e8] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
-                <button onClick={() => setMissionPanelOpen(false)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-500">Cerrar</button>
+                <button onClick={() => setMissionPanelOpen(false)} className="rounded-[4px] border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-500">Cerrar</button>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
                 <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{orderedDraft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
@@ -1992,15 +1992,15 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
                 <Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
                 <div className="flex items-end">
-                  <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir</button>
+                  <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir</button>
                 </div>
               </div>
               <label className="mt-3 inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
             </aside>
           )}
 
-          <section className="min-w-0 overflow-x-auto rounded-[28px] border border-blue-100 bg-white shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
-            <div className="grid min-w-[1120px] grid-cols-7 divide-x divide-blue-100">
+          <section className="min-w-0 overflow-x-auto rounded-[8px] border border-[#e8e8e8] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+            <div className="grid min-w-[1120px] grid-cols-7 divide-x divide-[#e8e8e8]">
               {orderedDraft.map(day => {
                 const mainMissions = day.missions.filter(mission => mission.role === 'main')
                 return (
@@ -2008,9 +2008,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     key={day.date}
                     onDragOver={event => event.preventDefault()}
                     onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}
-                    className={`min-h-[430px] bg-white ${day.isToday ? 'ring-2 ring-inset ring-blue-300' : ''}`}
+                    className={`min-h-[430px] bg-white ${day.isToday ? 'ring-2 ring-inset ring-[#ccc]' : ''}`}
                   >
-                    <div className="sticky top-0 z-10 border-b border-blue-100 bg-white/95 px-3 py-3 backdrop-blur">
+                    <div className="sticky top-0 z-10 border-b border-[#e8e8e8] bg-white/95 px-3 py-3 backdrop-blur">
                       <h3 className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{day.label.split(' ')[0]}</h3>
                       <p className="mt-1 text-sm font-black text-slate-950">{day.label.replace(day.label.split(' ')[0], '').trim()}</p>
                     </div>
@@ -2018,21 +2018,21 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                       {mainMissions.length ? mainMissions.map(mission => {
                         const theme = themeFor(mission.subject)
                         return (
-                          <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="group min-w-0 rounded-2xl border bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: theme.border }}>
+                          <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="group min-w-0 rounded-[6px] border bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: theme.border }}>
                             <div className="flex items-center gap-1.5">
                               <button type="button" aria-label="Arrastrar para mover" className="shrink-0 cursor-grab rounded-lg p-1 text-slate-300 hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"><GripVertical size={12} /></button>
                               <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{subjectAbbr(mission.subject)}</span>
-                              <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-violet-50 hover:text-violet-500"><Bookmark size={12} /></button>
+                              <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-[#f5f5f5] hover:text-[#666]"><Bookmark size={12} /></button>
                               <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
                             </div>
                             <p className="mt-1.5 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
                             <p className="mt-1 text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min · {missionKindLabel(mission.kind, mission.missionType)}</p>
-                            <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-500 sm:hidden">
+                            <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-[4px] border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-500 sm:hidden">
                               {orderedDraft.map(optionDay => <option key={optionDay.date} value={optionDay.date}>Mover a {optionDay.label}</option>)}
                             </select>
                           </div>
                         )
-                      }) : <p className="rounded-2xl border border-dashed border-blue-100 bg-blue-50/50 px-3 py-4 text-center text-[11px] font-bold text-slate-400">Sin misiones. Arrastra aquí.</p>}
+                      }) : <p className="rounded-[6px] border border-dashed border-[#e8e8e8] bg-[#f5f5f5] px-3 py-4 text-center text-[11px] font-bold text-slate-400">Sin misiones. Arrastra aquí.</p>}
                     </div>
                   </article>
                 )
@@ -2040,50 +2040,50 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             </div>
           </section>
 
-          <section className="mt-5 rounded-[28px] border border-violet-100 bg-white p-4 shadow-[0_12px_34px_rgba(124,58,237,0.06)]">
+          <section className="mt-5 rounded-[8px] border border-[#e8e8e8] bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-500">Misiones extra / bonus</p>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#666]">Misiones extra / bonus</p>
                 <h3 className="text-base font-black text-slate-950">Opcionales para sumar ritmo sin romper el plan</h3>
               </div>
-              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-600">{bonusMissions.length} bonus</span>
+              <span className="rounded-full bg-[#f5f5f5] px-3 py-1 text-xs font-black text-[#555]">{bonusMissions.length} bonus</span>
             </div>
             <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
               {bonusMissions.length ? bonusMissions.map(({ mission, day }) => {
                 const theme = themeFor(mission.subject)
                 return (
-                  <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="rounded-2xl border border-violet-100 bg-violet-50/40 p-3">
+                  <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="rounded-[6px] border border-[#e8e8e8] bg-[#f9f9f9] p-3">
                     <div className="flex items-start gap-2">
-                      <button type="button" aria-label="Arrastrar para mover bonus" className="cursor-grab rounded-lg p-1.5 text-violet-300 hover:bg-white hover:text-violet-500"><GripVertical size={13} /></button>
+                      <button type="button" aria-label="Arrastrar para mover bonus" className="cursor-grab rounded-lg p-1.5 text-[#bbb] hover:bg-white hover:text-[#555]"><GripVertical size={13} /></button>
                       <div className="min-w-0 flex-1">
                         <span className="inline-block max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
                         <p className="mt-1 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
-                        <p className="mt-1 text-[10px] font-semibold text-violet-500">{day.label} · {mission.estimatedMinutes} min</p>
-                        <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-xl border border-violet-100 bg-white px-2 py-1.5 text-[11px] font-bold text-slate-500">
+                        <p className="mt-1 text-[10px] font-semibold text-[#666]">{day.label} · {mission.estimatedMinutes} min</p>
+                        <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-[4px] border border-[#e8e8e8] bg-white px-2 py-1.5 text-[11px] font-bold text-slate-500">
                           {orderedDraft.map(optionDay => <option key={optionDay.date} value={optionDay.date}>Mover a {optionDay.label}</option>)}
                         </select>
                       </div>
                       <div className="flex shrink-0 flex-col gap-1">
-                        <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="rounded-lg p-1.5 text-violet-500 transition-colors hover:bg-white"><Bookmark size={13} className="fill-violet-400" /></button>
+                        <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="rounded-lg p-1.5 text-[#666] transition-colors hover:bg-white"><Bookmark size={13} className="fill-[#888]" /></button>
                         <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión bonus" className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
                       </div>
                     </div>
                   </div>
                 )
-              }) : <p className="rounded-2xl border border-dashed border-violet-100 bg-violet-50/50 px-4 py-4 text-sm font-bold text-violet-500">No hay bonus opcionales esta semana.</p>}
+              }) : <p className="rounded-[6px] border border-dashed border-[#e8e8e8] bg-[#f5f5f5] px-4 py-4 text-sm font-bold text-[#666]">No hay bonus opcionales esta semana.</p>}
             </div>
           </section>
         </div>
 
-        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-blue-100 bg-white px-5 py-4">
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#e8e8e8] bg-white px-5 py-4">
           <p className="text-xs font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
           <div className="flex flex-wrap gap-2">
-            <button onClick={onClose} className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-500">Cancelar</button>
-            <button onClick={handleSave} className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.20)] transition hover:bg-blue-700">Guardar cambios</button>
+            <button onClick={onClose} className="rounded-[6px] border border-slate-200 px-5 py-3 text-sm font-black text-slate-500">Cancelar</button>
+            <button onClick={handleSave} className="inline-flex items-center justify-center rounded-[6px] bg-[#1c1c1c] px-5 py-3 text-sm font-black text-white shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition hover:bg-[#111]">Guardar cambios</button>
           </div>
         </footer>
 
-        <style>{`.inputish{width:100%;border-radius:14px;border:1px solid #dbe7fb;background:#f8fbff;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#93c5fd;background:white}`}</style>
+        <style>{`.inputish{width:100%;border-radius:14px;border:1px solid #e0e0e0;background:#f9f9f9;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#999;background:white}`}</style>
       </motion.section>
     </motion.div>
   )
@@ -2129,7 +2129,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
 }) {
   const [showNotSeenConfirm, setShowNotSeenConfirm] = useState(false)
   const [microDone, setMicroDone] = useState(false)
-  const theme = mission ? themeFor(mission.subject) : { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
+  const theme = mission ? themeFor(mission.subject) : { bg: '#f5f5f5', text: '#1c1c1c', border: '#e0e0e0' }
   const subjectUpper = (mission?.subject ?? '').toUpperCase()
   const blockLabel = formatBlockLabel(mission?.blockKey).toUpperCase()
   const headerParts = ['CAMINO PAU', subjectUpper, blockLabel].filter(Boolean)
@@ -2137,7 +2137,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   const reason = mission ? heroReason(mission, blockCompleted, nextMissionTitle) : null
 
   return (
-    <div className="h-full rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <div className="h-full rounded-[8px] border border-[#e8e8e8] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{headerParts.join(' · ')}</p>
 
       {mission ? (
@@ -2149,26 +2149,26 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
           </p>
 
           {reason && (
-            <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+            <div className="mt-4 rounded-[6px] bg-slate-50 px-4 py-3">
               <p className="text-sm font-semibold text-slate-600">{reason}</p>
             </div>
           )}
 
           <div className="mt-5">
             {mission.status === 'done' ? (
-              <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-sm font-black text-emerald-700"><Check size={15} /> Misión completada hoy</div>
+              <div className="flex items-center justify-center gap-2 rounded-[6px] border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-sm font-black text-emerald-700"><Check size={15} /> Misión completada hoy</div>
             ) : target?.href ? (
-              <a href={target.href} className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700">Empezar misión <ArrowRight size={15} /></a>
+              <a href={target.href} className="flex items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-6 py-3.5 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition hover:bg-[#111]">Empezar misión <ArrowRight size={15} /></a>
             ) : (
-              <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-black text-slate-400">Contenido en preparación</div>
+              <div className="flex items-center justify-center gap-2 rounded-[6px] border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-black text-slate-400">Contenido en preparación</div>
             )}
           </div>
 
           {mission.status !== 'done' && (
             <div className="mt-3 flex justify-center gap-3">
-              <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50"><RotateCcw size={12} /> Posponer</button>
+              <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-[4px] border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50"><RotateCcw size={12} /> Posponer</button>
               {mission.subjectSlug && mission.v2SortOrder != null && (
-                <button onClick={() => setShowNotSeenConfirm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50">Aún no lo he dado</button>
+                <button onClick={() => setShowNotSeenConfirm(true)} className="inline-flex items-center gap-1.5 rounded-[4px] border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50">Aún no lo he dado</button>
               )}
             </div>
           )}
@@ -2177,7 +2177,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
         <div className="mt-4">
           {microDone ? (
             <>
-              <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <div className="flex items-center gap-2 rounded-[6px] border border-emerald-200 bg-emerald-50 px-4 py-3">
                 <Check size={16} className="text-emerald-600" />
                 <p className="text-sm font-black text-emerald-800">¡Reto completado! Vuelve mañana para tu próxima misión.</p>
               </div>
@@ -2187,10 +2187,10 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
               <h2 className="text-xl font-black text-slate-950">Reto exprés de hoy</h2>
               <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-400">
                 <span>{microMission.subject}</span>
-                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-black text-blue-700">5 tarjetas · 3 min</span>
+                <span className="rounded-full bg-[#f5f5f5] px-2.5 py-0.5 text-[11px] font-black text-[#1c1c1c]">5 tarjetas · 3 min</span>
               </p>
               {microMission.hasCompletedItems && (
-                <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="mt-4 rounded-[6px] bg-slate-50 px-4 py-3">
                   <p className="text-sm font-semibold text-slate-600">Repaso de contenido que ya has visto. Sin afectar tu plan de mañana.</p>
                 </div>
               )}
@@ -2198,7 +2198,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
                 <a
                   href={microMission.href}
                   onClick={() => setMicroDone(true)}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
+                  className="flex items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-6 py-3.5 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition hover:bg-[#111]"
                 >
                   Empezar reto <ArrowRight size={15} />
                 </a>
@@ -2213,7 +2213,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
               <h2 className="text-xl font-black text-slate-950">Explora tu primer tema</h2>
               <p className="mt-1 text-sm font-semibold text-slate-400">Tu plan aún está generándose. Mientras tanto, empieza a explorar.</p>
               <div className="mt-5">
-                <a href="#explorar" className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700">
+                <a href="#explorar" className="flex items-center justify-center gap-2 rounded-[6px] bg-[#1c1c1c] px-6 py-3.5 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition hover:bg-[#111]">
                   Ver temas disponibles <ArrowRight size={15} />
                 </a>
               </div>
@@ -2245,12 +2245,12 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
       <AnimatePresence>
         {showNotSeenConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[8px] bg-white p-6 shadow-2xl">
               <h3 className="text-lg font-black text-slate-950">¿Aún no lo has dado en clase?</h3>
               <p className="mt-2 text-sm font-semibold text-slate-500">Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
               <div className="mt-5 flex justify-end gap-2">
-                <button onClick={() => setShowNotSeenConfirm(false)} className="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-500">Cancelar</button>
-                <button onClick={() => { setShowNotSeenConfirm(false); onMarkNotSeen() }} className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white">Confirmar</button>
+                <button onClick={() => setShowNotSeenConfirm(false)} className="rounded-[6px] border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-500">Cancelar</button>
+                <button onClick={() => { setShowNotSeenConfirm(false); onMarkNotSeen() }} className="rounded-[6px] bg-[#1c1c1c] px-4 py-2.5 text-sm font-black text-white">Confirmar</button>
               </div>
             </motion.div>
           </motion.div>
@@ -2297,7 +2297,7 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
 
   if (daysDiff === 0) {
     return (
-      <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4">
+      <div className="rounded-[6px] border border-amber-200 bg-amber-50 px-5 py-4">
         <p className="text-base font-black text-amber-900">¡Hoy es tu parcial de {exam.subject}!</p>
         <p className="mt-1 text-sm font-semibold text-amber-700">Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
       </div>
@@ -2305,7 +2305,7 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
   }
 
   return (
-    <div className="rounded-[24px] border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-[0_8px_24px_rgba(251,146,60,0.10)]">
+    <div className="rounded-[6px] border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-[0_8px_24px_rgba(251,146,60,0.10)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-600">Próximo parcial</p>
@@ -2320,7 +2320,7 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
         </div>
         <a
           href={href}
-          className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-amber-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_4px_12px_rgba(245,158,11,0.30)] transition hover:-translate-y-0.5 hover:bg-amber-600"
+          className="inline-flex shrink-0 items-center gap-2 rounded-[6px] bg-amber-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_4px_12px_rgba(245,158,11,0.30)] transition hover:-translate-y-0.5 hover:bg-amber-600"
         >
           Empezar práctica <ArrowRight size={14} />
         </a>
@@ -2332,7 +2332,7 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
 function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[] }) {
   const [expandedDate, setExpandedDate] = useState<string | null>(null)
   return (
-    <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
+    <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-[6px] border border-slate-100">
       {days.map(day => {
         const main = day.missions.filter(m => m.role === 'main')
         const done = main.length > 0 && main.every(m => m.status === 'done')
@@ -2345,14 +2345,14 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
           <div key={day.date}>
             <button
               onClick={() => setExpandedDate(isExpanded ? null : day.date)}
-              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 ${isToday ? 'bg-blue-50/60' : 'bg-white'}`}
+              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 ${isToday ? 'bg-[#f0f0f0]' : 'bg-white'}`}
             >
-              <span className={`flex w-24 shrink-0 items-center gap-1.5 text-xs font-black capitalize ${isToday ? 'text-blue-700' : 'text-slate-500'}`}>
+              <span className={`flex w-24 shrink-0 items-center gap-1.5 text-xs font-black capitalize ${isToday ? 'font-bold text-[#1c1c1c]' : 'text-slate-500'}`}>
                 {compactDayLabel(day.date)}
-                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" aria-label="Hoy" />}
+                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-[#1c1c1c]" aria-label="Hoy" />}
               </span>
               <span className="flex-1 text-sm font-semibold text-slate-700">{subjectLabel}</span>
-              {isToday && <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}
+              {isToday && <span className="shrink-0 rounded-full bg-[#e8e8e8] px-2 py-0.5 text-[10px] font-black text-[#1c1c1c]">Hoy</span>}
               {main.some(m => m.missionType === 'partial_practice') && (
                 <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>
               )}
@@ -2377,7 +2377,7 @@ function WeeklyGoalCard({ completed, target }: { completed: number; target: numb
   const [open, setOpen] = useState(false)
   const remaining = Math.max(0, target - completed)
   return (
-    <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <div className="rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
       <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left">
         <span>
           <span className="block text-lg font-black text-slate-950">Ranking y divisiones</span>
@@ -2388,7 +2388,7 @@ function WeeklyGoalCard({ completed, target }: { completed: number; target: numb
       <AnimatePresence>
         {open && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <div className="mt-5 rounded-3xl bg-slate-50 p-4">
+            <div className="mt-5 rounded-[8px] bg-slate-50 p-4">
               <p className="text-sm font-black text-slate-800">Tu objetivo semanal</p>
               <p className="mt-2 text-sm font-semibold text-slate-500">
                 {remaining === 0 ? '¡Has completado tu objetivo de la semana! 🎉' : `Completa ${remaining} misión${remaining !== 1 ? 'es' : ''} más esta semana.`}
@@ -2404,17 +2404,17 @@ function WeeklyGoalCard({ completed, target }: { completed: number; target: numb
 function MissionRow({ mission, onPostpone, onComplete, compact = false }: { mission: Mission; onPostpone: (id: string) => void; onComplete?: (mission: Mission) => void; compact?: boolean }) {
   const theme = themeFor(mission.subject)
   const target = hrefForMission(mission)
-  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
+  return <div className={`rounded-[6px] border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-[#e8e8e8]' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.role === 'bonus' && <span className="rounded-full bg-[#f5f5f5] px-2.5 py-1 text-[11px] font-black text-[#444]">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-[4px] bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-[4px] bg-[#1c1c1c] px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-[4px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-[4px] border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   const main = day.missions.filter(mission => mission.role === 'main')
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-[8px] border p-3 ${day.isToday ? 'border-[#ccc] bg-[#f5f5f5]/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-[#1c1c1c]' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-[#e8e8e8] px-2 py-0.5 text-[10px] font-black text-[#1c1c1c]">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-[4px] bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-[6px] border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-[6px] border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { subjects: string[]; draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }; setDraft: (draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }) => void; onClose: () => void; onSave: () => void; editing: boolean }) {
-  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm"><motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl"><h2 className="text-xl font-black text-slate-950">{editing ? 'Editar examen parcial' : 'Añadir examen parcial'}</h2><p className="mt-1 text-sm font-semibold text-slate-500">Si tienes un parcial cerca, Camino PAU priorizará bloque, tema y ejercicios reales.</p><div className="mt-5 grid gap-3"><Field label="Asignatura"><select value={draft.subject} onChange={event => setDraft({ ...draft, subject: event.target.value })} className="inputish">{subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field><Field label="Fecha"><input type="date" value={draft.date} onChange={event => setDraft({ ...draft, date: event.target.value })} className="inputish" /></Field><Field label="Bloque"><input value={draft.block} onChange={event => setDraft({ ...draft, block: event.target.value })} placeholder="Álgebra, Análisis, Probabilidad..." className="inputish" /></Field><Field label="Tema opcional"><input value={draft.topic} onChange={event => setDraft({ ...draft, topic: event.target.value })} placeholder="Sistemas/Gauss, Derivadas, Writing..." className="inputish" /></Field><Field label="Nombre opcional"><input value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} placeholder="Parcial 1" className="inputish" /></Field><Field label="Prioridad"><select value={draft.priority} onChange={event => setDraft({ ...draft, priority: event.target.value as ExamPriority })} className="inputish"><option value="baja">Baja</option><option value="normal">Normal</option><option value="alta">Alta</option><option value="muy_alta">Muy alta</option></select></Field></div><style>{`.inputish{width:100%;border-radius:14px;border:1px solid #dbe7fb;background:#f8fbff;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#93c5fd;background:white}`}</style><div className="mt-6 flex justify-end gap-2"><button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button><button onClick={onSave} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">{editing ? 'Guardar cambios' : 'Guardar examen'}</button></div></motion.div></motion.div>
+  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm"><motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-lg rounded-[8px] bg-white p-6 shadow-2xl"><h2 className="text-xl font-black text-slate-950">{editing ? 'Editar examen parcial' : 'Añadir examen parcial'}</h2><p className="mt-1 text-sm font-semibold text-slate-500">Si tienes un parcial cerca, Camino PAU priorizará bloque, tema y ejercicios reales.</p><div className="mt-5 grid gap-3"><Field label="Asignatura"><select value={draft.subject} onChange={event => setDraft({ ...draft, subject: event.target.value })} className="inputish">{subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field><Field label="Fecha"><input type="date" value={draft.date} onChange={event => setDraft({ ...draft, date: event.target.value })} className="inputish" /></Field><Field label="Bloque"><input value={draft.block} onChange={event => setDraft({ ...draft, block: event.target.value })} placeholder="Álgebra, Análisis, Probabilidad..." className="inputish" /></Field><Field label="Tema opcional"><input value={draft.topic} onChange={event => setDraft({ ...draft, topic: event.target.value })} placeholder="Sistemas/Gauss, Derivadas, Writing..." className="inputish" /></Field><Field label="Nombre opcional"><input value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} placeholder="Parcial 1" className="inputish" /></Field><Field label="Prioridad"><select value={draft.priority} onChange={event => setDraft({ ...draft, priority: event.target.value as ExamPriority })} className="inputish"><option value="baja">Baja</option><option value="normal">Normal</option><option value="alta">Alta</option><option value="muy_alta">Muy alta</option></select></Field></div><style>{`.inputish{width:100%;border-radius:14px;border:1px solid #e0e0e0;background:#f9f9f9;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#999;background:white}`}</style><div className="mt-6 flex justify-end gap-2"><button onClick={onClose} className="rounded-[6px] border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button><button onClick={onSave} className="rounded-[6px] bg-[#1c1c1c] px-4 py-2 text-sm font-black text-white">{editing ? 'Guardar cambios' : 'Guardar examen'}</button></div></motion.div></motion.div>
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
 
@@ -2423,18 +2423,18 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
   const visibleRows = tab === 'community' ? rows.filter(row => row.community === community) : rows
 
   return (
-    <div className="flex flex-1 flex-col rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <div className="flex flex-1 flex-col rounded-[8px] border border-[#e8e8e8] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
       <p className="text-base font-black text-slate-950">Ranking y divisiones</p>
       <div className="mt-4 grid gap-4">
         {/* División + XP compacto */}
-        <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+        <div className="flex items-center justify-between rounded-[6px] bg-slate-50 px-4 py-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">División actual</p>
             <p className="mt-0.5 text-sm font-black text-slate-900">{division}</p>
           </div>
           <div className="text-right">
             <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">XP total</p>
-            <p className="mt-0.5 text-sm font-black text-blue-700">{totalXP.toLocaleString('es-ES')} XP</p>
+            <p className="mt-0.5 text-sm font-black text-[#1c1c1c]">{totalXP.toLocaleString('es-ES')} XP</p>
           </div>
         </div>
 
@@ -2446,8 +2446,8 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
                 {tab === 'community' && community !== 'Sin comunidad' ? `Ranking · ${community}` : 'Ranking global'}
               </p>
               <div className="flex gap-1">
-                <button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Global</button>
-                <button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Comunidad</button>
+                <button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-[#1c1c1c] text-white' : 'bg-slate-100 text-slate-500'}`}>Global</button>
+                <button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-[#1c1c1c] text-white' : 'bg-slate-100 text-slate-500'}`}>Comunidad</button>
               </div>
             </div>
             {tab === 'community' && community === 'Sin comunidad' ? (
@@ -2461,7 +2461,7 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
             )}
             {currentRow && !visibleRows.slice(0, 3).some(r => r.isCurrentUser) && (
               <>
-                <div className="my-3 h-px bg-blue-100" />
+                <div className="my-3 h-px bg-[#e8e8e8]" />
                 <RankingRow row={currentRow} fixed />
               </>
             )}
@@ -2481,9 +2481,9 @@ function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, 
 function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean }) {
   const rowDivision = divisionFor(row.xp)
   const podium = row.rank <= 3
-  return <div className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2 ${row.isCurrentUser ? 'border border-blue-200 bg-blue-50 shadow-sm' : podium ? 'bg-white shadow-sm' : 'bg-white/70'} ${fixed ? 'ring-1 ring-blue-100' : ''}`}><span className="min-w-0 text-sm font-black text-slate-800"><span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black" style={{ background: podium ? rowDivision.bg : '#f1f5f9', color: podium ? rowDivision.text : '#64748b' }}>{podium ? <Medal size={14} /> : `#${row.rank}`}</span>{row.name}{row.isMock && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-400">demo</span>}</span><span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: rowDivision.bg, color: rowDivision.text }}>{rowDivision.name}</span><span className="shrink-0 text-xs font-black text-blue-700">{row.xp.toLocaleString('es-ES')} XP</span></div>
+  return <div className={`flex items-center justify-between gap-3 rounded-[6px] px-3 py-2 ${row.isCurrentUser ? 'border border-[#e0e0e0] bg-[#f5f5f5] shadow-sm' : podium ? 'bg-white shadow-sm' : 'bg-white/70'} ${fixed ? 'ring-1 ring-[#e8e8e8]' : ''}`}><span className="min-w-0 text-sm font-black text-slate-800"><span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black" style={{ background: podium ? rowDivision.bg : '#f1f5f9', color: podium ? rowDivision.text : '#64748b' }}>{podium ? <Medal size={14} /> : `#${row.rank}`}</span>{row.name}{row.isMock && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-400">demo</span>}</span><span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: rowDivision.bg, color: rowDivision.text }}>{rowDivision.name}</span><span className="shrink-0 text-xs font-black text-[#1c1c1c]">{row.xp.toLocaleString('es-ES')} XP</span></div>
 }
-function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
+function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-[6px] bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-[#1c1c1c]">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
 
 function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaInfo | null; loading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
   const [mode, setMode] = useState<'idle' | 'creating' | 'joining'>('idle')
@@ -2527,20 +2527,20 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
           <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
           <h3 className="text-sm font-black text-slate-950">{liga.nombre}</h3>
         </div>
-        <button onClick={copyLink} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-black text-blue-700 transition hover:bg-blue-100">
+        <button onClick={copyLink} className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#e8e8e8] bg-[#f5f5f5] px-3 py-1.5 text-[11px] font-black text-[#1c1c1c] transition hover:bg-[#e8e8e8]">
           {copied ? '✓ Copiado' : 'Compartir liga'}
         </button>
       </div>
       <div className="grid gap-1.5">
         {liga.miembros.map(m => (
-          <div key={m.user_id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2" style={{ background: m.name === 'Tú' ? '#eff6ff' : '#fff', border: m.name === 'Tú' ? '1px solid #bfdbfe' : '1px solid #f1f5f9' }}>
+          <div key={m.user_id} className="flex items-center justify-between gap-2 rounded-[4px] px-3 py-2" style={{ background: m.name === 'Tú' ? '#f5f5f5' : '#fff', border: m.name === 'Tú' ? '1px solid #bfdbfe' : '1px solid #f1f5f9' }}>
             <span className="flex items-center gap-2 text-xs font-black text-slate-800">
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black" style={{ background: m.rank <= 3 ? '#eff6ff' : '#f1f5f9', color: m.rank <= 3 ? '#1d4ed8' : '#64748b' }}>
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black" style={{ background: m.rank <= 3 ? '#f5f5f5' : '#f1f5f9', color: m.rank <= 3 ? '#1c1c1c' : '#64748b' }}>
                 {m.rank <= 3 ? <Medal size={11} /> : m.rank}
               </span>
               {m.name}
             </span>
-            <span className="text-[11px] font-bold text-blue-700 shrink-0">{m.weekly_xp} XP sem.</span>
+            <span className="text-[11px] font-bold text-[#1c1c1c] shrink-0">{m.weekly_xp} XP sem.</span>
           </div>
         ))}
       </div>
@@ -2551,10 +2551,10 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
     <div>
       <p className="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">
+        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-[4px] border border-[#e8e8e8] bg-[#f5f5f5] px-3 py-2 text-xs font-black text-[#1c1c1c] hover:bg-[#e8e8e8]">
           + Crear liga
         </button>
-        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
+        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-[4px] border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
           Unirme a una liga
         </button>
       </div>
@@ -2565,9 +2565,9 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
     <div>
       <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Crear liga</p>
       <div className="flex gap-2">
-        <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre de la liga" maxLength={40} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-300 focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleCreate()} />
-        <button onClick={handleCreate} disabled={busy || !nombre.trim()} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Crear'}</button>
-        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
+        <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre de la liga" maxLength={40} className="min-w-0 flex-1 rounded-[4px] border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#ccc] focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleCreate()} />
+        <button onClick={handleCreate} disabled={busy || !nombre.trim()} className="rounded-[4px] bg-[#1c1c1c] px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Crear'}</button>
+        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-[4px] border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
       </div>
       {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
     </div>
@@ -2577,9 +2577,9 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
     <div>
       <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Unirme a una liga</p>
       <div className="flex gap-2">
-        <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="Código (ej. AB3K7M)" maxLength={10} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-300 focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleJoin()} />
-        <button onClick={handleJoin} disabled={busy || !codigo.trim()} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Entrar'}</button>
-        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
+        <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="Código (ej. AB3K7M)" maxLength={10} className="min-w-0 flex-1 rounded-[4px] border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#ccc] focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleJoin()} />
+        <button onClick={handleJoin} disabled={busy || !codigo.trim()} className="rounded-[4px] bg-[#1c1c1c] px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Entrar'}</button>
+        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-[4px] border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
       </div>
       {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
     </div>
@@ -2594,13 +2594,13 @@ function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
   ]
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <motion.div initial={{ scale: 0.96, y: 16, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.96, y: 16, opacity: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 28 }} className="w-full max-w-[480px] rounded-[28px] bg-white p-8 shadow-2xl">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p>
+      <motion.div initial={{ scale: 0.96, y: 16, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.96, y: 16, opacity: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 28 }} className="w-full max-w-[480px] rounded-[8px] bg-white p-8 shadow-2xl">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#1c1c1c]">Camino PAU</p>
         <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">Tu ruta hacia la PAU</h2>
         <div className="mt-6 grid gap-4">
           {steps.map((step, i) => (
-            <div key={i} className="flex items-start gap-4 rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)]">
+            <div key={i} className="flex items-start gap-4 rounded-[6px] border border-[#e8e8e8] bg-[#f5f5f5] p-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#1c1c1c] text-white shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                 {step.icon}
               </div>
               <div className="min-w-0 pt-0.5">
@@ -2610,7 +2610,7 @@ function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-        <button onClick={onClose} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-6 py-4 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:shadow-[0_16px_36px_rgba(37,99,235,0.32)]">
+        <button onClick={onClose} className="mt-6 w-full rounded-[6px] bg-[#1c1c1c] px-6 py-4 text-sm font-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition hover:shadow-[0_4px_16px_rgba(0,0,0,0.14)]">
           Empezar
         </button>
       </motion.div>
@@ -2619,10 +2619,10 @@ function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
 }
 
 const ADDABLE_SUBJECT_OPTS = [
-  { id: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff' },
-  { id: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
-  { id: 'Lengua Castellana', color: '#0891b2', bg: '#ecfeff' },
-  { id: 'Historia de España', color: '#b45309', bg: '#fff7ed' },
+  { id: 'Matemáticas II', color: '#1c1c1c', bg: '#f5f5f5' },
+  { id: 'Matemáticas CCSS', color: '#1c1c1c', bg: '#f5f5f5' },
+  { id: 'Lengua Castellana', color: '#1c1c1c', bg: '#f5f5f5' },
+  { id: 'Historia de España', color: '#1c1c1c', bg: '#f5f5f5' },
 ]
 
 function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
@@ -2637,10 +2637,10 @@ function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
   if (available.length === 0) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-        <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+        <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[8px] bg-white p-6 shadow-2xl">
           <h2 className="text-xl font-black text-slate-950">Todas las asignaturas añadidas</h2>
           <p className="mt-2 text-sm font-semibold text-slate-500">Ya tienes todas las asignaturas disponibles en tu Camino PAU.</p>
-          <div className="mt-6 flex justify-end"><button onClick={onClose} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">Cerrar</button></div>
+          <div className="mt-6 flex justify-end"><button onClick={onClose} className="rounded-[6px] bg-[#1c1c1c] px-4 py-2 text-sm font-black text-white">Cerrar</button></div>
         </motion.div>
       </motion.div>
     )
@@ -2648,21 +2648,21 @@ function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-      <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+      <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[8px] bg-white p-6 shadow-2xl">
         <h2 className="text-xl font-black text-slate-950">Añadir asignatura</h2>
         <p className="mt-1 text-sm font-semibold text-slate-500">Selecciona una asignatura para añadir a tu Camino PAU. Las misiones aparecerán a partir de mañana.</p>
         <div className="mt-5 grid gap-2">
           {available.map(subj => (
-            <button key={subj.id} onClick={() => setSelected(subj.id)} className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition ${selected === subj.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50 hover:border-blue-200'}`}>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black" style={{ background: subj.bg, color: subj.color }}>{subj.id.slice(0, 2)}</span>
+            <button key={subj.id} onClick={() => setSelected(subj.id)} className={`flex items-center gap-3 rounded-[6px] border-2 px-4 py-3 text-left transition ${selected === subj.id ? 'border-[#1c1c1c] bg-[#f5f5f5]' : 'border-slate-200 bg-slate-50 hover:border-[#ccc]'}`}>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] text-sm font-black" style={{ background: subj.bg, color: subj.color }}>{subj.id.slice(0, 2)}</span>
               <span className="text-sm font-black text-slate-800">{subj.id}</span>
-              {selected === subj.id && <Check size={16} className="ml-auto text-blue-600" />}
+              {selected === subj.id && <Check size={16} className="ml-auto text-[#1c1c1c]" />}
             </button>
           ))}
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button>
-          <button onClick={() => selected && onAdd(selected)} disabled={!selected || loading} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white disabled:opacity-60">
+          <button onClick={onClose} className="rounded-[6px] border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button>
+          <button onClick={() => selected && onAdd(selected)} disabled={!selected || loading} className="inline-flex items-center gap-2 rounded-[6px] bg-[#1c1c1c] px-4 py-2 text-sm font-black text-white disabled:opacity-60">
             {loading ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />Añadiendo...</> : 'Añadir asignatura'}
           </button>
         </div>

@@ -18,13 +18,13 @@ interface DailyTaskCardProps {
 }
 
 const SUBJECT_COLORS: Record<string, { bg: string; icon: string }> = {
-  'Matemáticas II':      { bg: '#dbeafe', icon: '#2563eb' },
-  'Física':              { bg: '#fef3c7', icon: '#d97706' },
-  'Historia de España':  { bg: '#ffedd5', icon: '#c2410c' },
-  'Química':             { bg: '#fce7f3', icon: '#be185d' },
-  'Biología':            { bg: '#dcfce7', icon: '#16a34a' },
-  'Lengua y Literatura': { bg: '#ede9fe', icon: '#7c3aed' },
-  'Inglés':              { bg: '#e0f2fe', icon: '#0284c7' },
+  'Matemáticas II':      { bg: '#f5f5f5', icon: '#1c1c1c' },
+  'Física':              { bg: '#f5f5f5', icon: '#1c1c1c' },
+  'Historia de España':  { bg: '#f5f5f5', icon: '#1c1c1c' },
+  'Química':             { bg: '#f5f5f5', icon: '#1c1c1c' },
+  'Biología':            { bg: '#f5f5f5', icon: '#1c1c1c' },
+  'Lengua y Literatura': { bg: '#f5f5f5', icon: '#1c1c1c' },
+  'Inglés':              { bg: '#f5f5f5', icon: '#1c1c1c' },
 }
 const DEFAULT_SC = { bg: '#f1f5f9', icon: '#64748b' }
 
@@ -82,7 +82,7 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
             style={{
               position: 'absolute', top: 5, left: '50%', transform: 'translateX(-50%)',
               pointerEvents: 'none', zIndex: 10,
-              color: '#7c3aed', fontWeight: 900, fontSize: 12.5, whiteSpace: 'nowrap',
+              color: '#1c1c1c', fontWeight: 900, fontSize: 12.5, whiteSpace: 'nowrap',
             }}
           >
             +{task.xp} XP
@@ -152,7 +152,7 @@ export default function DailyTaskCard({ task, completed, onComplete }: DailyTask
           onClick={() => setExpanded(e => !e)}
           aria-label={expanded ? 'Ocultar flashcards' : 'Ver flashcards'}
           style={{
-            color: expanded ? '#2563eb' : '#d1d5db', flexShrink: 0,
+            color: expanded ? '#1c1c1c' : '#d1d5db', flexShrink: 0,
             display: 'flex', alignItems: 'center', lineHeight: 1,
             background: 'none', border: 'none', cursor: 'pointer', padding: 2,
           }}

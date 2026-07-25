@@ -2952,7 +2952,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           position: relative;
           z-index: 1;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 324px;
+          grid-template-columns: minmax(0, 1fr) 308px;
           gap: 22px;
           align-items: start;
         }
@@ -2964,23 +2964,16 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         .exams-ai-panel {
           position: sticky;
           top: 88px;
-          display: grid;
-          gap: 14px;
+          display: flex;
+          flex-direction: column;
         }
 
         .exams-side-card {
           width: 100%;
-          border: 1px solid rgba(219, 231, 251, 0.9);
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.9);
-          box-shadow: 0 24px 60px rgba(37, 99, 235, 0.09);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          padding: 18px;
-        }
-
-        .exams-ai-panel .exams-side-card:first-child {
-          border-left: 4px solid #8b5cf6;
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 14px;
+          overflow: hidden;
         }
 
         .exams-side-section {
@@ -3852,9 +3845,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
 
               <aside className="exams-ai-panel" aria-label="Panel de feedback de Kairo">
-                <div className="exams-side-card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div className="exams-side-card">
 
-                  {/* Nota estimada */}
+                  {/* ── Nota estimada ── */}
                   {(() => {
                     const parts = correctionScoreLabel !== '--' ? correctionScoreLabel.split('/') : null
                     const ratio = parts ? parseFloat(parts[0]) / parseFloat(parts[1]) : null
@@ -3863,61 +3856,72 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 6 }}>Nota estimada</div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                           <span style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>
-                            {correccion ? (parts?.[0] ?? '--') : cargando ? '...' : '--'}
+                            {correccion ? (parts?.[0] ?? '--') : cargando ? '…' : '--'}
                           </span>
                           {parts && <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>/{parts[1]}</span>}
+                          {!parts && !cargando && (
+                            <span style={{ fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>/pts</span>
+                          )}
                         </div>
                         <div style={{ height: 4, borderRadius: 999, background: '#f1f5f9', marginTop: 10, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: ratio !== null ? `${(ratio * 100).toFixed(0)}%` : '0%', background: 'linear-gradient(90deg,#2563eb,#60a5fa)', borderRadius: 999, transition: 'width 600ms cubic-bezier(0.4,0,0.2,1)' }} />
+                          <div style={{ height: '100%', width: ratio !== null ? `${Math.min(ratio * 100, 100).toFixed(0)}%` : '0%', background: 'linear-gradient(90deg,#2563eb,#60a5fa)', borderRadius: 999, transition: 'width 700ms cubic-bezier(0.4,0,0.2,1)' }} />
                         </div>
-                        {!correccion && <p className="exams-side-text" style={{ marginTop: 8 }}>{cargando ? 'Calculando con la rúbrica oficial...' : 'Resuelve el ejercicio y Kairo te dará feedback.'}</p>}
+                        {!correccion && (
+                          <p style={{ margin: '8px 0 0', fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>
+                            {cargando ? 'Calculando con la rúbrica oficial…' : 'Resuelve el ejercicio y Kairo te dará feedback.'}
+                          </p>
+                        )}
                       </div>
                     )
                   })()}
 
-                  {/* Puntos fuertes */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f8fafc' }}>
+                  {/* ── Puntos fuertes ── */}
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#15803d', marginBottom: 10 }}>Puntos fuertes</div>
                     {correctionFuertes.length > 0 ? correctionFuertes.map((point, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                        <div style={{ width: 16, height: 16, borderRadius: 9999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>✓</div>
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>✓</div>
                         <span style={{ fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{point}</span>
                       </div>
                     )) : (
-                      <p className="exams-side-text">{cargando ? 'Analizando lo que sí suma puntos...' : 'Aquí aparecerán tus puntos fuertes.'}</p>
+                      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                        {cargando ? 'Analizando…' : 'Aquí aparecerán tus puntos fuertes.'}
+                      </p>
                     )}
                   </div>
 
-                  {/* Errores a corregir */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f8fafc' }}>
+                  {/* ── Errores a corregir ── */}
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#b91c1c', marginBottom: 10 }}>Errores a corregir</div>
                     {correctionErrores.length > 0 ? correctionErrores.map((err, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                        <div style={{ width: 16, height: 16, borderRadius: 9999, display: 'grid', placeItems: 'center', background: '#ffedd5', color: '#ea580c', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>!</div>
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#fee2e2', color: '#dc2626', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>!</div>
                         <span style={{ fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{err}</span>
                       </div>
                     )) : (
-                      <p className="exams-side-text">{cargando ? 'Revisando errores y pasos omitidos...' : 'Aquí verás qué debes corregir.'}</p>
+                      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                        {cargando ? 'Revisando…' : 'Aquí verás qué debes corregir.'}
+                      </p>
                     )}
                   </div>
 
-                  {/* Bloque asociado */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f8fafc' }}>
+                  {/* ── Bloque asociado ── */}
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 10 }}>Bloque asociado</div>
                     {!isCatalunaExam && preguntaActiva ? (
                       <>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 9999, background: '#eff6ff', color: '#1d4ed8', fontSize: 11, fontWeight: 800, border: '1px solid #bfdbfe' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', fontSize: 11, fontWeight: 800, border: '1px solid #bfdbfe' }}>
                           📐 {bloqueActivoLabel}
                         </div>
                         <a href="/camino" style={{ display: 'block', marginTop: 8, fontSize: 11, fontWeight: 700, color: '#2563eb', textDecoration: 'none' }}>Ver material de repaso →</a>
                       </>
                     ) : (
-                      <p className="exams-side-text">Selecciona un ejercicio para ver el bloque asociado.</p>
+                      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>Selecciona un ejercicio para ver el bloque asociado.</p>
                     )}
                   </div>
 
-                  {/* Sesión activa */}
-                  <div style={{ margin: '0 16px 16px', padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {/* ── Sesión activa ── */}
+                  <div style={{ margin: '0 16px 16px', marginTop: 16, padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Sesión activa</div>

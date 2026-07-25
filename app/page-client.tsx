@@ -92,6 +92,7 @@ const WARM = {
 }
 
 const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
+const BOOKS_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_134153_21d8ecce-c198-4ae1-8fc9-22814072fdbc.png'
 
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 
@@ -3994,95 +3995,168 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         )}
 
         {seccion === 'chat' && (
-          <div style={{ flex: 1, minHeight: 0, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-            {/* Campus light atmosphere */}
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-              <div style={{ position: 'absolute', top: '-8%', left: '10%', width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, rgba(191,219,254,0.50) 0%, transparent 70%)', filter: 'blur(58px)' }} />
-              <div style={{ position: 'absolute', bottom: '6%', right: '3%', width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(221,214,254,0.34) 0%, transparent 70%)', filter: 'blur(74px)' }} />
-              <div style={{ position: 'absolute', top: '44%', left: '-8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(207,250,254,0.32) 0%, transparent 70%)', filter: 'blur(64px)' }} />
-            </div>
+          <div style={{ flex: 1, minHeight: 0, height: 'calc(100vh - 64px)', display: 'flex', overflow: 'hidden' }}>
 
-            {/* Messages scroll area */}
-            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '18px 32px 10px', display: 'flex', flexDirection: 'column', maxWidth: 820, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
+            {/* V4 El Despacho — left context panel */}
+            <div style={{ width: 300, background: '#111827', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,.05)' }}>
 
-              {mensajes.length === 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
-                  <div className="chat-avatar-pulse" style={{ width: 174, height: 82, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
-                    <KairoBrand subtitle={null} size="lg" />
-                  </div>
-                  <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
-                    Hola, soy{' '}
-                    <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Kairo</span>
-                  </h2>
-                  <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 430, lineHeight: 1.6, fontWeight: 520 }}>
-                    Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
-                  </p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', maxWidth: 600 }}>
-                    {[
-                      '¿Cómo es el examen de mates?',
-                      'Explícame la Segunda República',
-                    ].map((s, idx) => (
-                      <button key={s} className="chat-chip" onClick={() => setInputChat(s)} style={{ animationDelay: `${idx * 65}ms` }}>{s}</button>
-                    ))}
+              {/* Photo hero */}
+              <div style={{ position: 'relative', height: 160, flexShrink: 0, overflow: 'hidden' }}>
+                <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.4) saturate(.6)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(17,24,39,.95) 0%, transparent 60%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 20px' }}>
+                  <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#4b5563', marginBottom: 5 }}>Kairo · Tutor IA</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: 1.05 }}>Chat con<br />Kairo</div>
+                </div>
+              </div>
+
+              {/* Scrollable body */}
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+
+                {/* Subject chips */}
+                <div style={{ padding: '16px 20px' }}>
+                  <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase', color: '#374151', marginBottom: 10 }}>Asignatura</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {HOME_SUBJECTS.map(key => {
+                      const val = ASIGNATURAS[key]
+                      const card = SUBJECT_CARDS[key]
+                      const isActive = asignatura === key
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => navegarAAsignatura(key)}
+                          style={{ padding: '5px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, border: isActive ? `1.5px solid rgba(37,99,235,.6)` : '1px solid rgba(255,255,255,.07)', background: isActive ? 'rgba(37,99,235,.15)' : 'transparent', color: isActive ? '#93c5fd' : '#4b5563', transition: 'all 100ms' }}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: val.color, flexShrink: 0, display: 'inline-block' }} />
+                          {card.title}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
-              )}
 
-              {mensajes.map((msg, i) => (
-                msg.rol === 'kairo' ? (
-                  /* Kairo — full-width editorial card */
-                  <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '16px 0' }}>
-                    <div style={{ borderRadius: 28, padding: '22px 22px 24px', background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(219,231,251,0.92)', boxShadow: '0 20px 52px rgba(37,99,235,0.09)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                        <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 850, color: '#2563eb', marginBottom: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kairo</div>
-                        {(() => {
-                          const isStreamingMessage = cargandoChat && i === mensajes.length - 1
-                          if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
-                          const { main, why } = splitWhyExplanationMarkdown(msg.texto)
-                          return (
-                            <>
-                              <div style={{ fontSize: 15, lineHeight: 1.85, color: '#334155' }}>
-                                <MathMarkdown text={main} format={false} components={darkMdComponents} />
-                              </div>
-                              <WhyExplanation markdown={why} components={darkMdComponents} />
-                            </>
-                          )
-                        })()}
+                {/* Stats */}
+                <div style={{ borderTop: '1px solid rgba(255,255,255,.05)' }}>
+                  {([
+                    { label: 'Esta sesión', value: mensajes.filter(m => m.rol === 'usuario').length },
+                    { label: 'Correcciones', value: historial.length },
+                  ] as { label: string; value: number }[]).map(s => (
+                    <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 20px', borderBottom: '1px solid rgba(255,255,255,.04)' }}>
+                      <span style={{ fontSize: 11, color: '#374151', fontWeight: 600 }}>{s.label}</span>
+                      <span style={{ fontSize: 20, fontWeight: 900, color: '#e2e8f0', letterSpacing: '-.03em' }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Suggestion chips */}
+                <div style={{ padding: '14px 20px 20px' }}>
+                  <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase', color: '#374151', marginBottom: 10 }}>Sugerencias</div>
+                  {[
+                    '¿Cómo es el examen de mates?',
+                    'Explícame la Segunda República',
+                    '¿Qué es la entalpía de reacción?',
+                  ].map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      className="chat-chip"
+                      onClick={() => setInputChat(s)}
+                      style={{ width: '100%', textAlign: 'left', marginBottom: 6, justifyContent: 'flex-start' }}
+                    >{s}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '14px 20px', borderTop: '1px solid rgba(255,255,255,.05)', flexShrink: 0 }}>
+                <div style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+                  Kairo · {examSystemLabel(ccaa)}<br />Versión Beta
+                </div>
+              </div>
+            </div>
+
+            {/* Right chat column */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f8fafc', minWidth: 0, overflow: 'hidden' }}>
+
+              {/* Topbar */}
+              <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', flexShrink: 0, boxShadow: '0 0 0 2px rgba(34,197,94,.2)' }} />
+                <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', letterSpacing: '-.01em' }}>{cfg.label}</span>
+                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>· Kairo activo</span>
+              </div>
+
+              {/* Messages scroll area */}
+              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '18px 24px 10px', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
+
+                {mensajes.length === 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
+                    <div className="chat-avatar-pulse" style={{ width: 174, height: 82, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
+                      <KairoBrand subtitle={null} size="lg" />
+                    </div>
+                    <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
+                      Hola, soy{' '}
+                      <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Kairo</span>
+                    </h2>
+                    <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 380, lineHeight: 1.6, fontWeight: 520 }}>
+                      Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
+                    </p>
+                  </div>
+                )}
+
+                {mensajes.map((msg, i) => (
+                  msg.rol === 'kairo' ? (
+                    /* Kairo — clean editorial card (V4 El Despacho) */
+                    <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '10px 0' }}>
+                      <div style={{ borderRadius: 22, padding: '18px 20px', background: 'white', border: '1px solid #e8eef7', boxShadow: '0 2px 14px rgba(15,23,42,.05)' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                          <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, background: '#eff6ff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 4px 12px rgba(37,99,235,0.10)' }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 10, fontWeight: 900, color: '#2563eb', marginBottom: 10, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Kairo</div>
+                            {(() => {
+                              const isStreamingMessage = cargandoChat && i === mensajes.length - 1
+                              if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
+                              const { main, why } = splitWhyExplanationMarkdown(msg.texto)
+                              return (
+                                <>
+                                  <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
+                                    <MathMarkdown text={main} format={false} components={darkMdComponents} />
+                                  </div>
+                                  <WhyExplanation markdown={why} components={darkMdComponents} />
+                                </>
+                              )
+                            })()}
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  ) : (
+                    /* Usuario — compact bubble right */
+                    <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 0' }}>
+                      <div style={{ maxWidth: '68%', padding: '13px 18px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #60a5fa 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 650, boxShadow: '0 8px 24px rgba(37,99,235,0.22)' }}>
+                        {msg.texto}
+                      </div>
+                    </div>
+                  )
+                ))}
+
+                {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
+                  <div className="chat-msg-ai" style={{ padding: '16px 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                      <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, background: '#eff6ff', border: '1px solid rgba(191,219,254,0.85)' }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
+                        <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                        <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                        <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  /* Usuario — compact bubble right */
-                  <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 0' }}>
-                    <div style={{ maxWidth: '70%', padding: '14px 20px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #60a5fa 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 650, boxShadow: '0 12px 30px rgba(37,99,235,0.24)' }}>
-                      {msg.texto}
-                    </div>
-                  </div>
-                )
-              ))}
+                )}
 
-              {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
-                <div className="chat-msg-ai" style={{ padding: '24px 0' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <KairoBrand variant="mark" size="sm" style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: '#fff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 8px 20px rgba(37,99,235,0.12)' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
-                      <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                      <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                      <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                    </div>
-                  </div>
-                </div>
-              )}
+                <div ref={chatEndRef} />
+              </div>
 
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Input area */}
-            <div style={{ padding: '10px 32px 18px', maxWidth: 820, width: '100%', margin: '0 auto', flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, boxSizing: 'border-box', background: 'linear-gradient(180deg, rgba(248,251,255,0), rgba(248,251,255,0.94) 22%, rgba(248,251,255,0.98))' }}>
-              <div style={{ borderTop: '1px solid rgba(219,231,251,0.84)', paddingTop: 16 }}>
+              {/* Input area — editorial border from V3 */}
+              <div style={{ flexShrink: 0, background: 'white', borderTop: '1px solid #e2e8f0', padding: '12px 24px 18px' }}>
                 <div className="chat-input-wrap">
                   <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 56, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '15px 4px 15px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' }} />
                   <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>

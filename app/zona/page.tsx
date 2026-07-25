@@ -1,17 +1,29 @@
-﻿'use client'
+'use client'
 
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  BrainCircuit,
-  Sparkles,
-  Zap
-} from 'lucide-react'
-import Sidebar from '@/app/components/Sidebar'
+import { House, LayoutGrid, Zap, Clock, BookOpen } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import Flashcards from '@/components/zona/Flashcards'
 import type { Flashcard, ZonaUser } from '@/components/zona/types'
+
+const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
+
+const SUBJ_CHIPS = [
+  { label: 'Todas', color: '#94a3b8' },
+  { label: 'Mates II', color: '#2563eb' },
+  { label: 'Mates CCSS', color: '#7c3aed' },
+  { label: 'Física', color: '#CA8A04' },
+  { label: 'Química', color: '#ea580c' },
+  { label: 'Biología', color: '#2f6f4e' },
+  { label: 'Historia', color: '#92400e' },
+  { label: 'Lengua', color: '#0284C7' },
+  { label: 'Inglés', color: '#0f766e' },
+]
+
+const SB_BTN: React.CSSProperties = { width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', textDecoration: 'none', background: 'transparent', color: '#475569' }
+const SB_BTN_ACTIVE: React.CSSProperties = { ...SB_BTN, background: 'rgba(37,99,235,.15)', color: '#2563eb' }
 
 export default function ZonaPage() {
   const [user, setUser] = useState<ZonaUser | null>(null)
@@ -35,43 +47,69 @@ export default function ZonaPage() {
       setCards((flashcards ?? []) as Flashcard[])
       setLoading(false)
     }
-
     load()
   }, [router])
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_16%_12%,rgba(219,234,254,0.9),transparent_30%),radial-gradient(circle_at_86%_8%,rgba(224,231,255,0.72),transparent_28%),linear-gradient(135deg,#fbfdff_0%,#f8fafc_48%,#eff6ff_100%)]">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-700 via-blue-600 to-sky-400 text-white shadow-[0_18px_38px_rgba(37,99,235,0.24)]"><Zap size={28} /></div>
-          <p className="font-black text-slate-500">Cargando La Zona...</p>
+      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ margin: '0 auto 16px', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 24, background: '#2563eb', color: 'white' }}><Zap size={28} /></div>
+          <p style={{ fontWeight: 900, color: '#64748b', margin: 0 }}>Cargando La Zona...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(circle_at_16%_12%,rgba(219,234,254,0.9),transparent_30%),radial-gradient(circle_at_86%_8%,rgba(224,231,255,0.72),transparent_28%),linear-gradient(135deg,#fbfdff_0%,#f8fafc_48%,#eff6ff_100%)] text-[#172033] max-lg:block">
-      <Sidebar email={user.email} />
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
+      {/* 60px dark sidebar */}
+      <nav style={{ width: 60, background: '#0f172a', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', gap: 4, height: '100vh' }}>
+        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 900, fontSize: 11, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase', marginBottom: 16, padding: '8px 0' }}>Kairo</div>
+        <a href="/" style={SB_BTN}><House size={18} /></a>
+        <a href="/camino" style={SB_BTN}><LayoutGrid size={18} /></a>
+        <a href="/zona" style={SB_BTN_ACTIVE}><Zap size={18} /></a>
+        <a href="/" style={SB_BTN}><BookOpen size={18} /></a>
+        <a href="/" style={SB_BTN}><Clock size={18} /></a>
+      </nav>
 
-      <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-40 flex h-[78px] items-center justify-between border-b border-[#dbe7fb] bg-white/80 px-8 backdrop-blur-2xl max-md:h-auto max-md:flex-wrap max-md:gap-4 max-md:p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700"><BrainCircuit size={22} /></div>
+      {/* Main column */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+        {/* Hero 155px */}
+        <div style={{ position: 'relative', height: 155, flexShrink: 0, overflow: 'hidden' }}>
+          <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.4) saturate(.6)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '16px 28px' }}>
             <div>
-              <h1 className="m-0 text-xl font-black">La Zona</h1>
-              <p className="m-0 text-sm text-slate-500">Estudia a tu manera</p>
-              <p className="m-0 mt-1 max-w-xl text-xs font-semibold text-slate-400">Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
+              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Tu espacio personal</div>
+              <div style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>La Zona</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)]"><Sparkles size={15} /> Zona de estudio</div>
-            {CANVAS_ENABLED && (
-              <a className="flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-white/80 px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700" href="/zona/canvas"><Zap size={15} /> Mi Espacio</a>
-            )}
-          </div>
-        </header>
-        <main className="mx-auto w-full max-w-6xl p-8 max-md:p-4">
+        </div>
+
+        {/* Subject chips band */}
+        <div style={{ background: 'white', borderBottom: '2px solid #0f172a', display: 'flex', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none', padding: '0 20px' }}>
+          {SUBJ_CHIPS.map((chip, i) => (
+            <div key={chip.label} style={{ padding: '12px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, borderBottom: i === 0 ? '3px solid #2563eb' : '3px solid transparent', marginBottom: -2, fontSize: 11, fontWeight: 700, color: i === 0 ? '#0f172a' : '#64748b' }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: chip.color, flexShrink: 0 }} />
+              {chip.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Tab nav */}
+        <div style={{ background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', padding: '0 20px', flexShrink: 0 }}>
+          <a href="/zona" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#0f172a', borderBottom: '3px solid #2563eb', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <Zap size={13} /> Zona de Estudio
+          </a>
+          {CANVAS_ENABLED && (
+            <a href="/zona/canvas" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#64748b', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <LayoutGrid size={13} /> Mi Espacio
+            </a>
+          )}
+        </div>
+
+        {/* Content */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
           <Flashcards userId={user.id} initialCards={cards} />
         </main>
       </div>

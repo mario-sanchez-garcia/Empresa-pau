@@ -288,8 +288,8 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
               )}
 
               <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-                <button onClick={() => answerCard('dont')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-black text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"><XCircle size={18} /> No me la sé</button>
-                <button onClick={() => answerCard('know')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 font-black text-blue-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"><CheckCircle2 size={18} /> Me la sé</button>
+                <button onClick={() => answerCard('dont')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-100 bg-white px-4 py-3 font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-45"><XCircle size={16} /> No me la sé</button>
+                <button onClick={() => answerCard('know')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 font-black text-green-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"><CheckCircle2 size={16} /> Me la sé</button>
               </div>
             </div>
           </div>

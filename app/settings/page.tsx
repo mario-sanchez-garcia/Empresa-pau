@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Clock, House, LayoutGrid, LogOut, Save, UserRound, X, Zap } from 'lucide-react'
+import { Camera, LogOut, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
+import SidebarNav from '@/app/components/SidebarNav'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
 const STORAGE_KEY = 'kairo_profile_preferences'
@@ -45,8 +46,6 @@ const EDUC_LABELS: Record<string, string> = {
   'preparacion-pau': 'Prep. PAU', 'otro': 'Otro',
 }
 
-const SB_BTN: React.CSSProperties = { width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', textDecoration: 'none', background: 'transparent', color: '#475569' }
-const SB_BTN_ACTIVE: React.CSSProperties = { ...SB_BTN, background: 'rgba(37,99,235,.15)', color: '#2563eb' }
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -130,15 +129,7 @@ export default function SettingsPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
-      {/* 60px dark sidebar */}
-      <nav style={{ width: 60, background: '#0f172a', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', gap: 4, height: '100vh' }}>
-        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 900, fontSize: 11, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase', marginBottom: 16, padding: '8px 0' }}>Kairo</div>
-        <a href="/" style={SB_BTN}><House size={18} /></a>
-        <a href="/camino" style={SB_BTN}><LayoutGrid size={18} /></a>
-        <a href="/zona" style={SB_BTN}><Zap size={18} /></a>
-        <a href="/" style={SB_BTN}><Clock size={18} /></a>
-        <a href="/settings" style={SB_BTN_ACTIVE}><UserRound size={18} /></a>
-      </nav>
+      <SidebarNav />
 
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>

@@ -3,8 +3,9 @@
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { House, LayoutGrid, Zap, Clock, BookOpen } from 'lucide-react'
+import { LayoutGrid, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import SidebarNav from '@/app/components/SidebarNav'
 import Flashcards from '@/components/zona/Flashcards'
 import type { Flashcard, ZonaUser } from '@/components/zona/types'
 
@@ -21,9 +22,6 @@ const SUBJ_CHIPS = [
   { label: 'Lengua', color: '#0284C7' },
   { label: 'Inglés', color: '#0f766e' },
 ]
-
-const SB_BTN: React.CSSProperties = { width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', textDecoration: 'none', background: 'transparent', color: '#475569' }
-const SB_BTN_ACTIVE: React.CSSProperties = { ...SB_BTN, background: 'rgba(37,99,235,.15)', color: '#2563eb' }
 
 export default function ZonaPage() {
   const [user, setUser] = useState<ZonaUser | null>(null)
@@ -63,15 +61,7 @@ export default function ZonaPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
-      {/* 60px dark sidebar */}
-      <nav style={{ width: 60, background: '#0f172a', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', gap: 4, height: '100vh' }}>
-        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 900, fontSize: 11, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase', marginBottom: 16, padding: '8px 0' }}>Kairo</div>
-        <a href="/" style={SB_BTN}><House size={18} /></a>
-        <a href="/camino" style={SB_BTN}><LayoutGrid size={18} /></a>
-        <a href="/zona" style={SB_BTN_ACTIVE}><Zap size={18} /></a>
-        <a href="/" style={SB_BTN}><BookOpen size={18} /></a>
-        <a href="/" style={SB_BTN}><Clock size={18} /></a>
-      </nav>
+      <SidebarNav />
 
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>

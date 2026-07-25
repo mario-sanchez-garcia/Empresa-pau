@@ -3350,47 +3350,57 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   {caminoExerciseNotice}
                 </div>
               )}
-              {/* V4 filtros — single chip row */}
-              {(() => {
-                const chipActive: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: 999, border: '1.5px solid #2563eb', background: '#2563eb', color: 'white', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }
-                const chipInactive: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }
-                const chipLabel: React.CSSProperties = { fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', whiteSpace: 'nowrap', flexShrink: 0 }
-                const chipSep: React.CSSProperties = { width: 1, height: 16, background: '#e2e8f0', flexShrink: 0 }
-                return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={chipLabel}>Tipo</span>
-                    {convocatoriaFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
-                    <div style={chipSep} />
-                    <span style={chipLabel}>Año</span>
-                    {yearFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
-                    {versionFilterOptions.length > 1 && (
-                      <>
-                        <div style={chipSep} />
-                        <span style={chipLabel}>Sesión</span>
-                        {versionFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
-                      </>
-                    )}
-                    {questionFilterOptions.length > 0 && (
-                      <>
-                        <div style={chipSep} />
-                        <span style={chipLabel}>Pregunta</span>
-                        {questionFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
-                      </>
-                    )}
-                    {!isCatalunaExam && opcionesDisponibles.length > 0 && (
-                      <>
-                        <div style={chipSep} />
-                        <span style={chipLabel}>Opción</span>
-                        {opcionesDisponibles.map(op => (
-                          <button key={op} type="button" onClick={() => { setOpcion(op); reset() }} style={{ width: 26, height: 26, borderRadius: '50%', border: opcion === op ? '1.5px solid #2563eb' : '1.5px solid #e2e8f0', background: opcion === op ? '#2563eb' : 'white', color: opcion === op ? 'white' : '#475569', fontSize: 10, fontWeight: 900, cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
-                            {op === 0 ? 'A' : 'B'}
-                          </button>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                )
-              })()}
+              <div className="exams-filter-bar">
+                <FilterDropdown
+                  label="Año"
+                  value={String(anioSeleccionado ?? aniosDisponibles[examenIdx] ?? 'Año')}
+                  options={yearFilterOptions}
+                />
+                <div className="exams-filter-divider" />
+                <FilterDropdown
+                  label="Convocatoria"
+                  value={tipo}
+                  options={convocatoriaFilterOptions}
+                />
+                {versionFilterOptions.length > 1 && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <FilterDropdown
+                      label={asignatura === 'historia' || asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Versión'}
+                      value={versionExamenSeleccionada ?? 'Única'}
+                      options={versionFilterOptions}
+                    />
+                  </>
+                )}
+                {questionFilterOptions.length > 0 && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <FilterDropdown
+                      label={isCatalunaExam ? 'Ejercicio' : 'Pregunta'}
+                      value={questionFilterValue}
+                      options={questionFilterOptions}
+                    />
+                  </>
+                )}
+                {!isCatalunaExam && opcionesDisponibles.length > 0 && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <div className="exams-option-group">
+                      <span className="exam-option-label">Opción</span>
+                      {opcionesDisponibles.map(op => (
+                        <button
+                          type="button"
+                          className={`exam-option-button ${opcion === op ? 'is-active' : ''}`}
+                          key={op}
+                          onClick={() => { setOpcion(op); reset() }}
+                        >
+                          {op === 0 ? 'A' : 'B'}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
               {isCatalunaMates && (
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                   {ejerciciosDisponiblesCat.map((pregunta, i) => {
@@ -3634,40 +3644,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             )}
 
             {!isCatalunaExam && preguntaActiva && (
-             <div className="exams-question-card" key={preguntaActivaKey} style={{
-  background: 'rgba(255, 255, 255, 0.82)',
-  borderRadius: '24px',
-  border: '1px solid rgba(219, 231, 251, 0.80)',
-  overflow: 'clip',
-  marginBottom: '22px',
-  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)'
-}}>
-                <div style={{ padding: '16px 24px', backgroundColor: cfg.light, borderBottom: '2px solid ' + cfg.accent, display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
-                    {asignatura === 'historia' && diaHistoriaSeleccionado && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{diaHistoriaSeleccionado}</span>
-                    )}
-                    {asignatura === 'lengua' && versionExamenSeleccionada && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
-                    )}
-                    {asignatura === 'ingles' && versionExamenSeleccionada && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
-                    )}
-                    {asignatura === 'biologia' && versionExamenSeleccionada && (
-                      <span style={{ padding: '2px 10px', borderRadius: '20px', background: '#fff', color: cfg.color, fontSize: '11px', border: '1px solid ' + cfg.accent, fontWeight: 700 }}>{versionExamenSeleccionada}</span>
-                    )}
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: cfg.color, color: '#fff', fontSize: '11px', fontWeight: 600 }}>{bloqueActivoLabel}</span>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', background: WARM.wash, color: WARM.ink, fontSize: '11px', border: '1px solid ' + cfg.soft }}>{asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión / opción' : 'Opción'} {opcionMostrada}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                    <span style={{ fontSize: '26px', fontWeight: 800, color: cfg.color }}>{formatPts(puntuacionPreguntaActiva)}</span>
-                    <span style={{ fontSize: '13px', color: cfg.accent }}>pts</span>
-                  </div>
+             <div className="exams-question-card" key={preguntaActivaKey} style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, background: '#fafbfc' }}>
+                  <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', whiteSpace: 'nowrap' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
+                  {bloqueActivoLabel && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, whiteSpace: 'nowrap' }}>{bloqueActivoLabel}</span>}
+                  {asignatura === 'historia' && diaHistoriaSeleccionado && (
+                    <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{diaHistoriaSeleccionado}</span>
+                  )}
+                  {(asignatura === 'lengua' || asignatura === 'ingles' || asignatura === 'biologia') && versionExamenSeleccionada && (
+                    <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{versionExamenSeleccionada}</span>
+                  )}
+                  <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>
+                    {asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Opción'} {opcionMostrada}
+                  </span>
+                  <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{formatPts(puntuacionPreguntaActiva)} pts</span>
                 </div>
-                <div style={{ padding: '24px', overflowY: 'auto' }}>
+                <div style={{ padding: 18, overflowY: 'auto' }}>
                   {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Text</div>
@@ -3749,8 +3741,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     </div>
                   )}
                   {asignatura !== 'ingles' && (
-                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Enunciado</div>
+                    <div>
+                      <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginBottom: 8 }}>Enunciado</div>
                       {preguntaActivaIncompleta ? (
                         <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
                           <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
@@ -3866,12 +3858,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   {(() => {
                     const parts = correctionScoreLabel !== '--' ? correctionScoreLabel.split('/') : null
                     const ratio = parts ? parseFloat(parts[0]) / parseFloat(parts[1]) : null
-                    const scoreColor = ratio !== null ? colorNota(ratio * 10) : '#0f172a'
                     return (
-                      <div style={{ padding: '16px 18px', borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
-                        <div className="exams-side-label">Nota estimada</div>
-                        <div style={{ marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                          <span style={{ fontSize: 36, fontWeight: 900, color: correccion ? scoreColor : '#94a3b8', lineHeight: 1, letterSpacing: '-0.02em', transition: 'color 400ms ease' }}>
+                      <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                        <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 6 }}>Nota estimada</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                          <span style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>
                             {correccion ? (parts?.[0] ?? '--') : cargando ? '...' : '--'}
                           </span>
                           {parts && <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>/{parts[1]}</span>}
@@ -3885,8 +3876,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   })()}
 
                   {/* Puntos fuertes */}
-                  <div style={{ padding: '14px 18px', borderBottom: '1px solid #f8fafc' }}>
-                    <div className="exams-side-label" style={{ color: '#15803d', marginBottom: 10 }}>Puntos fuertes</div>
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f8fafc' }}>
+                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#15803d', marginBottom: 10 }}>Puntos fuertes</div>
                     {correctionFuertes.length > 0 ? correctionFuertes.map((point, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
                         <div style={{ width: 16, height: 16, borderRadius: 9999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>✓</div>
@@ -3898,8 +3889,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
 
                   {/* Errores a corregir */}
-                  <div style={{ padding: '14px 18px', borderBottom: '1px solid #f8fafc' }}>
-                    <div className="exams-side-label" style={{ color: '#b91c1c', marginBottom: 10 }}>Errores a corregir</div>
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f8fafc' }}>
+                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#b91c1c', marginBottom: 10 }}>Errores a corregir</div>
                     {correctionErrores.length > 0 ? correctionErrores.map((err, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
                         <div style={{ width: 16, height: 16, borderRadius: 9999, display: 'grid', placeItems: 'center', background: '#ffedd5', color: '#ea580c', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>!</div>
@@ -3911,8 +3902,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
 
                   {/* Bloque asociado */}
-                  <div style={{ padding: '14px 18px', borderBottom: '1px solid #f8fafc' }}>
-                    <div className="exams-side-label" style={{ marginBottom: 10 }}>Bloque asociado</div>
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f8fafc' }}>
+                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 10 }}>Bloque asociado</div>
                     {!isCatalunaExam && preguntaActiva ? (
                       <>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 9999, background: '#eff6ff', color: '#1d4ed8', fontSize: 11, fontWeight: 800, border: '1px solid #bfdbfe' }}>
@@ -3926,11 +3917,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
 
                   {/* Sesión activa */}
-                  <div style={{ margin: '12px 14px', padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ margin: '0 16px 16px', padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Sesión activa</div>
-                      <div style={{ fontSize: 10, color: '#4ade80', marginTop: 1 }}>
+                      <div style={{ fontSize: 10, color: '#86efac', marginTop: 1 }}>
                         {respuesta.trim() || imagen ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
                       </div>
                     </div>

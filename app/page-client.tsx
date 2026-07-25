@@ -93,6 +93,7 @@ const WARM = {
 
 const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
 const BOOKS_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_134153_21d8ecce-c198-4ae1-8fc9-22814072fdbc.png'
+const EXAM_HALL_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_120451_1bd058fd-522e-43ce-9cd1-c935de500674.png'
 
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 
@@ -4171,21 +4172,41 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         )}
 
         {seccion === 'historial' && (
-          <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+          <>
             {cargandoHistorial ? (
-              <div style={{ textAlign: 'center', padding: '60px', color: WARM.muted }}>Cargando historial...</div>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center', color: WARM.muted }}>Cargando historial...</div>
+              </div>
             ) : historial.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px' }}>
-                <div style={{ width: '58px', height: '58px', borderRadius: '20px', background: WARM.wash, color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.14)', border: '1px solid #dbeafe' }}><BarChart3 size={28} /></div>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Sin correcciones aún</div>
-                <div style={{ fontSize: '14px', color: WARM.muted }}>Haz tu primera corrección en Exámenes</div>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <div style={{ width: 58, height: 58, borderRadius: 20, background: WARM.wash, color: WARM.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.14)', border: '1px solid #dbeafe' }}><BarChart3 size={28} /></div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: WARM.ink, marginBottom: 8 }}>Sin correcciones aún</div>
+                  <div style={{ fontSize: 14, color: WARM.muted }}>Haz tu primera corrección en Exámenes</div>
+                </div>
               </div>
             ) : (
-              <div>
+              <>
+                {/* V4 La Cuadrícula — photo hero */}
+                <div style={{ position: 'relative', height: 160, flexShrink: 0, overflow: 'hidden' }}>
+                  <img src={EXAM_HALL_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.42) saturate(.6)' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '18px 28px', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Registro académico</div>
+                      <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>Mis<br />correcciones</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                      <div style={{ fontSize: 52, fontWeight: 900, color: 'white', letterSpacing: '-.05em', lineHeight: 1 }}>{historial.length}</div>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,.4)', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase' }}>total</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats band */}
                 {(() => {
                   const statItems: Array<{ label: string; media: string | null; cfg: typeof ASIGNATURAS.mates }> = [
-                    { label: 'Matemáticas', media: mediaM, cfg: ASIGNATURAS.mates },
-                    { label: 'Matemáticas CCSS', media: mediaMatematicasCCSS, cfg: ASIGNATURAS.matematicas_ccss },
+                    { label: 'Mates II', media: mediaM, cfg: ASIGNATURAS.mates },
+                    { label: 'Mates CCSS', media: mediaMatematicasCCSS, cfg: ASIGNATURAS.matematicas_ccss },
                     { label: 'Física', media: mediaFisica, cfg: ASIGNATURAS.fisica },
                     { label: 'Química', media: mediaQuimica, cfg: ASIGNATURAS.quimica },
                     { label: 'Biología', media: mediaBiologia, cfg: ASIGNATURAS.biologia },
@@ -4194,65 +4215,82 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     { label: 'Historia', media: mediaHist, cfg: ASIGNATURAS.historia },
                   ]
                   return (
-                    <div className="pau-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '28px' }}>
-                      <div style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(37,99,235,0.06)' }}>
-                        <div style={{ fontSize: '10px', fontWeight: 800, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Total</div>
-                        <div style={{ fontSize: '34px', fontWeight: 820, color: WARM.ink, letterSpacing: '-0.02em' }}>{historial.length}</div>
-                        <div style={{ fontSize: '11px', color: WARM.softText, marginTop: '4px' }}>correcciones</div>
-                      </div>
+                    <div style={{ background: 'white', borderBottom: '2px solid #0f172a', display: 'flex', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}>
                       {statItems.map(({ label, media, cfg: sCfg }) => (
-                        <div key={label} style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px', textAlign: 'center', boxShadow: '0 8px 24px rgba(37,99,235,0.06)', position: 'relative', overflow: 'hidden' }}>
-                          {media && (
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: sCfg.soft }}>
-                              <div style={{ height: '100%', width: `${Math.min(parseFloat(media) * 10, 100)}%`, background: colorNota(parseFloat(media)), borderRadius: 999, transition: 'width 800ms var(--ease-out)' }} />
-                            </div>
-                          )}
-                          <div style={{ fontSize: '10px', fontWeight: 800, color: sCfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>{label}</div>
+                        <div key={label} style={{ flexShrink: 0, minWidth: 110, padding: '12px 18px', borderRight: '1px solid #f1f5f9' }}>
+                          <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: sCfg.color, marginBottom: 4 }}>{label}</div>
                           {media ? (
-                            <div style={{ fontSize: '30px', fontWeight: 820, color: colorNota(parseFloat(media)), letterSpacing: '-0.02em' }}>
-                              {media}<span style={{ fontSize: '13px', color: WARM.softText, fontWeight: 600 }}>/10</span>
+                            <div>
+                              <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-.04em', lineHeight: 1, color: colorNota(parseFloat(media)) }}>{media}</span>
+                              <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>/10</span>
                             </div>
                           ) : (
-                            <div style={{ fontSize: '14px', color: WARM.softText, marginTop: '6px' }}>—</div>
+                            <div style={{ fontSize: 18, color: '#e2e8f0', fontWeight: 900 }}>—</div>
                           )}
                         </div>
                       ))}
                     </div>
                   )
                 })()}
-                <div className="pau-stagger" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {historial.map((item, i) => {
-                    const itemCfg = ASIGNATURAS[item.asignatura as Asignatura] ?? ASIGNATURAS.historia
-                    const ItemIcon = itemCfg.icon
-                    return (
-                    <div className="campus-hover" key={i} onClick={() => setItemSeleccionado(item)} style={{ ...hoverVars(itemCfg.color, itemCfg.light, itemCfg.accent), background: '#ffffff', borderRadius: '18px', border: '1px solid #e5edf9', padding: '18px 20px', cursor: 'pointer', boxShadow: '0 6px 20px rgba(37,99,235,0.05)', borderLeft: '4px solid ' + itemCfg.color, display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 14, background: itemCfg.light, color: itemCfg.color, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                        <ItemIcon size={18} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
-                          <span style={{ fontSize: '13px', fontWeight: 750, color: '#111827' }}>{nombreAsignatura(item.asignatura)}</span>
-                          <span style={{ padding: '1px 8px', borderRadius: '20px', background: itemCfg.light, color: itemCfg.color, fontSize: '11px', fontWeight: 700, border: '1px solid ' + itemCfg.soft }}>{item.tipo}</span>
-                          <span style={{ padding: '1px 8px', borderRadius: '20px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.año}</span>
-                          {item.bloque && <span style={{ padding: '1px 8px', borderRadius: '20px', background: '#f8fafc', color: WARM.muted, fontSize: '11px', fontWeight: 600 }}>{item.bloque}</span>}
+
+                {/* Grid content */}
+                <main style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px', maxWidth: 1100, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+                  {(() => {
+                    const grouped = historial.reduce((acc: Record<string, typeof historial>, item) => {
+                      const d = new Date(item.created_at)
+                      const key = d.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+                      const cap = key.charAt(0).toUpperCase() + key.slice(1)
+                      if (!acc[cap]) acc[cap] = []
+                      acc[cap].push(item)
+                      return acc
+                    }, {})
+                    return Object.entries(grouped).map(([month, items]) => (
+                      <div key={month} style={{ marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          <div style={{ fontSize: 9, fontWeight: 900, color: '#0f172a', letterSpacing: '.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{month}</div>
+                          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
                         </div>
-                        <div style={{ fontSize: '12px', color: WARM.softText }}>{new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                          {items.map((item, i) => {
+                            const itemCfg = ASIGNATURAS[item.asignatura as Asignatura] ?? ASIGNATURAS.historia
+                            const scoreRatio = item.nota !== null && item.nota_maxima ? item.nota / item.nota_maxima * 10 : null
+                            return (
+                              <div
+                                key={i}
+                                className="campus-hover"
+                                onClick={() => setItemSeleccionado(item)}
+                                style={{ ...hoverVars(itemCfg.color, itemCfg.light, itemCfg.accent), background: 'white', borderRadius: 16, border: '1px solid #e8eef7', overflow: 'hidden', cursor: 'pointer', transition: 'transform 120ms, box-shadow 120ms', boxShadow: '0 2px 10px rgba(15,23,42,.04)', display: 'flex', flexDirection: 'column' }}
+                              >
+                                <div style={{ height: 5, background: itemCfg.color, flexShrink: 0 }} />
+                                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+                                    <div style={{ fontSize: 13, fontWeight: 900, color: '#111827', lineHeight: 1.25, flex: 1, minWidth: 0, paddingRight: 8 }}>{nombreAsignatura(item.asignatura)}</div>
+                                    {scoreRatio !== null && (
+                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <span style={{ fontSize: 34, fontWeight: 900, letterSpacing: '-.05em', lineHeight: 1, color: colorNota(scoreRatio) }}>{item.nota}</span>
+                                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>/{item.nota_maxima}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 'auto', paddingTop: 10, borderTop: '1px solid #f1f5f9', alignItems: 'center' }}>
+                                    <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700, background: itemCfg.light, color: itemCfg.color }}>{item.tipo}</span>
+                                    {item.bloque && <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 10, fontWeight: 600, background: '#f8fafc', color: '#64748b' }}>{item.bloque}</span>}
+                                    <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: '#f8fafc', color: '#94a3b8', marginLeft: 'auto' }}>
+                                      {new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                        {item.nota !== null && item.nota_maxima !== null && (
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: '26px', fontWeight: 820, color: colorNota(item.nota / item.nota_maxima * 10), letterSpacing: '-0.02em' }}>{item.nota}</span>
-                            <span style={{ fontSize: '13px', color: WARM.softText }}>/{item.nota_maxima}</span>
-                          </div>
-                        )}
-                        <ArrowUpRight size={16} color={WARM.softText} />
-                      </div>
-                    </div>
-                  )})}
-                </div>
-              </div>
+                    ))
+                  })()}
+                </main>
+              </>
             )}
-          </main>
+          </>
         )}
 
         {seccion === 'planning' && (

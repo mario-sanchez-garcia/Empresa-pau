@@ -163,7 +163,7 @@ export default function RichTextArea({
           fontSize: "14px",
           lineHeight: "1.7",
           border: `1.5px solid ${borderColor}`,
-          borderTop: "none",
+          borderTop: "1px solid #e2e8f0",
           background: "#fafafa",
           color: "#1f2937",
           resize: "vertical",

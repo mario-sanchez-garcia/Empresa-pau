@@ -240,8 +240,8 @@ export default function MathAnswerToolbar({
       style={{
         borderLeft: `1.5px solid ${borderColor}`,
         borderRight: `1.5px solid ${borderColor}`,
-        borderBottom: open ? `1px solid ${borderColor}` : "none",
-        background: "#fff",
+        borderBottom: `1px solid #e2e8f0`,
+        background: "#f8fafc",
       }}
     >
       <div className="flex items-center gap-2 overflow-x-auto px-2 py-2">

@@ -3,7 +3,7 @@ import { useState, useEffect, type CSSProperties } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { ArrowUpRight, Bot, CalendarDays, Check, Clock3, ListChecks, PenLine, RefreshCw, Rocket, Settings, Target, type LucideIcon } from 'lucide-react'
-import Sidebar from '@/app/components/Sidebar'
+import SidebarNav from '@/app/components/SidebarNav'
 import GradePredictionCard from '@/components/grade/GradePredictionCard'
 import { calculateGradePredictions, type GradeEvidenceItem, type GradePredictionResult } from '@/app/lib/gradePrediction'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
@@ -374,7 +374,7 @@ Máximo 3 tareas por día. Adapta la carga a las horas disponibles (${p.horas_di
 
   return (
     <div className="flex min-h-screen max-lg:block" style={{ background: 'radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.9), transparent 30%), radial-gradient(circle at 86% 8%, rgba(224, 231, 255, 0.72), transparent 28%), radial-gradient(circle at 78% 82%, rgba(186, 230, 253, 0.58), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #f8fafc 48%, #eff6ff 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif' }}>
-      <Sidebar activeItem="camino" email={usuario?.email} />
+      <SidebarNav />
       <div className="min-w-0 flex-1">
       <style>{`
         .campus-hover,

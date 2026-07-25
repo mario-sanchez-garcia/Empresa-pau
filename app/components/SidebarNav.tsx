@@ -27,13 +27,13 @@ export default function SidebarNav() {
   const pathname = usePathname()
 
   return (
-    // Spacer keeps layout at 60px; nav overlays rightward on hover
-    <div style={{ width: 60, flexShrink: 0, position: 'relative', zIndex: 50 }}>
+    // Spacer keeps 60px column in layout; nav is fixed to viewport
+    <div style={{ width: 60, flexShrink: 0 }}>
       <nav
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         style={{
-          position: 'absolute', left: 0, top: 0, height: '100vh',
+          position: 'fixed', left: 0, top: 0, height: '100vh', zIndex: 50,
           width: open ? 212 : 60,
           background: '#0f172a',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',

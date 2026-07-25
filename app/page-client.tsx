@@ -23,7 +23,6 @@ import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from './lib/contentQuality'
 import { getRandomEvauExerciseForMission, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
-import Sidebar, { type SidebarItemId } from './components/Sidebar'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
 import CatFisicaEjercicioCard from './components/CatFisicaEjercicioCard'
@@ -91,6 +90,8 @@ const WARM = {
   blue: '#2563eb',
   shadow: '0 24px 70px rgba(37, 99, 235, 0.09)'
 }
+
+const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
 
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 
@@ -2732,24 +2733,18 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           position: relative;
           z-index: 90;
           display: flex;
-          align-items: stretch;
+          align-items: center;
           gap: 4px;
           width: 100%;
-          padding: 6px;
-          border: 1px solid rgba(226, 232, 240, 0.9);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.62);
-          box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.72);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          padding: 0;
           overflow: visible;
+          flex-wrap: wrap;
         }
 
         .exams-filter-card {
           position: relative;
           z-index: 90;
           overflow: visible !important;
-          margin-bottom: 34px !important;
         }
 
         .exams-filter-card > div:not(:first-child):not(.exams-filter-bar) {
@@ -3195,12 +3190,28 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           transform: translateY(-2px);
         }
       `}</style>
-      <Sidebar
-        activeItem={seccion === 'planning' ? 'camino' : seccion as SidebarItemId}
-        email={usuario?.email}
-        onNavigate={(item) => navegarASeccion(item as Seccion)}
-        onLogout={cerrarSesion}
-      />
+      {/* 60px dark sidebar — same DNA as SimulacroShell */}
+      <nav style={{ width: 60, background: '#0f172a', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', gap: 4, position: 'sticky', top: 0, height: '100vh', zIndex: 40 }}>
+        <a href="/camino" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 900, fontSize: 11, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase', marginBottom: 16, padding: '8px 0', textDecoration: 'none' }}>Kairo</a>
+        <a href="/" title="Inicio" style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', textDecoration: 'none' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </a>
+        <a href="/camino" title="Camino PAU" style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', textDecoration: 'none' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </a>
+        <button type="button" title="Exámenes" onClick={() => navegarASeccion('examenes')} style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: (seccion === 'examenes' || seccion === 'chat' || seccion === 'historial') ? 'rgba(37,99,235,0.2)' : 'transparent', color: (seccion === 'examenes' || seccion === 'chat' || seccion === 'historial') ? '#2563eb' : '#475569', border: 'none', cursor: 'pointer' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </button>
+        <a href="/simulacros" title="Simulacros" style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', textDecoration: 'none' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </a>
+        <a href="/zona" title="La Zona" style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', textDecoration: 'none' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        </a>
+        <a href="/settings" title="Configuración" style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', textDecoration: 'none', marginTop: 'auto' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+        </a>
+      </nav>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? 'radial-gradient(circle at 14% 8%, rgba(219,234,254,0.95), transparent 30%), radial-gradient(circle at 86% 18%, rgba(224,231,255,0.72), transparent 32%), linear-gradient(180deg, #fbfdff 0%, #f8fbff 45%, #eff6ff 100%)' : undefined, transition: 'background 300ms ease' }}>
        <header className="kairo-app-header kairo-topbar" style={{
   borderBottom: seccion === 'chat' ? '1px solid rgba(219,231,251,0.88)' : '1px solid rgba(219,231,251,0.78)',
@@ -3209,12 +3220,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   WebkitBackdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
   padding: '10px 32px',
   minHeight: '64px',
-  display: 'flex',
+  display: seccion === 'examenes' ? 'none' : 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '18px',
-  position: seccion === 'examenes' ? 'relative' : 'sticky',
-  top: seccion === 'examenes' ? undefined : 0,
+  position: 'sticky',
+  top: 0,
   zIndex: 40,
   transition: 'background 300ms ease, border-color 300ms ease',
 }}>
@@ -3245,23 +3256,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         </header>
 
         {seccion === 'examenes' && (
-          <main className="exams-screen" style={{ flex: 1, padding: '32px 32px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
-
-            {/* ── Page title ──────────────────────────────── */}
-            <div className="exams-hero">
-              <div className="pau-reveal" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ width: 52, height: 52, borderRadius: 18, background: cfg.light, border: '1.5px solid ' + cfg.soft, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 24px ' + cfg.accent + '28', flexShrink: 0 }}>
-                  <cfg.icon size={26} />
-                </div>
+          <>
+            {/* V4 Mesa de Trabajo — photo hero */}
+            <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+              <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)' }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
-                  <h1 style={{ margin: 0, fontSize: 28, fontWeight: 860, color: '#111827', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-                    {cfg.label}
-                  </h1>
-                  <p style={{ margin: '5px 0 0', fontSize: 13, color: '#6b7280', lineHeight: 1.5 }}>
-                    {tipo} {anioSeleccionado ? `· ${anioSeleccionado}` : ''} · {examSystemLabel(ccaa)}
-                  </p>
+                  <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
+                  <div style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 8, fontWeight: 600 }}>{tipo} · {anioSeleccionado ?? '—'} · {examSystemLabel(ccaa)}</div>
                 </div>
               </div>
+            </div>
+            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
+
+            {/* ── Search bar ──────────────────────────────── */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
               <div className="exams-search-bar pau-reveal pau-reveal-delay-1">
                 <input
                   className="exams-search-input"
@@ -3306,118 +3316,27 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
             </div>
 
-            <div className="exams-subject-section" style={{ marginBottom: '22px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ color: WARM.softText, fontSize: 11, fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{showAllSubjects ? 'Todas las asignaturas' : 'Selecciona una asignatura'}</div>
-                </div>
-                <button
-                  className="campus-hover"
-                  onClick={() => setShowAllSubjects(value => !value)}
-                  style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), border: '1px solid #dbe7fb', borderRadius: '999px', background: '#ffffff', color: WARM.blue, padding: '9px 14px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 850, cursor: 'pointer', boxShadow: '0 12px 24px rgba(37,99,235,0.06)' } as CSSProperties}
-                  type="button"
-                >
-                  {showAllSubjects ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  {showAllSubjects ? 'Ocultar' : 'Ver todas'}
-                </button>
-              </div>
-              {pinnedLimitMsg && !showAllSubjects && (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '12px', padding: '8px 14px', marginBottom: '12px', color: '#c2410c', fontSize: '13px', fontWeight: 600 }}>
-                  Puedes anclar hasta 4 asignaturas. Desancla una para añadir otra.
-                </div>
-              )}
-
-              <div
-                className="subject-card-grid exams-subject-strip pau-stagger"
-                style={!showAllSubjects ? {
-                  gridTemplateColumns:
-                    visibleSubjectCards.length === 1 ? 'minmax(280px, 520px)' :
-                    visibleSubjectCards.length === 2 ? 'repeat(2, 1fr)' :
-                    visibleSubjectCards.length === 3 ? 'repeat(3, 1fr)' :
-                    'repeat(4, 1fr)',
-                  justifyContent: visibleSubjectCards.length === 1 ? 'center' : undefined,
-                } : {}}
-              >
-              {visibleSubjectCards.map(key => {
+            {/* V4 subject chips */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
+              <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
+              {HOME_SUBJECTS.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
-                const Icon = card.icon
-                const active = asignatura === key
-                const pinned = pinnedClean.includes(key)
+                const isActive = asignatura === key
                 return (
-                  <div
-                    className={`campus-subject-card pau-subject-card ${active ? 'is-active' : ''}`}
+                  <button
                     key={key}
+                    type="button"
                     onClick={() => navegarAAsignatura(key)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        navegarAAsignatura(key)
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    style={{
-                      ...hoverVars(val.color, val.light, val.accent),
-                      position: 'relative',
-                      overflow: 'hidden',
-                      width: '100%',
-                      textAlign: 'left',
-                      minHeight: '104px',
-                      padding: '16px',
-                      borderRadius: '20px',
-                      border: active ? '1px solid ' + val.accent : '1px solid rgba(219,231,251,0.95)',
-                      background: active ? 'linear-gradient(145deg, #ffffff 0%, ' + val.light + ' 100%)' : 'rgba(255,255,255,0.9)',
-                      cursor: 'pointer',
-                      outline: 'none',
-                      boxShadow: active ? '0 18px 42px ' + val.accent + '22' : '0 12px 30px rgba(15, 23, 42, 0.06)'
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, border: isActive ? `1.5px solid ${val.color}` : '1px solid #e2e8f0', background: isActive ? val.light : 'white', fontSize: 12, fontWeight: 700, color: isActive ? val.color : '#475569', cursor: 'pointer', transition: 'all 120ms ease-out' }}
                   >
-                    <div style={{ position: 'absolute', right: '-46px', bottom: '-54px', width: '120px', height: '120px', borderRadius: '50%', background: val.accent + '14' }} />
-                    <SubjectIllustration subject={key} color={val.color} accent={val.accent} />
-                    <button
-                      aria-label={pinned ? `Desanclar ${card.title}` : `Anclar ${card.title}`}
-                      className="campus-hover"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        togglePinnedSubject(key)
-                      }}
-                      style={{ ...hoverVars(val.color, val.light, val.accent), position: 'absolute', right: '14px', top: '14px', width: '34px', height: '34px', borderRadius: '999px', border: '1px solid ' + (pinned ? val.accent : '#dbe7fb'), background: pinned ? val.light : '#ffffff', color: pinned ? val.color : WARM.softText, display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 4, boxShadow: '0 10px 22px rgba(37,99,235,0.08)' } as CSSProperties}
-                      type="button"
-                    >
-                      <Pin size={16} fill={pinned ? 'currentColor' : 'none'} />
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '13px', paddingRight: '34px', position: 'relative', zIndex: 2 }}>
-                      <div style={{ width: '46px', height: '46px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : val.light, color: val.color, boxShadow: '0 12px 28px rgba(37,99,235,0.08)', flex: '0 0 auto' }}>
-                        <Icon size={22} strokeWidth={2.1} />
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: 820, color: WARM.ink, lineHeight: 1.25 }}>{card.title}</div>
-                        <div style={{ marginTop: '4px', color: WARM.muted, fontSize: '12px', lineHeight: '1.35', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.subtitle}</div>
-                      </div>
-                    </div>
-                    <div className="subject-kicker" style={{ marginTop: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 10px', borderRadius: '999px', background: active ? '#ffffff' : val.light, color: val.color, fontSize: '11px', fontWeight: 760, position: 'relative', zIndex: 2 }}>
-                      <Flame size={13} />{card.kicker}
-                    </div>
-                  </div>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: val.color, flexShrink: 0 }} />
+                    {card.title}
+                  </button>
                 )
               })}
-              </div>
             </div>
-           {!isPhilosophy && <div className="exams-filter-card pau-reveal pau-reveal-delay-2" style={{
-  background: 'rgba(255, 255, 255, 0.92)',
-  borderRadius: '22px',
-  border: '1px solid rgba(219, 231, 251, 0.85)',
-  padding: '20px',
-  marginBottom: '22px',
-  boxShadow: '0 20px 50px rgba(37,99,235,0.08)',
-  backdropFilter: 'blur(16px)',
-  WebkitBackdropFilter: 'blur(16px)'
-}}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '14px' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
-                <div style={{ fontSize: '11px', fontWeight: 850, color: WARM.softText, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Filtros del examen · {cfg.short}</div>
-              </div>
+           {!isPhilosophy && <div className="exams-filter-card" style={{ background: 'white', borderTop: '1px solid #e2e8f0', borderBottom: '2px solid #0f172a', padding: '12px 0', marginBottom: 20 }}>
               {caminoExerciseNotice && (
                 <div style={{ marginBottom: '14px', borderRadius: '14px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', padding: '10px 12px', fontSize: '12px', fontWeight: 760, lineHeight: 1.45 }}>
                   {caminoExerciseNotice}
@@ -4071,6 +3990,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
             </footer>
           </main>
+          </>
         )}
 
         {seccion === 'chat' && (

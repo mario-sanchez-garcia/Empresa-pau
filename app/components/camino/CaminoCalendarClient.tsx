@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, Bookmark, BookOpen, BookPlus, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, GripVertical, Medal, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, Bookmark, BookOpen, BookPlus, CalendarDays, Check, ChevronDown, ChevronLeft, Clock3, GripVertical, Medal, PanelLeft, Pencil, Plus, RotateCcw, Target, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import Sidebar from '@/app/components/Sidebar'
 import { supabase } from '@/app/lib/supabase'
@@ -775,6 +775,7 @@ export default function CaminoCalendarClient() {
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
   const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [streak, setStreak] = useState(0)
   const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
   const [blockCompletedCount, setBlockCompletedCount] = useState(0)
@@ -1382,11 +1383,11 @@ export default function CaminoCalendarClient() {
   }
 
   if (!hasProfile) return (
-    <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-700"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Kairo cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
+    <Shell sidebarOpen={true}><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-700"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Kairo cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
   )
 
   if (caminoReadyStatus === 'no_queue') return (
-    <Shell>
+    <Shell sidebarOpen={true}>
       <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
         <section className="w-full rounded-[32px] border border-amber-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
@@ -1409,7 +1410,7 @@ export default function CaminoCalendarClient() {
   )
 
   if (caminoReadyStatus === 'no_future') return (
-    <Shell>
+    <Shell sidebarOpen={true}>
       <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
         <section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
           <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
@@ -1421,8 +1422,28 @@ export default function CaminoCalendarClient() {
   )
 
   return (
-    <Shell>
-      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-5 py-4 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p><h1 className="text-2xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1></div><div className="flex flex-wrap gap-2"><button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-[0_10px_26px_rgba(37,99,235,0.08)]"><CalendarDays size={16} /> Ver semana</button><button onClick={openNewExam} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition"><Plus size={16} /> Añadir examen</button><button onClick={() => setShowAddSubjectModal(true)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-700 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:bg-emerald-100 transition"><BookPlus size={16} /> Añadir asignatura</button></div></div></header>
+    <Shell sidebarOpen={sidebarOpen}>
+      <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/90 px-4 py-3 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(v => !v)}
+              className="hidden lg:inline-flex items-center justify-center rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 active:scale-[0.95]"
+              aria-label={sidebarOpen ? 'Cerrar menú lateral' : 'Abrir menú lateral'}
+            >
+              <PanelLeft size={18} />
+            </button>
+            <div>
+              <h1 className="text-xl font-black tracking-tight text-slate-950">Tu semana de estudio</h1>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-white px-4 py-2 text-sm font-black text-blue-700 transition hover:bg-blue-50 active:scale-[0.97]"><CalendarDays size={15} /> Ver semana</button>
+            <button onClick={openNewExam} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-600 transition hover:bg-slate-50 active:scale-[0.97]"><Plus size={15} /> Añadir examen</button>
+            <button onClick={() => setShowAddSubjectModal(true)} className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 transition hover:bg-emerald-100 active:scale-[0.97]"><BookPlus size={15} /> Añadir asignatura</button>
+          </div>
+        </div>
+      </header>
       <main className="mx-auto max-w-7xl px-5 py-6">
         <section className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1500,32 +1521,26 @@ export default function CaminoCalendarClient() {
             )}
           </div>
           <div className="flex flex-col gap-3">
-            <div className="rounded-[28px] border border-blue-100 bg-white px-4 py-4 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Tu objetivo de hoy</p>
+            <div className="rounded-[20px] border border-slate-100 bg-white px-4 py-4">
+              <p className="text-sm font-black text-slate-700">Objetivo de hoy</p>
               {todayMain[0] ? (
-                <>
-                  <p className="mt-2 text-xs font-black text-slate-700">Completa esta misión para:</p>
-                  <ul className="mt-1.5 grid gap-1">
-                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-blue-600">+{todayMain[0].baseXP} XP</span></li>
-                    <li className="text-xs font-semibold text-slate-600">• {streak > 0 ? 'Mantener tu racha' : 'Empezar una racha'}</li>
-                    <li className="text-xs font-semibold text-slate-600">• Avanzar en <span className="font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
-                  </ul>
-                </>
+                <ul className="mt-2.5 grid gap-1.5">
+                  <li className="flex items-center gap-2 text-xs font-semibold text-slate-600"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-black text-blue-700">+</span><span className="font-black text-blue-600">+{todayMain[0].baseXP} XP</span></li>
+                  <li className="flex items-center gap-2 text-xs font-semibold text-slate-600"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-500">🔥</span>{streak > 0 ? 'Mantener tu racha' : 'Empezar una racha'}</li>
+                  <li className="flex items-center gap-2 text-xs font-semibold text-slate-600"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-500">→</span>Avanzar en <span className="ml-1 font-black text-slate-800">{formatBlockLabel(todayMain[0].blockKey) || todayMain[0].block || todayMain[0].subject}</span></li>
+                </ul>
               ) : microMission ? (
-                <>
-                  <p className="mt-2 text-xs font-black text-slate-700">Reto exprés de hoy:</p>
-                  <ul className="mt-1.5 grid gap-1">
-                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-blue-600">5 tarjetas · 3 min</span></li>
-                    <li className="text-xs font-semibold text-slate-600">• <span className="font-black text-slate-800">{microMission.subject}</span></li>
-                    <li className="text-xs font-semibold text-slate-600">• Sin tocar tu plan de mañana</li>
-                  </ul>
-                </>
+                <ul className="mt-2.5 grid gap-1.5">
+                  <li className="flex items-center gap-2 text-xs font-semibold text-slate-600"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-black text-blue-700">5</span><span className="font-black text-blue-600">5 tarjetas · 3 min</span></li>
+                  <li className="flex items-center gap-2 text-xs font-semibold text-slate-600"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-500">→</span><span className="font-black text-slate-800">{microMission.subject}</span></li>
+                  <li className="flex items-center gap-2 text-xs font-semibold text-slate-600"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-500">✓</span>Sin tocar tu plan de mañana</li>
+                </ul>
               ) : null}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
-                <span className="text-[11px] font-semibold text-slate-400">División</span>
-                <span className="rounded-xl px-2 py-0.5 text-[11px] font-bold" style={{ background: division.bg, color: division.text }}>{division.name}</span>
+                <span className="text-xs font-semibold text-slate-400">División actual</span>
+                <span className="rounded-lg px-2.5 py-1 text-xs font-black" style={{ background: division.bg, color: division.text }}>{division.name}</span>
                 {caminoPlanId === 'free' && daysSinceReg !== null && (
-                  <p className="w-full rounded-xl bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
+                  <p className="w-full rounded-lg bg-blue-50 px-2.5 py-1.5 text-xs font-bold text-blue-700">Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</p>
                 )}
               </div>
             </div>
@@ -1534,8 +1549,8 @@ export default function CaminoCalendarClient() {
         </section>
 
         {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null) && (
-          <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu avance</p>
+          <section className="mb-5 rounded-2xl border border-slate-100 bg-white/60 px-5 py-4">
+            <p className="mb-3 text-sm font-black text-slate-700">Tu avance</p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {([
                 { subject: 'matematicas_ii', label: 'Matemáticas II', total: 9, color: '#2563eb' },
@@ -1595,25 +1610,25 @@ export default function CaminoCalendarClient() {
           </section>
         )}
 
-        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+        <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_4px_20px_rgba(37,99,235,0.06)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Tu semana</p>
               <h2 className="text-xl font-black text-slate-950">{selectedWeekLabel}</h2>
-              <p className="mt-1 text-xs font-bold text-slate-400">{completedMain} de {totalMain} misiones completadas</p>
+              <p className="mt-0.5 text-sm font-semibold text-slate-400">{completedMain} de {totalMain} misiones completadas</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Pencil size={15} /> Editar</button>
-            </div>
+            <button onClick={() => setCalendarEditorOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700 transition hover:bg-blue-100 active:scale-[0.97]"><Pencil size={14} /> Editar semana</button>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Anterior</button>
-            <button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3 py-2 text-xs font-black text-white transition hover:bg-blue-700">Esta semana</button>
-            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Siguiente <ArrowRight size={14} /></button>
+            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-50 active:scale-[0.97]"><ChevronLeft size={13} /> Anterior</button>
+            <button onClick={goToCurrentWeek} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white transition hover:bg-blue-700 active:scale-[0.97]">Esta semana</button>
+            <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-50 active:scale-[0.97]">Siguiente <ArrowRight size={13} /></button>
           </div>
-          <button onClick={toggleCalendarExpanded} className="mt-3 inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-100">
-            <ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={14} aria-hidden />
-            {calendarExpanded ? 'Ocultar' : 'Ver semana'}
+          <button
+            onClick={toggleCalendarExpanded}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-sm font-black text-blue-700 transition hover:bg-blue-100 active:scale-[0.98]"
+          >
+            <ChevronDown className={`transition-transform duration-200${calendarExpanded ? ' rotate-180' : ''}`} size={15} aria-hidden />
+            {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
           </button>
           {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} />}
         </section>
@@ -1636,7 +1651,24 @@ export default function CaminoCalendarClient() {
   )
 }
 
-function Shell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div> }
+function Shell({ children, sidebarOpen }: { children: React.ReactNode; sidebarOpen: boolean }) {
+  return (
+    <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block">
+      {/* Layout wrapper — controls how much space the sidebar takes in the flex row */}
+      <div
+        className="shrink-0 max-lg:!w-full"
+        style={{
+          width: sidebarOpen ? 248 : 0,
+          transition: 'width 280ms cubic-bezier(0.32, 0.72, 0, 1)',
+          overflow: 'clip', // clip clips overflow without creating a scroll container (preserves sticky)
+        }}
+      >
+        <Sidebar activeItem="camino" />
+      </div>
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
+  )
+}
 
 type BlockEntry = { bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }
 type ProjectionEntry = { asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: BlockEntry[] }
@@ -2137,108 +2169,117 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   const reason = mission ? heroReason(mission, blockCompleted, nextMissionTitle) : null
 
   return (
-    <div className="h-full rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{headerParts.join(' · ')}</p>
-
-      {mission ? (
-        <>
-          <h2 className="mt-3 text-2xl font-black leading-tight text-slate-950">{mission.title}</h2>
-          <p className="mt-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-400">
-            <span>{mission.estimatedMinutes} min · Misión principal</span>
-            {!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}
-          </p>
-
-          {reason && (
-            <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-              <p className="text-sm font-semibold text-slate-600">{reason}</p>
-            </div>
+    <div className="h-full overflow-hidden rounded-[28px] border border-blue-100 bg-white shadow-[0_8px_30px_rgba(37,99,235,0.10)]">
+      {/* Blue header band — primary action context */}
+      <div className="bg-blue-600 px-6 pt-5 pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {mission ? (
+            <>
+              <span className="rounded-full bg-white/25 px-3 py-1 text-[11px] font-black text-white">{mission.subject}</span>
+              {blockLabel && <span className="text-[11px] font-semibold text-blue-200">{blockLabel}</span>}
+              {!!mission.metadata?.express && <span className="rounded-full bg-amber-400/30 px-2.5 py-0.5 text-[11px] font-black text-amber-100">⚡ Repaso Express</span>}
+            </>
+          ) : microMission ? (
+            <span className="rounded-full bg-white/25 px-3 py-1 text-[11px] font-black text-white">{microMission.subject}</span>
+          ) : (
+            <span className="text-[11px] font-black text-blue-200">Camino PAU</span>
           )}
+        </div>
+        <p className="mt-1.5 text-xs font-semibold text-blue-200">
+          {mission ? 'Misión principal' : microMission ? 'Reto exprés' : 'Tu misión del día'}
+        </p>
+      </div>
 
-          <div className="mt-5">
-            {mission.status === 'done' ? (
-              <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-sm font-black text-emerald-700"><Check size={15} /> Misión completada hoy</div>
-            ) : target?.href ? (
-              <a href={target.href} className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700">Empezar misión <ArrowRight size={15} /></a>
-            ) : (
-              <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-black text-slate-400">Contenido en preparación</div>
+      {/* Card body */}
+      <div className="p-6">
+        {mission ? (
+          <>
+            <h2 className="text-2xl font-black leading-tight text-slate-950">{mission.title}</h2>
+            <p className="mt-1.5 text-sm font-semibold text-slate-400">{mission.estimatedMinutes} min</p>
+
+            {reason && (
+              <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-600">{reason}</p>
+              </div>
             )}
-          </div>
 
-          {mission.status !== 'done' && (
-            <div className="mt-3 flex justify-center gap-3">
-              <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50"><RotateCcw size={12} /> Posponer</button>
-              {mission.subjectSlug && mission.v2SortOrder != null && (
-                <button onClick={() => setShowNotSeenConfirm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50">Aún no lo he dado</button>
+            <div className="mt-5">
+              {mission.status === 'done' ? (
+                <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-sm font-black text-emerald-700"><Check size={15} /> Misión completada hoy</div>
+              ) : target?.href ? (
+                <a href={target.href} className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.28)] transition hover:bg-blue-700 active:scale-[0.98]">Empezar misión <ArrowRight size={15} /></a>
+              ) : (
+                <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-black text-slate-400">Contenido en preparación</div>
               )}
             </div>
-          )}
-        </>
-      ) : hasOnboardingSubjects && microMission ? (
-        <div className="mt-4">
-          {microDone ? (
-            <>
+
+            {mission.status !== 'done' && (
+              <div className="mt-3 flex justify-center gap-3">
+                <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50 active:scale-[0.97]"><RotateCcw size={12} /> Posponer</button>
+                {mission.subjectSlug && mission.v2SortOrder != null && (
+                  <button onClick={() => setShowNotSeenConfirm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50 active:scale-[0.97]">Aún no lo he dado</button>
+                )}
+              </div>
+            )}
+          </>
+        ) : hasOnboardingSubjects && microMission ? (
+          <div>
+            {microDone ? (
               <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                 <Check size={16} className="text-emerald-600" />
                 <p className="text-sm font-black text-emerald-800">¡Reto completado! Vuelve mañana para tu próxima misión.</p>
               </div>
-            </>
-          ) : (
-            <>
-              <h2 className="text-xl font-black text-slate-950">Reto exprés de hoy</h2>
-              <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-400">
-                <span>{microMission.subject}</span>
-                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-black text-blue-700">5 tarjetas · 3 min</span>
-              </p>
-              {microMission.hasCompletedItems && (
-                <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-slate-600">Repaso de contenido que ya has visto. Sin afectar tu plan de mañana.</p>
+            ) : (
+              <>
+                <h2 className="text-xl font-black text-slate-950">Reto exprés de hoy</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-400">5 tarjetas · 3 min</p>
+                {microMission.hasCompletedItems && (
+                  <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-slate-600">Repaso de contenido que ya has visto. Sin afectar tu plan de mañana.</p>
+                  </div>
+                )}
+                <div className="mt-5">
+                  <a href={microMission.href} onClick={() => setMicroDone(true)} className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.28)] transition hover:bg-blue-700 active:scale-[0.98]">
+                    Empezar reto <ArrowRight size={15} />
+                  </a>
                 </div>
-              )}
-              <div className="mt-5">
-                <a
-                  href={microMission.href}
-                  onClick={() => setMicroDone(true)}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
-                >
-                  Empezar reto <ArrowRight size={15} />
-                </a>
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="mt-4">
-          {hasOnboardingSubjects ? (
-            <>
-              <h2 className="text-xl font-black text-slate-950">Explora tu primer tema</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-400">Tu plan aún está generándose. Mientras tanto, empieza a explorar.</p>
-              <div className="mt-5">
-                <a href="#explorar" className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700">
-                  Ver temas disponibles <ArrowRight size={15} />
-                </a>
-              </div>
-            </>
-          ) : (
-            <>
-              <h2 className="text-xl font-black text-slate-400">Completa tu onboarding para empezar</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-400">Configura tu perfil y construiremos tu Camino PAU.</p>
-            </>
-          )}
-        </div>
-      )}
+              </>
+            )}
+          </div>
+        ) : (
+          <div>
+            {hasOnboardingSubjects ? (
+              <>
+                <h2 className="text-xl font-black text-slate-950">Explora tu primer tema</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-400">Tu plan aún está generándose. Mientras tanto, empieza a explorar.</p>
+                <div className="mt-5">
+                  <a href="#explorar" className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.28)] transition hover:bg-blue-700 active:scale-[0.98]">
+                    Ver temas disponibles <ArrowRight size={15} />
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-black text-slate-400">Completa tu onboarding para empezar</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-400">Configura tu perfil y construiremos tu Camino PAU.</p>
+              </>
+            )}
+          </div>
+        )}
 
-      <div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
-        <div className="text-center">
-          <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '—'}</p>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{streak > 0 ? 'días de racha' : 'Empieza tu racha hoy'}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-black text-slate-900">{completedThisWeek}<span className="text-sm font-semibold text-slate-400">/{totalThisWeek}</span></p>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">misiones esta semana</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-black text-slate-900">{weeklyXP > 0 ? `+${weeklyXP}` : '—'}</p>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{weeklyXP > 0 ? 'XP esta semana' : 'Gana XP al completar'}</p>
+        <div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
+          <div className="text-center">
+            <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '—'}</p>
+            <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{streak > 0 ? 'días de racha' : 'Empieza hoy'}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-black text-slate-900">{completedThisWeek}<span className="text-sm font-semibold text-slate-400">/{totalThisWeek}</span></p>
+            <p className="mt-0.5 text-[11px] font-semibold text-slate-400">misiones esta semana</p>
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-black text-slate-900">{weeklyXP > 0 ? `+${weeklyXP}` : '—'}</p>
+            <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{weeklyXP > 0 ? 'XP esta semana' : 'Gana XP al completar'}</p>
+          </div>
         </div>
       </div>
 

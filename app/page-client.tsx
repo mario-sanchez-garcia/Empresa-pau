@@ -3251,12 +3251,29 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             {/* V4 Mesa de Trabajo — photo hero */}
             <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
               <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
                   <div style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 8, fontWeight: 600 }}>{tipo} · {anioSeleccionado ?? '—'} · {examSystemLabel(ccaa)}</div>
                 </div>
+                {(() => {
+                  const h = historial.filter((item: any) => item.asignatura === asignatura) // eslint-disable-line @typescript-eslint/no-explicit-any
+                  const med = calcMedia(h)
+                  const mejor = h.filter((i: any) => i.nota && i.nota_maxima).length > 0 // eslint-disable-line @typescript-eslint/no-explicit-any
+                    ? Math.max(...h.filter((i: any) => i.nota && i.nota_maxima).map((i: any) => (Number(i.nota) / i.nota_maxima) * 10)).toFixed(1) // eslint-disable-line @typescript-eslint/no-explicit-any
+                    : null
+                  return (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {[{ val: String(h.length), label: 'Ejercicios' }, { val: med ?? '—', label: 'Media' }, { val: mejor ?? '—', label: 'Mejor' }].map(stat => (
+                        <div key={stat.label} style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, padding: '6px 12px', textAlign: 'center', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: 'white', lineHeight: 1 }}>{stat.val}</div>
+                          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: '.08em', marginTop: 2 }}>{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
             <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
@@ -3333,99 +3350,47 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   {caminoExerciseNotice}
                 </div>
               )}
-              <div className="exams-filter-bar">
-                <FilterDropdown
-                  label="Año"
-                  value={String(anioSeleccionado ?? aniosDisponibles[examenIdx] ?? 'Año')}
-                  options={yearFilterOptions}
-                />
-                <div className="exams-filter-divider" />
-                <FilterDropdown
-                  label="Convocatoria"
-                  value={tipo}
-                  options={convocatoriaFilterOptions}
-                />
-                {versionFilterOptions.length > 1 && (
-                  <>
-                    <div className="exams-filter-divider" />
-                    <FilterDropdown
-                      label={asignatura === 'historia' || asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Versión'}
-                      value={versionExamenSeleccionada ?? 'Única'}
-                      options={versionFilterOptions}
-                    />
-                  </>
-                )}
-                {questionFilterOptions.length > 0 && (
-                  <>
-                    <div className="exams-filter-divider" />
-                    <FilterDropdown
-                      label={isCatalunaExam ? 'Ejercicio' : 'Pregunta'}
-                      value={questionFilterValue}
-                      options={questionFilterOptions}
-                    />
-                  </>
-                )}
-                {!isCatalunaExam && opcionesDisponibles.length > 0 && (
-                  <>
-                    <div className="exams-filter-divider" />
-                    <div className="exams-option-group">
-                      <span className="exam-option-label">Opción</span>
-                      {opcionesDisponibles.map(op => (
-                        <button
-                          type="button"
-                          className={`exam-option-button ${opcion === op ? 'is-active' : ''}`}
-                          key={op}
-                          onClick={() => { setOpcion(op); reset() }}
-                        >
-                          {op === 0 ? 'A' : 'B'}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
-                {((isCatalunaExam ? ['Ordinaria', 'Extraordinaria'] : ['Ordinaria', 'Extraordinaria', 'Modelo']) as Tipo[]).map(t => (
-                  <button className={tipo === t ? 'campus-primary' : 'campus-hover'} key={t} onClick={() => cambiarTipo(t)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '7px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: tipo === t ? cfg.color : WARM.field, color: tipo === t ? '#fff' : WARM.muted, border: tipo === t ? 'none' : '1px solid #dbe7fb' } as CSSProperties}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
-                      {t === 'Ordinaria' ? <ClipboardList size={14} /> : t === 'Extraordinaria' ? <FileText size={14} /> : <Target size={14} />}
-                      {t}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                {aniosDisponibles.map((anio, i) => (
-  <button
-    className={examenIdx === i ? 'campus-primary' : 'campus-hover'}
-    key={anio}
-    onClick={() => {
-      setExamenIdx(i)
-      setCatEjercicioIdx(0)
-      setCatHistoriaEjercicioIdx(0)
-      setCatFisicaEjercicioIdx(0)
-      setCatAsignaturaEjercicioIdx(0)
-      setBloqueIdx(0)
-      setDiaHistoriaIdx(0)
-      setOpcion(0)
-      reset()
-    }}
-    style={{
-      ...hoverVars(cfg.color, cfg.light, cfg.accent),
-      padding: '6px 14px',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      fontSize: '13px',
-      fontWeight: 700,
-      background: examenIdx === i ? cfg.color : WARM.field,
-      color: examenIdx === i ? '#fff' : WARM.ink,
-      border: examenIdx === i ? 'none' : '1px solid #dbe7fb'
-    } as CSSProperties}
-  >
-    {anio}
-  </button>
-))}
-              </div>
+              {/* V4 filtros — single chip row */}
+              {(() => {
+                const chipActive: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: 999, border: '1.5px solid #2563eb', background: '#2563eb', color: 'white', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }
+                const chipInactive: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }
+                const chipLabel: React.CSSProperties = { fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', whiteSpace: 'nowrap', flexShrink: 0 }
+                const chipSep: React.CSSProperties = { width: 1, height: 16, background: '#e2e8f0', flexShrink: 0 }
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={chipLabel}>Tipo</span>
+                    {convocatoriaFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
+                    <div style={chipSep} />
+                    <span style={chipLabel}>Año</span>
+                    {yearFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
+                    {versionFilterOptions.length > 1 && (
+                      <>
+                        <div style={chipSep} />
+                        <span style={chipLabel}>Sesión</span>
+                        {versionFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
+                      </>
+                    )}
+                    {questionFilterOptions.length > 0 && (
+                      <>
+                        <div style={chipSep} />
+                        <span style={chipLabel}>Pregunta</span>
+                        {questionFilterOptions.map(opt => <button key={opt.label} type="button" onClick={opt.onSelect} style={opt.active ? chipActive : chipInactive}>{opt.label}</button>)}
+                      </>
+                    )}
+                    {!isCatalunaExam && opcionesDisponibles.length > 0 && (
+                      <>
+                        <div style={chipSep} />
+                        <span style={chipLabel}>Opción</span>
+                        {opcionesDisponibles.map(op => (
+                          <button key={op} type="button" onClick={() => { setOpcion(op); reset() }} style={{ width: 26, height: 26, borderRadius: '50%', border: opcion === op ? '1.5px solid #2563eb' : '1.5px solid #e2e8f0', background: opcion === op ? '#2563eb' : 'white', color: opcion === op ? 'white' : '#475569', fontSize: 10, fontWeight: 900, cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
+                            {op === 0 ? 'A' : 'B'}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )
+              })()}
               {isCatalunaMates && (
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                   {ejerciciosDisponiblesCat.map((pregunta, i) => {
@@ -3819,7 +3784,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 ))}
               </div>
               {/* Content */}
-              <div style={{ padding: '0 0 0 0' }}>
+              <div style={{ padding: '0 16px' }}>
                 {modo === 'texto' ? (
                   <RichTextArea
                     value={respuesta}
@@ -3850,8 +3815,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 )}
               </div>
               {/* Footer row */}
-              <div style={{ padding: '10px 16px', borderTop: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>fx Símbolos</span>
+              <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                 <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '9px 20px', borderRadius: 10, border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 4px 16px rgba(37,99,235,.3)', display: 'flex', alignItems: 'center', gap: 7 }}>
                   {cargando ? <KairoLoadingDot /> : <WandSparkles size={15} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
                 </button>

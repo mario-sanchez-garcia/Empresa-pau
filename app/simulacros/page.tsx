@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle2, Eye, EyeOff, ListChecks, PlayCircle, Settings2, Shuffle, Target, TrendingDown } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, PlayCircle } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
@@ -208,458 +208,256 @@ function SimulacrosPage() {
 
   const cfg = SUBJECTS[subject]
   const autoInfo = autoModeInfo(mode, weakCandidateCount)
-  const AutoInfoIcon = mode === 'errores' ? TrendingDown : mode === 'tipicos' ? Target : Shuffle
+  const effectiveYearChoiceRender = mode === 'personalizado' ? yearChoice : 'all'
+  const optionSelectionRender = effectiveOptionChoice(mode, subject, optionChoice)
+
+  const BLACKBOARD_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_120452_c4495c67-d88a-4442-b112-50e991ce414f.png'
+
+  const modeBadgeLabel = (m: SimulacroMode) => {
+    if (m === 'normal') return 'Recomendado'
+    if (m === 'errores') return weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'
+    if (m === 'tipicos') return 'Recurrente'
+    return 'Ajustable'
+  }
+  const modeBadgeColor = (m: SimulacroMode) => {
+    if (m === 'errores') return weakCandidateCount > 0 ? '#15803d' : '#b45309'
+    if (m === 'tipicos') return '#7c3aed'
+    if (m === 'personalizado') return '#64748b'
+    return cfg.color
+  }
 
   return (
-    <SimulacroShell
-      title="Simulacros"
-      subtitle="Ponte a prueba en condiciones reales de examen"
-      actions={
-        <button
-          onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}
-          className="kairo-pill px-4 py-2 text-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-        >
-          {historyOpen ? <EyeOff size={15} /> : <Eye size={15} />}
-          {historyOpen ? 'Ocultar historial' : 'Mis simulacros'}
-        </button>
-      }
-    >
-      <div className="mx-auto grid max-w-6xl gap-7">
+    <SimulacroShell>
+    {/* ── BLACKBOARD HERO ── */}
+    <div style={{ position: 'relative', height: 340, overflow: 'hidden', flexShrink: 0 }}>
+      <img src={BLACKBOARD_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.45) saturate(.6)', display: 'block' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.2) 0%, rgba(15,23,42,.85) 100%)', padding: '28px 32px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+        <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Simulacros PAU · {ccaa}</div>
+        <div style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: .88, letterSpacing: '-.04em', marginBottom: 8 }}>
+          {stats.completedCount > 0 ? stats.completedCount : '—'}
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.5)', letterSpacing: '.12em', textTransform: 'uppercase' }}>
+          {stats.completedCount > 0 ? 'Simulacros completados en tu historial' : 'Completa tu primer simulacro para ver tus estadísticas'}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap', alignItems: 'center' }}>
+          {stats.completedCount > 0 && <>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
+              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatScore(stats.bestScore)}</span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Mejor nota</span>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
+              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatScore(stats.averageScore)}</span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Media</span>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
+              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{stats.averageTime} min</span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Tiempo medio</span>
+            </div>
+          </>}
+          <button
+            onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 10, padding: '8px 14px', color: 'rgba(255,255,255,.75)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+          >
+            {historyOpen ? <EyeOff size={13} /> : <Eye size={13} />}
+            {historyOpen ? 'Ocultar historial' : 'Mis simulacros'}
+          </button>
+        </div>
+      </div>
+    </div>
 
-        {/* Camino parcial banner */}
-        {isCaminoPartial && caminoBlock && (
-          <div className="pau-reveal flex items-center gap-3 rounded-2xl border p-4 text-sm font-semibold" style={{ borderColor: '#bfdbfe', background: '#eff6ff', color: '#1e40af' }}>
-            <PlayCircle size={16} className="shrink-0" />
-            Simulacro enfocado en <strong className="ml-1">{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
-            <span className="ml-1 font-normal" style={{ color: '#3b82f6' }}>— generando para tu parcial...</span>
+    {/* ── CONTENT ── */}
+    <div style={{ background: 'white', borderTop: '2px solid #0f172a', flex: 1 }}>
+
+      {/* Camino parcial banner */}
+      {isCaminoPartial && caminoBlock && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', borderBottom: '1px solid #dbeafe', background: '#eff6ff', color: '#1e40af', fontSize: 13, fontWeight: 600 }}>
+          <PlayCircle size={15} style={{ flexShrink: 0 }} />
+          Simulacro enfocado en <strong style={{ marginLeft: 4 }}>{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
+          <span style={{ marginLeft: 4, fontWeight: 400, color: '#3b82f6' }}>— generando para tu parcial...</span>
+        </div>
+      )}
+
+      {/* History panel */}
+      {historyOpen && (
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Mis simulacros anteriores</span>
+            <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 10px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>{history.length} total</span>
           </div>
-        )}
-
-        {/* Stats */}
-        <section className="pau-reveal">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>Tus estadísticas</p>
-          {stats.completedCount === 0 ? (
-            <div className="pau-empty text-sm">
-              Completa tu primer simulacro para ver tu media, mejor nota y tiempo medio aquí.
-            </div>
+          {history.length === 0 ? (
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>Todavía no tienes simulacros guardados.</p>
           ) : (
-            <div className="pau-stagger grid grid-cols-5 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
-              <StatCard label="Completados" value={String(stats.completedCount)} />
-              <StatCard label="Media" value={`${formatScore(stats.averageScore)}/10`} />
-              <StatCard label="Mejor nota" value={`${formatScore(stats.bestScore)}/10`} accent />
-              <StatCard label="Tiempo medio" value={`${stats.averageTime} min`} />
-              <StatCard
-                label="Último simulacro"
-                value={stats.lastCompleted ? formatDate(stats.lastCompleted.updated_at ?? stats.lastCompleted.created_at) : '-'}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
+              {history.map(item => (
+                <a
+                  key={item.id}
+                  href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', textDecoration: 'none', color: 'inherit', transition: 'border-color .12s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLElement).style.background = '#eff6ff' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9'; (e.currentTarget as HTMLElement).style.background = 'white' }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
+                    <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{item.id.slice(0, 8)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    {item.estado === 'completado'
+                      ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
+                      : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                  </div>
+                </a>
+              ))}
             </div>
           )}
-          {stats.lastCompleted && (
-            <div className="mt-3 flex items-center gap-2">
-              <span
-                className="rounded-full px-3 py-1 text-xs font-black"
-                style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
-              >
-                Último: {SUBJECTS[stats.lastCompleted.asignatura]?.label ?? stats.lastCompleted.asignatura} · {formatScore(stats.lastCompleted.nota_final)}/10
-              </span>
-            </div>
-          )}
-        </section>
+        </div>
+      )}
 
-        {/* History panel */}
-        {historyOpen && (
-          <section className="pau-card-section pau-reveal grid gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-black" style={{ color: '#0f172a' }}>Mis simulacros anteriores</h2>
-              <span
-                className="rounded-full px-3 py-1 text-xs font-black"
-                style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
-              >
-                {history.length} total
-              </span>
-            </div>
-            {history.length === 0 ? (
-              <p className="text-sm font-semibold" style={{ color: '#94a3b8' }}>Todavía no tienes simulacros guardados.</p>
-            ) : (
-              <div className="pau-stagger grid gap-2" style={{ maxHeight: 320, overflowY: 'auto' }}>
-                {history.map(item => (
-                  <a
-                    key={item.id}
-                    href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
-                    className="flex items-center justify-between rounded-xl border p-3 no-underline transition hover:-translate-y-0.5 hover:shadow-sm"
-                    style={{
-                      borderColor: '#dbe7fb',
-                      background: '#f8fbff',
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'
-                      ;(e.currentTarget as HTMLElement).style.background = '#eff6ff'
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = '#dbe7fb'
-                      ;(e.currentTarget as HTMLElement).style.background = '#f8fbff'
-                    }}
-                  >
-                    <div className="min-w-0">
-                      <strong className="block truncate text-sm" style={{ color: '#0f172a' }}>
-                        {SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}
-                      </strong>
-                      <small style={{ color: '#94a3b8' }}>
-                        {item.id.slice(0, 8)} · {item.estado === 'completado' ? `Nota ${item.nota_final ?? '-'}/10` : 'En progreso'}
-                      </small>
-                    </div>
-                    <div className="ml-3 flex shrink-0 items-center gap-2">
-                      {item.estado === 'completado' ? (
-                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#f0fdf4', color: '#15803d' }}>
-                          <CheckCircle2 size={12} />Completado
-                        </span>
-                      ) : (
-                        <span className="rounded-full px-2 py-0.5 text-xs font-black" style={{ background: '#fffbeb', color: '#b45309' }}>En progreso</span>
-                      )}
-                      <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+      <div style={{ padding: 24, maxWidth: 860, margin: '0 auto' }}>
 
         {/* Error */}
         {errorMessage && (
-          <div className="pau-error pau-reveal" role="alert">
-            {errorMessage}
-          </div>
+          <div role="alert" style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 10, background: '#fef2f2', border: '1px solid #fecaca', fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{errorMessage}</div>
         )}
 
-        {/* Step 1: Subject */}
-        <section className="pau-reveal pau-reveal-delay-1">
-          <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
-            Paso 1 · Asignatura
-          </p>
-          <div className="pau-stagger grid grid-cols-4 gap-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
+        {/* ── STEP 1: ASIGNATURA ── */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Asignatura</div>
+            <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }}>{cfg.label}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
               const s = SUBJECTS[key]
-              const available = s.available
-              const Icon = s.icon
               const isActive = subject === key
               return (
                 <button
                   key={key}
-                  disabled={!available}
-                  onClick={() => available && setSubject(key)}
-                  className="pau-subject-card relative overflow-hidden rounded-2xl border p-5 text-left"
-                  style={{
-                    borderColor: isActive ? s.color : 'rgba(219,231,251,0.82)',
-                    background: isActive
-                      ? `linear-gradient(145deg, #ffffff 0%, ${s.light} 100%)`
-                      : 'rgba(255,255,255,0.82)',
-                    boxShadow: isActive
-                      ? `0 0 0 2.5px ${s.color}28, 0 14px 36px ${s.color}18`
-                      : '0 2px 8px rgba(37,99,235,0.05)',
-                    cursor: available ? 'pointer' : 'not-allowed',
-                    opacity: available ? 1 : 0.6,
-                  }}
+                  disabled={!s.available}
+                  onClick={() => s.available && setSubject(key)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `2px solid ${isActive ? s.color : '#e2e8f0'}`, background: isActive ? s.light : 'white', cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center' }}
                 >
-                  {/* Watermark icon */}
-                  <Icon
-                    size={96}
-                    className="pointer-events-none absolute -bottom-5 -right-4"
-                    style={{ color: s.color, opacity: isActive ? 0.13 : 0.07 }}
-                  />
-                  {/* Icon badge */}
-                  <div
-                    className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl"
-                    style={{
-                      background: isActive ? s.color : s.light,
-                      color: isActive ? '#fff' : s.color,
-                      boxShadow: isActive ? `0 6px 16px ${s.color}33` : 'none',
-                      transition: 'background 220ms, color 220ms, box-shadow 220ms',
-                    }}
-                  >
-                    <Icon size={22} />
-                  </div>
-                  <h3 className="relative mb-1 text-sm font-black" style={{ color: '#0f172a' }}>{s.label}</h3>
-                  <p className="relative text-xs font-semibold" style={{ color: '#94a3b8' }}>
-                    {available
-                      ? key === 'lengua'
-                        ? 'Examen oficial completo'
-                        : 'Simulacro mezclado oficial'
-                      : 'Cargando ejercicios oficiales'}
-                  </p>
-                  {!available && (
-                    <span
-                      className="absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
-                      style={{ background: '#f0fdf4', color: '#15803d' }}
-                    >
-                      Pronto
-                    </span>
-                  )}
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
+                  <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? s.color : '#334155', lineHeight: 1.3 }}>{s.label}</div>
+                  {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}>Pronto</span>}
                 </button>
               )
             })}
           </div>
-        </section>
+        </div>
 
-        {/* Step 2: Mode */}
-        <section className="pau-reveal pau-reveal-delay-2">
-          <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
-            Paso 2 · Tipo de simulacro
-          </p>
-          <div className="pau-stagger grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-            <button
-              onClick={() => setMode('normal')}
-              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
-              style={{
-                borderColor: mode === 'normal' ? cfg.color : 'rgba(219,231,251,0.82)',
-                background: mode === 'normal'
-                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
-                  : 'rgba(255,255,255,0.84)',
-                boxShadow: mode === 'normal'
-                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(37,99,235,0.04)',
-              }}
-            >
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <span
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl text-white transition group-hover:scale-105"
-                  style={{ background: cfg.color, boxShadow: `0 10px 24px ${cfg.color}2b` }}
+        {/* ── STEP 2: TIPO ── */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 12 }}>Tipo de simulacro</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {(['normal', 'errores', 'tipicos', 'personalizado'] as SimulacroMode[]).map(m => {
+              const isActive = mode === m
+              const labels: Record<SimulacroMode, string> = { normal: 'Simulacro normal', errores: 'Peores notas', tipicos: 'Típicos PAU', personalizado: 'Personalizado' }
+              return (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 999, border: `2px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#475569', fontSize: 12, fontWeight: 800, cursor: 'pointer', transition: 'all .12s' }}
                 >
-                  <Shuffle size={22} />
-                </span>
-                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}24` }}>
-                  Recomendado
-                </span>
-              </div>
-              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Simulacro normal</h3>
-              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
-                Puede salir cualquier año oficial disponible y cualquier opción A/B. Ideal para practicar como examen real.
-              </p>
-            </button>
-
-            <button
-              onClick={() => setMode('errores')}
-              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
-              style={{
-                borderColor: mode === 'errores' ? cfg.color : 'rgba(219,231,251,0.82)',
-                background: mode === 'errores'
-                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
-                  : 'rgba(255,255,255,0.84)',
-                boxShadow: mode === 'errores'
-                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(37,99,235,0.04)',
-              }}
-            >
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <span
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
-                  style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
-                >
-                  <TrendingDown size={22} />
-                </span>
-                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: weakCandidateCount > 0 ? '#f0fdf4' : '#fffbeb', color: weakCandidateCount > 0 ? '#15803d' : '#b45309', border: `1px solid ${weakCandidateCount > 0 ? '#bbf7d0' : '#fde68a'}` }}>
-                  {weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'}
-                </span>
-              </div>
-              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Peores notas</h3>
-              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
-                Crea un examen con ejercicios y bloques donde peor has rendido para remontar puntos concretos.
-              </p>
-            </button>
-
-            <button
-              onClick={() => setMode('tipicos')}
-              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
-              style={{
-                borderColor: mode === 'tipicos' ? cfg.color : 'rgba(219,231,251,0.82)',
-                background: mode === 'tipicos'
-                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
-                  : 'rgba(255,255,255,0.84)',
-                boxShadow: mode === 'tipicos'
-                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(37,99,235,0.04)',
-              }}
-            >
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <span
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
-                  style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
-                >
-                  <Target size={22} />
-                </span>
-                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}24` }}>
-                  Recurrente
-                </span>
-              </div>
-              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Típicos PAU</h3>
-              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
-                Prioriza patrones habituales de examen: bloques clave, años mezclados y estructura equilibrada.
-              </p>
-            </button>
-
-            <button
-              onClick={() => setMode('personalizado')}
-              className="group rounded-[24px] border p-5 text-left transition hover:-translate-y-0.5"
-              style={{
-                borderColor: mode === 'personalizado' ? cfg.color : 'rgba(219,231,251,0.82)',
-                background: mode === 'personalizado'
-                  ? `linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`
-                  : 'rgba(255,255,255,0.84)',
-                boxShadow: mode === 'personalizado'
-                  ? `0 0 0 2.5px ${cfg.color}24, 0 16px 38px ${cfg.color}16`
-                  : '0 2px 8px rgba(37,99,235,0.04)',
-              }}
-            >
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <span
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition group-hover:scale-105"
-                  style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}
-                >
-                  <Settings2 size={22} />
-                </span>
-                <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: '#f8fbff', color: '#64748b', border: '1px solid #dbe7fb' }}>
-                  Ajustable
-                </span>
-              </div>
-              <h3 className="text-lg font-black" style={{ color: '#0f172a' }}>Simulacro personalizado</h3>
-              <p className="mt-2 text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
-                Elige el rango de años y, si la asignatura lo permite, la opción concreta que quieres entrenar.
-              </p>
-            </button>
+                  {labels[m]}
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 7px', borderRadius: 999, background: isActive ? cfg.color : '#f1f5f9', color: isActive ? 'white' : modeBadgeColor(m) }}>
+                    {modeBadgeLabel(m)}
+                  </span>
+                </button>
+              )
+            })}
           </div>
-        </section>
+          {/* Auto info */}
+          {mode !== 'personalizado' && (
+            <div style={{ marginTop: 10, padding: '12px 16px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{autoInfo.title}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 4, lineHeight: 1.5 }}>{autoInfo.description}</div>
+            </div>
+          )}
+        </div>
 
-        {/* Step 3: Personalization */}
-        {mode === 'personalizado' ? (
-          <section className="pau-reveal pau-reveal-delay-3">
-            <p className="mb-4 text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
-              Paso 3 · Ajustes personalizados
-            </p>
-            <div className="grid gap-5 rounded-[26px] border bg-white/80 p-5 shadow-[0_18px_46px_rgba(37,99,235,0.06)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <ListChecks size={16} style={{ color: cfg.color }} />
-                  <h3 className="text-sm font-black" style={{ color: '#0f172a' }}>Años de convocatoria</h3>
-                </div>
-                <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1">
-                  {YEAR_CHOICES.map(item => {
-                    const isActive = yearChoice === item.id
+        {/* ── STEP 3: CONFIG (personalizado) ── */}
+        {mode === 'personalizado' && (
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, marginBottom: 24 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 14 }}>Ajustes personalizados</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Años de convocatoria</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+              {YEAR_CHOICES.map(item => {
+                const isActive = yearChoice === item.id
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setYearChoice(item.id)}
+                    style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#334155', cursor: 'pointer', transition: 'all .12s' }}
+                  >
+                    {item.label}
+                  </button>
+                )
+              })}
+            </div>
+            {yearChoice !== 'all' && (
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 12, padding: '6px 10px', background: 'white', borderRadius: 8, border: '1px solid #f1f5f9' }}>
+                {YEAR_CHOICES.find(y => y.id === yearChoice)?.description}
+              </div>
+            )}
+            {subject !== 'lengua' ? (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Opción del examen</div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {OPTION_CHOICES.map(item => {
+                    const isActive = optionChoice === item.id
                     return (
                       <button
                         key={item.id}
-                        onClick={() => setYearChoice(item.id)}
-                        className="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5"
-                        style={{
-                          borderColor: isActive ? cfg.color : '#dbe7fb',
-                          background: isActive ? `${cfg.color}10` : '#f8fbff',
-                          boxShadow: isActive ? `0 0 0 2px ${cfg.color}18` : 'none',
-                        }}
+                        onClick={() => setOptionChoice(item.id)}
+                        style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#334155', cursor: 'pointer', transition: 'all .12s' }}
                       >
-                        <span className="block text-sm font-black" style={{ color: isActive ? cfg.color : '#0f172a' }}>{item.label}</span>
-                        <span className="mt-1 block text-xs font-semibold leading-5" style={{ color: '#64748b' }}>{item.description}</span>
+                        {item.label}
                       </button>
                     )
                   })}
                 </div>
+              </>
+            ) : (
+              <div style={{ padding: '10px 14px', borderRadius: 10, background: `${cfg.color}0f`, border: `1px solid ${cfg.color}24`, fontSize: 12, fontWeight: 600, color: '#475569', lineHeight: 1.5 }}>
+                Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
               </div>
-
-              {subject !== 'lengua' ? (
-                <div>
-                  <div className="mb-3 flex items-center gap-2">
-                    <Shuffle size={16} style={{ color: cfg.color }} />
-                    <h3 className="text-sm font-black" style={{ color: '#0f172a' }}>Opciones del examen</h3>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 max-md:grid-cols-1">
-                    {OPTION_CHOICES.map(item => {
-                      const isActive = optionChoice === item.id
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => setOptionChoice(item.id)}
-                          className="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5"
-                          style={{
-                            borderColor: isActive ? cfg.color : '#dbe7fb',
-                            background: isActive ? `${cfg.color}10` : '#f8fbff',
-                            boxShadow: isActive ? `0 0 0 2px ${cfg.color}18` : 'none',
-                          }}
-                        >
-                          <span className="block text-sm font-black" style={{ color: isActive ? cfg.color : '#0f172a' }}>{item.label}</span>
-                          <span className="mt-1 block text-xs font-semibold leading-5" style={{ color: '#64748b' }}>{item.description}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-2xl border p-4 text-sm font-semibold leading-6" style={{ borderColor: `${cfg.color}24`, background: `${cfg.color}0f`, color: '#475569' }}>
-                  Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
-                </div>
-              )}
-            </div>
-          </section>
-        ) : (
-          <section className="pau-reveal pau-reveal-delay-3">
-            <div className="flex flex-wrap items-center gap-3 rounded-[24px] border p-5" style={{ background: `${cfg.color}0d`, borderColor: `${cfg.color}22` }}>
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: '#fff', color: cfg.color, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
-                <AutoInfoIcon size={18} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-black" style={{ color: '#0f172a' }}>{autoInfo.title}</p>
-                <p className="text-sm font-semibold leading-6" style={{ color: '#64748b' }}>
-                  {autoInfo.description}
-                </p>
-              </div>
-            </div>
-          </section>
+            )}
+          </div>
         )}
 
-        {/* Summary */}
-        <section className="pau-reveal pau-reveal-delay-3">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border bg-white/82 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.06)]" style={{ borderColor: '#dbe7fb' }}>
+        {/* ── SUMMARY + CTA ── */}
+        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>Listo para crear</p>
-              <p className="mt-1 text-base font-black" style={{ color: '#0f172a' }}>
-                {cfg.label} · {buildConfigLabel(mode, mode === 'personalizado' ? yearChoice : 'all', effectiveOptionChoice(mode, subject, optionChoice))}
-              </p>
+              <div style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8' }}>Listo para crear</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginTop: 3 }}>
+                {cfg.label} · {buildConfigLabel(mode, effectiveYearChoiceRender, optionSelectionRender)}
+              </div>
             </div>
-            <span className="rounded-full px-3 py-1 text-xs font-black" style={{ background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>
-              {ccaa}
-            </span>
+            <span style={{ fontSize: 10, fontWeight: 800, padding: '4px 12px', borderRadius: 999, background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>{ccaa}</span>
           </div>
-        </section>
-
-        {/* Generate CTA */}
-        <button
-          onClick={createSimulacro}
-          disabled={loading || !userId || !SUBJECTS[subject].available}
-          className="campus-primary"
-          style={{ width: '100%', borderRadius: 16, padding: '16px 24px', fontSize: 16, gap: 10 }}
-        >
-          {loading ? <KairoLoadingDot /> : <PlayCircle size={20} />}
-          {loading
-            ? 'Generando simulacro...'
-            : !SUBJECTS[subject].available
-            ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
-            : userId
-            ? ctaLabel(mode, cfg.short)
-            : 'Cargando sesión...'}
-        </button>
+          <button
+            onClick={createSimulacro}
+            disabled={loading || !userId || !SUBJECTS[subject].available}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 900, padding: '16px', borderRadius: 12, background: loading || !userId || !SUBJECTS[subject].available ? '#94a3b8' : '#2563eb', color: 'white', border: 'none', boxShadow: loading || !userId || !SUBJECTS[subject].available ? 'none' : '0 4px 20px rgba(37,99,235,.32)', cursor: loading || !userId || !SUBJECTS[subject].available ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
+          >
+            {loading ? <KairoLoadingDot /> : <PlayCircle size={18} />}
+            {loading
+              ? 'Generando simulacro...'
+              : !SUBJECTS[subject].available
+              ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
+              : userId
+              ? ctaLabel(mode, cfg.short)
+              : 'Cargando sesión...'}
+          </button>
+        </div>
       </div>
+    </div>
     </SimulacroShell>
   )
 }
 
-function StatCard({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div
-      className="kairo-stitch-card rounded-2xl p-4"
-      style={accent ? { background: 'linear-gradient(145deg, #eff6ff, #dbeafe)', borderColor: '#bfdbfe' } : undefined}
-    >
-      <p className="text-[11px] font-black uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>
-      <p className="mt-2 text-2xl font-black" style={{ color: '#0f172a' }}>{value}</p>
-    </div>
-  )
-}
 
 function buildStats(history: SimulacroRecord[]) {
   const completed = history.filter(item => item.estado === 'completado' && Number.isFinite(Number(item.nota_final)))

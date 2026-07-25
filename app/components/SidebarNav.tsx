@@ -2,22 +2,23 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ClipboardList, Clock, House, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
+import { ClipboardList, Clock, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
 
 const NAV = [
-  { label: 'Inicio',          href: '/',         icon: House },
-  { label: 'Camino PAU',      href: '/camino',   icon: LayoutGrid },
-  { label: 'Exámenes',        href: '/',         icon: ClipboardList },
-  { label: 'La Zona',         href: '/zona',     icon: Zap },
-  { label: 'Chat con Kairo',  href: '/',         icon: MessageCircle },
-  { label: 'Historial',       href: '/',         icon: Clock },
-  { label: 'Mi Perfil',       href: '/settings', icon: UserRound },
+  { label: 'Exámenes',        href: '/examenes',             icon: ClipboardList },
+  { label: 'Camino PAU',      href: '/camino',               icon: LayoutGrid },
+  { label: 'La Zona',         href: '/zona',                 icon: Zap },
+  { label: 'Chat con Kairo',  href: '/examenes?view=chat',   icon: MessageCircle },
+  { label: 'Historial',       href: '/examenes?view=historial', icon: Clock },
+  { label: 'Mi Perfil',       href: '/settings',             icon: UserRound },
 ]
 
 function isActive(href: string, pathname: string) {
   if (href === '/camino')   return pathname.startsWith('/camino')
   if (href === '/zona')     return pathname.startsWith('/zona')
   if (href === '/settings') return pathname === '/settings'
+  if (href === '/examenes') return pathname === '/examenes'
+  if (href.startsWith('/examenes?')) return pathname === '/examenes'
   return false
 }
 

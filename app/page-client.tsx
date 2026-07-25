@@ -47,6 +47,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardList,
+  Check,
   Dna,
   FileText,
   Flame,
@@ -518,17 +519,19 @@ function stringifyForSearch(value: unknown): string {
 
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
   const [open, setOpen] = useState(false)
+  const hasValue = options.some(o => o.active)
   return (
-    <div className={`exam-filter-dropdown ${open ? 'is-open' : ''}`}>
+    <div className={`exam-filter-dropdown${open ? ' is-open' : ''}`}>
       <button
         type="button"
-        className="exam-filter-trigger"
+        className={`exam-filter-trigger${hasValue ? ' has-value' : ''}${open ? ' is-open' : ''}`}
         aria-expanded={open}
-        onClick={() => setOpen(current => !current)}
+        onClick={() => setOpen(c => !c)}
       >
         <span className="exam-filter-label">{label}</span>
+        <span className="exam-filter-sep">·</span>
         <span className="exam-filter-value">{value}</span>
-        <ChevronDown size={14} />
+        <ChevronDown size={11} style={{ flexShrink: 0, color: open ? '#2563eb' : '#94a3b8', transition: 'transform 180ms cubic-bezier(0.23,1,0.32,1), color 140ms', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
       </button>
       {open && (
         <div className="exam-filter-menu">
@@ -536,13 +539,11 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
             <button
               type="button"
               key={option.label}
-              className={`exam-filter-option ${option.active ? 'is-active' : ''}`}
-              onClick={() => {
-                option.onSelect()
-                setOpen(false)
-              }}
+              className={`exam-filter-option${option.active ? ' is-active' : ''}`}
+              onClick={() => { option.onSelect(); setOpen(false) }}
             >
-              {option.label}
+              <span>{option.label}</span>
+              {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
             </button>
           ))}
         </div>
@@ -2765,187 +2766,169 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .exams-filter-divider {
           width: 1px;
-          align-self: stretch;
-          background: linear-gradient(180deg, transparent, #e5e7eb, transparent);
-          margin: 7px 5px;
-          flex: 0 0 auto;
+          height: 18px;
+          background: #e2e8f0;
+          flex-shrink: 0;
+          margin: 0 2px;
         }
 
+        /* ── Filter dropdown ── */
         .exam-filter-dropdown {
           position: relative;
           z-index: 91;
-          min-width: 150px;
-          flex: 0 1 auto;
         }
 
         .exam-filter-trigger {
-          min-height: 54px;
-          width: 100%;
-          border: 0;
-          border-radius: 999px;
-          background: transparent;
-          color: #111827;
-          display: grid;
-          grid-template-columns: 1fr auto;
+          display: inline-flex;
           align-items: center;
-          column-gap: 8px;
-          padding: 9px 16px;
+          gap: 5px;
+          height: 34px;
+          padding: 0 11px;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 8px;
+          background: white;
           cursor: pointer;
-          text-align: left;
-          position: relative;
-          isolation: isolate;
-          transition: background 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
+          white-space: nowrap;
+          transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
         }
 
-        .exam-filter-trigger:hover,
-        .exam-filter-trigger[aria-expanded="true"] {
-          background: rgba(248, 250, 252, 0.95);
-          box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.95), 0 12px 26px rgba(37, 99, 235, 0.08);
-          transform: translateY(-1px);
+        .exam-filter-trigger:hover {
+          border-color: #cbd5e1;
+          background: #f8fafc;
         }
 
-        .exam-filter-dropdown:hover .exam-filter-trigger::before,
-        .exam-filter-dropdown.is-open .exam-filter-trigger::before {
-          content: '';
-          position: absolute;
-          left: 50%;
-          top: -7px;
-          width: 34px;
-          height: 4px;
-          transform: translateX(-50%);
-          border-radius: 999px 999px 0 0;
-          background: #2563eb;
-          box-shadow: 0 0 18px rgba(37, 99, 235, 0.34), 0 8px 20px rgba(37, 99, 235, 0.14);
-          pointer-events: none;
-          z-index: 1;
+        .exam-filter-trigger.has-value {
+          border-color: #bfdbfe;
+          background: #f0f7ff;
         }
 
-        .exam-filter-dropdown:hover .exam-filter-trigger::after,
-        .exam-filter-dropdown.is-open .exam-filter-trigger::after {
-          content: '';
-          position: absolute;
-          left: 50%;
-          top: -13px;
-          width: 58px;
-          height: 28px;
-          transform: translateX(-50%);
-          border-radius: 999px;
-          background: rgba(37, 99, 235, 0.13);
-          filter: blur(10px);
-          pointer-events: none;
-          z-index: -1;
+        .exam-filter-trigger.is-open {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+          background: #f0f7ff;
         }
 
         .exam-filter-label {
-          grid-column: 1 / -1;
-          color: #9ca3af;
-          font-size: 10px;
-          font-weight: 850;
-          letter-spacing: 0.09em;
+          font-size: 9px;
+          font-weight: 900;
           text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #94a3b8;
+          flex-shrink: 0;
+        }
+
+        .exam-filter-sep {
+          font-size: 11px;
+          color: #cbd5e1;
+          flex-shrink: 0;
+          line-height: 1;
         }
 
         .exam-filter-value {
-          min-width: 0;
-          max-width: 260px;
+          font-size: 12px;
+          font-weight: 800;
+          color: #0f172a;
+          max-width: 180px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          color: #111827;
-          font-size: 13px;
-          font-weight: 880;
+        }
+
+        .exam-filter-trigger.has-value .exam-filter-value,
+        .exam-filter-trigger.is-open .exam-filter-value {
+          color: #1d4ed8;
+        }
+
+        @keyframes filterDropIn {
+          from { opacity: 0; transform: translateY(-5px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .exam-filter-menu {
           position: absolute;
           left: 0;
-          top: calc(100% + 8px);
+          top: calc(100% + 6px);
           z-index: 120;
-          min-width: 220px;
-          max-height: 310px;
+          min-width: 190px;
+          max-height: 300px;
           overflow-y: auto;
-          padding: 8px;
-          border-radius: 22px;
-          border: 1px solid rgba(226, 232, 240, 0.95);
-          background: rgba(255, 255, 255, 0.96);
-          box-shadow: 0 26px 70px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
+          padding: 4px;
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05);
+          animation: filterDropIn 160ms cubic-bezier(0.23, 1, 0.32, 1) both;
         }
 
         .exam-filter-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           width: 100%;
-          min-height: 36px;
+          padding: 7px 10px;
           border: 0;
-          border-radius: 999px;
+          border-radius: 6px;
           background: transparent;
-          color: #374151;
-          padding: 9px 12px;
-          text-align: left;
           font-size: 13px;
-          font-weight: 740;
+          font-weight: 600;
+          color: #374151;
           cursor: pointer;
-          transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+          text-align: left;
+          transition: background 100ms ease, color 100ms ease;
         }
 
         .exam-filter-option:hover {
           background: #f8fafc;
-          color: #1d4ed8;
-          transform: translateX(2px);
+          color: #0f172a;
         }
 
         .exam-filter-option.is-active {
           background: #eff6ff;
           color: #1d4ed8;
-          box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+          font-weight: 700;
         }
 
+        /* ── Opción A / B group ── */
         .exams-option-group {
-          min-height: 54px;
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 7px 8px 7px 12px;
-          border-radius: 999px;
-          position: relative;
-          background: transparent;
+          gap: 4px;
+          padding: 0 4px;
         }
 
         .exam-option-label {
-          color: #9ca3af;
-          font-size: 10px;
-          font-weight: 850;
-          letter-spacing: 0.09em;
+          font-size: 9px;
+          font-weight: 900;
           text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #94a3b8;
           margin-right: 2px;
         }
 
         .exam-option-button {
-          width: 38px;
-          height: 38px;
-          border-radius: 999px;
-          border: 1px solid #e5e7eb;
-          background: rgba(255, 255, 255, 0.82);
-          color: #374151;
+          width: 34px;
+          height: 34px;
+          border-radius: 8px;
+          border: 1.5px solid #e2e8f0;
+          background: white;
+          font-size: 12px;
+          font-weight: 800;
+          color: #475569;
           cursor: pointer;
-          font-size: 13px;
-          font-weight: 900;
-          display: inline-grid;
+          display: grid;
           place-items: center;
-          transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+          transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
         }
 
         .exam-option-button:hover {
           background: #f8fafc;
-          color: #1d4ed8;
-          transform: translateY(-1px);
+          border-color: #cbd5e1;
         }
 
         .exam-option-button.is-active {
-          border-color: rgba(37, 99, 235, 0.14);
           background: #eff6ff;
+          border-color: #2563eb;
           color: #1d4ed8;
-          box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08), 0 10px 24px rgba(37, 99, 235, 0.12);
         }
 
         .exams-workspace {
@@ -3063,7 +3046,6 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
 
           .exam-filter-dropdown {
-            min-width: 170px;
             flex: 0 0 auto;
           }
 

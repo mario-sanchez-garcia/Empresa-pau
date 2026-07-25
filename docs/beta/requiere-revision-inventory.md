@@ -9,7 +9,7 @@ Se han encontrado flags `requiereRevision: true` en datos de Cataluña, especial
 - `app/components/CatEjercicioCard.tsx`
 - `app/components/CatFisicaEjercicioCard.tsx`
 
-Para beta pública, estos ejercicios deben mantenerse etiquetados como “En revisión” o excluirse de flujos comerciales hasta completar QA editorial.
+Para beta pública, estos ejercicios deben mantenerse cetiquetados como “En revisión” o excluirse de flujos comerciales hasta completar QA editorial.
 
 ## Archivos afectados
 

@@ -13,7 +13,7 @@ INTERNAL_USER_EMAILS=correo1@gmail.com,correo2@gmail.com
 Rules:
 
 - Separate emails with commas.
-- Emails are compared case-insensitively.
+- Emails are conmpared case-insensitively.
 - Spaces around emails are ignored.
 - Do not commit real secrets or private production-only values to the repo.
 

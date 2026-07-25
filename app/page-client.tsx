@@ -1413,6 +1413,15 @@ const correctionScoreLabel = correctionScoreMatch
   ? `${correctionScoreMatch[1].replace(',', '.')}/${correctionScoreMatch[2].replace(',', '.')}`
   : '--'
 
+function extractCorrectionBullets(text: string, section: string): string[] {
+  const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = text.match(new RegExp(`## ${escaped}[\\s\\S]*?\\n([\\s\\S]*?)(?=##|$)`, 'i'))
+  if (!match) return []
+  return match[1].split('\n').map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean)
+}
+const correctionFuertes = correccion ? extractCorrectionBullets(correccion, 'Puntos fuertes') : []
+const correctionErrores = correccion ? extractCorrectionBullets(correccion, 'Errores a corregir') : []
+
 useEffect(() => {
   if (typeof window === 'undefined' || window.location.pathname !== '/') return
 
@@ -3800,53 +3809,53 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
             )}
 
-           {!isCatalunaExam && preguntaActiva && <div className="exams-answer-card" style={{
-  background: 'rgba(255, 255, 255, 0.82)',
-  borderRadius: '24px',
-  border: '1px solid rgba(219, 231, 251, 0.80)',
-  padding: '26px',
-  marginBottom: '22px',
-  boxShadow: '0 4px 20px rgba(37,99,235,0.07), 0 1px 4px rgba(37,99,235,0.04)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)'
-}}>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: WARM.muted, marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu respuesta</div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+           {!isCatalunaExam && preguntaActiva && <div className="exams-answer-card" style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
+              {/* Tabs */}
+              <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
                 {(['texto', 'imagen'] as const).map(m => (
-                  <button className={modo === m ? 'campus-primary' : 'campus-hover'} key={m} onClick={() => setModo(m)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '9px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, background: modo === m ? 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')' : cfg.light, color: modo === m ? '#fff' : cfg.color, display: 'flex', alignItems: 'center', gap: '8px' }}>{m === 'texto' ? <PenLine size={15} /> : <Camera size={15} />}{m === 'texto' ? 'Escribir' : 'Subir foto'}</button>
+                  <button key={m} onClick={() => setModo(m)} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: modo === m ? '#2563eb' : '#94a3b8', borderBottom: modo === m ? '2px solid #2563eb' : '2px solid transparent', marginBottom: -1, background: 'none', border: 'none', borderBottomWidth: 2, borderBottomStyle: 'solid', borderBottomColor: modo === m ? '#2563eb' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {m === 'texto' ? <PenLine size={13} /> : <Camera size={13} />}{m === 'texto' ? '✏️ Escribir' : '📷 Subir foto'}
+                  </button>
                 ))}
               </div>
-              {modo === 'texto' ? (
-                <RichTextArea
-                  value={respuesta}
-                  onChange={setRespuesta}
-                  placeholder="Empieza a resolver el problema aquí..."
-                  minHeight={asignatura === 'historia' || asignatura === 'lengua' ? 280 : 180}
-                  accentColor={cfg.color}
-                  softColor={cfg.light}
-                  borderColor={cfg.soft}
-                  mathSubject={asignatura}
-                />
-              ) : (
-                <div>
-                  <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
-                  {imagenPreview ? (
-                    <div style={{ position: 'relative' }}>
-                      <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '16px', border: '1.5px solid #dbe7fb' }} />
-                      <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
-                    </div>
-                  ) : (
-                    <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: '180px', borderRadius: '18px', border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
-                      <UploadCloud size={34} color={cfg.color} />
-                      <p style={{ fontSize: '14px', fontWeight: 600, color: cfg.color, margin: '8px 0 4px' }}>Haz clic para subir una foto</p>
-                      <p style={{ fontSize: '12px', color: cfg.accent, margin: '0' }}>Fotografía tu respuesta manuscrita</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), marginTop: '16px', width: '100%', padding: '15px', borderRadius: '18px', border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : 'linear-gradient(135deg, ' + cfg.color + ', ' + cfg.accent + ')', color: '#fff', fontSize: '15px', fontWeight: 760, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 16px 34px ' + cfg.accent + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
-                {cargando ? <KairoLoadingDot /> : <WandSparkles size={17} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con IA'}
-              </button>
+              {/* Content */}
+              <div style={{ padding: '0 0 0 0' }}>
+                {modo === 'texto' ? (
+                  <RichTextArea
+                    value={respuesta}
+                    onChange={setRespuesta}
+                    placeholder="Empieza a resolver el problema aquí..."
+                    minHeight={asignatura === 'historia' || asignatura === 'lengua' ? 280 : 110}
+                    accentColor={cfg.color}
+                    softColor={cfg.light}
+                    borderColor={cfg.soft}
+                    mathSubject={asignatura}
+                  />
+                ) : (
+                  <div style={{ padding: '14px 16px' }}>
+                    <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
+                    {imagenPreview ? (
+                      <div style={{ position: 'relative' }}>
+                        <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
+                        <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
+                      </div>
+                    ) : (
+                      <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: 160, borderRadius: 10, border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
+                        <UploadCloud size={30} color={cfg.color} />
+                        <p style={{ fontSize: 13, fontWeight: 600, color: cfg.color, margin: '8px 0 3px' }}>Haz clic para subir una foto</p>
+                        <p style={{ fontSize: 11, color: cfg.accent, margin: 0 }}>Fotografía tu respuesta manuscrita</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {/* Footer row */}
+              <div style={{ padding: '10px 16px', borderTop: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>fx Símbolos</span>
+                <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '9px 20px', borderRadius: 10, border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 4px 16px rgba(37,99,235,.3)', display: 'flex', alignItems: 'center', gap: 7 }}>
+                  {cargando ? <KairoLoadingDot /> : <WandSparkles size={15} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
+                </button>
+              </div>
             </div>}
 
             {!isCatalunaExam && (correccion || streamText || cargando) && (
@@ -3887,74 +3896,82 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
 
               <aside className="exams-ai-panel" aria-label="Panel de feedback de Kairo">
-                <div className="exams-side-card">
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
-                    <div>
-                      <div className="exams-side-label">Nota estimada</div>
-                      {(() => {
-                        const parts = correctionScoreLabel !== '--' ? correctionScoreLabel.split('/') : null
-                        const ratio = parts ? (parseFloat(parts[0]) / parseFloat(parts[1])) * 10 : null
-                        const scoreColor = ratio !== null ? colorNota(ratio) : '#111827'
-                        return (
-                          <div style={{ marginTop: 6, color: correccion ? scoreColor : '#94a3b8', fontSize: 40, lineHeight: 1, fontWeight: 920, transition: 'color 400ms ease', letterSpacing: '-0.02em' }}>
-                            {correccion ? correctionScoreLabel : cargando ? '...' : '--'}
-                            <span style={{ marginLeft: 5, color: '#94a3b8', fontSize: 13, fontWeight: 700 }}>{correctionScoreLabel === '--' ? '' : 'pts'}</span>
-                          </div>
-                        )
-                      })()}
-                      <p className="exams-side-text" style={{ marginTop: 8 }}>
-                        {correccion ? `Máximo oficial: ${!isCatalunaExam && preguntaActiva ? formatPts(puntuacionPreguntaActiva) : '--'} pts` : cargando ? 'Calculando con la rúbrica oficial...' : 'Resuelve el ejercicio y Kairo te dará feedback.'}
-                      </p>
-                    </div>
-                    <div style={{ width: 42, height: 42, borderRadius: 16, display: 'grid', placeItems: 'center', background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }}>
-                      <WandSparkles size={20} />
-                    </div>
+                <div className="exams-side-card" style={{ padding: 0, overflow: 'hidden' }}>
+
+                  {/* Nota estimada */}
+                  {(() => {
+                    const parts = correctionScoreLabel !== '--' ? correctionScoreLabel.split('/') : null
+                    const ratio = parts ? parseFloat(parts[0]) / parseFloat(parts[1]) : null
+                    const scoreColor = ratio !== null ? colorNota(ratio * 10) : '#0f172a'
+                    return (
+                      <div style={{ padding: '16px 18px', borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                        <div className="exams-side-label">Nota estimada</div>
+                        <div style={{ marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                          <span style={{ fontSize: 36, fontWeight: 900, color: correccion ? scoreColor : '#94a3b8', lineHeight: 1, letterSpacing: '-0.02em', transition: 'color 400ms ease' }}>
+                            {correccion ? (parts?.[0] ?? '--') : cargando ? '...' : '--'}
+                          </span>
+                          {parts && <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>/{parts[1]}</span>}
+                        </div>
+                        <div style={{ height: 4, borderRadius: 999, background: '#f1f5f9', marginTop: 10, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: ratio !== null ? `${(ratio * 100).toFixed(0)}%` : '0%', background: 'linear-gradient(90deg,#2563eb,#60a5fa)', borderRadius: 999, transition: 'width 600ms cubic-bezier(0.4,0,0.2,1)' }} />
+                        </div>
+                        {!correccion && <p className="exams-side-text" style={{ marginTop: 8 }}>{cargando ? 'Calculando con la rúbrica oficial...' : 'Resuelve el ejercicio y Kairo te dará feedback.'}</p>}
+                      </div>
+                    )
+                  })()}
+
+                  {/* Puntos fuertes */}
+                  <div style={{ padding: '14px 18px', borderBottom: '1px solid #f8fafc' }}>
+                    <div className="exams-side-label" style={{ color: '#15803d', marginBottom: 10 }}>Puntos fuertes</div>
+                    {correctionFuertes.length > 0 ? correctionFuertes.map((point, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                        <div style={{ width: 16, height: 16, borderRadius: 9999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>✓</div>
+                        <span style={{ fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{point}</span>
+                      </div>
+                    )) : (
+                      <p className="exams-side-text">{cargando ? 'Analizando lo que sí suma puntos...' : 'Aquí aparecerán tus puntos fuertes.'}</p>
+                    )}
                   </div>
 
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    <div className="exams-side-section">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 12, fontWeight: 900 }}>✓</span>
-                        <div className="exams-side-label" style={{ color: '#15803d' }}>Puntos fuertes</div>
+                  {/* Errores a corregir */}
+                  <div style={{ padding: '14px 18px', borderBottom: '1px solid #f8fafc' }}>
+                    <div className="exams-side-label" style={{ color: '#b91c1c', marginBottom: 10 }}>Errores a corregir</div>
+                    {correctionErrores.length > 0 ? correctionErrores.map((err, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                        <div style={{ width: 16, height: 16, borderRadius: 9999, display: 'grid', placeItems: 'center', background: '#ffedd5', color: '#ea580c', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>!</div>
+                        <span style={{ fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{err}</span>
                       </div>
-                      <p className="exams-side-text">
-                        {correccion ? 'Disponibles en la corrección detallada generada por Kairo.' : cargando ? 'Analizando lo que sí suma puntos...' : 'Aquí aparecerán tus puntos fuertes.'}
-                      </p>
-                    </div>
-                    <div className="exams-side-section">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ width: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#ffedd5', color: '#ea580c', fontSize: 12, fontWeight: 900 }}>!</span>
-                        <div className="exams-side-label" style={{ color: '#c2410c' }}>Errores a corregir</div>
-                      </div>
-                      <p className="exams-side-text">
-                        {correccion ? 'Consulta el detalle para ver fallos concretos, pasos omitidos y mejoras.' : cargando ? 'Revisando errores y pasos omitidos...' : 'Aquí verás qué debes corregir.'}
-                      </p>
-                    </div>
-                    <div className="exams-side-section" style={{ background: '#f5f3ff', borderColor: '#ddd6fe' }}>
-                      <div className="exams-side-label" style={{ color: '#7c3aed' }}>Bloque asociado</div>
-                      <p className="exams-side-text">
-                        {!isCatalunaExam && preguntaActiva ? bloqueActivoLabel : 'Selecciona un ejercicio para ver el bloque asociado.'}
-                      </p>
-                      <a href="/camino" style={{ marginTop: 12, border: '1px solid #ddd6fe', background: '#ffffff', color: '#6d28d9', borderRadius: 999, padding: '8px 11px', fontSize: 12, fontWeight: 850, display: 'inline-flex', textDecoration: 'none' }}>
-                        Ver material de repaso
-                      </a>
-                    </div>
+                    )) : (
+                      <p className="exams-side-text">{cargando ? 'Revisando errores y pasos omitidos...' : 'Aquí verás qué debes corregir.'}</p>
+                    )}
                   </div>
-                </div>
 
-                <div className="exams-side-card" style={{ background: 'linear-gradient(145deg, #ffffff, #f8fafc)' }}>
-                  <div className="exams-side-label">Racha de estudio</div>
-                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#fff7ed', color: '#ea580c', boxShadow: '0 10px 22px rgba(15,23,42,0.06)' }}>
-                      <Flame size={20} />
-                    </div>
+                  {/* Bloque asociado */}
+                  <div style={{ padding: '14px 18px', borderBottom: '1px solid #f8fafc' }}>
+                    <div className="exams-side-label" style={{ marginBottom: 10 }}>Bloque asociado</div>
+                    {!isCatalunaExam && preguntaActiva ? (
+                      <>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 9999, background: '#eff6ff', color: '#1d4ed8', fontSize: 11, fontWeight: 800, border: '1px solid #bfdbfe' }}>
+                          📐 {bloqueActivoLabel}
+                        </div>
+                        <a href="/camino" style={{ display: 'block', marginTop: 8, fontSize: 11, fontWeight: 700, color: '#2563eb', textDecoration: 'none' }}>Ver material de repaso →</a>
+                      </>
+                    ) : (
+                      <p className="exams-side-text">Selecciona un ejercicio para ver el bloque asociado.</p>
+                    )}
+                  </div>
+
+                  {/* Sesión activa */}
+                  <div style={{ margin: '12px 14px', padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
                     <div>
-                      <div style={{ color: '#111827', fontSize: 15, fontWeight: 850 }}>Sesión activa</div>
-                      <div style={{ color: '#6b7280', fontSize: 12, fontWeight: 650, marginTop: 2 }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Sesión activa</div>
+                      <div style={{ fontSize: 10, color: '#4ade80', marginTop: 1 }}>
                         {respuesta.trim() || imagen ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
                       </div>
                     </div>
                   </div>
+
                 </div>
               </aside>
             </div>

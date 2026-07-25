@@ -4071,14 +4071,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
                 {mensajes.length === 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
-                    <div className="chat-avatar-pulse" style={{ width: 174, height: 82, margin: '0 auto 14px', display: 'grid', placeItems: 'center' }}>
-                      <KairoBrand subtitle={null} size="lg" />
+                    <div className="chat-avatar-pulse" style={{ margin: '0 auto 28px', display: 'inline-flex', padding: '18px 32px', background: '#0f172a', borderRadius: 20, border: '1px solid rgba(37,99,235,.28)' }}>
+                      <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 46, width: 'auto', display: 'block' }} />
                     </div>
-                    <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.035em', lineHeight: 1.08 }}>
-                      Hola, soy{' '}
-                      <span style={{ background: 'linear-gradient(90deg, #004aad 0%, #2563eb 58%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Kairo</span>
+                    <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 800, letterSpacing: '0.24em', color: '#94a3b8', textTransform: 'uppercase' }}>Hola, soy</p>
+                    <h2 style={{ margin: '0 0 18px', fontSize: 46, fontWeight: 900, color: '#2563eb', letterSpacing: '-0.045em', lineHeight: 1, textShadow: '0 0 32px rgba(37,99,235,.3)' }}>
+                      Kairo
                     </h2>
-                    <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 380, lineHeight: 1.6, fontWeight: 520 }}>
+                    <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 340, lineHeight: 1.65, fontWeight: 450 }}>
                       Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
                     </p>
                   </div>

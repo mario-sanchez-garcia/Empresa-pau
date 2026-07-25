@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ClipboardList, Clock, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
+import { ClipboardList, Clock, GraduationCap, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
 
 const NAV = [
   { label: 'Exámenes',        href: '/examenes',                icon: ClipboardList },
+  { label: 'Simulacros',      href: '/simulacros',              icon: GraduationCap },
   { label: 'Camino PAU',      href: '/camino',                  icon: LayoutGrid },
   { label: 'La Zona',         href: '/zona',                    icon: Zap },
   { label: 'Chat con Kairo',  href: '/examenes?view=chat',      icon: MessageCircle },
@@ -58,12 +59,11 @@ export default function SidebarNav() {
         {NAV.map(({ label, href, icon: Icon }) => {
           // Determine if this is the strictly current destination
           const isCurrentPage = (() => {
-            if (href === '/camino')   return pathname.startsWith('/camino')
-            if (href === '/zona')     return pathname.startsWith('/zona')
-            if (href === '/settings') return pathname === '/settings'
-            // For /examenes routes, only the base /examenes link is "active" on the main exam page
-            // Chat/historial links are never strictly "active" since we can't read query params here
-            if (href === '/examenes') return pathname === '/examenes'
+            if (href === '/camino')      return pathname.startsWith('/camino')
+            if (href === '/zona')        return pathname.startsWith('/zona')
+            if (href === '/simulacros')  return pathname.startsWith('/simulacros')
+            if (href === '/settings')    return pathname === '/settings'
+            if (href === '/examenes')    return pathname === '/examenes'
             return false
           })()
 

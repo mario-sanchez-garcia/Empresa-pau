@@ -3930,7 +3930,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     const card = SUBJECT_CARDS[key]
                     const isActive = asignatura === key
                     return (
-                      <button key={key} type="button" onClick={() => navegarAAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1px solid rgba(147,197,253,.5)' : '1px solid rgba(255,255,255,.18)', background: isActive ? 'rgba(37,99,235,.5)' : 'rgba(255,255,255,.08)', color: isActive ? 'white' : 'rgba(255,255,255,.7)', fontSize: 11, fontWeight: 700, backdropFilter: 'blur(8px)', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit' }}>
+                      <button key={key} type="button" onClick={() => cambiarAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1px solid rgba(147,197,253,.5)' : '1px solid rgba(255,255,255,.18)', background: isActive ? 'rgba(37,99,235,.5)' : 'rgba(255,255,255,.08)', color: isActive ? 'white' : 'rgba(255,255,255,.7)', fontSize: 11, fontWeight: 700, backdropFilter: 'blur(8px)', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit' }}>
                         {card.title}
                       </button>
                     )
@@ -3947,7 +3947,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 const card = SUBJECT_CARDS[key]
                 const isActive = asignatura === key
                 return (
-                  <button key={key} type="button" onClick={() => navegarAAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1.5px solid #2563eb' : '1px solid #e2e8f0', background: isActive ? '#eff6ff' : 'white', fontSize: 12, fontWeight: 700, color: isActive ? '#2563eb' : '#475569', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <button key={key} type="button" onClick={() => cambiarAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1.5px solid #2563eb' : '1px solid #e2e8f0', background: isActive ? '#eff6ff' : 'white', fontSize: 12, fontWeight: 700, color: isActive ? '#2563eb' : '#475569', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: val.color, flexShrink: 0, display: 'inline-block' }} />
                     {card.title}
                   </button>

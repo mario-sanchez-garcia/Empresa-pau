@@ -2535,23 +2535,19 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
 
   return (
     <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #2563eb', background: 'white', padding: '16px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Próximo parcial</p>
-          <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
-            {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
-            {exam.subject ? ` · ${exam.subject}` : ''}
-            {blockDisplay ? ` · ${blockDisplay}` : ''}
-          </p>
-          <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>Kairo ha ajustado esta semana para que llegues preparado.</p>
-        </div>
-        <a
-          href={href}
-          style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.22)', whiteSpace: 'nowrap' }}
-        >
-          Empezar práctica <ArrowRight size={13} />
-        </a>
-      </div>
+      <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Próximo parcial</p>
+      <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
+        {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
+        {exam.subject ? ` · ${exam.subject}` : ''}
+        {blockDisplay ? ` · ${blockDisplay}` : ''}
+      </p>
+      <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 12px', fontWeight: 600 }}>Kairo ha ajustado esta semana para que llegues preparado.</p>
+      <a
+        href={href}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}
+      >
+        Empezar práctica <ArrowRight size={13} />
+      </a>
     </div>
   )
 }

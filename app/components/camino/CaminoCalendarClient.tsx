@@ -1422,9 +1422,17 @@ export default function CaminoCalendarClient() {
   )
 
   const heroImageUrl = (() => {
-    const s = (heroAsignatura ?? '').toLowerCase()
-    if (s.includes('historia')) return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260724_175525_a082853d-a113-4ae3-bd27-0bff89dc2c5b.png'
-    return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_004636_0cd5b1d2-163e-4b72-8007-d329221bcbfb.png'
+    const s = (heroAsignatura ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    if (s.includes('filosofia'))                    return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000852_5474f700-2ed4-44ef-83b0-2a54eeff1d80.png'
+    if (s.includes('historia'))                     return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260724_175525_a082853d-a113-4ae3-bd27-0bff89dc2c5b.png'
+    if (s.includes('fisica'))                       return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000822_ca28aa98-71b6-42b5-82a1-eb035f90e318.png'
+    if (s.includes('quimica'))                      return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000824_d921117a-9232-49e7-b9c2-08ffffcd4475.png'
+    if (s.includes('biologia'))                     return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000825_0fbd7567-1cac-444c-81e2-36c2551b946c.png'
+    if (s.includes('ingles'))                       return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000853_ea284c50-cadc-413d-8412-9ddfb0c44ec9.png'
+    if (s.includes('lengua'))                       return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_134153_21d8ecce-c198-4ae1-8fc9-22814072fdbc.png'
+    if (s.includes('ccss') || s.includes('social')) return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000821_38eb7eb4-e4a8-415f-b754-88efab45f708.png'
+    // matematicas (II y cualquier otra) y fallback
+    return 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
   })()
   const daysUntilPAU = (() => {
     const now = realToday ? new Date(realToday + 'T00:00:00') : new Date()

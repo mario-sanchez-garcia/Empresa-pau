@@ -97,6 +97,18 @@ const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldt
 const BOOKS_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_134153_21d8ecce-c198-4ae1-8fc9-22814072fdbc.png'
 const EXAM_HALL_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_120451_1bd058fd-522e-43ce-9cd1-c935de500674.png'
 
+const SUBJECT_HERO_IMGS: Record<string, string> = {
+  mates:             STUDY_DESK_IMG,
+  matematicas_ccss:  'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000821_38eb7eb4-e4a8-415f-b754-88efab45f708.png',
+  fisica:            'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000822_ca28aa98-71b6-42b5-82a1-eb035f90e318.png',
+  quimica:           'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000824_d921117a-9232-49e7-b9c2-08ffffcd4475.png',
+  biologia:          'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000825_0fbd7567-1cac-444c-81e2-36c2551b946c.png',
+  lengua:            BOOKS_IMG,
+  historia:          'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260724_175525_a082853d-a113-4ae3-bd27-0bff89dc2c5b.png',
+  historia_filosofia:'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000852_5474f700-2ed4-44ef-83b0-2a54eeff1d80.png',
+  ingles:            'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260726_000853_ea284c50-cadc-413d-8412-9ddfb0c44ec9.png',
+}
+
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 
 function readSafeStreamText(rawText: string) {
@@ -3195,7 +3207,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           <>
             {/* V4 Mesa de Trabajo — photo hero */}
             <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
-              <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)' }} />
+              <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
@@ -3909,7 +3921,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
             {/* Photo hero */}
             <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
-              <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.45) saturate(.75)' }} />
+              <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.45) saturate(.75)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,.85) 0%, rgba(15,23,42,.3) 55%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px' }}>
                 <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
                 <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .9, marginBottom: 10 }}>Tutor<br />Inteligente</div>

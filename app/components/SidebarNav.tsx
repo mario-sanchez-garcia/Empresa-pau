@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation'
 import { ClipboardList, Clock, GraduationCap, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
 
 const NAV = [
+  { label: 'Camino PAU',      href: '/camino',                  icon: LayoutGrid },
   { label: 'Exámenes',        href: '/examenes',                icon: ClipboardList },
   { label: 'Simulacros',      href: '/simulacros',              icon: GraduationCap },
-  { label: 'Camino PAU',      href: '/camino',                  icon: LayoutGrid },
   { label: 'La Zona',         href: '/zona',                    icon: Zap },
   { label: 'Chat con Kairo',  href: '/examenes?view=chat',      icon: MessageCircle },
   { label: 'Historial',       href: '/examenes?view=historial', icon: Clock },

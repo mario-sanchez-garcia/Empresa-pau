@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BarChart3, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Medal, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Medal, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
@@ -1920,133 +1920,79 @@ function gradeColors(nota: number, confidence: 'low' | 'medium' | 'high'): { tex
   if (nota >= 7) return { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
   if (nota >= 5) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
   if (nota >= 4) return { text: '#92400e', bar: '#d97706', bg: '#fffbeb' }
-  // nota < 4 with medium/high confidence: neutral dark, plan-first layout handles color
+  // nota < 4: neutral dark
   return { text: '#1e293b', bar: '#94a3b8', bg: '#f8fafc' }
-}
-
-function planLine(nota: number, bloques: BlockEntry[]): string {
-  const weak = bloques.filter(b => b.num_entries >= 1)
-  const weakName = weak[0]?.bloque ?? null
-  if (nota < 5) {
-    const gap = (5 - nota).toFixed(1)
-    return weakName
-      ? `Estás a ${gap} del aprobado — ${weakName} es donde más puntos puedes recuperar`
-      : `Estás a ${gap} puntos del aprobado — practica los ejercicios más flojos`
-  }
-  if (nota < 7) {
-    return weakName
-      ? `Vas camino del aprobado — asegura subiendo ${weakName}`
-      : 'Vas camino del aprobado — sigue practicando para asegurar la nota'
-  }
-  return weakName
-    ? `Buena proyección — consolida ${weakName} para asegurar la nota`
-    : 'Buena proyección — mantén el ritmo y consolida los bloques más difíciles'
 }
 
 function NotaProyectadaCard({ projections, heroAsignatura }: { projections: ProjectionEntry[]; heroAsignatura: string | null }) {
   const hero = projections.find(p => p.asignatura === heroAsignatura) ?? projections[0] ?? null
   const rest = projections.filter(p => p !== hero)
-  const totalEntries = projections.reduce((s, p) => s + p.num_entries, 0)
 
   if (!hero) return null
 
   const heroNota = hero.nota_proyectada
   const heroBloques = hero.bloques ?? []
-  const isLowScore = heroNota !== null && hero.confidence !== 'low' && heroNota < 4
-  const heroC = heroNota !== null ? gradeColors(heroNota, hero.confidence) : null
-
-  // Steps for plan-first layout (nota < 4)
-  const weakSteps = heroBloques.filter(b => b.num_entries >= 1).slice(0, 2)
-  const planSteps: string[] = weakSteps.map((b, i) => {
-    const pts = b.avg_max_pts !== null ? ` — vale ${b.avg_max_pts.toFixed(1)} pts del examen` : ''
-    return `${i + 1}. ${i === 0 ? 'Refuerza' : 'Practica'} ${b.bloque}${pts}`
-  })
-  planSteps.push(`${planSteps.length + 1}. Mantén tu ritmo de misiones diarias`)
+  const bestBloque = heroBloques.find(b => b.num_entries >= 1)?.bloque
+  const subLabel = subjectLabelFromSlug(hero.asignatura)
+  const subtitle = bestBloque ? `${subLabel} · ${bestBloque}` : subLabel
+  const trend = hero.trend_7d
+  const hasTrend = trend !== null && Math.abs(trend) >= 0.1
 
   return (
-    <section className="mb-5 rounded-[28px] border border-emerald-100 bg-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.07)]">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+    <>
+      <p style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Nota proyectada PAU</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">Proyección PAU</p>
-          <h2 className="text-lg font-black text-slate-950">Nota proyectada</h2>
-          <p className="mt-0.5 text-xs font-semibold text-slate-400">Basada en {totalEntries} corrección{totalEntries !== 1 ? 'es' : ''} · se actualiza con cada práctica</p>
+          {hero.confidence === 'low' ? (
+            <>
+              <p style={{ fontSize: 18, fontWeight: 900, color: '#64748b', lineHeight: 1, margin: 0 }}>Aún afinando</p>
+              <p style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>
+                {Math.max(1, 3 - hero.recent_entries)} ejercicio{3 - hero.recent_entries !== 1 ? 's' : ''} más
+              </p>
+            </>
+          ) : heroNota !== null ? (
+            <>
+              <span style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{heroNota.toFixed(1)}</span>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{subtitle}</div>
+            </>
+          ) : (
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>Sin datos</span>
+          )}
         </div>
-        <BarChart3 size={20} className="shrink-0 text-emerald-400" />
+        {heroNota !== null && hero.confidence !== 'low' && (
+          <div style={{ textAlign: 'right' }}>
+            {hasTrend ? (
+              <>
+                <div style={{ fontSize: 13, fontWeight: 800, color: trend! > 0 ? '#16a34a' : '#dc2626' }}>
+                  {trend! > 0 ? '▲' : '▼'} {trend! > 0 ? '+' : ''}{trend!.toFixed(1)}
+                </div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>esta semana</div>
+              </>
+            ) : (
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>estable</div>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* Hero: priority subject */}
-      <div className="mb-3 rounded-2xl border border-slate-100 px-5 py-4" style={{ background: heroC?.bg ?? '#f8fafc' }}>
-        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{subjectLabelFromSlug(hero.asignatura)}</p>
-
-        {hero.confidence === 'low' ? (
-          <>
-            <p className="text-sm font-black text-slate-500">Aún afinando</p>
-            <p className="mt-1 text-xs font-semibold text-slate-400">
-              Resuelve {Math.max(1, 3 - hero.recent_entries)} ejercicio{3 - hero.recent_entries !== 1 ? 's' : ''} más para ver tu proyección
-            </p>
-          </>
-        ) : isLowScore && heroNota !== null ? (
-          /* Plan-first layout for nota < 4 */
-          <>
-            <p className="text-base font-black text-slate-800">Tu plan para llegar al 5</p>
-            <p className="mt-0.5 text-xs font-semibold text-slate-400">Proyección actual: <span className="font-black text-slate-600">{heroNota.toFixed(1)}/10</span></p>
-            <ul className="mt-3 grid gap-1.5">
-              {planSteps.map((step, i) => (
-                <li key={i} className="text-xs font-semibold text-slate-600">{step}</li>
-              ))}
-            </ul>
-            {/* Neutral bar with aprobado marker */}
-            <div className="relative mt-4 h-2 overflow-visible rounded-full bg-slate-200">
-              <div className="h-full rounded-full bg-slate-400 transition-all duration-700" style={{ width: `${Math.min(100, (heroNota / 10) * 100)}%` }} />
-              {/* aprobado marker at 50% */}
-              <div className="absolute top-1/2 -translate-y-1/2" style={{ left: '50%' }}>
-                <div className="h-4 w-0.5 -translate-y-[2px] rounded-full bg-slate-500" />
-              </div>
-            </div>
-            <div className="relative mt-1 h-3">
-              <span className="absolute text-[10px] font-black text-slate-400" style={{ left: '50%', transform: 'translateX(-50%)' }}>Aprobado (5)</span>
-            </div>
-          </>
-        ) : heroNota !== null && heroC ? (
-          /* Normal layout for nota >= 4 */
-          <>
-            <div className="flex flex-wrap items-end gap-3">
-              <span className="text-5xl font-black leading-none" style={{ color: heroC.text }}>{heroNota.toFixed(1)}</span>
-              <span className="mb-1 text-xl font-semibold text-slate-400">/10</span>
-              {hero.trend_7d !== null && Math.abs(hero.trend_7d) >= 0.1 && (
-                <span className={`mb-1 text-sm font-black ${hero.trend_7d > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                  {hero.trend_7d > 0 ? '▲' : '▼'} {hero.trend_7d > 0 ? '+' : ''}{hero.trend_7d.toFixed(1)} esta semana
-                </span>
-              )}
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (heroNota / 10) * 100)}%`, background: heroC.bar }} />
-            </div>
-            <p className="mt-3 text-xs font-semibold text-slate-500">{planLine(heroNota, heroBloques)}</p>
-          </>
-        ) : null}
-      </div>
-
-      {/* Compact chips for remaining subjects */}
       {rest.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
           {rest.map(p => {
             const nota = p.nota_proyectada
             const colors = nota !== null && p.confidence !== 'low' ? gradeColors(nota, p.confidence) : null
             return (
-              <div key={p.asignatura} className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                <span className="text-xs font-black text-slate-600">{subjectLabelFromSlug(p.asignatura)}</span>
+              <div key={p.asignatura} style={{ display: 'flex', alignItems: 'center', gap: 5, borderRadius: 99, border: '1px solid #f1f5f9', background: '#f8fafc', padding: '4px 10px' }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b' }}>{subjectLabelFromSlug(p.asignatura)}</span>
                 {p.confidence === 'low' ? (
-                  <span className="text-[11px] font-semibold text-slate-400">Afinando</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: '#cbd5e1' }}>—</span>
                 ) : nota !== null && colors ? (
-                  <span className="text-[11px] font-black" style={{ color: colors.text }}>{nota.toFixed(1)}/10</span>
+                  <span style={{ fontSize: 10, fontWeight: 900, color: colors.text }}>{nota.toFixed(1)}</span>
                 ) : null}
               </div>
             )
           })}
         </div>
       )}
-    </section>
+    </>
   )
 }
 

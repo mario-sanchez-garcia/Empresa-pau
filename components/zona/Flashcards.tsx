@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent, ReactNode } from 'react'
@@ -33,17 +33,6 @@ const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[
   { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' }
 ]
 
-const WARM = {
-  ink: '#172033',
-  muted: '#64748b',
-  softText: '#94a3b8',
-  surface: '#ffffff',
-  field: '#f8fbff',
-  border: '#dbe7fb',
-  wash: '#eff6ff',
-  blue: '#2563eb'
-}
-
 type ZonaMode = 'study' | 'create' | 'space'
 
 interface FlashcardsProps {
@@ -51,6 +40,11 @@ interface FlashcardsProps {
   initialCards: Flashcard[]
 }
 
+const MODES: { key: ZonaMode; icon: ReactNode; title: string; text: string }[] = [
+  { key: 'study', icon: <BookOpenCheck size={15} />, title: 'Repasar tarjetas', text: 'Practica conceptos rápidos por asignatura.' },
+  { key: 'create', icon: <PencilLine size={15} />, title: 'Crear tarjetas', text: 'Guarda fórmulas o errores para repasar después.' },
+  { key: 'space', icon: <Layers3 size={15} />, title: 'Mi espacio', text: 'Consulta tus tarjetas guardadas.' },
+]
 
 export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   const [cards, setCards] = useState<Flashcard[]>(initialCards)
@@ -199,39 +193,61 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   }
 
   return (
-    <div className="grid gap-5">
-      <section className="rounded-[28px] border border-[#dbe7fb] bg-white/90 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.10)] max-md:p-4">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Empieza aquí</div>
-            <h2 className="mt-1 text-2xl font-black text-slate-900 max-md:text-xl">Elige qué quieres hacer</h2>
-            <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-500">Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+      {/* ── Mode selector ── */}
+      <section style={{ paddingBottom: 24 }}>
+        <div style={{ marginBottom: 18 }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Empieza aquí</p>
+          <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 26, fontWeight: 700, color: '#0f172a', letterSpacing: '-.02em', marginBottom: 5 }}>Elige qué quieres hacer</h2>
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 max-lg:grid-cols-1">
-          <ModeCard active={mode === 'study'} icon={<BookOpenCheck size={20} />} title="Repasar tarjetas" text="Practica conceptos rápidos por asignatura." onClick={() => setMode('study')} />
-          <ModeCard active={mode === 'create'} icon={<PencilLine size={20} />} title="Crear tus propias tarjetas" text="Guarda preguntas, fórmulas o errores para repasarlos después." onClick={() => setMode('create')} />
-          <ModeCard active={mode === 'space'} icon={<Layers3 size={20} />} title="Mi espacio" text="Consulta tus tarjetas y recursos guardados." onClick={() => setMode('space')} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid #e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+          {MODES.map((m, i) => {
+            const isActive = mode === m.key
+            return (
+              <button
+                key={m.key}
+                onClick={() => setMode(m.key)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 7,
+                  padding: '16px 18px',
+                  background: isActive ? '#0f172a' : 'white',
+                  borderWidth: 0,
+                  borderRightWidth: i < 2 ? 1 : 0,
+                  borderRightStyle: 'solid',
+                  borderRightColor: '#e2e8f0',
+                  cursor: 'pointer', textAlign: 'left',
+                  transition: 'background .12s',
+                }}
+              >
+                <div style={{ color: isActive ? '#93c5fd' : '#2563eb' }}>{m.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: isActive ? 'white' : '#0f172a', lineHeight: 1.2 }}>{m.title}</div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: isActive ? '#94a3b8' : '#64748b', lineHeight: 1.55 }}>{m.text}</div>
+              </button>
+            )
+          })}
         </div>
       </section>
 
+      {/* ── Study mode ── */}
       {mode === 'study' && (
-        <section className="grid gap-4 rounded-[28px] border border-[#dbe7fb] bg-white/95 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.08)] max-md:p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dbe7fb] pb-4">
+        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>
             <div>
-              <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">1 · Selecciona asignatura</div>
-              <h3 className="mt-1 text-xl font-black text-slate-900">Repasa antes de hacer ejercicios</h3>
+              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 5 }}>Repaso activo</p>
+              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Repasa antes de hacer ejercicios</h3>
             </div>
-            <button onClick={resetDeck} className="inline-flex items-center gap-2 rounded-full border border-[#dbe7fb] bg-[#f8fbff] px-4 py-2 text-sm font-black text-slate-600 transition hover:border-blue-300 hover:text-blue-700">
-              <RotateCcw size={15} /> Reiniciar
+            <button onClick={resetDeck} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '7px 13px', fontSize: 11, fontWeight: 900, color: '#64748b', cursor: 'pointer' }}>
+              <RotateCcw size={13} /> Reiniciar
             </button>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
-            <aside className="grid content-start gap-4 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+            <aside style={{ display: 'grid', alignContent: 'start', gap: 16, border: '1px solid #e2e8f0', borderRadius: 4, padding: 16, background: '#fafaf9' }}>
               <div>
-                <div className="mb-2 text-xs font-black uppercase tracking-[0.08em] text-slate-400">Asignatura</div>
+                <div style={eyebrowStyle}>Asignatura</div>
                 <select value={subject} onChange={event => selectSubject(event.target.value as ZonaSubject | 'all')} style={inputStyle}>
                   <option value="all">Todas</option>
                   {SUBJECTS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
@@ -239,25 +255,25 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-slate-400" htmlFor="zona-topic">2 · Qué quieres practicar</label>
+                <label style={eyebrowStyle} htmlFor="zona-topic">Qué quieres practicar</label>
                 <select id="zona-topic" value={topic} onChange={event => { setTopic(event.target.value); resetDeck() }} style={inputStyle}>
                   <option value="all">Todo</option>
                   {topics.map(item => <option key={item} value={item}>{item}</option>)}
                 </select>
-                <p className="mt-2 text-xs font-semibold leading-5 text-slate-400">Empieza por Todo si no sabes por dónde empezar.</p>
+                <p style={{ marginTop: 6, fontSize: 11, fontWeight: 500, color: '#94a3b8', lineHeight: 1.5 }}>Empieza por Todo si no sabes por dónde empezar.</p>
               </div>
 
-              <div className="rounded-2xl border border-blue-100 bg-white p-4">
-                <div className="text-xs font-black uppercase tracking-[0.08em] text-blue-500">Progreso</div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-50">
-                  <div className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-[width]" style={{ width: progress + '%' }} />
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, padding: '12px 14px', background: 'white' }}>
+                <div style={eyebrowStyle}>Progreso</div>
+                <div style={{ height: 3, borderRadius: 999, background: '#f1f5f9', overflow: 'hidden', margin: '10px 0 8px' }}>
+                  <div style={{ height: '100%', background: '#2563eb', transition: 'width .3s', width: progress + '%' }} />
                 </div>
-                <div className="mt-2 text-sm font-black text-slate-600">{reviewed}/{studyCards.length} tarjetas repasadas</div>
-                <div className="text-xs font-semibold text-slate-400">{filtered.length ? 'Tus tarjetas' : 'Tarjetas recomendadas para empezar'}</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>{reviewed}/{studyCards.length} tarjetas repasadas</div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 2 }}>{filtered.length ? 'Tus tarjetas' : 'Tarjetas recomendadas para empezar'}</div>
               </div>
             </aside>
 
-            <div className="grid gap-4">
+            <div style={{ display: 'grid', gap: 14 }}>
               {current ? (
                 <div
                   onPointerDown={event => setDragStart(event.clientX)}
@@ -287,25 +303,34 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                 <EmptyStudyState />
               )}
 
-              <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-                <button onClick={() => answerCard('dont')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-100 bg-white px-4 py-3 font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-45"><XCircle size={16} /> No me la sé</button>
-                <button onClick={() => answerCard('know')} disabled={!current} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 font-black text-green-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"><CheckCircle2 size={16} /> Me la sé</button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <button onClick={() => answerCard('dont')} disabled={!current} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #fecaca', background: 'white', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#dc2626', cursor: 'pointer', opacity: !current ? .45 : 1 }}>
+                  <XCircle size={15} /> No me la sé
+                </button>
+                <button onClick={() => answerCard('know')} disabled={!current} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #bbf7d0', background: '#f0fdf4', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#059669', cursor: 'pointer', opacity: !current ? .45 : 1 }}>
+                  <CheckCircle2 size={15} /> Me la sé
+                </button>
               </div>
             </div>
           </div>
         </section>
       )}
 
+      {/* ── Create mode ── */}
       {mode === 'create' && (
-        <section className="grid gap-4 rounded-[28px] border border-[#dbe7fb] bg-white/95 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.08)] max-md:p-4 lg:grid-cols-[0.82fr_1.18fr]">
-          <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5">
-            <div className="text-[11px] font-black uppercase tracking-[0.1em] text-blue-500">Crear tarjeta</div>
-            <h3 className="mt-2 text-2xl font-black text-slate-900">Hazlo rápido y vuelve luego</h3>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Guarda aquí fórmulas, errores o ideas que quieras recordar.</p>
-            <div className="mt-5 rounded-2xl border border-[#dbe7fb] bg-white p-4 text-sm font-bold leading-6 text-slate-500">Ejemplo: escribe `$P(A\\mid B)$` o una fórmula en bloque y se verá con el mismo renderizador.</div>
+        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24 }} className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
+          <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: '#fafaf9', padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <p style={eyebrowStyle}>Crear tarjeta</p>
+              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', marginBottom: 6, marginTop: 6 }}>Hazlo rápido y vuelve luego</h3>
+              <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>Guarda aquí fórmulas, errores o ideas que quieras recordar.</p>
+            </div>
+            <div style={{ border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '12px 14px', fontSize: 12, fontWeight: 600, color: '#64748b', lineHeight: 1.7 }}>
+              Ejemplo: escribe <code style={{ background: '#f1f5f9', borderRadius: 3, padding: '1px 4px', fontSize: 11 }}>{`$P(A\\mid B)$`}</code> o una fórmula en bloque y se verá con el mismo renderizador.
+            </div>
           </div>
 
-          <form onSubmit={createCard} className="rounded-3xl border border-[#dbe7fb] bg-white p-5">
+          <form onSubmit={createCard} style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: 20, display: 'grid', gap: 14 }}>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label style={labelStyle}>Asignatura</label>
@@ -319,61 +344,66 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
               </div>
             </div>
 
-            <label style={labelStyle}>Pregunta / concepto</label>
-            <textarea value={form.front} onChange={e => setForm(prev => ({ ...prev, front: e.target.value }))} placeholder="Concepto o pregunta" style={{ ...inputStyle, minHeight: 96, resize: 'vertical' }} />
+            <div>
+              <label style={labelStyle}>Pregunta / concepto</label>
+              <textarea value={form.front} onChange={e => setForm(prev => ({ ...prev, front: e.target.value }))} placeholder="Concepto o pregunta" style={{ ...inputStyle, minHeight: 96, resize: 'vertical' }} />
+            </div>
 
-            <label style={labelStyle}>Respuesta / explicación</label>
-            <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 132, resize: 'vertical' }} />
+            <div>
+              <label style={labelStyle}>Respuesta / explicación</label>
+              <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 132, resize: 'vertical' }} />
+            </div>
 
-            {formError && <div className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black leading-6 text-blue-900">{formError}</div>}
+            {formError && <div style={{ border: '1px solid #bfdbfe', background: '#eff6ff', borderRadius: 4, padding: '10px 14px', fontSize: 13, fontWeight: 800, color: '#1e40af' }}>{formError}</div>}
 
-            <button disabled={saving} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 px-5 py-3 font-black text-white shadow-[0_16px_34px_rgba(37,99,235,.24)] transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70">
-              <Plus size={18} />{saving ? 'Guardando...' : 'Crear tarjeta'}
+            <button disabled={saving} style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, background: '#0f172a', border: 'none', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: 'white', cursor: saving ? 'wait' : 'pointer', opacity: saving ? .7 : 1 }}>
+              <Plus size={16} />{saving ? 'Guardando...' : 'Crear tarjeta'}
             </button>
           </form>
         </section>
       )}
 
+      {/* ── Space mode ── */}
       {mode === 'space' && (
-        <section className="grid gap-4 rounded-[28px] border border-[#dbe7fb] bg-white/95 p-5 shadow-[0_24px_70px_rgba(37,99,235,0.08)] max-md:p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dbe7fb] pb-4">
+        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>
             <div>
-              <div className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Mi espacio</div>
-              <h3 className="mt-1 text-xl font-black text-slate-900">Guarda aquí lo que quieras volver a repasar</h3>
+              <p style={eyebrowStyle}>Mi espacio</p>
+              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', marginTop: 5 }}>Guarda aquí lo que quieras volver a repasar</h3>
             </div>
-            <Link href="/zona/canvas" className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)]">
-              Abrir canvas <ArrowRight size={15} />
+            <Link href="/zona/canvas" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0f172a', color: 'white', borderRadius: 4, padding: '9px 14px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+              Abrir canvas <ArrowRight size={12} />
             </Link>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="grid gap-3">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div style={{ display: 'grid', gap: 8 }}>
               {cards.length > 0 ? cards.map(card => (
                 <SavedCard key={card.id} card={card} onDelete={() => void deleteCard(card)} />
               )) : (
-                <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
-                  <Sparkles className="mx-auto text-blue-600" size={34} />
-                  <h4 className="mt-3 text-lg font-black text-slate-900">Todavía no tienes tarjetas propias</h4>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">Aún no tienes tarjetas propias. Crea una con un error o fórmula que quieras repasar.</p>
-                  <button onClick={() => setMode('create')} className="mt-4 rounded-full bg-blue-600 px-4 py-2 text-sm font-black text-white">Crear primera tarjeta</button>
+                <div style={{ border: '1px dashed #bfdbfe', borderRadius: 4, background: '#f8fafc', padding: 28, textAlign: 'center' }}>
+                  <Sparkles style={{ margin: '0 auto 10px', color: '#2563eb', display: 'block' }} size={26} />
+                  <h4 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>Todavía no tienes tarjetas propias</h4>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7, marginBottom: 14 }}>Crea una con un error o fórmula que quieras repasar.</p>
+                  <button onClick={() => setMode('create')} style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>Crear primera tarjeta</button>
                 </div>
               )}
             </div>
 
-            <aside className="grid content-start gap-3 rounded-3xl border border-[#dbe7fb] bg-[#f8fbff] p-4">
-              <div>
-                <div className="text-xs font-black uppercase tracking-[0.08em] text-slate-400">Tarjetas recomendadas</div>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Copia solo las tarjetas que quieras tener en tu cuenta.</p>
+            <aside style={{ display: 'grid', alignContent: 'start', gap: 10, border: '1px solid #e2e8f0', borderRadius: 4, padding: 16, background: '#fafaf9' }}>
+              <div style={{ paddingBottom: 10, borderBottom: '1px solid #e2e8f0' }}>
+                <div style={eyebrowStyle}>Tarjetas recomendadas</div>
+                <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginTop: 5 }}>Copia solo las que quieras tener en tu cuenta.</p>
               </div>
               {SUBJECTS.filter(item => !selectedSubject || item.id === selectedSubject.id).map(item => {
                 const deckSize = RECOMMENDED_FLASHCARDS.filter(card => card.subject === item.id).length
                 return (
-                  <article key={item.id} className="rounded-2xl border border-[#dbe7fb] bg-white p-4">
-                    <div className="text-xs font-black uppercase tracking-[0.08em]" style={{ color: item.color }}>Tarjetas recomendadas</div>
-                    <h4 className="mt-1 font-black text-slate-900">{item.label}</h4>
-                    <p className="text-sm font-semibold text-slate-500">{deckSize} tarjetas esenciales</p>
-                    <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-black disabled:cursor-wait disabled:opacity-60" style={{ borderColor: item.color + '33', background: item.soft, color: item.color }}>
-                      <CopyPlus size={15} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar tarjetas'}
+                  <article key={item.id} style={{ border: '1px solid #e2e8f0', borderRadius: 4, padding: '12px 14px', background: 'white' }}>
+                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: item.color, marginBottom: 3 }}>Recomendado</div>
+                    <h4 style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 2 }}>{item.label}</h4>
+                    <p style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginBottom: 10 }}>{deckSize} tarjetas esenciales</p>
+                    <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 4, padding: '7px 10px', fontSize: 11, fontWeight: 900, cursor: 'pointer', border: `1px solid ${item.color}33`, background: item.soft, color: item.color, opacity: copyingSubject !== null ? .6 : 1 }}>
+                      <CopyPlus size={13} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar tarjetas'}
                     </button>
                   </article>
                 )
@@ -386,33 +416,19 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
   )
 }
 
-function ModeCard({ active, icon, title, text, onClick }: { active: boolean; icon: ReactNode; title: string; text: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className={`group rounded-3xl border p-4 text-left transition ${active ? 'border-blue-300 bg-blue-50 shadow-[0_16px_34px_rgba(37,99,235,0.12)]' : 'border-[#dbe7fb] bg-white hover:border-blue-200 hover:bg-[#f8fbff]'}`}>
-      <div className="flex items-start gap-3">
-        <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${active ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700'}`}>{icon}</div>
-        <div>
-          <div className="font-black text-slate-900">{title}</div>
-          <div className="mt-1 text-sm font-semibold leading-5 text-slate-500">{text}</div>
-        </div>
-      </div>
-    </button>
-  )
-}
-
 function CardFace({ subject, topic, label, text, back = false }: { subject: ZonaSubject; topic: string; label: string; text: string; back?: boolean }) {
-  const color = SUBJECTS.find(item => item.id === subject)?.color ?? WARM.blue
+  const color = SUBJECTS.find(item => item.id === subject)?.color ?? '#2563eb'
 
   return (
     <div style={{
       position: 'absolute',
       inset: 0,
       minHeight: 320,
-      borderRadius: 26,
+      borderRadius: 6,
       padding: 26,
-      background: back ? 'linear-gradient(145deg, #f8fbff, #eef6ff)' : 'linear-gradient(145deg, #ffffff, #f8fbff)',
-      border: '1px solid ' + WARM.border,
-      boxShadow: '0 24px 60px rgba(37,99,235,0.10)',
+      background: back ? '#f8fafc' : 'white',
+      border: '1px solid #e2e8f0',
+      boxShadow: '0 8px 32px rgba(0,0,0,.06)',
       backfaceVisibility: 'hidden',
       transform: back ? 'rotateY(180deg)' : 'rotateY(0deg)',
       display: 'flex',
@@ -420,27 +436,27 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
       justifyContent: 'space-between',
       overflowX: 'auto'
     }}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span style={{ color, fontWeight: 850, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
-        <span style={{ color: WARM.muted, background: WARM.field, border: '1px solid ' + WARM.border, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 750 }}>{subjectLabel(subject)} · {topic}</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ color, fontWeight: 900, fontSize: 10, letterSpacing: '.16em', textTransform: 'uppercase' }}>{label}</span>
+        <span style={{ color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '3px 9px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>{subjectLabel(subject)} · {topic}</span>
       </div>
       <MathMarkdown text={text} className={back ? 'text-lg font-semibold overflow-x-auto' : 'text-xl font-black overflow-x-auto'} />
-      <div style={{ color: WARM.softText, fontSize: 12, fontWeight: 750 }}>Toca para girar · Arrastra derecha/izquierda</div>
+      <div style={{ color: '#94a3b8', fontSize: 11, fontWeight: 600 }}>Toca para girar · Arrastra derecha/izquierda</div>
     </div>
   )
 }
 
 function SavedCard({ card, onDelete }: { card: Flashcard; onDelete: () => void }) {
   return (
-    <article className="rounded-3xl border border-[#dbe7fb] bg-white p-4 shadow-[0_10px_26px_rgba(37,99,235,0.06)]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-xs font-black uppercase tracking-[0.08em] text-slate-400">{subjectLabel(card.subject)} · {card.topic}</div>
-          <div className="mt-2 font-black text-slate-900"><MathMarkdown text={card.front} /></div>
-          <div className="mt-2 rounded-2xl bg-[#f8fbff] p-3 text-sm font-semibold text-slate-600"><MathMarkdown text={card.back} /></div>
+    <article style={{ border: '1px solid #e2e8f0', borderRadius: 4, padding: '14px 16px', background: 'white' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginBottom: 6 }}>{subjectLabel(card.subject)} · {card.topic}</div>
+          <div style={{ fontWeight: 900, color: '#0f172a', marginBottom: 8 }}><MathMarkdown text={card.front} /></div>
+          <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 4, padding: '10px 12px', fontSize: 13, fontWeight: 500, color: '#475569' }}><MathMarkdown text={card.back} /></div>
         </div>
-        <button onClick={onDelete} aria-label="Eliminar flashcard" className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700 transition hover:bg-white">
-          <Trash2 size={16} />
+        <button onClick={onDelete} aria-label="Eliminar flashcard" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, border: '1px solid #fecaca', background: 'white', borderRadius: 4, color: '#dc2626', cursor: 'pointer' }}>
+          <Trash2 size={14} />
         </button>
       </div>
     </article>
@@ -449,11 +465,11 @@ function SavedCard({ card, onDelete }: { card: Flashcard; onDelete: () => void }
 
 function EmptyStudyState() {
   return (
-    <div className="grid min-h-[320px] place-items-center rounded-[26px] border border-dashed border-blue-200 bg-blue-50/70 p-6 text-center">
+    <div style={{ display: 'grid', minHeight: 320, placeItems: 'center', border: '1px dashed #bfdbfe', borderRadius: 4, background: '#f8fafc', padding: 24, textAlign: 'center' }}>
       <div>
-        <Sparkles className="mx-auto text-blue-600" size={36} />
-        <h3 className="mt-3 text-lg font-black text-slate-900">No hay tarjetas con este filtro</h3>
-        <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Prueba otra asignatura o crea una flashcard propia.</p>
+        <Sparkles style={{ margin: '0 auto 10px', color: '#2563eb', display: 'block' }} size={26} />
+        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>No hay tarjetas con este filtro</h3>
+        <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.6 }}>Prueba otra asignatura o crea una flashcard propia.</p>
       </div>
     </div>
   )
@@ -463,23 +479,34 @@ function subjectLabel(subject: ZonaSubject) {
   return SUBJECTS.find(item => item.id === subject)?.label ?? subject
 }
 
+const eyebrowStyle: CSSProperties = {
+  fontSize: 9,
+  fontWeight: 900,
+  letterSpacing: '.18em',
+  textTransform: 'uppercase',
+  color: '#94a3b8',
+  margin: 0,
+}
 
 const labelStyle: CSSProperties = {
   display: 'block',
-  color: WARM.muted,
-  fontSize: 12,
+  color: '#64748b',
+  fontSize: 11,
   fontWeight: 800,
-  margin: '0 0 7px'
+  letterSpacing: '.1em',
+  textTransform: 'uppercase',
+  marginBottom: 6,
 }
 
 const inputStyle: CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
-  border: '1.5px solid ' + WARM.border,
-  background: WARM.field,
-  color: WARM.ink,
-  borderRadius: 15,
-  padding: '11px 12px',
+  border: '1px solid #e2e8f0',
+  background: 'white',
+  color: '#0f172a',
+  borderRadius: 4,
+  padding: '10px 12px',
   font: 'inherit',
-  outline: 'none'
+  fontSize: 13,
+  outline: 'none',
 }

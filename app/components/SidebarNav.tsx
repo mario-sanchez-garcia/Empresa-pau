@@ -48,10 +48,11 @@ export default function SidebarNav() {
           </div>
           <div style={{
             position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', paddingLeft: 18,
+            display: 'flex', alignItems: 'center', paddingLeft: 18, gap: 10,
             opacity: open ? 1 : 0, transition: 'opacity 150ms 80ms', pointerEvents: 'none',
           }}>
             <span style={{ fontWeight: 900, fontSize: 14, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Kairo</span>
+            <img src="/brand/kairo-logo-white.png" alt="" aria-hidden style={{ height: 18, width: 'auto', opacity: 0.85, flexShrink: 0 }} />
           </div>
         </div>
 

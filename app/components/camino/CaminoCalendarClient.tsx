@@ -1527,11 +1527,11 @@ export default function CaminoCalendarClient() {
                   })()}
                 </div>
               ) : (
-                <div style={{ borderRadius: 14, background: 'linear-gradient(135deg,#2563eb,#4338ca)', padding: '16px 20px', color: 'white', boxShadow: '0 8px 24px rgba(37,99,235,0.25)' }}>
-                  <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#bfdbfe', margin: 0 }}>Simulacro del Domingo</p>
-                  <p style={{ fontSize: 15, fontWeight: 900, margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
-                  <p style={{ fontSize: 12, color: '#bfdbfe', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
-                  <button onClick={startSundayMock} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: 'white', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: '#1d4ed8', border: 'none', cursor: 'pointer' }}>Empezar simulacro →</button>
+                <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: 'white', padding: '16px 20px' }}>
+                  <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
+                  <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                  <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
+                  <button onClick={startSundayMock} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#2563eb', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}>Empezar simulacro →</button>
                 </div>
               )}
             </div>
@@ -1663,14 +1663,13 @@ export default function CaminoCalendarClient() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
               {weekCalendar.map((day, i) => {
-                const mainMs = day.missions.filter(m => m.role === 'main')
-                const done = mainMs.length > 0 && mainMs.every(m => m.status === 'done')
+                const isPast = day.date < realToday
                 const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
                 const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{dayLetter}</span>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : done ? '#0f172a' : '#f1f5f9', color: day.isToday || done ? 'white' : '#64748b', border: day.isToday || done ? 'none' : '1px solid #e2e8f0' }}>{dayNum}</div>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: day.isToday || isPast ? 'none' : '1px solid #e2e8f0' }}>{dayNum}</div>
                   </div>
                 )
               })}
@@ -1722,20 +1721,6 @@ export default function CaminoCalendarClient() {
             </div>
           )}
 
-          {/* Share informe */}
-          {filteredProjection && filteredProjection.length > 0 && isShareWindow && (weeklyXP > 0 || weeklyMissionsCompleted > 0 || weeklySimsCompleted > 0) && (
-            <div style={{ padding: '14px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', margin: 0 }}>¿Quieres compartir tu progreso?</p>
-                <p style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', margin: '4px 0 0' }}>Comparte un resumen semanal con tus padres</p>
-              </div>
-              <button onClick={shareInforme} style={{ flexShrink: 0, borderRadius: 10, background: '#2563eb', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer' }}>Compartir</button>
-            </div>
-          )}
-
-          <div style={{ padding: '16px 20px' }} id="acceso-premium">
-            <ParentLinkModule billing={{ loading: false, hasActivePack: caminoPlanId !== 'free', activePlans: [], pendingParentCheckout: null }} daysSinceReg={daysSinceReg} />
-          </div>
         </div>
 
         {/* ── RIGHT PANEL ── */}
@@ -1771,14 +1756,13 @@ export default function CaminoCalendarClient() {
             <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>{selectedWeekLabel}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
               {weekCalendar.map((day, i) => {
-                const mainMs = day.missions.filter(m => m.role === 'main')
-                const done = mainMs.length > 0 && mainMs.every(m => m.status === 'done')
+                const isPast = day.date < realToday
                 const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
                 const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                     <span style={{ fontSize: 8, fontWeight: 700, color: '#94a3b8' }}>{dayLetter}</span>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#2563eb' : done ? '#0f172a' : '#f1f5f9', color: day.isToday || done ? 'white' : '#64748b' }}>{dayNum}</div>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b' }}>{dayNum}</div>
                   </div>
                 )
               })}

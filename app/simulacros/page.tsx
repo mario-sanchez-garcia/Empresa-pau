@@ -244,7 +244,7 @@ function SimulacrosPage() {
     <div style={{ position: 'relative', height: 340, overflow: 'hidden', flexShrink: 0 }}>
       <img src={heroImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.45) saturate(.6)', display: 'block', transition: 'opacity 400ms ease' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.2) 0%, rgba(15,23,42,.85) 100%)', padding: '28px 32px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <div className="pau-eyebrow" style={{ color: '#93c5fd', marginBottom: 6 }}>Simulacros PAU · {ccaa}</div>
+        <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Simulacros PAU · {ccaa}</div>
         <div style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: .88, letterSpacing: '-.04em', marginBottom: 8 }}>
           {stats.completedCount > 0 ? stats.completedCount : '—'}
         </div>
@@ -335,7 +335,7 @@ function SimulacrosPage() {
         {/* ── STEP 1: ASIGNATURA ── */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div className="pau-eyebrow" style={{ color: '#94a3b8' }}>Asignatura</div>
+            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Asignatura</div>
             <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }}>{cfg.label}</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
@@ -360,7 +360,7 @@ function SimulacrosPage() {
 
         {/* ── STEP 2: TIPO ── */}
         <div style={{ marginBottom: 24 }}>
-          <div className="pau-eyebrow" style={{ color: '#94a3b8', marginBottom: 12 }}>Tipo de simulacro</div>
+          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 12 }}>Tipo de simulacro</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {(['normal', 'errores', 'tipicos', 'personalizado'] as SimulacroMode[]).map(m => {
               const isActive = mode === m

@@ -3210,8 +3210,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
-                  <div className="pau-eyebrow" style={{ color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
-                  <div className="pau-display" style={{ fontSize: 40, fontWeight: 900, color: 'white' }}>{cfg.label}</div>
+                  <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
+                  <div style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 8, fontWeight: 600 }}>{tipo} · {anioSeleccionado ?? '—'} · {examSystemLabel(ccaa)}</div>
                 </div>
                 {(() => {
@@ -3283,7 +3283,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
             {/* V4 subject chips */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
-              <span className="pau-eyebrow" style={{ color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
+              <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
               {HOME_SUBJECTS.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
@@ -3923,8 +3923,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
               <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.45) saturate(.75)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,.85) 0%, rgba(15,23,42,.3) 55%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px' }}>
-                <div className="pau-eyebrow" style={{ color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
-                <div className="pau-display" style={{ fontSize: 38, fontWeight: 900, color: 'white', marginBottom: 10 }}>Tutor<br />Inteligente</div>
+                <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
+                <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .9, marginBottom: 10 }}>Tutor<br />Inteligente</div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {HOME_SUBJECTS.map(key => {
                     const card = SUBJECT_CARDS[key]
@@ -3941,7 +3941,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
             {/* Controls bar */}
             <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
-              <span className="pau-eyebrow" style={{ color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
+              <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
               {HOME_SUBJECTS.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
@@ -4061,8 +4061,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   <img src={EXAM_HALL_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.42) saturate(.6)' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '18px 28px', justifyContent: 'space-between' }}>
                     <div>
-                      <div className="pau-eyebrow" style={{ color: '#60a5fa', marginBottom: 4 }}>Kairo · Registro académico</div>
-                      <div className="pau-display" style={{ fontSize: 38, fontWeight: 900, color: 'white' }}>Mis<br />correcciones</div>
+                      <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Registro académico</div>
+                      <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>Mis<br />correcciones</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
                       <div style={{ fontSize: 52, fontWeight: 900, color: 'white', letterSpacing: '-.05em', lineHeight: 1 }}>{historial.length}</div>

@@ -220,22 +220,22 @@ function LessonMarkdown({ text, className = '', format = 'raw' }: LessonMarkdown
 
 function LessonMarkdownTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <div className="my-5 overflow-x-auto rounded-2xl border border-blue-100 bg-white shadow-sm">
-      <table className="w-full min-w-[520px] border-collapse text-left text-sm">
-        <thead className="bg-blue-50 text-blue-900">
-          <tr>
+    <div style={{ margin: '16px 0', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: 5 }}>
+      <table style={{ width: '100%', minWidth: 520, borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
+        <thead>
+          <tr style={{ background: '#f8fafc' }}>
             {headers.map((header, index) => (
-              <th key={`${header}-${index}`} className="border-b border-blue-100 px-4 py-3 font-black align-top">
+              <th key={`${header}-${index}`} style={{ borderBottom: '2px solid #0f172a', padding: '10px 14px', fontWeight: 900, fontSize: 11, color: '#0f172a', verticalAlign: 'top' }}>
                 <LessonMarkdown text={header} format="raw" />
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className="align-top">
+            <tr key={rowIndex} style={{ borderBottom: '1px solid #f1f5f9', verticalAlign: 'top' }}>
               {row.map((cell, cellIndex) => (
-                <td key={`${rowIndex}-${cellIndex}`} className="px-4 py-3 font-semibold leading-7 text-slate-700">
+                <td key={`${rowIndex}-${cellIndex}`} style={{ padding: '10px 14px', fontWeight: 500, color: '#334155', lineHeight: 1.7 }}>
                   <LessonMarkdown text={cell} format="raw" />
                 </td>
               ))}
@@ -744,74 +744,103 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
   return (
     <Shell>
-      <main className="mx-auto max-w-6xl px-5 py-6">
-        <Link href="/camino" className="mb-4 inline-flex items-center gap-2 text-sm font-black text-blue-700"><ArrowLeft size={16} /> Volver a Camino PAU</Link>
-        <section className="rounded-[30px] border border-blue-100 bg-white p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU → {subjectLabelFromSlug(currentTopic.subject)} → {currentTopic.blockTitle}</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{currentTopic.title}</h1>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{selectedV2Card ? 'Mini-misión 25 min' : '25 min'}</span>
-                <span className={`rounded-full px-3 py-1 text-xs font-black ${topicCompleted ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{statusLabel}</span>
-                <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">{selectedV2Card ? `Misión ${selectedV2Card.sort_order} de 60` : 'Subpágina de aprendizaje'}</span>
-                {selectedV2Number && <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700">Mini-misión {selectedV2Number} de {v2Cards.length}</span>}
-              </div>
-              <p className="mt-3 text-sm font-semibold text-slate-500">Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.</p>
+      {/* ── Dark topbar ── */}
+      <div style={{ background: '#0f172a', padding: '11px 32px', display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+        <Link href="/camino" style={{ color: '#475569', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
+          <ArrowLeft size={13} /> Volver
+        </Link>
+        <span style={{ width: 1, height: 14, background: '#1e293b', flexShrink: 0 }} />
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#475569', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          Camino PAU &rsaquo; {subjectLabelFromSlug(currentTopic.subject)} &rsaquo; <span style={{ color: '#93c5fd' }}>{currentTopic.blockTitle}</span>
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {streak > 0 && <span style={{ fontSize: 10, fontWeight: 900, color: '#f59e0b', background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 999, padding: '3px 10px' }}>🔥 {streak}</span>}
+          <button onClick={markNotSeen} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, color: '#92400e', background: 'rgba(251,191,36,.08)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 5, padding: '5px 10px', cursor: 'pointer' }}>
+            <School size={13} /> No lo he dado en clase
+          </button>
+        </div>
+      </div>
+
+      {/* ── Document body: article + aside ── */}
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+
+        {/* Article column */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}>
+
+          {/* Document header */}
+          <header style={{ marginBottom: 36, paddingBottom: 28, borderBottom: '2px solid #0f172a' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 10 }}>
+              {subjectLabelFromSlug(currentTopic.subject)} &middot; {currentTopic.blockTitle}
+            </p>
+            <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
+              {currentTopic.title}
+            </h1>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, padding: '3px 10px' }}>
+                {selectedV2Card ? 'Mini-misión · 25 min' : '25 min'}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: topicCompleted ? '#059669' : '#64748b', background: topicCompleted ? '#f0fdf4' : '#f8fafc', border: `1px solid ${topicCompleted ? '#bbf7d0' : '#e2e8f0'}`, borderRadius: 4, padding: '3px 10px' }}>
+                {statusLabel}
+              </span>
+              {selectedV2Number && (
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 4, padding: '3px 10px' }}>
+                  Mini-misión {selectedV2Number} de {v2Cards.length}
+                </span>
+              )}
             </div>
-            <button onClick={markNotSeen} className="inline-flex items-center gap-2 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700"><School size={16} /> No lo he dado en clase</button>
-          </div>
-          <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
-            <div className="grid gap-4">
-              {/* Vista de mini-misión individual (flashcard_v2) */}
-              {currentTopic.contentStatus === 'flashcard_v2' ? (
-                v2Loading ? (
-                  <LearningCard title="Explicación"><ContentSkeleton /></LearningCard>
-                ) : selectedV2Card ? (
-                  <>
-                    <LearningCard title="Idea clave">
-                      {selectedV2Card.concept_markdown
-                        ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
-                        : <EmptyContent />}
-                      {selectedV2Card.alert_markdown && (
-                        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                          <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
-                        </div>
-                      )}
-                    </LearningCard>
-                    {selectedV2Card.worked_example_markdown && (
-                      <LearningCard title="Caso práctico resuelto">
-                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
-                          <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                            <LessonMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
-                          </div>
-                        </div>
-                      </LearningCard>
-                    )}
-                    {videoId && (
-                      <LearningCard title="Vídeo explicativo">
-                        <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
-                          🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
-                        </button>
-                        {videoOpen && (
-                          <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-                            <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                              <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
-                            </div>
-                          </div>
-                        )}
-                      </LearningCard>
-                    )}
-                    {selectedV2Card.practice_prompt && (
-                      <LearningCard title="Inténtalo tú">
-                        <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
-                      </LearningCard>
-                    )}
-                  </>
-                ) : null
-              ) : (
+            <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>
+              Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.
+            </p>
+          </header>
+
+          {/* ── Content sections ── */}
+          {currentTopic.contentStatus === 'flashcard_v2' ? (
+            v2Loading ? (
+              <LearningCard title="Explicación"><ContentSkeleton /></LearningCard>
+            ) : selectedV2Card ? (
               <>
-              {/* Mini clase: contenido real primero, fallback discreto solo si falta */}
+                <LearningCard title="Idea clave">
+                  {selectedV2Card.concept_markdown
+                    ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
+                    : <EmptyContent />}
+                  {selectedV2Card.alert_markdown && (
+                    <div style={{ marginTop: 14, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '12px 14px' }}>
+                      <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
+                    </div>
+                  )}
+                </LearningCard>
+                {selectedV2Card.worked_example_markdown && (
+                  <LearningCard title="Caso práctico resuelto">
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '14px 16px' }}>
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                        <LessonMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
+                      </div>
+                    </div>
+                  </LearningCard>
+                )}
+                {videoId && (
+                  <LearningCard title="Vídeo explicativo">
+                    <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                      🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
+                    </button>
+                    {videoOpen && (
+                      <div style={{ marginTop: 12, overflow: 'hidden', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                        <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                          <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
+                        </div>
+                      </div>
+                    )}
+                  </LearningCard>
+                )}
+                {selectedV2Card.practice_prompt && (
+                  <LearningCard title="Inténtalo tú">
+                    <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                  </LearningCard>
+                )}
+              </>
+            ) : null
+          ) : (
+            <>
               <LearningCard title={lessonTitleFor(currentTopic)}>
                 {v2Loading
                   ? <ContentSkeleton />
@@ -825,23 +854,20 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                           ? <StructuredLesson topic={currentTopic} />
                           : <EmptyContent />}
               </LearningCard>
-              {/* Secciones fallback cuando no hay datos v2 */}
               {!v2Loading && v2Cards.length === 0 && (
                 <>
                   {videoId && (
                     <LearningCard title="Vídeo explicativo">
-                      <div>
-                        <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
-                          🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
-                        </button>
-                        {videoOpen && (
-                          <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-                            <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                              <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo de apoyo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
-                            </div>
+                      <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                        🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
+                      </button>
+                      {videoOpen && (
+                        <div style={{ marginTop: 12, overflow: 'hidden', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                          <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                            <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo de apoyo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </LearningCard>
                   )}
                   <LearningCard title="Ejemplo guiado paso a paso">
@@ -853,36 +879,39 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   {(currentTopic.commonMistakes?.length || currentTopic.progressCriteria) && (
                     <LearningCard title="Errores típicos y criterio de avance">
                       {currentTopic.commonMistakes?.length ? (
-                        <ul className="space-y-2 text-sm font-semibold text-slate-700">
-                          {currentTopic.commonMistakes.map(mistake => <li key={mistake}>• {mistake}</li>)}
+                        <ul style={{ display: 'grid', gap: 6 }}>
+                          {currentTopic.commonMistakes.map(mistake => (
+                            <li key={mistake} style={{ fontSize: 13, fontWeight: 600, color: '#334155', display: 'flex', gap: 8 }}>
+                              <span style={{ color: '#2563eb' }}>•</span> {mistake}
+                            </li>
+                          ))}
                         </ul>
                       ) : null}
                       {currentTopic.progressCriteria && (
-                        <div className="mt-4 grid gap-2 text-sm font-semibold text-slate-700 sm:grid-cols-2">
-                          <p><span className="font-black text-blue-700">Visto:</span> {currentTopic.progressCriteria.seen}</p>
-                          <p><span className="font-black text-blue-700">Practicado:</span> {currentTopic.progressCriteria.practiced}</p>
-                          <p><span className="font-black text-blue-700">Completado:</span> {currentTopic.progressCriteria.completed}</p>
-                          <p><span className="font-black text-blue-700">Dominado:</span> {currentTopic.progressCriteria.mastered}</p>
+                        <div style={{ marginTop: 14, display: 'grid', gap: 6, gridTemplateColumns: '1fr 1fr' }}>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}><span style={{ fontWeight: 900, color: '#2563eb' }}>Visto:</span> {currentTopic.progressCriteria.seen}</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}><span style={{ fontWeight: 900, color: '#2563eb' }}>Practicado:</span> {currentTopic.progressCriteria.practiced}</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}><span style={{ fontWeight: 900, color: '#2563eb' }}>Completado:</span> {currentTopic.progressCriteria.completed}</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}><span style={{ fontWeight: 900, color: '#2563eb' }}>Dominado:</span> {currentTopic.progressCriteria.mastered}</p>
                         </div>
                       )}
                     </LearningCard>
                   )}
                 </>
               )}
-              {/* 2. Tu misión de hoy: selector + vídeo + práctica + navegación */}
               {v2Cards.length > 0 && (
-                <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
-                  <h2 className="text-lg font-black text-slate-950">🎯 Tu misión de hoy</h2>
-                  <p className="mt-1 mb-4 text-sm font-semibold text-slate-500">Elige una mini-misión y pon en práctica lo que has aprendido arriba.</p>
+                <article style={{ paddingTop: 28, paddingBottom: 28, borderTop: '1px solid #e2e8f0' }}>
+                  <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', marginBottom: 6, letterSpacing: '-.01em' }}>🎯 Tu misión de hoy</h2>
+                  <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16, fontWeight: 600 }}>Elige una mini-misión y pon en práctica lo que has aprendido arriba.</p>
                   <V2MiniMissionSelector cards={v2Cards} activeIndex={activeV2Index} onSelect={selectV2Card} />
                   {videoId && (
-                    <div className="mt-4">
-                      <p className="mb-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">{videoSupportCopy}</p>
-                      <button onClick={() => setVideoOpen(v => !v)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition-colors hover:text-slate-600">
+                    <div style={{ marginTop: 16 }}>
+                      <p style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#1e40af', marginBottom: 10 }}>{videoSupportCopy}</p>
+                      <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                         🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                       </button>
                       {videoOpen && (
-                        <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+                        <div style={{ marginTop: 10, overflow: 'hidden', borderRadius: 4, border: '1px solid #e2e8f0' }}>
                           <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                             <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
                           </div>
@@ -891,130 +920,186 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     </div>
                   )}
                   {selectedV2Card?.practice_prompt && (
-                    <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-                      <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-blue-700">Ahora inténtalo tú</p>
+                    <div style={{ marginTop: 16, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '14px 16px' }}>
+                      <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#2563eb', marginBottom: 8 }}>Ahora inténtalo tú</p>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
                       </div>
                     </div>
                   )}
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                    <button type="button" onClick={() => selectV2Card(activeV2Index - 1)} disabled={activeV2Index === 0} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-xs font-black text-blue-700 disabled:cursor-not-allowed disabled:opacity-40">
-                      <ArrowLeft size={14} /> Misión anterior
+                  <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderTop: '1px solid #f1f5f9', paddingTop: 16 }}>
+                    <button type="button" onClick={() => selectV2Card(activeV2Index - 1)} disabled={activeV2Index === 0} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'white', border: '1px solid #e2e8f0', borderRadius: 5, padding: '8px 14px', fontSize: 12, fontWeight: 900, color: '#2563eb', cursor: 'pointer', opacity: activeV2Index === 0 ? .4 : 1 }}>
+                      <ArrowLeft size={13} /> Misión anterior
                     </button>
-                    <button type="button" onClick={() => selectV2Card(activeV2Index + 1)} disabled={activeV2Index >= v2Cards.length - 1} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40">
-                      Siguiente misión <ArrowRight size={14} />
+                    <button type="button" onClick={() => selectV2Card(activeV2Index + 1)} disabled={activeV2Index >= v2Cards.length - 1} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#2563eb', border: 'none', borderRadius: 5, padding: '8px 16px', fontSize: 12, fontWeight: 900, color: 'white', cursor: 'pointer', opacity: activeV2Index >= v2Cards.length - 1 ? .4 : 1 }}>
+                      Siguiente misión <ArrowRight size={13} />
                     </button>
                   </div>
                 </article>
               )}
-              </>
-              )}
-              {/* Entrega y corrección IA */}
-              <article ref={exerciseRef} id="course-exercise" className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h2 className="text-lg font-black text-slate-950">Entrega tu ejercicio</h2>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">El XP se asigna sólo después de corregir con Kairo y depende de la nota obtenida.</p>
+            </>
+          )}
+
+          {/* ── Exercise submission ── */}
+          <article ref={exerciseRef} id="course-exercise" style={{ paddingTop: 28, paddingBottom: 40, borderTop: '2px solid #0f172a', marginTop: 4 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <div>
+                <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
+                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>El XP se asigna sólo después de corregir con Kairo y depende de la nota obtenida.</p>
+              </div>
+              {missionId && <span style={{ borderRadius: 999, background: '#eff6ff', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: '#2563eb', border: '1px solid #bfdbfe' }}>Misión conectada</span>}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+              <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'texto' ? '#0f172a' : '#f1f5f9', color: answerMode === 'texto' ? 'white' : '#64748b' }}>
+                <PenLine size={13} /> Escribir respuesta
+              </button>
+              <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'imagen' ? '#0f172a' : '#f1f5f9', color: answerMode === 'imagen' ? 'white' : '#64748b' }}>
+                <Camera size={13} /> Subir foto
+              </button>
+            </div>
+            {answerMode === 'texto' ? (
+              <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" mathSubject={currentTopic.subject} />
+            ) : (
+              <div style={{ borderRadius: 4, border: '1px dashed #cbd5e1', background: '#f8fafc', padding: 14 }}>
+                <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} style={{ display: 'none' }} />
+                {image ? (
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    <img src={image.preview} alt="Respuesta subida" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
+                    <button type="button" onClick={clearImage} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '6px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
+                      <X size={13} /> Quitar foto
+                    </button>
                   </div>
-                  {missionId && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Misión conectada</span>}
-                </div>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setAnswerMode('texto')} className={`inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black ${answerMode === 'texto' ? 'bg-blue-600 text-white' : 'border border-blue-100 bg-blue-50 text-blue-700'}`}><PenLine size={14} /> Escribir respuesta</button>
-                  <button type="button" onClick={() => setAnswerMode('imagen')} className={`inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black ${answerMode === 'imagen' ? 'bg-blue-600 text-white' : 'border border-blue-100 bg-blue-50 text-blue-700'}`}><Camera size={14} /> Subir foto</button>
-                </div>
-                {answerMode === 'texto' ? (
-                  <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" mathSubject={currentTopic.subject} />
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 p-4">
-                    <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} className="hidden" />
-                    {image ? (
-                      <div className="grid gap-3">
-                        <img src={image.preview} alt="Respuesta subida" className="max-h-72 rounded-2xl border border-blue-100 object-contain" />
-                        <button type="button" onClick={clearImage} className="inline-flex w-fit items-center gap-2 rounded-xl border border-red-100 bg-white px-3 py-2 text-xs font-black text-red-600"><X size={14} /> Quitar foto</button>
-                      </div>
-                    ) : (
-                      <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-blue-700 shadow-sm"><UploadCloud size={16} /> Elegir foto de mi respuesta</button>
-                    )}
-                  </div>
+                  <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, background: 'white', border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
+                    <UploadCloud size={15} /> Elegir foto de mi respuesta
+                  </button>
                 )}
-                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">
-                  {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={16} /></>}
-                </button>
-                {score != null && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800">Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}</p>}
-                {correction && <div className="mt-4"><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
-              </article>
-            </div>
-            <aside className="grid content-start gap-4">
-              <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="shrink-0 text-center">
-                    <p className="text-xl font-black leading-none text-blue-600">{streak}</p>
-                    <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">días racha</p>
-                  </div>
-                  <div className="h-8 w-px shrink-0 bg-slate-100" />
-                  <div className="min-w-0 flex-1">
-                    {ligaLoading ? (
-                      <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
-                    ) : liga && myLigaEntry ? (
-                      <>
-                        <p className="truncate text-xs font-black text-slate-800">{liga.nombre}</p>
-                        <p className="text-[10px] font-semibold text-slate-400">#{myLigaEntry.rank} en liga · {myLigaEntry.weekly_xp} XP sem.</p>
-                      </>
-                    ) : (
-                      <Link href="/camino" className="text-xs font-black text-blue-600 hover:underline">Crear liga con amigos →</Link>
-                    )}
-                  </div>
-                </div>
               </div>
-              <div className="rounded-3xl border border-blue-100 bg-blue-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Práctica PAU/EVAU</p>
-                <p className="mt-2 text-sm font-semibold text-slate-600">Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
-                <Link href={buildEvauHref(currentTopic)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Hacer ejercicio PAU de este tema <ArrowRight size={16} /></Link>
-                <a href="#course-exercise" className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-700">Corregir ejercicio del curso <Check size={16} /></a>
+            )}
+            <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)) ? .5 : 1 }}>
+              {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
+            </button>
+            {score != null && (
+              <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
+                Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
+              </p>
+            )}
+            {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
+          </article>
+        </main>
+
+        {/* ── Aside ── */}
+        <aside style={{ width: 264, flexShrink: 0, background: '#fafaf9', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+          {/* Streak + Liga */}
+          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Tu progreso</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                <p style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{streak}</p>
+                <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.1em', color: '#94a3b8', marginTop: 2 }}>días racha</p>
               </div>
-              <div className="rounded-3xl border border-violet-100 bg-white p-4">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Preguntar a Kairo sobre este tema</p>
-                <p className="mt-2 text-sm font-semibold text-slate-600">Abre el Chat con Kairo con esta asignatura, bloque y tema como contexto.</p>
-                <div className="mt-3 flex flex-wrap gap-2">{['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => <Link key={item} href={chatHref(item)} className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700">{item}</Link>)}</div>
-                <Link href={chatHref()} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Abrir Chat con Kairo <MessageCircle size={16} /></Link>
+              <div style={{ width: 1, height: 28, background: '#e2e8f0', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {ligaLoading ? (
+                  <div style={{ height: 10, width: 80, borderRadius: 999, background: '#f1f5f9' }} />
+                ) : liga && myLigaEntry ? (
+                  <>
+                    <p style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{liga.nombre}</p>
+                    <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP sem.</p>
+                  </>
+                ) : (
+                  <Link href="/camino" style={{ fontSize: 12, fontWeight: 900, color: '#2563eb', textDecoration: 'none' }}>Crear liga →</Link>
+                )}
               </div>
-              <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4">
-                <p className="text-sm font-black text-emerald-900">{current.xp ?? 0} XP en este tema</p>
-                <p className="mt-1 text-xs font-bold text-emerald-700">{topicCompleted ? 'Tema completado con corrección.' : 'El XP se asigna solo después de corregir el ejercicio final.'}</p>
-              </div>
-            </aside>
-          </div>
-        </section>
-        {toast && <div className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}<button onClick={() => setToast('')} className="ml-3 text-slate-300"><RotateCcw size={13} /></button></div>}
-        {showPaywall && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
-              <div className="mb-5 flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-black text-slate-950">Tu plan gratuito ha terminado</h2>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Has completado 7 días de Camino PAU. Para seguir avanzando, desbloquea el acceso completo.</p>
-                </div>
-                <button type="button" onClick={() => setShowPaywall(false)} className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
-              </div>
-              <ParentLinkModule billing={billing} />
-              <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
             </div>
           </div>
-        )}
-        {showSuccessModal && score != null && (
-          <SuccessModal
-            score={score}
-            xp={xpAwarded ?? 0}
-            streak={streak}
-            blockProgress={blockProgress}
-            nextMissionTitle={nextMissionTitle}
-            onViewWeek={() => { setShowSuccessModal(false); router.push('/camino') }}
-            onDoBonus={() => setShowSuccessModal(false)}
-            onClose={() => setShowSuccessModal(false)}
-          />
-        )}
-      </main>
+
+          {/* Práctica PAU */}
+          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ height: 2, background: '#0f172a', marginBottom: 10 }} />
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#0f172a', marginBottom: 8 }}>Práctica PAU/EVAU</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
+            <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#0f172a', color: 'white', borderRadius: 4, padding: '10px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
+              Hacer ejercicio PAU de este tema <ArrowRight size={12} />
+            </Link>
+            <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0', borderRadius: 4, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+              Corregir ejercicio del curso <Check size={12} />
+            </a>
+          </div>
+
+          {/* Chat Kairo */}
+          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Abre el Chat con Kairo con esta asignatura, bloque y tema como contexto.</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
+              {['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => (
+                <Link key={item} href={chatHref(item)} style={{ borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', padding: '4px 9px', fontSize: 10, fontWeight: 700, color: '#334155', textDecoration: 'none' }}>
+                  {item}
+                </Link>
+              ))}
+            </div>
+            <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 4, padding: '10px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+              Abrir Chat con Kairo <MessageCircle size={12} />
+            </Link>
+          </div>
+
+          {/* XP */}
+          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>XP en este tema</p>
+            <p style={{ fontSize: 26, fontWeight: 900, color: topicCompleted ? '#059669' : '#0f172a', lineHeight: 1, marginBottom: 4 }}>{current.xp ?? 0} XP</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'El XP se asigna solo después de corregir el ejercicio final.'}</p>
+          </div>
+
+          {/* Parent + planes */}
+          <ParentLinkModule billing={billing} />
+          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 10, textDecoration: 'none' }}>Ver planes</Link>
+        </aside>
+
+      </div>{/* end document body */}
+
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 50, borderRadius: 8, background: '#0f172a', padding: '12px 18px', fontSize: 13, fontWeight: 900, color: 'white', boxShadow: '0 8px 28px rgba(0,0,0,.25)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          {toast}
+          <button onClick={() => setToast('')} style={{ color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><RotateCcw size={13} /></button>
+        </div>
+      )}
+
+      {/* Paywall */}
+      {showPaywall && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-black text-slate-950">Tu plan gratuito ha terminado</h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Has completado 7 días de Camino PAU. Para seguir avanzando, desbloquea el acceso completo.</p>
+              </div>
+              <button type="button" onClick={() => setShowPaywall(false)} className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
+            </div>
+            <div className="grid gap-2">
+              <Link href="/pricing" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Desbloquear acceso completo <ArrowRight size={14} /></Link>
+              <button type="button" onClick={() => setShowPaywall(false)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-600">Seguir con el plan gratuito</button>
+            </div>
+            <ParentLinkModule billing={billing} />
+            <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
+          </div>
+        </div>
+      )}
+
+      {/* Success modal */}
+      {showSuccessModal && score != null && (
+        <SuccessModal
+          score={score}
+          xp={xpAwarded ?? 0}
+          streak={streak}
+          blockProgress={blockProgress}
+          nextMissionTitle={nextMissionTitle}
+          onViewWeek={() => { setShowSuccessModal(false); router.push('/camino') }}
+          onDoBonus={() => setShowSuccessModal(false)}
+          onClose={() => setShowSuccessModal(false)}
+        />
+      )}
     </Shell>
   )
 }
@@ -1024,37 +1109,37 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
   const [openIdx, setOpenIdx] = useState<number>(0)
   return (
-    <div className="flex flex-col gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       {cards.map((card, i) => {
         const isOpen = openIdx === i
         return (
-          <div key={card.sort_order} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div key={card.sort_order} style={{ overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: 5 }}>
             <button
               type="button"
               onClick={() => setOpenIdx(isOpen ? -1 : i)}
-              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+              style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '11px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              <span className="flex items-center gap-2 text-sm font-black leading-snug text-slate-800">
-                <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-blue-500">#{i + 1}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, color: '#0f172a' }}>
+                <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.12em', color: '#2563eb', flexShrink: 0 }}>#{i + 1}</span>
                 <span className="[&_p]:m-0 [&_p]:inline"><LessonMarkdown text={card.title} format="raw" /></span>
               </span>
-              <ChevronDown size={16} className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={14} style={{ flexShrink: 0, color: '#2563eb', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 250ms ease' }} />
             </button>
             <div style={{ display: 'grid', gridTemplateRows: isOpen ? '1fr' : '0fr', transition: 'grid-template-rows 280ms ease' }}>
-              <div className="overflow-hidden">
-                <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid #f1f5f9', padding: '12px 14px' }}>
                   {card.concept_markdown && (
                     <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                       <LessonMarkdown text={card.concept_markdown} format="raw" />
                     </div>
                   )}
                   {card.alert_markdown && (
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                    <div style={{ border: '1px solid #fde68a', background: '#fffbeb', borderRadius: 4, padding: '10px 12px' }}>
                       <LessonMarkdown text={card.alert_markdown} format="raw" />
                     </div>
                   )}
                   {card.worked_example_markdown && (
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                    <div style={{ border: '1px solid #bbf7d0', background: '#f0fdf4', borderRadius: 4, padding: '12px 14px' }}>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={card.worked_example_markdown} format="raw" />
                       </div>
@@ -1074,15 +1159,15 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
 
 function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: CurriculumV2Card[]; activeIndex: number; onSelect: (index: number) => void }) {
   return (
-    <section className="rounded-3xl border border-blue-100 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div style={{ border: '1px solid #e2e8f0', borderRadius: 5, overflow: 'hidden', padding: 14 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Misiones de este tema</p>
-          <p className="mt-1 text-sm font-semibold text-slate-500">Cada tarjeta es una mini-misión independiente.</p>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase' as const, color: '#2563eb', marginBottom: 3 }}>Misiones de este tema</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Cada tarjeta es una mini-misión independiente.</p>
         </div>
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">{cards.length} mini-misiones</span>
+        <span style={{ borderRadius: 999, background: '#eff6ff', border: '1px solid #bfdbfe', padding: '2px 10px', fontSize: 10, fontWeight: 900, color: '#2563eb' }}>{cards.length} mini-misiones</span>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div style={{ display: 'grid', gap: 6, gridTemplateColumns: '1fr 1fr' }}>
         {cards.map((card, index) => {
           const isActive = activeIndex === index
           return (
@@ -1090,17 +1175,17 @@ function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: Curric
               key={card.sort_order}
               type="button"
               onClick={() => onSelect(index)}
-              className={'rounded-2xl border px-4 py-3 text-left transition-all ' + (isActive ? 'border-blue-300 bg-blue-50 shadow-sm' : 'border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-white')}
+              style={{ border: isActive ? '1px solid #2563eb' : '1px solid #e2e8f0', borderRadius: 4, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: isActive ? '#eff6ff' : '#fafafa', transition: 'all .1s' }}
             >
-              <span className={'mb-1 block text-[10px] font-black uppercase tracking-[0.12em] ' + (isActive ? 'text-blue-700' : 'text-slate-400')}>Mini-misión {index + 1}</span>
-              <span className={'block text-sm font-black leading-snug ' + (isActive ? 'text-blue-950' : 'text-slate-700') + ' [&_p]:m-0 [&_p]:inline'}>
+              <span style={{ display: 'block', fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.12em', color: isActive ? '#2563eb' : '#94a3b8', marginBottom: 4 }}>Mini-misión {index + 1}</span>
+              <span style={{ display: 'block', fontSize: 12, fontWeight: 800, color: isActive ? '#1e40af' : '#334155', lineHeight: 1.4 }} className="[&_p]:m-0 [&_p]:inline">
                 <LessonMarkdown text={card.title} format="raw" />
               </span>
             </button>
           )
         })}
       </div>
-    </section>
+    </div>
   )
 }
 
@@ -1146,40 +1231,34 @@ function DiegoContentCards({ markdown }: { markdown: string }) {
   if (!sections.length) return <LessonMarkdown text={markdown} />
 
   return (
-    <div className="flex flex-col gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       {sections.map((section, i) => {
         const isOpen = openIdx === i
         return (
-          <div key={i} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div key={i} style={{ overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: 5 }}>
             <button
               type="button"
               onClick={() => setOpenIdx(isOpen ? null : i)}
-              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+              style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '11px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              <span className="text-sm font-black leading-snug text-slate-800 [&_p]:inline [&_p]:m-0">
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', lineHeight: 1.4 }} className="[&_p]:inline [&_p]:m-0">
                 <LessonMarkdown text={section.title} format="raw" />
               </span>
               <ChevronDown
-                size={16}
-                className={`shrink-0 text-blue-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                size={14}
+                style={{ flexShrink: 0, color: '#2563eb', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 250ms ease' }}
               />
             </button>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateRows: isOpen ? '1fr' : '0fr',
-                transition: 'grid-template-rows 280ms ease',
-              }}
-            >
-              <div className="overflow-hidden">
-                <div className="space-y-4 border-t border-slate-100 px-5 pb-5 pt-4">
+            <div style={{ display: 'grid', gridTemplateRows: isOpen ? '1fr' : '0fr', transition: 'grid-template-rows 280ms ease' }}>
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid #f1f5f9', padding: '12px 14px' }}>
                   {section.body && (
                     <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                       <LessonMarkdown text={section.body} format="raw" />
                     </div>
                   )}
                   {section.caseStudy && (
-                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+                    <div style={{ border: '1px solid #bbf7d0', background: '#f0fdf4', borderRadius: 4, padding: '12px 14px' }}>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={section.caseStudy} format="raw" />
                       </div>
@@ -1275,7 +1354,14 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="flex min-h-screen bg-[#f4f7fb]"><SidebarNav /><div className="min-w-0 flex-1">{children}</div></div>
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#fdfdfc' }}>
+      <SidebarNav />
+      <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh' }}>
+        {children}
+      </div>
+    </div>
+  )
 }
 
 function cleanLessonLine(value: string) {
@@ -1317,39 +1403,39 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
   const tags = topic.examTags?.slice(0, 4) ?? []
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
-        <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">Idea clave</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, padding: '12px 14px' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#2563eb', marginBottom: 6 }}>Idea clave</p>
         <LessonMarkdown text={idea} />
       </div>
       {theory && (
-        <div className="rounded-2xl border border-indigo-100 bg-white px-4 py-4 shadow-sm">
-          <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-indigo-600">Teoría rápida</p>
+        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 5, padding: '12px 14px' }}>
+          <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#4f46e5', marginBottom: 6 }}>Teoría rápida</p>
           <LessonMarkdown text={theory} />
         </div>
       )}
       {(use || pau || tags.length > 0) && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
           {use && <InfoTile label="Para qué sirve" text={use} />}
           {pau && <InfoTile label="Cómo aparece en PAU" text={pau} />}
           {tags.length > 0 && <InfoTile label="Etiquetas PAU" text={tags.join(' · ')} />}
         </div>
       )}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
-        <p className="mb-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Cómo se trabaja</p>
-        <ol className="space-y-2">
+      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 5, padding: '12px 14px' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#94a3b8', marginBottom: 10 }}>Cómo se trabaja</p>
+        <ol style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0, listStyle: 'none' }}>
           {lessonStepsFor(topic).map((step, index) => (
-            <li key={step} className="flex gap-3 text-sm font-semibold leading-6 text-slate-700">
-              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-black text-white">{index + 1}</span>
+            <li key={step} style={{ display: 'flex', gap: 10, fontSize: 13, fontWeight: 600, color: '#334155', lineHeight: 1.6 }}>
+              <span style={{ flexShrink: 0, marginTop: 2, width: 20, height: 20, borderRadius: '50%', background: '#0f172a', color: 'white', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{index + 1}</span>
               <span>{step}</span>
             </li>
           ))}
         </ol>
       </div>
       {alert && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-sm font-black text-amber-800">Error típico</p>
-          <p className="mt-1 text-sm font-semibold leading-6 text-amber-900">{alert}</p>
+        <div style={{ border: '1px solid #fde68a', background: '#fffbeb', borderRadius: 5, padding: '12px 14px' }}>
+          <p style={{ fontSize: 12, fontWeight: 900, color: '#92400e', marginBottom: 4 }}>Error típico</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#78350f', lineHeight: 1.6 }}>{alert}</p>
         </div>
       )}
     </div>
@@ -1358,8 +1444,8 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
 
 function InfoTile({ label, text }: { label: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <p className="mb-1 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+    <div style={{ border: '1px solid #e2e8f0', borderRadius: 5, padding: '10px 12px' }}>
+      <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#94a3b8', marginBottom: 5 }}>{label}</p>
       <LessonMarkdown text={text} />
     </div>
   )
@@ -1367,8 +1453,8 @@ function InfoTile({ label, text }: { label: string; text: string }) {
 
 function GuidedExamplePanel({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
-      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Ejemplo guiado</p>
+    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 5, padding: '12px 14px' }}>
+      <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#059669', marginBottom: 8 }}>Ejemplo guiado</p>
       <LessonMarkdown text={text} />
     </div>
   )
@@ -1376,8 +1462,8 @@ function GuidedExamplePanel({ text }: { text: string }) {
 
 function PracticePromptPanel({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
-      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Ejercicio corregible</p>
+    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, padding: '12px 14px' }}>
+      <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#2563eb', marginBottom: 8 }}>Ejercicio corregible</p>
       <LessonMarkdown text={text} />
     </div>
   )
@@ -1387,19 +1473,27 @@ function EmptyContent({ compact = false }: { compact?: boolean }) {
   const copy = compact
     ? 'Este bloque aún necesita contenido completo.'
     : 'Este tema aún necesita contenido completo. Puedes practicar con ejercicios disponibles.'
-  return <p className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">{copy}</p>
+  return <p style={{ border: '1px dashed #bfdbfe', borderRadius: 5, padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#3b82f6', background: '#eff6ff' }}>{copy}</p>
 }
 
 function ContentSkeleton() {
   return (
-    <div className="animate-pulse space-y-3">
+    <div className="animate-pulse" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {[80, 60, 90, 50, 75].map(w => (
-        <div key={w} className="h-3 rounded-full bg-slate-100" style={{ width: `${w}%` }} />
+        <div key={w} style={{ height: 10, borderRadius: 999, background: '#f1f5f9', width: `${w}%` }} />
       ))}
     </div>
   )
 }
 
 function LearningCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-black text-slate-950">{title}</h2><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">Paso de lectura</span></div><div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div></article>
+  return (
+    <article style={{ paddingTop: 28, paddingBottom: 28, borderTop: '1px solid #e2e8f0' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16 }}>
+        <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>{title}</h2>
+        <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase' as const, color: '#94a3b8' }}>Paso de lectura</span>
+      </div>
+      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div>
+    </article>
+  )
 }

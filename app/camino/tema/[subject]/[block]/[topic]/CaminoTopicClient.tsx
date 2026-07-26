@@ -289,18 +289,27 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       queueMicrotask(() => setDiegoLoading(false))
       return
     }
+    // Query by block only (no topic_slug) so granular v2 topics find the
+    // broader Diego notes that cover the whole block.
+    // analisis absorbs the old 'integrales' block, so we query both.
+    const blockSlugs = topic.blockSlug === 'analisis'
+      ? [topic.blockSlug, 'integrales']
+      : [topic.blockSlug]
     supabase
       .from('curriculum_content')
       .select('content_markdown')
       .eq('subject', topic.subject)
-      .eq('block_slug', topic.blockSlug)
-      .eq('topic_slug', topic.topicSlug)
-      .single()
+      .in('block_slug', blockSlugs)
+      .order('topic_slug', { ascending: true })
       .then(({ data }) => {
-        if (data?.content_markdown) setDiegoContent(data.content_markdown)
+        const combined = (data ?? [])
+          .map(r => r.content_markdown)
+          .filter(Boolean)
+          .join('\n\n')
+        if (combined) setDiegoContent(combined)
         setDiegoLoading(false)
       })
-  }, [topic?.subject, topic?.blockSlug, topic?.topicSlug])
+  }, [topic?.subject, topic?.blockSlug])
 
   useEffect(() => {
     let cancelled = false
@@ -853,6 +862,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                           ? <StructuredLesson topic={currentTopic} />
                           : <EmptyContent />}
               </LearningCard>
+              {!v2Loading && v2Cards.length > 0 && !diegoLoading && diegoContent && (
+                <LearningCard title="Apuntes del bloque">
+                  <DiegoContentCards markdown={diegoContent} />
+                </LearningCard>
+              )}
               {!v2Loading && v2Cards.length === 0 && (
                 <>
                   {videoId && (

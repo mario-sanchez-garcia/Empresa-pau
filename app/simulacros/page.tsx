@@ -360,8 +360,8 @@ function SimulacrosPage() {
 
         {/* ── STEP 2: TIPO ── */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 12 }}>Tipo de simulacro</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 10 }}>Tipo de simulacro</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {(['normal', 'errores', 'tipicos', 'personalizado'] as SimulacroMode[]).map(m => {
               const isActive = mode === m
               const labels: Record<SimulacroMode, string> = { normal: 'Simulacro normal', errores: 'Peores notas', tipicos: 'Típicos PAU', personalizado: 'Personalizado' }
@@ -369,10 +369,31 @@ function SimulacrosPage() {
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 999, border: `2px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#475569', fontSize: 12, fontWeight: 800, cursor: 'pointer', transition: 'all .12s' }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: 6,
+                    padding: '12px 14px',
+                    borderRadius: 12,
+                    border: `1.5px solid ${isActive ? cfg.color : '#e2e8f0'}`,
+                    background: isActive ? cfg.light : 'white',
+                    cursor: 'pointer',
+                    transition: 'border-color .12s, background .12s',
+                    textAlign: 'left',
+                  }}
                 >
-                  {labels[m]}
-                  <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 7px', borderRadius: 999, background: isActive ? cfg.color : '#f1f5f9', color: isActive ? 'white' : modeBadgeColor(m) }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? cfg.color : '#334155', lineHeight: 1.2 }}>
+                    {labels[m]}
+                  </span>
+                  <span style={{
+                    fontSize: 9,
+                    fontWeight: 900,
+                    letterSpacing: '.08em',
+                    textTransform: 'uppercase',
+                    color: isActive ? cfg.color : modeBadgeColor(m),
+                    opacity: isActive ? 1 : 0.75,
+                  }}>
                     {modeBadgeLabel(m)}
                   </span>
                 </button>

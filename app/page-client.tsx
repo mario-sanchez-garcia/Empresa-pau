@@ -686,7 +686,7 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
       <div style={{ width: '66px', height: '66px', borderRadius: '23px', background: config.light, color: config.color, border: '1px solid ' + config.soft, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 14px 30px rgba(37,99,235,0.08)' }}>
         <SearchX size={30} />
       </div>
-      <div style={{ fontSize: '20px', fontWeight: 850, color: WARM.ink, marginBottom: '8px' }}>
+      <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: 850, color: WARM.ink, marginBottom: '8px' }}>
         {isPendingDataSubject ? 'No hay exámenes disponibles todavía para esta asignatura.' : `No hay preguntas de ${title} para este filtro.`}
       </div>
       <p style={{ maxWidth: '620px', margin: '0 auto', color: WARM.muted, fontSize: '15px', lineHeight: 1.7, fontWeight: 650 }}>
@@ -3211,7 +3211,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
-                  <div style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
+                  <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 8, fontWeight: 600 }}>{tipo} · {anioSeleccionado ?? '—'} · {examSystemLabel(ccaa)}</div>
                 </div>
                 {(() => {

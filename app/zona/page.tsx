@@ -71,7 +71,7 @@ export default function ZonaPage() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '16px 28px' }}>
             <div>
               <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Tu espacio personal</div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>La Zona</div>
+              <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>La Zona</div>
             </div>
           </div>
         </div>

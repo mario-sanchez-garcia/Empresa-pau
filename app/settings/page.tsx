@@ -154,7 +154,7 @@ export default function SettingsPage() {
                 <Camera size={18} color="white" />
               </div>
             </div>
-            <div style={{ fontSize: 32, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: 1, marginBottom: 8, textAlign: 'center' }}>{displayName}</div>
+            <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 32, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: 1, marginBottom: 8, textAlign: 'center' }}>{displayName}</div>
             <div style={{ width: 40, height: 3, background: '#2563eb', borderRadius: 999, marginBottom: 10 }} />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, fontSize: 9, fontWeight: 900, letterSpacing: '.1em', textTransform: 'uppercase', background: 'rgba(37,99,235,.2)', border: '1px solid rgba(37,99,235,.25)', color: '#60a5fa' }}>{ccaa || 'Madrid'}</span>

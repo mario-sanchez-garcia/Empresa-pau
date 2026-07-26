@@ -14,7 +14,6 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
-import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
@@ -1051,9 +1050,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'El XP se asigna solo después de corregir el ejercicio final.'}</p>
           </div>
 
-          {/* Parent + planes */}
-          <ParentLinkModule billing={billing} />
-          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 10, textDecoration: 'none' }}>Ver planes</Link>
+          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
         </aside>
 
       </div>{/* end document body */}
@@ -1081,7 +1078,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               <Link href="/pricing" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Desbloquear acceso completo <ArrowRight size={14} /></Link>
               <button type="button" onClick={() => setShowPaywall(false)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-600">Seguir con el plan gratuito</button>
             </div>
-            <ParentLinkModule billing={billing} />
             <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
           </div>
         </div>

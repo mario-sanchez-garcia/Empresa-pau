@@ -3108,43 +3108,39 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         .chat-avatar-pulse { animation: chat-avatar-pulse 3s ease-in-out infinite; }
 
         .chat-input-wrap {
-          background: rgba(255,255,255,0.86);
-          border: 1px solid rgba(191,219,254,0.86);
-          border-radius: 24px;
-          padding: 12px 10px 12px 20px;
+          background: #f8fafc;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 18px;
+          padding: 10px 10px 10px 18px;
           display: flex;
           gap: 10px;
           align-items: flex-end;
-          box-shadow: 0 18px 46px rgba(37,99,235,0.10), inset 0 1px 0 rgba(255,255,255,0.88);
-          backdrop-filter: blur(20px) saturate(1.14);
-          -webkit-backdrop-filter: blur(20px) saturate(1.14);
-          transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+          transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
         }
         .chat-input-wrap:focus-within {
-          background: rgba(255,255,255,0.96);
-          border-color: rgba(96,165,250,0.92);
-          box-shadow: 0 0 0 4px rgba(96,165,250,0.18), 0 24px 56px rgba(37,99,235,0.16);
+          border-color: #2563eb;
+          background: white;
+          box-shadow: 0 0 0 3px rgba(37,99,235,.08);
         }
 
         .chat-send-btn {
           padding: 11px 18px;
-          border-radius: 16px;
+          border-radius: 12px;
           border: none;
           cursor: pointer;
-          background: linear-gradient(135deg, #1d4ed8, #2563eb 58%, #60a5fa);
+          background: #2563eb;
           color: #fff;
           font-size: 13px;
-          font-weight: 850;
+          font-weight: 800;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           gap: 7px;
-          transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
-          box-shadow: 0 12px 28px rgba(37,99,235,0.28);
+          transition: transform 100ms ease, box-shadow 100ms ease, opacity 150ms ease;
         }
         .chat-send-btn:not(:disabled):hover {
-          transform: translateY(-2px);
-          box-shadow: 0 18px 36px rgba(37,99,235,0.34);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 18px rgba(37,99,235,.3);
         }
         .chat-send-btn:disabled {
           opacity: 0.42;
@@ -3153,40 +3149,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           background: #dbe7fb;
           color: #64748b;
         }
-
-        .chat-chip {
-          padding: 10px 18px;
-          border-radius: 40px;
-          background: rgba(255,255,255,0.76);
-          border: 1px solid rgba(191,219,254,0.92);
-          color: #1e40af;
-          font-size: 13px;
-          font-weight: 800;
-          cursor: pointer;
-          transition: background 160ms ease, border-color 160ms ease, transform 130ms ease, color 160ms ease;
-          white-space: nowrap;
-          font-family: inherit;
-          box-shadow: 0 10px 24px rgba(37,99,235,0.07);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-        }
-        .chat-chip:hover {
-          background: #eff6ff;
-          border-color: rgba(96,165,250,0.92);
-          color: #1d4ed8;
-          transform: translateY(-2px);
-        }
       `}</style>
       <SidebarNav />
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', background: seccion === 'chat' ? 'radial-gradient(circle at 14% 8%, rgba(219,234,254,0.95), transparent 30%), radial-gradient(circle at 86% 18%, rgba(224,231,255,0.72), transparent 32%), linear-gradient(180deg, #fbfdff 0%, #f8fbff 45%, #eff6ff 100%)' : undefined, transition: 'background 300ms ease' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
        <header className="kairo-app-header kairo-topbar" style={{
-  borderBottom: seccion === 'chat' ? '1px solid rgba(219,231,251,0.88)' : '1px solid rgba(219,231,251,0.78)',
-  background: seccion === 'chat' ? 'rgba(255,255,255,0.76)' : undefined,
-  backdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
-  WebkitBackdropFilter: seccion === 'chat' ? 'blur(22px) saturate(1.16)' : undefined,
+  borderBottom: '1px solid rgba(219,231,251,0.78)',
   padding: '10px 32px',
   minHeight: '64px',
-  display: seccion === 'examenes' ? 'none' : 'flex',
+  display: (seccion === 'examenes' || seccion === 'chat') ? 'none' : 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '18px',
@@ -3934,108 +3904,56 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         )}
 
         {seccion === 'chat' && (
-          <div style={{ flex: 1, minHeight: 0, height: 'calc(100vh - 64px)', display: 'flex', overflow: 'hidden' }}>
+          /* V2 La Sala — full-width with photo hero + controls bar */
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh', background: 'white' }}>
 
-            {/* V4 El Despacho — left context panel */}
-            <div style={{ width: 300, background: '#111827', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,.05)' }}>
-
-              {/* Photo hero */}
-              <div style={{ position: 'relative', height: 160, flexShrink: 0, overflow: 'hidden' }}>
-                <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.4) saturate(.6)' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(17,24,39,.95) 0%, transparent 60%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 20px' }}>
-                  <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#4b5563', marginBottom: 5 }}>Kairo · Tutor IA</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: 1.05 }}>Chat con<br />Kairo</div>
-                </div>
-              </div>
-
-              {/* Scrollable body */}
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-
-                {/* Subject chips */}
-                <div style={{ padding: '16px 20px' }}>
-                  <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase', color: '#374151', marginBottom: 10 }}>Asignatura</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {HOME_SUBJECTS.map(key => {
-                      const val = ASIGNATURAS[key]
-                      const card = SUBJECT_CARDS[key]
-                      const isActive = asignatura === key
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => navegarAAsignatura(key)}
-                          style={{ padding: '5px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, border: isActive ? `1.5px solid rgba(37,99,235,.6)` : '1px solid rgba(255,255,255,.07)', background: isActive ? 'rgba(37,99,235,.15)' : 'transparent', color: isActive ? '#93c5fd' : '#4b5563', transition: 'all 100ms' }}
-                        >
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: val.color, flexShrink: 0, display: 'inline-block' }} />
-                          {card.title}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div style={{ borderTop: '1px solid rgba(255,255,255,.05)' }}>
-                  {([
-                    { label: 'Esta sesión', value: mensajes.filter(m => m.rol === 'usuario').length },
-                    { label: 'Correcciones', value: historial.length },
-                  ] as { label: string; value: number }[]).map(s => (
-                    <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 20px', borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                      <span style={{ fontSize: 11, color: '#374151', fontWeight: 600 }}>{s.label}</span>
-                      <span style={{ fontSize: 20, fontWeight: 900, color: '#e2e8f0', letterSpacing: '-.03em' }}>{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Suggestion chips */}
-                <div style={{ padding: '14px 20px 20px' }}>
-                  <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase', color: '#374151', marginBottom: 10 }}>Sugerencias</div>
-                  {[
-                    '¿Cómo es el examen de mates?',
-                    'Explícame la Segunda República',
-                    '¿Qué es la entalpía de reacción?',
-                  ].map(s => (
-                    <button
-                      key={s}
-                      type="button"
-                      className="chat-chip"
-                      onClick={() => setInputChat(s)}
-                      style={{ width: '100%', textAlign: 'left', marginBottom: 6, justifyContent: 'flex-start' }}
-                    >{s}</button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div style={{ padding: '14px 20px', borderTop: '1px solid rgba(255,255,255,.05)', flexShrink: 0 }}>
-                <div style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>
-                  Kairo · {examSystemLabel(ccaa)}<br />Versión Beta
+            {/* Photo hero */}
+            <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+              <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.45) saturate(.75)' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,.85) 0%, rgba(15,23,42,.3) 55%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px' }}>
+                <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
+                <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .9, marginBottom: 10 }}>Tutor<br />Inteligente</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {HOME_SUBJECTS.map(key => {
+                    const card = SUBJECT_CARDS[key]
+                    const isActive = asignatura === key
+                    return (
+                      <button key={key} type="button" onClick={() => navegarAAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1px solid rgba(147,197,253,.5)' : '1px solid rgba(255,255,255,.18)', background: isActive ? 'rgba(37,99,235,.5)' : 'rgba(255,255,255,.08)', color: isActive ? 'white' : 'rgba(255,255,255,.7)', fontSize: 11, fontWeight: 700, backdropFilter: 'blur(8px)', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit' }}>
+                        {card.title}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* Right chat column */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f8fafc', minWidth: 0, overflow: 'hidden' }}>
+            {/* Controls bar */}
+            <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
+              {HOME_SUBJECTS.map(key => {
+                const val = ASIGNATURAS[key]
+                const card = SUBJECT_CARDS[key]
+                const isActive = asignatura === key
+                return (
+                  <button key={key} type="button" onClick={() => navegarAAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1.5px solid #2563eb' : '1px solid #e2e8f0', background: isActive ? '#eff6ff' : 'white', fontSize: 12, fontWeight: 700, color: isActive ? '#2563eb' : '#475569', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: val.color, flexShrink: 0, display: 'inline-block' }} />
+                    {card.title}
+                  </button>
+                )
+              })}
+            </div>
 
-              {/* Topbar */}
-              <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', flexShrink: 0, boxShadow: '0 0 0 2px rgba(34,197,94,.2)' }} />
-                <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', letterSpacing: '-.01em' }}>{cfg.label}</span>
-                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>· Kairo activo</span>
-              </div>
-
-              {/* Messages scroll area */}
-              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '18px 24px 10px', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
+            {/* Messages scroll area */}
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 28px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+              <div style={{ maxWidth: 820, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
                 {mensajes.length === 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '22px 20px 14px', minHeight: 0 }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
                     <div className="chat-avatar-pulse" style={{ margin: '0 auto 28px', display: 'inline-flex', padding: '18px 32px', background: '#0f172a', borderRadius: 20, border: '1px solid rgba(37,99,235,.28)' }}>
                       <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 46, width: 'auto', display: 'block' }} />
                     </div>
                     <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 800, letterSpacing: '0.24em', color: '#94a3b8', textTransform: 'uppercase' }}>Hola, soy</p>
-                    <h2 style={{ margin: '0 0 18px', fontSize: 46, fontWeight: 900, color: '#2563eb', letterSpacing: '-0.045em', lineHeight: 1, textShadow: '0 0 32px rgba(37,99,235,.3)' }}>
-                      Kairo
-                    </h2>
+                    <h2 style={{ margin: '0 0 18px', fontSize: 46, fontWeight: 900, color: '#2563eb', letterSpacing: '-0.045em', lineHeight: 1, textShadow: '0 0 32px rgba(37,99,235,.3)' }}>Kairo</h2>
                     <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 340, lineHeight: 1.65, fontWeight: 450 }}>
                       Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
                     </p>
@@ -4044,13 +3962,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
                 {mensajes.map((msg, i) => (
                   msg.rol === 'kairo' ? (
-                    /* Kairo — clean editorial card (V4 El Despacho) */
-                    <div key={i} className="chat-msg-ai" style={{ width: '100%', padding: '10px 0' }}>
-                      <div style={{ borderRadius: 22, padding: '18px 20px', background: 'white', border: '1px solid #e8eef7', boxShadow: '0 2px 14px rgba(15,23,42,.05)' }}>
+                    <div key={i} className="chat-msg-ai" style={{ padding: '10px 0' }}>
+                      <div style={{ borderRadius: 22, padding: '20px 22px', background: 'white', border: '1px solid #e8eef7', boxShadow: '0 4px 20px rgba(15,23,42,.06)' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                          <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, background: '#eff6ff', border: '1px solid rgba(191,219,254,0.85)', boxShadow: '0 4px 12px rgba(37,99,235,0.10)' }} />
+                          <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, background: '#eff6ff', border: '1px solid #bfdbfe', boxShadow: '0 4px 12px rgba(37,99,235,.10)' }} />
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 10, fontWeight: 900, color: '#2563eb', marginBottom: 10, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Kairo</div>
+                            <div style={{ fontSize: 10, fontWeight: 900, color: '#2563eb', marginBottom: 10, letterSpacing: '.12em', textTransform: 'uppercase' }}>Kairo</div>
                             {(() => {
                               const isStreamingMessage = cargandoChat && i === mensajes.length - 1
                               if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
@@ -4069,9 +3986,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                       </div>
                     </div>
                   ) : (
-                    /* Usuario — compact bubble right */
-                    <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 0' }}>
-                      <div style={{ maxWidth: '68%', padding: '13px 18px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #60a5fa 100%)', color: '#fff', fontSize: 14, lineHeight: 1.68, fontWeight: 650, boxShadow: '0 8px 24px rgba(37,99,235,0.22)' }}>
+                    <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
+                      <div style={{ maxWidth: '65%', padding: '13px 18px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', color: 'white', fontSize: 14, fontWeight: 600, lineHeight: 1.65, boxShadow: '0 8px 24px rgba(37,99,235,.22)' }}>
                         {msg.texto}
                       </div>
                     </div>
@@ -4093,17 +4009,20 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
                 <div ref={chatEndRef} />
               </div>
+            </div>
 
-              {/* Input area — editorial border from V3 */}
-              <div style={{ flexShrink: 0, background: 'white', borderTop: '1px solid #e2e8f0', padding: '12px 24px 18px' }}>
+            {/* Input zone */}
+            <div style={{ flexShrink: 0, background: 'linear-gradient(to top, white 60%, transparent)', padding: '12px 28px 20px' }}>
+              <div style={{ maxWidth: 820, margin: '0 auto' }}>
+                <div style={{ borderTop: '1px solid #e2e8f0', marginBottom: 12 }} />
                 <div className="chat-input-wrap">
-                  <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 56, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '15px 4px 15px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' }} />
+                  <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
                   <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
                     {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
                     {cargandoChat ? 'Pensando...' : 'Enviar'}
                   </button>
                 </div>
-                <p style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', margin: '10px 0 0', letterSpacing: '0.02em' }}>Enter para enviar · Shift+Enter para nueva línea</p>
+                <p style={{ textAlign: 'center', fontSize: 10, color: '#94a3b8', marginTop: 8, letterSpacing: '.02em' }}>Enter para enviar · Shift+Enter para nueva línea</p>
               </div>
             </div>
           </div>

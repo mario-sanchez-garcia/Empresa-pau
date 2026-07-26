@@ -2526,32 +2526,30 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
 
   if (daysDiff === 0) {
     return (
-      <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4">
-        <p className="text-base font-black text-amber-900">¡Hoy es tu parcial de {exam.subject}!</p>
-        <p className="mt-1 text-sm font-semibold text-amber-700">Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
+      <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: '#0f172a', padding: '16px 20px' }}>
+        <p style={{ fontSize: 15, fontWeight: 900, color: 'white', margin: 0 }}>¡Hoy es tu parcial de {exam.subject}!</p>
+        <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0', fontWeight: 600 }}>Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-[24px] border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-[0_8px_24px_rgba(251,146,60,0.10)]">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-600">Próximo parcial</p>
-          <p className="mt-1 text-base font-black text-slate-900">
+    <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #2563eb', background: 'white', padding: '16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Próximo parcial</p>
+          <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
             {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
             {exam.subject ? ` · ${exam.subject}` : ''}
             {blockDisplay ? ` · ${blockDisplay}` : ''}
           </p>
-          <p className="mt-1 text-sm font-semibold text-slate-600">
-            Kairo ha ajustado esta semana para que llegues preparado.
-          </p>
+          <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>Kairo ha ajustado esta semana para que llegues preparado.</p>
         </div>
         <a
           href={href}
-          className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-amber-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_4px_12px_rgba(245,158,11,0.30)] transition hover:-translate-y-0.5 hover:bg-amber-600"
+          style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.22)', whiteSpace: 'nowrap' }}
         >
-          Empezar práctica <ArrowRight size={14} />
+          Empezar práctica <ArrowRight size={13} />
         </a>
       </div>
     </div>

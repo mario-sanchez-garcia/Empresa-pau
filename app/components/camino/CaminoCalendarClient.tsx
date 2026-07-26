@@ -1453,7 +1453,7 @@ export default function CaminoCalendarClient() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
-            <span style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setCalendarEditorOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
@@ -1496,7 +1496,7 @@ export default function CaminoCalendarClient() {
             <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-              <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
+              <div style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
               <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>

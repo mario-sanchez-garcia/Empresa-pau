@@ -114,9 +114,6 @@ body {
 /* Cap body line length */
 p, li { max-width: 72ch; }
 
-/* ─── Serif headings ────────────────────────────────────────────── */
-h1, h2, h3, h4 { font-family: Georgia, "Times New Roman", serif; }
-
 /* ─── Atmospheric page background ───────────────────────────────── */
 .pau-bg-atmosphere {
   background:

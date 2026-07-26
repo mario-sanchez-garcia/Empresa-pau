@@ -1671,18 +1671,18 @@ export default function CaminoCalendarClient() {
                   const dayName = diff === 1 ? 'Mañana' : diff === 2 ? 'Pasado mañana' : calendarDayLabel(day.date)
                   const num = String(2 + todayBonus.length + di).padStart(2, '0')
                   return (
-                    <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid #f8fafc', opacity: 0.38 }}>
-                      <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#e2e8f0', flexShrink: 0, width: 48, paddingTop: 2 }}>{num}</div>
+                    <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid #f1f5f9', borderLeft: `3px solid ${di === 0 ? '#2563eb' : '#8b5cf6'}`, opacity: 0.45 }}>
+                      <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: di === 0 ? '#2563eb' : '#8b5cf6', flexShrink: 0, width: 48, paddingTop: 2 }}>{num}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 5 }}>{dayName}</div>
+                        <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: di === 0 ? '#2563eb' : '#8b5cf6', marginBottom: 5 }}>{dayName}</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 5, alignItems: 'center' }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: di === 0 ? '#2563eb' : '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
                           {(formatBlockLabel(mission.blockKey) || mission.block) && (
-                            <><span style={{ color: '#e2e8f0', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
+                            <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
                           )}
                         </div>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: '#334155', lineHeight: 1.3 }}>{mission.title}</div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>{mission.estimatedMinutes} min</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{mission.title}</div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginTop: 4 }}>{mission.estimatedMinutes} min</div>
                       </div>
                     </div>
                   )

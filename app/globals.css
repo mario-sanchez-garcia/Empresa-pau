@@ -701,6 +701,7 @@ button:active:not(:disabled),
 }
 
 .exam-statement-body .math-markdown {
+  font-family: Georgia, "Times New Roman", serif;
   color: #253044;
   font-size: 1.01rem;
   line-height: 1.92;

@@ -38,21 +38,22 @@ export default function SidebarNav() {
         }}
       >
         {/* Brand */}
-        <div style={{ position: 'relative', height: 44, flexShrink: 0, marginBottom: 10 }}>
+        <div style={{ position: 'relative', height: 44, flexShrink: 0, marginBottom: 10, overflow: 'hidden' }}>
+          {/* Collapsed: tiny centered crop of the chill logo */}
           <div style={{
             position: 'absolute', inset: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             opacity: open ? 0 : 1, transition: 'opacity 120ms', pointerEvents: 'none',
           }}>
-            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 900, fontSize: 11, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase' }}>Kairo</div>
+            <img src="/brand/kairo-chill.png" alt="Kairo" style={{ height: 28, width: 'auto', mixBlendMode: 'screen', opacity: 0.9, objectFit: 'cover' }} />
           </div>
+          {/* Expanded: full chill logo */}
           <div style={{
             position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', paddingLeft: 18, gap: 10,
+            display: 'flex', alignItems: 'center', paddingLeft: 14,
             opacity: open ? 1 : 0, transition: 'opacity 150ms 80ms', pointerEvents: 'none',
           }}>
-            <span style={{ fontWeight: 900, fontSize: 14, letterSpacing: 3, color: '#2563eb', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Kairo</span>
-            <img src="/brand/kairo-logo-white.png" alt="" aria-hidden style={{ height: 18, width: 'auto', opacity: 0.85, flexShrink: 0 }} />
+            <img src="/brand/kairo-chill.png" alt="Kairo" style={{ height: 34, width: 'auto', mixBlendMode: 'screen', opacity: 0.92, flexShrink: 0 }} />
           </div>
         </div>
 

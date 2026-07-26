@@ -887,6 +887,24 @@ button:active:not(:disabled),
 .circular-gallery:active { cursor: grabbing; }
 .circular-gallery:focus-visible { outline: 2px solid #2563eb; outline-offset: 4px; }
 
+/* ─── Landing-aligned typography ─────────────────────────────────── */
+/* Display titles — Bebas Neue, same as kairo-pau.com headings        */
+.pau-display {
+  font-family: var(--font-display, 'Bebas Neue', sans-serif);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* Eyebrow / label — DM Mono, same as kairo-pau.com section labels   */
+.pau-eyebrow {
+  font-family: var(--font-label, 'DM Mono', monospace);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 /* ─── CursorGrid ──────────────────────────────────────────────────── */
 .cursor-grid {
   position: relative;

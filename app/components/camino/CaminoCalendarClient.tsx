@@ -1452,8 +1452,8 @@ export default function CaminoCalendarClient() {
       <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
+            <span className="pau-eyebrow" style={{ color: '#2563eb' }}>Camino PAU</span>
+            <span className="pau-display" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Tu semana de estudio</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setCalendarEditorOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>

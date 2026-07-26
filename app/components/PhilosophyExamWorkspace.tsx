@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
+import { Camera, Check, ChevronDown, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
@@ -239,171 +239,217 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
     return <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm font-semibold text-slate-500">No hay exámenes de Filosofía disponibles para esta convocatoria.</div>
   }
 
+  const convocatoriaOptions = [...new Set(
+    (ccaa === 'Madrid' ? examenesHistoriaFilosofiaMadrid : examenesHistoriaFilosofiaCataluna).map(exam => exam.convocatoria)
+  )]
+
   return (
-    <div className="mb-8 grid gap-5">
-      <section className="bg-white px-6 py-6" style={{ borderRadius: 16, border: `1px solid ${UI.border}`, boxShadow: 'var(--shadow-sm)' }}>
-        <div className="mb-4 text-xs font-bold text-slate-400">Filtros</div>
-        <div className="grid gap-4">
-          <div className="flex flex-wrap gap-4">
-            <FilterGroup
-              label="Convocatoria"
-              value={convocatoria}
-              onChange={value => setConvocatoria(value as Convocatoria)}
-              options={[...new Set((ccaa === 'Madrid' ? examenesHistoriaFilosofiaMadrid : examenesHistoriaFilosofiaCataluna).map(exam => exam.convocatoria))].map(value => ({ value, label: titleCase(value) }))}
-            />
-            <FilterGroup
-              label="Año"
-              value={String(year)}
-              onChange={value => setYear(Number(value))}
-              options={years.map(value => ({ value: String(value), label: String(value) }))}
-            />
-            {examsForYear.length > 1 && (
-              <FilterGroup
+    <>
+      <div className="exams-filter-card" style={{ background: 'white', borderTop: '1px solid #e2e8f0', borderBottom: '2px solid #0f172a', padding: '12px 0', marginBottom: 20 }}>
+        <div className="exams-filter-bar">
+          <FilterDropdown
+            label="Año"
+            value={String(year ?? years[0] ?? 'Año')}
+            options={years.map(y => ({ label: String(y), active: y === year, onSelect: () => setYear(y) }))}
+          />
+          <div className="exams-filter-divider" />
+          <FilterDropdown
+            label="Convocatoria"
+            value={titleCase(convocatoria)}
+            options={convocatoriaOptions.map(conv => ({
+              label: titleCase(conv),
+              active: conv === convocatoria,
+              onSelect: () => setConvocatoria(conv as Convocatoria)
+            }))}
+          />
+          {examsForYear.length > 1 && (
+            <>
+              <div className="exams-filter-divider" />
+              <FilterDropdown
                 label={ccaa === 'Madrid' ? 'Variante' : 'Serie'}
-                value={selectedExam.id}
-                onChange={setExamId}
+                value={ccaa === 'Madrid'
+                  ? ('variante' in selectedExam && selectedExam.variante ? selectedExam.variante : 'Principal')
+                  : ('serie' in selectedExam ? selectedExam.serie : 'Principal')}
                 options={examsForYear.map(exam => ({
-                  value: exam.id,
-                  label: ccaa === 'Madrid' ? ('variante' in exam && exam.variante ? exam.variante : 'Principal') : ('serie' in exam ? exam.serie : 'Principal')
+                  label: ccaa === 'Madrid'
+                    ? ('variante' in exam && exam.variante ? exam.variante : 'Principal')
+                    : ('serie' in exam ? exam.serie : 'Principal'),
+                  active: exam.id === examId,
+                  onSelect: () => setExamId(exam.id)
                 }))}
               />
-            )}
-          </div>
-          <div className="flex flex-wrap gap-4">
-            {ccaa === 'Madrid' ? (
-              <FilterGroup
+            </>
+          )}
+          {ccaa === 'Madrid' && (madridExam?.textos ?? []).length > 0 && (
+            <>
+              <div className="exams-filter-divider" />
+              <FilterDropdown
                 label="Texto"
-                value={textOption}
-                onChange={value => setTextOption(value as 'A' | 'B')}
-                options={(madridExam?.textos ?? []).map(text => ({ value: text.opcion, label: `Texto ${text.opcion}` }))}
+                value={`Texto ${textOption}`}
+                options={(madridExam?.textos ?? []).map(text => ({
+                  label: `Texto ${text.opcion}`,
+                  active: text.opcion === textOption,
+                  onSelect: () => setTextOption(text.opcion as 'A' | 'B')
+                }))}
               />
-            ) : (
-              <>
-                <FilterGroup
-                  label="Ejercicio"
-                  value={String(selectedExercise?.numero)}
-                  onChange={value => setExerciseNumber(Number(value))}
-                  options={(catalunaExam?.ejercicios ?? []).map(exercise => ({ value: String(exercise.numero), label: `Ejercicio ${exercise.numero}` }))}
-                />
-                {selectedExercise?.opciones && (
-                  <FilterGroup
+            </>
+          )}
+          {ccaa === 'Cataluña' && (catalunaExam?.ejercicios ?? []).length > 0 && (
+            <>
+              <div className="exams-filter-divider" />
+              <FilterDropdown
+                label="Ejercicio"
+                value={`Ejercicio ${selectedExercise?.numero ?? ''}`}
+                options={(catalunaExam?.ejercicios ?? []).map(exercise => ({
+                  label: `Ejercicio ${exercise.numero}`,
+                  active: exercise.numero === exerciseNumber,
+                  onSelect: () => setExerciseNumber(exercise.numero)
+                }))}
+              />
+              {selectedExercise?.opciones && (
+                <>
+                  <div className="exams-filter-divider" />
+                  <FilterDropdown
                     label="Opción"
-                    value={exerciseOption}
-                    onChange={value => setExerciseOption(value as 'A' | 'B')}
-                    options={selectedExercise.opciones.map(option => ({ value: option.opcion, label: `Opción ${option.opcion}` }))}
+                    value={`Opción ${exerciseOption}`}
+                    options={selectedExercise.opciones.map(option => ({
+                      label: `Opción ${option.opcion}`,
+                      active: option.opcion === exerciseOption,
+                      onSelect: () => setExerciseOption(option.opcion as 'A' | 'B')
+                    }))}
                   />
-                )}
-              </>
-            )}
-          </div>
-          <FilterGroup
-            label={ccaa === 'Madrid' ? 'Pregunta' : 'Apartados'}
-            value={selectedQuestion?.id ?? ''}
-            onChange={setQuestionId}
-            options={questions.map(question => ({ value: question.id, label: `${question.id} · ${question.titulo}` }))}
-            wide
-          />
+                </>
+              )}
+            </>
+          )}
+          {questions.length > 0 && (
+            <>
+              <div className="exams-filter-divider" />
+              <FilterDropdown
+                label={ccaa === 'Madrid' ? 'Pregunta' : 'Apartado'}
+                value={selectedQuestion ? `${selectedQuestion.id} · ${selectedQuestion.titulo}` : 'Selecciona'}
+                options={questions.map(question => ({
+                  label: `${question.id} · ${question.titulo}`,
+                  active: question.id === questionId,
+                  onSelect: () => setQuestionId(question.id)
+                }))}
+              />
+            </>
+          )}
         </div>
-      </section>
+      </div>
 
-      <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(100,116,139,0.10)]" style={{ borderColor: UI.border }}>
-        <header className="flex flex-wrap items-start justify-between gap-4 border-b px-6 py-5" style={{ background: UI.light, borderColor: UI.border }}>
-          <div className="min-w-0">
-            <ExamMetaChips
-              color={UI.color}
-              accent={UI.accent}
-              items={[
-                ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid',
-                String(selectedExam.anio),
-                titleCase(convocatoria),
-                variantLabel,
-                ccaa === 'Cataluña' ? `Exercici ${selectedExercise?.numero ?? ''}` : `Texto ${textOption}`,
-                ccaa === 'Cataluña' && selectedExercise?.opciones ? `Opció ${exerciseOption}` : null,
-                selectedQuestion?.id ? `Pregunta ${selectedQuestion.id}` : null,
-              ]}
-            />
-            <h2 className="mt-2 text-xl font-black text-slate-900">{selectedQuestion?.titulo}</h2>
-          </div>
-          <div className="text-2xl font-black" style={{ color: UI.color }}>{maxScore} <span className="text-sm">pts</span></div>
-        </header>
-        <div className="grid gap-5 p-6">
-          {sourceText && (
-            <ExamContentCard title={ccaa === 'Cataluña' ? 'Texto filosófico / fuente oficial' : 'Texto filosófico'} color={UI.color} borderColor={UI.border} soft>
+      <div className="mb-8 grid gap-5">
+        <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(100,116,139,0.10)]" style={{ borderColor: UI.border }}>
+          <header className="flex flex-wrap items-start justify-between gap-4 border-b px-6 py-5" style={{ background: UI.light, borderColor: UI.border }}>
+            <div className="min-w-0">
+              <ExamMetaChips
+                color={UI.color}
+                accent={UI.accent}
+                items={[
+                  ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid',
+                  String(selectedExam.anio),
+                  titleCase(convocatoria),
+                  variantLabel,
+                  ccaa === 'Cataluña' ? `Exercici ${selectedExercise?.numero ?? ''}` : `Texto ${textOption}`,
+                  ccaa === 'Cataluña' && selectedExercise?.opciones ? `Opció ${exerciseOption}` : null,
+                  selectedQuestion?.id ? `Pregunta ${selectedQuestion.id}` : null,
+                ]}
+              />
+              <h2 className="mt-2 text-xl font-black text-slate-900">{selectedQuestion?.titulo}</h2>
+            </div>
+            <div className="text-2xl font-black" style={{ color: UI.color }}>{maxScore} <span className="text-sm">pts</span></div>
+          </header>
+          <div className="grid gap-5 p-6">
+            {sourceText && (
+              <ExamContentCard title={ccaa === 'Cataluña' ? 'Texto filosófico / fuente oficial' : 'Texto filosófico'} color={UI.color} borderColor={UI.border} soft>
+                <ExamStatement
+                  text={sourceText}
+                  storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:fuente`}
+                  accentColor={UI.color}
+                  softColor={UI.light}
+                  readingMode
+                />
+              </ExamContentCard>
+            )}
+            <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor={UI.border}>
               <ExamStatement
-                text={sourceText}
-                storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:fuente`}
+                text={selectedQuestion?.enunciado ?? ''}
+                storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:enunciado`}
                 accentColor={UI.color}
                 softColor={UI.light}
                 readingMode
               />
+              {wordLimit && <div className="mt-3 text-xs font-bold text-slate-500">Límite: {wordLimit}</div>}
             </ExamContentCard>
-          )}
-          <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor={UI.border}>
-            <ExamStatement
-              text={selectedQuestion?.enunciado ?? ''}
-              storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:enunciado`}
-              accentColor={UI.color}
-              softColor={UI.light}
-              readingMode
-            />
-            {wordLimit && <div className="mt-3 text-xs font-bold text-slate-500">Límite: {wordLimit}</div>}
-          </ExamContentCard>
-        </div>
-        <section className="border-t p-6" style={{ borderColor: UI.border }}>
-          <div className="mb-4 flex gap-2">
-            <ModeButton active={mode === 'text'} onClick={() => setMode('text')} icon={<PenLine size={15} />} label="Escribir" />
-            <ModeButton active={mode === 'image'} onClick={() => setMode('image')} icon={<Camera size={15} />} label="Subir foto" />
           </div>
-          {mode === 'text' ? (
-            <RichTextArea value={answer} onChange={setAnswer} placeholder="Redacta aquí tu respuesta..." minHeight={208} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} />
-          ) : (
-            <div>
-              <input ref={fileRef} type="file" accept="image/*" onChange={chooseImage} className="hidden" />
-              {imagePreview ? <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: UI.border }}><img src={imagePreview} alt="Respuesta manuscrita" className="max-h-80 w-full object-contain" /><button type="button" onClick={clearImage} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-white"><X size={16} /></button></div>
-                : <button type="button" onClick={() => fileRef.current?.click()} className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed text-sm font-black" style={{ borderColor: UI.accent, background: UI.light, color: UI.color }}><UploadCloud size={32} /><span className="mt-2">Sube una foto de tu respuesta</span></button>}
+          <section className="border-t p-6" style={{ borderColor: UI.border }}>
+            <div className="mb-4 flex gap-2">
+              <ModeButton active={mode === 'text'} onClick={() => setMode('text')} icon={<PenLine size={15} />} label="Escribir" />
+              <ModeButton active={mode === 'image'} onClick={() => setMode('image')} icon={<Camera size={15} />} label="Subir foto" />
             </div>
-          )}
-          {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
-          <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>{loading ? <KairoLoadingDot /> : <WandSparkles size={17} />}{loading ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}</button>
-        </section>
-        {correction && <section className="border-t-2" style={{ borderColor: UI.color }}><div className="px-6 py-4 text-sm font-black text-white" style={{ background: UI.color }}>CORRECCIÓN DE KAIRO</div><CorrectionResultCard correction={correction} officialMaxScore={maxScore} className="p-6 text-sm leading-7" /></section>}
-      </article>
-    </div>
+            {mode === 'text' ? (
+              <RichTextArea value={answer} onChange={setAnswer} placeholder="Redacta aquí tu respuesta..." minHeight={208} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} />
+            ) : (
+              <div>
+                <input ref={fileRef} type="file" accept="image/*" onChange={chooseImage} className="hidden" />
+                {imagePreview
+                  ? <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: UI.border }}><img src={imagePreview} alt="Respuesta manuscrita" className="max-h-80 w-full object-contain" /><button type="button" onClick={clearImage} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-white"><X size={16} /></button></div>
+                  : <button type="button" onClick={() => fileRef.current?.click()} className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed text-sm font-black" style={{ borderColor: UI.accent, background: UI.light, color: UI.color }}><UploadCloud size={32} /><span className="mt-2">Sube una foto de tu respuesta</span></button>
+                }
+              </div>
+            )}
+            {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
+            <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>{loading ? <KairoLoadingDot /> : <WandSparkles size={17} />}{loading ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}</button>
+          </section>
+          {correction && <section className="border-t-2" style={{ borderColor: UI.color }}><div className="px-6 py-4 text-sm font-black text-white" style={{ background: UI.color }}>CORRECCIÓN DE KAIRO</div><CorrectionResultCard correction={correction} officialMaxScore={maxScore} className="p-6 text-sm leading-7" /></section>}
+        </article>
+      </div>
+    </>
   )
 }
 
-function FilterGroup({ label, value, onChange, options, wide = false }: { label: string, value: string, onChange: (value: string) => void, options: { value: string, label: string }[], wide?: boolean }) {
-  if (!options.length) return null
+type PhiloFilterOption = { label: string; active: boolean; onSelect: () => void }
+
+function FilterDropdown({ label, value, options }: { label: string; value: string; options: PhiloFilterOption[] }) {
+  const [open, setOpen] = useState(false)
+  const hasValue = options.some(o => o.active)
   return (
-    <div className={wide ? 'min-w-[260px] flex-1' : 'min-w-[150px]'}>
-      <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">{label}</span>
-      <div className="flex flex-wrap gap-2">
-        {options.map(option => {
-          const active = value === option.value
-          return (
+    <div className={`exam-filter-dropdown${open ? ' is-open' : ''}`}>
+      <button
+        type="button"
+        className={`exam-filter-trigger${hasValue ? ' has-value' : ''}${open ? ' is-open' : ''}`}
+        aria-expanded={open}
+        onClick={() => setOpen(c => !c)}
+      >
+        <span className="exam-filter-label">{label}</span>
+        <span className="exam-filter-sep">·</span>
+        <span className="exam-filter-value">{value}</span>
+        <ChevronDown
+          size={11}
+          style={{
+            flexShrink: 0,
+            color: open ? '#2563eb' : '#94a3b8',
+            transition: 'transform 180ms cubic-bezier(0.23,1,0.32,1), color 140ms',
+            transform: open ? 'rotate(180deg)' : 'rotate(0)',
+          }}
+        />
+      </button>
+      {open && (
+        <div className="exam-filter-menu">
+          {options.map(option => (
             <button
-              key={option.value}
               type="button"
-              onClick={() => onChange(option.value)}
-              className="campus-hover rounded-2xl border px-4 py-2.5 text-sm font-black transition"
-              style={{
-                '--hover-color': UI.color,
-                '--hover-bg': UI.light,
-                '--hover-border': UI.accent,
-                '--hover-shadow': `${UI.accent}33`,
-                background: active ? UI.color : '#fff',
-                borderColor: active ? UI.color : UI.border,
-                color: active ? '#fff' : '#334155',
-                boxShadow: active ? `0 14px 28px ${UI.accent}33` : '0 8px 18px rgba(100,116,139,0.05)',
-                maxWidth: wide ? '100%' : undefined,
-                textAlign: 'left',
-              } as CSSProperties}
+              key={option.label}
+              className={`exam-filter-option${option.active ? ' is-active' : ''}`}
+              onClick={() => { option.onSelect(); setOpen(false) }}
             >
-              {option.label}
+              <span>{option.label}</span>
+              {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
             </button>
-          )
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

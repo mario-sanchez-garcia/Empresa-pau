@@ -876,6 +876,94 @@ button:active:not(:disabled),
   .sim-tab-reveal { animation: none; opacity: 1; }
 }
 
+/* ─── Exam filter bar (PhilosophyExamWorkspace) ─────────────────── */
+.exams-filter-bar {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 20px;
+}
+.exams-filter-bar::-webkit-scrollbar { display: none; }
+
+.exams-filter-divider {
+  width: 1px;
+  height: 22px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.exam-filter-dropdown { position: relative; flex-shrink: 0; }
+
+.exam-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 140ms;
+}
+.exam-filter-trigger:hover .exam-filter-value { color: #0f172a; }
+.exam-filter-trigger.is-open .exam-filter-label { color: #2563eb; }
+.exam-filter-trigger.is-open .exam-filter-value { color: #2563eb; }
+
+.exam-filter-label {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.exam-filter-sep { color: #cbd5e1; font-size: 10px; }
+.exam-filter-value {
+  font-size: 11px;
+  font-weight: 800;
+  color: #334155;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exam-filter-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.12);
+  min-width: 160px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.exam-filter-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 80ms;
+}
+.exam-filter-option:hover { background: #f8fafc; }
+.exam-filter-option.is-active { background: #eff6ff; color: #1d4ed8; font-weight: 800; }
+
 /* ─── CircularGallery ────────────────────────────────────────────── */
 .circular-gallery {
   width: 100%;

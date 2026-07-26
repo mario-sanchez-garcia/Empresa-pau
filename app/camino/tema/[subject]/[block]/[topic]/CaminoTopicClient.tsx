@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, MessageCircle, PenLine, RotateCcw, School, UploadCloud, X } from 'lucide-react'
-import Sidebar from '@/app/components/Sidebar'
+import SidebarNav from '@/app/components/SidebarNav'
 import { buildEvauHref, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
@@ -1275,7 +1275,7 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="flex min-h-screen bg-[#f4f7fb] max-lg:block"><Sidebar activeItem="camino" /><div className="min-w-0 flex-1">{children}</div></div>
+  return <div className="flex min-h-screen bg-[#f4f7fb]"><SidebarNav /><div className="min-w-0 flex-1">{children}</div></div>
 }
 
 function cleanLessonLine(value: string) {

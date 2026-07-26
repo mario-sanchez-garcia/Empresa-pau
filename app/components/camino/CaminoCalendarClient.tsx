@@ -1651,6 +1651,46 @@ export default function CaminoCalendarClient() {
             </>
           )}
 
+          {/* ── PRÓXIMAS MISIONES ── */}
+          {(() => {
+            const nextDays = visibleCalendar
+              .filter(d => d.date > realToday)
+              .slice(0, 2)
+              .filter(d => d.missions.some(m => m.role === 'main'))
+            if (nextDays.length === 0) return null
+            const todayMs = new Date(realToday + 'T00:00:00').getTime()
+            return (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', borderTop: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>Próximas misiones</span>
+                </div>
+                {nextDays.map((day, di) => {
+                  const mission = day.missions.find(m => m.role === 'main')
+                  if (!mission) return null
+                  const diff = Math.round((new Date(day.date + 'T00:00:00').getTime() - todayMs) / 86400000)
+                  const dayName = diff === 1 ? 'Mañana' : diff === 2 ? 'Pasado mañana' : calendarDayLabel(day.date)
+                  const num = String(2 + todayBonus.length + di).padStart(2, '0')
+                  return (
+                    <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid #f8fafc', opacity: 0.38 }}>
+                      <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#e2e8f0', flexShrink: 0, width: 48, paddingTop: 2 }}>{num}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 5 }}>{dayName}</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 5, alignItems: 'center' }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
+                          {(formatBlockLabel(mission.blockKey) || mission.block) && (
+                            <><span style={{ color: '#e2e8f0', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: '#334155', lineHeight: 1.3 }}>{mission.title}</div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>{mission.estimatedMinutes} min</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </>
+            )
+          })()}
+
           {/* ── WEEK SECTION ── */}
           <div style={{ padding: '16px 20px', borderTop: '2px solid #0f172a' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>

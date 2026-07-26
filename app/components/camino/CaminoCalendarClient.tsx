@@ -2073,8 +2073,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   const [editorNotice, setEditorNotice] = useState('')
   const [editorWeekStart, setEditorWeekStart] = useState(weekStartISO)
   const [missionPanelOpen, setMissionPanelOpen] = useState(false)
+  const [selectedDayDate, setSelectedDayDate] = useState<string>(() => calendar.find(d => d.isToday)?.date ?? calendar[0]?.date ?? todayISO())
   const topics = curriculumForSubject(newMission.subject, curriculum)
   const orderedDraft = draft.slice().sort((a, b) => a.date.localeCompare(b.date))
+  const selectedDay = orderedDraft.find(d => d.date === selectedDayDate) ?? orderedDraft[0]
   const mainMissionCount = orderedDraft.reduce((total, day) => total + day.missions.filter(mission => mission.role === 'main').length, 0)
   const bonusMissions = orderedDraft.flatMap(day => day.missions.filter(mission => mission.role === 'bonus').map(mission => ({ mission, day })))
 
@@ -2089,6 +2091,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     setDraft(nextDraft)
     setNewMission(current => ({ ...current, day: nextDraft[0]?.date ?? nextWeekStart }))
     setDraggedMissionId(null)
+    setSelectedDayDate(nextDraft.find(d => d.isToday)?.date ?? nextDraft[0]?.date ?? nextWeekStart)
   }
 
   function moveMission(missionId: string, nextDate: string) {
@@ -2174,136 +2177,265 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 bg-slate-950/20 p-3 backdrop-blur-sm max-lg:left-0 sm:p-4 lg:left-[248px]">
-      <motion.section initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="mx-auto flex h-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-2xl">
-        <header className="shrink-0 border-b border-blue-100 px-4 py-4 sm:px-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 flex items-stretch bg-slate-950/25 p-3 backdrop-blur-[2px] max-lg:left-0 sm:p-5 lg:left-[248px]">
+      <motion.section
+        initial={{ opacity: 0, y: 14, scale: 0.987 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 14, scale: 0.987 }}
+        transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+        className="mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-[#e2e8f0] bg-white"
+      >
+        {/* ── Dark header ── */}
+        <header className="shrink-0 bg-[#0f172a] px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">Editar calendario</p>
-              <h2 className="text-xl font-black text-slate-950">Ajusta tu semana</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-500">Mueve misiones entre días. Kairo respetará tus cambios manuales al guardar.</p>
+              <p className="text-[8px] font-black uppercase tracking-[.18em] text-slate-500">Editar calendario</p>
+              <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: 'white', letterSpacing: '-0.02em', margin: '3px 0 0', lineHeight: 1.2 }}>Ajusta tu semana</h2>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={onAddExam} className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><Plus size={15} /> Añadir parcial</button>
-              <button onClick={() => setMissionPanelOpen(current => !current)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-[0_6px_18px_rgba(37,99,235,0.18)]"><Plus size={15} /> Añadir misión</button>
+            <div className="flex items-center gap-2">
+              <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded border border-white/10 bg-white/[0.07] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.13]"><Plus size={13} /> Añadir parcial</button>
+              <button onClick={() => setMissionPanelOpen(c => !c)} className="inline-flex items-center gap-1.5 rounded bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100"><Plus size={13} /> Añadir misión</button>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50"><ChevronLeft size={14} /> Semana anterior</button>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black text-slate-700">{weekRangeLabel(editorWeekStart)}</div>
-            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-900 px-3 py-2 text-xs font-black text-white transition hover:bg-slate-800"><RotateCcw size={14} /> Hoy</button>
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 transition hover:bg-blue-50">Semana siguiente <ArrowRight size={14} /></button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1 rounded border border-white/10 bg-white/[0.07] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.13]"><ChevronLeft size={11} /> Anterior</button>
+            <span className="rounded border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[10px] font-black text-slate-400">{weekRangeLabel(editorWeekStart)}</span>
+            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1 rounded border border-white/10 bg-white/[0.07] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.13]"><RotateCcw size={10} /> Hoy</button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1 rounded border border-white/10 bg-white/[0.07] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.13]">Siguiente <ArrowRight size={11} /></button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-white to-blue-50/40 p-4 sm:p-5">
-          {editorNotice && <p className="mb-4 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800">{editorNotice}</p>}
+        {/* ── Body: sidebar + main ── */}
+        <div className="flex min-h-0 flex-1">
 
-          {missionPanelOpen && (
-            <aside className="mb-4 rounded-3xl border border-blue-100 bg-white p-4 shadow-[0_12px_34px_rgba(37,99,235,0.08)]">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-black text-slate-950">Añadir misión</h3>
-                <button onClick={() => setMissionPanelOpen(false)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-500">Cerrar</button>
+          {/* Left: day list */}
+          <aside className="flex w-48 shrink-0 flex-col overflow-y-auto border-r border-[#e2e8f0] bg-[#fafaf9]">
+            {orderedDraft.map(day => {
+              const dayMains = day.missions.filter(m => m.role === 'main')
+              const isSelected = day.date === selectedDayDate
+              const isToday = day.isToday
+              return (
+                <button
+                  key={day.date}
+                  type="button"
+                  onClick={() => setSelectedDayDate(day.date)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => {
+                    e.preventDefault()
+                    if (draggedMissionId) { moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date) }
+                    setDraggedMissionId(null)
+                  }}
+                  className="relative flex w-full items-center gap-3 border-b border-[#f1f5f9] px-4 py-3 text-left transition-colors"
+                  style={{
+                    background: isToday ? '#0f172a' : isSelected ? '#f1f5f9' : 'transparent',
+                    borderRight: isSelected && !isToday ? '2px solid #0f172a' : undefined,
+                    minHeight: 64,
+                  }}
+                >
+                  <div className="shrink-0 text-center" style={{ minWidth: 32 }}>
+                    <div className="text-[8px] font-black uppercase tracking-[.12em]" style={{ color: isToday ? '#64748b' : '#94a3b8' }}>
+                      {new Date(day.date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase().slice(0, 3)}
+                    </div>
+                    <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 19, fontWeight: 700, color: isToday ? 'white' : '#0f172a', lineHeight: 1.1 }}>
+                      {parseInt(day.date.slice(-2), 10)}
+                    </div>
+                    {isToday && <div className="mt-px text-[7px] font-black uppercase tracking-[.1em] text-blue-300">Hoy</div>}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    {dayMains.length > 0 ? (
+                      <>
+                        <div className="text-[10px] font-bold" style={{ color: isToday ? '#94a3b8' : '#475569' }}>
+                          {dayMains.length} misión{dayMains.length !== 1 ? 'es' : ''}
+                        </div>
+                        <div className="mt-0.5 truncate text-[9px] font-semibold" style={{ color: isToday ? '#475569' : '#94a3b8' }}>
+                          {[...new Set(dayMains.map(m => m.subject.split(' ')[0]))].join(', ')}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-[10px] font-semibold" style={{ color: isToday ? '#475569' : '#cbd5e1' }}>Sin misiones</div>
+                    )}
+                  </div>
+                  {dayMains.length > 0 && (
+                    <div className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: themeFor(dayMains[0].subject).text }} />
+                  )}
+                </button>
+              )
+            })}
+          </aside>
+
+          {/* Right: selected day detail */}
+          <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+
+            {/* Day header */}
+            <div className="shrink-0 border-b border-[#e2e8f0] px-6 py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[8px] font-black uppercase tracking-[.16em] text-slate-400">
+                    {selectedDay?.isToday ? 'Hoy · ' : ''}{selectedDay?.label ?? ''}
+                  </p>
+                  <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.1, margin: '4px 0 0' }}>
+                    {selectedDay?.date ? new Date(selectedDay.date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase()) : ''}
+                  </h3>
+                  <p className="mt-1.5 text-[11px] font-semibold text-slate-400">
+                    {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} misiones principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
+                  </p>
+                </div>
+                <button
+                  onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(c => !c) }}
+                  className="inline-flex items-center gap-1.5 rounded border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50"
+                >
+                  <Plus size={13} /> Añadir aquí
+                </button>
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-                <Field label="Día"><select value={newMission.day} onChange={event => setNewMission({ ...newMission, day: event.target.value })} className="inputish">{orderedDraft.map(day => <option key={day.date} value={day.date}>{day.label}</option>)}</select></Field>
-                <Field label="Asignatura"><select value={newMission.subject} onChange={event => setNewMission({ ...newMission, subject: event.target.value, topic: '' })} className="inputish">{safeSubjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field>
-                <Field label="Tema"><select value={newMission.topic} onChange={event => setNewMission({ ...newMission, topic: event.target.value })} className="inputish"><option value="">Sugerido</option>{topics.map(topic => <option key={`${topic.subject}-${topic.sortOrder}`} value={topic.topic}>{topic.block} · {topic.topic}</option>)}</select></Field>
-                <Field label="Tipo"><select value={newMission.kind} onChange={event => setNewMission({ ...newMission, kind: event.target.value as MissionKind })} className="inputish">{kindOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
-                <Field label="Duración"><input type="number" min={5} max={90} value={newMission.minutes} onChange={event => setNewMission({ ...newMission, minutes: Number(event.target.value) })} className="inputish" /></Field>
-                <div className="flex items-end">
-                  <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> Añadir</button>
+            </div>
+
+            {/* Add mission panel */}
+            {missionPanelOpen && (
+              <div className="shrink-0 border-b border-[#e2e8f0] bg-[#fafaf9] px-6 py-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Añadir misión</p>
+                  <button onClick={() => setMissionPanelOpen(false)} className="rounded border border-[#e2e8f0] bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 transition hover:bg-slate-50">Cerrar</button>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field label="Día">
+                    <select value={newMission.day} onChange={e => setNewMission({ ...newMission, day: e.target.value })} className="inputish">
+                      {orderedDraft.map(d => <option key={d.date} value={d.date}>{d.label}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Asignatura">
+                    <select value={newMission.subject} onChange={e => setNewMission({ ...newMission, subject: e.target.value, topic: '' })} className="inputish">
+                      {safeSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Tema">
+                    <select value={newMission.topic} onChange={e => setNewMission({ ...newMission, topic: e.target.value })} className="inputish">
+                      <option value="">Sugerido</option>
+                      {topics.map(t => <option key={`${t.subject}-${t.sortOrder}`} value={t.topic}>{t.block} · {t.topic}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Tipo">
+                    <select value={newMission.kind} onChange={e => setNewMission({ ...newMission, kind: e.target.value as MissionKind })} className="inputish">
+                      {kindOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Duración (min)">
+                    <input type="number" min={5} max={90} value={newMission.minutes} onChange={e => setNewMission({ ...newMission, minutes: Number(e.target.value) })} className="inputish" />
+                  </Field>
+                  <div className="flex flex-col justify-end gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] font-black text-slate-600">
+                      <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
+                      Opcional / bonus
+                    </label>
+                    <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex items-center justify-center gap-1.5 rounded bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
+                      <Plus size={12} /> Añadir
+                    </button>
+                  </div>
                 </div>
               </div>
-              <label className="mt-3 inline-flex items-center gap-2 text-sm font-black text-slate-600"><input type="checkbox" checked={newMission.bonus} onChange={event => setNewMission({ ...newMission, bonus: event.target.checked })} /> Opcional / bonus</label>
-            </aside>
-          )}
+            )}
 
-          <section className="min-w-0 overflow-x-auto rounded-[28px] border border-blue-100 bg-white shadow-[0_18px_48px_rgba(37,99,235,0.08)]">
-            <div className="grid min-w-[1120px] grid-cols-7 divide-x divide-blue-100">
-              {orderedDraft.map(day => {
-                const mainMissions = day.missions.filter(mission => mission.role === 'main')
-                return (
-                  <article
-                    key={day.date}
-                    onDragOver={event => event.preventDefault()}
-                    onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}
-                    className={`min-h-[430px] bg-white ${day.isToday ? 'ring-2 ring-inset ring-blue-300' : ''}`}
-                  >
-                    <div className="sticky top-0 z-10 border-b border-blue-100 bg-white/95 px-3 py-3 backdrop-blur">
-                      <h3 className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{day.label.split(' ')[0]}</h3>
-                      <p className="mt-1 text-sm font-black text-slate-950">{day.label.replace(day.label.split(' ')[0], '').trim()}</p>
-                    </div>
-                    <div className="flex flex-col gap-2 p-2.5">
-                      {mainMissions.length ? mainMissions.map(mission => {
-                        const theme = themeFor(mission.subject)
-                        return (
-                          <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="group min-w-0 rounded-2xl border bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: theme.border }}>
-                            <div className="flex items-center gap-1.5">
-                              <button type="button" aria-label="Arrastrar para mover" className="shrink-0 cursor-grab rounded-lg p-1 text-slate-300 hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"><GripVertical size={12} /></button>
-                              <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{subjectAbbr(mission.subject)}</span>
-                              <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-violet-50 hover:text-violet-500"><Bookmark size={12} /></button>
-                              <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión" className="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
-                            </div>
-                            <p className="mt-1.5 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
-                            <p className="mt-1 text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min · {missionKindLabel(mission.kind, mission.missionType)}</p>
-                            <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-500 sm:hidden">
-                              {orderedDraft.map(optionDay => <option key={optionDay.date} value={optionDay.date}>Mover a {optionDay.label}</option>)}
-                            </select>
-                          </div>
-                        )
-                      }) : <p className="rounded-2xl border border-dashed border-blue-100 bg-blue-50/50 px-3 py-4 text-center text-[11px] font-bold text-slate-400">Sin misiones. Arrastra aquí.</p>}
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-          </section>
+            {/* Notice */}
+            {editorNotice && (
+              <div className="mx-6 mt-4 shrink-0 rounded border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] font-black text-amber-800">{editorNotice}</div>
+            )}
 
-          <section className="mt-5 rounded-[28px] border border-violet-100 bg-white p-4 shadow-[0_12px_34px_rgba(124,58,237,0.06)]">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-violet-500">Misiones extra / bonus</p>
-                <h3 className="text-base font-black text-slate-950">Opcionales para sumar ritmo sin romper el plan</h3>
+            {/* Scrollable missions area */}
+            <div
+              className="flex-1 overflow-y-auto px-6 py-5"
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); if (draggedMissionId && selectedDay) moveMission(draggedMissionId, selectedDay.date); setDraggedMissionId(null) }}
+            >
+              <p className="mb-3 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Misiones principales</p>
+              <div className="flex flex-col gap-3">
+                {(selectedDay?.missions.filter(m => m.role === 'main') ?? []).map(mission => {
+                  const theme = themeFor(mission.subject)
+                  return (
+                    <div
+                      key={mission.id}
+                      draggable
+                      onDragStart={() => setDraggedMissionId(mission.id)}
+                      onDragEnd={() => setDraggedMissionId(null)}
+                      className="rounded border border-[#e2e8f0] bg-white p-4 transition hover:border-[#cbd5e1]"
+                      style={{ cursor: 'grab' }}
+                    >
+                      <div className="mb-3 flex items-center gap-2">
+                        <GripVertical size={13} className="shrink-0 text-slate-300" />
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>
+                          <span className="h-1 w-1 shrink-0 rounded-full" style={{ background: theme.text }} />
+                          {mission.subject}
+                        </span>
+                        <span className="text-[9px] font-bold uppercase tracking-[.08em] text-slate-400">{missionKindLabel(mission.kind, mission.missionType)}</span>
+                        <div className="ml-auto flex items-center gap-0.5">
+                          <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="rounded p-1.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500"><Bookmark size={13} /></button>
+                          <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="rounded p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
+                        </div>
+                      </div>
+                      <p className="text-[13px] font-black leading-snug text-slate-900">{mission.title}</p>
+                      <div className="mt-2 flex items-center gap-4">
+                        <span className="text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min</span>
+                        <span className="text-[10px] font-semibold text-slate-400">+{mission.baseXP} XP</span>
+                      </div>
+                      <select value={selectedDay?.date ?? ''} onChange={e => moveMission(mission.id, e.target.value)} className="inputish mt-3">
+                        {orderedDraft.map(d => <option key={d.date} value={d.date}>Mover a {d.label}</option>)}
+                      </select>
+                    </div>
+                  )
+                })}
+
+                {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0) === 0 && (
+                  <button type="button" onClick={() => setMissionPanelOpen(true)} className="flex w-full items-center gap-3 rounded border-2 border-dashed border-[#e2e8f0] bg-[#fafaf9] px-5 py-4 text-left transition hover:border-slate-300">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#e2e8f0] bg-white text-[15px] font-black text-slate-400">+</span>
+                    <span className="text-[12px] font-bold text-slate-400">Sin misiones · Añadir una</span>
+                  </button>
+                )}
+                {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0) > 0 && (
+                  <button type="button" onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(true) }} className="flex w-full items-center gap-3 rounded border-2 border-dashed border-[#e2e8f0] bg-white px-5 py-3 text-left transition hover:border-slate-300">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[#e2e8f0] bg-[#fafaf9] text-[13px] font-black text-slate-400">+</span>
+                    <span className="text-[11px] font-bold text-slate-400">Añadir otra misión a este día</span>
+                  </button>
+                )}
               </div>
-              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-600">{bonusMissions.length} bonus</span>
-            </div>
-            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {bonusMissions.length ? bonusMissions.map(({ mission, day }) => {
-                const theme = themeFor(mission.subject)
-                return (
-                  <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="rounded-2xl border border-violet-100 bg-violet-50/40 p-3">
-                    <div className="flex items-start gap-2">
-                      <button type="button" aria-label="Arrastrar para mover bonus" className="cursor-grab rounded-lg p-1.5 text-violet-300 hover:bg-white hover:text-violet-500"><GripVertical size={13} /></button>
-                      <div className="min-w-0 flex-1">
-                        <span className="inline-block max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
-                        <p className="mt-1 line-clamp-2 text-xs font-black leading-snug text-slate-800">{mission.title}</p>
-                        <p className="mt-1 text-[10px] font-semibold text-violet-500">{day.label} · {mission.estimatedMinutes} min</p>
-                        <select value={day.date} onChange={event => moveMission(mission.id, event.target.value)} className="mt-2 w-full rounded-xl border border-violet-100 bg-white px-2 py-1.5 text-[11px] font-bold text-slate-500">
-                          {orderedDraft.map(optionDay => <option key={optionDay.date} value={optionDay.date}>Mover a {optionDay.label}</option>)}
-                        </select>
-                      </div>
-                      <div className="flex shrink-0 flex-col gap-1">
-                        <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="rounded-lg p-1.5 text-violet-500 transition-colors hover:bg-white"><Bookmark size={13} className="fill-violet-400" /></button>
-                        <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar misión bonus" className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
-                      </div>
-                    </div>
+
+              {/* Bonus */}
+              <div className="mt-8 border-t border-[#f1f5f9] pt-6">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Misiones extra · Bonus</p>
+                  <span className="rounded-full border border-[#e2e8f0] px-2.5 py-0.5 text-[9px] font-black text-slate-400">{bonusMissions.length} bonus</span>
+                </div>
+                {bonusMissions.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {bonusMissions.map(({ mission, day: bonusDay }) => {
+                      const theme = themeFor(mission.subject)
+                      return (
+                        <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="flex items-center gap-3 rounded border border-[#e2e8f0] bg-[#fafaf9] px-4 py-2.5" style={{ cursor: 'grab' }}>
+                          <GripVertical size={12} className="shrink-0 text-slate-300" />
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject.split(' ')[0]}</span>
+                          <p className="min-w-0 flex-1 truncate text-[12px] font-bold text-slate-700">{mission.title}</p>
+                          <span className="shrink-0 text-[10px] font-semibold text-slate-400">{bonusDay.label.split(',')[0]}</span>
+                          <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="shrink-0 rounded p-1.5 text-slate-300 transition hover:bg-white hover:text-[#0f172a]"><Bookmark size={13} /></button>
+                          <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="shrink-0 rounded p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
+                        </div>
+                      )
+                    })}
                   </div>
-                )
-              }) : <p className="rounded-2xl border border-dashed border-violet-100 bg-violet-50/50 px-4 py-4 text-sm font-bold text-violet-500">No hay bonus opcionales esta semana.</p>}
+                ) : (
+                  <p className="text-[11px] font-semibold text-[#cbd5e1]">No hay bonus opcionales esta semana.</p>
+                )}
+              </div>
             </div>
-          </section>
+          </main>
         </div>
 
-        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-blue-100 bg-white px-5 py-4">
-          <p className="text-xs font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={onClose} className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-500">Cancelar</button>
-            <button onClick={handleSave} className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-[0_6px_20px_rgba(37,99,235,0.20)] transition hover:bg-blue-700">Guardar cambios</button>
+        {/* ── Footer ── */}
+        <footer className="flex shrink-0 items-center justify-between gap-3 border-t-2 border-[#0f172a] bg-white px-6 py-4">
+          <p className="text-[11px] font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="rounded border border-[#e2e8f0] bg-white px-5 py-2.5 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">Cancelar</button>
+            <button onClick={handleSave} className="rounded bg-[#0f172a] px-5 py-2.5 text-[12px] font-black text-white transition hover:bg-slate-800">Guardar cambios</button>
           </div>
         </footer>
 
-        <style>{`.inputish{width:100%;border-radius:14px;border:1px solid #dbe7fb;background:#f8fbff;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#93c5fd;background:white}`}</style>
+        <style>{`.inputish{width:100%;border-radius:6px;border:1px solid #e2e8f0;background:#fafaf9;padding:9px 12px;font-size:13px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#94a3b8;background:white}`}</style>
       </motion.section>
     </motion.div>
   )

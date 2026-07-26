@@ -1469,7 +1469,7 @@ export default function CaminoCalendarClient() {
         </div>
         {/* Ticker */}
         <div style={{ background: '#eff6ff', borderBottom: '1px solid #dbeafe', padding: '6px 20px', display: 'flex', gap: 20, overflowX: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} /><span className="flame-anim">🔥</span> {streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />🔥 {streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />{completedMain}/{Math.min(totalMain, 5)} misiones esta semana</div>
           {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP esta semana</div>}
           {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial próximo · {upcomingPartial.subject}</div>}
@@ -1499,7 +1499,7 @@ export default function CaminoCalendarClient() {
               <div style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
               <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}><span className="flame-anim">🔥</span> {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
                 {fixedCurrentRow && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{fixedCurrentRow.rank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
               </div>
@@ -1778,7 +1778,7 @@ export default function CaminoCalendarClient() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
               <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 10, padding: '10px 12px' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{streak > 0 ? <><span className="flame-anim">🔥</span> {streak}</> : '—'}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</div>
                 <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Racha</div>
               </div>
               <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 10, padding: '10px 12px' }}>
@@ -2457,7 +2457,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
 
         <div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
           <div className="text-center">
-            <p className="text-lg font-black text-slate-900">{streak > 0 ? <><span className="flame-anim">🔥</span> {streak}</> : '—'}</p>
+            <p className="text-lg font-black text-slate-900">{streak > 0 ? `🔥 ${streak}` : '—'}</p>
             <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{streak > 0 ? 'días de racha' : 'Empieza hoy'}</p>
           </div>
           <div className="text-center">

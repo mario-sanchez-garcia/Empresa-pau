@@ -19,8 +19,6 @@ type Preferences = {
   defaultSubject: string
   correctionStyle: 'breve' | 'normal' | 'detallado'
   longAdvice: boolean
-  studyReminders: boolean
-  correctionEmails: boolean
 }
 
 const defaults: Preferences = {
@@ -31,8 +29,6 @@ const defaults: Preferences = {
   defaultSubject: 'mates',
   correctionStyle: 'normal',
   longAdvice: true,
-  studyReminders: true,
-  correctionEmails: false
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -192,7 +188,7 @@ export default function SettingsPage() {
             { label: 'Objetivo', value: `${preferences.dailyGoal}`, unit: 'min' },
             { label: 'Asignatura', value: SUBJECT_LABELS[preferences.defaultSubject] ?? 'Mates II', unit: '' },
             { label: 'Corrección', value: preferences.correctionStyle.charAt(0).toUpperCase() + preferences.correctionStyle.slice(1), unit: '' },
-            { label: 'Recordatorios', value: preferences.studyReminders ? 'Activos' : 'Inactivos', unit: '', green: preferences.studyReminders },
+            { label: 'Recordatorios', value: emailNotifications ? 'Activos' : 'Inactivos', unit: '', green: emailNotifications },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, padding: '12px 20px', borderRight: '1px solid #f1f5f9', textAlign: 'center' }}>
               <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>{s.label}</div>
@@ -255,15 +251,13 @@ export default function SettingsPage() {
               </select>
             </Field>
           </div>
-          <Toggle label="Recordatorios de estudio" description="Mantener activa tu rutina de Mi Plan." checked={preferences.studyReminders} onChange={v => setPreferences(cur => ({ ...cur, studyReminders: v }))} />
-          <Toggle label="Resumen de correcciones por email" description="Preparar un resumen periódico de tu progreso." checked={preferences.correctionEmails} onChange={v => setPreferences(cur => ({ ...cur, correctionEmails: v }))} />
-          <div style={{ display: 'flex', cursor: 'pointer', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid #f8fafc', marginBottom: 28 }}>
-            <span>
-              <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Recibir recordatorios diarios por email</strong>
-              <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: '#94a3b8' }}>Kairo te avisará cuando tengas misiones pendientes en Camino PAU.{emailNotifSaving ? ' Guardando…' : ''}</small>
-            </span>
-            <input type="checkbox" checked={emailNotifications} onChange={e => saveEmailNotifications(e.target.checked)} disabled={emailNotifSaving} style={{ width: 18, height: 18, accentColor: '#2563eb', flexShrink: 0 }} />
-          </div>
+          <Toggle
+            label={`Recordatorios de estudio por email${emailNotifSaving ? ' · Guardando…' : ''}`}
+            description="Kairo te avisará cuando tengas misiones pendientes en Camino PAU."
+            checked={emailNotifications}
+            onChange={v => saveEmailNotifications(v)}
+          />
+          <div style={{ marginBottom: 28 }} />
 
           {/* Personalización IA */}
           <Section label="Personalización IA" />

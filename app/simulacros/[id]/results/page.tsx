@@ -52,8 +52,10 @@ export default function SimulacroResultsPage() {
 
   const result = record?.resultado_json ?? {}
   const correctionFailed = Boolean(result.correction_error || result.estado_correccion === 'error')
+  // Use resultado_json.nota_final as the authoritative grade source.
+  // Falling back to the DB column risks showing 0 (DB default) before correction runs.
   const nota = safeNumber(result.nota_final ?? record?.nota_final, 0)
-  const hasGrade = Boolean(record) && !correctionFailed && isFiniteNumber(result.nota_final ?? record?.nota_final)
+  const hasGrade = Boolean(record) && !correctionFailed && isFiniteNumber(result.nota_final) && (result.nota_final as number) > 0
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
 
   // Count-up animation when record loads

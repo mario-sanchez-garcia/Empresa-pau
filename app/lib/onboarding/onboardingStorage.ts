@@ -17,6 +17,7 @@ export interface OnboardingData {
   weeklyStudyDays: string | null
   weeklyStudyDaysValue: number | null
   completedAt: string | null
+  lastStep: string | null
 }
 
 const KEY = 'kairo_onboarding_v1'
@@ -60,5 +61,6 @@ function emptyOnboarding(): OnboardingData {
     weeklyStudyDays: null,
     weeklyStudyDaysValue: null,
     completedAt: null,
+    lastStep: null,
   }
 }

@@ -136,6 +136,25 @@ export default function OnboardingFlow() {
   const [dbInstitutes, setDbInstitutes] = useState<string[]>([])
   const generateRetriesRef = useRef(0)
 
+  // On mount: redirect already-completed users; restore last step for interrupted sessions
+  useEffect(() => {
+    const saved = loadOnboarding()
+    if (saved.completedAt) {
+      router.replace('/camino')
+      return
+    }
+    const savedStep = saved.lastStep as Step | null
+    if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
+      setStep(savedStep)
+      if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist current step so interrupted sessions can resume
+  useEffect(() => {
+    if (step !== 'saving' && step !== 'done') saveOnboarding({ lastStep: step })
+  }, [step])
+
   const centers = useMemo(
     () => data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : [],
     [data.community]

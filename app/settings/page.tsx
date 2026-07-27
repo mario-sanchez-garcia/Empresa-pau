@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Camera, LogOut, Save, X } from 'lucide-react'
+import { Camera, LogOut, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
@@ -52,6 +52,10 @@ export default function SettingsPage() {
   const [saveError, setSaveError] = useState('')
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [emailNotifSaving, setEmailNotifSaving] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -102,17 +106,64 @@ export default function SettingsPage() {
     setEmailNotifSaving(false)
   }
 
-  function save() {
+  async function save() {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
       window.dispatchEvent(new Event(CHANGE_EVENT))
       setSaveError('')
       setSaved(true)
       window.setTimeout(() => setSaved(false), 2200)
+      if (preferences.displayName.trim()) {
+        const session = await supabase.auth.getSession()
+        const token = session.data.session?.access_token
+        if (token) {
+          fetch('/api/profile', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ display_name: preferences.displayName.trim() }),
+          }).catch(() => {})
+        }
+      }
     } catch {
       setSaved(false)
       setSaveError('No se han podido guardar los cambios en este dispositivo. Prueba con una foto más pequeña.')
     }
+  }
+
+  async function deleteAccount() {
+    if (deleteConfirm !== 'BORRAR') return
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) {
+        setDeleteError('No se ha podido verificar la sesión. Vuelve a iniciar sesión.')
+        setDeleting(false)
+        return
+      }
+      const res = await fetch('/api/account/delete', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        await supabase.auth.signOut()
+        router.push('/login')
+      } else {
+        const json = await res.json().catch(() => null) as { error?: string } | null
+        setDeleteError(json?.error ?? 'No se ha podido borrar la cuenta. Contacta con soporte.')
+        setDeleting(false)
+      }
+    } catch {
+      setDeleteError('No se ha podido borrar la cuenta. Revisa la conexión y vuelve a intentarlo.')
+      setDeleting(false)
+    }
+  }
+
+  function openDeleteModal() {
+    setDeleteConfirm('')
+    setDeleteError('')
+    setShowDeleteModal(true)
   }
 
   async function logout() {
@@ -276,9 +327,14 @@ export default function SettingsPage() {
 
         {/* Save bar */}
         <div style={{ background: 'white', borderTop: '2px solid #0f172a', padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, gap: 12 }}>
-          <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
-            <LogOut size={14} /> Cerrar sesión
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <LogOut size={14} /> Cerrar sesión
+            </button>
+            <button type="button" onClick={openDeleteModal} style={{ padding: '9px 18px', borderRadius: 999, background: '#fff7ed', color: '#c2410c', fontSize: 12, fontWeight: 900, border: '1px solid #fed7aa', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <Trash2 size={14} /> Borrar cuenta
+            </button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
             {saveError && <div style={{ maxWidth: 360, borderRadius: 10, border: '1px solid #fee2e2', background: '#fff5f5', padding: '8px 14px', fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{saveError}</div>}
             <button type="button" onClick={save} style={{ padding: '10px 22px', borderRadius: 999, background: '#0f172a', color: 'white', fontSize: 12, fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -287,6 +343,44 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(15,23,42,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" style={{ width: 'min(460px, 100%)', borderRadius: 24, background: 'white', boxShadow: '0 24px 70px rgba(15,23,42,.26)', border: '1px solid #fee2e2', overflow: 'hidden' }}>
+            <div style={{ padding: '22px 24px 18px', borderBottom: '1px solid #fee2e2', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+              <div>
+                <div style={{ width: 42, height: 42, borderRadius: 16, background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c2410c', marginBottom: 12 }}>
+                  <Trash2 size={20} />
+                </div>
+                <h2 id="delete-account-title" style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: '-.04em', color: '#0f172a' }}>Borrar cuenta</h2>
+                <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.55, fontWeight: 600, color: '#64748b' }}>Esta acción eliminará tu cuenta y los datos asociados de Kairo. No se puede deshacer.</p>
+              </div>
+              <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} aria-label="Cerrar" style={{ width: 34, height: 34, borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', color: '#64748b', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={16} />
+              </button>
+            </div>
+            <div style={{ padding: 24 }}>
+              <label>
+                <span style={{ display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: '#991b1b' }}>Escribe BORRAR para confirmar</span>
+                <input
+                  value={deleteConfirm}
+                  onChange={e => setDeleteConfirm(e.target.value)}
+                  disabled={deleting}
+                  placeholder="BORRAR"
+                  style={{ ...inputStyle, borderColor: deleteConfirm && deleteConfirm !== 'BORRAR' ? '#fecaca' : '#fed7aa', background: '#fff7ed' }}
+                />
+              </label>
+              {deleteError && <div style={{ marginTop: 12, borderRadius: 12, border: '1px solid #fecaca', background: '#fff5f5', padding: '10px 12px', fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{deleteError}</div>}
+              <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} style={{ padding: '10px 16px', borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', color: '#475569', fontSize: 12, fontWeight: 900, cursor: deleting ? 'not-allowed' : 'pointer' }}>Cancelar</button>
+                <button type="button" onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'BORRAR'} style={{ padding: '10px 16px', borderRadius: 999, border: 'none', background: deleteConfirm === 'BORRAR' ? '#dc2626' : '#fecaca', color: 'white', fontSize: 12, fontWeight: 900, cursor: deleting || deleteConfirm !== 'BORRAR' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <Trash2 size={14} /> {deleting ? 'Borrando…' : 'Borrar definitivamente'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

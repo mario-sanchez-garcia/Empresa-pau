@@ -38,6 +38,7 @@ type ZonaMode = 'study' | 'create' | 'space'
 interface FlashcardsProps {
   userId: string
   initialCards: Flashcard[]
+  externalSubject?: ZonaSubject | 'all'
 }
 
 const MODES: { key: ZonaMode; icon: ReactNode; title: string; text: string }[] = [
@@ -46,7 +47,7 @@ const MODES: { key: ZonaMode; icon: ReactNode; title: string; text: string }[] =
   { key: 'space', icon: <Layers3 size={15} />, title: 'Mi espacio', text: 'Consulta tus tarjetas guardadas.' },
 ]
 
-export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
+export default function Flashcards({ userId, initialCards, externalSubject }: FlashcardsProps) {
   const [cards, setCards] = useState<Flashcard[]>(initialCards)
   const [mode, setMode] = useState<ZonaMode | null>(null)
   const [subject, setSubject] = useState<ZonaSubject | 'all'>('all')
@@ -94,6 +95,11 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDragX(0)
   }, [studySignature])
+
+  useEffect(() => {
+    if (externalSubject != null) selectSubject(externalSubject)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalSubject])
 
   function resetDeck() {
     setReviewQueue(studyCards.map(card => card.id))
@@ -299,6 +305,8 @@ export default function Flashcards({ userId, initialCards }: FlashcardsProps) {
                     <CardFace subject={current.subject} topic={current.topic} label="Explicación" text={current.back} back />
                   </div>
                 </div>
+              ) : studyCards.length > 0 ? (
+                <DeckCompleteState onReset={resetDeck} count={reviewed} />
               ) : (
                 <EmptyStudyState />
               )}
@@ -460,6 +468,21 @@ function SavedCard({ card, onDelete }: { card: Flashcard; onDelete: () => void }
         </button>
       </div>
     </article>
+  )
+}
+
+function DeckCompleteState({ onReset, count }: { onReset: () => void; count: number }) {
+  return (
+    <div style={{ display: 'grid', minHeight: 320, placeItems: 'center', border: '1px solid #bbf7d0', borderRadius: 4, background: '#f0fdf4', padding: 24, textAlign: 'center' }}>
+      <div>
+        <CheckCircle2 style={{ margin: '0 auto 10px', color: '#059669', display: 'block' }} size={32} />
+        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>¡Mazo completado!</h3>
+        <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginBottom: 16 }}>{count} tarjeta{count !== 1 ? 's' : ''} repasada{count !== 1 ? 's' : ''}.</p>
+        <button onClick={onReset} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#059669', color: 'white', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>
+          <RotateCcw size={13} /> Repetir mazo
+        </button>
+      </div>
+    </div>
   )
 }
 

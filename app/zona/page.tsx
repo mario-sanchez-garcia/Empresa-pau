@@ -12,22 +12,23 @@ import type { Flashcard, ZonaUser } from '@/components/zona/types'
 
 const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
 
-const SUBJ_CHIPS = [
-  { label: 'Todas', color: '#94a3b8' },
-  { label: 'Mates II', color: '#2563eb' },
-  { label: 'Mates CCSS', color: '#7c3aed' },
-  { label: 'Física', color: '#CA8A04' },
-  { label: 'Química', color: '#ea580c' },
-  { label: 'Biología', color: '#2f6f4e' },
-  { label: 'Historia', color: '#92400e' },
-  { label: 'Lengua', color: '#0284C7' },
-  { label: 'Inglés', color: '#0f766e' },
+const SUBJ_CHIPS: { label: string; id: 'all' | 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'historia' | 'lengua' | 'ingles'; color: string }[] = [
+  { label: 'Todas',       id: 'all',               color: '#94a3b8' },
+  { label: 'Mates II',    id: 'mates',             color: '#2563eb' },
+  { label: 'Mates CCSS',  id: 'matematicas_ccss',  color: '#7c3aed' },
+  { label: 'Física',      id: 'fisica',            color: '#CA8A04' },
+  { label: 'Química',     id: 'quimica',           color: '#ea580c' },
+  { label: 'Biología',    id: 'biologia',          color: '#2f6f4e' },
+  { label: 'Historia',    id: 'historia',          color: '#92400e' },
+  { label: 'Lengua',      id: 'lengua',            color: '#0284C7' },
+  { label: 'Inglés',      id: 'ingles',            color: '#0f766e' },
 ]
 
 export default function ZonaPage() {
   const [user, setUser] = useState<ZonaUser | null>(null)
   const [cards, setCards] = useState<Flashcard[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeSubject, setActiveSubject] = useState<'all' | 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'historia' | 'lengua' | 'ingles'>('all')
   const router = useRouter()
 
   useEffect(() => {
@@ -70,12 +71,19 @@ export default function ZonaPage() {
 
         {/* Subject chips band */}
         <div style={{ background: 'white', borderBottom: '2px solid #0f172a', display: 'flex', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none', padding: '0 20px' }}>
-          {SUBJ_CHIPS.map((chip, i) => (
-            <div key={chip.label} style={{ padding: '12px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, borderBottom: i === 0 ? '3px solid #2563eb' : '3px solid transparent', marginBottom: -2, fontSize: 11, fontWeight: 700, color: i === 0 ? '#0f172a' : '#64748b' }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: chip.color, flexShrink: 0 }} />
-              {chip.label}
-            </div>
-          ))}
+          {SUBJ_CHIPS.map((chip) => {
+            const isActive = activeSubject === chip.id
+            return (
+              <button
+                key={chip.label}
+                onClick={() => setActiveSubject(chip.id)}
+                style={{ padding: '12px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, borderBottom: isActive ? '3px solid #2563eb' : '3px solid transparent', marginBottom: -2, fontSize: 11, fontWeight: 700, color: isActive ? '#0f172a' : '#64748b', background: 'none', border: 'none', borderBottomStyle: 'solid', cursor: 'pointer' }}
+              >
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: chip.color, flexShrink: 0 }} />
+                {chip.label}
+              </button>
+            )
+          })}
         </div>
 
         {/* Tab nav */}
@@ -92,7 +100,7 @@ export default function ZonaPage() {
 
         {/* Content */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
-          <Flashcards userId={user.id} initialCards={cards} />
+          <Flashcards userId={user.id} initialCards={cards} externalSubject={activeSubject} />
         </main>
       </div>
     </div>

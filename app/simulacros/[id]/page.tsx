@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { AlertTriangle, BookOpenCheck, Camera, CheckCircle2, ClipboardList, Flag, PenLine, PlayCircle, Send, TimerReset, Trash2 } from 'lucide-react'
+import { AlertTriangle, Camera, CheckCircle2, Flag, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -273,73 +273,112 @@ export default function SimulacroActivoPage() {
   if (!examStarted) {
     const community = record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'
     const totalPoints = record.bloques.reduce((sum, block) => sum + Number(block.puntuacion || 0), 0)
-    const Icon = cfg.icon
+    const BLOCK_COLORS = ['#2563eb', '#7c3aed', '#0369a1', '#15803d', '#c2410c', '#b45309', '#831843']
 
     return (
       <SimulacroShell title="Simulacro PAU" subtitle="Antes de empezar">
-        <div className="mx-auto grid max-w-6xl gap-6">
-          <section
-            className="pau-reveal overflow-hidden rounded-[28px] border p-8 max-md:p-5"
+        <div className="mx-auto max-w-5xl">
+          <div
+            className="pau-reveal overflow-hidden rounded-[20px]"
             style={{
-              background: `radial-gradient(circle at 84% 8%, ${cfg.color}18, transparent 34%), linear-gradient(145deg, #ffffff 0%, ${cfg.light} 100%)`,
-              borderColor: `${cfg.color}24`,
-              boxShadow: `0 24px 70px ${cfg.color}14, 0 4px 18px rgba(15,23,42,0.06)`,
+              display: 'grid',
+              gridTemplateColumns: '240px 1fr',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 24px 64px rgba(15,23,42,0.16), 0 4px 20px rgba(15,23,42,0.08)',
             }}
           >
-            <div className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+            {/* ── LEFT SIDEBAR ── */}
+            <div style={{ background: '#060e1e', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 520, borderRight: '1px solid rgba(255,255,255,0.04)' }}>
               <div>
-                <div
-                  className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl text-white"
-                  style={{ background: `linear-gradient(135deg, ${cfg.color}, #60a5fa)`, boxShadow: `0 16px 34px ${cfg.color}2e` }}
-                >
-                  <Icon size={27} />
+                <p style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.3em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 32 }}>Camino PAU</p>
+                <div style={{ fontSize: 80, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', lineHeight: 0.88, marginBottom: 6 }}>
+                  {record.bloques.length}
                 </div>
-                <p className="mb-3 text-[11px] font-black uppercase tracking-widest" style={{ color: cfg.color }}>Experiencia de examen real</p>
-                <h2 className="text-5xl font-black tracking-tight max-md:text-4xl" style={{ color: '#0f172a', letterSpacing: '-0.055em', lineHeight: 0.98 }}>
-                  Simulacro PAU
-                </h2>
-                <p className="mt-5 max-w-xl text-base font-semibold leading-8" style={{ color: '#64748b' }}>
-                  Trabaja en condiciones de examen. Durante el simulacro verás el tiempo, podrás navegar entre ejercicios y marcar dudas para revisarlas antes de entregar.
-                </p>
-                <div className="mt-6 rounded-2xl border p-4 text-sm font-bold" style={{ background: 'rgba(255,255,255,0.76)', borderColor: '#dbe7fb', color: '#334155' }}>
-                  La corrección se mostrará al entregar.
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 36 }}>
+                  ejercicios
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {([
+                    { label: 'Asignatura', value: cfg.label, blue: true },
+                    { label: 'Comunidad', value: community, blue: false },
+                    { label: 'Duración', value: `${durationMinutes} min`, blue: false },
+                    { label: 'Puntuación', value: totalPoints ? `${formatCompact(totalPoints)} pts` : '10 pts', blue: false },
+                    { label: 'Dificultad', value: record.dificultad_real ?? record.dificultad, blue: false },
+                  ] as { label: string; value: string; blue: boolean }[]).map(({ label, value, blue }) => (
+                    <div key={label}>
+                      <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 3 }}>{label}</div>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: blue ? '#3b82f6' : '#64748b', letterSpacing: '-0.01em' }}>{value}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="grid gap-4">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <StartStat icon={<BookOpenCheck size={18} />} label="Asignatura" value={cfg.label} color={cfg.color} />
-                  <StartStat icon={<ClipboardList size={18} />} label="Comunidad" value={community} color={cfg.color} />
-                  <StartStat icon={<TimerReset size={18} />} label="Duración" value={`${durationMinutes} min`} color={cfg.color} />
-                  <StartStat icon={<PenLine size={18} />} label="Ejercicios" value={`${record.bloques.length} ejercicios`} color={cfg.color} />
-                </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 8, background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.18)', fontSize: 9, fontWeight: 900, color: '#3b82f6', letterSpacing: '.06em' }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', display: 'inline-block' }} />
+                Kairo IA
+              </div>
+            </div>
 
-                <div className="rounded-3xl border bg-white/78 p-5 shadow-[0_18px_46px_rgba(37,99,235,0.08)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    <Badge color={cfg.color}>{record.dificultad_real ?? record.dificultad}</Badge>
-                    {record.asignatura !== 'lengua' && <Badge color="#475569">{optionSummaryForRecord(record)}</Badge>}
-                    <Badge color="#2563eb">{totalPoints ? `${formatCompact(totalPoints)} pts` : 'Criterios oficiales'}</Badge>
-                  </div>
-                  <div className="grid gap-2">
-                    {record.bloques.map((block, index) => (
-                      <div key={block.id} className="flex items-center justify-between gap-3 rounded-2xl border px-4 py-3" style={{ borderColor: '#e2e8f0', background: '#f8fbff' }}>
-                        <span className="text-sm font-black" style={{ color: '#0f172a' }}>Ejercicio {index + 1}</span>
-                        <span className="truncate text-right text-xs font-bold" style={{ color: '#64748b' }}>{block.tema} · {block.puntuacion} pts</span>
+            {/* ── RIGHT MAIN ── */}
+            <div style={{ background: '#fff', display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
+              <div style={{ padding: '36px 36px 24px', borderBottom: '1px solid #f1f5f9' }}>
+                <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 8 }}>
+                  Simulacro PAU · Antes de empezar
+                </p>
+                <h2 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', lineHeight: 0.95, marginBottom: 12 }}>
+                  Simulacro<br />real
+                </h2>
+                <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.75, maxWidth: 400 }}>
+                  Trabaja en condiciones de examen. Verás el tiempo, podrás navegar entre bloques y marcar dudas para revisarlas antes de entregar.
+                </p>
+              </div>
+
+              {/* Body: exercise list */}
+              <div style={{ padding: '22px 36px', flex: 1 }}>
+                <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 10 }}>
+                  Estructura del examen
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  {record.bloques.map((block, index) => (
+                    <div
+                      key={block.id}
+                      style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fafbfc' }}
+                    >
+                      <div style={{ background: BLOCK_COLORS[index % BLOCK_COLORS.length] }} />
+                      <div style={{ padding: '12px 14px' }}>
+                        <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 2 }}>
+                          Bloque {String(index + 1).padStart(2, '0')}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>{block.tema}</div>
                       </div>
-                    ))}
-                  </div>
+                      <div style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: '#94a3b8', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                        {block.puntuacion} pts
+                      </div>
+                    </div>
+                  ))}
                 </div>
+                <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#cbd5e1', display: 'inline-block', flexShrink: 0 }} />
+                  La corrección se mostrará al entregar el examen.
+                </div>
+              </div>
 
+              {/* Footer */}
+              <div style={{ borderTop: '2px solid #0f172a', padding: '18px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>
+                  {record.asignatura !== 'lengua' ? `${optionSummaryForRecord(record)} · ` : ''}{record.dificultad_real ?? record.dificultad}
+                </p>
                 <button
                   onClick={startExam}
                   className="campus-primary"
-                  style={{ width: '100%', borderRadius: 18, padding: '16px 24px', fontSize: 16, gap: 10, background: `linear-gradient(135deg, ${cfg.color}, #60a5fa)`, boxShadow: `0 18px 38px ${cfg.color}2f` }}
+                  style={{ padding: '12px 26px', borderRadius: 10, fontSize: 13, gap: 8, background: '#0f172a', boxShadow: '0 6px 18px rgba(15,23,42,0.18)' }}
                 >
-                  <PlayCircle size={20} />Empezar simulacro
+                  Empezar simulacro →
                 </button>
               </div>
             </div>
-          </section>
+          </div>
         </div>
       </SimulacroShell>
     )
@@ -798,17 +837,6 @@ export default function SimulacroActivoPage() {
   )
 }
 
-function StartStat({ icon, label, value, color }: { icon: ReactNode; label: string; value: string; color: string }) {
-  return (
-    <div className="rounded-3xl border bg-white/80 p-5 shadow-[0_16px_42px_rgba(37,99,235,0.08)] backdrop-blur-xl" style={{ borderColor: '#dbe7fb' }}>
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: `${color}12`, color }}>
-        {icon}
-      </div>
-      <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>{label}</p>
-      <p className="mt-1 text-lg font-black" style={{ color: '#0f172a' }}>{value}</p>
-    </div>
-  )
-}
 
 function Badge({ children, color }: { children: ReactNode; color: string }) {
   return (

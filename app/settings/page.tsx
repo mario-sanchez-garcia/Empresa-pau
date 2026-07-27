@@ -274,6 +274,7 @@ export default function SettingsPage() {
                 <option value="preparacion-pau">Preparación PAU</option>
                 <option value="otro">Otro</option>
               </select>
+              <Hint>Solo orientativo: ahora mismo no cambia el algoritmo de Camino.</Hint>
             </Field>
           </div>
 
@@ -287,6 +288,7 @@ export default function SettingsPage() {
                 <option value={60}>60 minutos</option>
                 <option value={90}>90 minutos</option>
               </select>
+              <Hint>Solo orientativo: no ajusta todavía la carga de misiones.</Hint>
             </Field>
             <Field label="Asignatura por defecto">
               <select value={preferences.defaultSubject} onChange={e => setPreferences(cur => ({ ...cur, defaultSubject: e.target.value }))} style={inputStyle}>
@@ -403,6 +405,10 @@ function Field({ label, children }: { label: string, children: React.ReactNode }
       {children}
     </label>
   )
+}
+
+function Hint({ children }: { children: React.ReactNode }) {
+  return <small style={{ display: 'block', marginTop: 6, fontSize: 10, lineHeight: 1.4, color: '#94a3b8', fontWeight: 650 }}>{children}</small>
 }
 
 function Toggle({ label, description, checked, onChange }: { label: string, description: string, checked: boolean, onChange: (v: boolean) => void }) {

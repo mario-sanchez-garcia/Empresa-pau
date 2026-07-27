@@ -134,16 +134,18 @@ export async function GET(request: NextRequest) {
   const entries = sortEntries(baseRows.map(row => {
     const userId = String(row.user_id)
     const isCurrentUser = userId === user.id
+    const publicName = displayName(profiles.get(userId), '')
+    if (!isCurrentUser && !publicName) return null
     return {
       id: publicId(userId),
-      name: isCurrentUser ? 'Tú' : displayName(profiles.get(userId), 'Alumno PAU'),
+      name: isCurrentUser ? 'Tú' : publicName,
       community: isCurrentUser
         ? cleanCommunity(communities.get(userId) ?? requestedCommunity)
         : cleanCommunity(communities.get(userId) ?? profiles.get(userId)?.community),
       xp: Number(row.xp_total ?? 0),
       isCurrentUser,
     }
-  }))
+  }).filter((entry): entry is Omit<LeaderboardEntry, 'rank'> => entry !== null))
 
   return NextResponse.json(buildPayload(entries, cleanCommunity(communities.get(user.id) ?? requestedCommunity ?? currentProfile?.community)))
 }

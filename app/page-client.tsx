@@ -4127,7 +4127,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
                           {items.map((item, i) => {
                             const itemCfg = ASIGNATURAS[item.asignatura as Asignatura] ?? ASIGNATURAS.historia
-                            const scoreRatio = item.nota !== null && item.nota_maxima ? item.nota / item.nota_maxima * 10 : null
+                            const hasScore = item.nota != null && item.nota_maxima != null && item.nota_maxima > 0
+                            const scoreRatio = hasScore ? item.nota / item.nota_maxima * 10 : null
                             return (
                               <div
                                 key={i}
@@ -4139,10 +4140,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                                 <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
                                     <div style={{ fontSize: 13, fontWeight: 900, color: '#111827', lineHeight: 1.25, flex: 1, minWidth: 0, paddingRight: 8 }}>{nombreAsignatura(item.asignatura)}</div>
-                                    {scoreRatio !== null && (
+                                    {scoreRatio !== null ? (
                                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                         <span style={{ fontSize: 34, fontWeight: 900, letterSpacing: '-.05em', lineHeight: 1, color: colorNota(scoreRatio) }}>{item.nota}</span>
                                         <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>/{item.nota_maxima}</span>
+                                      </div>
+                                    ) : (
+                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <span style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-.03em', lineHeight: 1, color: '#cbd5e1' }}>—</span>
                                       </div>
                                     )}
                                   </div>
@@ -4201,10 +4206,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   <div style={{ fontSize: '12px', color: WARM.softText, marginTop: '2px' }}>{new Date(itemSeleccionado.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {itemSeleccionado.nota !== null && (
+                  {itemSeleccionado.nota != null && itemSeleccionado.nota_maxima != null && itemSeleccionado.nota_maxima > 0 ? (
                     <div>
                       <span style={{ fontSize: '24px', fontWeight: 800, color: colorNota(itemSeleccionado.nota / itemSeleccionado.nota_maxima * 10) }}>{itemSeleccionado.nota}</span>
                       <span style={{ fontSize: '13px', color: WARM.softText }}>/{itemSeleccionado.nota_maxima}</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <span style={{ fontSize: '24px', fontWeight: 800, color: '#cbd5e1' }}>—</span>
                     </div>
                   )}
                   <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>

@@ -28,9 +28,10 @@ export default function Login() {
   // ── Google OAuth ──────────────────────────────────────────────────────────────
   const handleGoogleLogin = async () => {
     setCargando(true)
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${base}/auth/callback` },
     })
     if (error) {
       setMensaje('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')

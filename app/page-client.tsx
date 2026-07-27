@@ -1673,7 +1673,7 @@ function cambiarTipo(t: Tipo) {
   async function streamCorrectionRequest(
     accessToken: string,
     prompt: string,
-    options: { includeImage: boolean; appendTo?: string; blockId?: string; sessionId?: string }
+    options: { includeImage: boolean; appendTo?: string; blockId?: string; sessionId?: string; creditKey?: string }
   ) {
     const res = await fetch('/api/chat?stream=1', {
       method: 'POST',
@@ -1684,7 +1684,8 @@ function cambiarTipo(t: Tipo) {
         imagenTipo: options.includeImage && modo === 'imagen' ? imagenTipo : null,
         correctionMode: 'chunked_correction',
         correctionBlock: options.blockId ?? null,
-        correctionSessionId: options.sessionId ?? null
+        correctionSessionId: options.sessionId ?? null,
+        creditKey: options.creditKey ?? null
       })
     })
 
@@ -1862,7 +1863,8 @@ Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown lim
   async function runChunkedCorrection(
     accessToken: string,
     chunks: ReturnType<typeof buildChunkedCorrectionPrompts>,
-    sessionId: string
+    sessionId: string,
+    creditKey: string
   ) {
     const completed: string[] = []
     const failedOptional: string[] = []
@@ -1882,7 +1884,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         includeImage: true,
         appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
         blockId: chunk.id,
-        sessionId
+        sessionId,
+        creditKey
       })
 
       if (result.truncated || !result.text.trim()) {
@@ -1892,7 +1895,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           includeImage: true,
           appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
           blockId: `${chunk.id}:retry`,
-          sessionId
+          sessionId,
+          creditKey
         })
         setContinuingCorrection(false)
       }
@@ -1938,6 +1942,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       const p = preguntaActiva as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
       const correctionSessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const correctionCreditKey = `exam:${ccaa}:${asignatura}:${examenActivo?.año ?? anioSeleccionado}:${tipo}:${opcionMostrada}:${p?.id ?? preguntaActivaStorageId ?? bloqueActivoLabel ?? 'sin-id'}`
       const chunks = buildChunkedCorrectionPrompts({
         subject: nombreAsignatura(asignatura),
         subjectId: asignatura,
@@ -1957,7 +1962,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
           : respuesta
       })
-      const chunkedCorrection = await runChunkedCorrection(accessToken, chunks, correctionSessionId)
+      const chunkedCorrection = await runChunkedCorrection(accessToken, chunks, correctionSessionId, correctionCreditKey)
       const accumulated = chunkedCorrection.markdown
       const isTruncated = chunkedCorrection.truncated
       if (!accumulated) {

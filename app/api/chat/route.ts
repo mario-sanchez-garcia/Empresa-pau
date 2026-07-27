@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
-import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
+import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 
 const client = new Anthropic()
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const wantsStream = searchParams.get('stream') === '1'
 
-  const { pregunta, imagen, imagenTipo, imagenes, correctionMode, correctionBlock, correctionSessionId } = await request.json()
+  const { pregunta, imagen, imagenTipo, imagenes, correctionMode, correctionBlock, correctionSessionId, creditKey } = await request.json()
 
   const imagePayloadSize =
     (typeof imagen === 'string' ? imagen.length : 0) +
@@ -91,7 +91,8 @@ export async function POST(request: NextRequest) {
     promptChars: typeof pregunta === 'string' ? pregunta.length : null,
     correctionMode: typeof correctionMode === 'string' ? correctionMode : null,
     correctionBlock: typeof correctionBlock === 'string' ? correctionBlock : null,
-    correctionSessionId: typeof correctionSessionId === 'string' ? correctionSessionId : null
+    correctionSessionId: typeof correctionSessionId === 'string' ? correctionSessionId : null,
+    creditKey: typeof creditKey === 'string' && creditKey.trim() ? creditKey.trim().slice(0, 180) : null
   }
   const internalUser = isInternalUser(authContext.user.email)
 
@@ -110,7 +111,9 @@ export async function POST(request: NextRequest) {
     const planLimits = getCaminoPlanLimits(billing.planId)
 
     if (action === 'image_correction') {
-      const monthlyPhotos = await getMonthlyActionCount(authContext.user.id, ['image_correction'])
+      const monthlyPhotos = metadata.creditKey
+        ? await getMonthlyUniqueActionCount(authContext.user.id, ['image_correction'])
+        : await getMonthlyActionCount(authContext.user.id, ['image_correction'])
       if (monthlyPhotos >= planLimits.photosPerMonth) {
         return NextResponse.json(
           { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes.`, code: BILLING_BLOCK_CODE },
@@ -118,7 +121,9 @@ export async function POST(request: NextRequest) {
         )
       }
     } else {
-      const monthlyChats = await getMonthlyActionCount(authContext.user.id, ['chat'])
+      const monthlyChats = metadata.creditKey
+        ? await getMonthlyUniqueActionCount(authContext.user.id, ['chat'])
+        : await getMonthlyActionCount(authContext.user.id, ['chat'])
       if (monthlyChats >= planLimits.correctionsPerMonth) {
         return NextResponse.json(
           { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes.`, code: BILLING_BLOCK_CODE },
@@ -290,4 +295,3 @@ function rateLimitResponse(action: RateLimitAction, result: { limit: number; cou
     }
   )
 }
-

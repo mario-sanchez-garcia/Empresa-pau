@@ -134,6 +134,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
         body: JSON.stringify({
           pregunta: prompt,
           imagenes: modo === 'imagen' ? imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })) : [],
+          creditKey: `cat-fisica:${examen.id}:${ejercicio.numero}:${apartado?.letra ?? 'unico'}:${option}`,
         }),
       })
       const data = await response.json()

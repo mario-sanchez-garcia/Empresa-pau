@@ -193,6 +193,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
           pregunta: prompt,
           imagen: modo === 'imagen' ? imagen : null,
           imagenTipo: modo === 'imagen' ? imagenTipo : null,
+          creditKey: `cat-historia:${contexto}:${ejercicio.numero}`,
         }),
       })
       const data = await response.json()

@@ -655,7 +655,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ pregunta: prompt, imagen: answerMode === 'imagen' ? image?.data : null, imagenTipo: answerMode === 'imagen' ? image?.type : null })
+        body: JSON.stringify({
+          pregunta: prompt,
+          imagen: answerMode === 'imagen' ? image?.data : null,
+          imagenTipo: answerMode === 'imagen' ? image?.type : null,
+          creditKey: `camino:${key}:${selectedV2Card?.sort_order ?? currentTopic.v2SortOrder ?? selectedMissionTitle}`,
+        })
       })
       const data = await response.json()
       if (!response.ok) {

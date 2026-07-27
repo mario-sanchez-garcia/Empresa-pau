@@ -199,7 +199,12 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ pregunta: prompt, imagen: mode === 'image' ? image : null, imagenTipo: mode === 'image' ? imageType : null })
+        body: JSON.stringify({
+          pregunta: prompt,
+          imagen: mode === 'image' ? image : null,
+          imagenTipo: mode === 'image' ? imageType : null,
+          creditKey: `filosofia:${ccaa}:${selectedExam.anio}:${convocatoria}:${contextLabel}:${ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única'}`,
+        })
       })
       const data = await response.json()
       if (!response.ok) throw new Error(getApiErrorMessage(data, 'No se pudo corregir la respuesta.'))

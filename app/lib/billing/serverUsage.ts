@@ -55,3 +55,36 @@ export async function getMonthlyActionCount(userId: string, actions: string[]): 
     return 0
   }
 }
+
+export async function getMonthlyUniqueActionCount(
+  userId: string,
+  actions: string[],
+  metadataKey = 'creditKey'
+): Promise<number> {
+  try {
+    const db = createServiceClient()
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const { data } = await db
+      .from('ai_usage_events')
+      .select('id, action, metadata')
+      .eq('user_id', userId)
+      .in('action', actions)
+      .eq('status', 'success')
+      .gte('created_at', startOfMonth)
+
+    const uniqueCredits = new Set<string>()
+    for (const row of data ?? []) {
+      const metadata = row.metadata && typeof row.metadata === 'object'
+        ? row.metadata as Record<string, unknown>
+        : {}
+      const key = metadata[metadataKey]
+      uniqueCredits.add(typeof key === 'string' && key.trim()
+        ? `${row.action}:${key.trim()}`
+        : `${row.action}:event:${row.id}`)
+    }
+    return uniqueCredits.size
+  } catch {
+    return getMonthlyActionCount(userId, actions)
+  }
+}

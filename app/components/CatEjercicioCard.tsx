@@ -177,6 +177,7 @@ export default function CatEjercicioCard({
         body: JSON.stringify({
           pregunta: prompt,
           imagenes: modo === 'imagen' ? imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })) : [],
+          creditKey: `cat-${asignatura}:${examen.id}:${ejercicio.titulo}:${apartado?.id ?? 'unico'}:${ejercicio.opcion ?? 'unica'}`,
         }),
       })
       const data = await response.json()

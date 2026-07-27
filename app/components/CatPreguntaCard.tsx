@@ -91,7 +91,12 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ pregunta: prompt, imagen: modo === 'imagen' ? imagen : null, imagenTipo: modo === 'imagen' ? imagenTipo : null })
+        body: JSON.stringify({
+          pregunta: prompt,
+          imagen: modo === 'imagen' ? imagen : null,
+          imagenTipo: modo === 'imagen' ? imagenTipo : null,
+          creditKey: `cat-mates:${pregunta.year}:${pregunta.tipo}:${pregunta.serie}:${pregunta.ejercicio}:${option}`,
+        })
       })
       const data = await res.json()
       if (!res.ok) {

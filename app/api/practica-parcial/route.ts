@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { generatePracticeSession } from '@/components/simulacros/data'
 import type { SimulacroSubject } from '@/components/simulacros/types'
+import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
+import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { isInternalUser } from '@/app/lib/internalUsers'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +33,30 @@ export async function POST(request: NextRequest) {
 
   const { data: { user }, error } = await getUser(token)
   if (error || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  if (!isInternalUser(user.email ?? '')) {
+    const billing = await getUserBillingContext(user.id, user.created_at ?? new Date().toISOString())
+
+    if (!billing.hasActivePack && billing.daysSince >= 7) {
+      return NextResponse.json(
+        { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
+        { status: 403 }
+      )
+    }
+
+    const planLimits = getCaminoPlanLimits(billing.planId)
+    const monthlySimulacros = await getMonthlyActionCount(user.id, ['simulacro_correction'])
+    if (monthlySimulacros >= planLimits.partialsPerMonth) {
+      return NextResponse.json(
+        {
+          error: 'simulacro_limit_reached',
+          message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} simulacro${planLimits.partialsPerMonth !== 1 ? 's' : ''} este mes.`,
+          code: BILLING_BLOCK_CODE
+        },
+        { status: 429 }
+      )
+    }
+  }
 
   let body: Record<string, unknown> = {}
   try { body = await request.json() } catch { /* ok */ }

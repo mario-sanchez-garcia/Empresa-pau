@@ -2,14 +2,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
-
-const HOLIDAYS = new Set([
-  '2026-10-12', '2026-11-01', '2026-11-02',
-  '2026-12-06', '2026-12-08', '2026-12-25',
-  '2027-01-01', '2027-01-06', '2027-04-01',
-  '2027-04-02', '2027-04-03', '2027-04-04',
-  '2027-04-17', '2027-04-18', '2027-06-07',
-])
+import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 
 const EXAM_DATE = '2027-06-07'
 const CALENDAR_HORIZON = 14
@@ -26,7 +19,7 @@ function addDays(dateStr: string, n: number): string {
 
 function isStudyDay(dateStr: string): boolean {
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  return dow !== 0 && dow !== 6 && !HOLIDAYS.has(dateStr)
+  return dow !== 0 && dow !== 6 && !SPAIN_HOLIDAYS.has(dateStr)
 }
 
 function getStudyDays(startDate: string, n: number): string[] {
@@ -170,11 +163,11 @@ async function maybeInjectCommentText(
   for (let i = 0; i < 42; i++) {
     const d = addDays(today, i)
     const dow = new Date(d + 'T12:00:00Z').getUTCDay()
-    if (dow !== 5 || HOLIDAYS.has(d)) continue // only Fridays, non-holiday
+    if (dow !== 5 || SPAIN_HOLIDAYS.has(d)) continue // only Fridays, non-holiday
     if (!takenDates.has(d)) { candidate = d; break }
     // Friday taken — try Thursday (day before)
     const thu = addDays(d, -1)
-    if (thu >= today && !HOLIDAYS.has(thu) && !takenDates.has(thu)) { candidate = thu; break }
+    if (thu >= today && !SPAIN_HOLIDAYS.has(thu) && !takenDates.has(thu)) { candidate = thu; break }
   }
   if (!candidate) return
 

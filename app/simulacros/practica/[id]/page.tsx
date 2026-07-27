@@ -7,7 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
-import { getApiErrorMessage, RATE_LIMIT_CODE } from '@/app/lib/rateLimitMessages'
+import { getApiErrorMessage, RATE_LIMIT_CODE, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
@@ -200,7 +200,8 @@ function PracticaPageInner() {
       const result = await safeJson(res)
 
       if (!res.ok || result?.correction_error) {
-        const updatePayload = result?.code === RATE_LIMIT_CODE
+        const noResultSave = result?.code === RATE_LIMIT_CODE || result?.code === BILLING_BLOCK_CODE
+        const updatePayload = noResultSave
           ? { tiempo_empleado: elapsedMinutes, respuestas_parciales: answersSnapshot, updated_at: new Date().toISOString() }
           : {
               resultado_json: { ...(result ?? {}), __practice_session: true },

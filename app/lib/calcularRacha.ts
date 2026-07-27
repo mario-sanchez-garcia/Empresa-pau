@@ -1,4 +1,5 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
+import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 
 function getMadridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -10,9 +11,9 @@ function addDays(dateStr: string, n: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-function isWeekend(dateStr: string): boolean {
+function isNonStudyDay(dateStr: string): boolean {
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  return dow === 0 || dow === 6
+  return dow === 0 || dow === 6 || SPAIN_HOLIDAYS.has(dateStr)
 }
 
 export async function calcularRacha(
@@ -30,12 +31,18 @@ export async function calcularRacha(
   const completedDates = new Set(data.map(r => r.scheduled_date as string))
 
   const today = getMadridToday()
-  let streak = 0
-  let current = today
 
-  // Walk backwards from today, skipping weekends (they never break the streak)
+  // If today is a study day but not yet done, the previous streak is intact —
+  // start the backward walk from yesterday so we don't show 0 until end of day.
+  const start = !isNonStudyDay(today) && !completedDates.has(today)
+    ? addDays(today, -1)
+    : today
+
+  let streak = 0
+  let current = start
+
   while (true) {
-    if (isWeekend(current)) {
+    if (isNonStudyDay(current)) {
       current = addDays(current, -1)
       continue
     }

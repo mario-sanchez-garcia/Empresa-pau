@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { isInternalUser } from '@/app/lib/internalUsers'
-import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
+import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -17,6 +18,14 @@ export async function POST(req: NextRequest) {
   const internalUser = isInternalUser(authContext.user.email)
 
   if (!internalUser) {
+    const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at)
+    if (!billing.hasActivePack && billing.daysSince >= 7) {
+      return NextResponse.json(
+        { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
+        { status: 403 }
+      )
+    }
+
     const rateLimit = await checkAiRateLimit({
       userId: authContext.user.id,
       route: '/api/planning',

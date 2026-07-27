@@ -3,8 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { isInternalUser } from '@/app/lib/internalUsers'
-import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
-import { createServiceClient } from '@/app/lib/billing/supabase'
+import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
+import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
@@ -97,19 +98,30 @@ export async function POST(request: NextRequest) {
   contenido.push({ type: 'text', text: `${responseFormatRules}\n\n${pregunta}` })
 
   if (!internalUser) {
-    const billing = await getUserBilling(authContext.user.id)
-    if (!billing.hasActivePack) {
-      const daysSince = getDaysSince(authContext.user.created_at)
-      if (daysSince >= 7) {
+    const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at)
+
+    if (!billing.hasActivePack && billing.daysSince >= 7) {
+      return NextResponse.json(
+        { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
+        { status: 403 }
+      )
+    }
+
+    const planLimits = getCaminoPlanLimits(billing.planId)
+
+    if (action === 'image_correction') {
+      const monthlyPhotos = await getMonthlyActionCount(authContext.user.id, ['image_correction'])
+      if (monthlyPhotos >= planLimits.photosPerMonth) {
         return NextResponse.json(
-          { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.' },
-          { status: 403 }
+          { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes.`, code: BILLING_BLOCK_CODE },
+          { status: 429 }
         )
       }
-      const monthlyCount = await getMonthlyCorrections(authContext.user.id)
-      if (monthlyCount >= 25) {
+    } else {
+      const monthlyChats = await getMonthlyActionCount(authContext.user.id, ['chat'])
+      if (monthlyChats >= planLimits.correctionsPerMonth) {
         return NextResponse.json(
-          { error: 'correction_limit_reached', message: 'Has alcanzado el límite de 25 correcciones este mes.' },
+          { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes.`, code: BILLING_BLOCK_CODE },
           { status: 429 }
         )
       }
@@ -125,10 +137,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!rateLimit.allowed) {
-      return rateLimitResponse(
-        action,
-        rateLimit
-      )
+      return rateLimitResponse(action, rateLimit)
     }
   }
 
@@ -282,41 +291,3 @@ function rateLimitResponse(action: RateLimitAction, result: { limit: number; cou
   )
 }
 
-async function getUserBilling(userId: string): Promise<{ hasActivePack: boolean }> {
-  try {
-    const db = createServiceClient()
-    const now = new Date().toISOString()
-    const { data } = await db
-      .from('user_entitlements')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${now}`)
-      .limit(1)
-    return { hasActivePack: (data?.length ?? 0) > 0 }
-  } catch {
-    return { hasActivePack: false }
-  }
-}
-
-function getDaysSince(isoDate: string): number {
-  return Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000)
-}
-
-async function getMonthlyCorrections(userId: string): Promise<number> {
-  try {
-    const db = createServiceClient()
-    const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    const { count } = await db
-      .from('ai_usage_events')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .in('action', ['chat', 'image_correction'])
-      .eq('status', 'success')
-      .gte('created_at', startOfMonth)
-    return count ?? 0
-  } catch {
-    return 0
-  }
-}

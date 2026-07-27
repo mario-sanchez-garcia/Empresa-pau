@@ -63,6 +63,7 @@ async function handleCheckoutCompleted(
 
   const now = new Date().toISOString()
   const stripeCustomerId = typeof session.customer === 'string' ? session.customer : null
+  const expiresAt = planId === 'pack_curso_pau' ? cursoPauExpiresAt() : null
 
   // ── Step 1: Idempotency check ─────────────────────────────────────────────
   // If an entitlement already exists for this Stripe session, a prior webhook
@@ -102,7 +103,7 @@ async function handleCheckoutCompleted(
     source: 'stripe_parent_checkout',
     status: 'active',
     started_at: now,
-    expires_at: null,
+    expires_at: expiresAt,
     stripe_checkout_session_id: sessionId,
     stripe_customer_id: stripeCustomerId,
     parent_checkout_link_id: parentCheckoutLinkId ?? null,
@@ -174,6 +175,13 @@ async function handleCheckoutCompleted(
       payment_intent: session.payment_intent,
     },
   })
+}
+
+function cursoPauExpiresAt(): string {
+  const now = new Date()
+  const month = now.getMonth() + 1 // 1-12; July = 7
+  const year = month >= 7 ? now.getFullYear() + 1 : now.getFullYear()
+  return `${year}-06-30T23:59:59.000Z`
 }
 
 async function handleCheckoutExpired(

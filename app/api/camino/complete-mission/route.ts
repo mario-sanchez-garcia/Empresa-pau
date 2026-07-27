@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
+import { divisionFor } from '@/app/lib/camino/leagues'
 
 export const dynamic = 'force-dynamic'
 
@@ -101,8 +102,14 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .maybeSingle()
 
-    const newXpTotal = (Number(currentProgress?.xp_total) || 0) + xp
+    const oldXpTotal = Number(currentProgress?.xp_total) || 0
+    const newXpTotal = oldXpTotal + xp
     const newMissionsCompleted = (Number(currentProgress?.missions_completed) || 0) + 1
+    const oldDivision = divisionFor(oldXpTotal)
+    const newDivision = divisionFor(newXpTotal)
+    const leagueUpgrade = newDivision.name !== oldDivision.name
+      ? { from: oldDivision.name, to: newDivision.name }
+      : null
 
     if (!currentProgress) {
       await db.from('camino_user_progress').insert({
@@ -129,7 +136,7 @@ export async function POST(request: NextRequest) {
     }
 
     // PASO 5 — Respuesta
-    return NextResponse.json({ success: true, xpAwarded: xp, totalXp: newXpTotal })
+    return NextResponse.json({ success: true, xpAwarded: xp, totalXp: newXpTotal, leagueUpgrade })
   } catch (err) {
     console.error('[camino/complete-mission]', err)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

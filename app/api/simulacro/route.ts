@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { buildBlockPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
-import { createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
+import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
+import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -145,9 +147,28 @@ export async function POST(request: NextRequest) {
       })
 
       if (!rateLimit.allowed) {
-        return rateLimitResponse(
-          'simulacro_correction',
-          rateLimit
+        return rateLimitResponse('simulacro_correction', rateLimit)
+      }
+
+      const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at)
+
+      if (!billing.hasActivePack && billing.daysSince >= 7) {
+        return NextResponse.json(
+          { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
+          { status: 403 }
+        )
+      }
+
+      const planLimits = getCaminoPlanLimits(billing.planId)
+      const monthlySimulacros = await getMonthlyActionCount(authContext.user.id, ['simulacro_correction'])
+      if (monthlySimulacros >= planLimits.partialsPerMonth) {
+        return NextResponse.json(
+          {
+            error: 'simulacro_limit_reached',
+            message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} simulacro${planLimits.partialsPerMonth !== 1 ? 's' : ''} este mes.`,
+            code: BILLING_BLOCK_CODE
+          },
+          { status: 429 }
         )
       }
     }

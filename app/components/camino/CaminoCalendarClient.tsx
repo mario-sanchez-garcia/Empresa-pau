@@ -13,6 +13,7 @@ import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/o
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
+import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
@@ -107,14 +108,6 @@ const CAMINO_TO_SIM_SUBJECT: Record<string, string> = {
   fisica: 'fisica', quimica: 'quimica', biologia: 'biologia',
   ingles: 'ingles', lengua: 'lengua', historia_espana: 'historia',
 }
-const DIVISIONS = [
-  { name: 'Bronce', min: 0, max: 499, bg: '#fff7ed', text: '#92400e', bar: '#b45309' },
-  { name: 'Plata', min: 500, max: 1499, bg: '#f8fafc', text: '#475569', bar: '#94a3b8' },
-  { name: 'Oro', min: 1500, max: 3499, bg: '#fefce8', text: '#a16207', bar: '#eab308' },
-  { name: 'Platino', min: 3500, max: 6999, bg: '#f0f9ff', text: '#0369a1', bar: '#38bdf8' },
-  { name: 'Diamante', min: 7000, max: 12999, bg: '#eff6ff', text: '#1d4ed8', bar: '#2563eb' },
-  { name: 'Élite PAU', min: 13000, max: Infinity, bg: '#f5f3ff', text: '#6d28d9', bar: '#7c3aed' },
-]
 
 function toISO(date: Date) { return date.toISOString().slice(0, 10) }
 function todayISO() { return toISO(new Date()) }
@@ -265,7 +258,6 @@ function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU/EVAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
-function divisionFor(xp: number) { return DIVISIONS.find(d => xp >= d.min && xp <= d.max) ?? DIVISIONS[0] }
 function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') return 4; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
 function priorityLabel(priority: ExamPriority) { return priority === 'muy_alta' ? 'Muy alta' : priority.charAt(0).toUpperCase() + priority.slice(1) }
 function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) }
@@ -764,7 +756,6 @@ export default function CaminoCalendarClient() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
-  const [calendarEditorOpen, setCalendarEditorOpen] = useState(false)
   const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
   const [addSubjectLoading, setAddSubjectLoading] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
@@ -785,6 +776,7 @@ export default function CaminoCalendarClient() {
   const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> | null>(null)
   const [centroPulso, setCentroPulso] = useState<{ enoughData: true; centroDisplay: string; subject: string; topicName: string; position: 'ahead' | 'same' | 'behind'; delta: number; peers: number } | null>(null)
   const [sundayMockSession, setSundayMockSession] = useState<{ id: string; nota_final: number | null } | null | undefined>(undefined)
+  const [monthlySimsUsed, setMonthlySimsUsed] = useState(0)
   const isSunday = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' }) === 'Sun'
 
   useEffect(() => {
@@ -829,7 +821,9 @@ export default function CaminoCalendarClient() {
       if (cancelled) return
       const weekStart = currentWeekStartISO()
       const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
-      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult] = await Promise.all([
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
@@ -840,6 +834,7 @@ export default function CaminoCalendarClient() {
         supabase.from('camino_xp_events').select('xp_amount').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
         supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
         supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
+        supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', startOfMonth),
       ])
       if (cancelled) return
       if (calDays && calDays.length > 0) {
@@ -873,6 +868,7 @@ export default function CaminoCalendarClient() {
       setXpTotal(Number(progressRow.data?.xp_total) || 0)
       setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
       setWeeklySimsCompleted((simsWeekResult as { count: number | null }).count ?? 0)
+      setMonthlySimsUsed((monthlySimsResult as { count: number | null }).count ?? 0)
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
@@ -1514,9 +1510,6 @@ export default function CaminoCalendarClient() {
             <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setCalendarEditorOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
-              <CalendarDays size={13} /> Editar semana
-            </button>
             <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
               <Plus size={13} /> Examen
             </button>
@@ -1565,35 +1558,44 @@ export default function CaminoCalendarClient() {
           </div>
 
           {/* Sunday mock */}
-          {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
-              {sundayMockSession !== null ? (
-                <div style={{ borderRadius: 14, border: '1px solid #bfdbfe', background: 'linear-gradient(135deg,#eff6ff,#eef2ff)', padding: '12px 16px' }}>
-                  <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Simulacro del Domingo</p>
-                  <p style={{ fontSize: 14, fontWeight: 900, color: '#1e293b', margin: '4px 0 0' }}>Simulacro del Domingo hecho ✓</p>
-                  {(() => {
-                    const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
-                    const nota = sundayMockSession.nota_final
-                    const proj = heroProj?.nota_proyectada ?? null
-                    if (nota == null) return null
-                    if (proj != null && heroProj?.confidence !== 'low') {
-                      const delta = Math.round((nota - proj) * 10) / 10
-                      const sign = delta >= 0 ? '+' : ''
-                      return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>{sign}{delta.toFixed(1).replace('.', ',')} vs proyección · {nota.toFixed(1)}/10</p>
-                    }
-                    return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>Sacaste {nota.toFixed(1)}/10 esta semana</p>
-                  })()}
-                </div>
-              ) : (
-                <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: 'white', padding: '16px 20px' }}>
-                  <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
-                  <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
-                  <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
-                  <button onClick={startSundayMock} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#2563eb', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}>Empezar simulacro →</button>
-                </div>
-              )}
-            </div>
-          )}
+          {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (() => {
+            const simLimitReached = monthlySimsUsed >= getCaminoPlanLimits(caminoPlanId).partialsPerMonth
+            return (
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                {sundayMockSession !== null ? (
+                  <div style={{ borderRadius: 14, border: '1px solid #bfdbfe', background: 'linear-gradient(135deg,#eff6ff,#eef2ff)', padding: '12px 16px' }}>
+                    <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Simulacro del Domingo</p>
+                    <p style={{ fontSize: 14, fontWeight: 900, color: '#1e293b', margin: '4px 0 0' }}>Simulacro del Domingo hecho ✓</p>
+                    {(() => {
+                      const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
+                      const nota = sundayMockSession.nota_final
+                      const proj = heroProj?.nota_proyectada ?? null
+                      if (nota == null) return null
+                      if (proj != null && heroProj?.confidence !== 'low') {
+                        const delta = Math.round((nota - proj) * 10) / 10
+                        const sign = delta >= 0 ? '+' : ''
+                        return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>{sign}{delta.toFixed(1).replace('.', ',')} vs proyección · {nota.toFixed(1)}/10</p>
+                      }
+                      return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>Sacaste {nota.toFixed(1)}/10 esta semana</p>
+                    })()}
+                  </div>
+                ) : simLimitReached ? (
+                  <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#f8fafc', padding: '16px 20px' }}>
+                    <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
+                    <p style={{ fontSize: 15, fontWeight: 900, color: '#64748b', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                    <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes.</p>
+                  </div>
+                ) : (
+                  <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: 'white', padding: '16px 20px' }}>
+                    <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
+                    <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                    <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
+                    <button onClick={startSundayMock} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#2563eb', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}>Empezar simulacro →</button>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           {upcomingPartial && <div style={{ padding: '8px 20px', borderBottom: '1px solid #f1f5f9' }}><PartialExamBanner exam={upcomingPartial} today={realToday} /></div>}
 
@@ -1953,7 +1955,7 @@ export default function CaminoCalendarClient() {
         )}
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
-      <AnimatePresence>{calendarEditorOpen && onboarding && <CalendarEditorOverlay calendar={weekCalendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setCalendarEditorOpen(false)} onAddExam={() => { setCalendarEditorOpen(false); openNewExam() }} onSave={(next) => { persist(next); setCalendarEditorOpen(false); setToast('Calendario guardado') }} />}</AnimatePresence>
+      {/* CalendarEditorOverlay disabled: edits were only persisted to localStorage and wiped on next page load by saveCalendarWeeksToCache. Re-enable when calendar edits can be written to camino_calendar in DB. */}
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('kairo_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>

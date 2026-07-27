@@ -1,6 +1,7 @@
 export type RateLimitAction = 'chat' | 'image_correction' | 'simulacro_correction' | 'planning_generation'
 
 export const RATE_LIMIT_CODE = 'RATE_LIMIT_EXCEEDED'
+export const BILLING_BLOCK_CODE = 'BILLING_REQUIRED'
 export const RATE_LIMIT_BETA_NOTICE = 'Estamos usando límites durante la beta para mantener Kairo estable mientras seguimos mejorando.'
 
 const RATE_LIMIT_MESSAGES: Record<RateLimitAction, string> = {

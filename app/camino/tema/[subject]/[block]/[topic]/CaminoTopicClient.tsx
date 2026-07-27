@@ -13,6 +13,7 @@ import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
 import { calcularRacha } from '@/app/lib/calcularRacha'
+import { DIVISIONS } from '@/app/lib/camino/leagues'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -262,6 +263,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [correction, setCorrection] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [xpAwarded, setXpAwarded] = useState<number | null>(null)
+  const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
   const [correcting, setCorrecting] = useState(false)
   const [diegoContent, setDiegoContent] = useState<string | null>(null)
   const [diegoLoading, setDiegoLoading] = useState(true)
@@ -694,6 +696,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             if (cmJson.success && typeof cmJson.xpAwarded === 'number') {
               setXpAwarded(cmJson.xpAwarded)
               toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10`
+              if (cmJson.leagueUpgrade) setLeagueUpgrade(cmJson.leagueUpgrade)
             } else if (cmJson.reason === 'already_completed') {
               toastText = `Nota ${rawScore}/10 · Misión ya completada`
             }
@@ -1096,6 +1099,31 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
         </div>
       )}
+
+      {/* League upgrade modal */}
+      {leagueUpgrade && (() => {
+        const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+              <div className="mb-4 rounded-2xl px-4 py-5 text-center" style={{ background: upgradedDiv.bg }}>
+                <p className="text-3xl font-black" style={{ color: upgradedDiv.text }}>🏆 {leagueUpgrade.to}</p>
+                <p className="mt-1 text-sm font-bold" style={{ color: upgradedDiv.text, opacity: 0.75 }}>Nueva división</p>
+              </div>
+              <h2 className="text-center text-lg font-black text-slate-950">¡Has subido de división!</h2>
+              <p className="mt-1 text-center text-sm font-semibold text-slate-500">De <strong className="text-slate-700">{leagueUpgrade.from}</strong> a <strong style={{ color: upgradedDiv.text }}>{leagueUpgrade.to}</strong>. Sigue así.</p>
+              <button
+                type="button"
+                onClick={() => setLeagueUpgrade(null)}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black text-white"
+                style={{ background: upgradedDiv.bar }}
+              >
+                ¡A por más XP!
+              </button>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Success modal */}
       {showSuccessModal && score != null && (

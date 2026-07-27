@@ -312,7 +312,7 @@ export default function OnboardingFlow() {
 
   return (
     <div style={{ minHeight: '100dvh', fontFamily: 'Geist, system-ui, sans-serif', background: '#0f172a' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap');*{box-sizing:border-box}.onb-input{width:100%;border-radius:8px;border:1px solid #e2e8f0;background:#fafbfc;padding:10px 12px;font-size:13px;font-weight:700;color:#0f172a;font-family:Geist,system-ui,sans-serif;outline:none}.onb-input::placeholder{color:#94a3b8;font-weight:600}.onb-input:focus{border-color:#2563eb;background:white}`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap');*{box-sizing:border-box}.onb-input{width:100%;border-radius:8px;border:1px solid #e2e8f0;background:#fafbfc;padding:10px 12px;font-size:13px;font-weight:700;color:#0f172a;font-family:Geist,system-ui,sans-serif;outline:none}.onb-input::placeholder{color:#94a3b8;font-weight:600}.onb-input:focus{border-color:#2563eb;background:white}@keyframes onb-top-slam{0%{transform:translateY(-50%);opacity:0}45%{opacity:1}72%{transform:translateY(3.5%)}86%{transform:translateY(-1%)}100%{transform:translateY(0)}}@keyframes onb-bot-slam{0%{transform:translateY(50%);opacity:0}45%{opacity:1}72%{transform:translateY(-3.5%)}86%{transform:translateY(1%)}100%{transform:translateY(0)}}@keyframes onb-seam{0%{opacity:0;transform:scaleX(0.3)}40%{opacity:1;transform:scaleX(1)}75%{opacity:0.5}100%{opacity:0}}@keyframes onb-bar-save{0%{width:0}100%{width:80%}}.onb-lw{position:relative;display:inline-block;margin-right:-4px}.onb-lw:last-child{margin-right:0}.onb-ghost{font-size:100px;font-weight:900;letter-spacing:-0.04em;line-height:1;visibility:hidden;display:block;white-space:nowrap}.onb-glyph{position:absolute;top:0;left:0;font-size:100px;font-weight:900;color:white;letter-spacing:-0.04em;line-height:1;white-space:nowrap;display:block}.onb-top{clip-path:inset(0 0 50% 0);animation:onb-top-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}.onb-bot{clip-path:inset(50% 0 0 0);animation:onb-bot-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}.onb-seam{position:absolute;left:-2px;right:-2px;top:calc(50% - 1px);height:2px;background:linear-gradient(90deg,transparent,rgba(37,99,235,0.9),rgba(120,196,255,0.95),rgba(37,99,235,0.9),transparent);animation:onb-seam .72s ease-out both;pointer-events:none}`}</style>
       {step === 'welcome' ? renderWelcome() : renderShell()}
     </div>
   )
@@ -454,22 +454,24 @@ export default function OnboardingFlow() {
           </div>
 
           {/* RIGHT PANEL */}
-          <div style={{ background: '#fff', display: 'flex', flexDirection: 'column' }}>
-            {/* Panel header */}
-            <div style={{ background: '#0f172a', padding: '28px 32px 22px' }}>
-              <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#475569', marginBottom: 8 }}>
-                {isDone ? 'Completado' : isSaving ? 'Procesando' : `Paso ${currentStep} de ${STEPS.length}`}
+          <div style={{ background: isSaving && !savingError ? '#0f172a' : '#fff', display: 'flex', flexDirection: 'column', transition: 'background 0.2s' }}>
+            {/* Panel header — hidden during saving animation */}
+            {!(isSaving && !savingError) && (
+              <div style={{ background: '#0f172a', padding: '28px 32px 22px' }}>
+                <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#475569', marginBottom: 8 }}>
+                  {isDone ? 'Completado' : `Paso ${currentStep} de ${STEPS.length}`}
+                </div>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 6px' }}>
+                  {STEP_LABELS[step].title}
+                </h2>
+                <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, margin: 0 }}>{STEP_LABELS[step].help}</p>
               </div>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 6px' }}>
-                {STEP_LABELS[step].title}
-              </h2>
-              <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, margin: 0 }}>{STEP_LABELS[step].help}</p>
-            </div>
+            )}
 
             {/* Panel body */}
-            <div style={{ padding: '22px 32px', flex: 1, overflowY: 'auto' }}>
+            <div style={{ padding: isSaving && !savingError ? '0' : '22px 32px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: isSaving && !savingError ? 'center' : 'stretch', justifyContent: isSaving && !savingError ? 'center' : 'flex-start' }}>
               <AnimatePresence mode="wait">
-                <motion.div key={`${step}-content`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}>
+                <motion.div key={`${step}-content`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }} style={{ width: '100%' }}>
                   {renderStep()}
                 </motion.div>
               </AnimatePresence>
@@ -678,21 +680,36 @@ export default function OnboardingFlow() {
         )
       }
       return (
-        <div style={{ borderRadius: 10, border: '1px solid #bfdbfe', background: '#eff6ff', padding: '32px 24px', textAlign: 'center' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #bfdbfe', borderTopColor: '#2563eb', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <div style={{ textAlign: 'center', padding: '32px 0' }}>
+          {/* KAIRO split-halves animation */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40 }}>
+            {['K', 'A', 'I', 'R', 'O'].map((ch, i) => (
+              <div key={i} className="onb-lw">
+                <span className="onb-ghost">{ch}</span>
+                <span className="onb-glyph onb-top" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
+                <span className="onb-glyph onb-bot" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
+                <div className="onb-seam" style={{ animationDelay: `${i * 110}ms` }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 10 }}>
+            Generando tu Camino PAU
+          </div>
           <AnimatePresence mode="wait">
             <motion.p
               key={savingMsgIdx}
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.3 }}
-              style={{ fontSize: 12, fontWeight: 700, color: '#1e40af', margin: 0 }}
+              style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: '0 0 28px' }}
             >
               {savingMessages[savingMsgIdx]}
             </motion.p>
           </AnimatePresence>
+          <div style={{ width: 200, height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden', margin: '0 auto' }}>
+            <div style={{ height: '100%', background: '#2563eb', borderRadius: 99, animation: 'onb-bar-save 6s ease-out forwards' }} />
+          </div>
         </div>
       )
     }

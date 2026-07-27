@@ -1383,7 +1383,63 @@ export default function CaminoCalendarClient() {
   }
 
   if (!hasProfile) return (
-    <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-700"><Target size={30} /></div><h1 className="text-3xl font-black tracking-tight text-slate-950">Completa tu perfil para que Kairo cree tu Camino PAU.</h1><p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Usaremos tu comunidad, asignaturas, centro y disponibilidad para generar un calendario semanal sencillo.</p><button onClick={() => router.push('/onboarding')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)]">Completar perfil <ArrowRight size={16} /></button></section></main></Shell>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0f172a' }}>
+      <SidebarNav />
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+        {/* Subtle grid texture */}
+        <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(37,99,235,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.04) 1px,transparent 1px)', backgroundSize: '48px 48px', pointerEvents: 'none' }} />
+        {/* Top accent line */}
+        <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,transparent,#2563eb 30%,#60a5fa 60%,transparent)', opacity: 0.7 }} />
+
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 40px', position: 'relative', zIndex: 1 }}>
+          <div style={{ maxWidth: 540, width: '100%' }}>
+
+            {/* Eyebrow */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 28, padding: '6px 12px', background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.25)', borderRadius: 9999 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb', boxShadow: '0 0 8px #2563eb' }} />
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa' }}>Kairo · Configuración inicial</span>
+            </div>
+
+            {/* Heading */}
+            <h1 style={{ fontSize: 'clamp(32px,4vw,48px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', color: '#fff', margin: '0 0 16px' }}>
+              Tu Camino PAU<br />
+              <span style={{ color: '#2563eb' }}>empieza aquí.</span>
+            </h1>
+            <p style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.65, color: '#94a3b8', margin: '0 0 40px', maxWidth: 420 }}>
+              En 2 minutos Kairo genera un plan de estudio semanal personalizado para tu PAU — asignaturas, ritmo y objetivos.
+            </p>
+
+            {/* Feature list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 44 }}>
+              {[
+                { icon: CalendarDays, label: 'Plan diario adaptado a tu disponibilidad' },
+                { icon: BrainCircuit, label: 'Corrección con IA de tus exámenes reales' },
+                { icon: Trophy, label: 'Ranking y progreso frente a tus compañeros' },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={16} color="#60a5fa" />
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#cbd5e1' }}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={() => router.push('/onboarding')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px 28px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 0 1px rgba(37,99,235,0.4), 0 16px 40px rgba(37,99,235,0.35)', transition: 'transform 150ms, box-shadow 150ms', letterSpacing: '-0.01em' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 0 1px rgba(37,99,235,0.5), 0 20px 50px rgba(37,99,235,0.45)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ''; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 0 1px rgba(37,99,235,0.4), 0 16px 40px rgba(37,99,235,0.35)' }}
+            >
+              Crear mi Camino PAU
+              <ArrowRight size={16} />
+            </button>
+            <p style={{ marginTop: 14, fontSize: 12, color: '#475569', fontWeight: 500 }}>Tarda menos de 2 minutos · Sin tarjeta</p>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 
   if (caminoReadyStatus === 'no_queue') return (

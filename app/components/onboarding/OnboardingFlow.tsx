@@ -226,6 +226,10 @@ export default function OnboardingFlow() {
     update({ community, schoolName: null, schoolSource: null })
     setSchoolQuery('')
     setSchoolOpen(false)
+    // Sync to kairo_ccaa so simulacros use the correct community immediately
+    if (community === 'Madrid' || community === 'Cataluña') {
+      window.localStorage.setItem('kairo_ccaa', community)
+    }
   }
 
   function selectSchool(name: string, source: 'dataset' | 'manual') {
@@ -298,6 +302,11 @@ export default function OnboardingFlow() {
         }
       }
       markOnboardingComplete()
+      // Ensure kairo_ccaa is in sync at completion (covers edge cases where
+      // selectCommunity ran on a previous session)
+      if (data.community === 'Madrid' || data.community === 'Cataluña') {
+        window.localStorage.setItem('kairo_ccaa', data.community)
+      }
       router.push('/camino')
     } catch {
       setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')

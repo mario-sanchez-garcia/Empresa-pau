@@ -1493,7 +1493,9 @@ export default function CaminoCalendarClient() {
   const daysUntilPAU = (() => {
     const now = realToday ? new Date(realToday + 'T00:00:00') : new Date()
     const year = now.getFullYear()
-    const pau = new Date(`${year}-06-08T00:00:00`)
+    // Community-specific last exam day: Cataluña PAU ends ~June 6, Madrid EBAU ~June 8
+    const mmdd = onboarding?.community === 'Cataluña' ? '06-06' : '06-08'
+    const pau = new Date(`${year}-${mmdd}T00:00:00`)
     if (pau <= now) pau.setFullYear(year + 1)
     return Math.ceil((pau.getTime() - now.getTime()) / 86400000)
   })()

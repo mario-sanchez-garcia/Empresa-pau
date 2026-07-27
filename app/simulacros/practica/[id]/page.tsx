@@ -13,6 +13,7 @@ import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
+import KairoLoader from '@/app/components/ui/KairoLoader'
 
 function PracticaPageInner() {
   const params = useParams<{ id: string }>()
@@ -259,16 +260,7 @@ function PracticaPageInner() {
     )
   }
 
-  if (!record) {
-    return (
-      <SimulacroShell title="Práctica parcial" subtitle="Cargando...">
-        <div className="pau-card-section mx-auto max-w-6xl">
-          <div className="pau-skeleton" style={{ height: 24, width: '50%', borderRadius: 8, marginBottom: 12 }} />
-          <div className="pau-skeleton" style={{ height: 16, width: '30%', borderRadius: 6 }} />
-        </div>
-      </SimulacroShell>
-    )
-  }
+  if (!record) return <KairoLoader />
 
   const subtitle = blockLabel
     ? `${cfg.label} · ${blockLabel} · ${record.bloques.length} preguntas`
@@ -625,13 +617,7 @@ async function safeJson(response: Response) {
 
 export default function PracticaPage() {
   return (
-    <Suspense fallback={
-      <SimulacroShell title="Práctica parcial" subtitle="Cargando...">
-        <div className="pau-card-section mx-auto max-w-6xl">
-          <div className="pau-skeleton" style={{ height: 24, width: '50%', borderRadius: 8, marginBottom: 12 }} />
-        </div>
-      </SimulacroShell>
-    }>
+    <Suspense fallback={<KairoLoader />}>
       <PracticaPageInner />
     </Suspense>
   )

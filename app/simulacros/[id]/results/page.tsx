@@ -10,6 +10,7 @@ import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroRecord } from '@/components/simulacros/types'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import WhyExplanation from '@/components/shared/WhyExplanation'
+import KairoLoader from '@/app/components/ui/KairoLoader'
 
 type Tab = 'resumen' | 'detalle' | 'plan' | 'bloques'
 
@@ -137,16 +138,7 @@ export default function SimulacroResultsPage() {
     }
   }, [scoreReady, hasGrade, nota])
 
-  if (!record) {
-    return (
-      <SimulacroShell title="Resultados" subtitle="Cargando corrección...">
-        <div className="pau-card-section mx-auto max-w-6xl">
-          <div className="pau-skeleton" style={{ height: 24, width: '40%', borderRadius: 8, marginBottom: 12 }} />
-          <div className="pau-skeleton" style={{ height: 80, borderRadius: 12 }} />
-        </div>
-      </SimulacroShell>
-    )
-  }
+  if (!record) return <KairoLoader />
 
   const detail = normalizeDetail(result, record, correctionFailed)
   const plan = normalizePlan(result, detail, correctionFailed)

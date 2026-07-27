@@ -26,6 +26,17 @@ function CallbackHandler() {
       return
     }
 
+    // After auth, always land on the canonical production domain so
+    // localStorage (onboarding data) is consistent across Vercel preview and prod.
+    const productionBase = process.env.NEXT_PUBLIC_APP_URL
+    function redirectNext() {
+      if (productionBase && window.location.origin !== productionBase) {
+        window.location.replace(`${productionBase}${next}`)
+      } else {
+        router.replace(next)
+      }
+    }
+
     if (code) {
       // PKCE flow: exchange code for session
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
@@ -33,7 +44,7 @@ function CallbackHandler() {
           console.error('[auth/callback] exchangeCodeForSession:', error.message)
           setErrorMsg(error.message)
         } else {
-          router.replace(next)
+          redirectNext()
         }
       })
       return
@@ -43,7 +54,7 @@ function CallbackHandler() {
     // By the time this useEffect runs, getSession() may already have the session.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.replace(next)
+        redirectNext()
         return
       }
 
@@ -51,7 +62,7 @@ function CallbackHandler() {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && sess) {
           subscription.unsubscribe()
-          router.replace(next)
+          redirectNext()
         }
       })
 

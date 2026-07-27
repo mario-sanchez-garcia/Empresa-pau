@@ -14,50 +14,63 @@ function CallbackHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [errorMsg, setErrorMsg] = useState('')
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
   useEffect(() => {
     const code = searchParams.get('code')
     const errorParam = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
     const next = searchParams.get('next') ?? '/camino'
+    const allParams = Object.fromEntries(searchParams.entries())
+    const hash = window.location.hash
 
-    // OAuth provider returned an error
-    if (errorParam) {
-      console.error('[auth/callback] provider error:', errorParam, errorDescription)
-      setErrorMsg(errorDescription ?? errorParam)
-      return
-    }
+    // Show debug info for 3 seconds so we can see what Supabase is sending
+    setDebugInfo(JSON.stringify({ url: window.location.href, params: allParams, hash: hash || '(none)' }, null, 2))
 
-    if (code) {
-      // PKCE flow: exchange code for session
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          console.error('[auth/callback] exchangeCodeForSession:', error.message)
-          setErrorMsg(error.message)
-        } else {
+    const proceed = () => {
+      setDebugInfo(null)
+
+      // OAuth provider returned an error
+      if (errorParam) {
+        console.error('[auth/callback] provider error:', errorParam, errorDescription)
+        setErrorMsg(errorDescription ?? errorParam)
+        return
+      }
+
+      if (code) {
+        // PKCE flow: exchange code for session
+        supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+          if (error) {
+            console.error('[auth/callback] exchangeCodeForSession:', error.message)
+            setErrorMsg(error.message)
+          } else {
+            router.replace(next)
+          }
+        })
+        return
+      }
+
+      // No code and no error — check if supabase already set session from URL hash (implicit flow)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          subscription.unsubscribe()
           router.replace(next)
         }
       })
-      return
-    }
 
-    // No code and no error — check if supabase already set session from URL hash (implicit flow)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      const timeout = setTimeout(() => {
         subscription.unsubscribe()
-        router.replace(next)
+        setErrorMsg('No se recibió código. Params: ' + JSON.stringify(allParams))
+      }, 4000)
+
+      return () => {
+        clearTimeout(timeout)
+        subscription.unsubscribe()
       }
-    })
-
-    const timeout = setTimeout(() => {
-      subscription.unsubscribe()
-      setErrorMsg('No se recibió un código de autenticación. Vuelve a intentarlo.')
-    }, 4000)
-
-    return () => {
-      clearTimeout(timeout)
-      subscription.unsubscribe()
     }
+
+    const debugTimer = setTimeout(proceed, 3000)
+    return () => clearTimeout(debugTimer)
   }, [router, searchParams])
 
   if (errorMsg) {
@@ -82,6 +95,16 @@ function CallbackHandler() {
         >
           Volver al login
         </button>
+      </div>
+    )
+  }
+
+  if (debugInfo) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0d0d0d', padding: 24, fontFamily: 'monospace', color: '#94a3b8', fontSize: 12 }}>
+        <div style={{ color: '#60a5fa', marginBottom: 8, fontSize: 14, fontWeight: 700 }}>DEBUG — Callback recibido</div>
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{debugInfo}</pre>
+        <div style={{ marginTop: 16, color: '#475569' }}>Continuando en 3s…</div>
       </div>
     )
   }

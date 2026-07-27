@@ -2756,7 +2756,101 @@ function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
 }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { subjects: string[]; draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }; setDraft: (draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }) => void; onClose: () => void; onSave: () => void; editing: boolean }) {
-  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm"><motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl"><h2 className="text-xl font-black text-slate-950">{editing ? 'Editar examen parcial' : 'Añadir examen parcial'}</h2><p className="mt-1 text-sm font-semibold text-slate-500">Si tienes un parcial cerca, Camino PAU priorizará bloque, tema y ejercicios reales.</p><div className="mt-5 grid gap-3"><Field label="Asignatura"><select value={draft.subject} onChange={event => setDraft({ ...draft, subject: event.target.value })} className="inputish">{subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}</select></Field><Field label="Fecha"><input type="date" value={draft.date} onChange={event => setDraft({ ...draft, date: event.target.value })} className="inputish" /></Field><Field label="Bloque"><input value={draft.block} onChange={event => setDraft({ ...draft, block: event.target.value })} placeholder="Álgebra, Análisis, Probabilidad..." className="inputish" /></Field><Field label="Tema opcional"><input value={draft.topic} onChange={event => setDraft({ ...draft, topic: event.target.value })} placeholder="Sistemas/Gauss, Derivadas, Writing..." className="inputish" /></Field><Field label="Nombre opcional"><input value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} placeholder="Parcial 1" className="inputish" /></Field><Field label="Prioridad"><select value={draft.priority} onChange={event => setDraft({ ...draft, priority: event.target.value as ExamPriority })} className="inputish"><option value="baja">Baja</option><option value="normal">Normal</option><option value="alta">Alta</option><option value="muy_alta">Muy alta</option></select></Field></div><style>{`.inputish{width:100%;border-radius:14px;border:1px solid #dbe7fb;background:#f8fbff;padding:11px 12px;font-size:14px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#93c5fd;background:white}`}</style><div className="mt-6 flex justify-end gap-2"><button onClick={onClose} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-500">Cancelar</button><button onClick={onSave} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">{editing ? 'Guardar cambios' : 'Guardar examen'}</button></div></motion.div></motion.div>
+  const PRIORITIES: { value: ExamPriority; label: string; active: { bg: string; text: string; border: string } }[] = [
+    { value: 'baja',     label: 'Baja',     active: { bg: '#f0fdf4', text: '#15803d', border: '#86efac' } },
+    { value: 'normal',   label: 'Normal',   active: { bg: '#eff6ff', text: '#2563eb', border: '#93c5fd' } },
+    { value: 'alta',     label: 'Alta',     active: { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' } },
+    { value: 'muy_alta', label: 'Muy alta', active: { bg: '#fef2f2', text: '#dc2626', border: '#fca5a5' } },
+  ]
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.97, y: 14 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.97, y: 14 }}
+        transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+        className="w-full max-w-md overflow-hidden rounded-2xl bg-white"
+        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
+      >
+        {/* Header */}
+        <div className="bg-[#0f172a] px-6 py-5">
+          <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Calendario</p>
+          <h2 className="mt-1 font-black text-slate-100" style={{ fontSize: 22, letterSpacing: '-0.025em', lineHeight: 1 }}>
+            {editing ? 'Editar parcial' : 'Añadir parcial'}
+          </h2>
+          <p className="mt-2 text-[12px] font-semibold text-slate-400">Camino ajustará tus misiones para preparar este bloque.</p>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5">
+          <div className="grid gap-3">
+            <Field label="Asignatura">
+              <select value={draft.subject} onChange={e => setDraft({ ...draft, subject: e.target.value })} className="em-input">
+                {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </Field>
+            <Field label="Fecha del examen">
+              <input type="date" value={draft.date} onChange={e => setDraft({ ...draft, date: e.target.value })} className="em-input" />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Bloque">
+                <input value={draft.block} onChange={e => setDraft({ ...draft, block: e.target.value })} placeholder="Álgebra, Análisis..." className="em-input" />
+              </Field>
+              <Field label="Tema (opcional)">
+                <input value={draft.topic} onChange={e => setDraft({ ...draft, topic: e.target.value })} placeholder="Matrices, Gauss..." className="em-input" />
+              </Field>
+            </div>
+            <Field label="Nombre (opcional)">
+              <input value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} placeholder="Parcial 1, Examen tema 3..." className="em-input" />
+            </Field>
+            <div>
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Prioridad</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {PRIORITIES.map(p => {
+                  const active = draft.priority === p.value
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => setDraft({ ...draft, priority: p.value })}
+                      className="rounded-lg py-2 text-center text-[10px] font-black transition-all"
+                      style={{
+                        background: active ? p.active.bg : '#fafbfc',
+                        color: active ? p.active.text : '#94a3b8',
+                        border: `1.5px solid ${active ? p.active.border : '#f1f5f9'}`,
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-3 border-t-2 border-[#0f172a] px-6 py-4">
+          <p className="text-[10px] font-semibold text-slate-400">Tus misiones se adaptarán al parcial.</p>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">
+              Cancelar
+            </button>
+            <button onClick={onSave} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800">
+              {editing ? 'Guardar cambios' : 'Guardar parcial'}
+            </button>
+          </div>
+        </div>
+
+        <style>{`.em-input{width:100%;border-radius:8px;border:1px solid #f1f5f9;background:#fafbfc;padding:8px 12px;font-size:13px;font-weight:700;color:#334155;outline:none}.em-input:focus{border-color:#bfdbfe;background:white}`}</style>
+      </motion.div>
+    </motion.div>
+  )
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
 

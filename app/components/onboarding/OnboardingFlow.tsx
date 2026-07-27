@@ -20,26 +20,50 @@ type Step = 'welcome' | 'community' | 'school' | 'subjects' | 'feeling' | 'daily
 
 const STEPS: Step[] = ['community', 'school', 'subjects', 'feeling', 'daily-time', 'weekly-days', 'confirm']
 
+const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
+const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
+const HF_EQUATIONS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125527_d366f113-8e29-4f93-b91c-7a6c40bfe1d1.png'
+
+const STEP_PHOTO: Partial<Record<Step, string>> = {
+  community: HF_FLATLAY,
+  school: HF_EQUATIONS,
+  subjects: HF_FLATLAY,
+  feeling: HF_EQUATIONS,
+  'daily-time': HF_LIBRARY,
+  'weekly-days': HF_LIBRARY,
+  confirm: HF_FLATLAY,
+}
+
+const STEP_HEADLINE: Partial<Record<Step, string[]>> = {
+  community: ['¿Dónde', 'haces la', 'PAU?'],
+  school: ['¿Cuál es', 'tu', 'centro?'],
+  subjects: ['¿Qué', 'asigna-', 'turas?'],
+  feeling: ['¿Cómo', 'llevas la', 'prep?'],
+  'daily-time': ['¿Cuánto', 'tiempo', 'al día?'],
+  'weekly-days': ['¿Cuántos', 'días a la', 'semana?'],
+  confirm: ['Tu plan', 'está', 'listo.'],
+}
+
 const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: string }> = [
   { id: 'Madrid', label: 'Madrid', desc: 'EBAU Madrid' },
   { id: 'Cataluña', label: 'Cataluña', desc: 'PAU Cataluña' },
   { id: 'Otra', label: 'Otra comunidad', desc: 'Ruta troncal común' },
 ]
 
-const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; bg: string; betaStatus: 'enabled' | 'locked'; badge?: string }> = [
-  { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff', betaStatus: 'enabled' },
-  { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff', betaStatus: 'enabled' },
-  { id: 'Lengua Castellana', label: 'Lengua Castellana y Literatura', color: '#0891b2', bg: '#ecfeff', betaStatus: 'enabled' },
-  { id: 'Historia de España', label: 'Historia de España', color: '#b45309', bg: '#fff7ed', betaStatus: 'enabled' },
-  { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
-  { id: 'Inglés', label: 'Inglés', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
-  { id: 'Física', label: 'Física', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
-  { id: 'Química', label: 'Química', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
-  { id: 'Biología', label: 'Biología', color: '#64748b', bg: '#f8fafc', betaStatus: 'locked', badge: 'Próximamente' },
+const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; betaStatus: 'enabled' | 'locked'; badge?: string }> = [
+  { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', betaStatus: 'enabled' },
+  { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', betaStatus: 'enabled' },
+  { id: 'Lengua Castellana', label: 'Lengua Castellana y Literatura', color: '#0891b2', betaStatus: 'enabled' },
+  { id: 'Historia de España', label: 'Historia de España', color: '#b45309', betaStatus: 'enabled' },
+  { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Inglés', label: 'Inglés', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Física', label: 'Física', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Química', label: 'Química', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Biología', label: 'Biología', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
 ]
-const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'enabled')
-const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(subject => subject.betaStatus === 'locked')
-const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => subject.id))
+const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'enabled')
+const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'locked')
+const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(s => s.id))
 
 const FEELING_OPTS = [
   'Voy bastante bien',
@@ -69,49 +93,37 @@ const WEEKLY_DAY_OPTS = [
 ]
 
 const STEP_LABELS: Record<Step, { title: string; help: string }> = {
-  welcome: {
-    title: 'Crea tu Camino PAU',
-    help: 'Te haremos unas preguntas rápidas para adaptar Kairo a tu comunidad, centro y ritmo real.',
-  },
-  community: {
-    title: '¿Dónde haces la PAU?',
-    help: 'Así ajustamos la experiencia a tu comunidad autónoma.',
-  },
-  school: {
-    title: '¿Cuál es tu centro educativo?',
-    help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.',
-  },
-  subjects: {
-    title: '¿Qué asignaturas quieres preparar?',
-    help: 'Elige todas las que entran en tu PAU. Puedes cambiarlo más adelante.',
-  },
-  feeling: {
-    title: '¿Cómo llevas la preparación?',
-    help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.',
-  },
-  'daily-time': {
-    title: '¿Cuánto tiempo podrías estudiar al día?',
-    help: 'Lo ajustaremos mejor más adelante según tu ritmo.',
-  },
-  'weekly-days': {
-    title: '¿Cuántos días a la semana estudiarías?',
-    help: 'En el futuro, Kairo adaptará el plan a tu ritmo y preferencias.',
-  },
-  confirm: {
-    title: 'Perfecto. Ya podemos construir tu Camino PAU.',
-    help: 'Revisa el resumen y empieza cuando lo tengas claro.',
-  },
-  saving: {
-    title: 'Construyendo tu Camino PAU',
-    help: 'Estamos preparando tu experiencia inicial.',
-  },
-  done: {
-    title: 'Tu Camino PAU está listo',
-    help: 'Kairo ya tiene lo necesario para empezar a ayudarte.',
-  },
+  welcome: { title: 'Crea tu Camino PAU', help: 'Te haremos unas preguntas rápidas para adaptar Kairo a tu comunidad, centro y ritmo real.' },
+  community: { title: '¿Dónde haces la PAU?', help: 'Así ajustamos la experiencia a tu comunidad autónoma.' },
+  school: { title: '¿Cuál es tu centro educativo?', help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.' },
+  subjects: { title: '¿Qué asignaturas quieres preparar?', help: 'Elige todas las que entran en tu PAU. Puedes cambiarlo más adelante.' },
+  feeling: { title: '¿Cómo llevas la preparación?', help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.' },
+  'daily-time': { title: '¿Cuánto tiempo podrías estudiar al día?', help: 'Lo ajustaremos mejor más adelante según tu ritmo.' },
+  'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'En el futuro, Kairo adaptará el plan a tu ritmo y preferencias.' },
+  confirm: { title: 'Perfecto. Ya podemos construir tu Camino PAU.', help: 'Revisa el resumen y empieza cuando lo tengas claro.' },
+  saving: { title: 'Construyendo tu Camino PAU', help: 'Estamos preparando tu experiencia inicial.' },
+  done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
 }
 
 const SIDEBAR_STEPS = ['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
+
+const BASE_CSS = `
+*{box-sizing:border-box}
+.onb-input{width:100%;border:none;background:transparent;padding:0;font-size:13px;font-weight:700;color:#1c1c1c;font-family:'Inter',system-ui,sans-serif;outline:none}
+.onb-input::placeholder{color:#94a3b8;font-weight:500}
+@keyframes onb-top-slam{0%{transform:translateY(-50%);opacity:0}45%{opacity:1}72%{transform:translateY(3.5%)}86%{transform:translateY(-1%)}100%{transform:translateY(0)}}
+@keyframes onb-bot-slam{0%{transform:translateY(50%);opacity:0}45%{opacity:1}72%{transform:translateY(-3.5%)}86%{transform:translateY(1%)}100%{transform:translateY(0)}}
+@keyframes onb-seam{0%{opacity:0;transform:scaleX(0.3)}40%{opacity:1;transform:scaleX(1)}75%{opacity:0.5}100%{opacity:0}}
+@keyframes onb-bar-save{0%{width:0}100%{width:80%}}
+.onb-lw{position:relative;display:inline-block;margin-right:-4px}.onb-lw:last-child{margin-right:0}
+.onb-ghost{font-size:100px;font-weight:900;letter-spacing:-0.04em;line-height:1;visibility:hidden;display:block;white-space:nowrap}
+.onb-glyph{position:absolute;top:0;left:0;font-size:100px;font-weight:900;color:white;letter-spacing:-0.04em;line-height:1;white-space:nowrap;display:block}
+.onb-top{clip-path:inset(0 0 50% 0);animation:onb-top-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}
+.onb-bot{clip-path:inset(50% 0 0 0);animation:onb-bot-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}
+.onb-seam{position:absolute;left:-2px;right:-2px;top:calc(50% - 1px);height:2px;background:linear-gradient(90deg,transparent,rgba(37,99,235,0.9),rgba(120,196,255,0.95),rgba(37,99,235,0.9),transparent);animation:onb-seam .72s ease-out both;pointer-events:none}
+`
 
 export default function OnboardingFlow() {
   const router = useRouter()
@@ -157,11 +169,11 @@ export default function OnboardingFlow() {
 
   const savingMessages = useMemo(() => {
     const msgs: string[] = []
-    const selectedEnabledSubjects = data.subjects.filter(subject => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject))
-    if (selectedEnabledSubjects.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
-    if (selectedEnabledSubjects.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
-    if (selectedEnabledSubjects.includes('Lengua Castellana')) msgs.push('Preparando comentario, gramática y literatura…')
-    if (selectedEnabledSubjects.includes('Historia de España')) msgs.push('Construyendo tu cronología de Historia de España…')
+    const enabledSelected = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+    if (enabledSelected.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
+    if (enabledSelected.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
+    if (enabledSelected.includes('Lengua Castellana')) msgs.push('Preparando comentario, gramática y literatura…')
+    if (enabledSelected.includes('Historia de España')) msgs.push('Construyendo tu cronología de Historia de España…')
     if (msgs.length === 0) {
       msgs.push('Calculando tu ritmo de estudio…')
       msgs.push('Construyendo tu Camino PAU…')
@@ -239,8 +251,8 @@ export default function OnboardingFlow() {
     setSavingMsgIdx(0)
     setStep('saving')
     const completedAt = new Date().toISOString()
-    const selectedEnabledSubjects = data.subjects.filter(subject => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject))
-    saveOnboarding({ ...data, subjects: selectedEnabledSubjects, completedAt })
+    const selectedEnabled = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+    saveOnboarding({ ...data, subjects: selectedEnabled, completedAt })
     try {
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
@@ -253,7 +265,7 @@ export default function OnboardingFlow() {
             community: data.community,
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,
-            subjects: selectedEnabledSubjects,
+            subjects: selectedEnabled,
             preparationFeeling: data.preparationFeeling,
             dailyStudyTime: data.dailyStudyTime,
             dailyMinutes: data.dailyMinutes,
@@ -263,7 +275,7 @@ export default function OnboardingFlow() {
           }),
         })
 
-        const subjectSlugs = selectedEnabledSubjects
+        const subjectSlugs = selectedEnabled
           .map(s => SUBJECT_TO_SLUG[s])
           .filter((s): s is string => Boolean(s))
 
@@ -275,20 +287,12 @@ export default function OnboardingFlow() {
             body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero' }),
           })
           if (!genRes.ok) {
-            setSavingError(
-              generateRetriesRef.current >= 2
-                ? 'Algo fue mal. Contacta con soporte en hola@kairo.es'
-                : 'No pudimos generar tu plan. Inténtalo de nuevo.'
-            )
+            setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')
             return
           }
           const genJson = await genRes.json()
           if (!genJson.success) {
-            setSavingError(
-              generateRetriesRef.current >= 2
-                ? 'Algo fue mal. Contacta con soporte en hola@kairo.es'
-                : 'No pudimos generar tu plan. Inténtalo de nuevo.'
-            )
+            setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')
             return
           }
         }
@@ -296,11 +300,7 @@ export default function OnboardingFlow() {
       markOnboardingComplete()
       router.push('/camino')
     } catch {
-      setSavingError(
-        generateRetriesRef.current >= 2
-          ? 'Algo fue mal. Contacta con soporte en hola@kairo.es'
-          : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.'
-      )
+      setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
     }
   }
 
@@ -311,233 +311,320 @@ export default function OnboardingFlow() {
   const showConfirm = !isDone && !isSaving && step === 'confirm'
 
   return (
-    <div style={{ minHeight: '100dvh', fontFamily: 'Geist, system-ui, sans-serif', background: '#0f172a' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap');*{box-sizing:border-box}.onb-input{width:100%;border-radius:8px;border:1px solid #e2e8f0;background:#fafbfc;padding:10px 12px;font-size:13px;font-weight:700;color:#0f172a;font-family:Geist,system-ui,sans-serif;outline:none}.onb-input::placeholder{color:#94a3b8;font-weight:600}.onb-input:focus{border-color:#2563eb;background:white}@keyframes onb-top-slam{0%{transform:translateY(-50%);opacity:0}45%{opacity:1}72%{transform:translateY(3.5%)}86%{transform:translateY(-1%)}100%{transform:translateY(0)}}@keyframes onb-bot-slam{0%{transform:translateY(50%);opacity:0}45%{opacity:1}72%{transform:translateY(-3.5%)}86%{transform:translateY(1%)}100%{transform:translateY(0)}}@keyframes onb-seam{0%{opacity:0;transform:scaleX(0.3)}40%{opacity:1;transform:scaleX(1)}75%{opacity:0.5}100%{opacity:0}}@keyframes onb-bar-save{0%{width:0}100%{width:80%}}.onb-lw{position:relative;display:inline-block;margin-right:-4px}.onb-lw:last-child{margin-right:0}.onb-ghost{font-size:100px;font-weight:900;letter-spacing:-0.04em;line-height:1;visibility:hidden;display:block;white-space:nowrap}.onb-glyph{position:absolute;top:0;left:0;font-size:100px;font-weight:900;color:white;letter-spacing:-0.04em;line-height:1;white-space:nowrap;display:block}.onb-top{clip-path:inset(0 0 50% 0);animation:onb-top-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}.onb-bot{clip-path:inset(50% 0 0 0);animation:onb-bot-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}.onb-seam{position:absolute;left:-2px;right:-2px;top:calc(50% - 1px);height:2px;background:linear-gradient(90deg,transparent,rgba(37,99,235,0.9),rgba(120,196,255,0.95),rgba(37,99,235,0.9),transparent);animation:onb-seam .72s ease-out both;pointer-events:none}`}</style>
-      {step === 'welcome' ? renderWelcome() : renderShell()}
+    <div style={{ minHeight: '100dvh', fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <style>{FONTS + BASE_CSS}</style>
+      {step === 'welcome'
+        ? renderWelcome()
+        : (isSaving || isDone)
+          ? renderSavingDone()
+          : renderShell()}
     </div>
   )
 
+  // ─── V4: Welcome screen ──────────────────────────────────────────────────────
   function renderWelcome() {
     return (
-      <div style={{ minHeight: '100dvh', display: 'grid', gridTemplateRows: 'auto 1fr auto', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(37,99,235,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.025) 1px,transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+      <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#111' }}>
+        {/* Left — dark editorial */}
+        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', background: '#111', position: 'relative', overflow: 'hidden' }}>
+          {/* Decorative large K */}
+          <div style={{ position: 'absolute', top: '50%', left: '-20px', transform: 'translateY(-56%)', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(200px, 22vw, 300px)', color: 'rgba(255,255,255,.025)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none', letterSpacing: '-0.03em' }}>K</div>
 
-        {/* Nav */}
-        <nav style={{ position: 'relative', zIndex: 2, padding: '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-          <div style={{ fontSize: 14, fontWeight: 900, color: 'white', letterSpacing: '-0.02em' }}>Kairo</div>
-          <div style={{ padding: '5px 12px', borderRadius: 999, background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.2)', fontSize: 9, fontWeight: 900, color: '#3b82f6', letterSpacing: '.1em', textTransform: 'uppercase' }}>Beta privada</div>
-        </nav>
+          {/* Header */}
+          <div style={{ padding: '22px 44px', borderBottom: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: '.05em', color: '#fff' }}>Kairo</span>
+            <span style={{ padding: '4px 10px', border: '1px solid rgba(37,99,235,.3)', background: 'rgba(37,99,235,.1)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#3b82f6' }}>Beta privada</span>
+          </div>
 
-        {/* Body */}
-        <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', padding: '0 96px', gap: 60 }}>
-          {/* Left: hero */}
-          <div style={{ flex: 1, maxWidth: 560 }}>
-            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.28em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 20 }}>Camino PAU · Configuración inicial</div>
-            <h1 style={{ fontSize: 68, fontWeight: 900, color: 'white', letterSpacing: '-0.045em', lineHeight: 0.93, margin: '0 0 24px' }}>
-              Tu plan de<br /><span style={{ color: '#3b82f6' }}>PAU</span><br />empieza aquí.
-            </h1>
-            <p style={{ fontSize: 15, fontWeight: 500, color: '#64748b', lineHeight: 1.75, margin: '0 0 36px', maxWidth: 420 }}>
+          {/* Main */}
+          <div style={{ flex: 1, padding: '0 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6', marginBottom: 20 }}>Tu plan de selectividad · 2025–2026</div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(52px, 6.5vw, 88px)', lineHeight: .91, color: '#fff', letterSpacing: '.01em', marginBottom: 22 }}>
+              La PAU<br />empieza<br /><span style={{ color: 'rgba(255,255,255,.2)' }}>hoy.</span>
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.75, color: 'rgba(255,255,255,.4)', maxWidth: 380, marginBottom: 36 }}>
               7 preguntas. 3 minutos. Kairo construye un Camino PAU adaptado a tu comunidad, asignaturas y ritmo real.
             </p>
-            <div style={{ display: 'flex', gap: 24, marginBottom: 44 }}>
-              {['Simulacros reales', 'Misiones diarias', 'IA de corrección'].map(f => (
-                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 900, color: '#475569' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />
-                  {f}
+
+            {/* Stats grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0, border: '1px solid rgba(255,255,255,.08)', marginBottom: 40 }}>
+              {[['4.200+', 'Alumnos'], ['8.4', 'Nota media'], ['2 min', 'Configurar']].map(([val, label], i) => (
+                <div key={i} style={{ padding: '14px 18px', borderRight: i < 2 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, color: '#fff', lineHeight: 1 }}>{val}</div>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: 3 }}>{label}</div>
                 </div>
               ))}
             </div>
-            <button
-              onClick={goNext}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 36px', borderRadius: 10, border: 'none', background: 'white', color: '#0f172a', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 15, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 28px rgba(0,0,0,0.3)', transition: 'all .14s' }}
-            >
-              Empezar con Kairo →
-            </button>
-            <div style={{ marginTop: 12, fontSize: 10, fontWeight: 700, color: '#334155' }}>Acceso gratuito durante la beta privada</div>
+
+            {/* Circle CTA */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <button
+                onClick={goNext}
+                style={{ width: 100, height: 100, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,.2)', background: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'transform .2s, border-color .2s', flexShrink: 0 }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.07)'; (e.currentTarget as HTMLElement).style.borderColor = '#fff' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,.2)' }}
+              >
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: '.08em', color: '#fff', lineHeight: 1.2, textAlign: 'center' }}>Empezar</span>
+                <span style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', marginTop: 4 }}>↗</span>
+              </button>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.2)', lineHeight: 1.7 }}>
+                Personaliza tu plan<br />de preparación PAU<br />Gratis en beta privada
+              </div>
+            </div>
           </div>
 
-          {/* Right: floating step preview */}
-          <div style={{ width: 300, flexShrink: 0 }}>
-            <div style={{ borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 24px 64px rgba(0,0,0,0.5)' }}>
-              <div style={{ height: 3, background: '#0a101e' }}><div style={{ height: '100%', width: '57%', background: '#2563eb' }} /></div>
-              <div style={{ background: '#060e1e', padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.24em', textTransform: 'uppercase', color: '#1e293b', marginBottom: 4 }}>Camino PAU</div>
-                <div style={{ fontSize: 9, fontWeight: 900, color: '#2563eb', marginBottom: 5 }}>Paso 4 de 7</div>
-                <div style={{ fontSize: 13, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.02em', lineHeight: 1.2 }}>¿Cómo llevas la preparación?</div>
-              </div>
-              <div style={{ background: '#fff', padding: '14px 18px' }}>
-                {[
-                  { label: 'Voy bastante bien', sel: false },
-                  { label: 'Voy bien, quiero mejorar', sel: true },
-                  { label: 'Me cuesta organizarme', sel: false },
-                  { label: 'Voy un poco perdido/a', sel: false },
-                  { label: 'Prefiero empezar desde lo básico', sel: false },
-                ].map(opt => (
-                  <div key={opt.label} style={{ display: 'grid', gridTemplateColumns: '3px 1fr auto', borderRadius: 7, border: `1px solid ${opt.sel ? '#2563eb' : '#f1f5f9'}`, overflow: 'hidden', marginBottom: 5, background: opt.sel ? '#eff6ff' : '#fafbfc' }}>
-                    <div style={{ background: opt.sel ? '#2563eb' : '#e2e8f0' }} />
-                    <div style={{ padding: '8px 10px', fontSize: 10, fontWeight: 900, color: opt.sel ? '#1e40af' : '#475569' }}>{opt.label}</div>
-                    <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center' }}>
-                      <div style={{ width: 12, height: 12, borderRadius: '50%', background: opt.sel ? '#2563eb' : 'transparent', border: opt.sel ? 'none' : '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {opt.sel && <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>}
-                      </div>
-                    </div>
+          {/* Progress */}
+          <div style={{ flexShrink: 0, borderTop: '1px solid rgba(255,255,255,.07)', padding: '14px 44px', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {STEPS.map((_, i) => (
+                <div key={i} style={{ flex: 1, height: 2, background: 'rgba(255,255,255,.08)', borderRadius: 2 }} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right — cinematic photo */}
+        <div style={{ width: '50%', position: 'relative', overflow: 'hidden' }}>
+          <img src={HF_LIBRARY} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.55) saturate(.6)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.9) 0%, rgba(17,17,17,.15) 45%, transparent 70%)' }} />
+          <div style={{ position: 'absolute', bottom: 32, right: 32, textAlign: 'right' }}>
+            <div style={{ display: 'inline-block', padding: '4px 10px', border: '1px solid rgba(255,255,255,.15)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: 8 }}>Editorial · Higgsfield</div>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,.25)', maxWidth: 160, lineHeight: 1.6 }}>Miles de alumnos ya han aprobado su PAU con Kairo</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ─── V1: Step shell ───────────────────────────────────────────────────────────
+  function renderShell() {
+    const photo = STEP_PHOTO[step] ?? HF_FLATLAY
+    const headlines = STEP_HEADLINE[step] ?? []
+
+    return (
+      <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#111' }}>
+        {/* Left — cinematic photo */}
+        <div style={{ width: '44%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={photo}
+              src={photo}
+              alt=""
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.45) saturate(.55)' }}
+            />
+          </AnimatePresence>
+          {/* Gradient: dark right edge + dark bottom */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.1) 0%, rgba(17,17,17,.75) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(17,17,17,.7) 0%, transparent 55%)' }} />
+
+          {/* Content overlay */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '32px 36px', zIndex: 1 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>
+              Paso {currentStep} de {STEPS.length} · {SIDEBAR_STEPS[stepIndex] ?? ''}
+            </div>
+
+            <div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(44px, 5.5vw, 72px)', lineHeight: .92, color: '#fff', letterSpacing: '.01em' }}>
+                    {headlines.map((line, i) => <div key={i}>{line}</div>)}
                   </div>
-                ))}
-              </div>
-              <div style={{ borderTop: '2px solid #0f172a', background: '#fff', padding: '10px 18px', display: 'flex', justifyContent: 'flex-end' }}>
-                <div style={{ padding: '7px 16px', borderRadius: 6, background: '#0f172a', color: 'white', fontSize: 10, fontWeight: 900 }}>Continuar →</div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Bottom mini stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: 'rgba(255,255,255,.06)', marginTop: 28 }}>
+                <div style={{ background: 'rgba(17,17,17,.7)', padding: '10px 14px' }}>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#fff', lineHeight: 1 }}>{currentStep}/{STEPS.length}</div>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: 2 }}>Pasos</div>
+                </div>
+                <div style={{ background: 'rgba(17,17,17,.7)', padding: '10px 14px' }}>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#fff', lineHeight: 1 }}>{progressPct}%</div>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: 2 }}>Completado</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <footer style={{ position: 'relative', zIndex: 2, padding: '18px 96px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 28 }}>
-          {[
-            { label: 'Comunidad', hint: 'Madrid o Cataluña' },
-            { label: 'Asignaturas', hint: '4 disponibles en beta' },
-            { label: 'Plan generado por', hint: 'Kairo IA' },
-          ].map(item => (
-            <div key={item.label} style={{ fontSize: 10, fontWeight: 900, color: '#1e293b' }}>
-              {item.label}: <span style={{ color: '#2563eb' }}>{item.hint}</span>
-            </div>
-          ))}
-        </footer>
-      </div>
-    )
-  }
+        {/* Right — editorial white panel */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f9f9f9', overflow: 'hidden' }}>
+          {/* Progress track */}
+          <div style={{ height: 2, background: '#e0e0e0', flexShrink: 0, position: 'relative' }}>
+            <motion.div
+              style={{ position: 'absolute', left: 0, top: 0, height: '100%', background: '#1c1c1c' }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            />
+          </div>
 
-  function renderShell() {
-    const displayNum = isDone ? '✓' : isSaving ? String(STEPS.length) : (currentStep > 0 ? String(currentStep) : '—')
-    const allDone = isDone || isSaving
-
-    return (
-      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ width: '100%', maxWidth: 900, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 32px 80px rgba(0,0,0,0.55)', display: 'grid', gridTemplateColumns: '240px 1fr' }}>
-
-          {/* LEFT SIDEBAR */}
-          <div style={{ background: '#060e1e', padding: '32px 26px', display: 'flex', flexDirection: 'column', minHeight: 540, borderRight: '1px solid rgba(255,255,255,0.04)' }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: 'white', letterSpacing: '-0.02em', marginBottom: 32 }}>Kairo</div>
-            <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.28em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 8 }}>Camino PAU</div>
-            <div style={{ fontSize: 72, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', lineHeight: 0.88, marginBottom: 6 }}>{displayNum}</div>
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 32 }}>
-              {isDone ? 'completado' : isSaving ? 'generando' : `de ${STEPS.length} pasos`}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+          {/* Header */}
+          <div style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
+            <div style={{ display: 'flex', gap: 0 }}>
               {SIDEBAR_STEPS.map((label, i) => {
-                const done = allDone || currentStep > i + 1
-                const active = !allDone && currentStep === i + 1
+                const done = currentStep > i + 1
+                const active = currentStep === i + 1
                 return (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: done ? '#2563eb' : active ? 'white' : '#0f172a', border: done || active ? 'none' : '1px solid #1e293b', fontSize: 8, fontWeight: 900, color: done ? 'white' : active ? '#0f172a' : '#334155' }}>
-                      {done
-                        ? <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" /></svg>
-                        : i + 1}
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: done ? '#2563eb' : active ? 'white' : '#334155' }}>{label}</span>
+                  <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent' }}>
+                    {label}
                   </div>
                 )
               })}
             </div>
-
-            <div style={{ marginTop: 24 }}>
-              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
-                <motion.div
-                  style={{ height: '100%', background: '#2563eb', borderRadius: 99 }}
-                  animate={{ width: `${progressPct}%` }}
-                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                />
-              </div>
-              <div style={{ fontSize: 8, fontWeight: 900, color: '#1e3a5f', marginTop: 6 }}>{progressPct}% completado</div>
-            </div>
           </div>
 
-          {/* RIGHT PANEL */}
-          <div style={{ background: isSaving && !savingError ? '#0f172a' : '#fff', display: 'flex', flexDirection: 'column', transition: 'background 0.2s' }}>
-            {/* Panel header — hidden during saving animation */}
-            {!(isSaving && !savingError) && (
-              <div style={{ background: '#0f172a', padding: '28px 32px 22px' }}>
-                <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#475569', marginBottom: 8 }}>
-                  {isDone ? 'Completado' : `Paso ${currentStep} de ${STEPS.length}`}
-                </div>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 6px' }}>
-                  {STEP_LABELS[step].title}
-                </h2>
-                <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, margin: 0 }}>{STEP_LABELS[step].help}</p>
-              </div>
-            )}
+          {/* Step title */}
+          <div style={{ padding: '24px 40px 0', flexShrink: 0 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Paso {currentStep} · {SIDEBAR_STEPS[stepIndex] ?? ''}</div>
+            <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.03em', color: '#1c1c1c', marginBottom: 4, lineHeight: 1.15 }}>{STEP_LABELS[step].title}</div>
+            <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 0 }}>{STEP_LABELS[step].help}</p>
+          </div>
 
-            {/* Panel body */}
-            <div style={{ padding: isSaving && !savingError ? '0' : '22px 32px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: isSaving && !savingError ? 'center' : 'stretch', justifyContent: isSaving && !savingError ? 'center' : 'flex-start' }}>
-              <AnimatePresence mode="wait">
-                <motion.div key={`${step}-content`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }} style={{ width: '100%' }}>
-                  {renderStep()}
-                </motion.div>
-              </AnimatePresence>
+          {/* Body */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${step}-content`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                style={{ width: '100%' }}
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Footer */}
+          <div style={{ borderTop: '1px solid #e0e0e0', padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: '#f9f9f9' }}>
+            <div>
+              {showBack && (
+                <button onClick={goBack} style={{ padding: '9px 18px', background: 'none', border: '1px solid #e0e0e0', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: '#94a3b8', cursor: 'pointer' }}>
+                  ← Atrás
+                </button>
+              )}
             </div>
-
-            {/* Panel footer */}
-            {!isSaving && (
-              <div style={{ borderTop: '2px solid #0f172a', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  {showBack && (
-                    <button
-                      onClick={goBack}
-                      style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 12, fontWeight: 900, color: '#64748b', cursor: 'pointer', transition: 'all .12s' }}
-                    >
-                      ← Atrás
-                    </button>
-                  )}
-                </div>
-                <div>
-                  {showContinue && (
-                    <button
-                      onClick={goNext}
-                      disabled={!canContinue}
-                      style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: canContinue ? '#0f172a' : '#f1f5f9', color: canContinue ? 'white' : '#cbd5e1', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 13, fontWeight: 900, cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 14px rgba(15,23,42,0.18)' : 'none', transition: 'all .12s' }}
-                    >
-                      Continuar →
-                    </button>
-                  )}
-                  {showConfirm && (
-                    <button
-                      onClick={finish}
-                      style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#0f172a', color: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 13, fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 14px rgba(15,23,42,0.18)', transition: 'all .12s' }}
-                    >
-                      Crear mi Camino PAU →
-                    </button>
-                  )}
-                  {isDone && (
-                    <button
-                      onClick={() => router.push('/camino')}
-                      style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#0f172a', color: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 13, fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 14px rgba(15,23,42,0.18)' }}
-                    >
-                      Ver mi Camino PAU →
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+            <div>
+              {showContinue && (
+                <button
+                  onClick={goNext}
+                  disabled={!canContinue}
+                  style={{ padding: '11px 28px', background: canContinue ? '#1c1c1c' : '#e0e0e0', border: 'none', color: canContinue ? '#fff' : '#94a3b8', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: canContinue ? 'pointer' : 'not-allowed', transition: 'background .12s' }}
+                >
+                  Continuar →
+                </button>
+              )}
+              {showConfirm && (
+                <button onClick={finish} style={{ padding: '11px 28px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: 'pointer' }}>
+                  Crear mi Camino PAU →
+                </button>
+              )}
+              {isDone && (
+                <button onClick={() => router.push('/camino')} style={{ padding: '11px 28px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
+                  Ver mi Camino PAU →
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
     )
   }
 
-  function renderStep() {
-    if (step === 'welcome') return null
+  // ─── Saving / Done full-screen ────────────────────────────────────────────────
+  function renderSavingDone() {
+    if (isDone) {
+      return (
+        <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 16 }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Check size={30} color="#111" strokeWidth={3} />
+          </div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, color: '#fff', letterSpacing: '.02em' }}>Tu Camino PAU está listo</div>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>Tu primer día empieza mañana.</p>
+          <button onClick={() => router.push('/camino')} style={{ marginTop: 8, padding: '12px 32px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
+            Ver mi Camino PAU →
+          </button>
+        </div>
+      )
+    }
 
+    if (savingError) {
+      return (
+        <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 16, padding: 24 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#f87171', textAlign: 'center', maxWidth: 400 }}>{savingError}</p>
+          {generateRetriesRef.current < 2 && (
+            <button onClick={finish} style={{ padding: '11px 24px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
+              Reintentar
+            </button>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40 }}>
+          {['K', 'A', 'I', 'R', 'O'].map((ch, i) => (
+            <div key={i} className="onb-lw">
+              <span className="onb-ghost">{ch}</span>
+              <span className="onb-glyph onb-top" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
+              <span className="onb-glyph onb-bot" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
+              <div className="onb-seam" style={{ animationDelay: `${i * 110}ms` }} />
+            </div>
+          ))}
+        </div>
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 10 }}>
+          Generando tu Camino PAU
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={savingMsgIdx}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.3 }}
+            style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: '0 0 28px', fontFamily: "'Inter', system-ui, sans-serif" }}
+          >
+            {savingMessages[savingMsgIdx]}
+          </motion.p>
+        </AnimatePresence>
+        <div style={{ width: 200, height: 2, background: 'rgba(255,255,255,.06)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', background: '#2563eb', animation: 'onb-bar-save 6s ease-out forwards' }} />
+        </div>
+      </div>
+    )
+  }
+
+  // ─── Step content ─────────────────────────────────────────────────────────────
+  function renderStep() {
     if (step === 'community') {
-      return <OptionGrid>{COMMUNITY_OPTS.map(option => <ChoiceCard key={option.id} title={option.label} desc={option.desc} selected={data.community === option.id} onClick={() => selectCommunity(option.id)} />)}</OptionGrid>
+      return (
+        <EditorialGrid cols={3}>
+          {COMMUNITY_OPTS.map(opt => (
+            <EditorialChoice key={opt.id} title={opt.label} sub={opt.desc} selected={data.community === opt.id} onClick={() => selectCommunity(opt.id)} />
+          ))}
+        </EditorialGrid>
+      )
     }
 
     if (step === 'school') {
       const showDropdown = schoolOpen && schoolQuery.length >= 2
       return (
         <div style={{ position: 'relative' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, borderRadius: 8, border: '1px solid #e2e8f0', background: '#fafbfc', padding: '10px 14px', transition: 'border-color .12s' }}>
-            <Search size={16} style={{ color: '#94a3b8', flexShrink: 0 }} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #e0e0e0', background: '#fff', padding: '11px 16px' }}>
+            <Search size={15} style={{ color: '#94a3b8', flexShrink: 0 }} />
             <input
               type="text"
               value={schoolQuery}
@@ -546,30 +633,27 @@ export default function OnboardingFlow() {
               onBlur={() => setTimeout(() => setSchoolOpen(false), 150)}
               placeholder="Busca tu instituto..."
               className="onb-input"
-              style={{ border: 'none', padding: 0, background: 'transparent' }}
               autoFocus
             />
           </label>
           {showDropdown && (
-            <div style={{ position: 'absolute', left: 0, right: 0, top: 'calc(100% + 6px)', zIndex: 20, borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', overflow: 'hidden', boxShadow: '0 12px 40px rgba(15,23,42,0.14)' }}>
+            <div style={{ position: 'absolute', left: 0, right: 0, top: 'calc(100% + 4px)', zIndex: 20, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,.1)' }}>
               {filteredCenters.map(center => (
                 <button
                   key={center}
                   type="button"
                   onMouseDown={() => selectSchool(center, 'dataset')}
-                  style={{ display: 'grid', gridTemplateColumns: '4px 1fr', width: '100%', textAlign: 'left', border: 'none', borderBottom: '1px solid #f8fafc', background: data.schoolName === center ? '#eff6ff' : 'white', cursor: 'pointer', overflow: 'hidden' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', border: 'none', borderBottom: '1px solid #f0f0f0', background: data.schoolName === center ? '#1c1c1c' : '#fff', cursor: 'pointer', padding: '10px 16px' }}
                 >
-                  <div style={{ background: data.schoolName === center ? '#2563eb' : 'transparent' }} />
-                  <div style={{ padding: '10px 13px', fontSize: 12, fontWeight: 900, color: data.schoolName === center ? '#1e40af' : '#334155' }}>{center}</div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: data.schoolName === center ? '#fff' : '#1c1c1c' }}>{center}</span>
                 </button>
               ))}
               <button
                 type="button"
                 onMouseDown={() => selectSchool('Mi centro no aparece', 'manual')}
-                style={{ display: 'grid', gridTemplateColumns: '4px 1fr', width: '100%', textAlign: 'left', border: 'none', background: data.schoolName === 'Mi centro no aparece' ? '#eff6ff' : '#fafbfc', cursor: 'pointer', overflow: 'hidden' }}
+                style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', border: 'none', background: data.schoolName === 'Mi centro no aparece' ? '#1c1c1c' : '#f9f9f9', cursor: 'pointer', padding: '10px 16px', borderTop: '1px solid #e0e0e0' }}
               >
-                <div style={{ background: data.schoolName === 'Mi centro no aparece' ? '#2563eb' : 'transparent' }} />
-                <div style={{ padding: '10px 13px', fontSize: 12, fontWeight: 900, color: data.schoolName === 'Mi centro no aparece' ? '#1e40af' : '#64748b' }}>Mi centro no aparece</div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: data.schoolName === 'Mi centro no aparece' ? '#fff' : '#64748b' }}>Mi centro no aparece</span>
               </button>
             </div>
           )}
@@ -580,49 +664,42 @@ export default function OnboardingFlow() {
     if (step === 'subjects') {
       return (
         <div>
-          <div style={{ borderRadius: 10, border: '1px solid #bfdbfe', background: '#eff6ff', padding: '11px 14px', marginBottom: 16 }}>
-            <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Beta privada</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', lineHeight: 1.5 }}>De momento puedes probar con Matemáticas II, CCSS, Lengua e Historia. El resto se irá abriendo próximamente.</div>
+          <div style={{ border: '1px solid #bfdbfe', background: '#eff6ff', padding: '10px 14px', marginBottom: 16 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Beta privada</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>De momento puedes probar con Matemáticas II, CCSS, Lengua e Historia. El resto se irá abriendo próximamente.</div>
           </div>
-          <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 10 }}>Disponibles en beta privada</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.2em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Disponibles en beta privada</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0', marginBottom: 14 }}>
             {PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => {
               const selected = data.subjects.includes(subject.id)
               return (
                 <button
                   key={subject.id}
                   onClick={() => toggleSubject(subject.id)}
-                  style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: `1px solid ${selected ? subject.color : '#f1f5f9'}`, overflow: 'hidden', background: selected ? subject.bg : '#fafbfc', cursor: 'pointer', textAlign: 'left', transition: 'all .12s' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: selected ? '#1c1c1c' : '#fff', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
                 >
-                  <div style={{ background: selected ? subject.color : '#e2e8f0', transition: 'background .12s' }} />
-                  <div style={{ padding: '11px 12px' }}>
-                    <div style={{ fontSize: 12, fontWeight: 900, color: selected ? subject.color : '#0f172a', lineHeight: 1.3 }}>{subject.label}</div>
+                  <div>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: selected ? '#fff' : subject.color, marginBottom: 8 }} />
+                    <div style={{ fontSize: 12, fontWeight: 700, color: selected ? '#fff' : '#1c1c1c', lineHeight: 1.3 }}>{subject.label}</div>
                   </div>
-                  <div style={{ padding: '11px 12px', display: 'flex', alignItems: 'center' }}>
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: selected ? subject.color : 'transparent', border: selected ? 'none' : '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {selected && <Check size={9} color="white" strokeWidth={3} />}
-                    </div>
+                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: selected ? '#fff' : 'transparent', border: selected ? 'none' : '1.5px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {selected && <Check size={9} color="#1c1c1c" strokeWidth={3} />}
                   </div>
                 </button>
               )
             })}
           </div>
-          <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 10 }}>Próximamente</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: !canContinue ? 14 : 0 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.2em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Próximamente</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0', opacity: .45 }}>
             {PRIVATE_BETA_LOCKED_SUBJECTS.map(subject => (
-              <div key={subject.id} style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fafbfc', opacity: 0.5 }}>
-                <div style={{ background: '#e2e8f0' }} />
-                <div style={{ padding: '11px 12px' }}>
-                  <div style={{ fontSize: 12, fontWeight: 900, color: '#94a3b8' }}>{subject.label}</div>
-                </div>
-                <div style={{ padding: '11px 12px', display: 'flex', alignItems: 'center' }}>
-                  <Lock size={11} style={{ color: '#cbd5e1' }} strokeWidth={2.5} />
-                </div>
+              <div key={subject.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: '#fff' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>{subject.label}</div>
+                <Lock size={11} style={{ color: '#cbd5e1' }} strokeWidth={2.5} />
               </div>
             ))}
           </div>
           {!canContinue && (
-            <div style={{ borderRadius: 8, border: '1px solid #fde68a', background: '#fffbeb', padding: '10px 13px', fontSize: 11, fontWeight: 700, color: '#92400e' }}>
+            <div style={{ marginTop: 14, border: '1px solid #fde68a', background: '#fffbeb', padding: '10px 14px', fontSize: 11, fontWeight: 600, color: '#92400e' }}>
               Selecciona al menos una asignatura disponible para construir tu Camino PAU.
             </div>
           )}
@@ -631,96 +708,58 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'feeling') {
-      return <OptionGrid>{FEELING_OPTS.map(label => <ChoiceCard key={label} title={label} selected={data.preparationFeeling === label} onClick={() => update({ preparationFeeling: label })} />)}</OptionGrid>
+      return (
+        <EditorialGrid cols={2}>
+          {FEELING_OPTS.map(label => (
+            <EditorialChoice key={label} title={label} selected={data.preparationFeeling === label} onClick={() => update({ preparationFeeling: label })} />
+          ))}
+        </EditorialGrid>
+      )
     }
 
     if (step === 'daily-time') {
-      return <OptionGrid>{TIME_OPTS.map(option => <ChoiceCard key={option.label} title={option.label} selected={data.dailyStudyTime === option.label} onClick={() => update({ dailyStudyTime: option.label, dailyMinutes: option.minutes })} />)}</OptionGrid>
+      return (
+        <EditorialGrid cols={2}>
+          {TIME_OPTS.map(opt => (
+            <EditorialChoice key={opt.label} title={opt.label} selected={data.dailyStudyTime === opt.label} onClick={() => update({ dailyStudyTime: opt.label, dailyMinutes: opt.minutes })} />
+          ))}
+        </EditorialGrid>
+      )
     }
 
     if (step === 'weekly-days') {
-      return <OptionGrid>{WEEKLY_DAY_OPTS.map(option => <ChoiceCard key={option.label} title={option.label} selected={data.weeklyStudyDays === option.label} onClick={() => update({ weeklyStudyDays: option.label, weeklyStudyDaysValue: option.value })} />)}</OptionGrid>
+      return (
+        <EditorialGrid cols={2}>
+          {WEEKLY_DAY_OPTS.map(opt => (
+            <EditorialChoice key={opt.label} title={opt.label} selected={data.weeklyStudyDays === opt.label} onClick={() => update({ weeklyStudyDays: opt.label, weeklyStudyDaysValue: opt.value })} />
+          ))}
+        </EditorialGrid>
+      )
     }
 
     if (step === 'confirm') {
       return (
         <div>
           {savingError && (
-            <div style={{ borderRadius: 8, border: '1px solid #fecaca', background: '#fef2f2', padding: '10px 13px', fontSize: 11, fontWeight: 700, color: '#991b1b', marginBottom: 14 }}>
+            <div style={{ border: '1px solid #fecaca', background: '#fef2f2', padding: '10px 14px', fontSize: 11, fontWeight: 700, color: '#991b1b', marginBottom: 14 }}>
               {savingError}
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <SummaryItem label="Comunidad" value={data.community || '-'} />
-            <SummaryItem label="Centro educativo" value={data.schoolName || '-'} />
-            <SummaryItem label="Asignaturas" value={data.subjects.join(', ') || '-'} />
-            <SummaryItem label="Preparación" value={data.preparationFeeling || '-'} />
-            <SummaryItem label="Tiempo diario" value={data.dailyStudyTime || '-'} />
-            <SummaryItem label="Días por semana" value={data.weeklyStudyDays || '-'} />
-          </div>
-        </div>
-      )
-    }
-
-    if (step === 'saving') {
-      if (savingError) {
-        return (
-          <div style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fef2f2', padding: '24px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#991b1b', marginBottom: generateRetriesRef.current < 2 ? 16 : 0 }}>{savingError}</p>
-            {generateRetriesRef.current < 2 && (
-              <button
-                type="button"
-                onClick={finish}
-                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#dc2626', color: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}
-              >
-                Reintentar
-              </button>
-            )}
-          </div>
-        )
-      }
-      return (
-        <div style={{ textAlign: 'center', padding: '32px 0' }}>
-          {/* KAIRO split-halves animation */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40 }}>
-            {['K', 'A', 'I', 'R', 'O'].map((ch, i) => (
-              <div key={i} className="onb-lw">
-                <span className="onb-ghost">{ch}</span>
-                <span className="onb-glyph onb-top" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
-                <span className="onb-glyph onb-bot" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
-                <div className="onb-seam" style={{ animationDelay: `${i * 110}ms` }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
+            {[
+              ['Comunidad', data.community || '—'],
+              ['Centro educativo', data.schoolName || '—'],
+              ['Asignaturas', data.subjects.join(', ') || '—'],
+              ['Preparación', data.preparationFeeling || '—'],
+              ['Tiempo diario', data.dailyStudyTime || '—'],
+              ['Días por semana', data.weeklyStudyDays || '—'],
+            ].map(([label, value]) => (
+              <div key={label} style={{ background: '#fff', padding: '16px 18px' }}>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>{label}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#1c1c1c', lineHeight: 1.4 }}>{value}</div>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 10 }}>
-            Generando tu Camino PAU
-          </div>
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={savingMsgIdx}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.3 }}
-              style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: '0 0 28px' }}
-            >
-              {savingMessages[savingMsgIdx]}
-            </motion.p>
-          </AnimatePresence>
-          <div style={{ width: 200, height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden', margin: '0 auto' }}>
-            <div style={{ height: '100%', background: '#2563eb', borderRadius: 99, animation: 'onb-bar-save 6s ease-out forwards' }} />
-          </div>
-        </div>
-      )
-    }
-
-    if (step === 'done') {
-      return (
-        <div style={{ textAlign: 'center', padding: '16px 0' }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 12px 36px rgba(15,23,42,0.2)' }}>
-            <Check size={30} color="white" strokeWidth={3} />
-          </div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#64748b', margin: 0 }}>Todo listo. Tu primer día empieza mañana.</p>
         </div>
       )
     }
@@ -730,46 +769,30 @@ export default function OnboardingFlow() {
 }
 
 function normalizeSearch(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ')
+  return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/\s+/g, ' ')
 }
 
-function OptionGrid({ children }: { children: ReactNode }) {
-  return <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{children}</div>
-}
-
-function ChoiceCard({ title, desc, selected, onClick }: { title: string; desc?: string; selected: boolean; compact?: boolean; onClick: () => void }) {
+function EditorialGrid({ children, cols }: { children: ReactNode; cols: number }) {
   return (
-    <button
-      onClick={onClick}
-      style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: `1px solid ${selected ? '#2563eb' : '#f1f5f9'}`, overflow: 'hidden', background: selected ? '#eff6ff' : '#fafbfc', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', width: '100%' }}
-    >
-      <div style={{ background: selected ? '#2563eb' : '#e2e8f0', transition: 'background .12s' }} />
-      <div style={{ padding: '12px 14px' }}>
-        <div style={{ fontSize: 13, fontWeight: 900, color: selected ? '#1e40af' : '#0f172a', lineHeight: 1.3 }}>{title}</div>
-        {desc && <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginTop: 2 }}>{desc}</div>}
-      </div>
-      <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center' }}>
-        <div style={{ width: 16, height: 16, borderRadius: '50%', background: selected ? '#2563eb' : 'transparent', border: selected ? 'none' : '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .12s' }}>
-          {selected && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>}
-        </div>
-      </div>
-    </button>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
+      {children}
+    </div>
   )
 }
 
-function SummaryItem({ label, value }: { label: string; value: string }) {
+function EditorialChoice({ title, sub, selected, onClick }: { title: string; sub?: string; selected: boolean; onClick: () => void }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '4px 1fr', borderRadius: 10, border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fafbfc' }}>
-      <div style={{ background: '#2563eb' }} />
-      <div style={{ padding: '12px 14px' }}>
-        <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 3 }}>{label}</div>
-        <div style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', lineHeight: 1.4 }}>{value}</div>
+    <button
+      onClick={onClick}
+      style={{ padding: '16px 18px', background: selected ? '#1c1c1c' : '#fff', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background .12s', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+    >
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: selected ? '#fff' : '#1c1c1c', lineHeight: 1.3 }}>{title}</div>
+        {sub && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.06em', color: selected ? 'rgba(255,255,255,.4)' : '#94a3b8', marginTop: 3 }}>{sub}</div>}
       </div>
-    </div>
+      <div style={{ width: 14, height: 14, borderRadius: '50%', background: selected ? '#fff' : 'transparent', border: selected ? 'none' : '1.5px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {selected && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="#1c1c1c" strokeWidth="1.8" strokeLinecap="round" /></svg>}
+      </div>
+    </button>
   )
 }

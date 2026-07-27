@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check, Lock, Search } from 'lucide-react'
+import { Check, Lock, Search } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
@@ -90,19 +90,19 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
     help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.',
   },
   'daily-time': {
-    title: '¿Cuánto tiempo podrías estudiar al día con Kairo?',
+    title: '¿Cuánto tiempo podrías estudiar al día?',
     help: 'Lo ajustaremos mejor más adelante según tu ritmo.',
   },
   'weekly-days': {
-    title: '¿Cuántos días a la semana te gustaría estudiar?',
+    title: '¿Cuántos días a la semana estudiarías?',
     help: 'En el futuro, Kairo adaptará el plan a tu ritmo y preferencias.',
   },
   confirm: {
-    title: 'Perfecto. Con esto Kairo puede empezar a construir tu Camino PAU.',
+    title: 'Perfecto. Ya podemos construir tu Camino PAU.',
     help: 'Revisa el resumen y empieza cuando lo tengas claro.',
   },
   saving: {
-    title: 'Guardando tu Camino PAU',
+    title: 'Construyendo tu Camino PAU',
     help: 'Estamos preparando tu experiencia inicial.',
   },
   done: {
@@ -110,6 +110,8 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
     help: 'Kairo ya tiene lo necesario para empezar a ayudarte.',
   },
 }
+
+const SIDEBAR_STEPS = ['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
 
 export default function OnboardingFlow() {
   const router = useRouter()
@@ -127,8 +129,6 @@ export default function OnboardingFlow() {
     [data.community]
   )
 
-  // Fetch matching institutes from DB as the user types (debounced 250ms).
-  // DB institutes are shown FIRST; static CENTROS fill remaining slots.
   const fetchDbInstitutes = useCallback(async (query: string, community: string) => {
     const normalizedQuery = normalizeInstituteName(query)
     if (normalizedQuery.length < 2) { setDbInstitutes([]); return }
@@ -150,9 +150,7 @@ export default function OnboardingFlow() {
   const filteredCenters = useMemo(() => {
     const q = normalizeSearch(schoolQuery)
     if (q.length < 2) return []
-    // DB results first (already limited to 8 by the query).
     const dbSet = new Set(dbInstitutes.map(s => normalizeSearch(s)))
-    // Static centers that aren't already represented by a DB result.
     const staticExtra = centers.filter(c => normalizeSearch(c).includes(q) && !dbSet.has(normalizeSearch(c)))
     return [...dbInstitutes.filter(s => normalizeSearch(s).includes(q)), ...staticExtra].slice(0, 10)
   }, [dbInstitutes, centers, schoolQuery])
@@ -306,96 +304,227 @@ export default function OnboardingFlow() {
     }
   }
 
+  const isSaving = step === 'saving'
+  const isDone = step === 'done'
+  const showBack = !isDone && !isSaving && (step === 'community' || stepIndex > 0)
+  const showContinue = !isDone && !isSaving && stepIndex >= 0 && step !== 'confirm'
+  const showConfirm = !isDone && !isSaving && step === 'confirm'
+
   return (
-    <div className="min-h-[100dvh] bg-[#f8fafc]" style={{ minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        * { box-sizing: border-box; }
-      `}</style>
+    <div style={{ minHeight: '100dvh', fontFamily: 'Geist, system-ui, sans-serif', background: '#0f172a' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap');*{box-sizing:border-box}.onb-input{width:100%;border-radius:8px;border:1px solid #e2e8f0;background:#fafbfc;padding:10px 12px;font-size:13px;font-weight:700;color:#0f172a;font-family:Geist,system-ui,sans-serif;outline:none}.onb-input::placeholder{color:#94a3b8;font-weight:600}.onb-input:focus{border-color:#2563eb;background:white}`}</style>
+      {step === 'welcome' ? renderWelcome() : renderShell()}
+    </div>
+  )
 
-      <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4">
-          <img src="/brand/kairo-logo.png" alt="Kairo" className="h-9 shrink-0 object-contain" />
-          <div className="ml-auto hidden items-center gap-3 text-sm font-bold text-slate-500 sm:flex">
-            <span>Preparación PAU</span>
-            <span className="h-1 w-1 rounded-full bg-slate-300" />
-            <span>Ruta personalizada</span>
+  function renderWelcome() {
+    return (
+      <div style={{ minHeight: '100dvh', display: 'grid', gridTemplateRows: 'auto 1fr auto', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(37,99,235,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.025) 1px,transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+
+        {/* Nav */}
+        <nav style={{ position: 'relative', zIndex: 2, padding: '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          <div style={{ fontSize: 14, fontWeight: 900, color: 'white', letterSpacing: '-0.02em' }}>Kairo</div>
+          <div style={{ padding: '5px 12px', borderRadius: 999, background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.2)', fontSize: 9, fontWeight: 900, color: '#3b82f6', letterSpacing: '.1em', textTransform: 'uppercase' }}>Beta privada</div>
+        </nav>
+
+        {/* Body */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', padding: '0 96px', gap: 60 }}>
+          {/* Left: hero */}
+          <div style={{ flex: 1, maxWidth: 560 }}>
+            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.28em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 20 }}>Camino PAU · Configuración inicial</div>
+            <h1 style={{ fontSize: 68, fontWeight: 900, color: 'white', letterSpacing: '-0.045em', lineHeight: 0.93, margin: '0 0 24px' }}>
+              Tu plan de<br /><span style={{ color: '#3b82f6' }}>PAU</span><br />empieza aquí.
+            </h1>
+            <p style={{ fontSize: 15, fontWeight: 500, color: '#64748b', lineHeight: 1.75, margin: '0 0 36px', maxWidth: 420 }}>
+              7 preguntas. 3 minutos. Kairo construye un Camino PAU adaptado a tu comunidad, asignaturas y ritmo real.
+            </p>
+            <div style={{ display: 'flex', gap: 24, marginBottom: 44 }}>
+              {['Simulacros reales', 'Misiones diarias', 'IA de corrección'].map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 900, color: '#475569' }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />
+                  {f}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={goNext}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 36px', borderRadius: 10, border: 'none', background: 'white', color: '#0f172a', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 15, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 28px rgba(0,0,0,0.3)', transition: 'all .14s' }}
+            >
+              Empezar con Kairo →
+            </button>
+            <div style={{ marginTop: 12, fontSize: 10, fontWeight: 700, color: '#334155' }}>Acceso gratuito durante la beta privada</div>
           </div>
-        </div>
-      </header>
 
-      <main className={`mx-auto grid w-full max-w-6xl gap-6 px-5 py-8 lg:py-12 ${step !== 'welcome' ? 'lg:grid-cols-[320px_1fr]' : ''}`}>
-        {step !== 'welcome' && (
-          <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-8 lg:self-start">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Onboarding</p>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Camino PAU</h1>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Una configuración breve, amable y útil para empezar sin burocracia.</p>
-
-            <div className="my-6">
-              <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-                <span>Progreso</span>
-                <span>{progressPct}%</span>
+          {/* Right: floating step preview */}
+          <div style={{ width: 300, flexShrink: 0 }}>
+            <div style={{ borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 24px 64px rgba(0,0,0,0.5)' }}>
+              <div style={{ height: 3, background: '#0a101e' }}><div style={{ height: '100%', width: '57%', background: '#2563eb' }} /></div>
+              <div style={{ background: '#060e1e', padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.24em', textTransform: 'uppercase', color: '#1e293b', marginBottom: 4 }}>Camino PAU</div>
+                <div style={{ fontSize: 9, fontWeight: 900, color: '#2563eb', marginBottom: 5 }}>Paso 4 de 7</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.02em', lineHeight: 1.2 }}>¿Cómo llevas la preparación?</div>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #1d4ed8, #7c3aed)' }} animate={{ width: `${progressPct}%` }} transition={{ duration: 0.45 }} />
+              <div style={{ background: '#fff', padding: '14px 18px' }}>
+                {[
+                  { label: 'Voy bastante bien', sel: false },
+                  { label: 'Voy bien, quiero mejorar', sel: true },
+                  { label: 'Me cuesta organizarme', sel: false },
+                  { label: 'Voy un poco perdido/a', sel: false },
+                  { label: 'Prefiero empezar desde lo básico', sel: false },
+                ].map(opt => (
+                  <div key={opt.label} style={{ display: 'grid', gridTemplateColumns: '3px 1fr auto', borderRadius: 7, border: `1px solid ${opt.sel ? '#2563eb' : '#f1f5f9'}`, overflow: 'hidden', marginBottom: 5, background: opt.sel ? '#eff6ff' : '#fafbfc' }}>
+                    <div style={{ background: opt.sel ? '#2563eb' : '#e2e8f0' }} />
+                    <div style={{ padding: '8px 10px', fontSize: 10, fontWeight: 900, color: opt.sel ? '#1e40af' : '#475569' }}>{opt.label}</div>
+                    <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ width: 12, height: 12, borderRadius: '50%', background: opt.sel ? '#2563eb' : 'transparent', border: opt.sel ? 'none' : '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {opt.sel && <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ borderTop: '2px solid #0f172a', background: '#fff', padding: '10px 18px', display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ padding: '7px 16px', borderRadius: 6, background: '#0f172a', color: 'white', fontSize: 10, fontWeight: 900 }}>Continuar →</div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="space-y-3">
-              {['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar'].map((item, index) => {
-                const active = currentStep >= index + 1 || step === 'done'
+        {/* Footer */}
+        <footer style={{ position: 'relative', zIndex: 2, padding: '18px 96px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 28 }}>
+          {[
+            { label: 'Comunidad', hint: 'Madrid o Cataluña' },
+            { label: 'Asignaturas', hint: '4 disponibles en beta' },
+            { label: 'Plan generado por', hint: 'Kairo IA' },
+          ].map(item => (
+            <div key={item.label} style={{ fontSize: 10, fontWeight: 900, color: '#1e293b' }}>
+              {item.label}: <span style={{ color: '#2563eb' }}>{item.hint}</span>
+            </div>
+          ))}
+        </footer>
+      </div>
+    )
+  }
+
+  function renderShell() {
+    const displayNum = isDone ? '✓' : isSaving ? String(STEPS.length) : (currentStep > 0 ? String(currentStep) : '—')
+    const allDone = isDone || isSaving
+
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ width: '100%', maxWidth: 900, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 32px 80px rgba(0,0,0,0.55)', display: 'grid', gridTemplateColumns: '240px 1fr' }}>
+
+          {/* LEFT SIDEBAR */}
+          <div style={{ background: '#060e1e', padding: '32px 26px', display: 'flex', flexDirection: 'column', minHeight: 540, borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: 'white', letterSpacing: '-0.02em', marginBottom: 32 }}>Kairo</div>
+            <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.28em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 8 }}>Camino PAU</div>
+            <div style={{ fontSize: 72, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', lineHeight: 0.88, marginBottom: 6 }}>{displayNum}</div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 32 }}>
+              {isDone ? 'completado' : isSaving ? 'generando' : `de ${STEPS.length} pasos`}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+              {SIDEBAR_STEPS.map((label, i) => {
+                const done = allDone || currentStep > i + 1
+                const active = !allDone && currentStep === i + 1
                 return (
-                  <div key={item} className="flex items-center gap-3">
-                    <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                      {active ? <Check size={13} strokeWidth={3} /> : index + 1}
-                    </span>
-                    <span className={`text-sm font-bold ${active ? 'text-slate-800' : 'text-slate-400'}`}>{item}</span>
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: done ? '#2563eb' : active ? 'white' : '#0f172a', border: done || active ? 'none' : '1px solid #1e293b', fontSize: 8, fontWeight: 900, color: done ? 'white' : active ? '#0f172a' : '#334155' }}>
+                      {done
+                        ? <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" /></svg>
+                        : i + 1}
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: done ? '#2563eb' : active ? 'white' : '#334155' }}>{label}</span>
                   </div>
                 )
               })}
             </div>
-          </aside>
-        )}
 
-        <section className="flex min-h-[620px] items-center">
-          <motion.div key={step} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="w-full rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_rgba(15,23,42,0.10)] sm:p-8">
-            <div className="mb-7 flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-700">
-                {step === 'welcome' ? 'Inicio' : step === 'saving' ? 'Guardando' : step === 'done' ? 'Completado' : `Paso ${currentStep} de ${STEPS.length}`}
-              </span>
-              {stepIndex > 0 && step !== 'saving' && step !== 'done' && (
-                <button onClick={goBack} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
-                  <ArrowLeft size={14} /> Atrás
-                </button>
-              )}
+            <div style={{ marginTop: 24 }}>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
+                <motion.div
+                  style={{ height: '100%', background: '#2563eb', borderRadius: 99 }}
+                  animate={{ width: `${progressPct}%` }}
+                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                />
+              </div>
+              <div style={{ fontSize: 8, fontWeight: 900, color: '#1e3a5f', marginTop: 6 }}>{progressPct}% completado</div>
+            </div>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div style={{ background: '#fff', display: 'flex', flexDirection: 'column' }}>
+            {/* Panel header */}
+            <div style={{ background: '#0f172a', padding: '28px 32px 22px' }}>
+              <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#475569', marginBottom: 8 }}>
+                {isDone ? 'Completado' : isSaving ? 'Procesando' : `Paso ${currentStep} de ${STEPS.length}`}
+              </div>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 6px' }}>
+                {STEP_LABELS[step].title}
+              </h2>
+              <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, margin: 0 }}>{STEP_LABELS[step].help}</p>
             </div>
 
-            <div className="mb-7">
-              <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{STEP_LABELS[step].title}</h2>
-              <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-500">{STEP_LABELS[step].help}</p>
+            {/* Panel body */}
+            <div style={{ padding: '22px 32px', flex: 1, overflowY: 'auto' }}>
+              <AnimatePresence mode="wait">
+                <motion.div key={`${step}-content`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}>
+                  {renderStep()}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div key={`${step}-content`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
-
-            {stepIndex >= 0 && step !== 'confirm' && step !== 'saving' && step !== 'done' && (
-              <div className="mt-7">
-                <PrimaryButton onClick={goNext}>Continuar <ArrowRight size={16} /></PrimaryButton>
+            {/* Panel footer */}
+            {!isSaving && (
+              <div style={{ borderTop: '2px solid #0f172a', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  {showBack && (
+                    <button
+                      onClick={goBack}
+                      style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 12, fontWeight: 900, color: '#64748b', cursor: 'pointer', transition: 'all .12s' }}
+                    >
+                      ← Atrás
+                    </button>
+                  )}
+                </div>
+                <div>
+                  {showContinue && (
+                    <button
+                      onClick={goNext}
+                      disabled={!canContinue}
+                      style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: canContinue ? '#0f172a' : '#f1f5f9', color: canContinue ? 'white' : '#cbd5e1', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 13, fontWeight: 900, cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 14px rgba(15,23,42,0.18)' : 'none', transition: 'all .12s' }}
+                    >
+                      Continuar →
+                    </button>
+                  )}
+                  {showConfirm && (
+                    <button
+                      onClick={finish}
+                      style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#0f172a', color: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 13, fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 14px rgba(15,23,42,0.18)', transition: 'all .12s' }}
+                    >
+                      Crear mi Camino PAU →
+                    </button>
+                  )}
+                  {isDone && (
+                    <button
+                      onClick={() => router.push('/camino')}
+                      style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#0f172a', color: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 13, fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 14px rgba(15,23,42,0.18)' }}
+                    >
+                      Ver mi Camino PAU →
+                    </button>
+                  )}
+                </div>
               </div>
             )}
-          </motion.div>
-        </section>
-      </main>
-    </div>
-  )
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   function renderStep() {
-    if (step === 'welcome') {
-      return <PrimaryButton onClick={goNext}>Empezar con Kairo <ArrowRight size={16} /></PrimaryButton>
-    }
+    if (step === 'welcome') return null
 
     if (step === 'community') {
       return <OptionGrid>{COMMUNITY_OPTS.map(option => <ChoiceCard key={option.id} title={option.label} desc={option.desc} selected={data.community === option.id} onClick={() => selectCommunity(option.id)} />)}</OptionGrid>
@@ -404,9 +533,9 @@ export default function OnboardingFlow() {
     if (step === 'school') {
       const showDropdown = schoolOpen && schoolQuery.length >= 2
       return (
-        <div className="relative">
-          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition">
-            <Search size={17} className="shrink-0 text-slate-400" />
+        <div style={{ position: 'relative' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, borderRadius: 8, border: '1px solid #e2e8f0', background: '#fafbfc', padding: '10px 14px', transition: 'border-color .12s' }}>
+            <Search size={16} style={{ color: '#94a3b8', flexShrink: 0 }} />
             <input
               type="text"
               value={schoolQuery}
@@ -414,30 +543,31 @@ export default function OnboardingFlow() {
               onFocus={() => setSchoolOpen(true)}
               onBlur={() => setTimeout(() => setSchoolOpen(false), 150)}
               placeholder="Busca tu instituto..."
-              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-700 outline-none placeholder:font-semibold placeholder:text-slate-400"
+              className="onb-input"
+              style={{ border: 'none', padding: 0, background: 'transparent' }}
               autoFocus
             />
           </label>
           {showDropdown && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1.5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.12)]">
+            <div style={{ position: 'absolute', left: 0, right: 0, top: 'calc(100% + 6px)', zIndex: 20, borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', overflow: 'hidden', boxShadow: '0 12px 40px rgba(15,23,42,0.14)' }}>
               {filteredCenters.map(center => (
                 <button
                   key={center}
                   type="button"
                   onMouseDown={() => selectSchool(center, 'dataset')}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-blue-50 hover:text-blue-800 border-b border-slate-100 last:border-0"
+                  style={{ display: 'grid', gridTemplateColumns: '4px 1fr', width: '100%', textAlign: 'left', border: 'none', borderBottom: '1px solid #f8fafc', background: data.schoolName === center ? '#eff6ff' : 'white', cursor: 'pointer', overflow: 'hidden' }}
                 >
-                  <Check size={13} className={`shrink-0 ${data.schoolName === center ? 'text-blue-600' : 'text-transparent'}`} strokeWidth={3} />
-                  {center}
+                  <div style={{ background: data.schoolName === center ? '#2563eb' : 'transparent' }} />
+                  <div style={{ padding: '10px 13px', fontSize: 12, fontWeight: 900, color: data.schoolName === center ? '#1e40af' : '#334155' }}>{center}</div>
                 </button>
               ))}
               <button
                 type="button"
                 onMouseDown={() => selectSchool('Mi centro no aparece', 'manual')}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
+                style={{ display: 'grid', gridTemplateColumns: '4px 1fr', width: '100%', textAlign: 'left', border: 'none', background: data.schoolName === 'Mi centro no aparece' ? '#eff6ff' : '#fafbfc', cursor: 'pointer', overflow: 'hidden' }}
               >
-                <Check size={13} className={`shrink-0 ${data.schoolName === 'Mi centro no aparece' ? 'text-blue-600' : 'text-transparent'}`} strokeWidth={3} />
-                Mi centro no aparece
+                <div style={{ background: data.schoolName === 'Mi centro no aparece' ? '#2563eb' : 'transparent' }} />
+                <div style={{ padding: '10px 13px', fontSize: 12, fontWeight: 900, color: data.schoolName === 'Mi centro no aparece' ? '#1e40af' : '#64748b' }}>Mi centro no aparece</div>
               </button>
             </div>
           )}
@@ -447,42 +577,53 @@ export default function OnboardingFlow() {
 
     if (step === 'subjects') {
       return (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Beta privada</p>
-            <p className="mt-1 text-sm font-bold leading-5 text-blue-900">De momento puedes probar Kairo con Matemáticas II, Matemáticas CCSS, Lengua e Historia. El resto de asignaturas se irán abriendo próximamente.</p>
+        <div>
+          <div style={{ borderRadius: 10, border: '1px solid #bfdbfe', background: '#eff6ff', padding: '11px 14px', marginBottom: 16 }}>
+            <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Beta privada</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', lineHeight: 1.5 }}>De momento puedes probar con Matemáticas II, CCSS, Lengua e Historia. El resto se irá abriendo próximamente.</div>
           </div>
-          <div>
-            <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Disponibles en beta privada</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => {
-                const selected = data.subjects.includes(subject.id)
-                return (
-                  <button key={subject.id} onClick={() => toggleSubject(subject.id)} className="flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left transition active:scale-[0.98]" style={{ borderColor: selected ? subject.color : '#e2e8f0', background: selected ? subject.bg : '#ffffff', boxShadow: selected ? `0 0 0 3px ${subject.color}1a` : '0 1px 3px rgba(0,0,0,0.04)' }}>
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2" style={{ borderColor: selected ? subject.color : '#cbd5e1', background: selected ? subject.color : 'white' }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
-                    <span className="text-sm font-black" style={{ color: selected ? subject.color : '#334155' }}>{subject.label}</span>
-                  </button>
-                )
-              })}
+          <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 10 }}>Disponibles en beta privada</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
+            {PRIVATE_BETA_ENABLED_SUBJECTS.map(subject => {
+              const selected = data.subjects.includes(subject.id)
+              return (
+                <button
+                  key={subject.id}
+                  onClick={() => toggleSubject(subject.id)}
+                  style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: `1px solid ${selected ? subject.color : '#f1f5f9'}`, overflow: 'hidden', background: selected ? subject.bg : '#fafbfc', cursor: 'pointer', textAlign: 'left', transition: 'all .12s' }}
+                >
+                  <div style={{ background: selected ? subject.color : '#e2e8f0', transition: 'background .12s' }} />
+                  <div style={{ padding: '11px 12px' }}>
+                    <div style={{ fontSize: 12, fontWeight: 900, color: selected ? subject.color : '#0f172a', lineHeight: 1.3 }}>{subject.label}</div>
+                  </div>
+                  <div style={{ padding: '11px 12px', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: selected ? subject.color : 'transparent', border: selected ? 'none' : '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {selected && <Check size={9} color="white" strokeWidth={3} />}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 10 }}>Próximamente</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: !canContinue ? 14 : 0 }}>
+            {PRIVATE_BETA_LOCKED_SUBJECTS.map(subject => (
+              <div key={subject.id} style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fafbfc', opacity: 0.5 }}>
+                <div style={{ background: '#e2e8f0' }} />
+                <div style={{ padding: '11px 12px' }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, color: '#94a3b8' }}>{subject.label}</div>
+                </div>
+                <div style={{ padding: '11px 12px', display: 'flex', alignItems: 'center' }}>
+                  <Lock size={11} style={{ color: '#cbd5e1' }} strokeWidth={2.5} />
+                </div>
+              </div>
+            ))}
+          </div>
+          {!canContinue && (
+            <div style={{ borderRadius: 8, border: '1px solid #fde68a', background: '#fffbeb', padding: '10px 13px', fontSize: 11, fontWeight: 700, color: '#92400e' }}>
+              Selecciona al menos una asignatura disponible para construir tu Camino PAU.
             </div>
-          </div>
-          <div>
-            <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">Próximamente</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PRIVATE_BETA_LOCKED_SUBJECTS.map(subject => {
-                return (
-                  <button key={subject.id} type="button" disabled title="Esta asignatura estará disponible próximamente. En esta beta estamos probando Matemáticas II, Matemáticas CCSS, Lengua e Historia." className="flex min-h-14 cursor-not-allowed items-center justify-between gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 text-left opacity-75">
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-slate-300 bg-white text-slate-400"><Lock size={11} strokeWidth={3} /></span>
-                      <span className="truncate text-sm font-black text-slate-500">{subject.label}</span>
-                    </span>
-                    <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">{subject.badge}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-          {!canContinue && <p className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">Selecciona al menos una asignatura disponible para construir tu Camino PAU.</p>}
+          )}
         </div>
       )
     }
@@ -501,9 +642,13 @@ export default function OnboardingFlow() {
 
     if (step === 'confirm') {
       return (
-        <div className="space-y-5">
-          {savingError && <p className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{savingError}</p>}
-          <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          {savingError && (
+            <div style={{ borderRadius: 8, border: '1px solid #fecaca', background: '#fef2f2', padding: '10px 13px', fontSize: 11, fontWeight: 700, color: '#991b1b', marginBottom: 14 }}>
+              {savingError}
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <SummaryItem label="Comunidad" value={data.community || '-'} />
             <SummaryItem label="Centro educativo" value={data.schoolName || '-'} />
             <SummaryItem label="Asignaturas" value={data.subjects.join(', ') || '-'} />
@@ -511,7 +656,6 @@ export default function OnboardingFlow() {
             <SummaryItem label="Tiempo diario" value={data.dailyStudyTime || '-'} />
             <SummaryItem label="Días por semana" value={data.weeklyStudyDays || '-'} />
           </div>
-          <PrimaryButton onClick={finish}>Crear mi Camino PAU <ArrowRight size={16} /></PrimaryButton>
         </div>
       )
     }
@@ -519,13 +663,13 @@ export default function OnboardingFlow() {
     if (step === 'saving') {
       if (savingError) {
         return (
-          <div className="space-y-4 rounded-3xl border border-red-100 bg-red-50 p-6 text-center">
-            <p className="text-sm font-bold text-red-800">{savingError}</p>
+          <div style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fef2f2', padding: '24px', textAlign: 'center' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#991b1b', marginBottom: generateRetriesRef.current < 2 ? 16 : 0 }}>{savingError}</p>
             {generateRetriesRef.current < 2 && (
               <button
                 type="button"
                 onClick={finish}
-                className="mx-auto flex items-center justify-center rounded-2xl bg-red-600 px-6 py-3 text-sm font-black text-white transition hover:bg-red-700 active:scale-[0.98]"
+                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#dc2626', color: 'white', fontFamily: 'Geist, system-ui, sans-serif', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}
               >
                 Reintentar
               </button>
@@ -534,8 +678,9 @@ export default function OnboardingFlow() {
         )
       }
       return (
-        <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+        <div style={{ borderRadius: 10, border: '1px solid #bfdbfe', background: '#eff6ff', padding: '32px 24px', textAlign: 'center' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #bfdbfe', borderTopColor: '#2563eb', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           <AnimatePresence mode="wait">
             <motion.p
               key={savingMsgIdx}
@@ -543,7 +688,7 @@ export default function OnboardingFlow() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.3 }}
-              className="text-sm font-bold text-blue-800"
+              style={{ fontSize: 12, fontWeight: 700, color: '#1e40af', margin: 0 }}
             >
               {savingMessages[savingMsgIdx]}
             </motion.p>
@@ -554,22 +699,16 @@ export default function OnboardingFlow() {
 
     if (step === 'done') {
       return (
-        <div className="space-y-6 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_18px_55px_rgba(37,99,235,0.35)]"><Check size={34} strokeWidth={3} /></div>
-          <PrimaryButton onClick={() => router.push('/camino')}>Ver mi Camino PAU <ArrowRight size={16} /></PrimaryButton>
+        <div style={{ textAlign: 'center', padding: '16px 0' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 12px 36px rgba(15,23,42,0.2)' }}>
+            <Check size={30} color="white" strokeWidth={3} />
+          </div>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#64748b', margin: 0 }}>Todo listo. Tu primer día empieza mañana.</p>
         </div>
       )
     }
 
     return null
-  }
-
-  function PrimaryButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-    return (
-      <button onClick={onClick} disabled={!canContinue && step !== 'welcome'} className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-black text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400" style={canContinue || step === 'welcome' ? { background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)', boxShadow: '0 10px 28px rgba(37,99,235,0.30)' } : undefined}>
-        {children}
-      </button>
-    )
   }
 }
 
@@ -583,26 +722,37 @@ function normalizeSearch(value: string) {
 }
 
 function OptionGrid({ children }: { children: ReactNode }) {
-  return <div className="grid gap-2">{children}</div>
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{children}</div>
 }
 
-function ChoiceCard({ title, desc, selected, compact, onClick }: { title: string; desc?: string; selected: boolean; compact?: boolean; onClick: () => void }) {
+function ChoiceCard({ title, desc, selected, onClick }: { title: string; desc?: string; selected: boolean; compact?: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`flex w-full items-center gap-3 rounded-2xl border text-left transition active:scale-[0.98] ${compact ? 'px-4 py-3' : 'px-4 py-4'} ${selected ? 'border-blue-500 bg-blue-50 shadow-[0_0_0_3px_rgba(37,99,235,0.10)]' : 'border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50'}`}>
-      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${selected ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white'}`}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
-      <span className="min-w-0">
-        <span className={`block text-sm font-black ${selected ? 'text-blue-800' : 'text-slate-800'}`}>{title}</span>
-        {desc && <span className="mt-0.5 block text-xs font-semibold text-slate-400">{desc}</span>}
-      </span>
+    <button
+      onClick={onClick}
+      style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: `1px solid ${selected ? '#2563eb' : '#f1f5f9'}`, overflow: 'hidden', background: selected ? '#eff6ff' : '#fafbfc', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', width: '100%' }}
+    >
+      <div style={{ background: selected ? '#2563eb' : '#e2e8f0', transition: 'background .12s' }} />
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ fontSize: 13, fontWeight: 900, color: selected ? '#1e40af' : '#0f172a', lineHeight: 1.3 }}>{title}</div>
+        {desc && <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginTop: 2 }}>{desc}</div>}
+      </div>
+      <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ width: 16, height: 16, borderRadius: '50%', background: selected ? '#2563eb' : 'transparent', border: selected ? 'none' : '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .12s' }}>
+          {selected && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>}
+        </div>
+      </div>
     </button>
   )
 }
 
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-black text-slate-800">{value}</p>
+    <div style={{ display: 'grid', gridTemplateColumns: '4px 1fr', borderRadius: 10, border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fafbfc' }}>
+      <div style={{ background: '#2563eb' }} />
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 3 }}>{label}</div>
+        <div style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', lineHeight: 1.4 }}>{value}</div>
+      </div>
     </div>
   )
 }

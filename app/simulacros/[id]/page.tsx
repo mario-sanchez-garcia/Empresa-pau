@@ -13,7 +13,7 @@ import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
-import KairoLoader from '@/app/components/ui/KairoLoader'
+import KairoSpinner from '@/app/components/ui/KairoSpinner'
 
 const DEFAULT_DURATION_MINUTES = 90
 const TOTAL_SECONDS = DEFAULT_DURATION_MINUTES * 60
@@ -260,7 +260,7 @@ export default function SimulacroActivoPage() {
     }
   }
 
-  if (!record) return <KairoLoader />
+  if (!record) return <KairoSpinner />
 
   if (!examStarted) {
     const community = record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'

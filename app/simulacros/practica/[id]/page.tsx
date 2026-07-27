@@ -13,7 +13,7 @@ import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
-import KairoLoader from '@/app/components/ui/KairoLoader'
+import KairoSpinner from '@/app/components/ui/KairoSpinner'
 
 function PracticaPageInner() {
   const params = useParams<{ id: string }>()
@@ -260,7 +260,7 @@ function PracticaPageInner() {
     )
   }
 
-  if (!record) return <KairoLoader />
+  if (!record) return <KairoSpinner />
 
   const subtitle = blockLabel
     ? `${cfg.label} · ${blockLabel} · ${record.bloques.length} preguntas`
@@ -617,7 +617,7 @@ async function safeJson(response: Response) {
 
 export default function PracticaPage() {
   return (
-    <Suspense fallback={<KairoLoader />}>
+    <Suspense fallback={<KairoSpinner />}>
       <PracticaPageInner />
     </Suspense>
   )

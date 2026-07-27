@@ -10,7 +10,7 @@ import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroRecord } from '@/components/simulacros/types'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import WhyExplanation from '@/components/shared/WhyExplanation'
-import KairoLoader from '@/app/components/ui/KairoLoader'
+import KairoSpinner from '@/app/components/ui/KairoSpinner'
 
 type Tab = 'resumen' | 'detalle' | 'plan' | 'bloques'
 
@@ -138,7 +138,7 @@ export default function SimulacroResultsPage() {
     }
   }, [scoreReady, hasGrade, nota])
 
-  if (!record) return <KairoLoader />
+  if (!record) return <KairoSpinner />
 
   const detail = normalizeDetail(result, record, correctionFailed)
   const plan = normalizePlan(result, detail, correctionFailed)

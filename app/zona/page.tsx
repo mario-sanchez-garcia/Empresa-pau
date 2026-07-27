@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { LayoutGrid, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
-import KairoLoader from '@/app/components/ui/KairoLoader'
+import KairoSpinner from '@/app/components/ui/KairoSpinner'
 import Flashcards from '@/components/zona/Flashcards'
 import type { Flashcard, ZonaUser } from '@/components/zona/types'
 
@@ -49,7 +49,7 @@ export default function ZonaPage() {
     load()
   }, [router])
 
-  if (loading || !user) return <KairoLoader />
+  if (loading || !user) return <KairoSpinner />
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>

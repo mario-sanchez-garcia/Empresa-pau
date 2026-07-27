@@ -10,7 +10,7 @@ import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRec
 import { useCCAA } from '@/app/hooks/useCCAA'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
-type SimulacroMode = 'normal' | 'errores' | 'tipicos' | 'personalizado'
+type SimulacroMode = 'normal' | 'errores' | 'personalizado'
 type YearChoice = 'all' | 'recent' | 'middle' | 'classic'
 type OptionChoice = 'mixed' | SimulacroOption
 
@@ -228,12 +228,10 @@ function SimulacrosPage() {
   const modeBadgeLabel = (m: SimulacroMode) => {
     if (m === 'normal') return 'Recomendado'
     if (m === 'errores') return weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'
-    if (m === 'tipicos') return 'Recurrente'
     return 'Ajustable'
   }
   const modeBadgeColor = (m: SimulacroMode) => {
     if (m === 'errores') return weakCandidateCount > 0 ? '#15803d' : '#b45309'
-    if (m === 'tipicos') return '#7c3aed'
     if (m === 'personalizado') return '#64748b'
     return cfg.color
   }
@@ -362,9 +360,9 @@ function SimulacrosPage() {
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 10 }}>Tipo de simulacro</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {(['normal', 'errores', 'tipicos', 'personalizado'] as SimulacroMode[]).map(m => {
+            {(['normal', 'errores', 'personalizado'] as SimulacroMode[]).map(m => {
               const isActive = mode === m
-              const labels: Record<SimulacroMode, string> = { normal: 'Simulacro normal', errores: 'Peores notas', tipicos: 'Típicos PAU', personalizado: 'Personalizado' }
+              const labels: Record<SimulacroMode, string> = { normal: 'Simulacro normal', errores: 'Peores notas', personalizado: 'Personalizado' }
               return (
                 <button
                   key={m}
@@ -495,7 +493,7 @@ function SimulacrosPage() {
 function buildStats(history: SimulacroRecord[]) {
   const completed = history.filter(item => item.estado === 'completado' && Number.isFinite(Number(item.nota_final)))
   const scores = completed.map(item => Number(item.nota_final))
-  const times = completed.map(item => Number(item.tiempo_empleado)).filter(Number.isFinite)
+  const times = completed.map(item => Number(item.tiempo_empleado)).filter(t => Number.isFinite(t) && t > 0)
   return {
     completedCount: completed.length,
     averageScore: average(scores),
@@ -536,7 +534,6 @@ function technicalDifficultyForYearChoice(choice: YearChoice): SimulacroDifficul
 function buildConfigLabel(mode: SimulacroMode, yearChoice: YearChoice, optionChoice: OptionChoice) {
   if (mode === 'normal') return 'Normal · cualquier año · opciones mixtas'
   if (mode === 'errores') return 'Peores notas · ejercicios a remontar'
-  if (mode === 'tipicos') return 'Típicos PAU · temas recurrentes'
   return `Personalizado · ${yearChoiceLabel(yearChoice)} · ${optionChoiceLabel(optionChoice)}`
 }
 
@@ -554,12 +551,6 @@ function autoModeInfo(mode: SimulacroMode, weakCandidateCount: number) {
         : 'Completa alguna corrección o simulacro de esta asignatura para que Kairo pueda detectar tus puntos débiles.'
     }
   }
-  if (mode === 'tipicos') {
-    return {
-      title: 'Patrones habituales de PAU',
-      description: 'Monta un examen con bloques recurrentes de la asignatura, años oficiales mezclados y opciones A/B cuando existan.'
-    }
-  }
   return {
     title: 'Configuración automática',
     description: 'Cualquier año oficial disponible, opciones A/B mezcladas cuando existan y bloques elegidos para parecerse a una PAU real.'
@@ -568,7 +559,6 @@ function autoModeInfo(mode: SimulacroMode, weakCandidateCount: number) {
 
 function ctaLabel(mode: SimulacroMode, subjectShort: string) {
   if (mode === 'errores') return `Crear simulacro de errores de ${subjectShort}`
-  if (mode === 'tipicos') return `Crear simulacro típico de ${subjectShort}`
   if (mode === 'personalizado') return `Crear simulacro personalizado de ${subjectShort}`
   return `Empezar simulacro normal de ${subjectShort}`
 }

@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
       await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session, db)
     } else if (event.type === 'checkout.session.expired') {
       await handleCheckoutExpired(event.data.object as Stripe.Checkout.Session, db)
+    } else if (event.type === 'customer.subscription.deleted') {
+      await handleSubscriptionDeleted(event.data.object as Stripe.Subscription, db)
+    } else if (event.type === 'invoice.payment_failed') {
+      await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice, db)
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error'
@@ -105,13 +109,14 @@ async function handleCheckoutCompleted(
     started_at: now,
     expires_at: expiresAt,
     stripe_checkout_session_id: sessionId,
-    stripe_customer_id: stripeCustomerId,
-    parent_checkout_link_id: parentCheckoutLinkId ?? null,
-    metadata: {
-      stripe_payment_intent: session.payment_intent,
-      amount_total: session.amount_total,
-      currency: session.currency,
-    }
+      stripe_customer_id: stripeCustomerId,
+      parent_checkout_link_id: parentCheckoutLinkId ?? null,
+      metadata: {
+        stripe_payment_intent: session.payment_intent,
+        stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+        amount_total: session.amount_total,
+        currency: session.currency,
+      }
   })
 
   if (entitlementError) {
@@ -209,4 +214,142 @@ async function handleCheckoutExpired(
     event_type: 'checkout_expired',
     payload: { session_id: sessionId },
   })
+}
+
+function stripeId(value: unknown): string | null {
+  if (typeof value === 'string' && value) return value
+  if (value && typeof value === 'object' && 'id' in value) {
+    const id = (value as { id?: unknown }).id
+    return typeof id === 'string' && id ? id : null
+  }
+  return null
+}
+
+function stripeTimestampToIso(value: unknown): string | null {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? new Date(value * 1000).toISOString()
+    : null
+}
+
+function latestIsoDate(a: string | null | undefined, b: string | null | undefined): string | null {
+  if (!a) return b ?? null
+  if (!b) return a
+  return new Date(a).getTime() >= new Date(b).getTime() ? a : b
+}
+
+async function handleSubscriptionDeleted(
+  subscription: Stripe.Subscription,
+  db: ReturnType<typeof createServiceClient>
+) {
+  const subscriptionId = subscription.id
+  const stripeCustomerId = stripeId(subscription.customer)
+  if (!stripeCustomerId) {
+    console.error('[stripe/webhook] customer.subscription.deleted missing customer', { subscriptionId })
+    return
+  }
+
+  const now = new Date().toISOString()
+  const paidThrough = stripeTimestampToIso((subscription as unknown as { current_period_end?: unknown }).current_period_end)
+    ?? stripeTimestampToIso(subscription.ended_at)
+    ?? stripeTimestampToIso(subscription.canceled_at)
+    ?? now
+
+  const { data: entitlements, error } = await db
+    .from('user_entitlements')
+    .select('id, user_id, expires_at, metadata')
+    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('status', 'active')
+
+  if (error) throw new Error(`subscription deleted entitlement lookup failed: ${error.message}`)
+
+  for (const entitlement of entitlements ?? []) {
+    const metadata = (entitlement.metadata && typeof entitlement.metadata === 'object')
+      ? entitlement.metadata as Record<string, unknown>
+      : {}
+    const accessUntil = latestIsoDate(entitlement.expires_at as string | null, paidThrough)
+
+    const { error: updateError } = await db
+      .from('user_entitlements')
+      .update({
+        expires_at: accessUntil,
+        updated_at: now,
+        metadata: {
+          ...metadata,
+          stripe_subscription_id: subscriptionId,
+          stripe_subscription_status: subscription.status,
+          stripe_subscription_deleted_at: now,
+          access_until_after_subscription_deleted: accessUntil,
+        },
+      })
+      .eq('id', entitlement.id)
+
+    if (updateError) throw new Error(`subscription deleted entitlement update failed: ${updateError.message}`)
+
+    await db.from('billing_events').insert({
+      user_id: entitlement.user_id,
+      stripe_checkout_session_id: null,
+      event_type: 'subscription_deleted_access_until_period_end',
+      payload: {
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: subscriptionId,
+        access_until: accessUntil,
+        stripe_status: subscription.status,
+      },
+    })
+  }
+}
+
+async function handleInvoicePaymentFailed(
+  invoice: Stripe.Invoice,
+  db: ReturnType<typeof createServiceClient>
+) {
+  const invoiceId = invoice.id
+  const stripeCustomerId = stripeId(invoice.customer)
+  if (!stripeCustomerId) {
+    console.error('[stripe/webhook] invoice.payment_failed missing customer', { invoiceId })
+    return
+  }
+
+  const subscriptionId = stripeId((invoice as unknown as { subscription?: unknown }).subscription)
+  const now = new Date().toISOString()
+  const { data: entitlements, error } = await db
+    .from('user_entitlements')
+    .select('id, user_id, metadata')
+    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('status', 'active')
+
+  if (error) throw new Error(`payment failed entitlement lookup failed: ${error.message}`)
+
+  for (const entitlement of entitlements ?? []) {
+    const metadata = (entitlement.metadata && typeof entitlement.metadata === 'object')
+      ? entitlement.metadata as Record<string, unknown>
+      : {}
+
+    const { error: updateError } = await db
+      .from('user_entitlements')
+      .update({
+        updated_at: now,
+        metadata: {
+          ...metadata,
+          stripe_payment_status: 'payment_failed',
+          stripe_payment_failed_at: now,
+          stripe_latest_invoice_id: invoiceId,
+          stripe_subscription_id: subscriptionId ?? metadata.stripe_subscription_id ?? null,
+        },
+      })
+      .eq('id', entitlement.id)
+
+    if (updateError) throw new Error(`payment failed entitlement update failed: ${updateError.message}`)
+
+    await db.from('billing_events').insert({
+      user_id: entitlement.user_id,
+      stripe_checkout_session_id: null,
+      event_type: 'invoice_payment_failed',
+      payload: {
+        stripe_customer_id: stripeCustomerId,
+        stripe_invoice_id: invoiceId,
+        stripe_subscription_id: subscriptionId,
+      },
+    })
+  }
 }

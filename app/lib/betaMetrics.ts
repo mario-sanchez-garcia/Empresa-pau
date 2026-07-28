@@ -12,6 +12,7 @@ export const BETA_METRIC_EVENTS = [
   'no_dado_en_clase_clicked',
   'day_2_return',
   'feedback_clicked',
+  'camino_calendar_source_selected',
 ] as const
 
 export type BetaMetricEvent = typeof BETA_METRIC_EVENTS[number]

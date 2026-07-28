@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Medal, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
@@ -63,6 +63,8 @@ type SchoolTopicAdjustment = { schoolName: string | null; community: string | nu
 type LegacySchoolFeedback = { schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }
 type CalendarWeekCache = Record<string, DayPlan[]>
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
+type CalendarSource = 'server' | 'client' | 'cache' | 'server_empty' | 'server_error'
+type CalendarSourceContext = 'initial_load' | 'week_navigation' | 'exam_change' | 'postpone'
 
 const EXAMS_KEY = 'kairo_camino_student_exams_v1'
 const WEAK_AREAS_KEY = 'kairo_camino_weak_areas_v1'
@@ -731,6 +733,10 @@ function visibleCalendarForOnboarding(calendar: DayPlan[], onboarding: Onboardin
   }))
 }
 
+function missionCount(days: DayPlan[]) {
+  return days.reduce((sum, day) => sum + day.missions.length, 0)
+}
+
 function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingData, weekStartISO = currentWeekStartISO()) {
   if (!calendarStartsWeek(calendar, weekStartISO)) return false
   return calendar.every(day => day.missions.every(mission =>
@@ -742,6 +748,7 @@ function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingDa
 
 export default function CaminoCalendarClient() {
   const router = useRouter()
+  const calendarSourceEventsRef = useRef<Set<string>>(new Set())
   const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
   const [exams, setExams] = useState<StudentExam[]>([])
@@ -779,6 +786,30 @@ export default function CaminoCalendarClient() {
   const [sundayMockSession, setSundayMockSession] = useState<{ id: string; nota_final: number | null } | null | undefined>(undefined)
   const [monthlySimsUsed, setMonthlySimsUsed] = useState(0)
   const isSunday = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' }) === 'Sun'
+
+  function recordCalendarSource(source: CalendarSource, context: CalendarSourceContext, details: { weekStart?: string; missionCount?: number; reason?: string } = {}) {
+    const weekStart = details.weekStart ?? selectedWeekStart
+    const key = `${context}:${source}:${weekStart}:${details.reason ?? ''}`
+    if (calendarSourceEventsRef.current.has(key)) return
+    calendarSourceEventsRef.current.add(key)
+    supabase.auth.getSession()
+      .then(({ data }) => {
+        const token = data.session?.access_token
+        if (!token) return
+        return fetch('/api/camino/calendar-source', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            source,
+            context,
+            weekStart,
+            missionCount: details.missionCount,
+            reason: details.reason,
+          }),
+        })
+      })
+      .catch(() => undefined)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -866,6 +897,7 @@ export default function CaminoCalendarClient() {
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
+        recordCalendarSource('server', 'initial_load', { weekStart, missionCount: missionCount(calDays) })
         const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
         const todayDay = calDays.find(d => d.date === realTodayStr)
         const heroMission = todayDay?.missions.find(m => m.role === 'main')
@@ -880,6 +912,7 @@ export default function CaminoCalendarClient() {
         }
       } else {
         const qCount = (queueResult as { count: number | null }).count ?? 0
+        recordCalendarSource('server_empty', 'initial_load', { weekStart, missionCount: 0, reason: qCount > 0 ? 'queue_without_future_calendar' : 'empty_queue' })
         if (!cancelled) setCaminoReadyStatus(qCount > 0 ? 'no_future' : 'no_queue')
       }
       setStreak(rachaValue)
@@ -893,7 +926,9 @@ export default function CaminoCalendarClient() {
       setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
       setWeeklySimsCompleted((simsWeekResult as { count: number | null }).count ?? 0)
       setMonthlySimsUsed((monthlySimsResult as { count: number | null }).count ?? 0)
-    }).catch(() => undefined)
+    }).catch(() => {
+      recordCalendarSource('server_error', 'initial_load', { weekStart: currentWeekStartISO(), reason: 'initial_load_failed' })
+    })
     return () => { cancelled = true }
   }, [])
 
@@ -913,7 +948,9 @@ export default function CaminoCalendarClient() {
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
+        recordCalendarSource('server', 'initial_load', { weekStart: currentWeekStartISO(), missionCount: missionCount(calDays), reason: 'retry_after_empty' })
       } else {
+        recordCalendarSource('server_empty', 'initial_load', { weekStart: currentWeekStartISO(), missionCount: 0, reason: 'retry_still_empty' })
         setCaminoReadyStatus('no_queue')
       }
     }, 2000)
@@ -1287,6 +1324,7 @@ export default function CaminoCalendarClient() {
     if (existingWeek.some(day => day.missions.length > 0)) {
       setSelectedWeekStart(weekStartISO)
       saveWeekCache(weekStartISO, existingWeek)
+      recordCalendarSource(supabaseCalLoaded ? 'server' : 'cache', 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(existingWeek), reason: 'existing_visible_week' })
       return existingWeek
     }
     const cachedWeek = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})[weekStartISO]
@@ -1294,6 +1332,7 @@ export default function CaminoCalendarClient() {
       const stableWeek = buildWeekDays(weekStartISO, cachedWeek)
       setSelectedWeekStart(weekStartISO)
       setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, stableWeek))
+      recordCalendarSource('cache', 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(stableWeek) })
       return stableWeek
     }
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
@@ -1302,6 +1341,7 @@ export default function CaminoCalendarClient() {
     setSelectedWeekStart(weekStartISO)
     saveWeekCache(weekStartISO, nextCalendar)
     setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))
+    recordCalendarSource('client', 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(nextCalendar), reason: 'no_server_or_cache_week' })
     return nextCalendar
   }
   function goToWeek(weekStartISO: string) {
@@ -1314,6 +1354,7 @@ export default function CaminoCalendarClient() {
     if (!onboarding) return
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
     const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {})
+    recordCalendarSource('client', 'exam_change', { weekStart: selectedWeekStart, missionCount: missionCount(regenerated) })
     persist(regenerated, nextExams)
     setToast('Camino PAU actualizado')
   }
@@ -1330,6 +1371,7 @@ export default function CaminoCalendarClient() {
     const mission = calendar[dayIndex].missions.find(item => item.id === missionId)
     if (!mission) return
     const nextCalendar = calendar.map((day, index) => index === dayIndex ? { ...day, missions: day.missions.filter(item => item.id !== missionId) } : index === dayIndex + 1 ? { ...day, missions: [...day.missions, { ...mission, id: `${day.date}-${mission.role}-postponed-${day.missions.length + 1}` }] } : day)
+    recordCalendarSource('client', 'postpone', { weekStart: selectedWeekStart, missionCount: missionCount(nextCalendar) })
     persist(nextCalendar); setToast('Misión pospuesta a mañana')
   }
   function resetExamDraft() {

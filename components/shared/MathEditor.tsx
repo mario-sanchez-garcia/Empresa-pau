@@ -19,8 +19,8 @@ interface MathEditorProps {
 
 const HAS_LATEX = /\$|\\\[|\\\(|\\begin\{/
 
-// Character-by-character scanner to avoid the $A$$B$ ambiguity:
-// When the previous char was $, the current $ starts a NEW inline block, not display math.
+// Character-by-character scanner — handles adjacent $A$$B$ correctly.
+// When previous char was $, current $ is a new inline block, NOT display math.
 function renderLatexSegments(text: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = []
   let i = 0
@@ -55,11 +55,9 @@ function renderLatexSegments(text: string): React.ReactNode[] {
       continue
     }
 
-    // text[i] === '$'
     const prevWasDollar = i > 0 && text[i - 1] === "$"
     const nextIsDollar = text[i + 1] === "$"
 
-    // Only treat $$ as display math if the previous char was NOT $ (i.e. not end of inline block)
     if (nextIsDollar && !prevWasDollar) {
       const close = text.indexOf("$$", i + 2)
       if (close !== -1) {
@@ -70,7 +68,6 @@ function renderLatexSegments(text: string): React.ReactNode[] {
       }
     }
 
-    // Inline math: scan forward to find closing $
     let j = i + 1
     while (j < text.length && text[j] !== "$") j++
 
@@ -81,7 +78,6 @@ function renderLatexSegments(text: string): React.ReactNode[] {
       continue
     }
 
-    // No matching $ found — plain text
     buf += text[i++]
   }
 
@@ -106,10 +102,12 @@ export default function MathEditor({
 
   const hasContent = value.trim().length > 0
   const hasLatex = HAS_LATEX.test(value)
-  const showRendered = !focused && hasContent && hasLatex
+  // Show rendered view whenever there's LaTeX — including while focused/typing.
+  // The textarea becomes transparent (color: transparent, caret visible) so the
+  // rendered view shows through. No more focus/blur toggle.
+  const showRendered = hasContent && hasLatex
 
   const focusTextarea = useCallback(() => {
-    setFocused(true)
     requestAnimationFrame(() => {
       const ta = textareaRef.current
       if (!ta) return
@@ -131,6 +129,37 @@ export default function MathEditor({
       />
 
       <div style={{ position: "relative" }}>
+        {/* Rendered view — always visible when there's LaTeX, sits behind the textarea */}
+        {showRendered && (
+          <div
+            onClick={focusTextarea}
+            aria-hidden="true"
+            style={{
+              minHeight,
+              width: "100%",
+              borderRadius: "0 0 16px 16px",
+              border: `1.5px solid ${focused ? accentColor : borderColor}`,
+              borderTop: "none",
+              padding: "14px 16px",
+              background: focused ? "#fff" : "#f8fbff",
+              color: "#0f172a",
+              fontSize: 14,
+              lineHeight: 1.85,
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+              boxShadow: focused ? `0 0 0 4px ${accentColor}14` : "none",
+              transition: "border-color 150ms, box-shadow 150ms, background 150ms",
+              wordBreak: "break-word" as const,
+              whiteSpace: "pre-wrap" as const,
+            }}
+          >
+            {renderLatexSegments(value)}
+          </div>
+        )}
+
+        {/* Textarea — always mounted so toolbar can insert into it.
+            When showRendered, it overlaps the rendered view but is fully transparent
+            (only the caret is visible) so the user types into it but sees rendered below. */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -140,68 +169,30 @@ export default function MathEditor({
           style={{
             width: "100%",
             minHeight,
-            resize: "vertical" as const,
+            resize: showRendered ? ("none" as const) : ("vertical" as const),
             borderRadius: "0 0 16px 16px",
-            border: `1.5px solid ${focused ? accentColor : borderColor}`,
+            border: showRendered ? "none" : `1.5px solid ${focused ? accentColor : borderColor}`,
             borderTop: "none",
             padding: "14px 16px",
             fontSize: 14,
             lineHeight: 1.85,
             fontFamily: "inherit",
-            background: focused ? "#fff" : "#f8fbff",
-            color: "#0f172a",
             outline: "none",
-            boxShadow: focused ? `0 0 0 4px ${accentColor}14` : "none",
             transition: "border-color 150ms, box-shadow 150ms, background 150ms",
-            opacity: showRendered ? 0 : 1,
-            pointerEvents: showRendered ? "none" : "auto",
+            // When rendered view is active: transparent text, only cursor visible
+            color: showRendered ? "transparent" : "#0f172a",
+            caretColor: accentColor,
+            background: "transparent",
+            boxShadow: showRendered ? "none" : (focused ? `0 0 0 4px ${accentColor}14` : "none"),
+            // Stack on top of rendered view
             position: showRendered ? "absolute" : "relative",
             inset: showRendered ? 0 : undefined,
+            zIndex: showRendered ? 2 : undefined,
             ...textareaStyle,
           }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />
-
-        {showRendered && (
-          <div
-            onClick={focusTextarea}
-            title="Haz clic para editar"
-            style={{
-              minHeight,
-              width: "100%",
-              borderRadius: "0 0 16px 16px",
-              border: `1.5px solid ${borderColor}`,
-              borderTop: "none",
-              padding: "14px 16px",
-              background: "#f8fbff",
-              cursor: "text",
-              color: "#0f172a",
-              fontSize: 14,
-              lineHeight: 1.85,
-              position: "relative",
-            }}
-          >
-            <div style={{ lineHeight: 1.85 }}>
-              {renderLatexSegments(value)}
-            </div>
-            <span
-              style={{
-                position: "absolute",
-                bottom: 8,
-                right: 12,
-                fontSize: 9,
-                fontWeight: 800,
-                letterSpacing: ".14em",
-                textTransform: "uppercase" as const,
-                color: accentColor,
-                opacity: 0.5,
-              }}
-            >
-              Haz clic para editar
-            </span>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -22,13 +22,32 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
   const weekStart = mondayISO()
   const { data: xpRows } = await db
     .from('camino_xp_events')
-    .select('user_id, xp_amount')
+    .select('user_id, xp_amount, source_id')
     .in('user_id', memberIds)
     .gte('created_at', weekStart)
 
   const xpByUser = new Map<string, number>()
+  const xpEventKeys = new Set<string>()
   for (const row of xpRows ?? []) {
-    xpByUser.set(row.user_id as string, (xpByUser.get(row.user_id as string) ?? 0) + Number(row.xp_amount ?? 0))
+    const uid = row.user_id as string
+    const sourceId = typeof row.source_id === 'string' ? row.source_id : ''
+    xpByUser.set(uid, (xpByUser.get(uid) ?? 0) + Number(row.xp_amount ?? 0))
+    if (sourceId) xpEventKeys.add(`${uid}:${sourceId}`)
+  }
+
+  const { data: completedMissions } = await db
+    .from('camino_calendar')
+    .select('id, user_id, xp_awarded')
+    .in('user_id', memberIds)
+    .eq('status', 'completed')
+    .gte('completed_at', weekStart)
+
+  for (const row of completedMissions ?? []) {
+    const uid = row.user_id as string
+    const missionId = row.id as string
+    if (!uid || !missionId || xpEventKeys.has(`${uid}:${missionId}`)) continue
+    const xpAwarded = Number(row.xp_awarded ?? 0)
+    if (xpAwarded > 0) xpByUser.set(uid, (xpByUser.get(uid) ?? 0) + xpAwarded)
   }
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)

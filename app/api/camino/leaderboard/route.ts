@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
   const { data: inserted } = await supabase
     .from('camino_xp_events')
     .upsert(
-      { user_id: user.id, source_type: 'calendar_mission', source_id: sourceId, xp_amount: xpDelta, mission_date: today },
+      { user_id: user.id, source_type: 'mission_completion', source_id: sourceId, xp_amount: xpDelta, mission_date: today },
       { onConflict: 'user_id,source_type,source_id,mission_date', ignoreDuplicates: true }
     )
     .select('id')

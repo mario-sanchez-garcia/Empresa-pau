@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const { error: xpError } = await db.from('camino_xp_events').insert({
       user_id: user.id,
       xp_amount: xp,
-      source_type: 'camino_mission',
+      source_type: 'mission_completion',
       source_id: String(updated[0].id),
       mission_date: new Date().toISOString().slice(0, 10),
     })

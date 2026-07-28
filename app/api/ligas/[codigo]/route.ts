@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
+import { currentRoundRange } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
-
-function mondayISO(): string {
-  const now = new Date()
-  const day = now.getUTCDay() || 7
-  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - day + 1))
-  return d.toISOString()
-}
 
 export async function GET(
   request: NextRequest,
@@ -39,7 +33,9 @@ export async function GET(
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', liga.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  const weekStart = mondayISO()
+  // "weekStart" quedó como nombre por compatibilidad con el resto del
+  // archivo — ahora es el inicio del mes natural (ronda), no de la semana.
+  const weekStart = currentRoundRange().start
   const { data: xpRows } = await db
     .from('camino_xp_events')
     .select('user_id, xp_amount, source_id')

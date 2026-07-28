@@ -92,16 +92,38 @@ export async function POST(request: NextRequest) {
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
 
-    // PASO 2c — Registrar XP event
+    // PASO 2c — Registrar XP event (con subject, para el ámbito de liga
+    // Comunidad+Materia — ver docs/plan de rediseño de Ligas)
     const { error: xpError } = await db.from('camino_xp_events').insert({
       user_id: user.id,
       xp_amount: xp,
       source_type: 'mission_completion',
       source_id: String(updated[0].id),
       mission_date: new Date().toISOString().slice(0, 10),
+      subject,
     })
     if (xpError) {
       console.error('[camino/complete-mission] xp_event insert failed', xpError)
+    }
+
+    // PASO 2d — Rollup de XP por asignatura (mismo evento de XP, derivado
+    // sin duplicar el dato de origen; alimenta el ranking "XP total" del
+    // ámbito Comunidad+Materia)
+    const { data: currentSubjectXp } = await db
+      .from('camino_subject_xp')
+      .select('xp_total')
+      .eq('user_id', user.id)
+      .eq('subject', subject)
+      .maybeSingle()
+
+    const { error: subjectXpError } = await db.from('camino_subject_xp').upsert({
+      user_id: user.id,
+      subject,
+      xp_total: (Number(currentSubjectXp?.xp_total) || 0) + xp,
+      updated_at: now,
+    }, { onConflict: 'user_id,subject' })
+    if (subjectXpError) {
+      console.error('[camino/complete-mission] camino_subject_xp upsert failed', subjectXpError)
     }
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,

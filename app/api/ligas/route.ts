@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
+import { currentRoundRange } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,18 +9,13 @@ function generateCode(): string {
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
-function mondayISO(): string {
-  const now = new Date()
-  const day = now.getUTCDay() || 7
-  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - day + 1))
-  return d.toISOString()
-}
-
 async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceSupabase>>, ligaRow: { id: string; codigo: string; nombre: string }, currentUserId: string) {
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', ligaRow.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  const weekStart = mondayISO()
+  // "weekStart" quedó como nombre por compatibilidad con el resto del
+  // archivo — ahora es el inicio del mes natural (ronda), no de la semana.
+  const weekStart = currentRoundRange().start
   const { data: xpRows } = await db
     .from('camino_xp_events')
     .select('user_id, xp_amount, source_id')

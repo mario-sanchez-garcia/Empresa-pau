@@ -131,6 +131,14 @@ export async function GET(request: NextRequest) {
   const currentProgress = rows.find(row => row.user_id === user.id)
   const baseRows = currentProgress ? rows : [...rows, { user_id: user.id, xp_total: 0 } as ProgressRow]
 
+  // perfiles.comunidad es ahora la fuente de verdad (escrita en
+  // /api/onboarding/setup); billing_events queda como fallback para
+  // usuarios que onboardearon antes de ese cambio y aún no se han
+  // backfillado (ver scripts/backfill-perfiles-comunidad.mjs).
+  function resolveCommunity(userId: string) {
+    return profiles.get(userId)?.comunidad ?? communities.get(userId)
+  }
+
   const entries = sortEntries(baseRows.map(row => {
     const userId = String(row.user_id)
     const isCurrentUser = userId === user.id
@@ -140,81 +148,18 @@ export async function GET(request: NextRequest) {
       id: publicId(userId),
       name: isCurrentUser ? 'Tú' : publicName,
       community: isCurrentUser
-        ? cleanCommunity(communities.get(userId) ?? requestedCommunity)
-        : cleanCommunity(communities.get(userId) ?? profiles.get(userId)?.community),
+        ? cleanCommunity(resolveCommunity(userId) ?? requestedCommunity)
+        : cleanCommunity(resolveCommunity(userId)),
       xp: Number(row.xp_total ?? 0),
       isCurrentUser,
     }
   }).filter((entry): entry is Omit<LeaderboardEntry, 'rank'> => entry !== null))
 
-  return NextResponse.json(buildPayload(entries, cleanCommunity(communities.get(user.id) ?? requestedCommunity ?? currentProfile?.community)))
+  return NextResponse.json(buildPayload(entries, cleanCommunity(resolveCommunity(user.id) ?? requestedCommunity ?? currentProfile?.comunidad)))
 }
 
-export async function POST(request: NextRequest) {
-  const authContext = await getAuthContext(request)
-  if ('response' in authContext) return authContext.response
-  const { user, accessToken } = authContext
-
-  let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
-  }
-
-  const xpDelta = Number(body.xpDelta ?? 0)
-  const sourceId = typeof body.sourceId === 'string' ? body.sourceId.slice(0, 120) : ''
-  if (!sourceId || !Number.isFinite(xpDelta) || xpDelta <= 0 || xpDelta > 500) {
-    return NextResponse.json({ error: 'XP inválido' }, { status: 400 })
-  }
-
-  const supabase = createUserSupabase(accessToken)
-  const today = new Date().toISOString().slice(0, 10)
-  const { data: inserted } = await supabase
-    .from('camino_xp_events')
-    .upsert(
-      { user_id: user.id, source_type: 'mission_completion', source_id: sourceId, xp_amount: xpDelta, mission_date: today },
-      { onConflict: 'user_id,source_type,source_id,mission_date', ignoreDuplicates: true }
-    )
-    .select('id')
-
-  if (!inserted || inserted.length === 0) {
-    const { data: currentProgress } = await supabase
-      .from('camino_user_progress')
-      .select('xp_total')
-      .eq('user_id', user.id)
-      .maybeSingle()
-    return NextResponse.json({ ok: true, alreadySynced: true, xpTotal: currentProgress?.xp_total ?? 0 })
-  }
-
-  const { data: currentProgress } = await supabase
-    .from('camino_user_progress')
-    .select('*')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  if (!currentProgress) {
-    await supabase.from('camino_user_progress').insert({
-      user_id: user.id,
-      xp_total: xpDelta,
-      streak_days: 0,
-      longest_streak: 0,
-      missions_completed: 0,
-      level_mates: 1,
-      level_historia: 1,
-      level_ingles: 1,
-      progress_towards_pau: 1,
-      updated_at: new Date().toISOString(),
-    })
-  } else {
-    await supabase
-      .from('camino_user_progress')
-      .update({
-        xp_total: Number(currentProgress.xp_total ?? 0) + xpDelta,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', user.id)
-  }
-
-  return NextResponse.json({ ok: true, alreadySynced: false })
-}
+// NOTA: este archivo tenía un POST que escribía XP de forma redundante
+// (camino_xp_events + camino_user_progress), sin ningún caller en el
+// cliente (confirmado por grep de xpDelta/sourceId). Se elimina como
+// parte del rediseño de Ligas — complete-mission/route.ts es ahora el
+// único punto de escritura de XP, para no arriesgar duplicados.

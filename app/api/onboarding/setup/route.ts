@@ -99,6 +99,15 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // Fuente de verdad server-side para agrupar ligas por comunidad
+      // (billing_events.payload.community sigue existiendo abajo como log,
+      // pero ya no es la única fuente — ver leaderboard/rankings).
+      await serviceDb.from('perfiles').upsert({ id: user.id, comunidad: community }, { onConflict: 'id' })
+    } catch { /* non-critical */ }
+  }
+
+  if (serviceDb) {
+    try {
       await recordBetaMetric(serviceDb, user.id, 'onboarding_completed', {
         community,
         school_name: schoolName,

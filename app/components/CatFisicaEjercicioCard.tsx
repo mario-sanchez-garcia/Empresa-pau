@@ -269,7 +269,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
             <div>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-5 py-4 text-sm font-black" style={{ borderColor: UI.accent, backgroundColor: UI.light, color: UI.color }}>
                 <UploadCloud size={20} /> Añadir fotos
-                <input type="file" multiple accept="image/png,image/jpeg,image/webp" onChange={handleImagenes} className="hidden" />
+                <input type="file" multiple accept="image/png,image/jpeg,image/webp" capture="environment" onChange={handleImagenes} className="hidden" />
               </label>
               {imagenes.length > 0 && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">

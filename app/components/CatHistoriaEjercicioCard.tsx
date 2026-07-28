@@ -279,7 +279,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
             <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe tu respuesta..." minHeight={260} accentColor={UI.color} softColor={UI.light} borderColor={UI.border} />
           ) : (
             <div>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} className="hidden" />
+              <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} className="hidden" />
               {imagenPreview ? (
                 <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: UI.border }}>
                   <img src={imagenPreview} alt="Respuesta" className="max-h-[360px] w-full object-contain" />

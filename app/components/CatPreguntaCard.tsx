@@ -194,7 +194,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe tu resolución paso a paso..." minHeight={180} accentColor={CAT_UI.color} softColor={CAT_UI.light} borderColor={CAT_UI.border} />
         ) : (
           <div>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} className="hidden" />
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} className="hidden" />
             {imagenPreview ? (
               <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: CAT_UI.border }}>
                 <img src={imagenPreview} alt="Respuesta" className="max-h-[300px] w-full object-contain" />

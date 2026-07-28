@@ -3,6 +3,7 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { divisionFor } from '@/app/lib/camino/leagues'
+import { calcularRacha } from '@/app/lib/calcularRacha'
 
 export const dynamic = 'force-dynamic'
 
@@ -98,13 +99,17 @@ export async function POST(request: NextRequest) {
     // PASO 3 — Actualizar camino_user_progress
     const { data: currentProgress } = await db
       .from('camino_user_progress')
-      .select('xp_total, missions_completed')
+      .select('xp_total, missions_completed, longest_streak')
       .eq('user_id', user.id)
       .maybeSingle()
 
     const oldXpTotal = Number(currentProgress?.xp_total) || 0
     const newXpTotal = oldXpTotal + xp
     const newMissionsCompleted = (Number(currentProgress?.missions_completed) || 0) + 1
+    const newStreakDays = await calcularRacha(user.id, db).catch(() => null)
+    const newLongestStreak = newStreakDays == null
+      ? Number(currentProgress?.longest_streak ?? 0)
+      : Math.max(Number(currentProgress?.longest_streak ?? 0), newStreakDays)
     const oldDivision = divisionFor(oldXpTotal)
     const newDivision = divisionFor(newXpTotal)
     const leagueUpgrade = newDivision.name !== oldDivision.name
@@ -115,8 +120,8 @@ export async function POST(request: NextRequest) {
       await db.from('camino_user_progress').insert({
         user_id: user.id,
         xp_total: xp,
-        streak_days: 0,
-        longest_streak: 0,
+        streak_days: newStreakDays ?? 0,
+        longest_streak: newLongestStreak,
         missions_completed: 1,
         level_mates: 1,
         level_historia: 1,
@@ -130,13 +135,14 @@ export async function POST(request: NextRequest) {
         .update({
           xp_total: newXpTotal,
           missions_completed: newMissionsCompleted,
+          ...(newStreakDays == null ? {} : { streak_days: newStreakDays, longest_streak: newLongestStreak }),
           updated_at: now,
         })
         .eq('user_id', user.id)
     }
 
     // PASO 5 — Respuesta
-    return NextResponse.json({ success: true, xpAwarded: xp, totalXp: newXpTotal, leagueUpgrade })
+    return NextResponse.json({ success: true, xpAwarded: xp, totalXp: newXpTotal, streakDays: newStreakDays, leagueUpgrade })
   } catch (err) {
     console.error('[camino/complete-mission]', err)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

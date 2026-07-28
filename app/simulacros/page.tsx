@@ -260,7 +260,7 @@ function SimulacrosPage() {
               <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Media</span>
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{stats.averageTime} min</span>
+              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{stats.averageTime == null ? '—' : `${stats.averageTime} min`}</span>
               <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Tiempo medio</span>
             </div>
           </>}
@@ -498,7 +498,7 @@ function buildStats(history: SimulacroRecord[]) {
     completedCount: completed.length,
     averageScore: average(scores),
     bestScore: scores.length ? Math.max(...scores) : 0,
-    averageTime: Math.round(average(times)),
+    averageTime: times.length ? Math.round(average(times)) : null,
     lastCompleted: completed[0] ?? null
   }
 }

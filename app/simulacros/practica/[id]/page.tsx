@@ -483,7 +483,7 @@ function PracticaPageInner() {
                         <Camera size={32} className="mb-3" style={{ color: cfg.color }} />
                         <span className="font-black" style={{ color: cfg.color }}>Sube una foto de tu respuesta</span>
                         <span className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>JPG, PNG, HEIC hasta 10 MB</span>
-                        <input type="file" accept="image/*" className="hidden" onChange={event => void handleImage(block.id, event.target.files?.[0])} />
+                        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={event => void handleImage(block.id, event.target.files?.[0])} />
                       </label>
                       {answers[block.id]?.image && (
                         <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: '#dbe7fb' }}>

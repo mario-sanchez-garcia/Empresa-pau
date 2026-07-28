@@ -964,7 +964,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               <RichTextArea value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" mathSubject={currentTopic.subject} />
             ) : (
               <div style={{ borderRadius: 4, border: '1px dashed #cbd5e1', background: '#f8fafc', padding: 14 }}>
-                <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} style={{ display: 'none' }} />
+                <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} style={{ display: 'none' }} />
                 {image ? (
                   <div style={{ display: 'grid', gap: 10 }}>
                     <img src={image.preview} alt="Respuesta subida" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
@@ -974,7 +974,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   </div>
                 ) : (
                   <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, background: 'white', border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
-                    <UploadCloud size={15} /> Elegir foto de mi respuesta
+                    <UploadCloud size={15} /> Hacer foto o elegir imagen
                   </button>
                 )}
               </div>

@@ -3752,7 +3752,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   />
                 ) : (
                   <div style={{ padding: '14px 16px' }}>
-                    <input ref={fileRef} type="file" accept="image/*" onChange={handleImagen} style={{ display: 'none' }} />
+                    <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} style={{ display: 'none' }} />
                     {imagenPreview ? (
                       <div style={{ position: 'relative' }}>
                         <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
@@ -3761,7 +3761,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     ) : (
                       <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: 160, borderRadius: 10, border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
                         <UploadCloud size={30} color={cfg.color} />
-                        <p style={{ fontSize: 13, fontWeight: 600, color: cfg.color, margin: '8px 0 3px' }}>Haz clic para subir una foto</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: cfg.color, margin: '8px 0 3px' }}>Haz una foto o sube una imagen</p>
                         <p style={{ fontSize: 11, color: cfg.accent, margin: 0 }}>Fotografía tu respuesta manuscrita</p>
                       </div>
                     )}

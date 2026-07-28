@@ -23,9 +23,9 @@ type RankingResponse = {
 }
 
 const SCOPES: Array<{ id: Scope; label: string; sublabel: string }> = [
-  { id: 'personal',          label: 'Liga',       sublabel: 'tus ligas' },
+  { id: 'personal',          label: 'Personal',   sublabel: 'tu liga'     },
   { id: 'comunidad_materia', label: 'Comunidad',  sublabel: 'por materia' },
-  { id: 'global',            label: 'Global',     sublabel: 'todos' },
+  { id: 'global',            label: 'Global',     sublabel: 'todos'       },
 ]
 
 const MODES: Array<{ id: Mode; label: string }> = [
@@ -259,20 +259,33 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[1,2,3,4,5].map(i => (
-                <div key={i} style={{ height: 52, borderRadius: 12, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.05)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                <div key={i} style={{ height: 52, borderRadius: 12, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.05)' }} />
               ))}
             </div>
-          ) : scope === 'comunidad_materia' && !availableSubjects.length ? (
-            <EmptyState
-              M={M}
-              title="Sin asignaturas registradas"
-              body="Todavía no tienes XP en ninguna asignatura este mes. Completa algún ejercicio para aparecer aquí."
-            />
           ) : scope === 'personal' && data?.error === 'not_in_liga' ? (
             <EmptyState
               M={M}
               title="No estás en ninguna liga"
-              body="Únete o crea una liga para ver tu clasificación personal."
+              body="Únete o crea una liga para ver tu clasificación personal. Puedes buscar una o crear la tuya desde Camino PAU."
+            />
+          ) : scope === 'comunidad_materia' && data?.error === 'no_comunidad' ? (
+            <EmptyState
+              M={M}
+              title="Configura tu comunidad"
+              body="Añade tu comunidad autónoma en tu perfil para ver el ranking de alumnos de tu región."
+              action={{ label: 'Ir a configuración →', href: '/camino/ajustes' }}
+            />
+          ) : scope === 'comunidad_materia' && !availableSubjects.length ? (
+            <EmptyState
+              M={M}
+              title="Sin asignaturas registradas"
+              body="Completa ejercicios en Kairo para acumular XP por asignatura y aparecer en este ranking."
+            />
+          ) : mode === 'etapas' && !entries.length ? (
+            <EmptyState
+              M={M}
+              title="Aún no hay etapas cerradas"
+              body="Las etapas se calculan al cierre de cada ronda mensual. Las primeras clasificaciones aparecerán a final de mes."
             />
           ) : entries.length ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -281,7 +294,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
               ))}
             </div>
           ) : (
-            <EmptyState M={M} title="Sin datos" body="Aún no hay actividad registrada para este periodo." />
+            <EmptyState M={M} title="Sin actividad" body="Aún no hay XP registrado para este periodo. ¡Completa misiones para aparecer aquí!" />
           )}
         </div>
       </motion.div>
@@ -289,7 +302,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
   )
 }
 
-function EmptyState({ M, title, body }: { M: string; title: string; body: string }) {
+function EmptyState({ M, title, body, action }: { M: string; title: string; body: string; action?: { label: string; href: string } }) {
   return (
     <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center' }}>
       <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)', display: 'grid', placeItems: 'center', marginBottom: 4 }}>
@@ -301,6 +314,11 @@ function EmptyState({ M, title, body }: { M: string; title: string; body: string
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,.3)', lineHeight: 1.6, margin: 0, maxWidth: 280 }}>
         {body}
       </p>
+      {action && (
+        <a href={action.href} style={{ marginTop: 4, fontFamily: M, fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: '#60a5fa', textDecoration: 'none', fontWeight: 500 }}>
+          {action.label}
+        </a>
+      )}
     </div>
   )
 }

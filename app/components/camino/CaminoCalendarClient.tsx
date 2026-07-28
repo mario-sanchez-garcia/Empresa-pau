@@ -765,6 +765,7 @@ export default function CaminoCalendarClient() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
+  const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
   const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
   const [streak, setStreak] = useState(0)
   const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
@@ -1160,28 +1161,52 @@ export default function CaminoCalendarClient() {
   }
 
   async function completeMission(mission: Mission) {
-    if (!mission.calendarRowId) return
+    if (!mission.calendarRowId || !mission.subjectSlug || mission.v2SortOrder == null) return
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
-    setCalendar(current => current.map(day => ({
-      ...day,
-      missions: day.missions.map(m => m.id === mission.id ? { ...m, status: 'done' as MissionStatus } : m),
-    })))
-    setXpTotal(prev => prev + 20)
-    setWeeklyXP(prev => prev + 20)
-    setToast('¡Misión completada! +20 XP')
-    await supabase
-      .from('camino_calendar')
-      .update({ status: 'completed', completed_at: new Date().toISOString(), xp_awarded: 20 })
-      .eq('id', mission.calendarRowId)
-    await supabase
-      .from('camino_xp_events')
-      .insert({
-        user_id: session.user.id,
-        xp: 20,
-        source: 'camino_mission',
-        metadata: { mission_id: mission.calendarRowId, subject: mission.subject, title: mission.title },
-      })
+    const res = await fetch('/api/camino/complete-mission', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({
+        subject: mission.subjectSlug,
+        v2SortOrder: mission.v2SortOrder,
+        missionType: mission.missionType ?? 'concept',
+        title: mission.title,
+      }),
+    })
+    const json = await res.json() as {
+      success?: boolean
+      reason?: string
+      xpAwarded?: number
+      totalXp?: number
+      streakDays?: number | null
+      leagueUpgrade?: { from: string; to: string } | null
+      error?: string
+    }
+    if (!res.ok) {
+      setToast(json.error ?? 'No hemos podido completar la misión ahora mismo')
+      return
+    }
+    if (json.success || json.reason === 'already_completed') {
+      setCalendar(current => current.map(day => ({
+        ...day,
+        missions: day.missions.map(m => m.id === mission.id ? { ...m, status: 'done' as MissionStatus } : m),
+      })))
+    }
+    if (json.success && typeof json.xpAwarded === 'number') {
+      const xpAwarded = json.xpAwarded
+      setXpTotal(typeof json.totalXp === 'number' ? json.totalXp : prev => prev + xpAwarded)
+      setWeeklyXP(prev => prev + xpAwarded)
+      if (typeof json.streakDays === 'number') setStreak(json.streakDays)
+      if (json.leagueUpgrade) setLeagueUpgrade(json.leagueUpgrade)
+      setToast(`¡Misión completada! +${xpAwarded} XP`)
+      fetch('/api/ligas', { headers: { Authorization: `Bearer ${session.access_token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.liga) setLiga(data.liga) })
+        .catch(() => undefined)
+    } else if (json.reason === 'already_completed') {
+      setToast('Misión ya completada')
+    }
   }
 
   async function generateCamino() {
@@ -1956,6 +1981,31 @@ export default function CaminoCalendarClient() {
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
       {/* CalendarEditorOverlay disabled: edits were only persisted to localStorage and wiped on next page load by saveCalendarWeeksToCache. Re-enable when calendar edits can be written to camino_calendar in DB. */}
+      <AnimatePresence>
+        {leagueUpgrade && (() => {
+          const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
+          return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+                <div className="mb-4 rounded-2xl px-4 py-5 text-center" style={{ background: upgradedDiv.bg }}>
+                  <p className="text-3xl font-black" style={{ color: upgradedDiv.text }}>🏆 {leagueUpgrade.to}</p>
+                  <p className="mt-1 text-sm font-bold" style={{ color: upgradedDiv.text, opacity: 0.75 }}>Nueva división</p>
+                </div>
+                <h2 className="text-center text-lg font-black text-slate-950">¡Has subido de división!</h2>
+                <p className="mt-1 text-center text-sm font-semibold text-slate-500">De <strong className="text-slate-700">{leagueUpgrade.from}</strong> a <strong style={{ color: upgradedDiv.text }}>{leagueUpgrade.to}</strong>. Sigue así.</p>
+                <button
+                  type="button"
+                  onClick={() => setLeagueUpgrade(null)}
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-black text-white"
+                  style={{ background: upgradedDiv.bar }}
+                >
+                  ¡A por más XP!
+                </button>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('kairo_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>

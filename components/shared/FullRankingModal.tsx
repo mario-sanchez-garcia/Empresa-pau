@@ -273,7 +273,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
               M={M}
               title="Configura tu comunidad"
               body="Añade tu comunidad autónoma en tu perfil para ver el ranking de alumnos de tu región."
-              action={{ label: 'Ir a configuración →', href: '/camino/ajustes' }}
+              action={{ label: 'Ir a configuración →', href: '/settings' }}
             />
           ) : scope === 'comunidad_materia' && !availableSubjects.length ? (
             <EmptyState

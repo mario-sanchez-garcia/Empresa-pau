@@ -1,21 +1,25 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import KairoBrand from '@/components/shared/KairoBrand'
 import KairoLoader from '@/app/components/ui/KairoLoader'
+import { CheckCircle2 } from 'lucide-react'
 
 const PLAN_LABELS: Record<string, string> = {
   pack_curso_pau: 'Curso PAU',
   premium: 'Premium',
 }
 
-export default function CheckoutPage() {
+type State = 'loading' | 'error' | 'already_active'
+
+function CheckoutFlow() {
   const searchParams = useSearchParams()
   const planId = searchParams.get('plan') ?? 'pack_curso_pau'
   const planLabel = PLAN_LABELS[planId] ?? planId
-  const [error, setError] = useState<string | null>(null)
+  const [state, setState] = useState<State>('loading')
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const initiated = useRef(false)
 
   useEffect(() => {
@@ -44,37 +48,57 @@ export default function CheckoutPage() {
         const data = await res.json()
 
         if (res.status === 409) {
-          // Already has active plan
-          window.location.href = '/examenes'
+          setState('already_active')
           return
         }
 
         if (!res.ok) {
-          setError(data.error ?? 'No hemos podido iniciar el pago. Inténtalo de nuevo.')
+          setErrorMsg(data.error ?? 'No hemos podido iniciar el pago. Inténtalo de nuevo.')
+          setState('error')
           return
         }
 
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl
         } else {
-          setError('No hemos podido obtener la URL de pago.')
+          setErrorMsg('No hemos podido obtener la URL de pago.')
+          setState('error')
         }
       } catch {
-        setError('Error de conexión. Comprueba tu conexión y vuelve a intentarlo.')
+        setErrorMsg('Error de conexión. Comprueba tu conexión y vuelve a intentarlo.')
+        setState('error')
       }
     }
 
     void start()
   }, [planId])
 
-  if (error) {
+  if (state === 'already_active') {
+    return (
+      <main style={styles.page}>
+        <div style={styles.card}>
+          <KairoBrand subtitle={null} size="md" />
+          <div style={styles.successIcon}>
+            <CheckCircle2 size={30} strokeWidth={2.4} />
+          </div>
+          <h1 style={styles.title}>Ya tienes acceso</h1>
+          <p style={styles.body}>
+            Tu cuenta ya tiene un plan activo. No necesitas volver a pagar.
+          </p>
+          <a href="/examenes" style={styles.btn}>Ir a Kairo →</a>
+        </div>
+      </main>
+    )
+  }
+
+  if (state === 'error') {
     return (
       <main style={styles.page}>
         <div style={styles.card}>
           <KairoBrand subtitle={null} size="md" />
           <div style={styles.errorIcon}>✕</div>
           <h1 style={styles.title}>Algo ha salido mal</h1>
-          <p style={styles.body}>{error}</p>
+          <p style={styles.body}>{errorMsg}</p>
           <a href="/pricing" style={styles.btn}>Ver planes →</a>
           <a href="mailto:hola@kairo.es" style={styles.link}>hola@kairo.es</a>
         </div>
@@ -99,6 +123,14 @@ export default function CheckoutPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<KairoLoader />}>
+      <CheckoutFlow />
+    </Suspense>
   )
 }
 
@@ -127,6 +159,17 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     textAlign: 'center',
   },
+  successIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 20,
+    display: 'grid',
+    placeItems: 'center',
+    color: '#16a34a',
+    background: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    boxShadow: '0 16px 34px rgba(22,163,74,0.12)',
+  },
   errorIcon: {
     width: 52,
     height: 52,
@@ -150,6 +193,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
     fontSize: 14,
     textDecoration: 'none',
+    width: '100%',
+    textAlign: 'center',
   },
   link: { fontSize: 13, color: '#2563eb', textDecoration: 'none', fontWeight: 600 },
 }

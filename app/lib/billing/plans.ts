@@ -45,6 +45,21 @@ export const PLANS: Record<string, BillingPlan> = {
       'Soporte prioritario',
     ],
   },
+  premium: {
+    id: 'premium',
+    label: 'Premium',
+    description: 'Plan mensual con acceso completo a correcciones, simulacros y Camino PAU.',
+    priceCents: 999,
+    currency: 'eur',
+    accessDays: 30,
+    features: [
+      '200 correcciones/mes',
+      '80 fotos/mes',
+      '12 parciales/mes · 5 simulacros/mes',
+      'Camino PAU completo',
+      'Ranking completo',
+    ],
+  },
 }
 
 export function getPlan(planId: string): BillingPlan | null {

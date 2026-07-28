@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { supabase } from '../lib/supabase'
 import { Eye, EyeOff } from 'lucide-react'
@@ -9,6 +10,9 @@ const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
 export default function Login() {
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo') ?? '/camino'
+
   // ── Auth state (preservado exactamente) ──────────────────────────────────────
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -29,9 +33,12 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setCargando(true)
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+    const callbackUrl = returnTo !== '/camino'
+      ? `${base}/auth/callback?next=${encodeURIComponent(returnTo)}`
+      : `${base}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${base}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     })
     if (error) {
       setMensaje('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
@@ -64,7 +71,7 @@ export default function Login() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMensaje(error.message)
-      else window.location.href = '/camino'
+      else window.location.href = returnTo
     }
     setCargando(false)
   }

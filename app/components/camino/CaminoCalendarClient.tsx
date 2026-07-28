@@ -1876,6 +1876,7 @@ export default function CaminoCalendarClient() {
 
           {/* Liga de amigos */}
           <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Mi liga</div>
             <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
           </div>
 
@@ -3021,28 +3022,24 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
 
   if (liga) return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
-          <h3 className="text-sm font-black text-slate-950">{liga.nombre}</h3>
-        </div>
-        <button onClick={copyLink} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-black text-blue-700 transition hover:bg-blue-100">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>{liga.nombre}</div>
+        <button
+          onClick={copyLink}
+          style={{ fontSize: 10, fontWeight: 800, color: copied ? '#16a34a' : '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
           {copied ? '✓ Copiado' : 'Compartir liga'}
         </button>
       </div>
-      <div className="grid gap-1.5">
-        {liga.miembros.map(m => (
-          <div key={m.user_id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2" style={{ background: m.name === 'Tú' ? '#eff6ff' : '#fff', border: m.name === 'Tú' ? '1px solid #bfdbfe' : '1px solid #f1f5f9' }}>
-            <span className="flex items-center gap-2 text-xs font-black text-slate-800">
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black" style={{ background: m.rank <= 3 ? '#eff6ff' : '#f1f5f9', color: m.rank <= 3 ? '#1d4ed8' : '#64748b' }}>
-                {m.rank <= 3 ? <Medal size={11} /> : m.rank}
-              </span>
-              {m.name}
-            </span>
-            <span className="text-[11px] font-bold text-blue-700 shrink-0">{m.weekly_xp} XP sem.</span>
-          </div>
-        ))}
-      </div>
+      {liga.miembros.map(m => (
+        <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8, background: m.name === 'Tú' ? '#eff6ff' : 'transparent', border: m.name === 'Tú' ? '1px solid #dbeafe' : '1px solid transparent' }}>
+          <span style={{ width: 20, fontWeight: 800, color: '#94a3b8', fontSize: 10, textAlign: 'center', flexShrink: 0 }}>
+            {m.rank <= 3 ? <Medal size={11} color={m.rank === 1 ? '#b45309' : m.rank === 2 ? '#64748b' : '#b87333'} /> : `#${m.rank}`}
+          </span>
+          <span style={{ flex: 1, fontSize: 11, fontWeight: m.name === 'Tú' ? 800 : 600, color: m.name === 'Tú' ? '#1d40af' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
+          <span style={{ fontWeight: 800, color: '#2563eb', fontSize: 10, flexShrink: 0 }}>{m.weekly_xp} XP</span>
+        </div>
+      ))}
     </div>
   )
 

@@ -38,6 +38,13 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
     if (name) nameById.set(p.id as string, name)
   }
 
+  const missingIds = memberIds.filter(uid => uid !== currentUserId && !nameById.has(uid))
+  for (const uid of missingIds) {
+    const { data: authData } = await db.auth.admin.getUserById(uid)
+    const email = authData?.user?.email
+    if (email) nameById.set(uid, email.split('@')[0])
+  }
+
   const miembros = memberIds
     .map(uid => ({
       user_id: uid,

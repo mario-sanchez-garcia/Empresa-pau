@@ -3966,7 +3966,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     <div key={i} className="chat-msg-ai" style={{ padding: '10px 0' }}>
                       <div style={{ borderRadius: 22, padding: '20px 22px', background: 'white', border: '1px solid #e8eef7', boxShadow: '0 4px 20px rgba(15,23,42,.06)' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                          <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, background: '#eff6ff', border: '1px solid #bfdbfe', boxShadow: '0 4px 12px rgba(37,99,235,.10)' }} />
+                          <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0 }} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 10, fontWeight: 900, color: '#2563eb', marginBottom: 10, letterSpacing: '.12em', textTransform: 'uppercase' }}>Kairo</div>
                             {(() => {
@@ -4004,7 +4004,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
                   <div className="chat-msg-ai" style={{ padding: '16px 0' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                      <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, background: '#eff6ff', border: '1px solid rgba(191,219,254,0.85)' }} />
+                      <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0 }} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
                         <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
                         <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />

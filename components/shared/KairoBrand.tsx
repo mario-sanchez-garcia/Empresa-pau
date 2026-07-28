@@ -40,11 +40,9 @@ export default function KairoBrand({
         flexShrink: 0,
         display: 'grid',
         placeItems: 'center',
-        background: inverse ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.88)',
-        border: inverse ? '1px solid rgba(255,255,255,0.30)' : '1px solid rgba(191,219,254,0.82)',
-        boxShadow: inverse
-          ? '0 14px 34px rgba(2,8,23,0.18)'
-          : '0 12px 28px rgba(37,99,235,0.14)',
+        background: '#0f172a',
+        border: '1px solid rgba(37,99,235,0.35)',
+        boxShadow: '0 8px 24px rgba(2,8,23,0.22)',
         overflow: 'hidden',
         ...(variant === 'mark' ? style : undefined),
       }}

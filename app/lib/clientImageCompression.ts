@@ -4,8 +4,8 @@ export async function compressImage(file: File): Promise<string> {
     const url = URL.createObjectURL(file)
 
     img.onload = () => {
-      const MAX = 800
-      const QUALITY = 0.7
+      const MAX = 1568
+      const QUALITY = 0.85
       let { width, height } = img
 
       if (width > MAX || height > MAX) {

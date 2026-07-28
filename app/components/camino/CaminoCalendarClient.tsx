@@ -1068,6 +1068,8 @@ export default function CaminoCalendarClient() {
     return dow === 'Fri' || dow === 'Sat' || dow === 'Sun'
   })()
   const heroAsignatura = (() => {
+    const todayMain = today.missions.find(m => m.role === 'main')?.subjectSlug ?? null
+    if (todayMain) return todayMain
     if (!filteredProjection?.length) return null
     const nextPartialSlug = upcomingPartial ? subjectSlug(upcomingPartial.subject) : null
     if (nextPartialSlug && filteredProjection.some(p => p.asignatura === nextPartialSlug)) return nextPartialSlug

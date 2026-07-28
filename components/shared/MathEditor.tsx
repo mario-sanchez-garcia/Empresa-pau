@@ -19,44 +19,73 @@ interface MathEditorProps {
 
 const HAS_LATEX = /\$|\\\[|\\\(|\\begin\{/
 
-// Render a string containing $...$ and $$...$$ into an array of React-renderable HTML spans.
-// Bypasses remark-math entirely to avoid the $$ adjacency parsing bug.
+// Character-by-character scanner to avoid the $A$$B$ ambiguity:
+// When the previous char was $, the current $ starts a NEW inline block, not display math.
 function renderLatexSegments(text: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = []
-  // Split on $$...$$ first (display math, usually contains newlines)
-  const displayParts = text.split(/((?:\$\$)[\s\S]*?(?:\$\$))/)
-  displayParts.forEach((seg, di) => {
-    if (seg.startsWith("$$") && seg.endsWith("$$") && seg.length > 4) {
-      const math = seg.slice(2, -2).trim()
-      try {
-        const html = katex.renderToString(math, { throwOnError: false, displayMode: true })
-        nodes.push(<span key={`d${di}`} dangerouslySetInnerHTML={{ __html: html }} style={{ display: "block", overflowX: "auto" }} />)
-      } catch {
-        nodes.push(<span key={`d${di}`} style={{ color: "#e11d48" }}>{seg}</span>)
-      }
-      return
-    }
-    // Split remaining segment on $...$ (inline math)
-    const inlineParts = seg.split(/(\$[^$\n]+?\$)/)
-    inlineParts.forEach((part, ii) => {
-      if (part.startsWith("$") && part.endsWith("$") && part.length > 2) {
-        const math = part.slice(1, -1)
-        try {
-          const html = katex.renderToString(math, { throwOnError: false, displayMode: false })
-          nodes.push(<span key={`d${di}i${ii}`} dangerouslySetInnerHTML={{ __html: html }} />)
-        } catch {
-          nodes.push(<span key={`d${di}i${ii}`} style={{ color: "#e11d48" }}>{part}</span>)
-        }
-        return
-      }
-      if (!part) return
-      // Plain text — preserve newlines
-      part.split("\n").forEach((line, li) => {
-        if (li > 0) nodes.push(<br key={`d${di}i${ii}br${li}`} />)
-        if (line) nodes.push(<span key={`d${di}i${ii}l${li}`}>{line}</span>)
-      })
+  let i = 0
+  let buf = ""
+  let key = 0
+
+  function flushText() {
+    if (!buf) return
+    buf.split("\n").forEach((line, li) => {
+      if (li > 0) nodes.push(<br key={key++} />)
+      if (line) nodes.push(<span key={key++}>{line}</span>)
     })
-  })
+    buf = ""
+  }
+
+  function pushMath(math: string, display: boolean) {
+    try {
+      const html = katex.renderToString(math, { throwOnError: false, displayMode: display })
+      if (display) {
+        nodes.push(<span key={key++} dangerouslySetInnerHTML={{ __html: html }} style={{ display: "block", overflowX: "auto", margin: "4px 0" }} />)
+      } else {
+        nodes.push(<span key={key++} dangerouslySetInnerHTML={{ __html: html }} />)
+      }
+    } catch {
+      nodes.push(<span key={key++} style={{ color: "#e11d48" }}>{display ? `$$${math}$$` : `$${math}$`}</span>)
+    }
+  }
+
+  while (i < text.length) {
+    if (text[i] !== "$") {
+      buf += text[i++]
+      continue
+    }
+
+    // text[i] === '$'
+    const prevWasDollar = i > 0 && text[i - 1] === "$"
+    const nextIsDollar = text[i + 1] === "$"
+
+    // Only treat $$ as display math if the previous char was NOT $ (i.e. not end of inline block)
+    if (nextIsDollar && !prevWasDollar) {
+      const close = text.indexOf("$$", i + 2)
+      if (close !== -1) {
+        flushText()
+        pushMath(text.slice(i + 2, close).trim(), true)
+        i = close + 2
+        continue
+      }
+    }
+
+    // Inline math: scan forward to find closing $
+    let j = i + 1
+    while (j < text.length && text[j] !== "$") j++
+
+    if (j < text.length && j > i + 1) {
+      flushText()
+      pushMath(text.slice(i + 1, j), false)
+      i = j + 1
+      continue
+    }
+
+    // No matching $ found — plain text
+    buf += text[i++]
+  }
+
+  flushText()
   return nodes
 }
 
@@ -77,8 +106,6 @@ export default function MathEditor({
 
   const hasContent = value.trim().length > 0
   const hasLatex = HAS_LATEX.test(value)
-
-  // Show rendered view only when blurred AND has LaTeX content
   const showRendered = !focused && hasContent && hasLatex
 
   const focusTextarea = useCallback(() => {
@@ -104,7 +131,6 @@ export default function MathEditor({
       />
 
       <div style={{ position: "relative" }}>
-        {/* Raw textarea — always mounted so toolbar can insert into it */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -137,7 +163,6 @@ export default function MathEditor({
           onBlur={() => setFocused(false)}
         />
 
-        {/* Rendered LaTeX view — shown when blurred + has LaTeX */}
         {showRendered && (
           <div
             onClick={focusTextarea}

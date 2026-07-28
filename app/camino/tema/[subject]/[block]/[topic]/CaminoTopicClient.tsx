@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, MessageCircle, PenLi
 import SidebarNav from '@/app/components/SidebarNav'
 import { buildEvauHref, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
@@ -628,50 +628,32 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         setCorrection('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
       }
-      const subjectLabel = subjectLabelFromSlug(currentTopic.subject)
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
-      const prompt = buildCorrectionPrompt({
-        subject: subjectLabel,
-        simulacroId: 'Camino PAU · ' + subjectLabel + ' · ' + currentTopic.blockTitle + ' · ' + selectedMissionTitle,
-        option: 'Curso',
-        elapsedMinutes: 0,
-        difficulty: 'Media',
-        blocks: [{
-          numeroBloque: 'Ejercicio de curso',
-          tema: selectedMissionTitle,
-          year: new Date().getFullYear(),
-          convocatoria: 'Camino PAU',
-          option: 'Curso',
-          maxScore,
-          officialPrompt: statement,
-          criteria: currentTopic.referenceSolution
-            ? `Solución orientativa del curso:\n${currentTopic.referenceSolution}`
-            : currentTopic.guidedExample
-              ? `Solución orientativa del curso:\n${currentTopic.guidedExample}`
-              : 'Corrección orientativa de curso. No hay rúbrica oficial asociada a este ejercicio.',
-          studentAnswer: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.' : studentAnswer,
-        }]
-      })
-      const response = await fetch('/api/chat', {
+      const selectedSortOrder = selectedV2Card?.sort_order ?? currentTopic.v2SortOrder ?? null
+      const response = await fetch('/api/camino/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: prompt,
-          imagen: answerMode === 'imagen' ? image?.data : null,
-          imagenTipo: answerMode === 'imagen' ? image?.type : null,
-          creditKey: `camino:${key}:${selectedV2Card?.sort_order ?? currentTopic.v2SortOrder ?? selectedMissionTitle}`,
+          topicId: `${currentTopic.subject}:${currentTopic.blockSlug}:${currentTopic.topicSlug}:${selectedSortOrder ?? 'legacy'}`,
+          subject: currentTopic.subject,
+          block: currentTopic.blockSlug,
+          topic: currentTopic.topicSlug,
+          sortOrder: selectedSortOrder,
+          responseMode: answerMode === 'imagen' ? 'image' : 'text',
+          studentResponse: answerMode === 'imagen' ? image?.data : studentAnswer,
+          imageType: answerMode === 'imagen' ? image?.type : null,
         })
       })
       const data = await response.json()
       if (!response.ok) {
-        if (data.error === 'free_plan_expired' || data.error === 'correction_limit_reached') {
+        if (data.error === 'free_plan_expired' || data.error === 'correction_limit_reached' || data.error === 'photo_limit_reached') {
           setShowPaywall(true)
           return
         }
         setCorrection(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsed = parseCorrectionPayload(data.respuesta)
+      const parsed = data.correction ?? parseCorrectionPayload(data.respuesta)
       const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
       const visibleCorrection = normalized
         ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })

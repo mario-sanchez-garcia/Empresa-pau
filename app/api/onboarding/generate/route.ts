@@ -4,6 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
+import { injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
@@ -12,6 +13,14 @@ export const dynamic = 'force-dynamic'
 
 const VALID_START_MODES = ['zero', 'first_block', 'mid', 'review', 'unknown'] as const
 type StartMode = typeof VALID_START_MODES[number]
+
+type OnboardingStudentExam = {
+  id: string
+  subject: string
+  date: string
+  block: string
+  topic?: string
+}
 
 // Private beta scope: Camino PAU is active only for the four core PAU subjects.
 const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana'])
@@ -67,6 +76,30 @@ function betaSequenceItems(subject: string): QueueSourceItem[] {
     }))
 }
 
+function cleanString(value: unknown, fallback = '') {
+  return typeof value === 'string' ? value.trim().slice(0, 160) : fallback
+}
+
+function cleanStudentExams(value: unknown): OnboardingStudentExam[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .flatMap((raw, index) => {
+      if (!raw || typeof raw !== 'object') return []
+      const exam = raw as Record<string, unknown>
+      const subject = cleanString(exam.subject, '').slice(0, 80)
+      const date = cleanString(exam.date, '').slice(0, 10)
+      if (!subject || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return []
+      return [{
+        id: cleanString(exam.id, `onboarding-exam-${index + 1}`).slice(0, 80),
+        subject,
+        date,
+        block: cleanString(exam.block, 'Repaso general').slice(0, 80) || 'Repaso general',
+        topic: cleanString(exam.topic, '').slice(0, 120),
+      }]
+    })
+    .slice(0, 8)
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authContext = await getAuthContext(request)
@@ -91,6 +124,24 @@ export async function POST(request: NextRequest) {
       ? (body.startMode as StartMode) : 'zero'
 
     const db = createServiceClient()
+    const requestedStudentExams = cleanStudentExams(body.studentExams)
+
+    async function loadStudentExams() {
+      if (requestedStudentExams.length > 0) return requestedStudentExams
+      const { data: profile } = await db
+        .from('perfiles')
+        .select('student_exams')
+        .eq('id', user.id)
+        .maybeSingle()
+      return cleanStudentExams(profile?.student_exams)
+    }
+
+    async function injectOnboardingPartials() {
+      const studentExams = await loadStudentExams()
+      for (const exam of studentExams) {
+        await injectPartialExamMissions(user.id, db, exam)
+      }
+    }
 
     // ── PASO 4: Idempotency — already scheduled ─────────────────────────────
     const { count: scheduledCount } = await db
@@ -101,6 +152,7 @@ export async function POST(request: NextRequest) {
       .eq('queue_status', 'scheduled')
 
     if (scheduledCount && scheduledCount > 0) {
+      await injectOnboardingPartials()
       await applyCalendarPersonalization(user.id, db)
 
       const todayIdempotent = getMadridToday()
@@ -298,6 +350,7 @@ export async function POST(request: NextRequest) {
       if (error) throw new Error(`Queue update error: ${error.message}`)
     }
 
+    await injectOnboardingPartials()
     await applyCalendarPersonalization(user.id, db)
 
     // ── PASO 4: Response ────────────────────────────────────────────────────

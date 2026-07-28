@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Lock, Search } from 'lucide-react'
+import { Calendar, Check, Lock, Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
+import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import {
   loadOnboarding,
   markOnboardingComplete,
@@ -17,11 +18,12 @@ import {
   syncOnboardingCommunity,
   type OnboardingCommunity,
   type OnboardingData,
+  type OnboardingStudentExam,
 } from '@/app/lib/onboarding/onboardingStorage'
 
-type Step = 'welcome' | 'community' | 'school' | 'subjects' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
+type Step = 'welcome' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
 
-const STEPS: Step[] = ['community', 'school', 'subjects', 'feeling', 'daily-time', 'weekly-days', 'confirm']
+const STEPS: Step[] = ['community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'confirm']
 
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
@@ -31,6 +33,7 @@ const STEP_PHOTO: Partial<Record<Step, string>> = {
   community: HF_FLATLAY,
   school: HF_EQUATIONS,
   subjects: HF_FLATLAY,
+  'upcoming-exams': HF_EQUATIONS,
   feeling: HF_EQUATIONS,
   'daily-time': HF_LIBRARY,
   'weekly-days': HF_LIBRARY,
@@ -41,6 +44,7 @@ const STEP_HEADLINE: Partial<Record<Step, string[]>> = {
   community: ['¿Dónde', 'haces la', 'PAU?'],
   school: ['¿Cuál es', 'tu', 'centro?'],
   subjects: ['¿Qué', 'asigna-', 'turas?'],
+  'upcoming-exams': ['¿Tienes', 'un parcial', 'pronto?'],
   feeling: ['¿Cómo', 'llevas la', 'prep?'],
   'daily-time': ['¿Cuánto', 'tiempo', 'al día?'],
   'weekly-days': ['¿Cuántos', 'días a la', 'semana?'],
@@ -100,6 +104,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   community: { title: '¿Dónde haces la PAU?', help: 'Así ajustamos la experiencia a tu comunidad autónoma.' },
   school: { title: '¿Cuál es tu centro educativo?', help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.' },
   subjects: { title: '¿Qué asignaturas quieres preparar?', help: 'Elige todas las que entran en tu PAU. Puedes cambiarlo más adelante.' },
+  'upcoming-exams': { title: '¿Tienes algún examen pronto?', help: 'Opcional. Si tienes un parcial cerca, Kairo añadirá práctica específica antes de esa fecha.' },
   feeling: { title: '¿Cómo llevas la preparación?', help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.' },
   'daily-time': { title: '¿Cuánto tiempo podrías estudiar al día?', help: 'Lo ajustaremos mejor más adelante según tu ritmo.' },
   'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'En el futuro, Kairo adaptará el plan a tu ritmo y preferencias.' },
@@ -108,7 +113,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
 }
 
-const SIDEBAR_STEPS = ['Comunidad', 'Centro', 'Asignaturas', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
+const SIDEBAR_STEPS = ['Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
 
@@ -137,6 +142,7 @@ export default function OnboardingFlow() {
   const [schoolQuery, setSchoolQuery] = useState('')
   const [schoolOpen, setSchoolOpen] = useState(false)
   const [dbInstitutes, setDbInstitutes] = useState<string[]>([])
+  const [examDraft, setExamDraft] = useState({ subject: '', date: inputDate(addDays(new Date(), 10)), block: '', topic: '', name: '', priority: 'normal' as const })
   const generateRetriesRef = useRef(0)
 
   // On mount: redirect already-completed users; restore last step for interrupted sessions
@@ -287,6 +293,29 @@ export default function OnboardingFlow() {
     update({ subjects: data.subjects.includes(subject) ? data.subjects.filter(item => item !== subject) : [...data.subjects, subject] })
   }
 
+  function addUpcomingExam() {
+    const subject = examDraft.subject || data.subjects.find(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s)) || PRIVATE_BETA_ENABLED_SUBJECTS[0]?.id || ''
+    const date = examDraft.date
+    if (!subject || !date) return
+    const block = normalizeBlockKey(examDraft.block.trim() || 'Repaso general')
+    const topic = examDraft.topic.trim()
+    const exam: OnboardingStudentExam = {
+      id: `onb-exam-${date}-${Date.now()}`,
+      subject,
+      date,
+      block,
+      topic,
+      name: examDraft.name.trim() || `Parcial de ${subject}`,
+      priority: examDraft.priority,
+    }
+    update({ studentExams: [...(data.studentExams ?? []), exam] })
+    setExamDraft(current => ({ ...current, block: '', topic: '', name: '', date: inputDate(addDays(new Date(), 10)), priority: 'normal' }))
+  }
+
+  function removeUpcomingExam(id: string) {
+    update({ studentExams: (data.studentExams ?? []).filter(exam => exam.id !== id) })
+  }
+
   const SUBJECT_TO_SLUG: Record<string, string> = {
     'Matemáticas II': 'matematicas_ii',
     'Matemáticas CCSS': 'matematicas_ccss',
@@ -300,7 +329,8 @@ export default function OnboardingFlow() {
     setStep('saving')
     const completedAt = new Date().toISOString()
     const selectedEnabled = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
-    saveOnboarding({ ...data, subjects: selectedEnabled, completedAt })
+    const upcomingExams = sanitizeOnboardingExams(data.studentExams ?? [], selectedEnabled)
+    saveOnboarding({ ...data, subjects: selectedEnabled, studentExams: upcomingExams, completedAt })
     try {
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
@@ -314,6 +344,7 @@ export default function OnboardingFlow() {
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,
             subjects: selectedEnabled,
+            studentExams: upcomingExams,
             preparationFeeling: data.preparationFeeling,
             dailyStudyTime: data.dailyStudyTime,
             dailyMinutes: data.dailyMinutes,
@@ -332,7 +363,7 @@ export default function OnboardingFlow() {
           const genRes = await fetch('/api/onboarding/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero' }),
+            body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero', studentExams: upcomingExams }),
           })
           if (!genRes.ok) {
             setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')
@@ -394,7 +425,7 @@ export default function OnboardingFlow() {
               La PAU<br />empieza<br /><span style={{ color: 'rgba(255,255,255,.2)' }}>hoy.</span>
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.75, color: 'rgba(255,255,255,.4)', maxWidth: 380, marginBottom: 36 }}>
-              7 preguntas. 3 minutos. Kairo construye un Camino PAU adaptado a tu comunidad, asignaturas y ritmo real.
+              8 pasos. 3 minutos. Kairo construye un Camino PAU adaptado a tu comunidad, asignaturas y ritmo real.
             </p>
 
             {/* Stats grid */}
@@ -758,6 +789,89 @@ export default function OnboardingFlow() {
       )
     }
 
+    if (step === 'upcoming-exams') {
+      const enabledSubjects = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+      const subjectOptions = enabledSubjects.length > 0 ? enabledSubjects : PRIVATE_BETA_ENABLED_SUBJECTS.map(s => s.id)
+      const exams = data.studentExams ?? []
+      const canAddExam = Boolean((examDraft.subject || subjectOptions[0]) && examDraft.date)
+      return (
+        <div>
+          <div style={{ border: '1px solid #dbeafe', background: '#eff6ff', padding: '10px 14px', marginBottom: 14 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Paso opcional</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>Si tienes un parcial cerca, añadiremos repasos específicos en los días previos. Si no, continúa sin añadir nada.</div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
+            <label style={{ background: '#fff', padding: '12px 14px' }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Asignatura</div>
+              <select
+                value={examDraft.subject || subjectOptions[0] || ''}
+                onChange={e => setExamDraft(current => ({ ...current, subject: e.target.value }))}
+                style={{ width: '100%', border: 'none', background: 'transparent', fontSize: 13, fontWeight: 800, color: '#1c1c1c', outline: 'none' }}
+              >
+                {subjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+              </select>
+            </label>
+            <label style={{ background: '#fff', padding: '12px 14px' }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Fecha</div>
+              <input
+                type="date"
+                min={inputDate(addDays(new Date(), 1))}
+                value={examDraft.date}
+                onChange={e => setExamDraft(current => ({ ...current, date: e.target.value }))}
+                style={{ width: '100%', border: 'none', background: 'transparent', fontSize: 13, fontWeight: 800, color: '#1c1c1c', outline: 'none' }}
+              />
+            </label>
+            <label style={{ background: '#fff', padding: '12px 14px' }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Bloque o tema</div>
+              <input
+                type="text"
+                value={examDraft.block}
+                onChange={e => setExamDraft(current => ({ ...current, block: e.target.value }))}
+                placeholder="Ej. Álgebra, Edad Media..."
+                className="onb-input"
+              />
+            </label>
+            <label style={{ background: '#fff', padding: '12px 14px' }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Nombre opcional</div>
+              <input
+                type="text"
+                value={examDraft.name}
+                onChange={e => setExamDraft(current => ({ ...current, name: e.target.value }))}
+                placeholder="Ej. Parcial del viernes"
+                className="onb-input"
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            onClick={addUpcomingExam}
+            disabled={!canAddExam}
+            style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, border: 'none', background: canAddExam ? '#1c1c1c' : '#e0e0e0', color: canAddExam ? '#fff' : '#94a3b8', padding: '10px 14px', fontSize: 12, fontWeight: 900, cursor: canAddExam ? 'pointer' : 'not-allowed' }}
+          >
+            <Plus size={14} /> Añadir parcial
+          </button>
+          {exams.length > 0 && (
+            <div style={{ marginTop: 16, display: 'grid', gap: 8 }}>
+              {exams.map(exam => (
+                <div key={exam.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, border: '1px solid #e0e0e0', background: '#fff', padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <Calendar size={15} style={{ color: '#2563eb', flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 900, color: '#1c1c1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exam.name}</div>
+                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: '#94a3b8', marginTop: 2 }}>{exam.subject} · {exam.date} · {exam.block}</div>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => removeUpcomingExam(exam.id)} style={{ border: '1px solid #fee2e2', background: '#fff', color: '#dc2626', padding: 7, cursor: 'pointer' }} aria-label="Eliminar parcial">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
     if (step === 'feeling') {
       return (
         <EditorialGrid cols={2}>
@@ -801,6 +915,7 @@ export default function OnboardingFlow() {
               ['Comunidad', data.community || '—'],
               ['Centro educativo', data.schoolName || '—'],
               ['Asignaturas', data.subjects.join(', ') || '—'],
+              ['Parciales próximos', data.studentExams?.length ? `${data.studentExams.length} añadido${data.studentExams.length === 1 ? '' : 's'}` : 'Ninguno'],
               ['Preparación', data.preparationFeeling || '—'],
               ['Tiempo diario', data.dailyStudyTime || '—'],
               ['Días por semana', data.weeklyStudyDays || '—'],
@@ -821,6 +936,34 @@ export default function OnboardingFlow() {
 
 function normalizeSearch(value: string) {
   return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/\s+/g, ' ')
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date)
+  next.setDate(next.getDate() + days)
+  return next
+}
+
+function inputDate(date: Date) {
+  return date.toISOString().slice(0, 10)
+}
+
+function sanitizeOnboardingExams(exams: OnboardingStudentExam[], selectedSubjects: string[]) {
+  const allowedSubjects = new Set(selectedSubjects)
+  const today = inputDate(new Date())
+  return exams
+    .filter(exam => allowedSubjects.has(exam.subject))
+    .filter(exam => /^\d{4}-\d{2}-\d{2}$/.test(exam.date) && exam.date > today)
+    .map(exam => ({
+      ...exam,
+      subject: exam.subject.trim(),
+      date: exam.date,
+      block: normalizeBlockKey((exam.block || 'Repaso general').trim()).slice(0, 80),
+      topic: (exam.topic || '').trim().slice(0, 120),
+      name: (exam.name || `Parcial de ${exam.subject}`).trim().slice(0, 120),
+      priority: exam.priority,
+    }))
+    .slice(0, 8)
 }
 
 function EditorialGrid({ children, cols }: { children: ReactNode; cols: number }) {

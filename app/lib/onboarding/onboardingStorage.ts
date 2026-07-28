@@ -5,12 +5,24 @@
 
 export type OnboardingCommunity = 'Madrid' | 'Cataluña' | 'Andalucía' | 'Otra'
 export type OnboardingSchoolSource = 'dataset' | 'manual' | null
+export type OnboardingExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
+
+export interface OnboardingStudentExam {
+  id: string
+  subject: string
+  date: string
+  block: string
+  topic: string
+  name: string
+  priority: OnboardingExamPriority
+}
 
 export interface OnboardingData {
   community: OnboardingCommunity | null
   schoolName: string | null
   schoolSource: OnboardingSchoolSource
   subjects: string[]
+  studentExams: OnboardingStudentExam[]
   preparationFeeling: string | null
   dailyStudyTime: string | null
   dailyMinutes: number | null
@@ -83,6 +95,7 @@ export function syncLocalOnboardingToServerIfMissing(accessToken: string, onboar
           schoolName: onboarding.schoolName,
           schoolSource: onboarding.schoolSource,
           subjects: onboarding.subjects,
+          studentExams: onboarding.studentExams,
           preparationFeeling: onboarding.preparationFeeling,
           dailyStudyTime: onboarding.dailyStudyTime,
           dailyMinutes: onboarding.dailyMinutes,
@@ -109,6 +122,7 @@ function emptyOnboarding(): OnboardingData {
     schoolName: null,
     schoolSource: null,
     subjects: DEFAULT_SUBJECTS,
+    studentExams: [],
     preparationFeeling: null,
     dailyStudyTime: null,
     dailyMinutes: null,

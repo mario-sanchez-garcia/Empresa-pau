@@ -1,4 +1,5 @@
 import ParentCheckoutClient from '../[token]/ParentCheckoutClient'
+import { getCursoPauPriceCents } from '@/app/lib/pricing'
 
 const PREVIEW_EXPIRES_AT = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -28,7 +29,7 @@ export default function ParentCheckoutPreviewPage() {
           planId="pack_curso_pau"
           planLabel="Pack Curso PAU"
           planFeatures={PREVIEW_FEATURES}
-          priceCents={4900}
+          priceCents={getCursoPauPriceCents()}
           currency="eur"
           studentDisplayName="Mario"
           expiresAt={PREVIEW_EXPIRES_AT}

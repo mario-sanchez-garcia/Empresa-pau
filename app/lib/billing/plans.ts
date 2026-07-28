@@ -1,5 +1,13 @@
 // Server-only: never import in client components.
 // Single source of truth for all billing plan definitions.
+// Los precios en sí viven en app/lib/pricing.ts (compartido con /pricing,
+// /landing y /waitlist) — este archivo solo los reexporta para el checkout.
+
+import {
+  CURSO_PAU_EARLY_PRICE_CENTS,
+  CURSO_PAU_STANDARD_PRICE_CENTS,
+  getCursoPauPriceCents,
+} from '@/app/lib/pricing'
 
 export interface BillingPlan {
   id: string
@@ -13,22 +21,12 @@ export interface BillingPlan {
   features: string[]
 }
 
-// Founding price active until FOUNDING_DEADLINE.
+// Founding price active until FOUNDING_DEADLINE (ver app/lib/pricing.ts).
 // After that, use standardPriceCents.
-export const PACK_CURSO_PAU_FOUNDING_PRICE_CENTS = 4900
-export const PACK_CURSO_PAU_STANDARD_PRICE_CENTS = 7900
-// ISO date string. Set via env var; defaults to 2026-09-01 if not configured.
-function getFoundingDeadline(): Date {
-  const raw = process.env.FOUNDING_DEADLINE_DATE ?? '2026-09-01'
-  return new Date(raw + 'T00:00:00Z')
-}
+export const PACK_CURSO_PAU_FOUNDING_PRICE_CENTS = CURSO_PAU_EARLY_PRICE_CENTS
+export const PACK_CURSO_PAU_STANDARD_PRICE_CENTS = CURSO_PAU_STANDARD_PRICE_CENTS
 
-export function getPackCursoPauPriceCents(): number {
-  const now = new Date()
-  return now < getFoundingDeadline()
-    ? PACK_CURSO_PAU_FOUNDING_PRICE_CENTS
-    : PACK_CURSO_PAU_STANDARD_PRICE_CENTS
-}
+export const getPackCursoPauPriceCents = getCursoPauPriceCents
 
 export const PLANS: Record<string, BillingPlan> = {
   pack_curso_pau: {

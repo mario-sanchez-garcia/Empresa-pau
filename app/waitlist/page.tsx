@@ -4,6 +4,17 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import KairoBrand from '@/components/shared/KairoBrand'
+import {
+  CURSO_PAU_EARLY_PRICE_CENTS,
+  CURSO_PAU_STANDARD_PRICE_CENTS,
+  WAITLIST_REFERRAL_TIERS,
+  formatEur,
+} from '@/app/lib/pricing'
+
+const CURSO_PAU_EARLY_PRICE = CURSO_PAU_EARLY_PRICE_CENTS / 100
+const CURSO_PAU_STANDARD_PRICE_DISPLAY = formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)
+// Tiers ordenados de más a menos referidos, ya vienen así de WAITLIST_REFERRAL_TIERS
+const [TIER_3, TIER_1] = WAITLIST_REFERRAL_TIERS
 
 const BLUE = '#2563eb'
 const INK = '#0f172a'
@@ -31,7 +42,7 @@ function WaitlistContent() {
   const [errorMsg, setErrorMsg] = useState('')
   const [screen, setScreen] = useState<Screen>('form')
   const [referralCode, setReferralCode] = useState('')
-  const [priceLocked, setPriceLocked] = useState(59)
+  const [priceLocked, setPriceLocked] = useState(CURSO_PAU_EARLY_PRICE)
   const [alreadyRegistered, setAlreadyRegistered] = useState(false)
   const [copied, setCopied] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
@@ -173,7 +184,7 @@ function WaitlistContent() {
             </h1>
 
             <p style={{ margin: '0 0 20px', fontSize: 17, color: MUTED, lineHeight: 1.6 }}>
-              Reserva tu plaza: Curso PAU completo a <strong style={{ color: INK }}>59 €</strong> en vez de 69 €.
+              Reserva tu plaza: Curso PAU completo a <strong style={{ color: INK }}>{formatEur(CURSO_PAU_EARLY_PRICE_CENTS)}</strong> en vez de {CURSO_PAU_STANDARD_PRICE_DISPLAY}.
               Exámenes reales, corrección IA y tu Camino diario de septiembre a junio.
             </p>
 
@@ -308,7 +319,7 @@ function WaitlistContent() {
                 ¿Quieres bajarlo más? Comparte tu link:
               </p>
               <p style={{ margin: '0 0 14px', fontSize: 13, color: '#1d4ed8', fontWeight: 700 }}>
-                1 amigo = 49 € · 3 amigos = 39 €
+                1 amigo = {formatEur(TIER_1.priceCents)} · 3 amigos = {formatEur(TIER_3.priceCents)}
               </p>
 
               {/* Visible link */}

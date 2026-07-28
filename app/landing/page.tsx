@@ -5,6 +5,7 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LABEL,
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
+import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -54,7 +55,7 @@ const COMPARE_ROWS: CompareRow[] = [
   { label: 'Disponible 24 horas al día',     kairo: true,            academia: false,       solo: true  },
   { label: 'Chat con tutor IA',              kairo: true,            academia: false,       solo: false },
   { label: 'Historial de progreso',          kairo: true,            academia: false,       solo: false },
-  { label: 'Precio mensual',                 kairo: 'Free / 9,99€',  academia: '100–200€',  solo: 'Gratis' },
+  { label: 'Precio mensual',                 kairo: `${getPlanPriceDisplay('free')} / ${getPlanPriceDisplay('premium')}`,  academia: '100–200€',  solo: 'Gratis' },
 ]
 
 const SUBJECTS = [
@@ -69,22 +70,22 @@ const SUBJECTS = [
 
 const PLANS = [
   {
-    name: 'Free',
-    price: '0 €',
-    period: 'sin tarjeta de crédito',
-    bullets: ['25 correcciones/mes', '3 fotos/mes', '1 simulacro mensual', 'Camino PAU limitado'],
+    name: PLAN_COPY.free.label,
+    price: getPlanPriceDisplay('free'),
+    period: PLAN_COPY.free.periodDisplay,
+    bullets: ['25 correcciones/mes', '3 fotos/mes', '1 parcial/mes', 'Camino PAU limitado'],
     cta: 'Empezar →',
   },
   {
-    name: 'Premium',
-    price: '9,99 €',
-    period: '/mes · cancela cuando quieras',
+    name: PLAN_COPY.premium.label,
+    price: getPlanPriceDisplay('premium'),
+    period: PLAN_COPY.premium.periodDisplay,
     bullets: ['200 correcciones/mes', '80 fotos/mes', '5 simulacros/mes', 'Camino PAU completo', 'Ranking de clase'],
     cta: 'Elegir Premium →',
   },
   {
-    name: 'Curso PAU · Early Bird',
-    price: '59 €',
+    name: `${PLAN_COPY.curso_pau.label} · Early Bird`,
+    price: getPlanPriceDisplay('curso_pau'),
     period: 'pago único · septiembre a junio',
     bullets: ['Todo Premium incluido', 'Acceso completo hasta junio', 'Sin renovación mensual'],
     cta: 'Reservar →',
@@ -555,7 +556,7 @@ export default function LandingPage() {
             ))}
           </div>
           <p style={{ marginTop: 32, fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.2)', letterSpacing: '.06em' }}>
-            IVA incluido. El Curso PAU pasará a 69 € a partir del 1 de octubre de 2026.{' '}
+            IVA incluido. El Curso PAU pasará a {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)} tras la fecha límite del precio de lanzamiento.{' '}
             <Link href="/pricing" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
               Ver todos los detalles →
             </Link>

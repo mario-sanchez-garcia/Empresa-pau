@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 import { sendWaitlistConfirmation, sendReferralReward } from '@/app/lib/email/sendWaitlistEmails'
+import { getWaitlistPriceCents, CURSO_PAU_EARLY_PRICE_CENTS } from '@/app/lib/pricing'
+
+// price_locked se guarda en euros enteros (no céntimos) — convención existente
+// de la tabla `waitlist`. La escalera real de precios vive en app/lib/pricing.ts.
+const CURSO_PAU_EARLY_PRICE = CURSO_PAU_EARLY_PRICE_CENTS / 100
 
 export const dynamic = 'force-dynamic'
 
@@ -33,9 +38,7 @@ function randomCode(): string {
 }
 
 function calcPrice(referralCount: number): number {
-  if (referralCount >= 3) return 39
-  if (referralCount >= 1) return 49
-  return 59
+  return getWaitlistPriceCents(referralCount) / 100
 }
 
 async function generateUniqueReferralCode(db: ReturnType<typeof createServiceClient>): Promise<string> {
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
       curso,
       referral_code: referralCode,
       referred_by: validRef,
-      price_locked: 59,
+      price_locked: CURSO_PAU_EARLY_PRICE,
     })
     .select('referral_code, price_locked')
     .single()
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         alreadyRegistered: true,
         referralCode: existing?.referral_code ?? '',
-        priceLocked: existing?.price_locked ?? 59,
+        priceLocked: existing?.price_locked ?? CURSO_PAU_EARLY_PRICE,
       })
     }
     console.error('[waitlist POST] insert error:', insertErr.message)

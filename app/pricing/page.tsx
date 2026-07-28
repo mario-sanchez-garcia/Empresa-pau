@@ -1,60 +1,40 @@
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Check, X } from 'lucide-react'
+import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
 const PLANS = [
   {
-    name: 'Free',
-    price: '0 €',
-    period: 'sin tarjeta de crédito',
-    description: 'Para probar Kairo y vivir el momento mágico de tu primera corrección.',
-    features: [
-      { text: '25 correcciones/mes',     included: true  },
-      { text: '3 fotos/mes',             included: true  },
-      { text: '1 simulacro/mes',         included: true  },
-      { text: '10 msgs Chat con Kairo',  included: true  },
-      { text: 'Camino PAU limitado',     included: true  },
-      { text: 'Ranking completo',        included: false },
-    ],
+    name: PLAN_COPY.free.label,
+    price: getPlanPriceDisplay('free'),
+    period: PLAN_COPY.free.periodDisplay,
+    description: PLAN_COPY.free.description,
+    features: PLAN_COPY.free.features.map((text) => ({ text, included: true })),
     cta: 'Empezar gratis →',
     href: '/login',
     dark: false,
     badge: null,
   },
   {
-    name: 'Premium',
-    price: '9,99 €',
-    period: '/mes · cancela cuando quieras',
-    description: 'El plan principal para preparar la PAU durante todo el curso.',
-    features: [
-      { text: '200 correcciones/mes',    included: true },
-      { text: '80 fotos/mes',            included: true },
-      { text: '5 simulacros/mes',        included: true },
-      { text: '100 msgs Chat con Kairo', included: true },
-      { text: 'Camino PAU completo',     included: true },
-      { text: 'Ranking completo',        included: true },
-    ],
+    name: PLAN_COPY.premium.label,
+    price: getPlanPriceDisplay('premium'),
+    period: PLAN_COPY.premium.periodDisplay,
+    description: PLAN_COPY.premium.description,
+    features: PLAN_COPY.premium.features.map((text) => ({ text, included: true })),
     cta: 'Probar Premium →',
     href: '/login',
     dark: true,
     badge: 'Recomendado',
   },
   {
-    name: 'Curso PAU',
-    price: '59 €',
-    period: 'pago único · sept → junio',
-    description: 'Acceso completo hasta junio. Ahorra 30 € frente al mensual. Precio de lanzamiento.',
-    features: [
-      { text: '200 correcciones/mes',    included: true },
-      { text: '80 fotos/mes',            included: true },
-      { text: '5 simulacros/mes',        included: true },
-      { text: '100 msgs Chat con Kairo', included: true },
-      { text: 'Camino PAU completo',     included: true },
-      { text: 'Ranking completo',        included: true },
-    ],
+    name: PLAN_COPY.curso_pau.label,
+    price: getPlanPriceDisplay('curso_pau'),
+    period: PLAN_COPY.curso_pau.periodDisplay,
+    description: PLAN_COPY.curso_pau.description,
+    features: PLAN_COPY.curso_pau.features.map((text) => ({ text, included: true })),
     cta: 'Reservar →',
     href: '/login',
     dark: false,
@@ -287,7 +267,7 @@ export default function PricingPage() {
       <section className="pr-note" style={{ background: '#111', padding: '40px 72px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.25)', letterSpacing: '.04em', lineHeight: 1.7 }}>
-            Los precios incluyen IVA. Curso PAU early bird 59 € hasta el 30 de septiembre, después 69 €.
+            Los precios incluyen IVA. Curso PAU early bird {getPlanPriceDisplay('curso_pau')} hasta la fecha límite, después {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)}.
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
             {[

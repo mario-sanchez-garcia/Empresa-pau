@@ -1,7 +1,12 @@
 import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
+import { WAITLIST_REFERRAL_TIERS, formatEur } from '@/app/lib/pricing'
 
 const SITE_URL = 'https://kairo-pau.com'
+// Tiers ordenados de más a menos referidos: [3+ referidos, 1+ referido, base]
+const [TIER_3_REF, TIER_1_REF] = WAITLIST_REFERRAL_TIERS
+const PRICE_AT_1_REF = TIER_1_REF.priceCents / 100
+const PRICE_AT_3_REF = TIER_3_REF.priceCents / 100
 
 // email_events.user_id is NOT NULL (uuid). Waitlist users have no auth UUID,
 // so we generate a throwaway UUID per call. True dedup for waitlist_confirm
@@ -37,7 +42,7 @@ export async function sendWaitlistConfirmation({
             Te avisaremos cuando abra el curso en septiembre.
           </p>
           <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
-            Comparte tu link y baja el precio: 1 amigo = 49 €, 3 amigos = 39 €.
+            Comparte tu link y baja el precio: 1 amigo = ${formatEur(TIER_1_REF.priceCents)}, 3 amigos = ${formatEur(TIER_3_REF.priceCents)}.
           </p>
           <a href="${shareUrl}"
              style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:900;text-decoration:none;padding:14px 32px;border-radius:14px">
@@ -89,9 +94,9 @@ export async function sendReferralReward({
   referralCount: number
 }): Promise<void> {
   const extra =
-    newPrice === 49
-      ? '<p style="margin:0 0 0;font-size:14px;color:#64748b;line-height:1.6">Un amigo más... y con 3 llegas a 39 €.</p>'
-      : newPrice === 39
+    newPrice === PRICE_AT_1_REF
+      ? `<p style="margin:0 0 0;font-size:14px;color:#64748b;line-height:1.6">Un amigo más... y con 3 llegas a ${formatEur(TIER_3_REF.priceCents)}.</p>`
+      : newPrice === PRICE_AT_3_REF
       ? '<p style="margin:0 0 0;font-size:14px;color:#64748b;line-height:1.6">Has llegado al precio mínimo. Bien jugado.</p>'
       : ''
 

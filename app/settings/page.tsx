@@ -5,6 +5,7 @@ import { Camera, LogOut, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
+import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import SidebarNav from '@/app/components/SidebarNav'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
@@ -42,6 +43,14 @@ const EDUC_LABELS: Record<string, string> = {
   'preparacion-pau': 'Prep. PAU', 'otro': 'Otro',
 }
 
+const DAILY_MINUTES_OPTIONS = [30, 45, 60, 90, 150, 180]
+const WEEKLY_DAYS_OPTIONS = [3, 4, 5, 6, 7]
+
+function weeklyDaysLabel(days: number | null) {
+  if (!days) return null
+  return `${days} días por semana`
+}
+
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -52,6 +61,10 @@ export default function SettingsPage() {
   const [saveError, setSaveError] = useState('')
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [emailNotifSaving, setEmailNotifSaving] = useState(false)
+  const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
+  const [caminoDailyMinutes, setCaminoDailyMinutes] = useState(60)
+  const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
+  const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -70,6 +83,20 @@ export default function SettingsPage() {
           if (res.ok) {
             const json = await res.json() as { email_notifications: boolean }
             setEmailNotifications(json.email_notifications ?? true)
+          }
+        } catch { /* silent */ }
+        try {
+          const res = await fetch('/api/onboarding/me', { headers: { Authorization: `Bearer ${token}` } })
+          if (res.ok) {
+            const json = await res.json() as { onboarding?: Partial<OnboardingData> | null }
+            const localOnboarding = loadOnboarding()
+            const nextOnboarding = {
+              ...localOnboarding,
+              ...(json.onboarding ?? {}),
+            } as OnboardingData
+            setOnboarding(nextOnboarding)
+            setCaminoDailyMinutes(nextOnboarding.dailyMinutes ?? 60)
+            setCaminoWeeklyDays(nextOnboarding.weeklyStudyDaysValue ?? 4)
           }
         } catch { /* silent */ }
       }
@@ -111,11 +138,12 @@ export default function SettingsPage() {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
       window.dispatchEvent(new Event(CHANGE_EVENT))
       setSaveError('')
+      setCaminoPrefsStatus('')
       setSaved(true)
       window.setTimeout(() => setSaved(false), 2200)
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
       if (preferences.displayName.trim()) {
-        const session = await supabase.auth.getSession()
-        const token = session.data.session?.access_token
         if (token) {
           fetch('/api/profile', {
             method: 'PATCH',
@@ -124,9 +152,45 @@ export default function SettingsPage() {
           }).catch(() => {})
         }
       }
+      if (token && onboarding?.completedAt) {
+        const nextOnboarding: OnboardingData = {
+          ...onboarding,
+          dailyMinutes: caminoDailyMinutes,
+          weeklyStudyDays: weeklyDaysLabel(caminoWeeklyDays),
+          weeklyStudyDaysValue: caminoWeeklyDays,
+        }
+        saveOnboarding(nextOnboarding)
+        setOnboarding(nextOnboarding)
+
+        const setupRes = await fetch('/api/onboarding/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            routeId: 'completa',
+            community: nextOnboarding.community ?? ccaa ?? 'Madrid',
+            schoolName: nextOnboarding.schoolName,
+            schoolSource: nextOnboarding.schoolSource,
+            subjects: nextOnboarding.subjects,
+            preparationFeeling: nextOnboarding.preparationFeeling,
+            dailyStudyTime: nextOnboarding.dailyStudyTime,
+            dailyMinutes: nextOnboarding.dailyMinutes,
+            weeklyStudyDays: nextOnboarding.weeklyStudyDays,
+            weeklyStudyDaysValue: nextOnboarding.weeklyStudyDaysValue,
+            onboardingCompleted: true,
+          }),
+        })
+        if (!setupRes.ok) throw new Error('onboarding_setup_failed')
+
+        const ensureRes = await fetch('/api/camino/ensure-calendar', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!ensureRes.ok) throw new Error('camino_personalization_failed')
+        setCaminoPrefsStatus('Tu Camino se ha ajustado para las próximas misiones.')
+      }
     } catch {
       setSaved(false)
-      setSaveError('No se han podido guardar los cambios en este dispositivo. Prueba con una foto más pequeña.')
+      setSaveError('No se han podido guardar todos los cambios. Revisa la conexión y vuelve a intentarlo.')
     }
   }
 
@@ -290,6 +354,18 @@ export default function SettingsPage() {
               </select>
               <Hint>Solo orientativo: no ajusta todavía la carga de misiones.</Hint>
             </Field>
+            <Field label="Días de Camino">
+              <select value={caminoWeeklyDays} onChange={e => setCaminoWeeklyDays(Number(e.target.value))} style={inputStyle}>
+                {WEEKLY_DAYS_OPTIONS.map(days => <option key={days} value={days}>{days} días por semana</option>)}
+              </select>
+              <Hint>Se aplica a tus próximas misiones. Lo completado no cambia.</Hint>
+            </Field>
+            <Field label="Minutos por día">
+              <select value={caminoDailyMinutes} onChange={e => setCaminoDailyMinutes(Number(e.target.value))} style={inputStyle}>
+                {DAILY_MINUTES_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes} minutos</option>)}
+              </select>
+              <Hint>Kairo concentrará el Camino en los días que puedes estudiar.</Hint>
+            </Field>
             <Field label="Asignatura por defecto">
               <select value={preferences.defaultSubject} onChange={e => setPreferences(cur => ({ ...cur, defaultSubject: e.target.value }))} style={inputStyle}>
                 <option value="mates">Matemáticas II</option>
@@ -304,6 +380,11 @@ export default function SettingsPage() {
               </select>
             </Field>
           </div>
+          {caminoPrefsStatus && (
+            <div style={{ margin: '-4px 0 18px', borderRadius: 14, border: '1px solid #bfdbfe', background: '#eff6ff', padding: '10px 12px', fontSize: 11, fontWeight: 750, color: '#1d4ed8' }}>
+              {caminoPrefsStatus}
+            </div>
+          )}
           <Toggle
             label={`Recordatorios de estudio por email${emailNotifSaving ? ' · Guardando…' : ''}`}
             description="Kairo te avisará cuando tengas misiones pendientes en Camino PAU."

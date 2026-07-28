@@ -3,9 +3,13 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, ChevronDown } from 'lucide-react'
+import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import RankingRow, { type RankingEntry } from './RankingRow'
+
+const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const mono  = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
 type Scope = 'personal' | 'comunidad_materia' | 'global'
 type Mode = 'ronda' | 'etapas' | 'xp_total'
@@ -18,21 +22,18 @@ type RankingResponse = {
   error?: string
 }
 
-const SCOPES: Array<{ id: Scope; label: string }> = [
-  { id: 'personal', label: 'Personal' },
-  { id: 'comunidad_materia', label: 'Comunidad · Materia' },
-  { id: 'global', label: 'Global' },
+const SCOPES: Array<{ id: Scope; label: string; sublabel: string }> = [
+  { id: 'personal',          label: 'Liga',       sublabel: 'tus ligas' },
+  { id: 'comunidad_materia', label: 'Comunidad',  sublabel: 'por materia' },
+  { id: 'global',            label: 'Global',     sublabel: 'todos' },
 ]
 
 const MODES: Array<{ id: Mode; label: string }> = [
-  { id: 'ronda', label: 'Ronda actual' },
-  { id: 'etapas', label: 'Etapas' },
+  { id: 'ronda',    label: 'Ronda actual' },
+  { id: 'etapas',   label: 'Etapas' },
   { id: 'xp_total', label: 'XP total' },
 ]
 
-// RankingRow espera un RankingEntry (con `community`/`xp`) — lo adaptamos
-// desde la forma genérica {score} que devuelve /api/ligas/rankings, sin
-// tocar RankingRow ni su estilo.
 function toRankingEntry(entry: RankingApiEntry): RankingEntry {
   return { id: entry.id, name: entry.name, community: '', xp: entry.score, rank: entry.rank, isCurrentUser: entry.isCurrentUser }
 }
@@ -43,6 +44,10 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
   const [subject, setSubject] = useState<string | null>(null)
   const [data, setData] = useState<RankingResponse | null>(null)
   const [loading, setLoading] = useState(false)
+  const [subjectOpen, setSubjectOpen] = useState(false)
+
+  const B = bebas.style.fontFamily
+  const M = mono.style.fontFamily
 
   useEffect(() => {
     let cancelled = false
@@ -55,7 +60,6 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
       .then(payload => {
         if (cancelled) return
         setData(payload)
-        // Autoselecciona la primera asignatura disponible si aún no hay ninguna elegida.
         if (scope === 'comunidad_materia' && !subject && payload?.availableSubjects?.length) {
           setSubject(payload.availableSubjects[0])
         }
@@ -71,73 +75,232 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
 
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        display: 'grid', placeItems: 'center',
+        background: 'rgba(0,0,0,.82)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+        padding: '16px',
+      }}
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }}
-        className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-[28px] border border-blue-100 bg-white p-5 shadow-2xl"
+        initial={{ scale: 0.96, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.96, y: 20, opacity: 0 }}
+        transition={{ type: 'spring', duration: 0.4, bounce: 0.12 }}
+        style={{
+          display: 'flex', flexDirection: 'column',
+          width: '100%', maxWidth: 500,
+          maxHeight: '88vh',
+          borderRadius: 24,
+          background: '#0e0e14',
+          border: '1px solid rgba(255,255,255,.1)',
+          boxShadow: '0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset',
+          overflow: 'hidden',
+        }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <p className="text-base font-black text-slate-950">Clasificación completa</p>
-          <button onClick={onClose} aria-label="Cerrar" className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-            <X size={18} />
+        {/* Header */}
+        <div style={{
+          padding: '24px 24px 0',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+          gap: 12,
+        }}>
+          <div>
+            <p style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.3)', letterSpacing: '.2em', textTransform: 'uppercase', margin: '0 0 4px' }}>
+              Kairo · Rankings
+            </p>
+            <h2 style={{ fontFamily: B, fontSize: 40, lineHeight: .88, letterSpacing: '.02em', color: '#fff', margin: 0 }}>
+              CLASIFICACIÓN<br />COMPLETA
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            style={{
+              width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+              display: 'grid', placeItems: 'center',
+              background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)',
+              color: 'rgba(255,255,255,.45)', cursor: 'pointer',
+              transition: 'background 140ms, color 140ms',
+            }}
+          >
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="mb-3 flex gap-1 rounded-2xl bg-slate-50 p-1">
-          {SCOPES.map(s => (
-            <button
-              key={s.id}
-              onClick={() => setScope(s.id)}
-              className={`flex-1 rounded-xl px-2 py-1.5 text-[11px] font-black transition ${scope === s.id ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100'}`}
-            >
-              {s.label}
-            </button>
-          ))}
+        {/* Scope tabs */}
+        <div style={{ padding: '20px 24px 0' }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+            gap: 4, background: 'rgba(255,255,255,.04)',
+            borderRadius: 14, padding: 4,
+            border: '1px solid rgba(255,255,255,.07)',
+          }}>
+            {SCOPES.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setScope(s.id)}
+                style={{
+                  borderRadius: 10, padding: '8px 6px',
+                  background: scope === s.id ? '#2563eb' : 'transparent',
+                  border: 'none', cursor: 'pointer',
+                  transition: 'background 160ms',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}
+              >
+                <span style={{
+                  fontFamily: M, fontSize: 10, fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase',
+                  color: scope === s.id ? '#fff' : 'rgba(255,255,255,.4)',
+                  transition: 'color 160ms',
+                }}>
+                  {s.label}
+                </span>
+                <span style={{
+                  fontFamily: M, fontSize: 8, letterSpacing: '.06em', textTransform: 'uppercase',
+                  color: scope === s.id ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.2)',
+                  transition: 'color 160ms',
+                }}>
+                  {s.sublabel}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <div className="flex gap-1">
+        {/* Mode chips + subject selector */}
+        <div style={{
+          padding: '12px 24px 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          borderBottom: '1px solid rgba(255,255,255,.06)',
+        }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
             {MODES.map(m => (
               <button
                 key={m.id}
                 onClick={() => setMode(m.id)}
-                className={`rounded-full px-3 py-1 text-[11px] font-black ${mode === m.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'}`}
+                style={{
+                  fontFamily: M, fontSize: 9, fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase',
+                  padding: '5px 10px', borderRadius: 20, cursor: 'pointer',
+                  background: mode === m.id ? 'rgba(255,255,255,.12)' : 'transparent',
+                  border: `1px solid ${mode === m.id ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.08)'}`,
+                  color: mode === m.id ? '#fff' : 'rgba(255,255,255,.35)',
+                  transition: 'all 140ms',
+                }}
               >
                 {m.label}
               </button>
             ))}
           </div>
+
+          {/* Subject dropdown for comunidad_materia */}
           {scope === 'comunidad_materia' && availableSubjects.length > 0 && (
-            <select
-              value={subject ?? ''}
-              onChange={e => setSubject(e.target.value)}
-              className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 outline-none"
-            >
-              {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <button
+                onClick={() => setSubjectOpen(v => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontFamily: M, fontSize: 9, fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase',
+                  padding: '5px 10px', borderRadius: 20, cursor: 'pointer',
+                  background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.35)',
+                  color: '#93c5fd',
+                }}
+              >
+                {subject ?? '—'}
+                <ChevronDown size={10} strokeWidth={2.5} style={{ transform: subjectOpen ? 'rotate(180deg)' : 'none', transition: 'transform 160ms' }} />
+              </button>
+              <AnimatePresence>
+                {subjectOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: .96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: .96 }}
+                    transition={{ duration: .15 }}
+                    style={{
+                      position: 'absolute', right: 0, top: '110%', zIndex: 10,
+                      background: '#1a1a24', border: '1px solid rgba(255,255,255,.12)',
+                      borderRadius: 12, overflow: 'hidden',
+                      boxShadow: '0 16px 40px rgba(0,0,0,.5)',
+                      minWidth: 160,
+                    }}
+                  >
+                    {availableSubjects.map(s => (
+                      <button
+                        key={s}
+                        onClick={() => { setSubject(s); setSubjectOpen(false) }}
+                        style={{
+                          display: 'block', width: '100%', textAlign: 'left',
+                          padding: '9px 14px',
+                          fontFamily: M, fontSize: 10, letterSpacing: '.06em',
+                          color: s === subject ? '#fff' : 'rgba(255,255,255,.5)',
+                          background: s === subject ? 'rgba(37,99,235,.2)' : 'transparent',
+                          border: 'none', cursor: 'pointer',
+                          borderBottom: '1px solid rgba(255,255,255,.05)',
+                          transition: 'background 120ms',
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
         </div>
 
-        <div className="min-h-[200px] flex-1 overflow-y-auto">
+        {/* Rankings list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px 24px', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,.08) transparent' }}>
           {loading ? (
-            <p className="py-8 text-center text-sm font-semibold text-slate-400">Cargando…</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[1,2,3,4,5].map(i => (
+                <div key={i} style={{ height: 52, borderRadius: 12, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.05)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              ))}
+            </div>
           ) : scope === 'comunidad_materia' && !availableSubjects.length ? (
-            <p className="py-8 text-center text-sm font-semibold text-slate-400">Todavía no tienes XP registrado en ninguna asignatura este mes.</p>
+            <EmptyState
+              M={M}
+              title="Sin asignaturas registradas"
+              body="Todavía no tienes XP en ninguna asignatura este mes. Completa algún ejercicio para aparecer aquí."
+            />
           ) : scope === 'personal' && data?.error === 'not_in_liga' ? (
-            <p className="py-8 text-center text-sm font-semibold text-slate-400">Únete o crea una liga para ver esta clasificación.</p>
+            <EmptyState
+              M={M}
+              title="No estás en ninguna liga"
+              body="Únete o crea una liga para ver tu clasificación personal."
+            />
           ) : entries.length ? (
-            <div className="grid gap-1.5">
-              {entries.map(entry => <RankingRow key={entry.id} row={toRankingEntry(entry)} fixed={entry.isCurrentUser} />)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {entries.map(entry => (
+                <RankingRow key={entry.id} row={toRankingEntry(entry)} fixed={entry.isCurrentUser} />
+              ))}
             </div>
           ) : (
-            <p className="py-8 text-center text-sm font-semibold text-slate-400">Sin datos por ahora.</p>
+            <EmptyState M={M} title="Sin datos" body="Aún no hay actividad registrada para este periodo." />
           )}
         </div>
       </motion.div>
     </motion.div>
+  )
+}
+
+function EmptyState({ M, title, body }: { M: string; title: string; body: string }) {
+  return (
+    <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center' }}>
+      <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)', display: 'grid', placeItems: 'center', marginBottom: 4 }}>
+        <span style={{ fontSize: 18 }}>📊</span>
+      </div>
+      <p style={{ fontFamily: M, fontSize: 11, fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', margin: 0 }}>
+        {title}
+      </p>
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,.3)', lineHeight: 1.6, margin: 0, maxWidth: 280 }}>
+        {body}
+      </p>
+    </div>
   )
 }

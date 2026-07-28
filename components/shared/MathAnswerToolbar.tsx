@@ -194,11 +194,9 @@ export default function MathAnswerToolbar({
     const start = textarea.selectionStart ?? value.length
     const end = textarea.selectionEnd ?? value.length
     const nextValue = value.slice(0, start) + snippet.latex + value.slice(end)
-    const cursor = start + (snippet.cursorOffset ?? snippet.latex.length)
     onChange(nextValue)
     requestAnimationFrame(() => {
-      textarea.focus()
-      textarea.setSelectionRange(cursor, cursor)
+      textarea.blur()
     })
     return true
   }
@@ -231,6 +229,7 @@ export default function MathAnswerToolbar({
 
   function insertSnippet(snippet: MathSnippet) {
     if (!insertIntoTextarea(snippet)) insertIntoEditor(snippet)
+    setOpen(false)
   }
 
   return (

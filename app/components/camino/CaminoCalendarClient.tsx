@@ -3083,32 +3083,72 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
 }
 
 function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
-  const steps = [
-    { icon: <Target size={26} />, title: 'Bienvenido a Camino PAU', desc: 'Tu coach de estudio diario para la PAU' },
-    { icon: <CalendarDays size={26} />, title: 'Cada día tienes una misión', desc: 'Empieza siempre por ella. Todo lo demás puede esperar.' },
-    { icon: <Trophy size={26} />, title: 'Completa misiones, gana XP', desc: 'Cuanto más practicas, más subes de división.' },
+  const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
+  const rows = [
+    { num: '01', title: 'Una misión al día', desc: 'Empieza siempre por ella. Todo lo demás puede esperar.' },
+    { num: '02', title: 'XP por cada práctica', desc: 'Cuanto más practicas, más subes en el ranking de tu liga.' },
+    { num: '03', title: 'Kairo IA te corrige', desc: 'Corrección instantánea con feedback por ejercicio.' },
   ]
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <motion.div initial={{ scale: 0.96, y: 16, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.96, y: 16, opacity: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 28 }} className="w-full max-w-[480px] rounded-[28px] bg-white p-8 shadow-2xl">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">Camino PAU</p>
-        <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">Tu ruta hacia la PAU</h2>
-        <div className="mt-6 grid gap-4">
-          {steps.map((step, i) => (
-            <div key={i} className="flex items-start gap-4 rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)]">
-                {step.icon}
-              </div>
-              <div className="min-w-0 pt-0.5">
-                <h3 className="text-sm font-black text-slate-950">{step.title}</h3>
-                <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">{step.desc}</p>
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'grid', placeItems: 'center', background: 'rgba(5,10,20,0.72)', backdropFilter: 'blur(8px)', padding: 16 }}
+    >
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');`}</style>
+      <motion.div
+        initial={{ scale: 0.94, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.94, y: 20, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+        style={{ width: '100%', maxWidth: 640, borderRadius: 20, overflow: 'hidden', display: 'grid', gridTemplateColumns: '220px 1fr', boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)' }}
+      >
+        {/* LEFT: image panel */}
+        <div style={{ position: 'relative', background: '#050d1a', overflow: 'hidden', minHeight: 340 }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HF_LIBRARY})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, rgba(5,13,26,0.45) 0%, rgba(5,13,26,0.82) 100%)' }} />
+          <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '24px 20px' }}>
+            <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.32em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)' }}>
+              Camino PAU
+            </span>
+            <div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 58, lineHeight: 0.84, color: '#fff', letterSpacing: '0.01em' }}>
+                Tu<br />camino<br /><span style={{ color: '#2563eb' }}>empieza.</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-        <button onClick={onClose} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-700 to-violet-600 px-6 py-4 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:shadow-[0_16px_36px_rgba(37,99,235,0.32)]">
-          Empezar
-        </button>
+
+        {/* RIGHT: content panel */}
+        <div style={{ background: '#060e1e', display: 'flex', flexDirection: 'column', padding: '28px 24px 24px' }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', marginBottom: 4 }}>
+            Bienvenido a Kairo
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.35)', marginBottom: 24, lineHeight: 1.5 }}>
+            Tu coach de estudio diario para la PAU.
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1 }}>
+            {rows.map((row, i) => (
+              <div key={i} style={{ display: 'flex', gap: 14, paddingTop: 14, paddingBottom: 14, borderTop: i === 0 ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(255,255,255,0.06)' }}>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#2563eb', lineHeight: 1, flexShrink: 0, width: 24 }}>
+                  {row.num}
+                </span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 900, color: '#fff', marginBottom: 2 }}>{row.title}</div>
+                  <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{row.desc}</div>
+                </div>
+              </div>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+          </div>
+
+          <button
+            onClick={onClose}
+            style={{ marginTop: 20, width: '100%', padding: '13px 0', borderRadius: 10, background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 900, border: 'none', cursor: 'pointer', letterSpacing: '-0.01em', boxShadow: '0 8px 24px rgba(37,99,235,0.35)', transition: 'transform 160ms ease-out, box-shadow 160ms ease-out' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 28px rgba(37,99,235,0.45)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'none'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 24px rgba(37,99,235,0.35)' }}
+          >
+            Empezar mi Camino PAU →
+          </button>
+        </div>
       </motion.div>
     </motion.div>
   )

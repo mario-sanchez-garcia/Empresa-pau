@@ -127,22 +127,6 @@ function readSafeStreamText(rawText: string) {
   return { visibleText: rawText, truncated: false }
 }
 
-function SafeStreamingText({ text }: { text: string }) {
-  return (
-    <div
-      style={{
-        whiteSpace: 'pre-wrap',
-        overflowWrap: 'anywhere',
-        fontSize: 15,
-        lineHeight: 1.75,
-        color: '#334155'
-      }}
-    >
-      {text}
-    </div>
-  )
-}
-
 const CORRECTION_PROGRESS_STEPS = [
   'Leyendo tu respuesta',
   'Comparando con la rúbrica oficial',
@@ -3987,7 +3971,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                             <div style={{ fontSize: 10, fontWeight: 900, color: '#2563eb', marginBottom: 10, letterSpacing: '.12em', textTransform: 'uppercase' }}>Kairo</div>
                             {(() => {
                               const isStreamingMessage = cargandoChat && i === mensajes.length - 1
-                              if (isStreamingMessage) return <SafeStreamingText text={msg.texto} />
+                              if (isStreamingMessage) {
+                                return (
+                                  <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
+                                    <MathMarkdown text={msg.texto} isStreaming components={darkMdComponents} />
+                                  </div>
+                                )
+                              }
                               const { main, why } = splitWhyExplanationMarkdown(msg.texto)
                               return (
                                 <>

@@ -40,9 +40,23 @@ export default function MathMarkdown({
   isStreaming?: boolean
 }) {
   if (isStreaming) {
+    // Streaming text arrives token by token, so it's frequently mid-formula
+    // (e.g. an unclosed "$" or "\begin{cases}" with no "\end" yet). We still
+    // want KaTeX active — strict:false + throwOnError:false means an
+    // incomplete/invalid math span renders as a small inline error instead of
+    // raw backslash text or a crash, and it self-corrects on the next chunk
+    // once the delimiter closes. No normalization pass here on purpose: the
+    // ~20-step regex pipeline is tuned for complete text and would be wasted
+    // work re-run on every chunk — the model already emits $...$/$$...$$
+    // per the prompt rules, which is enough for remark-math to pick up as
+    // soon as a pair closes.
     return (
       <div className={`math-markdown max-w-none ${className}`}>
-        <ReactMarkdown components={{ ...defaultComponents, ...(components ?? {}) }}>
+        <ReactMarkdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b' }]]}
+          components={{ ...defaultComponents, ...(components ?? {}) }}
+        >
           {text ?? ''}
         </ReactMarkdown>
       </div>

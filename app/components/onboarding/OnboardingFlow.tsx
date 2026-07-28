@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Check, Lock, Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -146,6 +146,8 @@ const BASE_CSS = `
 
 export default function OnboardingFlow() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isPreview = searchParams.get('preview') === '1'
   const [step, setStep] = useState<Step>('welcome')
   const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
   const [savingError, setSavingError] = useState('')
@@ -161,7 +163,7 @@ export default function OnboardingFlow() {
     let cancelled = false
     async function restore() {
       let saved = loadOnboarding()
-      if (saved.completedAt) {
+      if (saved.completedAt && !isPreview) {
         supabase.auth.getSession()
           .then(({ data: sessionData }) => {
             const token = sessionData.session?.access_token
@@ -176,7 +178,7 @@ export default function OnboardingFlow() {
         const token = sessionData.session?.access_token
         if (token) {
           const serverOnboarding = await restoreOnboardingFromServer(token)
-          if (serverOnboarding?.completedAt) {
+          if (serverOnboarding?.completedAt && !isPreview) {
             router.replace('/camino')
             return
           }

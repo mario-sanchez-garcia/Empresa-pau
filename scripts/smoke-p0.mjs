@@ -657,12 +657,16 @@ assert(
 assert(
   'Math answer toolbar inserts complete delimited templates only for STEM subjects',
   mathAnswerToolbar.includes('const MATH_SUBJECTS = new Set(["mates", "matematicas", "matematicas_ii", "matematicas_ccss", "matematicas_sociales", "fisica", "quimica"])') &&
-    mathAnswerToolbar.includes('\\\\(\\\\lim_{x \\\\to a} f(x)\\\\)') &&
-    mathAnswerToolbar.includes('\\\\(\\\\int f(x)\\\\,dx\\\\)') &&
-    mathAnswerToolbar.includes('\\\\(\\\\int_{a}^{b} f(x)\\\\,dx\\\\)') &&
-    mathAnswerToolbar.includes('\\\\(\\\\frac{d}{dx}\\\\left(f(x)\\\\right)\\\\)') &&
-    mathAnswerToolbar.includes('\\\\(\\\\frac{a}{b}\\\\)') &&
-    mathAnswerToolbar.includes('\\\\[\\n\\\\begin{pmatrix}') &&
+    // Snippets use $...$/$$...$$ (what remark-math/rehype-katex actually parse), not the
+    // \(...\)/\[...\] convention — normalizeExamStatement (used to render the student's
+    // saved answer in Historial) never converted \(...\) to $...$, so that style rendered raw.
+    mathAnswerToolbar.includes('$\\\\lim_{x \\\\to a} f(x)$') &&
+    mathAnswerToolbar.includes('$\\\\int f(x)\\\\,dx$') &&
+    mathAnswerToolbar.includes('$\\\\int_{a}^{b} f(x)\\\\,dx$') &&
+    mathAnswerToolbar.includes('$\\\\frac{d}{dx}\\\\left(f(x)\\\\right)$') &&
+    mathAnswerToolbar.includes('$\\\\frac{a}{b}$') &&
+    mathAnswerToolbar.includes('$$\\n\\\\begin{pmatrix}') &&
+    !mathAnswerToolbar.includes('\\\\(\\\\lim_{x \\\\to a} f(x)\\\\)') &&
     mathAnswerToolbar.includes('Puedes usar formato matemático') &&
     mathAnswerToolbar.includes('límite de f(x) cuando x tiende a a') &&
     !mathAnswerToolbar.includes("<span className=\"font-mono\">{'\\\\\\\\(\\\\\\\\lim_{x \\\\to a} f(x)\\\\\\\\)'}</span>") &&

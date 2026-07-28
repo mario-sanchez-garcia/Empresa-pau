@@ -1,3 +1,5 @@
 <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kairo">
-  <path fill-rule="evenodd" d="M80 14L8 150H30L80 52L130 150H152L80 14ZM80 56L56 110H71L80 78L89 110H104Z" fill="white"/>
+  <path d="M68 42L30 82H72V42H68Z" fill="#6AAFEA"/>
+  <path d="M74 42H126V87L90 124V82H74V42Z" fill="#075199"/>
+  <path d="M50 98L82 94V123L44 128L50 98Z" fill="#075199"/>
 </svg>

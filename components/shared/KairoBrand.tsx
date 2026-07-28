@@ -48,11 +48,11 @@ export default function KairoBrand({
       }}
     >
       <img
-        src="/brand/kairo-mark.svg"
+        src="/brand/kairo-logo-new.png"
         alt=""
         width={s.mark}
         height={s.mark}
-        style={{ width: '82%', height: '82%', objectFit: 'contain', display: 'block' }}
+        style={{ width: '90%', height: '90%', objectFit: 'contain', display: 'block' }}
       />
     </span>
   )

@@ -1,5 +1,6 @@
 import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
+import { buildEmailHtml, unsubUrl } from '@/app/lib/email/emailTemplate'
 
 const APP_URL = 'https://empresa-pau.vercel.app'
 
@@ -15,40 +16,31 @@ interface SendWeeklySummaryEmailParams {
 
 export async function sendWeeklySummaryEmail(params: SendWeeklySummaryEmailParams): Promise<void> {
   const { userId, userEmail, userName, completedThisWeek, streakDays, unsubscribeToken, mondayDedupeKey } = params
-
   const firstName = userName.split(' ')[0] ?? userName
 
-  const streakParagraph = streakDays >= 3
-    ? `Llevas ${streakDays} días seguidos. Sigue así el lunes.`
+  const streakLine = streakDays >= 3
+    ? `Llevas <strong style="color:#0f172a;">${streakDays} días seguidos</strong>. Sigue así el lunes.`
     : 'El lunes es un buen momento para retomar el ritmo.'
 
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f7fb;font-family:system-ui,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" style="max-width:480px;background:#ffffff;border-radius:24px;padding:36px;box-shadow:0 4px 24px rgba(37,99,235,0.08)">
-        <tr><td>
-          <p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#2563eb">Resumen semanal</p>
-          <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:#0f172a;line-height:1.3">Esta semana has completado ${completedThisWeek} misiones, ${firstName}.</h1>
-          <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
-            ${streakParagraph}
-          </p>
-          <a href="${APP_URL}/camino"
-             style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:900;text-decoration:none;padding:14px 32px;border-radius:14px">
-            Ver mi Camino →
-          </a>
-          <p style="margin:28px 0 0;font-size:12px;color:#94a3b8">
-            ¿No quieres recibir estos emails?
-            <a href="${APP_URL}/api/email/unsubscribe?token=${unsubscribeToken}" style="color:#94a3b8">Darse de baja</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
+  const html = buildEmailHtml({
+    number: '01',
+    label: 'Camino PAU · Resumen semanal',
+    headline: `${completedThisWeek}<br>MISIONES<br>ESTA SEMANA`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.75;color:#4b5563;">
+        <strong style="color:#0f172a;">${firstName}</strong>, esta semana has completado <strong style="color:#0f172a;">${completedThisWeek} misiones</strong> en Kairo.
+      </p>
+      <p style="margin:0;font-size:15px;line-height:1.75;color:#4b5563;">${streakLine}</p>
+    `,
+    ctaText: 'Ver mi Camino →',
+    ctaUrl: `${APP_URL}/camino`,
+    stats: [
+      { label: 'Esta semana', value: `${completedThisWeek} misiones` },
+      { label: 'Racha', value: streakDays >= 1 ? `${streakDays} días` : '—' },
+      { label: 'XP', value: `+${completedThisWeek * 50}`, accent: true },
+    ],
+    unsubscribeUrl: unsubUrl(unsubscribeToken),
+  })
 
   const subject = `Tu semana en Kairo — ${completedThisWeek} misiones completadas`
 
@@ -63,11 +55,5 @@ export async function sendWeeklySummaryEmail(params: SendWeeklySummaryEmailParam
     console.error('[sendWeeklySummaryEmail] sendEmail failed:', err instanceof Error ? err.message : String(err))
   }
 
-  await logEmailEvent({
-    userId,
-    emailType: 'weekly_summary',
-    dedupeKey: mondayDedupeKey,
-    status,
-    resendMessageId,
-  })
+  await logEmailEvent({ userId, emailType: 'weekly_summary', dedupeKey: mondayDedupeKey, status, resendMessageId })
 }

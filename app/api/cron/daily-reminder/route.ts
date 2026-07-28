@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
+import { buildEmailHtml } from '@/app/lib/email/emailTemplate'
 
 export const dynamic = 'force-dynamic'
 
@@ -138,63 +139,51 @@ export async function GET(request: NextRequest) {
 
   const emailSubject = isSunday
     ? 'Tu simulacro semanal te espera — 20 minutos que mueven tu nota'
-    : 'Tu misión de hoy en Kairo te espera 📚'
+    : 'Tu misión de hoy en Kairo te espera'
 
-  const html = isSunday ? `
-<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f7fb;font-family:system-ui,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" style="max-width:480px;background:#ffffff;border-radius:24px;padding:36px;box-shadow:0 4px 24px rgba(37,99,235,0.08)">
-        <tr><td>
-          <p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#2563eb">Simulacro del Domingo</p>
-          <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:#0f172a;line-height:1.3">El momento de la semana que más mueve tu Nota Proyectada.</h1>
-          <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
-            Son solo 3 ejercicios del bloque donde más puedes crecer — unos 20 minutos.<br>
-            El domingo es tu mejor oportunidad de la semana para mover la nota.
+  const html = isSunday
+    ? buildEmailHtml({
+        number: '01',
+        label: 'Camino PAU · Simulacro del domingo',
+        headline: 'EL MOMENTO<br>QUE MÁS MUEVE<br>TU NOTA',
+        bodyHtml: `
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.75;color:#4b5563;">
+            Son solo <strong style="color:#0f172a;">3 ejercicios</strong> del bloque donde más puedes crecer — unos 20 minutos.
           </p>
-          <a href="https://empresa-pau.vercel.app/camino"
-             style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:900;text-decoration:none;padding:14px 32px;border-radius:14px">
-            Empezar simulacro →
-          </a>
-          <p style="margin:28px 0 0;font-size:12px;color:#94a3b8">
-            Recibes este email porque tienes Camino PAU activo.
+          <p style="margin:0;font-size:15px;line-height:1.75;color:#4b5563;">
+            El domingo es tu mejor oportunidad de la semana para mover la Nota Proyectada.
           </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>` : `
-<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f7fb;font-family:system-ui,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" style="max-width:480px;background:#ffffff;border-radius:24px;padding:36px;box-shadow:0 4px 24px rgba(37,99,235,0.08)">
-        <tr><td>
-          <p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#2563eb">Camino PAU</p>
-          <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:#0f172a;line-height:1.3">Hoy tienes una misión pendiente</h1>
-          <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
-            Hola, hoy tienes una misión pendiente en Camino PAU.<br>
-            Dedica 25 minutos y sigue avanzando hacia la selectividad.
+        `,
+        ctaText: 'Empezar simulacro →',
+        ctaUrl: 'https://empresa-pau.vercel.app/camino',
+        stats: [
+          { label: 'Ejercicios', value: '3' },
+          { label: 'Tiempo', value: '20 min' },
+          { label: 'XP', value: '+150', accent: true },
+        ],
+        unsubscribeUrl: '',
+      })
+    : buildEmailHtml({
+        number: '01',
+        label: 'Camino PAU · Misión del día',
+        headline: 'HOY TIENES<br>UNA MISIÓN<br>PENDIENTE',
+        bodyHtml: `
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.75;color:#4b5563;">
+            Dedica <strong style="color:#0f172a;">25 minutos</strong> a tu misión de hoy en Camino PAU y sigue avanzando hacia la selectividad.
           </p>
-          <a href="https://empresa-pau.vercel.app/camino"
-             style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:900;text-decoration:none;padding:14px 32px;border-radius:14px">
-            Ver mi misión →
-          </a>
-          <p style="margin:28px 0 0;font-size:12px;color:#94a3b8">
-            Recibes este email porque tienes Camino PAU activo.
+          <p style="margin:0;font-size:15px;line-height:1.75;color:#4b5563;">
+            Tu progreso está guardado. Empieza cuando quieras.
           </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
+        `,
+        ctaText: 'Ver mi misión →',
+        ctaUrl: 'https://empresa-pau.vercel.app/camino',
+        stats: [
+          { label: 'Tiempo', value: '25 min' },
+          { label: 'Tipo', value: 'Misión' },
+          { label: 'XP', value: '+50', accent: true },
+        ],
+        unsubscribeUrl: '',
+      })
 
   let sent = 0
   let failed = 0

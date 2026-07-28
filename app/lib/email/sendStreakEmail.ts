@@ -1,5 +1,6 @@
 import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
+import { buildEmailHtml, unsubUrl } from '@/app/lib/email/emailTemplate'
 
 const APP_URL = 'https://empresa-pau.vercel.app'
 
@@ -13,37 +14,30 @@ interface SendStreakEmailParams {
 
 export async function sendStreakEmail(params: SendStreakEmailParams): Promise<void> {
   const { userId, userEmail, userName, streakDays, unsubscribeToken } = params
-
   const firstName = userName.split(' ')[0] ?? userName
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
 
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f7fb;font-family:system-ui,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" style="max-width:480px;background:#ffffff;border-radius:24px;padding:36px;box-shadow:0 4px 24px rgba(37,99,235,0.08)">
-        <tr><td>
-          <p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#2563eb">Camino PAU</p>
-          <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:#0f172a;line-height:1.3">Llevas ${streakDays} días seguidos, ${firstName}.</h1>
-          <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
-            Hoy tienes una misión pendiente. Son 15 minutos para mantener la racha viva.
-          </p>
-          <a href="${APP_URL}/camino"
-             style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:900;text-decoration:none;padding:14px 32px;border-radius:14px">
-            Completar la misión de hoy →
-          </a>
-          <p style="margin:28px 0 0;font-size:12px;color:#94a3b8">
-            ¿No quieres recibir estos emails?
-            <a href="${APP_URL}/api/email/unsubscribe?token=${unsubscribeToken}" style="color:#94a3b8">Darse de baja</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
+  const html = buildEmailHtml({
+    number: '0' + streakDays,
+    label: 'Camino PAU · Racha activa',
+    headline: `LLEVAS<br>${streakDays} DÍAS<br>SEGUIDOS`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.75;color:#4b5563;">
+        <strong style="color:#0f172a;">${firstName}</strong>, llevas ${streakDays} días estudiando consecutivos. No lo pierdas hoy.
+      </p>
+      <p style="margin:0;font-size:15px;line-height:1.75;color:#4b5563;">
+        Son solo <strong style="color:#0f172a;">15 minutos</strong> para mantener la racha viva.
+      </p>
+    `,
+    ctaText: 'Completar la misión de hoy →',
+    ctaUrl: `${APP_URL}/camino`,
+    stats: [
+      { label: 'Racha actual', value: `${streakDays} días` },
+      { label: 'Tiempo', value: '15 min' },
+      { label: 'XP', value: '+50', accent: true },
+    ],
+    unsubscribeUrl: unsubUrl(unsubscribeToken),
+  })
 
   const subject = `Llevas ${streakDays} días seguidos — no lo pierdas hoy`
 
@@ -58,11 +52,5 @@ export async function sendStreakEmail(params: SendStreakEmailParams): Promise<vo
     console.error('[sendStreakEmail] sendEmail failed:', err instanceof Error ? err.message : String(err))
   }
 
-  await logEmailEvent({
-    userId,
-    emailType: 'streak_warning',
-    dedupeKey: today,
-    status,
-    resendMessageId,
-  })
+  await logEmailEvent({ userId, emailType: 'streak_warning', dedupeKey: today, status, resendMessageId })
 }

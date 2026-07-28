@@ -1874,6 +1874,11 @@ export default function CaminoCalendarClient() {
             )}
           </div>
 
+          {/* Liga de amigos */}
+          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+            <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+          </div>
+
           {/* Avance por asignatura */}
           {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null) && (
             <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>

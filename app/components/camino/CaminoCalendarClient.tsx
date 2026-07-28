@@ -1876,7 +1876,7 @@ export default function CaminoCalendarClient() {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div style={{ width: 288, flexShrink: 0, display: 'flex', flexDirection: 'column', background: 'white', borderLeft: '1px solid #e2e8f0', position: 'sticky', top: 81, maxHeight: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
+        <div style={{ width: 288, flexShrink: 0, flexDirection: 'column', background: 'white', borderLeft: '1px solid #e2e8f0', position: 'sticky', top: 81, maxHeight: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
 
           {/* XP + División */}
           <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>

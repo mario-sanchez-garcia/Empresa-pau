@@ -239,14 +239,22 @@ export default function SettingsPage() {
   const initial = displayName[0]?.toUpperCase() ?? '?'
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
+    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .settings-header { height: 160px !important; }
+          .settings-scroll { padding: 20px 16px 20px !important; }
+          .settings-savebar { padding: 12px 16px !important; flex-wrap: wrap; }
+          .settings-grid-2 { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <SidebarNav />
 
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
         {/* V4 CREDENTIAL HEADER */}
-        <div style={{ position: 'relative', height: 240, flexShrink: 0, overflow: 'hidden', background: '#0f172a' }}>
+        <div className="settings-header" style={{ position: 'relative', height: 240, flexShrink: 0, overflow: 'hidden', background: '#0f172a' }}>
           <img src={NOTEBOOK_IMG} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.2) saturate(.4)' }} />
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0, padding: '20px 0' }}>
             <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#374151', marginBottom: 10 }}>Kairo · Mi perfil</div>
@@ -315,11 +323,11 @@ export default function SettingsPage() {
         </div>
 
         {/* Scrollable form — V1 style */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '28px 40px 20px' }}>
+        <div className="kairo-page-scroll settings-scroll" style={{ flex: 1, overflowY: 'auto', padding: '28px 40px 20px' }}>
 
           {/* Identidad */}
           <Section label="Identidad" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
+          <div className="settings-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
             <Field label="Nombre visible">
               <input value={preferences.displayName} onChange={e => setPreferences(cur => ({ ...cur, displayName: e.target.value }))} placeholder="¿Cómo quieres que te llamemos?" style={inputStyle} />
             </Field>
@@ -409,7 +417,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Save bar */}
-        <div style={{ background: 'white', borderTop: '2px solid #0f172a', padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, gap: 12 }}>
+        <div className="settings-savebar" style={{ background: 'white', borderTop: '2px solid #0f172a', padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
               <LogOut size={14} /> Cerrar sesión

@@ -801,12 +801,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   return (
     <Shell>
       {/* ── Dark topbar ── */}
-      <div style={{ background: '#0f172a', padding: '11px 32px', display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+      <div className="topic-topbar" style={{ background: '#0f172a', padding: '11px 32px', display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
         <Link href="/camino" style={{ color: '#475569', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
           <ArrowLeft size={13} /> Volver
         </Link>
         <span style={{ width: 1, height: 14, background: '#1e293b', flexShrink: 0 }} />
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#475569', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p className="topic-topbar-breadcrumb" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#475569', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           Camino PAU &rsaquo; {subjectLabelFromSlug(currentTopic.subject)} &rsaquo; <span style={{ color: '#93c5fd' }}>{currentTopic.blockTitle}</span>
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
@@ -821,14 +821,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
 
         {/* Article column */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}>
+        <main className="topic-main" style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}>
 
           {/* Document header */}
           <header style={{ marginBottom: 36, paddingBottom: 28, borderBottom: '2px solid #0f172a' }}>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 10 }}>
               {subjectLabelFromSlug(currentTopic.subject)} &middot; {currentTopic.blockTitle}
             </p>
-            <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
+            <h1 className="topic-h1" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
               {currentTopic.title}
             </h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12, alignItems: 'center' }}>
@@ -1052,7 +1052,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         </main>
 
         {/* ── Aside ── */}
-        <aside style={{ width: 264, flexShrink: 0, background: '#fafaf9', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
+        <aside className="topic-aside" style={{ width: 264, flexShrink: 0, background: '#fafaf9', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
 
           {/* Streak + Liga */}
           <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
@@ -1463,9 +1463,18 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#fdfdfc' }}>
+    <div style={{ display: 'flex', minHeight: '100dvh', background: '#fdfdfc' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .topic-topbar { padding: 10px 16px !important; }
+          .topic-topbar-breadcrumb { display: none !important; }
+          .topic-main { padding: 24px 18px !important; }
+          .topic-aside { display: none !important; }
+          .topic-h1 { font-size: 26px !important; }
+        }
+      `}</style>
       <SidebarNav />
-      <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh' }}>
+      <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100dvh' }}>
         {children}
       </div>
     </div>

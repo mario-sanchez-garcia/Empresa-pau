@@ -3062,6 +3062,18 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
         }
 
+        @media (max-width: 767px) {
+          /* Hide the stat badges in the hero on small screens */
+          .exams-hero-stats { display: none !important; }
+          /* Reduce hero height */
+          .exams-subject-hero { height: 130px !important; }
+          .exams-subject-hero-title { font-size: 28px !important; }
+          /* Main content padding */
+          .exams-screen { padding: 14px 16px 40px !important; }
+          /* Subject cards — allow 2 per row on mobile */
+          .pau-subject-card { flex-basis: 150px !important; min-width: 140px !important; }
+        }
+
         @media (max-width: 640px) {
           .kairo-app-header {
             padding: 14px 16px !important;
@@ -3195,12 +3207,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         {seccion === 'examenes' && (
           <>
             {/* V4 Mesa de Trabajo — photo hero */}
-            <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+            <div className="exams-subject-hero" style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
               <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
-                  <div style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
+                  <div className="exams-subject-hero-title" style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 8, fontWeight: 600 }}>{tipo} · {anioSeleccionado ?? '—'} · {examSystemLabel(ccaa)}</div>
                 </div>
                 {(() => {
@@ -3210,7 +3222,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     ? Math.max(...h.filter((i: any) => i.nota && i.nota_maxima).map((i: any) => (Number(i.nota) / i.nota_maxima) * 10)).toFixed(1) // eslint-disable-line @typescript-eslint/no-explicit-any
                     : null
                   return (
-                    <div style={{ display: 'flex', gap: 6 }}>
+                    <div className="exams-hero-stats" style={{ display: 'flex', gap: 6 }}>
                       {[{ val: String(h.length), label: 'Ejercicios' }, { val: med ?? '—', label: 'Media' }, { val: mejor ?? '—', label: 'Mejor' }].map(stat => (
                         <div key={stat.label} style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, padding: '6px 12px', textAlign: 'center', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                           <div style={{ fontSize: 18, fontWeight: 900, color: 'white', lineHeight: 1 }}>{stat.val}</div>

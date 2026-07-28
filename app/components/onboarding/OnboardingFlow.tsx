@@ -131,6 +131,17 @@ const BASE_CSS = `
 .onb-top{clip-path:inset(0 0 50% 0);animation:onb-top-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}
 .onb-bot{clip-path:inset(50% 0 0 0);animation:onb-bot-slam .72s cubic-bezier(0.34,1.4,0.64,1) both}
 .onb-seam{position:absolute;left:-2px;right:-2px;top:calc(50% - 1px);height:2px;background:linear-gradient(90deg,transparent,rgba(37,99,235,0.9),rgba(120,196,255,0.95),rgba(37,99,235,0.9),transparent);animation:onb-seam .72s ease-out both;pointer-events:none}
+@media(max-width:767px){
+  .onb-photo-panel{display:none!important}
+  .onb-form-panel{width:100%!important;padding:0 20px!important}
+  .onb-welcome-left{width:100%!important;padding:28px 24px!important}
+  .onb-welcome-right{display:none!important}
+  .onb-main-pad{padding:0 24px!important}
+  .onb-header-pad{padding:18px 24px!important}
+  .onb-footer-pad{padding:14px 24px!important}
+  .onb-steps-header{padding:14px 20px!important}
+  .onb-scroll-form{padding:20px 24px!important}
+}
 `
 
 export default function OnboardingFlow() {
@@ -408,18 +419,18 @@ export default function OnboardingFlow() {
     return (
       <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#111' }}>
         {/* Left — dark editorial */}
-        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', background: '#111', position: 'relative', overflow: 'hidden' }}>
+        <div className="onb-welcome-left" style={{ width: '50%', display: 'flex', flexDirection: 'column', background: '#111', position: 'relative', overflow: 'hidden' }}>
           {/* Decorative large K */}
           <div style={{ position: 'absolute', top: '50%', left: '-20px', transform: 'translateY(-56%)', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(200px, 22vw, 300px)', color: 'rgba(255,255,255,.025)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none', letterSpacing: '-0.03em' }}>K</div>
 
           {/* Header */}
-          <div style={{ padding: '22px 44px', borderBottom: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+          <div className="onb-header-pad" style={{ padding: '22px 44px', borderBottom: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'relative', zIndex: 1 }}>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: '.05em', color: '#fff' }}>Kairo</span>
             <span style={{ padding: '4px 10px', border: '1px solid rgba(37,99,235,.3)', background: 'rgba(37,99,235,.1)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#3b82f6' }}>Beta privada</span>
           </div>
 
           {/* Main */}
-          <div style={{ flex: 1, padding: '0 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+          <div className="onb-main-pad" style={{ flex: 1, padding: '0 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6', marginBottom: 20 }}>Tu plan de selectividad · 2025–2026</div>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(52px, 6.5vw, 88px)', lineHeight: .91, color: '#fff', letterSpacing: '.01em', marginBottom: 22 }}>
               La PAU<br />empieza<br /><span style={{ color: 'rgba(255,255,255,.2)' }}>hoy.</span>
@@ -466,7 +477,7 @@ export default function OnboardingFlow() {
         </div>
 
         {/* Right — cinematic photo */}
-        <div style={{ width: '50%', position: 'relative', overflow: 'hidden' }}>
+        <div className="onb-welcome-right" style={{ width: '50%', position: 'relative', overflow: 'hidden' }}>
           <img src={HF_LIBRARY} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.55) saturate(.6)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.9) 0%, rgba(17,17,17,.15) 45%, transparent 70%)' }} />
           <div style={{ position: 'absolute', bottom: 32, right: 32, textAlign: 'right' }}>
@@ -486,7 +497,7 @@ export default function OnboardingFlow() {
     return (
       <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#111' }}>
         {/* Left — cinematic photo */}
-        <div style={{ width: '44%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+        <div className="onb-photo-panel" style={{ width: '44%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <AnimatePresence mode="wait">
             <motion.img
               key={photo}
@@ -540,7 +551,7 @@ export default function OnboardingFlow() {
         </div>
 
         {/* Right — editorial white panel */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f9f9f9', overflow: 'hidden' }}>
+        <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f9f9f9', overflow: 'hidden' }}>
           {/* Progress track */}
           <div style={{ height: 2, background: '#e0e0e0', flexShrink: 0, position: 'relative' }}>
             <motion.div
@@ -551,7 +562,7 @@ export default function OnboardingFlow() {
           </div>
 
           {/* Header */}
-          <div style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
             <div style={{ display: 'flex', gap: 0 }}>
               {SIDEBAR_STEPS.map((label, i) => {
@@ -574,7 +585,7 @@ export default function OnboardingFlow() {
           </div>
 
           {/* Body */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
+          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${step}-content`}

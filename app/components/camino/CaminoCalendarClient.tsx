@@ -1556,10 +1556,10 @@ export default function CaminoCalendarClient() {
     <Shell>
       {/* ── HEADER ── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
+        <div className="camino-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
+            <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
@@ -1595,11 +1595,11 @@ export default function CaminoCalendarClient() {
           {isRescueMode && <div style={{ padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
 
           {/* ── HERO ── */}
-          <div style={{ position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+          <div className="camino-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
             <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-              <div style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
+              <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
               <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
@@ -1659,8 +1659,8 @@ export default function CaminoCalendarClient() {
 
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb', cursor: 'default' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
+            <div className="camino-mission-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb', cursor: 'default' }}>
+              <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
                   <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
@@ -2066,8 +2066,19 @@ export default function CaminoCalendarClient() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .camino-hero { height: 200px !important; }
+          .camino-hero-days { font-size: 64px !important; }
+          .camino-hero-overlay { padding: 16px 20px !important; }
+          .camino-header { padding: 10px 14px !important; }
+          .camino-header-title { font-size: 16px !important; }
+          .camino-mission-card { padding: 14px 16px !important; }
+          .camino-mission-number { font-size: 22px !important; width: 36px !important; }
+        }
+      `}</style>
       <SidebarNav />
-      <div style={{ minWidth: 0, flex: 1 }}>{children}</div>
+      <div className="kairo-page-scroll" style={{ minWidth: 0, flex: 1 }}>{children}</div>
     </div>
   )
 }

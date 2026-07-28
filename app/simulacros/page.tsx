@@ -239,11 +239,11 @@ function SimulacrosPage() {
   return (
     <SimulacroShell>
     {/* ── BLACKBOARD HERO ── */}
-    <div style={{ position: 'relative', height: 340, overflow: 'hidden', flexShrink: 0 }}>
+    <div className="sim-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', flexShrink: 0 }}>
       <img src={heroImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.45) saturate(.6)', display: 'block', transition: 'opacity 400ms ease' }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.2) 0%, rgba(15,23,42,.85) 100%)', padding: '28px 32px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div className="sim-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.2) 0%, rgba(15,23,42,.85) 100%)', padding: '28px 32px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
         <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Simulacros PAU · {ccaa}</div>
-        <div style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: .88, letterSpacing: '-.04em', marginBottom: 8 }}>
+        <div className="sim-hero-count" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: .88, letterSpacing: '-.04em', marginBottom: 8 }}>
           {stats.completedCount > 0 ? stats.completedCount : '—'}
         </div>
         <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.5)', letterSpacing: '.12em', textTransform: 'uppercase' }}>
@@ -323,7 +323,7 @@ function SimulacrosPage() {
         </div>
       )}
 
-      <div style={{ padding: 24, maxWidth: 860, margin: '0 auto' }}>
+      <div className="sim-main" style={{ padding: 24, maxWidth: 860, margin: '0 auto' }}>
 
         {/* Error */}
         {errorMessage && (
@@ -336,7 +336,7 @@ function SimulacrosPage() {
             <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Asignatura</div>
             <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }}>{cfg.label}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          <div className="sim-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
               const s = SUBJECTS[key]
               const isActive = subject === key

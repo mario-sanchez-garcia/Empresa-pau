@@ -13,11 +13,19 @@ interface SimulacroShellProps {
 export default function SimulacroShell({ children, title, subtitle, actions }: SimulacroShellProps) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
-
+      <style>{`
+        @media (max-width: 767px) {
+          .sim-hero { height: 200px !important; }
+          .sim-hero-count { font-size: 64px !important; }
+          .sim-hero-overlay { padding: 16px 20px 22px !important; }
+          .sim-card-grid { grid-template-columns: 1fr !important; }
+          .sim-main { padding: 16px !important; }
+        }
+      `}</style>
       <SidebarNav />
 
       {/* Content area */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <div className="kairo-page-scroll" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         {title && (
           <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>

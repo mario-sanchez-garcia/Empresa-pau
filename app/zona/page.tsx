@@ -53,18 +53,25 @@ export default function ZonaPage() {
   if (loading || !user) return <KairoSpinner />
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
+    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .zona-hero { height: 100px !important; }
+          .zona-hero-title { font-size: 26px !important; }
+          .zona-main { padding: 16px 16px 20px !important; }
+        }
+      `}</style>
       <SidebarNav />
 
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-        {/* Hero 155px */}
-        <div style={{ position: 'relative', height: 155, flexShrink: 0, overflow: 'hidden' }}>
+        {/* Hero */}
+        <div className="zona-hero" style={{ position: 'relative', height: 155, flexShrink: 0, overflow: 'hidden' }}>
           <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.4) saturate(.6)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '16px 28px' }}>
             <div>
               <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Tu espacio personal</div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>La Zona</div>
+              <div className="zona-hero-title" style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>La Zona</div>
             </div>
           </div>
         </div>
@@ -99,7 +106,7 @@ export default function ZonaPage() {
         </div>
 
         {/* Content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
+        <main className="kairo-page-scroll zona-main" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
           <Flashcards userId={user.id} initialCards={cards} externalSubject={activeSubject} />
         </main>
       </div>

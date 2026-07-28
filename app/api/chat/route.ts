@@ -6,6 +6,7 @@ import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { createServiceClient } from '@/app/lib/billing/supabase'
 
 const client = new Anthropic()
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
@@ -25,6 +26,14 @@ const IMAGE_CORRECTION_COMPACT_RULES = `Reglas de longitud para correcciones con
 - La teoria relacionada debe ocupar como maximo 2 lineas.
 - Objetivo 350-500 palabras. No hagas explicaciones largas salvo que sea imprescindible.
 - Si el usuario pide JSON estricto, conserva JSON valido y mantén cada campo textual compacto.`
+
+const PREPARATION_TONE_GUIDANCE: Record<string, string> = {
+  'Voy un poco perdido/a': 'Tono personalizado del onboarding: el alumno se siente perdido. Mantén el mismo rigor, pero empieza por los fundamentos, no asumas conocimiento previo, explica con pasos intermedios y comprueba comprensión antes de avanzar.',
+  'Prefiero empezar desde lo básico': 'Tono personalizado del onboarding: el alumno quiere empezar desde lo básico. Mantén el mismo rigor, pero construye la explicación desde conceptos base, define términos antes de usarlos y evita saltos de razonamiento.',
+  'Me cuesta organizarme': 'Tono personalizado del onboarding: al alumno le cuesta organizarse. Mantén el mismo rigor, ve al grano, estructura la respuesta en pasos accionables y evita explicaciones largas que puedan abrumar.',
+  'Voy bien, pero quiero mejorar': 'Tono personalizado del onboarding: el alumno va bien y quiere mejorar. Mantén el mismo rigor, sé más exigente, señala matices, errores finos y consejos concretos para subir nota.',
+  'Voy bastante bien': 'Tono personalizado del onboarding: el alumno va bastante bien. Mantén el mismo rigor, responde de forma directa y eficiente, sin sobreexplicar lo que probablemente ya domina.',
+}
 
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -146,7 +155,9 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const systemPrompt = `Eres Kairo, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Kairo. Usa $...$ para LaTeX inline y entornos \\begin{...}...\\end{...} sin $ externos para sistemas y matrices. NUNCA pongas \\begin{...} dentro de $...$. NUNCA mezcles delimitadores: si abres $ cierra con $, si abres $$ cierra con $$. Si el estudiante pregunta por correcciones anteriores, historial de errores o qué ha fallado antes, indica con claridad que no tienes acceso al historial de correcciones y recomiéndale consultar la sección Historial de la aplicación. No supongas ni inventes datos de sesiones anteriores.${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
+  const preparationFeeling = await getPreparationFeeling(authContext.user.id)
+  const toneGuidance = preparationFeeling ? PREPARATION_TONE_GUIDANCE[preparationFeeling] : ''
+  const systemPrompt = `Eres Kairo, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Kairo. Usa $...$ para LaTeX inline y entornos \\begin{...}...\\end{...} sin $ externos para sistemas y matrices. NUNCA pongas \\begin{...} dentro de $...$. NUNCA mezcles delimitadores: si abres $ cierra con $, si abres $$ cierra con $$. Si el estudiante pregunta por correcciones anteriores, historial de errores o qué ha fallado antes, indica con claridad que no tienes acceso al historial de correcciones y recomiéndale consultar la sección Historial de la aplicación. No supongas ni inventes datos de sesiones anteriores. El nivel de exigencia y la nota deben ser los mismos para todos; solo puede cambiar el modo de explicar.${toneGuidance ? ` ${toneGuidance}` : ''}${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
   const systemContent = [{ type: 'text' as const, text: systemPrompt, cache_control: { type: 'ephemeral' as const } }]
 
   if (wantsStream) {
@@ -284,6 +295,27 @@ function getBearerToken(request: NextRequest) {
   const authorization = request.headers.get('authorization') ?? ''
   const match = authorization.match(/^Bearer\s+(.+)$/i)
   return match?.[1] ?? null
+}
+
+async function getPreparationFeeling(userId: string): Promise<string | null> {
+  try {
+    const db = createServiceClient()
+    const { data, error } = await db
+      .from('billing_events')
+      .select('payload')
+      .eq('user_id', userId)
+      .eq('event_type', 'onboarding_completed')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) return null
+    const payload = data?.payload as Record<string, unknown> | null | undefined
+    const feeling = typeof payload?.preparation_feeling === 'string' ? payload.preparation_feeling.trim() : ''
+    return PREPARATION_TONE_GUIDANCE[feeling] ? feeling : null
+  } catch {
+    return null
+  }
 }
 
 function rateLimitResponse(action: RateLimitAction, result: { limit: number; count: number; retryAfterSeconds?: number }) {

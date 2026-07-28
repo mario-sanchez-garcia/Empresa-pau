@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import KairoBrand from '@/components/shared/KairoBrand'
+import KairoLoader from '@/app/components/ui/KairoLoader'
 
 const PLAN_LABELS: Record<string, string> = {
   pack_curso_pau: 'Curso PAU',
@@ -82,20 +83,22 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main style={styles.page}>
-      <div style={styles.card}>
-        <KairoBrand subtitle={null} size="md" />
-        <div style={styles.spinner} />
-        <h1 style={styles.title}>Preparando tu pago</h1>
-        <p style={styles.body}>
-          Te redirigimos a Stripe para completar el pago del plan <strong>{planLabel}</strong>.<br />
-          No cierres esta ventana.
+    <div style={{ position: 'relative' }}>
+      <KairoLoader />
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        paddingBottom: 48, gap: 8,
+        pointerEvents: 'none',
+      }}>
+        <p style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,.55)', margin: 0 }}>
+          Preparando el pago del plan <strong style={{ color: 'white' }}>{planLabel}</strong>
+        </p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,.28)', margin: 0 }}>
+          No cierres esta ventana
         </p>
       </div>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
-    </main>
+    </div>
   )
 }
 
@@ -123,14 +126,6 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 20,
     alignItems: 'center',
     textAlign: 'center',
-  },
-  spinner: {
-    width: 44,
-    height: 44,
-    borderRadius: '50%',
-    border: '3px solid #dbeafe',
-    borderTopColor: '#2563eb',
-    animation: 'spin 0.8s linear infinite',
   },
   errorIcon: {
     width: 52,

@@ -9,7 +9,7 @@ import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, C
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
-import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
+import { loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
@@ -781,18 +781,34 @@ export default function CaminoCalendarClient() {
   const isSunday = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' }) === 'Sun'
 
   useEffect(() => {
-    const loadedOnboarding = loadOnboarding()
-    const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
-    const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
-    setOnboarding(loadedOnboarding)
-    setExams(loadedExams)
-    setCalendarExpanded(loadedCalendarExpanded)
-    setSelectedWeekStart(currentWeekStartISO())
-    setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
-    if (!window.localStorage.getItem('kairo_camino_onboarding_done')) setShowOnboarding(true)
-    fetchCurriculumItems(loadedOnboarding.subjects)
-      .then(items => setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM))
-      .catch(() => setCurriculumItems(FALLBACK_CURRICULUM))
+    let cancelled = false
+    async function loadInitialState() {
+      let loadedOnboarding = loadOnboarding()
+      if (!loadedOnboarding.completedAt) {
+        try {
+          const { data } = await supabase.auth.getSession()
+          const token = data.session?.access_token
+          if (token) {
+            const restored = await restoreOnboardingFromServer(token)
+            if (restored) loadedOnboarding = restored
+          }
+        } catch { /* keep local fallback */ }
+      }
+      if (cancelled) return
+      const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
+      const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
+      setOnboarding(loadedOnboarding)
+      setExams(loadedExams)
+      setCalendarExpanded(loadedCalendarExpanded)
+      setSelectedWeekStart(currentWeekStartISO())
+      setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
+      if (!loadedOnboarding.completedAt && !window.localStorage.getItem('kairo_camino_onboarding_done')) setShowOnboarding(true)
+      fetchCurriculumItems(loadedOnboarding.subjects)
+        .then(items => { if (!cancelled) setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM) })
+        .catch(() => { if (!cancelled) setCurriculumItems(FALLBACK_CURRICULUM) })
+    }
+    loadInitialState()
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {

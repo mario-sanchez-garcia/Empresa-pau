@@ -11,7 +11,9 @@ import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import {
   loadOnboarding,
   markOnboardingComplete,
+  restoreOnboardingFromServer,
   saveOnboarding,
+  syncOnboardingCommunity,
   type OnboardingCommunity,
   type OnboardingData,
 } from '@/app/lib/onboarding/onboardingStorage'
@@ -138,16 +140,34 @@ export default function OnboardingFlow() {
 
   // On mount: redirect already-completed users; restore last step for interrupted sessions
   useEffect(() => {
-    const saved = loadOnboarding()
-    if (saved.completedAt) {
-      router.replace('/camino')
-      return
+    let cancelled = false
+    async function restore() {
+      let saved = loadOnboarding()
+      if (saved.completedAt) {
+        router.replace('/camino')
+        return
+      }
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData.session?.access_token
+        if (token) {
+          const serverOnboarding = await restoreOnboardingFromServer(token)
+          if (serverOnboarding?.completedAt) {
+            router.replace('/camino')
+            return
+          }
+          if (serverOnboarding) saved = serverOnboarding
+        }
+      } catch { /* local resume still works */ }
+      if (cancelled) return
+      const savedStep = saved.lastStep as Step | null
+      if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
+        setStep(savedStep)
+        if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
+      }
     }
-    const savedStep = saved.lastStep as Step | null
-    if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
-      setStep(savedStep)
-      if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
-    }
+    restore()
+    return () => { cancelled = true }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist current step so interrupted sessions can resume
@@ -246,9 +266,7 @@ export default function OnboardingFlow() {
     setSchoolQuery('')
     setSchoolOpen(false)
     // Sync to kairo_ccaa so simulacros use the correct community immediately
-    if (community === 'Madrid' || community === 'Cataluña') {
-      window.localStorage.setItem('kairo_ccaa', community)
-    }
+    syncOnboardingCommunity({ community })
   }
 
   function selectSchool(name: string, source: 'dataset' | 'manual') {
@@ -323,9 +341,7 @@ export default function OnboardingFlow() {
       markOnboardingComplete()
       // Ensure kairo_ccaa is in sync at completion (covers edge cases where
       // selectCommunity ran on a previous session)
-      if (data.community === 'Madrid' || data.community === 'Cataluña') {
-        window.localStorage.setItem('kairo_ccaa', data.community)
-      }
+      syncOnboardingCommunity(data)
       router.push('/camino')
     } catch {
       setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')

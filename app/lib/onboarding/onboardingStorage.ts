@@ -1,6 +1,6 @@
 'use client'
 
-// Onboarding state persisted in localStorage.
+// Onboarding state persisted in localStorage, with server recovery via /api/onboarding/me.
 // No DB migration needed for beta: /api/onboarding/setup logs the same data in Supabase.
 
 export type OnboardingCommunity = 'Madrid' | 'Cataluña' | 'Andalucía' | 'Otra'
@@ -39,6 +39,30 @@ export function saveOnboarding(data: Partial<OnboardingData>) {
   if (typeof window === 'undefined') return
   const current = loadOnboarding()
   window.localStorage.setItem(KEY, JSON.stringify({ ...current, ...data }))
+}
+
+export function syncOnboardingCommunity(data: Partial<OnboardingData>) {
+  if (typeof window === 'undefined') return
+  if (data.community === 'Madrid' || data.community === 'Cataluña') {
+    window.localStorage.setItem('kairo_ccaa', data.community)
+  }
+}
+
+export async function restoreOnboardingFromServer(accessToken: string): Promise<OnboardingData | null> {
+  if (typeof window === 'undefined') return null
+  try {
+    const res = await fetch('/api/onboarding/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    if (!res.ok) return null
+    const json = await res.json() as { onboarding?: Partial<OnboardingData> | null }
+    if (!json.onboarding?.completedAt) return null
+    saveOnboarding(json.onboarding)
+    syncOnboardingCommunity(json.onboarding)
+    return loadOnboarding()
+  } catch {
+    return null
+  }
 }
 
 export function markOnboardingComplete() {

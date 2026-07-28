@@ -682,6 +682,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             const cmJson = await cmRes.json()
             if (cmJson.success && typeof cmJson.xpAwarded === 'number') {
               setXpAwarded(cmJson.xpAwarded)
+              if (typeof cmJson.streakDays === 'number') setStreak(cmJson.streakDays)
               toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10`
               if (cmJson.leagueUpgrade) setLeagueUpgrade(cmJson.leagueUpgrade)
             } else if (cmJson.reason === 'already_completed') {

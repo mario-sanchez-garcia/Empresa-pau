@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState, type RefObject } from "react"
+import MathMarkdown from "@/components/shared/MathMarkdown"
 
 type MathGroupId = "basico" | "calculo" | "algebra" | "vectores" | "probabilidad" | "fisica" | "quimica" | "plantillas"
 
@@ -311,6 +312,22 @@ export default function MathAnswerToolbar({
       <p className="px-3 pb-2 text-[11px] font-semibold leading-5 text-slate-500">
         Puedes usar formato matemático. Ejemplo: límite de f(x) cuando x tiende a a. Kairo lo entenderá.
       </p>
+      {value.includes('$') && (
+        <div
+          style={{
+            borderTop: `1px solid ${borderColor}`,
+            padding: '8px 12px 10px',
+            background: softColor || '#f8fafc',
+          }}
+        >
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: accentColor, opacity: 0.7, marginBottom: 4 }}>
+            Vista previa
+          </p>
+          <div style={{ fontSize: 14, lineHeight: 1.8, color: '#1e293b' }}>
+            <MathMarkdown text={value} format="raw" />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

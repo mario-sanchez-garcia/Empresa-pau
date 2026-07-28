@@ -1,117 +1,178 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Bug, CreditCard, FlaskConical, Mail, Shield, type LucideIcon } from 'lucide-react'
-import KairoBrand from '@/components/shared/KairoBrand'
 
 export const metadata: Metadata = {
   title: 'Contacto · Kairo',
   description: 'Contacta con el equipo de Kairo para soporte, privacidad, reembolsos o preguntas sobre la beta.',
 }
 
+const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const mono  = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
+
 export default function ContactoPage() {
+  const B = bebas.style.fontFamily
+  const M = mono.style.fontFamily
+
   return (
-    <main className="pau-bg-atmosphere" style={page}>
-      <div style={container}>
-        <div style={logoRow}>
-          <KairoBrand subtitle={null} size="md" />
+    <div style={{ background: '#111', color: '#fff', minHeight: '100dvh', fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>
+      <LegalNav B={B} M={M} />
+
+      <main style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px 100px' }}>
+        <div style={{ paddingTop: 96, paddingBottom: 56, borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+          <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 16 }}>
+            Beta privada · Respondemos en 1–2 días laborables
+          </p>
+          <h1 style={{ fontFamily: B, fontSize: 'clamp(56px, 10vw, 100px)', lineHeight: .92, letterSpacing: '.01em', margin: 0 }}>
+            CONTACTO
+          </h1>
         </div>
 
-        <h1 style={h1}>Contacto</h1>
-        <p style={sub}>Estamos en beta privada y atendemos todas las consultas de forma personal.</p>
+        <div style={{ padding: '40px 0', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+          <p style={{ fontSize: 17, color: 'rgba(255,255,255,.55)', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 560 }}>
+            Estamos en beta privada y atendemos todas las consultas de forma personal.
+          </p>
 
-        <div style={cards}>
-          <ContactCard
-            icon={Mail}
-            title="Soporte general"
-            description="Preguntas sobre el producto, bugs, sugerencias o dudas de uso."
-            email="hola@kairo.es"
-            subject="Soporte"
-          />
-          <ContactCard
-            icon={Shield}
-            title="Privacidad y datos"
-            description="Solicitudes de acceso, rectificación o eliminación de tus datos."
-            email="hola@kairo.es"
-            subject="Privacidad"
-          />
-          <ContactCard
-            icon={CreditCard}
-            title="Reembolsos y pagos"
-            description="Solicitudes de reembolso o problemas con el pago del Pack Curso PAU."
-            email="hola@kairo.es"
-            subject="Reembolso"
-          />
-          <ContactCard
-            icon={Bug}
-            title="Problema técnico"
-            description="Si algo no funciona correctamente o encuentras un error."
-            email="hola@kairo.es"
-            subject="Problema técnico"
-          />
-          <ContactCard
-            icon={FlaskConical}
-            title="Beta privada"
-            description="Feedback sobre tu experiencia, ideas o preguntas sobre la fase beta."
-            email="hola@kairo.es"
-            subject="Beta privada"
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <ContactCard
+              icon={Mail}
+              title="Soporte general"
+              description="Preguntas sobre el producto, bugs, sugerencias o dudas de uso."
+              email="hola@kairo.es"
+              subject="Soporte"
+              M={M}
+            />
+            <ContactCard
+              icon={Shield}
+              title="Privacidad y datos"
+              description="Solicitudes de acceso, rectificación o eliminación de tus datos."
+              email="hola@kairo.es"
+              subject="Privacidad"
+              M={M}
+            />
+            <ContactCard
+              icon={CreditCard}
+              title="Reembolsos y pagos"
+              description="Solicitudes de reembolso o problemas con el pago del Pack Curso PAU."
+              email="hola@kairo.es"
+              subject="Reembolso"
+              M={M}
+            />
+            <ContactCard
+              icon={Bug}
+              title="Problema técnico"
+              description="Si algo no funciona correctamente o encuentras un error."
+              email="hola@kairo.es"
+              subject="Problema técnico"
+              M={M}
+            />
+            <ContactCard
+              icon={FlaskConical}
+              title="Beta privada"
+              description="Feedback sobre tu experiencia, ideas o preguntas sobre la fase beta."
+              email="hola@kairo.es"
+              subject="Beta privada"
+              M={M}
+            />
+          </div>
         </div>
 
-        <div style={note}>
-          <p style={noteText}>
-            Respondemos en un plazo de <strong>1–2 días laborables</strong>. Para solicitudes de reembolso, consulta también nuestra <Link href="/legal/reembolsos" style={aStyle}>política de reembolsos</Link>.
+        <div style={{ padding: '36px 0 0', display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div style={{ width: 2, background: '#2563eb', borderRadius: 2, flexShrink: 0, alignSelf: 'stretch', minHeight: 48 }} />
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,.45)', lineHeight: 1.75, margin: 0 }}>
+            Para solicitudes de reembolso, consulta también nuestra{' '}
+            <Link href="/legal/reembolsos" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
+              política de reembolsos
+            </Link>.{' '}
+            Respondemos en un plazo de <strong style={{ color: 'rgba(255,255,255,.7)' }}>1–2 días laborables</strong>.
           </p>
         </div>
+      </main>
 
-        <footer style={foot}>
-          <Link href="/legal/privacidad" style={footLink}>Privacidad</Link>
-          <span style={sep}>·</span>
-          <Link href="/legal/terminos" style={footLink}>Términos</Link>
-          <span style={sep}>·</span>
-          <Link href="/legal/reembolsos" style={footLink}>Reembolsos</Link>
-          <span style={sep}>·</span>
-          <Link href="/legal/ia" style={footLink}>Uso de IA</Link>
-        </footer>
-      </div>
-    </main>
-  )
-}
-
-function ContactCard({
-  icon, title, description, email, subject
-}: { icon: LucideIcon; title: string; description: string; email: string; subject: string }) {
-  const Icon = icon
-  return (
-    <div style={card}>
-      <span style={cardIcon}><Icon size={20} strokeWidth={2.2} /></span>
-      <div>
-        <p style={cardTitle}>{title}</p>
-        <p style={cardDesc}>{description}</p>
-        <a
-          href={`mailto:${email}?subject=${encodeURIComponent(subject + ' — Kairo')}`}
-          style={cardLink}
-        >
-          {email}
-        </a>
-      </div>
+      <LegalFooter M={M} />
     </div>
   )
 }
 
-const page: React.CSSProperties = { minHeight: '100vh', padding: '48px 16px 80px' }
-const container: React.CSSProperties = { maxWidth: 640, margin: '0 auto' }
-const logoRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }
-const h1: React.CSSProperties = { fontSize: 32, fontWeight: 900, color: '#111827', margin: '0 0 8px' }
-const sub: React.CSSProperties = { fontSize: 15, color: '#64748b', margin: '0 0 36px', lineHeight: 1.6 }
-const cards: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 12 }
-const card: React.CSSProperties = { background: 'white', borderRadius: 14, padding: '18px 20px', display: 'flex', gap: 16, alignItems: 'flex-start', border: '1px solid var(--pau-border, #dbe7fb)' }
-const cardIcon: React.CSSProperties = { width: 38, height: 38, borderRadius: 12, flexShrink: 0, marginTop: 2, display: 'grid', placeItems: 'center', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #dbeafe' }
-const cardTitle: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#111827', margin: '0 0 4px' }
-const cardDesc: React.CSSProperties = { fontSize: 13, color: '#6b7280', margin: '0 0 6px', lineHeight: 1.5 }
-const cardLink: React.CSSProperties = { fontSize: 13, color: '#2563eb', textDecoration: 'none', fontWeight: 600 }
-const note: React.CSSProperties = { background: '#eff6ff', borderRadius: 12, padding: '14px 18px', marginTop: 24 }
-const noteText: React.CSSProperties = { fontSize: 13, color: '#1e40af', margin: 0, lineHeight: 1.6 }
-const aStyle: React.CSSProperties = { color: '#1d4ed8' }
-const foot: React.CSSProperties = { borderTop: '1px solid #e5e7eb', paddingTop: 20, marginTop: 36, display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center' }
-const footLink: React.CSSProperties = { fontSize: 13, color: '#6b7280', textDecoration: 'none' }
-const sep: React.CSSProperties = { fontSize: 13, color: '#d1d5db' }
+function ContactCard({
+  icon, title, description, email, subject, M,
+}: {
+  icon: LucideIcon; title: string; description: string; email: string; subject: string; M: string
+}) {
+  const Icon = icon
+  return (
+    <a
+      href={`mailto:${email}?subject=${encodeURIComponent(subject + ' — Kairo')}`}
+      style={{
+        display: 'flex', alignItems: 'flex-start', gap: 20,
+        padding: '22px 24px',
+        borderRadius: 12,
+        textDecoration: 'none',
+        background: 'rgba(255,255,255,.03)',
+        border: '1px solid rgba(255,255,255,.07)',
+        transition: 'background 140ms, border-color 140ms',
+      }}
+    >
+      <span style={{
+        width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+        display: 'grid', placeItems: 'center',
+        color: '#60a5fa', background: 'rgba(96,165,250,.1)', border: '1px solid rgba(96,165,250,.18)',
+      }}>
+        <Icon size={20} strokeWidth={2} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.85)', margin: '0 0 5px' }}>{title}</p>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,.4)', margin: '0 0 10px', lineHeight: 1.55 }}>{description}</p>
+        <span style={{ fontFamily: M, fontSize: 10, color: '#60a5fa', letterSpacing: '.1em' }}>{email} →</span>
+      </div>
+    </a>
+  )
+}
+
+function LegalNav({ B, M }: { B: string; M: string }) {
+  const links = [
+    { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
+    { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
+    { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
+    { href: '/legal/ia',         label: 'IA',         key: 'ia'         },
+    { href: '/contacto',         label: 'Contacto',   key: 'contacto'   },
+  ]
+  return (
+    <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(17,17,17,.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '0 24px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+      <Link href="/" aria-label="Inicio">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
+      </Link>
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const }}>
+        {links.map(l => (
+          <Link key={l.key} href={l.href} style={{ fontFamily: M, fontSize: 9, fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', padding: '5px 10px', borderRadius: 6, textDecoration: 'none', color: l.key === 'contacto' ? '#fff' : 'rgba(255,255,255,.35)', background: l.key === 'contacto' ? 'rgba(37,99,235,.25)' : 'transparent', transition: 'all 140ms' }}>
+            {l.label}
+          </Link>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
+function LegalFooter({ M }: { M: string }) {
+  const links = [
+    { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
+    { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
+    { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
+    { href: '/legal/ia',         label: 'Uso de IA',  key: 'ia'         },
+    { href: '/contacto',         label: 'Contacto',   key: 'contacto'   },
+  ]
+  return (
+    <footer style={{ borderTop: '1px solid rgba(255,255,255,.07)', padding: '28px 24px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap' as const, gap: 6 }}>
+      {links.map((l, i) => (
+        <span key={l.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {i > 0 && <span style={{ color: 'rgba(255,255,255,.12)', fontFamily: M, fontSize: 10 }}>·</span>}
+          <Link href={l.href} style={{ fontFamily: M, fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', color: l.key === 'contacto' ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.25)', transition: 'color 140ms' }}>
+            {l.label}
+          </Link>
+        </span>
+      ))}
+    </footer>
+  )
+}

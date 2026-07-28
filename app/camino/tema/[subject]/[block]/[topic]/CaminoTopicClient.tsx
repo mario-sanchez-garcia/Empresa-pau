@@ -276,6 +276,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [nextMissionTitle, setNextMissionTitle] = useState<string | null>(null)
   const [blockProgress, setBlockProgress] = useState<{ completed: number; total: number }>({ completed: 0, total: 0 })
   const [missionXpStatus, setMissionXpStatus] = useState<MissionXpStatus>('checking')
+  const [pendingCalendarRowId, setPendingCalendarRowId] = useState<string | null>(null)
+  const [pendingMissionType, setPendingMissionType] = useState<string>('concept')
   const billing = useBillingStatus()
 
   useEffect(() => {
@@ -448,18 +450,25 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       }
       const { data: rows } = await supabase
         .from('camino_calendar')
-        .select('id, status')
+        .select('id, status, mission_type')
         .eq('user_id', userId)
         .eq('subject', topic.subject)
         .eq('v2_sort_order', pendingSortOrder)
         .limit(10)
 
       if (cancelled) return
-      if (rows?.some(row => row.status === 'pending')) {
+      const pendingRow = rows?.find(row => row.status === 'pending')
+      if (pendingRow) {
+        setPendingCalendarRowId(pendingRow.id)
+        setPendingMissionType(pendingRow.mission_type ?? 'concept')
         setMissionXpStatus('pending')
       } else if (rows?.some(row => row.status === 'completed')) {
+        setPendingCalendarRowId(null)
+        setPendingMissionType('concept')
         setMissionXpStatus('already_completed')
       } else {
+        setPendingCalendarRowId(null)
+        setPendingMissionType('concept')
         setMissionXpStatus('free_practice')
       }
     }).catch(() => {
@@ -713,7 +722,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               body: JSON.stringify({
                 subject: currentTopic.subject,
                 v2SortOrder: selectedSortOrder,
-                missionType: 'concept',
+                calendarRowId: pendingCalendarRowId ?? missionId ?? undefined,
+                missionType: pendingMissionType,
                 title: selectedMissionTitle,
               }),
             })
@@ -748,7 +758,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           tipo: 'Camino PAU',
           año: new Date().getFullYear(),
           bloque: currentTopic.blockTitle,
-          opcion: 'Curso',
+          opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
           nota: rawScore,
           nota_maxima: maxScore,
           enunciado: statement.substring(0, 2000),

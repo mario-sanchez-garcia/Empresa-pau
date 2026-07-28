@@ -13,6 +13,8 @@ export const BETA_METRIC_EVENTS = [
   'day_2_return',
   'feedback_clicked',
   'camino_calendar_source_selected',
+  'weak_review_injected',
+  'weak_review_mapping_missed',
 ] as const
 
 export type BetaMetricEvent = typeof BETA_METRIC_EVENTS[number]

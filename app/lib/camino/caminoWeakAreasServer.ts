@@ -11,6 +11,7 @@ export interface WeakArea {
 interface HistorialRow {
   asignatura: string
   bloque: string
+  opcion: string | null
   nota: number | null
   nota_maxima: number | null
 }
@@ -28,7 +29,7 @@ export async function getWeakAreas(
   try {
     const { data, error } = await supabase
       .from('historial_examenes')
-      .select('asignatura, bloque, nota, nota_maxima')
+      .select('asignatura, bloque, opcion, nota, nota_maxima')
       .eq('user_id', userId)
       .not('nota', 'is', null)
       .not('nota_maxima', 'is', null)
@@ -39,22 +40,25 @@ export async function getWeakAreas(
     if (error || !data) return []
 
     // Aggregate per (asignatura, bloque)
-    const agg: Record<string, { subjectKey: string; label: string; sum: number; max: number; count: number }> = {}
+    const agg: Record<string, { subjectKey: string; label: string; sum: number; max: number; count: number; baseCount: number }> = {}
 
     for (const row of data as HistorialRow[]) {
       if (!row.bloque || row.nota == null || row.nota_maxima == null || row.nota_maxima <= 0) continue
       const key = `${row.asignatura}||${row.bloque}`
       if (!agg[key]) {
-        agg[key] = { subjectKey: row.asignatura, label: row.bloque, sum: 0, max: 0, count: 0 }
+        agg[key] = { subjectKey: row.asignatura, label: row.bloque, sum: 0, max: 0, count: 0, baseCount: 0 }
       }
       agg[key].sum += row.nota
       agg[key].max += row.nota_maxima
       agg[key].count += 1
+      if ((row.opcion ?? '').toLowerCase() !== 'repaso') {
+        agg[key].baseCount += 1
+      }
     }
 
     const weakAreas: WeakArea[] = []
     for (const [, v] of Object.entries(agg)) {
-      if (v.count < MIN_ATTEMPTS) continue
+      if (v.baseCount < MIN_ATTEMPTS) continue
       const avg = v.sum / v.max
       if (avg < WEAK_THRESHOLD) {
         weakAreas.push({

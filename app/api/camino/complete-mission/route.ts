@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
 
     const subject = typeof body.subject === 'string' ? body.subject : null
     const v2SortOrder = typeof body.v2SortOrder === 'number' ? body.v2SortOrder : null
+    const calendarRowId = typeof body.calendarRowId === 'string' ? body.calendarRowId : null
     const missionType = typeof body.missionType === 'string' ? body.missionType : 'concept'
     const title = typeof body.title === 'string' ? body.title : null
 
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString()
 
     // PASO 2 — Marcar calendario como completado y detectar si ya estaba
-    const { data: updated } = await db
+    let updateQuery = db
       .from('camino_calendar')
       .update({
         status: 'completed',
@@ -54,20 +55,27 @@ export async function POST(request: NextRequest) {
         updated_at: now,
       })
       .eq('user_id', user.id)
-      .eq('subject', subject)
-      .eq('v2_sort_order', v2SortOrder)
       .eq('status', 'pending')
+
+    updateQuery = calendarRowId
+      ? updateQuery.eq('id', calendarRowId)
+      : updateQuery.eq('subject', subject).eq('v2_sort_order', v2SortOrder)
+
+    const { data: updated } = await updateQuery
       .select('id')
 
     // PASO 4 — Idempotencia: 0 filas afectadas = ya completada o no existe
     if (!updated || updated.length === 0) {
-      const { data: existing } = await db
+      let existingQuery = db
         .from('camino_calendar')
         .select('id, status')
         .eq('user_id', user.id)
-        .eq('subject', subject)
-        .eq('v2_sort_order', v2SortOrder)
-        .limit(10)
+
+      existingQuery = calendarRowId
+        ? existingQuery.eq('id', calendarRowId)
+        : existingQuery.eq('subject', subject).eq('v2_sort_order', v2SortOrder)
+
+      const { data: existing } = await existingQuery.limit(10)
 
       const reason = existing?.some(row => row.status === 'completed')
         ? 'already_completed'
@@ -98,12 +106,14 @@ export async function POST(request: NextRequest) {
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,
       v2_sort_order: v2SortOrder,
+      calendar_row_id: calendarRowId,
       mission_type: missionType,
       title,
     })
     await recordBetaMetric(db, user.id, 'xp_awarded', {
       subject,
       v2_sort_order: v2SortOrder,
+      calendar_row_id: calendarRowId,
       mission_type: missionType,
       xp,
     })

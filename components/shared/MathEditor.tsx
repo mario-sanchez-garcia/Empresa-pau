@@ -1,8 +1,8 @@
 "use client"
 
 import { useRef, useState, useCallback } from "react"
+import katex from "katex"
 import MathAnswerToolbar from "@/components/shared/MathAnswerToolbar"
-import MathMarkdown from "@/components/shared/MathMarkdown"
 
 interface MathEditorProps {
   subject?: string | null
@@ -18,6 +18,47 @@ interface MathEditorProps {
 }
 
 const HAS_LATEX = /\$|\\\[|\\\(|\\begin\{/
+
+// Render a string containing $...$ and $$...$$ into an array of React-renderable HTML spans.
+// Bypasses remark-math entirely to avoid the $$ adjacency parsing bug.
+function renderLatexSegments(text: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = []
+  // Split on $$...$$ first (display math, usually contains newlines)
+  const displayParts = text.split(/((?:\$\$)[\s\S]*?(?:\$\$))/)
+  displayParts.forEach((seg, di) => {
+    if (seg.startsWith("$$") && seg.endsWith("$$") && seg.length > 4) {
+      const math = seg.slice(2, -2).trim()
+      try {
+        const html = katex.renderToString(math, { throwOnError: false, displayMode: true })
+        nodes.push(<span key={`d${di}`} dangerouslySetInnerHTML={{ __html: html }} style={{ display: "block", overflowX: "auto" }} />)
+      } catch {
+        nodes.push(<span key={`d${di}`} style={{ color: "#e11d48" }}>{seg}</span>)
+      }
+      return
+    }
+    // Split remaining segment on $...$ (inline math)
+    const inlineParts = seg.split(/(\$[^$\n]+?\$)/)
+    inlineParts.forEach((part, ii) => {
+      if (part.startsWith("$") && part.endsWith("$") && part.length > 2) {
+        const math = part.slice(1, -1)
+        try {
+          const html = katex.renderToString(math, { throwOnError: false, displayMode: false })
+          nodes.push(<span key={`d${di}i${ii}`} dangerouslySetInnerHTML={{ __html: html }} />)
+        } catch {
+          nodes.push(<span key={`d${di}i${ii}`} style={{ color: "#e11d48" }}>{part}</span>)
+        }
+        return
+      }
+      if (!part) return
+      // Plain text — preserve newlines
+      part.split("\n").forEach((line, li) => {
+        if (li > 0) nodes.push(<br key={`d${di}i${ii}br${li}`} />)
+        if (line) nodes.push(<span key={`d${di}i${ii}l${li}`}>{line}</span>)
+      })
+    })
+  })
+  return nodes
+}
 
 export default function MathEditor({
   subject,
@@ -46,7 +87,6 @@ export default function MathEditor({
       const ta = textareaRef.current
       if (!ta) return
       ta.focus()
-      // Place cursor at end
       ta.selectionStart = ta.selectionEnd = ta.value.length
     })
   }, [])
@@ -87,7 +127,6 @@ export default function MathEditor({
             outline: "none",
             boxShadow: focused ? `0 0 0 4px ${accentColor}14` : "none",
             transition: "border-color 150ms, box-shadow 150ms, background 150ms",
-            // Hide visually when showing the rendered view, but keep mounted
             opacity: showRendered ? 0 : 1,
             pointerEvents: showRendered ? "none" : "auto",
             position: showRendered ? "absolute" : "relative",
@@ -118,7 +157,9 @@ export default function MathEditor({
               position: "relative",
             }}
           >
-            <MathMarkdown text={value} format="raw" />
+            <div style={{ lineHeight: 1.85 }}>
+              {renderLatexSegments(value)}
+            </div>
             <span
               style={{
                 position: "absolute",

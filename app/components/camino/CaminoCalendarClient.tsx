@@ -9,7 +9,7 @@ import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, C
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
-import { loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
+import { loadOnboarding, restoreOnboardingFromServer, saveOnboarding, syncLocalOnboardingToServerIfMissing, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
@@ -793,6 +793,13 @@ export default function CaminoCalendarClient() {
             if (restored) loadedOnboarding = restored
           }
         } catch { /* keep local fallback */ }
+      } else {
+        supabase.auth.getSession()
+          .then(({ data }) => {
+            const token = data.session?.access_token
+            if (token) syncLocalOnboardingToServerIfMissing(token, loadedOnboarding)
+          })
+          .catch(() => undefined)
       }
       if (cancelled) return
       const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])

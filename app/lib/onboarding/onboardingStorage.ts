@@ -65,6 +65,36 @@ export async function restoreOnboardingFromServer(accessToken: string): Promise<
   }
 }
 
+export function syncLocalOnboardingToServerIfMissing(accessToken: string, onboarding = loadOnboarding()) {
+  if (typeof window === 'undefined' || !onboarding.completedAt) return
+  void fetch('/api/onboarding/me', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+    .then(async res => {
+      if (!res.ok) return
+      const json = await res.json() as { onboarding?: Partial<OnboardingData> | null }
+      if (json.onboarding?.completedAt) return
+      await fetch('/api/onboarding/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          routeId: 'completa',
+          community: onboarding.community,
+          schoolName: onboarding.schoolName,
+          schoolSource: onboarding.schoolSource,
+          subjects: onboarding.subjects,
+          preparationFeeling: onboarding.preparationFeeling,
+          dailyStudyTime: onboarding.dailyStudyTime,
+          dailyMinutes: onboarding.dailyMinutes,
+          weeklyStudyDays: onboarding.weeklyStudyDays,
+          weeklyStudyDaysValue: onboarding.weeklyStudyDaysValue,
+          onboardingCompleted: true,
+        }),
+      })
+    })
+    .catch(() => undefined)
+}
+
 export function markOnboardingComplete() {
   saveOnboarding({ completedAt: new Date().toISOString() })
 }

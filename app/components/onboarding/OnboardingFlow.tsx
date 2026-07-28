@@ -13,6 +13,7 @@ import {
   markOnboardingComplete,
   restoreOnboardingFromServer,
   saveOnboarding,
+  syncLocalOnboardingToServerIfMissing,
   syncOnboardingCommunity,
   type OnboardingCommunity,
   type OnboardingData,
@@ -144,6 +145,12 @@ export default function OnboardingFlow() {
     async function restore() {
       let saved = loadOnboarding()
       if (saved.completedAt) {
+        supabase.auth.getSession()
+          .then(({ data: sessionData }) => {
+            const token = sessionData.session?.access_token
+            if (token) syncLocalOnboardingToServerIfMissing(token, saved)
+          })
+          .catch(() => undefined)
         router.replace('/camino')
         return
       }

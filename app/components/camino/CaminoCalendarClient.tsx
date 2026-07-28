@@ -767,6 +767,8 @@ export default function CaminoCalendarClient() {
   const [weeklySimsCompleted, setWeeklySimsCompleted] = useState(0)
   const [rankingOpen, setRankingOpen] = useState(false)
   const [rankingTab, setRankingTab] = useState<'global' | 'community'>('global')
+  const [showFullRanking, setShowFullRanking] = useState(false)
+  const [fullRankingToken, setFullRankingToken] = useState<string | null>(null)
   const [showExamForm, setShowExamForm] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', name: '', priority: 'normal' as ExamPriority })
@@ -1921,7 +1923,24 @@ export default function CaminoCalendarClient() {
 
           {/* Ranking */}
           <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
-            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Ranking</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>Ranking</div>
+              <button
+                onClick={async () => {
+                  const { data } = await supabase.auth.getSession()
+                  setFullRankingToken(data.session?.access_token ?? null)
+                  setShowFullRanking(true)
+                }}
+                style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                Ver clasificación completa →
+              </button>
+            </div>
+            <AnimatePresence>
+              {showFullRanking && fullRankingToken && (
+                <FullRankingModal token={fullRankingToken} onClose={() => setShowFullRanking(false)} />
+              )}
+            </AnimatePresence>
             <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
               <button onClick={() => setRankingTab('global')} style={{ flex: 1, textAlign: 'center', fontSize: 10, fontWeight: 800, padding: 5, borderRadius: 7, cursor: 'pointer', border: 'none', background: rankingTab === 'global' ? '#2563eb' : '#f1f5f9', color: rankingTab === 'global' ? 'white' : '#64748b', transition: 'all .15s' }}>Global</button>
               <button onClick={() => setRankingTab('community')} style={{ flex: 1, textAlign: 'center', fontSize: 10, fontWeight: 800, padding: 5, borderRadius: 7, cursor: 'pointer', border: 'none', background: rankingTab === 'community' ? '#2563eb' : '#f1f5f9', color: rankingTab === 'community' ? 'white' : '#64748b', transition: 'all .15s' }}>Comunidad</button>

@@ -41,8 +41,9 @@ function rankEntries(
   nameFor: (userId: string) => string,
   anonymize: boolean,
 ): Entry[] {
+  // Se muestran también los que están a 0 — el alumno quiere ver la
+  // clasificación completa (incluida la suya) aunque todavía no tenga XP.
   return Array.from(scores.entries())
-    .filter(([, score]) => score > 0)
     .sort((a, b) => b[1] - a[1])
     .map(([userId, score], index) => {
       const isCurrentUser = userId === currentUserId
@@ -120,7 +121,9 @@ export async function GET(request: NextRequest) {
     const memberIds = (miembros ?? []).map(m => m.user_id as string)
     const names = await getNameMap(db, memberIds)
 
-    let scores = new Map<string, number>()
+    // Todos los miembros parten de 0 — así se ven en la clasificación
+    // aunque todavía no tengan XP/medallas registradas.
+    const scores = new Map<string, number>(memberIds.map(id => [id, 0]))
     if (mode === 'ronda') {
       const { start, end } = currentRoundRange()
       const { data: xpRows } = await db
@@ -129,12 +132,12 @@ export async function GET(request: NextRequest) {
         .in('user_id', memberIds)
         .gte('mission_date', start)
         .lte('mission_date', end)
-      scores = sumByUser((xpRows ?? []) as Array<{ user_id: string; xp_amount: number }>)
+      for (const [id, xp] of sumByUser((xpRows ?? []) as Array<{ user_id: string; xp_amount: number }>)) scores.set(id, xp)
     } else if (mode === 'xp_total') {
       const { data: progressRows } = await db.from('camino_user_progress').select('user_id, xp_total').in('user_id', memberIds)
-      scores = sumByUser((progressRows ?? []) as Array<{ user_id: string; xp_total: number }>)
+      for (const [id, xp] of sumByUser((progressRows ?? []) as Array<{ user_id: string; xp_total: number }>)) scores.set(id, xp)
     } else {
-      scores = await getEtapasScores(db, 'personal', ligaId)
+      for (const [id, score] of await getEtapasScores(db, 'personal', ligaId)) scores.set(id, score)
     }
 
     return NextResponse.json({

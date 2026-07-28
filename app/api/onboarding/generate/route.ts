@@ -3,6 +3,8 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
+import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 
@@ -13,39 +15,6 @@ type StartMode = typeof VALID_START_MODES[number]
 
 // Private beta scope: Camino PAU is active only for the four core PAU subjects.
 const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana'])
-
-const HOLIDAYS = new Set([
-  '2026-10-12', '2026-11-01', '2026-11-02',
-  '2026-12-06', '2026-12-08', '2026-12-25',
-  '2027-01-01', '2027-01-06', '2027-04-01',
-  '2027-04-02', '2027-04-03', '2027-04-04',
-  '2027-04-17', '2027-04-18', '2027-06-07',
-])
-
-function getMadridToday(): string {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-}
-
-function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr + 'T12:00:00Z')
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
-
-function isStudyDay(dateStr: string): boolean {
-  const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  return dow !== 0 && dow !== 6 && !HOLIDAYS.has(dateStr)
-}
-
-function getStudyDays(startDate: string, n: number): string[] {
-  const days: string[] = []
-  let current = startDate
-  while (days.length < n) {
-    if (isStudyDay(current)) days.push(current)
-    current = addDays(current, 1)
-  }
-  return days
-}
 
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 1) return subjects[0]
@@ -132,6 +101,8 @@ export async function POST(request: NextRequest) {
       .eq('queue_status', 'scheduled')
 
     if (scheduledCount && scheduledCount > 0) {
+      await applyCalendarPersonalization(user.id, db)
+
       const todayIdempotent = getMadridToday()
       const { data: firstCal } = await db
         .from('camino_calendar')
@@ -326,6 +297,8 @@ export async function POST(request: NextRequest) {
         .in('id', scheduledQueueIds)
       if (error) throw new Error(`Queue update error: ${error.message}`)
     }
+
+    await applyCalendarPersonalization(user.id, db)
 
     // ── PASO 4: Response ────────────────────────────────────────────────────
     const first = calRows[0] as { title: string; subject: string; scheduled_date: string } | undefined

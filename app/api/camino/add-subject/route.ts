@@ -3,6 +3,7 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 
 export const dynamic = 'force-dynamic'
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
 
     // Fill the next 14 calendar days — ensureCaminoCalendar picks up the new subject from queue
     await ensureCaminoCalendar(user.id, db)
+    await applyCalendarPersonalization(user.id, db)
 
     return NextResponse.json({ ok: true, alreadyExists: false })
   } catch (err) {

@@ -14,7 +14,6 @@ import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2So
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
-import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
@@ -294,6 +293,14 @@ async function fetchLeaderboard(token: string, community: string) {
   }
 }
 
+async function ensureServerCalendar(token: string) {
+  const res = await fetch('/api/camino/ensure-calendar', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return res.ok
+}
+
 type CaminoCalRow = {
   id: string
   scheduled_date: string
@@ -320,6 +327,7 @@ function calRowToMission(row: CaminoCalRow): Mission {
   const topicSlug = resolveTopicSlugAlias(row.subject, blockSlug, rawTopicSlug)
   const href = linkedTopic ? buildTopicHref(linkedTopic) : resolveCourseHref(rowSubjectSlug, blockSlug, topicSlug)
   const cleanTitle = sanitizeLessonTitle(row.title)
+  const estimatedMinutes = typeof row.metadata?.estimated_minutes === 'number' ? row.metadata.estimated_minutes : 30
   return {
     id: row.id,
     calendarRowId: row.id,
@@ -334,7 +342,7 @@ function calRowToMission(row: CaminoCalRow): Mission {
     target: href,
     source: 'camino_pau',
     xpPolicy: 'after_correction',
-    estimatedMinutes: 30,
+    estimatedMinutes,
     baseXP: 20,
     status: row.status === 'completed' ? 'done' : 'pending',
     metadata: row.metadata ?? undefined,
@@ -872,7 +880,7 @@ export default function CaminoCalendarClient() {
         const days = Math.floor((Date.now() - new Date(created).getTime()) / 86400000)
         if (!cancelled) setDaysSinceReg(days)
       }
-      await ensureCaminoCalendar(userId, supabase)
+      if (token) await ensureServerCalendar(token)
       if (cancelled) return
       const weekStart = currentWeekStartISO()
       const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
@@ -940,7 +948,8 @@ export default function CaminoCalendarClient() {
       const { data } = await supabase.auth.getSession()
       const userId = data.session?.user.id
       if (!userId || cancelled) return
-      await ensureCaminoCalendar(userId, supabase)
+      const token = data.session?.access_token
+      if (token) await ensureServerCalendar(token)
       const calDays = await fetchCaminoCalendar(userId)
       if (cancelled) return
       if (calDays && calDays.length > 0) {
@@ -1288,7 +1297,7 @@ export default function CaminoCalendarClient() {
         body: JSON.stringify({ subjects, startMode: 'zero' }),
       })
       if (res.ok) {
-        await ensureCaminoCalendar(session.user.id, supabase)
+        await ensureServerCalendar(session.access_token)
         const calDays = await fetchCaminoCalendar(session.user.id)
         if (calDays && calDays.length > 0) {
           setCalendar(calDays)

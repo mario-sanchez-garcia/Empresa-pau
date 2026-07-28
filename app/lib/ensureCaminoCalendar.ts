@@ -3,44 +3,10 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
+import { addDays, countWorkingDays, getMadridToday, getStudyDays } from './camino/studyDays'
 
 const EXAM_DATE = '2027-06-07'
 const CALENDAR_HORIZON = 14
-
-function getMadridToday(): string {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-}
-
-function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr + 'T12:00:00Z')
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
-
-function isStudyDay(dateStr: string): boolean {
-  const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  return dow !== 0 && dow !== 6 && !SPAIN_HOLIDAYS.has(dateStr)
-}
-
-function getStudyDays(startDate: string, n: number): string[] {
-  const days: string[] = []
-  let current = startDate
-  while (days.length < n) {
-    if (isStudyDay(current)) days.push(current)
-    current = addDays(current, 1)
-  }
-  return days
-}
-
-function countWorkingDays(from: string, to: string): number {
-  let count = 0
-  let current = from
-  while (current < to) {
-    if (isStudyDay(current)) count++
-    current = addDays(current, 1)
-  }
-  return count
-}
 
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 0) return null

@@ -61,7 +61,19 @@ export async function POST(request: NextRequest) {
 
     // PASO 4 — Idempotencia: 0 filas afectadas = ya completada o no existe
     if (!updated || updated.length === 0) {
-      return NextResponse.json({ success: false, reason: 'already_completed' })
+      const { data: existing } = await db
+        .from('camino_calendar')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('subject', subject)
+        .eq('v2_sort_order', v2SortOrder)
+        .limit(10)
+
+      const reason = existing?.some(row => row.status === 'completed')
+        ? 'already_completed'
+        : 'no_pending_mission'
+
+      return NextResponse.json({ success: false, reason })
     }
 
     // PASO 2b — Marcar cola como completada (best-effort)

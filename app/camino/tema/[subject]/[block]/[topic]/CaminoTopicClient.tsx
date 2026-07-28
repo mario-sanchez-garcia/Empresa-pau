@@ -60,6 +60,7 @@ type CalendarDay = { date: string; missions: CalendarMission[] }
 type UploadedImage = { data: string; preview: string; type: string }
 type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
+type MissionXpStatus = 'checking' | 'pending' | 'already_completed' | 'free_practice'
 type CurriculumV2Card = {
   sort_order: number
   title: string
@@ -99,12 +100,6 @@ function daysSince(isoDate: string): number {
   const createdDay = new Date(isoDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
   const todayDay = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
   return Math.floor((new Date(todayDay + 'T00:00:00Z').getTime() - new Date(createdDay + 'T00:00:00Z').getTime()) / 86400000)
-}
-
-function xpFromScore(score: number) {
-  const baseXP = 10
-  const bonusXP = score < 4 ? 5 : score < 6 ? 12 : score < 8 ? 22 : score < 9 ? 32 : 45
-  return baseXP + bonusXP
 }
 
 function scoreFromCorrection(data: unknown, maxScore: number) {
@@ -280,6 +275,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [nextMissionTitle, setNextMissionTitle] = useState<string | null>(null)
   const [blockProgress, setBlockProgress] = useState<{ completed: number; total: number }>({ completed: 0, total: 0 })
+  const [missionXpStatus, setMissionXpStatus] = useState<MissionXpStatus>('checking')
   const billing = useBillingStatus()
 
   useEffect(() => {
@@ -430,6 +426,48 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    if (!topic) {
+      queueMicrotask(() => setMissionXpStatus('free_practice'))
+      return () => { cancelled = true }
+    }
+
+    const pendingSortOrder = v2Cards[activeV2Index]?.sort_order ?? topic.v2SortOrder ?? null
+    if (pendingSortOrder == null) {
+      queueMicrotask(() => setMissionXpStatus('free_practice'))
+      return () => { cancelled = true }
+    }
+
+    queueMicrotask(() => setMissionXpStatus('checking'))
+    supabase.auth.getSession().then(async ({ data }) => {
+      const userId = data.session?.user?.id
+      if (!userId || cancelled) {
+        if (!cancelled) setMissionXpStatus('free_practice')
+        return
+      }
+      const { data: rows } = await supabase
+        .from('camino_calendar')
+        .select('id, status')
+        .eq('user_id', userId)
+        .eq('subject', topic.subject)
+        .eq('v2_sort_order', pendingSortOrder)
+        .limit(10)
+
+      if (cancelled) return
+      if (rows?.some(row => row.status === 'pending')) {
+        setMissionXpStatus('pending')
+      } else if (rows?.some(row => row.status === 'completed')) {
+        setMissionXpStatus('already_completed')
+      } else {
+        setMissionXpStatus('free_practice')
+      }
+    }).catch(() => {
+      if (!cancelled) setMissionXpStatus(missionId ? 'pending' : 'free_practice')
+    })
+    return () => { cancelled = true }
+  }, [topic, v2Cards, activeV2Index, missionId])
+
   if (!topic) {
     return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[28px] border border-blue-100 bg-white p-8 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
   }
@@ -443,6 +481,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const selectedV2Card = v2Cards[activeV2Index] ?? v2Cards[0] ?? null
   const selectedV2Number = selectedV2Card ? activeV2Index + 1 : null
   const selectedMissionTitle = selectedV2Card?.title ?? currentTopic.title
+  const selectedSortOrder = selectedV2Card?.sort_order ?? currentTopic.v2SortOrder ?? null
   const uniqueV2VideoIds = Array.from(new Set(v2Cards.map(card => card.video_id).filter((id): id is string => Boolean(id))))
   const videoId = selectedV2Card?.video_id ?? TOPIC_VIDEO_MAP[key] ?? null
   const videoSupportCopy = selectedV2Card
@@ -573,8 +612,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     if (fileRef.current) fileRef.current.value = ''
   }
 
-  function awardCorrectionXp(scoreOnTen: number) {
-    const xp = xpFromScore(scoreOnTen)
+  function recordConfirmedCorrectionXp(scoreOnTen: number, xp: number) {
     const eventMissionId = missionId ?? `course:${key}`
     const calendar = loadJson<CalendarDay[]>(CALENDAR_KEY, [])
     const xpEvents = loadJson<CaminoXpEvent[]>(XP_KEY, [])
@@ -604,13 +642,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       saveJson(TOPIC_PROGRESS_KEY, next)
       return next
     })
-    if (scoreOnTen < 6) {
-      const weakAreas = loadJson<Array<{ subject: string; block: string; topic: string; score: number; date: string }>>(WEAK_AREAS_KEY, [])
-      const nextWeakAreas = [{ subject: subjectLabelFromSlug(currentTopic.subject), block: currentTopic.blockTitle, topic: currentTopic.title, score: scoreOnTen, date: new Date().toISOString() }, ...weakAreas.filter(item => !(item.subject === subjectLabelFromSlug(currentTopic.subject) && item.topic === currentTopic.title))].slice(0, 12)
-      saveJson(WEAK_AREAS_KEY, nextWeakAreas)
-    }
     setXpAwarded(xpChanged ? xp : previous?.xp ?? xp)
-    return { xp, xpChanged }
+  }
+
+  function recordCorrectionWeakArea(scoreOnTen: number) {
+    if (scoreOnTen >= 6) return
+    const weakAreas = loadJson<Array<{ subject: string; block: string; topic: string; score: number; date: string }>>(WEAK_AREAS_KEY, [])
+    const nextWeakAreas = [{ subject: subjectLabelFromSlug(currentTopic.subject), block: currentTopic.blockTitle, topic: currentTopic.title, score: scoreOnTen, date: new Date().toISOString() }, ...weakAreas.filter(item => !(item.subject === subjectLabelFromSlug(currentTopic.subject) && item.topic === currentTopic.title))].slice(0, 12)
+    saveJson(WEAK_AREAS_KEY, nextWeakAreas)
   }
 
   async function correctCourseExercise() {
@@ -629,7 +668,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         return
       }
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
-      const selectedSortOrder = selectedV2Card?.sort_order ?? currentTopic.v2SortOrder ?? null
       const response = await fetch('/api/camino/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
@@ -664,31 +702,40 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       if (rawScore == null) {
         setToast('Corrección recibida sin nota clara. No se asigna XP hasta tener una nota.')
       } else {
-        const { xp } = awardCorrectionXp(rawScore)
         setScore(rawScore)
-        let toastText = `+${xp} XP por corrección · nota ${rawScore}/10`
-        if (currentTopic.v2SortOrder != null) {
+        recordCorrectionWeakArea(rawScore)
+        let toastText = `Corrección guardada · nota ${rawScore}/10`
+        if (selectedSortOrder != null) {
           try {
             const cmRes = await fetch('/api/camino/complete-mission', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
               body: JSON.stringify({
                 subject: currentTopic.subject,
-                v2SortOrder: currentTopic.v2SortOrder,
+                v2SortOrder: selectedSortOrder,
                 missionType: 'concept',
                 title: selectedMissionTitle,
               }),
             })
             const cmJson = await cmRes.json()
             if (cmJson.success && typeof cmJson.xpAwarded === 'number') {
+              recordConfirmedCorrectionXp(rawScore, cmJson.xpAwarded)
               setXpAwarded(cmJson.xpAwarded)
+              setMissionXpStatus('already_completed')
               if (typeof cmJson.streakDays === 'number') setStreak(cmJson.streakDays)
               toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10`
               if (cmJson.leagueUpgrade) setLeagueUpgrade(cmJson.leagueUpgrade)
             } else if (cmJson.reason === 'already_completed') {
-              toastText = `Nota ${rawScore}/10 · Misión ya completada`
+              setMissionXpStatus('already_completed')
+              toastText = `Ya completaste esta misión hoy. La corrección se guarda igual.`
+            } else if (cmJson.reason === 'no_pending_mission') {
+              setMissionXpStatus('free_practice')
+              toastText = `Práctica libre guardada. El XP se gana con las misiones de tu Camino.`
             }
           } catch { /* silent */ }
+        } else {
+          setMissionXpStatus('free_practice')
+          toastText = `Práctica libre guardada. El XP se gana con las misiones de tu Camino.`
         }
         setToast(toastText)
       }
@@ -951,7 +998,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
                 <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>El XP se asigna sólo después de corregir con Kairo y depende de la nota obtenida.</p>
               </div>
-              {missionId && <span style={{ borderRadius: 999, background: '#eff6ff', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: '#2563eb', border: '1px solid #bfdbfe' }}>Misión conectada</span>}
+              <span style={{ borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
+                {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}
+              </span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
               <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'texto' ? '#0f172a' : '#f1f5f9', color: answerMode === 'texto' ? 'white' : '#64748b' }}>

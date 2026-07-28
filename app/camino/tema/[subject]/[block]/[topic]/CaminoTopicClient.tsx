@@ -1317,62 +1317,85 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
   onDoBonus: () => void
   onClose: () => void
 }) {
+  const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(5,10,20,0.78)', backdropFilter: 'blur(10px)', padding: 16 }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="relative w-full max-w-sm rounded-[28px] bg-white p-7 shadow-[0_32px_80px_rgba(0,0,0,0.18)]">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100"
-          aria-label="Cerrar"
-        >
-          <X size={18} />
-        </button>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');`}</style>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 380, borderRadius: 20, overflow: 'hidden', background: '#060e1e', boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)' }}>
 
-        <div className="text-center text-5xl leading-none">🎉</div>
-        <h2 className="mt-3 text-center text-2xl font-black text-slate-950">¡Misión completada!</h2>
-
-        <div className="mt-5 flex divide-x divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
-          <div className="flex-1 py-3 text-center">
-            <p className="text-base font-black text-blue-600">+{xp} XP</p>
-            <p className="mt-0.5 text-[10px] font-semibold text-slate-400">ganados</p>
+        {/* Image header with XP hero */}
+        <div style={{ position: 'relative', height: 180, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HF_FLATLAY})`, backgroundSize: 'cover', backgroundPosition: 'center 40%' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(6,14,30,0.35) 0%, rgba(6,14,30,0.92) 100%)' }} />
+          <button
+            onClick={onClose}
+            style={{ position: 'absolute', top: 12, right: 12, zIndex: 2, padding: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            aria-label="Cerrar"
+          >
+            <X size={14} />
+          </button>
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 20 }}>
+            <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.28em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>
+              Misión completada
+            </div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 72, lineHeight: 1, color: '#fff', letterSpacing: '0.03em', textShadow: '0 0 50px rgba(37,99,235,0.6)' }}>
+              +{xp} XP
+            </div>
           </div>
-          <div className="flex-1 py-3 text-center">
-            <p className="text-base font-black text-orange-500">{streak > 0 ? `🔥 ${streak}` : streak} días</p>
-            <p className="mt-0.5 text-[10px] font-semibold text-slate-400">de racha</p>
+        </div>
+
+        {/* Stats strip */}
+        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ flex: 1, padding: '14px 0', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: streak > 0 ? '#f97316' : 'rgba(255,255,255,0.3)', lineHeight: 1 }}>
+              {streak > 0 ? `🔥 ${streak}` : '—'}
+            </div>
+            <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>días racha</div>
           </div>
           {blockProgress.total > 0 && (
-            <div className="flex-1 py-3 text-center">
-              <p className="text-base font-black text-slate-700">{blockProgress.completed}/{blockProgress.total}</p>
-              <p className="mt-0.5 text-[10px] font-semibold text-slate-400">del bloque</p>
+            <div style={{ flex: 1, padding: '14px 0', textAlign: 'center' }}>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: '#2563eb', lineHeight: 1 }}>
+                {blockProgress.completed}/{blockProgress.total}
+              </div>
+              <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>del bloque</div>
             </div>
           )}
         </div>
 
-        <p className="mt-4 text-center text-sm font-semibold text-slate-600">{motivationalPhrase(score)}</p>
+        {/* Body */}
+        <div style={{ padding: '18px 24px 24px' }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.45)', textAlign: 'center', marginBottom: nextMissionTitle ? 16 : 0 }}>
+            {motivationalPhrase(score)}
+          </p>
 
-        {nextMissionTitle && (
-          <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-400">Mañana toca</p>
-            <p className="mt-1 text-sm font-black text-blue-900 leading-snug">{nextMissionTitle}</p>
+          {nextMissionTitle && (
+            <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)', marginBottom: 16 }}>
+              <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase' as const, color: '#3b82f6', marginBottom: 4 }}>Mañana toca</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.4 }}>{nextMissionTitle}</div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button
+              onClick={onViewWeek}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px 0', borderRadius: 10, background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(37,99,235,0.35)', transition: 'transform 160ms ease-out' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'none' }}
+            >
+              Ver mi semana <ArrowRight size={14} />
+            </button>
+            <button
+              onClick={onDoBonus}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0', borderRadius: 10, background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 800, border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', transition: 'color 160ms ease, border-color 160ms ease' }}
+              onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = 'rgba(255,255,255,0.7)'; b.style.borderColor = 'rgba(255,255,255,0.18)' }}
+              onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = 'rgba(255,255,255,0.4)'; b.style.borderColor = 'rgba(255,255,255,0.08)' }}
+            >
+              Hacer bonus
+            </button>
           </div>
-        )}
-
-        <div className="mt-5 grid gap-2">
-          <button
-            onClick={onViewWeek}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
-          >
-            Ver mi semana <ArrowRight size={15} />
-          </button>
-          <button
-            onClick={onDoBonus}
-            className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-600 transition hover:bg-slate-50"
-          >
-            Hacer bonus
-          </button>
         </div>
       </div>
     </div>

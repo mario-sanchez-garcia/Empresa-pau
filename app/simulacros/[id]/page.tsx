@@ -267,109 +267,87 @@ export default function SimulacroActivoPage() {
     const community = record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'
     const totalPoints = record.bloques.reduce((sum, block) => sum + Number(block.puntuacion || 0), 0)
     const BLOCK_COLORS = ['#2563eb', '#7c3aed', '#0369a1', '#15803d', '#c2410c', '#b45309', '#831843']
+    const HF_CLOCK = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260728_113008_a83f03ca-efc2-415e-99b4-d2af7f3807a2.png'
+    const tags = [
+      `${record.bloques.length} ejercicios`,
+      `${totalPoints || 10} puntos`,
+      record.dificultad_real ?? record.dificultad,
+      record.asignatura !== 'lengua' ? optionSummaryForRecord(record) : null,
+    ].filter((t): t is string => Boolean(t))
 
     return (
-      <SimulacroShell title="Simulacro PAU" subtitle="Antes de empezar">
-        <div className="mx-auto max-w-5xl">
-          <div
-            className="pau-reveal overflow-hidden rounded-[20px]"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '240px 1fr',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 24px 64px rgba(15,23,42,0.16), 0 4px 20px rgba(15,23,42,0.08)',
-            }}
-          >
-            {/* ── LEFT SIDEBAR ── */}
-            <div style={{ background: '#060e1e', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 520, borderRight: '1px solid rgba(255,255,255,0.04)' }}>
-              <div>
-                <p style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.3em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 32 }}>Camino PAU</p>
-                <div style={{ fontSize: 80, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', lineHeight: 0.88, marginBottom: 6 }}>
-                  {record.bloques.length}
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 36 }}>
-                  ejercicios
-                </div>
+      <SimulacroShell>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');`}</style>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {([
-                    { label: 'Asignatura', value: cfg.label, blue: true },
-                    { label: 'Comunidad', value: community, blue: false },
-                    { label: 'Duración', value: `${durationMinutes} min`, blue: false },
-                    { label: 'Puntuación', value: totalPoints ? `${formatCompact(totalPoints)} pts` : '10 pts', blue: false },
-                    { label: 'Dificultad', value: record.dificultad_real ?? record.dificultad, blue: false },
-                  ] as { label: string; value: string; blue: boolean }[]).map(({ label, value, blue }) => (
-                    <div key={label}>
-                      <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#1e3a5f', marginBottom: 3 }}>{label}</div>
-                      <div style={{ fontSize: 13, fontWeight: 900, color: blue ? '#3b82f6' : '#64748b', letterSpacing: '-0.01em' }}>{value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* Full-bleed scene */}
+        <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#000' }}>
 
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 8, background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.18)', fontSize: 9, fontWeight: 900, color: '#3b82f6', letterSpacing: '.06em' }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', display: 'inline-block' }} />
-                Kairo IA
-              </div>
+          {/* Background photo */}
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HF_CLOCK})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+          {/* Radial dark overlay */}
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 40%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 55%, rgba(0,0,0,0.97) 100%)' }} />
+
+          {/* Top nav */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px 44px', zIndex: 10 }}>
+            <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.3em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.25)' }}>
+              Simulacro PAU · Antes de empezar
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20, background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.3)', fontSize: 9, fontWeight: 900, color: '#60a5fa', letterSpacing: '.06em' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', display: 'inline-block', flexShrink: 0 }} />
+              Kairo IA
+            </span>
+          </div>
+
+          {/* Center: giant countdown + subject */}
+          <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 40px 40px' }}>
+            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.3em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>
+              Tu tiempo disponible
+            </div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(96px, 14vw, 192px)', lineHeight: 1, color: '#fff', letterSpacing: '0.04em', textShadow: '0 0 80px rgba(37,99,235,0.45)' }}>
+              {`${String(durationMinutes).padStart(2, '0')}:00`}
+            </div>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginTop: 6, display: 'block' }}>
+              minutos · simulacro real
+            </span>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 4vw, 50px)', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em', marginTop: 20 }}>
+              {cfg.label} · {community}
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center', marginTop: 20 }}>
+              {tags.map(tag => (
+                <span key={tag} style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.55)' }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom panel */}
+          <div style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            {/* Block strip */}
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${record.bloques.length}, 1fr)`, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              {record.bloques.map((block, i) => (
+                <div key={block.id} style={{ padding: '16px 20px', borderRight: i < record.bloques.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.2)' }}>
+                    Bloque {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.75)' }}>{block.tema}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: BLOCK_COLORS[i % BLOCK_COLORS.length] }}>{block.puntuacion} pts</div>
+                </div>
+              ))}
             </div>
 
-            {/* ── RIGHT MAIN ── */}
-            <div style={{ background: '#fff', display: 'flex', flexDirection: 'column' }}>
-              {/* Header */}
-              <div style={{ padding: '36px 36px 24px', borderBottom: '1px solid #f1f5f9' }}>
-                <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 8 }}>
-                  Simulacro PAU · Antes de empezar
-                </p>
-                <h2 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', lineHeight: 0.95, marginBottom: 12 }}>
-                  Simulacro<br />real
-                </h2>
-                <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.75, maxWidth: 400 }}>
-                  Trabaja en condiciones de examen. Verás el tiempo, podrás navegar entre bloques y marcar dudas para revisarlas antes de entregar.
-                </p>
-              </div>
-
-              {/* Body: exercise list */}
-              <div style={{ padding: '22px 36px', flex: 1 }}>
-                <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#cbd5e1', marginBottom: 10 }}>
-                  Estructura del examen
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  {record.bloques.map((block, index) => (
-                    <div
-                      key={block.id}
-                      style={{ display: 'grid', gridTemplateColumns: '4px 1fr auto', borderRadius: 10, border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fafbfc' }}
-                    >
-                      <div style={{ background: BLOCK_COLORS[index % BLOCK_COLORS.length] }} />
-                      <div style={{ padding: '12px 14px' }}>
-                        <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 2 }}>
-                          Bloque {String(index + 1).padStart(2, '0')}
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>{block.tema}</div>
-                      </div>
-                      <div style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: '#94a3b8', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                        {block.puntuacion} pts
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#cbd5e1', display: 'inline-block', flexShrink: 0 }} />
-                  La corrección se mostrará al entregar el examen.
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div style={{ borderTop: '2px solid #0f172a', padding: '18px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>
-                  {record.asignatura !== 'lengua' ? `${optionSummaryForRecord(record)} · ` : ''}{record.dificultad_real ?? record.dificultad}
-                </p>
-                <button
-                  onClick={startExam}
-                  className="campus-primary"
-                  style={{ padding: '12px 26px', borderRadius: 10, fontSize: 13, gap: 8, background: '#0f172a', boxShadow: '0 6px 18px rgba(15,23,42,0.18)' }}
-                >
-                  Empezar simulacro →
-                </button>
-              </div>
+            {/* CTA bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 44px' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>
+                La corrección aparece al entregar · Kairo IA
+              </span>
+              <button
+                onClick={startExam}
+                className="campus-primary"
+                style={{ padding: '15px 30px', borderRadius: 10, fontSize: 14, gap: 10, background: '#2563eb', boxShadow: '0 8px 24px rgba(37,99,235,0.4)' }}
+              >
+                Empezar simulacro →
+              </button>
             </div>
           </div>
         </div>

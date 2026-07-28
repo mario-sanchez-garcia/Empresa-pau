@@ -88,7 +88,7 @@ export default function KairoBrand({
         }}
       >
         <img
-          src={stacked ? '/brand/kairo-lockup.png' : '/brand/kairo-logo.png'}
+          src={stacked ? '/brand/kairo-lockup.png' : '/brand/kairo-logo-new.png'}
           alt="Kairo"
           width={stacked ? s.stackW : s.logoW}
           height={stacked ? s.stackH : s.logoH}

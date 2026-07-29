@@ -1,9 +1,6 @@
 'use client'
 
-import { Playfair_Display } from 'next/font/google'
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-
-const playfair = Playfair_Display({ weight: '700', subsets: ['latin'] })
 import { Camera, Check, ChevronDown, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
@@ -16,7 +13,7 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import RichTextArea from '@/components/shared/RichTextArea'
-import { ExamContentCard, ExamMetaChips } from '@/components/shared/ExamPracticeUI'
+import { ExamContentCard } from '@/components/shared/ExamPracticeUI'
 
 type Comunidad = 'Madrid' | 'Cataluña'
 type Convocatoria = 'ordinaria' | 'extraordinaria'
@@ -348,28 +345,22 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
       </div>
 
       <div className="mb-8 grid gap-5">
-        <article className="overflow-hidden rounded-[24px] border bg-white shadow-[0_18px_45px_rgba(100,116,139,0.10)]" style={{ borderColor: UI.border }}>
-          <header className="flex flex-wrap items-start justify-between gap-4 border-b px-6 py-5" style={{ background: UI.light, borderColor: UI.border }}>
-            <div className="min-w-0">
-              <ExamMetaChips
-                color={UI.color}
-                accent={UI.accent}
-                items={[
-                  ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid',
-                  String(selectedExam.anio),
-                  titleCase(convocatoria),
-                  variantLabel,
-                  ccaa === 'Cataluña' ? `Exercici ${selectedExercise?.numero ?? ''}` : `Texto ${textOption}`,
-                  ccaa === 'Cataluña' && selectedExercise?.opciones ? `Opció ${exerciseOption}` : null,
-                  selectedQuestion?.id ? `Pregunta ${selectedQuestion.id}` : null,
-                ]}
-              />
-              {selectedQuestion?.titulo && (
-                <h2 className="mt-2" style={{ fontFamily: playfair.style.fontFamily, fontSize: 22, lineHeight: 1.2, color: '#0f172a' }}>{selectedQuestion.titulo}</h2>
-              )}
+        <article className="overflow-hidden bg-white" style={{ borderRadius: 14, border: '1px solid #e2e8f0', marginBottom: 22 }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', whiteSpace: 'nowrap' }}>
+                {ccaa === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'} {selectedExam.anio} · {titleCase(convocatoria)}
+              </span>
+              {variantLabel && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', whiteSpace: 'nowrap' }}>{variantLabel}</span>}
+              <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', whiteSpace: 'nowrap' }}>
+                {ccaa === 'Cataluña' ? `Exercici ${selectedExercise?.numero ?? ''}` : `Texto ${textOption}`}
+                {ccaa === 'Cataluña' && selectedExercise?.opciones ? ` · Opció ${exerciseOption}` : ''}
+              </span>
+              {selectedQuestion?.id && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', whiteSpace: 'nowrap' }}>Pregunta {selectedQuestion.id}</span>}
+              <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{maxScore} pts</span>
             </div>
-            <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0 }}>{maxScore} pts</span>
-          </header>
+            {selectedQuestion?.titulo && <p style={{ marginTop: 8, fontSize: 18, fontWeight: 900, color: '#0f172a', lineHeight: 1.2 }}>{selectedQuestion.titulo}</p>}
+          </div>
           <div className="grid gap-5 p-6">
             {sourceText && (
               <ExamContentCard title={ccaa === 'Cataluña' ? 'Texto filosófico / fuente oficial' : 'Texto filosófico'} color={UI.color} borderColor={UI.border} soft>

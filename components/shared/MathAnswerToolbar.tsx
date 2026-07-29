@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState, type RefObject } from "react"
+import MathFillTemplateForm, { MATH_TEMPLATES, type MathTemplateId } from "./MathFillTemplates"
 
 type MathGroupId = "basico" | "calculo" | "algebra" | "vectores" | "probabilidad" | "fisica" | "quimica" | "plantillas"
 
@@ -183,6 +184,8 @@ export default function MathAnswerToolbar({
 }: MathAnswerToolbarProps) {
   const [open, setOpen] = useState(false)
   const [group, setGroup] = useState<MathGroupId>("basico")
+  const [templatesOpen, setTemplatesOpen] = useState(false)
+  const [activeTemplate, setActiveTemplate] = useState<MathTemplateId | null>(null)
   const visible = shouldShowMathToolbar(subject)
   const activeGroup = useMemo(() => GROUPS.find(item => item.id === group) ?? GROUPS[0], [group])
 
@@ -256,6 +259,18 @@ export default function MathAnswerToolbar({
         >
           ƒx Símbolos
         </button>
+        <button
+          type="button"
+          aria-expanded={templatesOpen}
+          aria-label={templatesOpen ? "Ocultar plantillas rellenables" : "Rellenar una plantilla matemática"}
+          title="Límite, fracción, potencia, raíz, integral o sistema — solo rellenas los valores"
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => { setTemplatesOpen(current => !current); setActiveTemplate(null) }}
+          className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-black transition"
+          style={{ background: templatesOpen ? accentColor : softColor, color: templatesOpen ? "#fff" : accentColor }}
+        >
+          🧩 Plantillas
+        </button>
         {open && activeGroup.snippets.slice(0, 8).map(snippet => (
           <button
             key={`${activeGroup.id}-${snippet.title}-${snippet.latex}`}
@@ -305,6 +320,40 @@ export default function MathAnswerToolbar({
               </button>
             ))}
           </div>
+        </div>
+      )}
+      {templatesOpen && (
+        <div className="border-t px-2 pb-2 pt-2" style={{ borderColor }}>
+          {!activeTemplate ? (
+            <div className="flex flex-wrap gap-1.5">
+              {MATH_TEMPLATES.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  aria-label={`Rellenar plantilla de ${t.label}`}
+                  title={t.label}
+                  onMouseDown={event => event.preventDefault()}
+                  onClick={() => setActiveTemplate(t.id)}
+                  className="shrink-0 rounded-xl border bg-white px-3 py-1.5 text-xs font-black text-slate-700 transition hover:-translate-y-0.5"
+                  style={{ borderColor }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <MathFillTemplateForm
+              templateId={activeTemplate}
+              accentColor={accentColor}
+              borderColor={borderColor}
+              onCancel={() => setActiveTemplate(null)}
+              onInsert={latex => {
+                insertSnippet({ label: "", title: "plantilla", latex })
+                setActiveTemplate(null)
+                setTemplatesOpen(false)
+              }}
+            />
+          )}
         </div>
       )}
       <p className="px-3 pb-2 text-[11px] font-semibold leading-5 text-slate-500">

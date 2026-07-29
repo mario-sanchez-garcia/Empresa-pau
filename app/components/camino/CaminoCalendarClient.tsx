@@ -1705,7 +1705,7 @@ export default function CaminoCalendarClient() {
                   <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Reto exprés</span>
                 </div>
                 <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>Reto exprés de hoy</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>5 tarjetas · 3 min</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>{microMission.topic} · repaso rápido</div>
               </div>
               <div style={{ flexShrink: 0 }}>
                 <a href={microMission.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none' }}>Empezar →</a>
@@ -2710,7 +2710,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
             ) : (
               <>
                 <h2 className="text-xl font-black text-slate-950">Reto exprés de hoy</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-400">5 tarjetas · 3 min</p>
+                <p className="mt-1 text-sm font-semibold text-slate-400">{microMission.topic} · repaso rápido</p>
                 {microMission.hasCompletedItems && (
                   <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
                     <p className="text-sm font-semibold text-slate-600">Repaso de contenido que ya has visto. Sin afectar tu plan de mañana.</p>

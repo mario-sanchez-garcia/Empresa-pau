@@ -363,7 +363,13 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
     .eq('user_id', userId)
     .gte('scheduled_date', todayStr)
     .order('scheduled_date', { ascending: true })
-    .limit(14)
+    // Filas, no días — un día puede tener más de una misión (bonus,
+    // comment_text, prácticas de parcial). ensureCaminoCalendar mantiene
+    // sembrados CALENDAR_HORIZON=30 días futuros; este límite tiene que
+    // ser generoso para no cortar antes de cubrirlos todos, o el cliente
+    // caería al generador local (ver generateCalendar) para días que en
+    // realidad ya están en Supabase.
+    .limit(90)
   if (error || !data || data.length === 0) return null
   const byDate = new Map<string, CaminoCalRow[]>()
   for (const row of data as CaminoCalRow[]) {

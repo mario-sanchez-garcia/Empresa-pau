@@ -6,7 +6,17 @@ import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, countWorkingDays, getMadridToday, getStudyDays } from './camino/studyDays'
 
 const EXAM_DATE = '2027-06-07'
-const CALENDAR_HORIZON = 14
+// Cuántos días futuros (con misión pendiente/postpuesta) mantiene
+// sembrados ensureCaminoCalendar en camino_calendar — todo lo que cae
+// dentro de este horizonte es 100% servidor, idéntico en cualquier
+// dispositivo. Más allá de esto, el cliente rellena una vista previa
+// generada localmente (ver generateCalendar en CaminoCalendarClient.tsx)
+// que SÍ puede divergir entre navegadores — subir este número reduce
+// directamente cuánto del calendario que un alumno ve en sus primeras
+// semanas depende de esa vista previa en vez del servidor. 30 días
+// (~1 mes) cubre con margen la ventana de lanzamiento sin cambiar el
+// resto de la lógica de programación (que ya escala con esta constante).
+const CALENDAR_HORIZON = 30
 
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 0) return null

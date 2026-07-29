@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState, type RefObject } from "react"
-import MathFillTemplateForm, { MATH_TEMPLATES, type MathTemplateId } from "./MathFillTemplates"
+import { useMemo, useRef, useState, type RefObject } from "react"
+import MathFillTemplateForm, { MATH_TEMPLATES, type MathTemplateHole, type MathTemplateId } from "./MathFillTemplates"
 
 type MathGroupId = "basico" | "calculo" | "algebra" | "vectores" | "probabilidad" | "fisica" | "quimica" | "plantillas"
 
@@ -10,6 +10,47 @@ type MathSnippet = {
   title: string
   latex: string
   cursorOffset?: number
+  holes?: MathTemplateHole[]
+}
+
+// Selects the hole at `index` in a live textarea and lets Tab/Shift+Tab step
+// through the rest, adjusting later offsets by whatever the student typed into
+// earlier holes. Returns a cleanup that detaches the listeners.
+function attachHoleNavigation(textarea: HTMLTextAreaElement, initialHoles: MathTemplateHole[], initialLength: number): () => void {
+  let holes = initialHoles
+  let index = 0
+  let baseline = initialLength
+
+  function selectHole(i: number) {
+    const hole = holes[i]
+    textarea.focus()
+    textarea.setSelectionRange(hole.start, hole.end)
+  }
+
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key !== "Tab") return
+    const delta = textarea.value.length - baseline
+    const nextIndex = index + (event.shiftKey ? -1 : 1)
+    if (nextIndex < 0 || nextIndex >= holes.length) {
+      cleanup()
+      return
+    }
+    event.preventDefault()
+    holes = holes.map((h, i) => (i > index ? { start: h.start + delta, end: h.end + delta } : h))
+    baseline = textarea.value.length
+    index = nextIndex
+    selectHole(index)
+  }
+
+  function cleanup() {
+    textarea.removeEventListener("keydown", handleKeyDown)
+    textarea.removeEventListener("blur", cleanup)
+  }
+
+  textarea.addEventListener("keydown", handleKeyDown)
+  textarea.addEventListener("blur", cleanup)
+  selectHole(0)
+  return cleanup
 }
 
 interface MathAnswerToolbarProps {
@@ -179,6 +220,7 @@ export default function MathAnswerToolbar({
   const [activeTemplate, setActiveTemplate] = useState<MathTemplateId | null>(null)
   const visible = shouldShowMathToolbar(subject)
   const activeGroup = useMemo(() => GROUPS.find(item => item.id === group) ?? GROUPS[0], [group])
+  const holeNavCleanupRef = useRef<(() => void) | null>(null)
 
   if (!visible) return null
 
@@ -189,9 +231,22 @@ export default function MathAnswerToolbar({
     const end = textarea.selectionEnd ?? value.length
     const nextValue = value.slice(0, start) + snippet.latex + value.slice(end)
     onChange(nextValue)
-    requestAnimationFrame(() => {
-      textarea.blur()
-    })
+
+    holeNavCleanupRef.current?.()
+    holeNavCleanupRef.current = null
+
+    if (snippet.holes && snippet.holes.length > 0) {
+      const absoluteHoles = snippet.holes.map(h => ({ start: start + h.start, end: start + h.end }))
+      requestAnimationFrame(() => {
+        holeNavCleanupRef.current = attachHoleNavigation(textarea, absoluteHoles, nextValue.length)
+      })
+    } else {
+      const caret = start + (snippet.cursorOffset ?? snippet.latex.length)
+      requestAnimationFrame(() => {
+        textarea.focus()
+        textarea.setSelectionRange(caret, caret)
+      })
+    }
     return true
   }
 
@@ -211,10 +266,16 @@ export default function MathAnswerToolbar({
     range.deleteContents()
     const node = document.createTextNode(snippet.latex)
     range.insertNode(node)
-    const cursor = snippet.cursorOffset ?? snippet.latex.length
+    const firstHole = snippet.holes?.[0]
     const nextRange = document.createRange()
-    nextRange.setStart(node, Math.min(cursor, snippet.latex.length))
-    nextRange.collapse(true)
+    if (firstHole) {
+      nextRange.setStart(node, Math.min(firstHole.start, snippet.latex.length))
+      nextRange.setEnd(node, Math.min(firstHole.end, snippet.latex.length))
+    } else {
+      const cursor = snippet.cursorOffset ?? snippet.latex.length
+      nextRange.setStart(node, Math.min(cursor, snippet.latex.length))
+      nextRange.collapse(true)
+    }
     selection?.removeAllRanges()
     selection?.addRange(nextRange)
     onChange(editor.innerText)
@@ -338,8 +399,8 @@ export default function MathAnswerToolbar({
               accentColor={accentColor}
               borderColor={borderColor}
               onCancel={() => setActiveTemplate(null)}
-              onInsert={latex => {
-                insertSnippet({ label: "", title: "plantilla", latex })
+              onInsert={(latex, holes) => {
+                insertSnippet({ label: "", title: "plantilla", latex, holes })
                 setActiveTemplate(null)
                 setTemplatesOpen(false)
               }}

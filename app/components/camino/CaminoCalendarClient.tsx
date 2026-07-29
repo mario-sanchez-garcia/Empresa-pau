@@ -827,25 +827,11 @@ export default function CaminoCalendarClient() {
   useEffect(() => {
     let cancelled = false
     async function loadInitialState() {
-      let loadedOnboarding = loadOnboarding()
-      if (!loadedOnboarding.completedAt) {
-        try {
-          const { data } = await supabase.auth.getSession()
-          const token = data.session?.access_token
-          if (token) {
-            const restored = await restoreOnboardingFromServer(token)
-            if (restored) loadedOnboarding = restored
-          }
-        } catch { /* keep local fallback */ }
-      } else {
-        supabase.auth.getSession()
-          .then(({ data }) => {
-            const token = data.session?.access_token
-            if (token) syncLocalOnboardingToServerIfMissing(token, loadedOnboarding)
-          })
-          .catch(() => undefined)
-      }
+      const loadedOnboarding = loadOnboarding()
       if (cancelled) return
+
+      // Pintado inmediato con la copia local (evita parpadeo) — se
+      // reconcilia con el servidor justo debajo, sea cual sea su estado.
       const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
       const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
       setOnboarding(loadedOnboarding)
@@ -857,6 +843,32 @@ export default function CaminoCalendarClient() {
       fetchCurriculumItems(loadedOnboarding.subjects)
         .then(items => { if (!cancelled) setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM) })
         .catch(() => { if (!cancelled) setCurriculumItems(FALLBACK_CURRICULUM) })
+
+      // El servidor es la fuente de verdad de qué asignaturas tiene el
+      // alumno — antes solo se reconciliaba la primera vez que ESTE
+      // navegador completaba onboarding; a partir de ahí se quedaba para
+      // siempre con la copia local, así que un cambio hecho desde otro
+      // dispositivo (u otra pestaña añadiendo una asignatura desde Camino)
+      // nunca llegaba aquí. Ahora se reconcilia en cada carga.
+      try {
+        const { data } = await supabase.auth.getSession()
+        const token = data.session?.access_token
+        if (!token || cancelled) return
+        const restored = await restoreOnboardingFromServer(token)
+        if (restored) {
+          if (cancelled) return
+          setOnboarding(restored)
+          setExamDraft(current => ({ ...current, subject: restored.subjects[0] ?? current.subject }))
+          fetchCurriculumItems(restored.subjects)
+            .then(items => { if (!cancelled) setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM) })
+            .catch(() => undefined)
+        } else if (loadedOnboarding.completedAt) {
+          // El servidor no tiene nada pero este navegador sí completó
+          // onboarding — cuenta antigua o fallo de red puntual; sube la
+          // copia local para que quede fijada como fuente de verdad.
+          syncLocalOnboardingToServerIfMissing(token, loadedOnboarding)
+        }
+      } catch { /* si falla, se queda con la copia local ya pintada arriba */ }
     }
     loadInitialState()
     return () => { cancelled = true }

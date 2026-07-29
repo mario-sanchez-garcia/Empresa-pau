@@ -3603,19 +3603,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
             {!isCatalunaExam && preguntaActiva && (
              <div className="exams-question-card" key={preguntaActivaKey} style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, background: '#fafbfc' }}>
-                  <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', whiteSpace: 'nowrap' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
-                  {bloqueActivoLabel && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, whiteSpace: 'nowrap' }}>{bloqueActivoLabel}</span>}
-                  {asignatura === 'historia' && diaHistoriaSeleccionado && (
-                    <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{diaHistoriaSeleccionado}</span>
-                  )}
-                  {(asignatura === 'lengua' || asignatura === 'ingles' || asignatura === 'biologia') && versionExamenSeleccionada && (
-                    <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{versionExamenSeleccionada}</span>
-                  )}
-                  <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>
-                    {asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Opción'} {opcionMostrada}
-                  </span>
-                  <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{formatPts(puntuacionPreguntaActiva)} pts</span>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', whiteSpace: 'nowrap' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
+                    {bloqueActivoLabel && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, whiteSpace: 'nowrap' }}>{bloqueActivoLabel}</span>}
+                    {asignatura === 'historia' && diaHistoriaSeleccionado && (
+                      <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{diaHistoriaSeleccionado}</span>
+                    )}
+                    {(asignatura === 'lengua' || asignatura === 'ingles' || asignatura === 'biologia') && versionExamenSeleccionada && (
+                      <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{versionExamenSeleccionada}</span>
+                    )}
+                    <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>
+                      {asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Opción'} {opcionMostrada}
+                    </span>
+                    <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{formatPts(puntuacionPreguntaActiva)} pts</span>
+                  </div>
+                  {bloqueActivoLabel && <p style={{ marginTop: 8, fontSize: 18, fontWeight: 900, color: '#0f172a', lineHeight: 1.2 }}>{bloqueActivoLabel}</p>}
                 </div>
                 <div style={{ padding: 18, overflowY: 'auto' }}>
                   {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión

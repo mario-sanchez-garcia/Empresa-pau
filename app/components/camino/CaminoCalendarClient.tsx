@@ -1950,7 +1950,15 @@ export default function CaminoCalendarClient() {
               <button
                 onClick={async () => {
                   const { data } = await supabase.auth.getSession()
-                  setFullRankingToken(data.session?.access_token ?? null)
+                  const token = data.session?.access_token ?? null
+                  // Sin token no hay forma de abrir el modal (necesita
+                  // Authorization para /api/ligas/rankings) — antes esto
+                  // fallaba en silencio y parecía que el botón no hacía
+                  // nada. Si esto pasa de forma repetida en un navegador
+                  // concreto, la sesión de Supabase no se está pudiendo
+                  // leer ahí (revisar bloqueo de localStorage/cookies).
+                  if (!token) { setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.'); return }
+                  setFullRankingToken(token)
                   setShowFullRanking(true)
                 }}
                 style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
@@ -1996,6 +2004,37 @@ export default function CaminoCalendarClient() {
           <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
             <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Mi liga</div>
             <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+          </div>
+
+          {/* Top Global — mismos datos ya cargados para la sección
+              "Ranking" de arriba (leaderboard.global), sin fetch nuevo */}
+          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>Top Global</div>
+              <button
+                onClick={async () => {
+                  const { data } = await supabase.auth.getSession()
+                  const token = data.session?.access_token ?? null
+                  if (!token) { setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.'); return }
+                  setFullRankingToken(token)
+                  setShowFullRanking(true)
+                }}
+                style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                Ver clasificación completa →
+              </button>
+            </div>
+            {(leaderboard?.global?.top ?? []).length ? (
+              (leaderboard?.global?.top ?? []).slice(0, 5).map(row => (
+                <div key={row.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8, background: row.isCurrentUser ? '#eff6ff' : 'transparent', border: row.isCurrentUser ? '1px solid #dbeafe' : '1px solid transparent' }}>
+                  <span style={{ width: 20, fontWeight: 800, color: '#94a3b8', fontSize: 10, textAlign: 'center' }}>#{row.rank}</span>
+                  <span style={{ flex: 1, fontSize: 11, fontWeight: row.isCurrentUser ? 800 : 600, color: row.isCurrentUser ? '#1d40af' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
+                  <span style={{ fontWeight: 800, color: '#2563eb', fontSize: 10 }}>{row.xp.toLocaleString('es-ES')}</span>
+                </div>
+              ))
+            ) : (
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', margin: 0 }}>Sin datos por ahora.</p>
+            )}
           </div>
 
           {/* Avance por asignatura */}

@@ -47,7 +47,7 @@ function MedalTallyBadge({ medals }: { medals: MedalTally }) {
   )
 }
 
-export default function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean }) {
+export default function RankingRow({ row, fixed = false, showDivision = true }: { row: RankingEntry; fixed?: boolean; showDivision?: boolean }) {
   const div = divisionFor(row.xp)
   const darkDiv = DARK_DIVISIONS[div.name] ?? DARK_DIVISIONS['Bronce']
   const podium = row.rank <= 3
@@ -92,14 +92,20 @@ export default function RankingRow({ row, fixed = false }: { row: RankingEntry; 
         <MedalTallyBadge medals={row.medals as MedalTally} />
       ) : (
         <>
-          {/* Division badge */}
-          <span style={{
-            flexShrink: 0, padding: '3px 8px', borderRadius: 6,
-            fontSize: 10, fontWeight: 600, letterSpacing: '.06em',
-            background: darkDiv.bg, color: darkDiv.text, border: `1px solid ${darkDiv.border}`,
-          }}>
-            {div.name}
-          </span>
+          {/* Division badge — basada en umbrales de XP histórico total
+              (leagues.ts), no tiene sentido sobre un XP acotado a un
+              periodo (ronda/top): con un mes normal casi nadie supera los
+              500 XP de "Bronce", así que todo el mundo saldría con la
+              misma división aunque no tenga nada que ver con su nivel. */}
+          {showDivision && (
+            <span style={{
+              flexShrink: 0, padding: '3px 8px', borderRadius: 6,
+              fontSize: 10, fontWeight: 600, letterSpacing: '.06em',
+              background: darkDiv.bg, color: darkDiv.text, border: `1px solid ${darkDiv.border}`,
+            }}>
+              {div.name}
+            </span>
+          )}
 
           {/* XP */}
           <span style={{

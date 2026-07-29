@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
+import { getCurrentRoundXpByUser } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,17 +13,20 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', ligaRow.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  // Use cumulative xp_total (same source as global leaderboard) so ranking is
-  // consistent regardless of when XP was earned or which path recorded it.
-  const { data: progressRows } = await db
-    .from('camino_user_progress')
-    .select('user_id, xp_total')
-    .in('user_id', memberIds)
-
-  const xpByUser = new Map<string, number>()
-  for (const row of progressRows ?? []) {
-    xpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
-  }
+  // Misma fuente que /api/ligas/rankings (getCurrentRoundXpByUser, filtra
+  // por camino_xp_events.mission_date) — antes esta ruta recalculaba el XP
+  // de la ronda a mano filtrando por created_at + un fallback sobre
+  // camino_calendar, lo que podía divergir del cálculo canónico y dejar
+  // el contador desactualizado el resto del mes. La rama main llegó a
+  // cambiar esto a xp_total acumulado (camino_user_progress) como parche
+  // temporal mientras la ronda parecía "atascada en 0" — la causa real
+  // era que a camino_xp_events le faltaba la columna `subject` en la BD
+  // (ver migración 20260729130000), no un problema del cálculo por ronda
+  // en sí. Con esa migración aplicada, el cálculo por ronda (coherente con
+  // "Ronda actual" en todo el resto de Ligas/Rankings) vuelve a ser la
+  // fuente correcta aquí — un widget de "liga" que mostrara XP de toda la
+  // vida no encajaría con el sistema de rondas mensuales/medallas.
+  const xpByUser = await getCurrentRoundXpByUser(db, memberIds)
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
   const nameById = new Map<string, string>()

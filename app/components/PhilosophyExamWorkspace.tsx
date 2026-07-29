@@ -1,6 +1,9 @@
 'use client'
 
+import { Bebas_Neue } from 'next/font/google'
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+
+const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 import { Camera, Check, ChevronDown, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
@@ -361,9 +364,11 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
                   selectedQuestion?.id ? `Pregunta ${selectedQuestion.id}` : null,
                 ]}
               />
-              <h2 className="mt-2 text-xl font-black text-slate-900">{selectedQuestion?.titulo}</h2>
+              {selectedQuestion?.titulo && (
+                <h2 className="mt-2" style={{ fontFamily: bebas.style.fontFamily, fontSize: 32, letterSpacing: '0.02em', lineHeight: 1, color: '#0f172a' }}>{selectedQuestion.titulo}</h2>
+              )}
             </div>
-            <div className="text-2xl font-black" style={{ color: UI.color }}>{maxScore} <span className="text-sm">pts</span></div>
+            <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0 }}>{maxScore} pts</span>
           </header>
           <div className="grid gap-5 p-6">
             {sourceText && (

@@ -775,6 +775,7 @@ export default function CaminoCalendarClient() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
+  const [showCalendarEditor, setShowCalendarEditor] = useState(false)
   const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
   const [addSubjectLoading, setAddSubjectLoading] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
@@ -1562,6 +1563,9 @@ export default function CaminoCalendarClient() {
             <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
+              <CalendarDays size={13} /> Editar semana
+            </button>
             <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
               <Plus size={13} /> Examen
             </button>
@@ -2030,7 +2034,7 @@ export default function CaminoCalendarClient() {
         )}
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
-      {/* CalendarEditorOverlay disabled: edits were only persisted to localStorage and wiped on next page load by saveCalendarWeeksToCache. Re-enable when calendar edits can be written to camino_calendar in DB. */}
+      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={w => calendar.filter(d => d.date >= w && d.date < addDays(new Date(w), 7).toISOString().slice(0, 10))} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onSave={updated => { setCalendar(updated); setShowCalendarEditor(false) }} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
           const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]

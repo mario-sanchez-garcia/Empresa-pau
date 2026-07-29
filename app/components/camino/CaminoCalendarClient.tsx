@@ -2328,11 +2328,13 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   ]
 
   async function handleSave() {
-    onSave(draft)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user?.id) return
-      const rows = draft.flatMap(day =>
+      if (!session?.user?.id) { onSave(draft); return }
+      const userId = session.user.id
+
+      // UPDATE missions that already exist in DB
+      const toUpdate = draft.flatMap(day =>
         day.missions
           .filter(m => m.calendarRowId)
           .map(m => ({
@@ -2345,10 +2347,71 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             is_locked: true,
           }))
       )
-      for (const { id, ...fields } of rows) {
+      for (const { id, ...fields } of toUpdate) {
         supabase.from('camino_calendar').update(fields).eq('id', id).then(() => {}, () => {})
       }
-    } catch { /* silent */ }
+
+      // INSERT new missions (no calendarRowId yet)
+      type InsertEntry = { missionId: string; row: Record<string, unknown> }
+      const insertEntries: InsertEntry[] = draft.flatMap(day =>
+        day.missions
+          .filter(m => !m.calendarRowId)
+          .map(m => {
+            const subjectRaw = m.subjectSlug ?? normalizeSubjectSlug(m.subject)
+            const blockKey = m.blockKey ?? m.block ?? null
+            const blockSlug = blockKey ? textSlug(blockKey) : null
+            return {
+              missionId: m.id,
+              row: {
+                user_id: userId,
+                scheduled_date: day.date,
+                subject: subjectRaw,
+                title: m.title,
+                block_key: blockKey,
+                block_slug: blockSlug,
+                is_main: m.role === 'main',
+                is_bonus: m.role !== 'main',
+                status: 'pending',
+                mission_type: m.missionType ?? (m.kind as string) ?? 'concept_explanation',
+                source: 'manual',
+                is_locked: true,
+                generated_by: 'calendar_editor',
+                v2_sort_order: m.v2SortOrder ?? null,
+              },
+            }
+          })
+      )
+
+      if (insertEntries.length === 0) {
+        onSave(draft)
+        return
+      }
+
+      const { data: inserted } = await supabase
+        .from('camino_calendar')
+        .insert(insertEntries.map(e => e.row))
+        .select('id')
+
+      // Map returned IDs back to draft missions by insertion order
+      const idMap = new Map<string, string>()
+      if (inserted) {
+        insertEntries.forEach((entry, i) => {
+          if (inserted[i]?.id) idMap.set(entry.missionId, inserted[i].id)
+        })
+      }
+
+      const updatedDraft = draft.map(day => ({
+        ...day,
+        missions: day.missions.map(m => {
+          if (m.calendarRowId) return m
+          const newId = idMap.get(m.id)
+          return newId ? { ...m, calendarRowId: newId } : m
+        }),
+      }))
+      onSave(updatedDraft)
+    } catch {
+      onSave(draft)
+    }
   }
 
   return (

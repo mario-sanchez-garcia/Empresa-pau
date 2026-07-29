@@ -607,7 +607,7 @@ function topic(input: TopicInput): CaminoCurriculumTopic {
     contentStatus: 'latex_notes',
     ...lesson,
     evauPracticeQuery: {
-      subject: input.subject === 'matematicas_ii' ? 'mates' : input.subject === 'lengua' ? 'lengua' : input.subject,
+      subject: input.subject === 'matematicas_ii' ? 'mates' : input.subject === 'matematicas_ccss' ? 'matematicas_ccss' : input.subject === 'lengua' ? 'lengua' : input.subject === 'historia_espana' ? 'historia' : input.subject,
       block: input.blockSlug,
       topic: input.topicSlug,
     },

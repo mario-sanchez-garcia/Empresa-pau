@@ -73,12 +73,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ onboarding: null })
   }
 
+  // perfiles.subjects es la fuente de verdad actual (la escriben
+  // /api/onboarding/setup y /api/camino/add-subject, así que refleja
+  // asignaturas añadidas después del onboarding inicial desde cualquier
+  // dispositivo). El snapshot de billing_events sigue siendo el fallback
+  // para cuentas que completaron onboarding antes de que esta columna
+  // existiera y no han vuelto a tocar sus asignaturas desde entonces.
+  const { data: perfil } = await db
+    .from('perfiles')
+    .select('subjects')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const subjects = Array.isArray(perfil?.subjects) ? cleanSubjects(perfil.subjects) : cleanSubjects(payload.subjects)
+
   return NextResponse.json({
     onboarding: {
       community: cleanCommunity(payload.community),
       schoolName: cleanString(payload.school_name),
       schoolSource: cleanSchoolSource(payload.school_source),
-      subjects: cleanSubjects(payload.subjects),
+      subjects,
       preparationFeeling: cleanString(payload.preparation_feeling),
       dailyStudyTime: cleanString(payload.daily_study_time),
       dailyMinutes: cleanDailyMinutes(payload.daily_minutes),

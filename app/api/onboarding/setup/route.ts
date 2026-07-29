@@ -104,6 +104,16 @@ export async function POST(request: NextRequest) {
       // pero ya no es la única fuente — ver leaderboard/rankings).
       await serviceDb.from('perfiles').upsert({ id: user.id, comunidad: community }, { onConflict: 'id' })
     } catch { /* non-critical */ }
+
+    if (Array.isArray(body.subjects)) {
+      try {
+        // Fuente de verdad server-side de "qué asignaturas tiene el
+        // alumno" — antes solo vivía en el snapshot de billing_events
+        // (ver /api/onboarding/me), lo que dejaba a cada navegador con su
+        // propia copia local sin forma de reconciliarse con el servidor.
+        await serviceDb.from('perfiles').upsert({ id: user.id, subjects }, { onConflict: 'id' })
+      } catch { /* non-critical: el snapshot de billing_events de abajo sigue funcionando como fallback */ }
+    }
   }
 
   if (serviceDb) {

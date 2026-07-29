@@ -1,0 +1,19 @@
+-- perfiles.subjects: fuente única y mutable de "qué asignaturas tiene
+-- el alumno" server-side.
+--
+-- Contexto: hasta ahora la única persistencia de las asignaturas elegidas
+-- en onboarding era un snapshot dentro de billing_events.payload (el
+-- evento 'onboarding_completed'), leído por /api/onboarding/me tomando el
+-- evento más reciente. Cada navegador además guardaba su propia copia en
+-- localStorage y, una vez que esa copia local tenía completedAt, el
+-- cliente nunca volvía a sincronizar con el servidor — así que dos
+-- dispositivos de la misma cuenta podían divergir para siempre en qué
+-- asignaturas veían, y /api/camino/add-subject (añadir una asignatura
+-- desde dentro de Camino) solo actualizaba esa copia local, sin tocar el
+-- registro "oficial" en ningún sitio.
+--
+-- Esta columna pasa a ser la fuente de verdad: /api/onboarding/setup y
+-- /api/camino/add-subject la escriben, /api/onboarding/me la lee (con
+-- fallback al snapshot de billing_events solo para cuentas antiguas que
+-- completaron onboarding antes de que existiera esta columna).
+alter table public.perfiles add column if not exists subjects jsonb;

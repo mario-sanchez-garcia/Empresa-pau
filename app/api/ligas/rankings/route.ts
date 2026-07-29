@@ -24,6 +24,12 @@ function safeName(value: unknown): string {
   return cleaned
 }
 
+// Nombre real del alumno — mismo criterio en cascada que /api/ligas:
+// perfiles.display_name/nombre primero, y si el alumno nunca los rellenó
+// (display_name es opt-in en Ajustes), el nombre de usuario de su email
+// (antes de la @), igual que ya hace buildLigaPayload en
+// app/api/ligas/route.ts. "Alumno PAU" queda solo como último recurso si
+// ni siquiera hay email accesible.
 async function getNameMap(db: SupabaseClient, userIds: string[]): Promise<Map<string, string>> {
   if (!userIds.length) return new Map()
   const { data } = await db.from('perfiles').select('id, display_name, nombre').in('id', userIds)
@@ -32,6 +38,14 @@ async function getNameMap(db: SupabaseClient, userIds: string[]): Promise<Map<st
     const name = safeName(row.display_name) || safeName(row.nombre)
     if (name) names.set(row.id as string, name)
   }
+
+  const missingIds = userIds.filter(id => !names.has(id))
+  for (const id of missingIds) {
+    const { data: authData } = await db.auth.admin.getUserById(id)
+    const email = authData?.user?.email
+    if (email) names.set(id, email.split('@')[0])
+  }
+
   return names
 }
 

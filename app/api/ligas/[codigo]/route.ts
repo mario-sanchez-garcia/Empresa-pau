@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
-import { currentRoundRange } from '@/app/lib/camino/leagueRounds'
+import { getCurrentRoundXpByUser } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,38 +33,11 @@ export async function GET(
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', liga.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  // "weekStart" quedó como nombre por compatibilidad con el resto del
-  // archivo — ahora es el inicio del mes natural (ronda), no de la semana.
-  const weekStart = currentRoundRange().start
-  const { data: xpRows } = await db
-    .from('camino_xp_events')
-    .select('user_id, xp_amount, source_id')
-    .in('user_id', memberIds)
-    .gte('created_at', weekStart)
-
-  const xpByUser = new Map<string, number>()
-  const xpEventKeys = new Set<string>()
-  for (const row of xpRows ?? []) {
-    const uid = row.user_id as string
-    const sourceId = typeof row.source_id === 'string' ? row.source_id : ''
-    xpByUser.set(uid, (xpByUser.get(uid) ?? 0) + Number(row.xp_amount ?? 0))
-    if (sourceId) xpEventKeys.add(`${uid}:${sourceId}`)
-  }
-
-  const { data: completedMissions } = await db
-    .from('camino_calendar')
-    .select('id, user_id, xp_awarded')
-    .in('user_id', memberIds)
-    .eq('status', 'completed')
-    .gte('completed_at', weekStart)
-
-  for (const row of completedMissions ?? []) {
-    const uid = row.user_id as string
-    const missionId = row.id as string
-    if (!uid || !missionId || xpEventKeys.has(`${uid}:${missionId}`)) continue
-    const xpAwarded = Number(row.xp_awarded ?? 0)
-    if (xpAwarded > 0) xpByUser.set(uid, (xpByUser.get(uid) ?? 0) + xpAwarded)
-  }
+  // Misma fuente que /api/ligas/rankings y /api/ligas (getCurrentRoundXpByUser,
+  // filtra por camino_xp_events.mission_date) — antes esta ruta recalculaba
+  // el XP a mano filtrando por created_at + un fallback sobre camino_calendar,
+  // lo que podía divergir del cálculo canónico.
+  const xpByUser = await getCurrentRoundXpByUser(db, memberIds)
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
   const nameById = new Map<string, string>()

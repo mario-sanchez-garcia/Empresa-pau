@@ -30,9 +30,6 @@ const GROUPS: Array<{ id: MathGroupId; label: string; snippets: MathSnippet[] }>
     id: "basico",
     label: "Básico",
     snippets: [
-      { label: "a/b", title: "Fracción", latex: "$\\frac{a}{b}$" },
-      { label: "√", title: "Raíz", latex: "$\\sqrt{x}$" },
-      { label: "x²", title: "Potencia", latex: "$x^{2}$" },
       { label: "_{}", title: "Subíndice", latex: "$x_{1}$" },
       { label: "·", title: "Producto", latex: "$\\cdot$" },
       { label: "±", title: "Más menos", latex: "$\\pm$" },
@@ -54,9 +51,6 @@ const GROUPS: Array<{ id: MathGroupId; label: string; snippets: MathSnippet[] }>
     id: "calculo",
     label: "Cálculo",
     snippets: [
-      { label: "lim", title: "Límite", latex: "$\\lim_{x \\to a} f(x)$" },
-      { label: "∫", title: "Integral indefinida", latex: "$\\int f(x)\\,dx$" },
-      { label: "∫ dx", title: "Integral definida", latex: "$\\int_{a}^{b} f(x)\\,dx$" },
       { label: "d/dx", title: "Derivada", latex: "$\\frac{d}{dx}\\left(f(x)\\right)$" },
       { label: "f'", title: "Primera derivada", latex: "$f'(x)$" },
       { label: "f''", title: "Segunda derivada", latex: "$f''(x)$" },
@@ -69,7 +63,6 @@ const GROUPS: Array<{ id: MathGroupId; label: string; snippets: MathSnippet[] }>
     snippets: [
       { label: "mat 2x2", title: "Matriz 2x2", latex: "$$\n\\begin{pmatrix}\na & b \\\\\nc & d\n\\end{pmatrix}\n$$" },
       { label: "|A|", title: "Determinante 2x2", latex: "$$\n\\begin{vmatrix}\na & b \\\\\nc & d\n\\end{vmatrix}\n$$" },
-      { label: "sistema", title: "Sistema de ecuaciones", latex: "$$\n\\begin{cases}\nax+by=c\\\\\ndx+ey=f\n\\end{cases}\n$$" },
       { label: "A⁻¹", title: "Matriz inversa", latex: "$A^{-1}$" },
       { label: "Aᵗ", title: "Matriz traspuesta", latex: "$A^t$" },
       { label: "|A|", title: "Determinante", latex: "$|A|$" },
@@ -145,9 +138,7 @@ const GROUPS: Array<{ id: MathGroupId; label: string; snippets: MathSnippet[] }>
     id: "plantillas",
     label: "Plantillas",
     snippets: [
-      { label: "∫a→b", title: "Integral definida", latex: "$\\int_{a}^{b} f(x)\\,dx = F(b)-F(a)$" },
       { label: "tangente", title: "Recta tangente", latex: "$y - f(a) = f'(a)(x-a)$" },
-      { label: "sistema", title: "Sistema 2x2", latex: "$$\n\\begin{cases}\nax+by=c\\\\\ndx+ey=f\n\\end{cases}\n$$" },
       { label: "ampliada", title: "Matriz ampliada", latex: "$$\n\\left(\n\\begin{array}{cc|c}\n & & \\\\\n & & \n\\end{array}\n\\right)\n$$" },
       { label: "Kc", title: "Equilibrio químico", latex: "$K_c=\\frac{[productos]}{[reactivos]}$" },
       { label: "g", title: "Campo gravitatorio", latex: "$g = G\\frac{M}{r^2}$" },

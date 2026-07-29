@@ -14,11 +14,35 @@ export const MATH_TEMPLATES: Array<{ id: MathTemplateId; label: string }> = [
   { id: "sistema", label: "Sistema" },
 ]
 
+// Offsets (within the delimited LaTeX string handed to onInsert) of each fillable
+// segment, in tab order — lets the toolbar select the segment so typing replaces it.
+export type MathTemplateHole = { start: number; end: number }
+
 interface FormProps {
-  onInsert: (latex: string) => void
+  onInsert: (latex: string, holes?: MathTemplateHole[]) => void
   onCancel: () => void
   accentColor: string
   borderColor: string
+}
+
+// Builds a string from literal fragments and "hole" fragments, tracking each
+// hole's offset in the assembled result so the caller can select it later.
+function assembleWithHoles(parts: Array<string | { hole: string }>): { text: string; holes: MathTemplateHole[] } {
+  let text = ""
+  const holes: MathTemplateHole[] = []
+  for (const part of parts) {
+    if (typeof part === "string") {
+      text += part
+    } else {
+      holes.push({ start: text.length, end: text.length + part.hole.length })
+      text += part.hole
+    }
+  }
+  return { text, holes }
+}
+
+function shiftHoles(holes: MathTemplateHole[], offset: number): MathTemplateHole[] {
+  return holes.map(h => ({ start: h.start + offset, end: h.end + offset }))
 }
 
 // Caja de relleno — el alumno solo escribe el valor, nunca el símbolo que la rodea.
@@ -56,26 +80,27 @@ function FillBox({ value, onChange, placeholder, small, wide, accentColor }: {
   )
 }
 
-function renderPreview(latex: string): string {
+function renderPreview(latex: string, displayMode: boolean): string {
   try {
-    return katex.renderToString(latex, { throwOnError: false, displayMode: false })
+    return katex.renderToString(latex, { throwOnError: false, displayMode })
   } catch {
     return ""
   }
 }
 
-function FormShell({ title, hint, children, preview, onInsert, onCancel, canInsert, accentColor, borderColor }: {
+function FormShell({ title, hint, children, preview, displayMode, onInsert, onCancel, canInsert, accentColor, borderColor }: {
   title: string
   hint?: string
   children: ReactNode
   preview: string
+  displayMode?: boolean
   onInsert: () => void
   onCancel: () => void
   canInsert: boolean
   accentColor: string
   borderColor: string
 }) {
-  const html = useMemo(() => (preview ? renderPreview(preview) : ""), [preview])
+  const html = useMemo(() => (preview ? renderPreview(preview, displayMode ?? false) : ""), [preview, displayMode])
   return (
     <div className="rounded-xl border bg-white p-3" style={{ borderColor }}>
       <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-slate-400">
@@ -109,9 +134,11 @@ function FormShell({ title, hint, children, preview, onInsert, onCancel, canInse
 function LimiteForm({ onInsert, onCancel, accentColor, borderColor }: FormProps) {
   const [target, setTarget] = useState("")
   const [expr, setExpr] = useState("")
-  const latex = `\\lim_{x \\to ${target || "a"}} ${expr || "f(x)"}`
+  const { text: inner, holes } = assembleWithHoles([
+    "\\lim_{x \\to ", { hole: target || "a" }, "} ", { hole: expr || "f(x)" },
+  ])
   return (
-    <FormShell title="Límite" preview={`$${latex}$`} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(target || expr)} accentColor={accentColor} borderColor={borderColor}>
+    <FormShell title="Límite" preview={inner} onInsert={() => onInsert(`$${inner}$`, shiftHoles(holes, 1))} onCancel={onCancel} canInsert={Boolean(target || expr)} accentColor={accentColor} borderColor={borderColor}>
       <div className="flex flex-col items-start leading-tight">
         <span className="text-sm italic text-slate-700">lim</span>
         <span className="flex items-center gap-1 text-[11px] text-slate-500">
@@ -126,9 +153,11 @@ function LimiteForm({ onInsert, onCancel, accentColor, borderColor }: FormProps)
 function FraccionForm({ onInsert, onCancel, accentColor, borderColor }: FormProps) {
   const [num, setNum] = useState("")
   const [den, setDen] = useState("")
-  const latex = `\\frac{${num || "\\,"}}{${den || "\\,"}}`
+  const { text: inner, holes } = assembleWithHoles([
+    "\\frac{", { hole: num || "\\," }, "}{", { hole: den || "\\," }, "}",
+  ])
   return (
-    <FormShell title="Fracción" preview={`$${latex}$`} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(num || den)} accentColor={accentColor} borderColor={borderColor}>
+    <FormShell title="Fracción" preview={inner} onInsert={() => onInsert(`$${inner}$`, shiftHoles(holes, 1))} onCancel={onCancel} canInsert={Boolean(num || den)} accentColor={accentColor} borderColor={borderColor}>
       <div className="flex flex-col items-stretch gap-1">
         <FillBox value={num} onChange={setNum} placeholder="numerador" accentColor={accentColor} />
         <div style={{ borderTop: "2px solid #0f172a" }} />
@@ -141,9 +170,11 @@ function FraccionForm({ onInsert, onCancel, accentColor, borderColor }: FormProp
 function PotenciaForm({ onInsert, onCancel, accentColor, borderColor }: FormProps) {
   const [base, setBase] = useState("")
   const [exp, setExp] = useState("")
-  const latex = `${base || "x"}^{${exp || "2"}}`
+  const { text: inner, holes } = assembleWithHoles([
+    { hole: base || "x" }, "^{", { hole: exp || "2" }, "}",
+  ])
   return (
-    <FormShell title="Potencia" preview={`$${latex}$`} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(base || exp)} accentColor={accentColor} borderColor={borderColor}>
+    <FormShell title="Potencia" preview={inner} onInsert={() => onInsert(`$${inner}$`, shiftHoles(holes, 1))} onCancel={onCancel} canInsert={Boolean(base || exp)} accentColor={accentColor} borderColor={borderColor}>
       <div className="flex items-start gap-0.5">
         <FillBox value={base} onChange={setBase} placeholder="base" accentColor={accentColor} />
         <FillBox value={exp} onChange={setExp} placeholder="exp" small accentColor={accentColor} />
@@ -155,13 +186,15 @@ function PotenciaForm({ onInsert, onCancel, accentColor, borderColor }: FormProp
 function RaizForm({ onInsert, onCancel, accentColor, borderColor }: FormProps) {
   const [index, setIndex] = useState("")
   const [radicand, setRadicand] = useState("")
-  const latex = index ? `\\sqrt[${index}]{${radicand || "x"}}` : `\\sqrt{${radicand || "x"}}`
+  const { text: inner, holes } = index
+    ? assembleWithHoles(["\\sqrt[", { hole: index }, "]{", { hole: radicand || "x" }, "}"])
+    : assembleWithHoles(["\\sqrt{", { hole: radicand || "x" }, "}"])
   return (
     <FormShell
       title="Raíz"
       hint="deja el índice vacío para raíz cuadrada"
-      preview={`$${latex}$`}
-      onInsert={() => onInsert(`$${latex}$`)}
+      preview={inner}
+      onInsert={() => onInsert(`$${inner}$`, shiftHoles(holes, 1))}
       onCancel={onCancel}
       canInsert={Boolean(radicand || index)}
       accentColor={accentColor}
@@ -183,15 +216,15 @@ function IntegralForm({ onInsert, onCancel, accentColor, borderColor }: FormProp
   const [upper, setUpper] = useState("")
   const [expr, setExpr] = useState("")
   const isDefinite = Boolean(lower || upper)
-  const latex = isDefinite
-    ? `\\int_{${lower || "a"}}^{${upper || "b"}} ${expr || "f(x)"}\\,dx`
-    : `\\int ${expr || "f(x)"}\\,dx`
+  const { text: inner, holes } = isDefinite
+    ? assembleWithHoles(["\\int_{", { hole: lower || "a" }, "}^{", { hole: upper || "b" }, "} ", { hole: expr || "f(x)" }, "\\,dx"])
+    : assembleWithHoles(["\\int ", { hole: expr || "f(x)" }, "\\,dx"])
   return (
     <FormShell
       title="Integral"
       hint="deja los límites vacíos para integral indefinida"
-      preview={`$${latex}$`}
-      onInsert={() => onInsert(`$${latex}$`)}
+      preview={inner}
+      onInsert={() => onInsert(`$${inner}$`, shiftHoles(holes, 1))}
       onCancel={onCancel}
       canInsert={Boolean(expr || lower || upper)}
       accentColor={accentColor}
@@ -220,7 +253,8 @@ function SistemaForm({ onInsert, onCancel, accentColor, borderColor }: FormProps
   return (
     <FormShell
       title="Sistema de ecuaciones"
-      preview={filled.length ? `$$${latex}$$` : ""}
+      preview={filled.length ? latex : ""}
+      displayMode
       onInsert={() => onInsert(`$$${latex}$$`)}
       onCancel={onCancel}
       canInsert={filled.length > 0}
@@ -266,7 +300,7 @@ export default function MathFillTemplateForm({
   borderColor,
 }: {
   templateId: MathTemplateId
-  onInsert: (latex: string) => void
+  onInsert: (latex: string, holes?: MathTemplateHole[]) => void
   onCancel: () => void
   accentColor: string
   borderColor: string

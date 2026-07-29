@@ -224,6 +224,18 @@ async function getRondaHistorial(
     .sort((a, b) => b.periodStart.localeCompare(a.periodStart))
 }
 
+// Fondo de alumnos "conocidos" para el ámbito Global — cualquiera que
+// haya usado Camino alguna vez (tiene fila en camino_user_progress). Se
+// usa para pre-sembrar la clasificación a 0 antes de sumar el XP real del
+// periodo elegido, igual que Personal ya hace con los miembros de la
+// liga: sin esto, si nadie tiene XP todavía en ese periodo (p.ej. "ronda"
+// recién empezada) la consulta de XP no devuelve ninguna fila y la lista
+// sale completamente vacía en vez de mostrar a todos a 0.
+async function getGlobalUserPool(db: SupabaseClient, limit = 500): Promise<string[]> {
+  const { data } = await db.from('camino_user_progress').select('user_id').order('xp_total', { ascending: false }).limit(limit)
+  return (data ?? []).map(r => r.user_id as string)
+}
+
 // XP histórico total para el modo "xp_total", opcionalmente restringido a
 // una materia. `camino_user_progress` es el total cruzado de materias;
 // `camino_subject_xp` es el rollup por materia — misma fuente de XP por
@@ -429,8 +441,13 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Toda la comunidad parte de 0 XP — igual que Personal, así se ven en
+    // la clasificación aunque nadie tenga XP todavía en este periodo (ver
+    // comentario en getGlobalUserPool).
+    const scores = new Map<string, number>(memberIds.map(id => [id, 0]))
     const fetched = await getScoresForMode(db, mode, period, memberIds, subject)
-    const names = await getNameMap(db, Array.from(fetched.keys()))
+    for (const [id, xp] of fetched) scores.set(id, xp)
+    const names = await getNameMap(db, Array.from(scores.keys()))
     // Solo hay una posición previa "única" que comparar cuando se ha
     // elegido una materia concreta (ver comentario en getPreviousRoundRank).
     const previousRank = mode === 'ronda' && subject
@@ -438,7 +455,7 @@ export async function GET(request: NextRequest) {
       : null
 
     return NextResponse.json({
-      entries: rankEntries(fetched, user.id, id => names.get(id) ?? '', true),
+      entries: rankEntries(scores, user.id, id => names.get(id) ?? '', true),
       currentUserId: user.id,
       availableSubjects,
       comunidad,
@@ -466,11 +483,18 @@ export async function GET(request: NextRequest) {
     })
   }
 
+  // Pre-siembra a 0 con el fondo de alumnos conocidos — ver comentario en
+  // getGlobalUserPool. Sin esto, la clasificación salía vacía siempre que
+  // nadie tuviera XP todavía en el periodo elegido (p.ej. "ronda" antes
+  // de que nadie complete nada ese mes).
+  const pool = await getGlobalUserPool(db)
+  const scores = new Map<string, number>(pool.map(id => [id, 0]))
   const fetched = await getScoresForMode(db, mode, period, null, subject)
-  const names = await getNameMap(db, Array.from(fetched.keys()))
+  for (const [id, xp] of fetched) scores.set(id, xp)
+  const names = await getNameMap(db, Array.from(scores.keys()))
   const previousRank = mode === 'ronda' ? await getPreviousRoundRank(db, user.id, 'global', 'global') : null
   return NextResponse.json({
-    entries: rankEntries(fetched, user.id, id => names.get(id) ?? '', true),
+    entries: rankEntries(scores, user.id, id => names.get(id) ?? '', true),
     currentUserId: user.id,
     availableSubjects,
     previousRank,

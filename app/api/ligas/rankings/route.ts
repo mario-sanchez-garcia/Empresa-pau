@@ -9,7 +9,8 @@ export const dynamic = 'force-dynamic'
 type Scope = 'personal' | 'comunidad_materia' | 'global'
 type Mode = 'ronda' | 'etapas' | 'xp_total'
 
-type Entry = { id: string; name: string; score: number; rank: number; isCurrentUser: boolean }
+type MedalTally = { oro: number; plata: number; bronce: number }
+type Entry = { id: string; name: string; score: number; rank: number; isCurrentUser: boolean; medals?: MedalTally }
 
 // Misma anonimización que /api/camino/leaderboard — IDs públicos hasheados
 // para los ámbitos que abarcan a todos los usuarios (comunidad+materia/global).
@@ -80,9 +81,35 @@ function sumByUser(rows: Array<{ user_id: string; xp_amount?: number; xp_total?:
   return byUser
 }
 
-// "Etapas": ranking por medallas históricas acumuladas en ligas_rondas_resultados,
-// restringido a las rondas de un scope_type + (opcionalmente) un scope_key concreto.
-async function getEtapasScores(db: SupabaseClient, scopeType: Scope, scopeKey?: string): Promise<Map<string, number>> {
+// "Etapas" es un ranking por medallas históricas (ganadores de ronda), no
+// por XP — cada fila lleva su propio conteo oro/plata/bronce en vez de un
+// número de XP. `weighted` (oro>plata>bronce) solo se usa para ordenar.
+function rankEtapasEntries(
+  tally: Map<string, MedalTally>,
+  currentUserId: string,
+  nameFor: (userId: string) => string,
+  anonymize: boolean,
+): Entry[] {
+  const weighted = (m: MedalTally) => m.oro * ETAPA_MEDAL_WEIGHTS.oro + m.plata * ETAPA_MEDAL_WEIGHTS.plata + m.bronce * ETAPA_MEDAL_WEIGHTS.bronce
+  return Array.from(tally.entries())
+    .sort((a, b) => weighted(b[1]) - weighted(a[1]) || b[1].oro - a[1].oro || b[1].plata - a[1].plata)
+    .map(([userId, medals], index) => {
+      const isCurrentUser = userId === currentUserId
+      return {
+        id: isCurrentUser ? 'me' : anonymize ? publicId(userId) : userId,
+        name: isCurrentUser ? 'Tú' : (nameFor(userId) || 'Alumno PAU'),
+        score: weighted(medals),
+        medals,
+        rank: index + 1,
+        isCurrentUser,
+      }
+    })
+}
+
+// Recuento de medallas por usuario en rondas cerradas de un scope_type,
+// restringido (opcionalmente) a un scope_key concreto (una liga, o una
+// comunidad+materia concreta).
+async function getEtapasTally(db: SupabaseClient, scopeType: Scope, scopeKey?: string): Promise<Map<string, MedalTally>> {
   let rondasQuery = db.from('ligas_rondas').select('id').eq('scope_type', scopeType)
   if (scopeKey) rondasQuery = rondasQuery.eq('scope_key', scopeKey)
   const { data: rondas } = await rondasQuery
@@ -94,14 +121,15 @@ async function getEtapasScores(db: SupabaseClient, scopeType: Scope, scopeKey?: 
     .select('user_id, medalla')
     .in('ronda_id', rondaIds)
 
-  const scores = new Map<string, number>()
+  const tally = new Map<string, MedalTally>()
   for (const row of resultados ?? []) {
     const medalla = row.medalla as Medal | null
     if (!medalla) continue
-    const weight = ETAPA_MEDAL_WEIGHTS[medalla]
-    scores.set(row.user_id as string, (scores.get(row.user_id as string) ?? 0) + weight)
+    const current = tally.get(row.user_id as string) ?? { oro: 0, plata: 0, bronce: 0 }
+    current[medalla] += 1
+    tally.set(row.user_id as string, current)
   }
-  return scores
+  return tally
 }
 
 export async function GET(request: NextRequest) {
@@ -135,8 +163,19 @@ export async function GET(request: NextRequest) {
     const memberIds = (miembros ?? []).map(m => m.user_id as string)
     const names = await getNameMap(db, memberIds)
 
-    // Todos los miembros parten de 0 — así se ven en la clasificación
-    // aunque todavía no tengan XP/medallas registradas.
+    if (mode === 'etapas') {
+      const tally = await getEtapasTally(db, 'personal', ligaId)
+      // Todos los miembros parten de 0 medallas — así se ven en la
+      // clasificación aunque todavía no hayan ganado ninguna ronda.
+      const medals = new Map<string, MedalTally>(memberIds.map(id => [id, tally.get(id) ?? { oro: 0, plata: 0, bronce: 0 }]))
+      return NextResponse.json({
+        entries: rankEtapasEntries(medals, user.id, id => names.get(id) ?? '', false),
+        currentUserId: user.id,
+      })
+    }
+
+    // Todos los miembros parten de 0 XP — así se ven en la clasificación
+    // aunque todavía no tengan XP registrado.
     const scores = new Map<string, number>(memberIds.map(id => [id, 0]))
     if (mode === 'ronda') {
       const { start, end } = currentRoundRange()
@@ -147,11 +186,9 @@ export async function GET(request: NextRequest) {
         .gte('mission_date', start)
         .lte('mission_date', end)
       for (const [id, xp] of sumByUser((xpRows ?? []) as Array<{ user_id: string; xp_amount: number }>)) scores.set(id, xp)
-    } else if (mode === 'xp_total') {
+    } else {
       const { data: progressRows } = await db.from('camino_user_progress').select('user_id, xp_total').in('user_id', memberIds)
       for (const [id, xp] of sumByUser((progressRows ?? []) as Array<{ user_id: string; xp_total: number }>)) scores.set(id, xp)
-    } else {
-      for (const [id, score] of await getEtapasScores(db, 'personal', ligaId)) scores.set(id, score)
     }
 
     return NextResponse.json({
@@ -178,11 +215,21 @@ export async function GET(request: NextRequest) {
     }
 
     const scopeKey = scopeKeyForComunidadMateria(comunidad, requestedSubject)
-    let scores = new Map<string, number>()
 
     if (mode === 'etapas') {
-      scores = await getEtapasScores(db, 'comunidad_materia', scopeKey)
-    } else if (mode === 'xp_total') {
+      const tally = await getEtapasTally(db, 'comunidad_materia', scopeKey)
+      const names = await getNameMap(db, Array.from(tally.keys()))
+      return NextResponse.json({
+        entries: rankEtapasEntries(tally, user.id, id => names.get(id) ?? '', true),
+        currentUserId: user.id,
+        availableSubjects,
+        comunidad,
+        subject: requestedSubject,
+      })
+    }
+
+    let scores = new Map<string, number>()
+    if (mode === 'xp_total') {
       const { data: subjectXpRows } = await db.from('camino_subject_xp').select('user_id, xp_total').eq('subject', requestedSubject).limit(2000)
       const candidateIds = (subjectXpRows ?? []).map(r => r.user_id as string)
       const { data: perfilesRows } = candidateIds.length
@@ -223,6 +270,15 @@ export async function GET(request: NextRequest) {
   // ---------------------------------------------------------------
   // Global — todos los alumnos, sin filtrar.
   // ---------------------------------------------------------------
+  if (mode === 'etapas') {
+    const tally = await getEtapasTally(db, 'global', 'global')
+    const names = await getNameMap(db, Array.from(tally.keys()))
+    return NextResponse.json({
+      entries: rankEtapasEntries(tally, user.id, id => names.get(id) ?? '', true),
+      currentUserId: user.id,
+    })
+  }
+
   let scores = new Map<string, number>()
   if (mode === 'ronda') {
     const { start, end } = currentRoundRange()
@@ -233,15 +289,13 @@ export async function GET(request: NextRequest) {
       .lte('mission_date', end)
       .limit(50_000)
     scores = sumByUser((xpRows ?? []) as Array<{ user_id: string; xp_amount: number }>)
-  } else if (mode === 'xp_total') {
+  } else {
     const { data: progressRows } = await db
       .from('camino_user_progress')
       .select('user_id, xp_total')
       .order('xp_total', { ascending: false })
       .limit(500)
     scores = sumByUser((progressRows ?? []) as Array<{ user_id: string; xp_total: number }>)
-  } else {
-    scores = await getEtapasScores(db, 'global')
   }
 
   const names = await getNameMap(db, Array.from(scores.keys()))

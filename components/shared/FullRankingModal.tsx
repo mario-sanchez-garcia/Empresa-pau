@@ -14,7 +14,14 @@ const mono  = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 type Scope = 'personal' | 'comunidad_materia' | 'global'
 type Mode = 'ronda' | 'etapas' | 'xp_total'
 
-type RankingApiEntry = { id: string; name: string; score: number; rank: number; isCurrentUser: boolean }
+type RankingApiEntry = {
+  id: string
+  name: string
+  score: number
+  rank: number
+  isCurrentUser: boolean
+  medals?: { oro: number; plata: number; bronce: number }
+}
 type RankingResponse = {
   entries: RankingApiEntry[]
   currentUserId: string
@@ -35,7 +42,7 @@ const MODES: Array<{ id: Mode; label: string }> = [
 ]
 
 function toRankingEntry(entry: RankingApiEntry): RankingEntry {
-  return { id: entry.id, name: entry.name, community: '', xp: entry.score, rank: entry.rank, isCurrentUser: entry.isCurrentUser }
+  return { id: entry.id, name: entry.name, community: '', xp: entry.score, rank: entry.rank, isCurrentUser: entry.isCurrentUser, medals: entry.medals }
 }
 
 export default function FullRankingModal({ token, onClose }: { token: string; onClose: () => void }) {

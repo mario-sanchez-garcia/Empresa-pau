@@ -3,6 +3,8 @@
 import { Trophy } from 'lucide-react'
 import { divisionFor } from '@/app/lib/camino/leagues'
 
+export type MedalTally = { oro: number; plata: number; bronce: number }
+
 export type RankingEntry = {
   id: string
   name: string
@@ -11,6 +13,9 @@ export type RankingEntry = {
   rank: number
   isCurrentUser: boolean
   isMock?: boolean
+  // Presente solo en el ranking "Etapas" — ahí no hay XP, hay medallas de
+  // ronda ganadas, así que la fila se pinta distinto (ver abajo).
+  medals?: MedalTally
 }
 
 const PODIUM_COLORS = ['#f59e0b', '#94a3b8', '#c2956e']
@@ -24,11 +29,30 @@ const DARK_DIVISIONS: Record<string, { bg: string; text: string; border: string 
   'Élite PAU': { bg: 'rgba(124,58,237,.14)',  text: '#c4b5fd', border: 'rgba(124,58,237,.28)' },
 }
 
+function MedalTallyBadge({ medals }: { medals: MedalTally }) {
+  const total = medals.oro + medals.plata + medals.bronce
+  if (!total) {
+    return (
+      <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.25)', fontFamily: 'var(--font-geist-mono, monospace)' }}>
+        0 oro · 0 plata · 0 bronce
+      </span>
+    )
+  }
+  return (
+    <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-geist-mono, monospace)' }}>
+      {medals.oro > 0 && <span style={{ color: '#fde68a' }}>🥇 {medals.oro}</span>}
+      {medals.plata > 0 && <span style={{ color: '#cbd5e1' }}>🥈 {medals.plata}</span>}
+      {medals.bronce > 0 && <span style={{ color: '#fbbf24' }}>🥉 {medals.bronce}</span>}
+    </span>
+  )
+}
+
 export default function RankingRow({ row, fixed = false }: { row: RankingEntry; fixed?: boolean }) {
   const div = divisionFor(row.xp)
   const darkDiv = DARK_DIVISIONS[div.name] ?? DARK_DIVISIONS['Bronce']
   const podium = row.rank <= 3
   const podiumColor = PODIUM_COLORS[row.rank - 1]
+  const isEtapas = Boolean(row.medals)
 
   return (
     <div style={{
@@ -64,24 +88,30 @@ export default function RankingRow({ row, fixed = false }: { row: RankingEntry; 
         )}
       </span>
 
-      {/* Division badge */}
-      <span style={{
-        flexShrink: 0, padding: '3px 8px', borderRadius: 6,
-        fontSize: 10, fontWeight: 600, letterSpacing: '.06em',
-        background: darkDiv.bg, color: darkDiv.text, border: `1px solid ${darkDiv.border}`,
-      }}>
-        {div.name}
-      </span>
+      {isEtapas ? (
+        <MedalTallyBadge medals={row.medals as MedalTally} />
+      ) : (
+        <>
+          {/* Division badge */}
+          <span style={{
+            flexShrink: 0, padding: '3px 8px', borderRadius: 6,
+            fontSize: 10, fontWeight: 600, letterSpacing: '.06em',
+            background: darkDiv.bg, color: darkDiv.text, border: `1px solid ${darkDiv.border}`,
+          }}>
+            {div.name}
+          </span>
 
-      {/* XP */}
-      <span style={{
-        flexShrink: 0, fontSize: 11, fontWeight: 700,
-        color: row.isCurrentUser ? '#60a5fa' : 'rgba(255,255,255,.4)',
-        fontFamily: 'var(--font-geist-mono, monospace)',
-        minWidth: 52, textAlign: 'right',
-      }}>
-        {row.xp.toLocaleString('es-ES')} XP
-      </span>
+          {/* XP */}
+          <span style={{
+            flexShrink: 0, fontSize: 11, fontWeight: 700,
+            color: row.isCurrentUser ? '#60a5fa' : 'rgba(255,255,255,.4)',
+            fontFamily: 'var(--font-geist-mono, monospace)',
+            minWidth: 52, textAlign: 'right',
+          }}>
+            {row.xp.toLocaleString('es-ES')} XP
+          </span>
+        </>
+      )}
     </div>
   )
 }

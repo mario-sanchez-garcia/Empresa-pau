@@ -33,6 +33,7 @@ const TOPIC_VIDEO_MAP: Record<string, string> = {
 
 // Maps each seed topic to its sort_order range in curriculum_content_v2
 const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
+  // Matemáticas II
   'matematicas_ii:algebra-lineal:matrices-operaciones':    { min: 1,  max: 9  },
   'matematicas_ii:algebra-lineal:sistemas-gauss':          { min: 10, max: 19 },
   'matematicas_ii:geometria-3d:producto-vectorial':        { min: 20, max: 34 },
@@ -41,6 +42,17 @@ const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
   'matematicas_ii:integrales:areas-integrales':            { min: 46, max: 49 },
   'matematicas_ii:probabilidad:probabilidad-combinatoria': { min: 50, max: 54 },
   'matematicas_ii:probabilidad:normal-tipificacion':       { min: 55, max: 60 },
+  // Historia de España (cards 1-128, sujeto historia_espana en curriculum_content_v2)
+  'historia_espana:raices-historicas:origenes-reino-visigodo':       { min: 1,   max: 11  },
+  'historia_espana:edad-media:edad-media-peninsular':                { min: 12,  max: 28  },
+  'historia_espana:edad-moderna:edad-moderna':                       { min: 29,  max: 52  },
+  'historia_espana:crisis-antiguo-regimen:crisis-antiguo-regimen':   { min: 53,  max: 70  },
+  'historia_espana:estado-liberal:construccion-estado-liberal':      { min: 53,  max: 70  },
+  'historia_espana:restauracion:restauracion':                       { min: 71,  max: 88  },
+  'historia_espana:siglo-xx:segunda-republica':                      { min: 89,  max: 97  },
+  'historia_espana:siglo-xx:guerra-civil':                           { min: 98,  max: 106 },
+  'historia_espana:franquismo-democracia:franquismo':                { min: 107, max: 118 },
+  'historia_espana:franquismo-democracia:transicion-democracia':     { min: 119, max: 128 },
 }
 
 const TOPIC_PROGRESS_KEY = 'kairo_camino_topic_progress_v1'

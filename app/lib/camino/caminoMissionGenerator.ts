@@ -125,7 +125,7 @@ export function buildDailyTasksFromWeek(
       subjectKey: 'mates',
       detail: `Trabajas este bloque porque aparece como punto débil reciente.`,
       actionLabel: 'Practicar bloque',
-      actionHref: `/?subject=mates&block=${encodeURIComponent(weakBlocks[0])}&mode=random&source=camino_legacy`,
+      actionHref: `/examenes?subject=mates&block=${encodeURIComponent(weakBlocks[0])}&mode=random&source=camino_legacy`,
     })
   }
 

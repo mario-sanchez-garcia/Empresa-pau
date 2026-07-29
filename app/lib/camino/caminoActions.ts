@@ -130,7 +130,7 @@ export function buildCaminoAction(
     if (subject && !base.href.includes('view=')) {
       const param = SUBJECT_PARAM[subject]
       if (param) {
-        base.href = `/?subject=${param}`
+        base.href = `/examenes?subject=${param}`
         base.subject = param
       }
     }

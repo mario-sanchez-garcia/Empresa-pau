@@ -270,7 +270,7 @@ export function buildTopicHref(topic: Pick<CaminoCurriculumTopic, 'subject' | 'b
 
 export function buildEvauHref(topic: CaminoCurriculumTopic) {
   const q = topic.evauPracticeQuery
-  return `/?subject=${encodeURIComponent(q.subject)}&block=${encodeURIComponent(q.block)}&topic=${encodeURIComponent(q.topic)}&mode=random&source=camino`
+  return `/examenes?subject=${encodeURIComponent(q.subject)}&block=${encodeURIComponent(q.block)}&topic=${encodeURIComponent(q.topic)}&mode=random&source=camino`
 }
 
 export function hasLatexContent(topic: CaminoCurriculumTopic) {

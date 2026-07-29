@@ -236,7 +236,7 @@ function getMissionTarget(kind: MissionKind, subject: string, topic?: string, bl
   const topicParam = topic ? `&topic=${encodeURIComponent(textSlug(topic))}` : ''
   const blockParam = block ? `&block=${encodeURIComponent(textSlug(block))}` : ''
   if (kind === 'mock_exam') return { href: `/simulacros?subject=${s}${blockParam}${topicParam}&source=camino_pau`, fallback: '', autoCompletable: false }
-  if (kind === 'evau_practice' || kind === 'exam_focus') return { href: `/?subject=${s}${blockParam}${topicParam}&mode=random&source=camino`, fallback: '', autoCompletable: false }
+  if (kind === 'evau_practice' || kind === 'exam_focus') return { href: `/examenes?subject=${s}${blockParam}${topicParam}&mode=random&source=camino`, fallback: '', autoCompletable: false }
   if ((kind === 'concept_explanation' || kind === 'guided_example' || kind === 'guided_practice') && block && topic) {
     const href = resolveCourseHref(s, block, topic)
     if (href) return { href, fallback: '', autoCompletable: false }
@@ -1112,7 +1112,7 @@ export default function CaminoCalendarClient() {
       const item = items[0] ?? null
       const href = item?.planTopic
         ? `${buildTopicHref(item.planTopic)}?start=exercise&source=repaso_express`
-        : `/?subject=${encodeURIComponent(topSlug)}&mode=random&source=repaso_express`
+        : `/examenes?subject=${encodeURIComponent(topSlug)}&mode=random&source=repaso_express`
       return { subject: subjectLabel, subjectSlug: topSlug, topic: item?.topic ?? subjectLabel, href, hasCompletedItems: Boolean(topEntry) }
     })()
   const isRescueMode = calendar.some(day => day.missions.some(m => m.metadata?.plan_mode === 'rescue'))

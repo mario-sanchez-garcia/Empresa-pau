@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
-import { currentRoundRange } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,37 +12,16 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', ligaRow.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  // "weekStart" quedó como nombre por compatibilidad con el resto del
-  // archivo — ahora es el inicio del mes natural (ronda), no de la semana.
-  const weekStart = currentRoundRange().start
-  const { data: xpRows } = await db
-    .from('camino_xp_events')
-    .select('user_id, xp_amount, source_id')
+  // Use cumulative xp_total (same source as global leaderboard) so ranking is
+  // consistent regardless of when XP was earned or which path recorded it.
+  const { data: progressRows } = await db
+    .from('camino_user_progress')
+    .select('user_id, xp_total')
     .in('user_id', memberIds)
-    .gte('created_at', weekStart)
 
   const xpByUser = new Map<string, number>()
-  const xpEventKeys = new Set<string>()
-  for (const row of xpRows ?? []) {
-    const uid = row.user_id as string
-    const sourceId = typeof row.source_id === 'string' ? row.source_id : ''
-    xpByUser.set(uid, (xpByUser.get(uid) ?? 0) + Number(row.xp_amount ?? 0))
-    if (sourceId) xpEventKeys.add(`${uid}:${sourceId}`)
-  }
-
-  const { data: completedMissions } = await db
-    .from('camino_calendar')
-    .select('id, user_id, xp_awarded')
-    .in('user_id', memberIds)
-    .eq('status', 'completed')
-    .gte('completed_at', weekStart)
-
-  for (const row of completedMissions ?? []) {
-    const uid = row.user_id as string
-    const missionId = row.id as string
-    if (!uid || !missionId || xpEventKeys.has(`${uid}:${missionId}`)) continue
-    const xpAwarded = Number(row.xp_awarded ?? 0)
-    if (xpAwarded > 0) xpByUser.set(uid, (xpByUser.get(uid) ?? 0) + xpAwarded)
+  for (const row of progressRows ?? []) {
+    xpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
   }
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)

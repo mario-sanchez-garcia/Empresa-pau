@@ -399,7 +399,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
           ) : entries.length ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {entries.map(entry => (
-                <RankingRow key={entry.id} row={toRankingEntry(entry)} fixed={entry.isCurrentUser} />
+                <RankingRow key={entry.id} row={toRankingEntry(entry)} fixed={entry.isCurrentUser} showDivision={mode === 'xp_total'} />
               ))}
             </div>
           ) : (

@@ -14,6 +14,12 @@ const mono  = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 type Scope = 'personal' | 'comunidad_materia' | 'global'
 type Mode = 'ronda' | 'etapas' | 'xp_total'
 
+// "Todas las asignaturas" — agrega el XP de todas las materias. Estado
+// por defecto del selector de materia, compartido por los tres ámbitos
+// (Personal/Comunidad/Global): la materia decide qué XP cuenta, el
+// ámbito decide contra quién compites — son ejes independientes.
+const ALL_SUBJECTS = '__all__'
+
 type RankingApiEntry = {
   id: string
   name: string
@@ -48,7 +54,10 @@ function toRankingEntry(entry: RankingApiEntry): RankingEntry {
 export default function FullRankingModal({ token, onClose }: { token: string; onClose: () => void }) {
   const [scope, setScope] = useState<Scope>('personal')
   const [mode, setMode] = useState<Mode>('ronda')
-  const [subject, setSubject] = useState<string | null>(null)
+  // Por defecto "todas las asignaturas": el XP se agrega entre materias
+  // salvo que el alumno elija una concreta arriba de la clasificación.
+  // Se aplica igual en los tres ámbitos (Personal/Comunidad/Global).
+  const [subject, setSubject] = useState<string>(ALL_SUBJECTS)
   const [data, setData] = useState<RankingResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [subjectOpen, setSubjectOpen] = useState(false)
@@ -59,18 +68,11 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    const params = new URLSearchParams({ scope, mode })
-    if (scope === 'comunidad_materia' && subject) params.set('subject', subject)
+    const params = new URLSearchParams({ scope, mode, subject })
 
     fetch(`/api/ligas/rankings?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.ok ? res.json() as Promise<RankingResponse> : null)
-      .then(payload => {
-        if (cancelled) return
-        setData(payload)
-        if (scope === 'comunidad_materia' && !subject && payload?.availableSubjects?.length) {
-          setSubject(payload.availableSubjects[0])
-        }
-      })
+      .then(payload => { if (!cancelled) setData(payload) })
       .catch(() => { if (!cancelled) setData(null) })
       .finally(() => { if (!cancelled) setLoading(false) })
 
@@ -141,6 +143,76 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
           </button>
         </div>
 
+        {/* Subject selector — arriba de todo, se aplica a los tres ámbitos */}
+        <div style={{ padding: '16px 24px 0' }}>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setSubjectOpen(v => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                width: '100%',
+                fontFamily: M, fontSize: 10, fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase',
+                padding: '9px 12px', borderRadius: 12, cursor: 'pointer',
+                background: 'rgba(37,99,235,.12)', border: '1px solid rgba(37,99,235,.3)',
+                color: '#93c5fd',
+              }}
+            >
+              <span>{subject === ALL_SUBJECTS ? 'Todas las asignaturas' : subject}</span>
+              <ChevronDown size={11} strokeWidth={2.5} style={{ transform: subjectOpen ? 'rotate(180deg)' : 'none', transition: 'transform 160ms' }} />
+            </button>
+            <AnimatePresence>
+              {subjectOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: .96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: .96 }}
+                  transition={{ duration: .15 }}
+                  style={{
+                    position: 'absolute', left: 0, right: 0, top: '110%', zIndex: 10,
+                    background: '#1a1a24', border: '1px solid rgba(255,255,255,.12)',
+                    borderRadius: 12, overflow: 'hidden',
+                    boxShadow: '0 16px 40px rgba(0,0,0,.5)',
+                  }}
+                >
+                  <button
+                    onClick={() => { setSubject(ALL_SUBJECTS); setSubjectOpen(false) }}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '9px 14px',
+                      fontFamily: M, fontSize: 10, letterSpacing: '.06em',
+                      color: subject === ALL_SUBJECTS ? '#fff' : 'rgba(255,255,255,.5)',
+                      background: subject === ALL_SUBJECTS ? 'rgba(37,99,235,.2)' : 'transparent',
+                      border: 'none', cursor: 'pointer',
+                      borderBottom: '1px solid rgba(255,255,255,.05)',
+                      transition: 'background 120ms',
+                    }}
+                  >
+                    Todas las asignaturas
+                  </button>
+                  {availableSubjects.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => { setSubject(s); setSubjectOpen(false) }}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left',
+                        padding: '9px 14px',
+                        fontFamily: M, fontSize: 10, letterSpacing: '.06em',
+                        color: s === subject ? '#fff' : 'rgba(255,255,255,.5)',
+                        background: s === subject ? 'rgba(37,99,235,.2)' : 'transparent',
+                        border: 'none', cursor: 'pointer',
+                        borderBottom: '1px solid rgba(255,255,255,.05)',
+                        transition: 'background 120ms',
+                      }}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         {/* Scope tabs */}
         <div style={{ padding: '20px 24px 0' }}>
           <div style={{
@@ -180,10 +252,10 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
           </div>
         </div>
 
-        {/* Mode chips + subject selector */}
+        {/* Mode chips */}
         <div style={{
           padding: '12px 24px 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          display: 'flex', alignItems: 'center', gap: 8,
           borderBottom: '1px solid rgba(255,255,255,.06)',
         }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
@@ -204,61 +276,6 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
               </button>
             ))}
           </div>
-
-          {/* Subject dropdown for comunidad_materia */}
-          {scope === 'comunidad_materia' && availableSubjects.length > 0 && (
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <button
-                onClick={() => setSubjectOpen(v => !v)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  fontFamily: M, fontSize: 9, fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase',
-                  padding: '5px 10px', borderRadius: 20, cursor: 'pointer',
-                  background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.35)',
-                  color: '#93c5fd',
-                }}
-              >
-                {subject ?? '—'}
-                <ChevronDown size={10} strokeWidth={2.5} style={{ transform: subjectOpen ? 'rotate(180deg)' : 'none', transition: 'transform 160ms' }} />
-              </button>
-              <AnimatePresence>
-                {subjectOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6, scale: .96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: .96 }}
-                    transition={{ duration: .15 }}
-                    style={{
-                      position: 'absolute', right: 0, top: '110%', zIndex: 10,
-                      background: '#1a1a24', border: '1px solid rgba(255,255,255,.12)',
-                      borderRadius: 12, overflow: 'hidden',
-                      boxShadow: '0 16px 40px rgba(0,0,0,.5)',
-                      minWidth: 160,
-                    }}
-                  >
-                    {availableSubjects.map(s => (
-                      <button
-                        key={s}
-                        onClick={() => { setSubject(s); setSubjectOpen(false) }}
-                        style={{
-                          display: 'block', width: '100%', textAlign: 'left',
-                          padding: '9px 14px',
-                          fontFamily: M, fontSize: 10, letterSpacing: '.06em',
-                          color: s === subject ? '#fff' : 'rgba(255,255,255,.5)',
-                          background: s === subject ? 'rgba(37,99,235,.2)' : 'transparent',
-                          border: 'none', cursor: 'pointer',
-                          borderBottom: '1px solid rgba(255,255,255,.05)',
-                          transition: 'background 120ms',
-                        }}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
         </div>
 
         {/* Rankings list */}
@@ -281,12 +298,6 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
               title="Configura tu comunidad"
               body="Añade tu comunidad autónoma en tu perfil para ver el ranking de alumnos de tu región."
               action={{ label: 'Ir a configuración →', href: '/settings' }}
-            />
-          ) : scope === 'comunidad_materia' && !availableSubjects.length ? (
-            <EmptyState
-              M={M}
-              title="Sin asignaturas registradas"
-              body="Completa ejercicios en Kairo para acumular XP por asignatura y aparecer en este ranking."
             />
           ) : mode === 'etapas' && !entries.length ? (
             <EmptyState

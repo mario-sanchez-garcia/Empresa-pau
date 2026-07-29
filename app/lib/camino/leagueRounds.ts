@@ -49,3 +49,10 @@ export function previousRoundRange(reference: Date = new Date()): { start: strin
 export function scopeKeyForComunidadMateria(comunidad: string, subject: string): string {
   return `${comunidad.trim().toLowerCase()}:${subject.trim().toLowerCase()}`
 }
+
+// Prefijo compartido por todas las rondas comunidad+materia de una misma
+// comunidad, sin importar la asignatura — usado para agregar "todas las
+// asignaturas" (Etapas) sumando medallas de cada materia por separado.
+export function scopeKeyPrefixForComunidad(comunidad: string): string {
+  return `${comunidad.trim().toLowerCase()}:`
+}

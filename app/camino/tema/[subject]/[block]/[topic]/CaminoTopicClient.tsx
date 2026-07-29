@@ -617,7 +617,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       topic: currentTopic.topicSlug,
     })
     if (prompt) params.set('question', prompt)
-    return `/?${params.toString()}`
+    return `/examenes?${params.toString()}`
   }
 
   async function handleImage(event: React.ChangeEvent<HTMLInputElement>) {

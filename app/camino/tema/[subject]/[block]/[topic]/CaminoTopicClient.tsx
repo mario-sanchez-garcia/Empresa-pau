@@ -609,10 +609,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }
 
   function chatHref(prompt?: string) {
+    const subjectParam =
+      currentTopic.subject === 'matematicas_ii' ? 'mates' :
+      currentTopic.subject === 'historia_espana' ? 'historia' :
+      currentTopic.subject
     const params = new URLSearchParams({
       view: 'chat',
       from: 'camino_course',
-      subject: currentTopic.subject,
+      subject: subjectParam,
       block: currentTopic.blockSlug,
       topic: currentTopic.topicSlug,
     })

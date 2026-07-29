@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
-import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 
@@ -110,6 +110,20 @@ export async function POST(request: NextRequest) {
     // Fill the next 14 calendar days — ensureCaminoCalendar picks up the new subject from queue
     await ensureCaminoCalendar(user.id, db)
     await applyCalendarPersonalization(user.id, db)
+
+    // Mantener perfiles.subjects (la fuente de verdad server-side de
+    // onboarding) al día — antes esta ruta solo sembraba la cola/calendario
+    // y dejaba que cada navegador actualizara su propia copia local, así
+    // que la asignatura añadida aquí no aparecía como "elegida" en ningún
+    // otro dispositivo ni al recargar tras limpiar caché.
+    try {
+      const { data: perfil } = await db.from('perfiles').select('subjects').eq('id', user.id).maybeSingle()
+      const currentLabels: string[] = Array.isArray(perfil?.subjects) ? perfil.subjects.filter((s: unknown): s is string => typeof s === 'string') : []
+      const label = subjectLabelFromSlug(subject)
+      if (!currentLabels.includes(label)) {
+        await db.from('perfiles').upsert({ id: user.id, subjects: [...currentLabels, label] }, { onConflict: 'id' })
+      }
+    } catch { /* non-critical: la cola/calendario ya quedó sembrada arriba */ }
 
     return NextResponse.json({ ok: true, alreadyExists: false })
   } catch (err) {

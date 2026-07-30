@@ -1085,7 +1085,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 ) : liga && myLigaEntry ? (
                   <>
                     <p style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{liga.nombre}</p>
-                    <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP sem.</p>
+                    <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP ronda</p>
                   </>
                 ) : (
                   <Link href="/camino" style={{ fontSize: 12, fontWeight: 900, color: '#2563eb', textDecoration: 'none' }}>Crear liga →</Link>

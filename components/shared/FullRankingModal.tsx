@@ -148,7 +148,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
 function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
   if (data === undefined) return <Loading />
 
-  if (!data || data.activeCount < 5) {
+  if (!data || data.activeCount === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>

@@ -7,8 +7,8 @@ import { X } from 'lucide-react'
 type LigaMember = { user_id: string; name: string; weekly_xp: number; total_xp: number }
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMember[] }
 
-type GlobalUser = { name: string; xp: number; rank: number; isCurrentUser: boolean }
-type GlobalData = { myRank: number; myXp: number; activeCount: number; top3: GlobalUser[]; neighbors: GlobalUser[]; nextTarget: { name: string; xpNeeded: number } | null }
+type GlobalEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
+type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number }
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
@@ -41,21 +41,22 @@ function Row({ rank, name, xp, isMe }: { rank: number; name: string; xp: number;
   )
 }
 
-function GlobalRow({ user, medal }: { user: GlobalUser; medal?: string }) {
+function GlobalRow({ entry }: { entry: GlobalEntry }) {
+  const medal = entry.rank <= 3 ? MEDALS[entry.rank - 1] : null
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12,
-      background: user.isCurrentUser ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
-      border: user.isCurrentUser ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+      background: entry.isCurrentUser ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
+      border: entry.isCurrentUser ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
     }}>
       <span style={{ fontSize: medal ? 17 : 12, fontWeight: 900, color: 'rgba(255,255,255,0.35)', minWidth: 26, textAlign: 'center', lineHeight: 1 }}>
-        {medal ?? `#${user.rank}`}
+        {medal ?? `#${entry.rank}`}
       </span>
-      <span style={{ flex: 1, fontSize: 14, fontWeight: user.isCurrentUser ? 800 : 600, color: user.isCurrentUser ? 'white' : 'rgba(255,255,255,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {user.name}
+      <span style={{ flex: 1, fontSize: 14, fontWeight: entry.isCurrentUser ? 800 : 600, color: entry.isCurrentUser ? 'white' : 'rgba(255,255,255,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {entry.name}
       </span>
-      <span style={{ fontSize: 13, fontWeight: 800, color: user.isCurrentUser ? '#60a5fa' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
-        {user.xp.toLocaleString('es-ES')} XP
+      <span style={{ fontSize: 13, fontWeight: 800, color: entry.isCurrentUser ? '#60a5fa' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
+        {entry.xp.toLocaleString('es-ES')} XP
       </span>
     </div>
   )
@@ -153,33 +154,21 @@ function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>
         <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Kairo acaba de empezar</p>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Tu puesto aparecerá cuando haya más alumnos activos.</p>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Sé el primero en completar misiones.</p>
       </div>
     )
   }
 
-  const myInTop3 = data.top3.some(u => u.isCurrentUser)
-
   return (
     <div>
       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-        Top Kairo · XP total histórico
+        {data.activeCount} alumnos · XP total histórico
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {data.top3.map((u, i) => (
-          <GlobalRow key={i} user={u} medal={MEDALS[i]} />
+        {data.entries.map((e, i) => (
+          <GlobalRow key={i} entry={e} />
         ))}
       </div>
-      {!myInTop3 && data.neighbors.length > 0 && (
-        <>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.18)', fontSize: 16, letterSpacing: '0.3em', margin: '12px 0' }}>···</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {data.neighbors.map((u, i) => (
-              <GlobalRow key={i} user={u} />
-            ))}
-          </div>
-        </>
-      )}
       {data.nextTarget && <Hint xpNeeded={data.nextTarget.xpNeeded} name={data.nextTarget.name} />}
     </div>
   )

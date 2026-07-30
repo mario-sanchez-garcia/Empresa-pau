@@ -1,7 +1,5 @@
 <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="160" height="160" fill="#0a0a0a"/>
-  <!-- Outer triangle: wide base -->
-  <path d="M80 14 L8 148 M80 14 L152 148" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Inner triangle: same apex, narrower and extends below outer -->
-  <path d="M80 14 L46 156 M80 14 L114 156" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M80 18 L10 148 M80 18 L150 148" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M80 18 L45 155 M80 18 L115 155" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

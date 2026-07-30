@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
+import { getXpByUserInRange, currentWeekRange } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,39 +13,36 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', ligaRow.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  const { data: progressRows } = await db
-    .from('camino_user_progress')
-    .select('user_id, xp_total')
-    .in('user_id', memberIds)
-  const xpByUser = new Map<string, number>()
-  for (const row of progressRows ?? []) {
-    xpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
-  }
+  // Weekly XP from Monday of current week
+  const xpByUser = await getXpByUserInRange(db, currentWeekRange(), memberIds)
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
   const nameById = new Map<string, string>()
   for (const p of profiles ?? []) {
     const name = ((p.display_name || p.nombre || '') as string).trim()
-    if (name) nameById.set(p.id as string, name)
+    if (name && !name.includes('@')) nameById.set(p.id as string, name)
   }
 
-  const missingIds = memberIds.filter(uid => uid !== currentUserId && !nameById.has(uid))
-  for (const uid of missingIds) {
-    const { data: authData } = await db.auth.admin.getUserById(uid)
-    const email = authData?.user?.email
-    if (email) nameById.set(uid, email.split('@')[0])
-  }
-
-  const miembros = memberIds
+  const sorted = memberIds
     .map(uid => ({
       user_id: uid,
       name: uid === currentUserId ? 'Tú' : (nameById.get(uid) || 'Alumno PAU'),
       weekly_xp: xpByUser.get(uid) ?? 0,
     }))
     .sort((a, b) => b.weekly_xp - a.weekly_xp)
-    .map((m, i) => ({ ...m, rank: i + 1 }))
 
-  return { id: ligaRow.id, codigo: ligaRow.codigo, nombre: ligaRow.nombre, miembros }
+  const miembros = sorted.map((m, i) => ({ ...m, rank: i + 1 }))
+
+  const allZero = miembros.every(m => m.weekly_xp === 0)
+
+  const myIndex = sorted.findIndex(m => m.user_id === currentUserId)
+  const above = myIndex > 0 ? sorted[myIndex - 1] : null
+  const myWeeklyXp = xpByUser.get(currentUserId) ?? 0
+  const nextTarget = above && above.weekly_xp > myWeeklyXp
+    ? { name: above.name, xpNeeded: above.weekly_xp - myWeeklyXp }
+    : null
+
+  return { id: ligaRow.id, codigo: ligaRow.codigo, nombre: ligaRow.nombre, miembros, allZero, nextTarget }
 }
 
 // GET — devuelve la liga del usuario actual (o null si no tiene)

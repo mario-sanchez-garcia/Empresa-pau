@@ -85,9 +85,7 @@ function sumXpByUser(rows: Array<{ user_id: string; xp_amount?: number | null }>
 
 // Fuente única para "cuánto XP ha ganado cada alumno en este rango de
 // fechas" — usa siempre camino_xp_events.mission_date (nunca created_at,
-// que puede no coincidir con la fecha de la misión). Reutilizado por
-// /api/ligas/rankings (ronda/top), /api/ligas y /api/ligas/[codigo] (antes
-// cada uno recalculaba esto a su manera, con el riesgo de que divergieran).
+// que puede no coincidir con la fecha de la misión).
 export async function getXpByUserInRange(
   db: SupabaseClient,
   range: { start: string; end: string },

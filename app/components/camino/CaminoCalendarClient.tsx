@@ -17,7 +17,6 @@ import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
-import RankingRow, { type RankingEntry } from '@/components/shared/RankingRow'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
@@ -51,6 +50,7 @@ type DayPlan = { date: string; label: string; isToday: boolean; missions: Missio
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 type StudentExam = { id: string; subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }
 type CurriculumItem = { subject: string; subjectSlug: string; block: string; blockSlug: string; topic: string; topicSlug: string; title: string; sortOrder: number; contentStatus: string; source: 'supabase' | 'fallback' | 'seed'; planTopic?: CaminoCurriculumTopic }
+type RankingEntry = { id: string; name: string; community: string; xp: number; rank: number; isCurrentUser: boolean }
 type LeaderboardPayload = {
   global: { top: RankingEntry[]; current: RankingEntry | null }
   community: { name: string; top: RankingEntry[]; current: RankingEntry | null }
@@ -58,7 +58,7 @@ type LeaderboardPayload = {
   realUserCount: number
 }
 type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
-type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
+type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[]; allZero: boolean; nextTarget: { name: string; xpNeeded: number } | null }
 type SchoolTopicAdjustment = { schoolName: string | null; community: string | null; subject: string; blockSlug: string | null; topicSlug: string; feedbackType: 'not_seen_in_class'; status: 'not_seen' | 'delayed_for_school'; notSeenCount: number; date: string }
 type LegacySchoolFeedback = { schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }
 type CalendarWeekCache = Record<string, DayPlan[]>
@@ -3075,85 +3075,6 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
   )
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
-
-function RankingCard({ open, setOpen, tab, setTab, rows, currentRow, community, totalXP, division, realUserCount, liga, ligaLoading, onCreateLiga, onJoinLiga }: { open: boolean; setOpen: (open: boolean) => void; tab: 'global' | 'community'; setTab: (tab: 'global' | 'community') => void; rows: RankingEntry[]; currentRow: RankingEntry | null; community: string; totalXP: number; division: string; realUserCount: number; liga: LigaInfo | null; ligaLoading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
-  const hasEnoughUsers = realUserCount >= 3
-  const visibleRows = tab === 'community' ? rows.filter(row => row.community === community) : rows
-  const [showFullRanking, setShowFullRanking] = useState(false)
-  const [fullRankingToken, setFullRankingToken] = useState<string | null>(null)
-
-  async function openFullRanking() {
-    const { data } = await supabase.auth.getSession()
-    setFullRankingToken(data.session?.access_token ?? null)
-    setShowFullRanking(true)
-  }
-
-  return (
-    <div className="flex flex-1 flex-col rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
-      <div className="flex items-center justify-between">
-        <p className="text-base font-black text-slate-950">Ranking y divisiones</p>
-        <button onClick={openFullRanking} className="text-[11px] font-black text-blue-600 hover:text-blue-700">
-          Ver clasificación completa →
-        </button>
-      </div>
-      <AnimatePresence>
-        {showFullRanking && fullRankingToken && (
-          <FullRankingModal token={fullRankingToken} onClose={() => setShowFullRanking(false)} />
-        )}
-      </AnimatePresence>
-      <div className="mt-4 grid gap-4">
-        {/* División + XP compacto */}
-        <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">División actual</p>
-            <p className="mt-0.5 text-sm font-black text-slate-900">{division}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">XP total</p>
-            <p className="mt-0.5 text-sm font-black text-blue-700">{totalXP.toLocaleString('es-ES')} XP</p>
-          </div>
-        </div>
-
-        {/* Ranking real o empty state */}
-        {hasEnoughUsers ? (
-          <div>
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
-                {tab === 'community' && community !== 'Sin comunidad' ? `Ranking · ${community}` : 'Ranking global'}
-              </p>
-              <div className="flex gap-1">
-                <button onClick={() => setTab('global')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'global' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Global</button>
-                <button onClick={() => setTab('community')} className={`rounded-full px-3 py-1.5 text-xs font-black ${tab === 'community' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>Comunidad</button>
-              </div>
-            </div>
-            {tab === 'community' && community === 'Sin comunidad' ? (
-              <p className="text-sm font-semibold text-slate-400">Completa tu perfil con tu comunidad autónoma para ver el ranking local.</p>
-            ) : visibleRows.length ? (
-              <div className="grid gap-1.5">
-                {visibleRows.slice(0, 3).map(row => <RankingRow key={row.id} row={row} />)}
-              </div>
-            ) : (
-              <p className="text-sm font-semibold text-slate-400">Sin datos por ahora.</p>
-            )}
-            {currentRow && !visibleRows.slice(0, 3).some(r => r.isCurrentUser) && (
-              <>
-                <div className="my-3 h-px bg-blue-100" />
-                <RankingRow row={currentRow} fixed />
-              </>
-            )}
-          </div>
-        ) : (
-          <div>
-            <p className="text-sm font-semibold text-slate-500">Aún no hay suficientes alumnos activos para mostrar un ranking real.</p>
-            <p className="mt-1 text-sm font-semibold text-slate-500">
-              {totalXP === 0 ? 'Empieza completando tu primera misión para sumar XP.' : 'Completa misiones esta semana para seguir sumando XP.'}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
 
 function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaInfo | null; loading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {

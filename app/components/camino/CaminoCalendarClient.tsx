@@ -57,8 +57,8 @@ type LeaderboardPayload = {
   currentXp: number
   realUserCount: number
 }
-type LigaMiembro = { user_id: string; name: string; weekly_xp: number; rank: number }
-type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[]; allZero: boolean; nextTarget: { name: string; xpNeeded: number } | null }
+type LigaMiembro = { user_id: string; name: string; weekly_xp: number; total_xp: number }
+type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
 type SchoolTopicAdjustment = { schoolName: string | null; community: string | null; subject: string; blockSlug: string | null; topicSlug: string; feedbackType: 'not_seen_in_class'; status: 'not_seen' | 'delayed_for_school'; notSeenCount: number; date: string }
 type LegacySchoolFeedback = { schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }
 type CalendarWeekCache = Record<string, DayPlan[]>
@@ -3112,28 +3112,33 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
 
   if (loading) return <p className="text-xs font-bold text-slate-400">Cargando liga…</p>
 
-  if (liga) return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>{liga.nombre}</div>
-        <button
-          onClick={copyLink}
-          style={{ fontSize: 10, fontWeight: 800, color: copied ? '#16a34a' : '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-        >
-          {copied ? '✓ Copiado' : 'Compartir liga'}
-        </button>
-      </div>
-      {liga.miembros.map(m => (
-        <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8, background: m.name === 'Tú' ? '#eff6ff' : 'transparent', border: m.name === 'Tú' ? '1px solid #dbeafe' : '1px solid transparent' }}>
-          <span style={{ width: 20, fontWeight: 800, color: '#94a3b8', fontSize: 10, textAlign: 'center', flexShrink: 0 }}>
-            {m.rank <= 3 ? <Medal size={11} color={m.rank === 1 ? '#b45309' : m.rank === 2 ? '#64748b' : '#b87333'} /> : `#${m.rank}`}
-          </span>
-          <span style={{ flex: 1, fontSize: 11, fontWeight: m.name === 'Tú' ? 800 : 600, color: m.name === 'Tú' ? '#1d40af' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
-          <span style={{ fontWeight: 800, color: '#2563eb', fontSize: 10, flexShrink: 0 }}>{m.weekly_xp} XP</span>
+  if (liga) {
+    const ranked = [...liga.miembros]
+      .sort((a, b) => b.total_xp - a.total_xp)
+      .map((m, i) => ({ ...m, rank: i + 1 }))
+    return (
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>{liga.nombre}</div>
+          <button
+            onClick={copyLink}
+            style={{ fontSize: 10, fontWeight: 800, color: copied ? '#16a34a' : '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            {copied ? '✓ Copiado' : 'Compartir liga'}
+          </button>
         </div>
-      ))}
-    </div>
-  )
+        {ranked.map(m => (
+          <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8, background: m.name === 'Tú' ? '#eff6ff' : 'transparent', border: m.name === 'Tú' ? '1px solid #dbeafe' : '1px solid transparent' }}>
+            <span style={{ width: 20, fontWeight: 800, color: '#94a3b8', fontSize: 10, textAlign: 'center', flexShrink: 0 }}>
+              {m.rank <= 3 ? <Medal size={11} color={m.rank === 1 ? '#b45309' : m.rank === 2 ? '#64748b' : '#b87333'} /> : `#${m.rank}`}
+            </span>
+            <span style={{ flex: 1, fontSize: 11, fontWeight: m.name === 'Tú' ? 800 : 600, color: m.name === 'Tú' ? '#1d40af' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
+            <span style={{ fontWeight: 800, color: '#2563eb', fontSize: 10, flexShrink: 0 }}>{m.total_xp} XP</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   if (mode === 'idle') return (
     <div>

@@ -13,8 +13,16 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', ligaRow.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  // Weekly XP from Monday of current week
-  const xpByUser = await getXpByUserInRange(db, currentWeekRange(), memberIds)
+  // Fetch weekly XP and total XP in parallel
+  const [xpByUser, progressResult] = await Promise.all([
+    getXpByUserInRange(db, currentWeekRange(), memberIds),
+    db.from('camino_user_progress').select('user_id, xp_total').in('user_id', memberIds),
+  ])
+
+  const totalXpByUser = new Map<string, number>()
+  for (const row of progressResult.data ?? []) {
+    totalXpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
+  }
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
   const nameById = new Map<string, string>()
@@ -23,26 +31,14 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
     if (name && !name.includes('@')) nameById.set(p.id as string, name)
   }
 
-  const sorted = memberIds
-    .map(uid => ({
-      user_id: uid,
-      name: uid === currentUserId ? 'Tú' : (nameById.get(uid) || 'Alumno PAU'),
-      weekly_xp: xpByUser.get(uid) ?? 0,
-    }))
-    .sort((a, b) => b.weekly_xp - a.weekly_xp)
+  const miembros = memberIds.map(uid => ({
+    user_id: uid,
+    name: uid === currentUserId ? 'Tú' : (nameById.get(uid) || 'Alumno PAU'),
+    weekly_xp: xpByUser.get(uid) ?? 0,
+    total_xp: totalXpByUser.get(uid) ?? 0,
+  }))
 
-  const miembros = sorted.map((m, i) => ({ ...m, rank: i + 1 }))
-
-  const allZero = miembros.every(m => m.weekly_xp === 0)
-
-  const myIndex = sorted.findIndex(m => m.user_id === currentUserId)
-  const above = myIndex > 0 ? sorted[myIndex - 1] : null
-  const myWeeklyXp = xpByUser.get(currentUserId) ?? 0
-  const nextTarget = above && above.weekly_xp > myWeeklyXp
-    ? { name: above.name, xpNeeded: above.weekly_xp - myWeeklyXp }
-    : null
-
-  return { id: ligaRow.id, codigo: ligaRow.codigo, nombre: ligaRow.nombre, miembros, allZero, nextTarget }
+  return { id: ligaRow.id, codigo: ligaRow.codigo, nombre: ligaRow.nombre, miembros }
 }
 
 // GET — devuelve la liga del usuario actual (o null si no tiene)

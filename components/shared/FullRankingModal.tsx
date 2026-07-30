@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
-type LigaMember = { user_id: string; name: string; weekly_xp: number; rank: number }
-type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMember[]; allZero: boolean; nextTarget: { name: string; xpNeeded: number } | null }
+type LigaMember = { user_id: string; name: string; weekly_xp: number; total_xp: number }
+type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMember[] }
 
 type GlobalUser = { name: string; xp: number; rank: number; isCurrentUser: boolean }
 type GlobalData = { myRank: number; myXp: number; activeCount: number; top3: GlobalUser[]; neighbors: GlobalUser[]; nextTarget: { name: string; xpNeeded: number } | null }
@@ -21,21 +21,41 @@ function Loading() {
   )
 }
 
-function Row({ rank, name, xp, isMe, medal }: { rank: number; name: string; xp: number; isMe: boolean; medal?: string }) {
+function Row({ rank, name, xp, isMe }: { rank: number; name: string; xp: number; isMe: boolean }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12,
       background: isMe ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
       border: isMe ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
     }}>
-      <span style={{ fontSize: medal ? 17 : 12, fontWeight: 900, color: 'rgba(255,255,255,0.35)', minWidth: 26, textAlign: 'center', lineHeight: 1 }}>
-        {medal ?? `#${rank}`}
+      <span style={{ fontSize: 12, fontWeight: 900, color: 'rgba(255,255,255,0.35)', minWidth: 26, textAlign: 'center' }}>
+        #{rank}
       </span>
       <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 800 : 600, color: isMe ? 'white' : 'rgba(255,255,255,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {name}
       </span>
       <span style={{ fontSize: 13, fontWeight: 800, color: isMe ? '#60a5fa' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
         {xp.toLocaleString('es-ES')} XP
+      </span>
+    </div>
+  )
+}
+
+function GlobalRow({ user, medal }: { user: GlobalUser; medal?: string }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12,
+      background: user.isCurrentUser ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
+      border: user.isCurrentUser ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+    }}>
+      <span style={{ fontSize: medal ? 17 : 12, fontWeight: 900, color: 'rgba(255,255,255,0.35)', minWidth: 26, textAlign: 'center', lineHeight: 1 }}>
+        {medal ?? `#${user.rank}`}
+      </span>
+      <span style={{ flex: 1, fontSize: 14, fontWeight: user.isCurrentUser ? 800 : 600, color: user.isCurrentUser ? 'white' : 'rgba(255,255,255,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {user.name}
+      </span>
+      <span style={{ fontSize: 13, fontWeight: 800, color: user.isCurrentUser ? '#60a5fa' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
+        {user.xp.toLocaleString('es-ES')} XP
       </span>
     </div>
   )
@@ -49,40 +69,72 @@ function Hint({ xpNeeded, name }: { xpNeeded: number; name: string }) {
   )
 }
 
+function PeriodToggle({ period, onChange }: { period: 'total' | 'week'; onChange: (p: 'total' | 'week') => void }) {
+  return (
+    <div style={{ display: 'inline-flex', gap: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 999, padding: 3, marginBottom: 16 }}>
+      {(['total', 'week'] as const).map(p => (
+        <button key={p} onClick={() => onChange(p)} style={{
+          padding: '5px 14px', borderRadius: 999, border: 'none', cursor: 'pointer',
+          fontSize: 11, fontWeight: 700,
+          background: period === p ? 'rgba(255,255,255,0.14)' : 'transparent',
+          color: period === p ? 'white' : 'rgba(255,255,255,0.35)',
+          transition: 'background 150ms, color 150ms',
+        }}>
+          {p === 'total' ? 'XP total' : 'Esta semana'}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undefined; onCopyInvite: () => void; copied: boolean }) {
+  const [period, setPeriod] = useState<'total' | 'week'>('total')
+
   if (liga === undefined) return <Loading />
 
   if (!liga) {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1.6 }}>
-          Únete a una liga para ver tu clasificación semanal.
+          Únete a una liga para ver tu clasificación.
         </p>
       </div>
     )
   }
 
-  if (liga.allZero) {
-    return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p style={{ fontSize: 30, marginBottom: 10 }}>✨</p>
-        <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>{liga.nombre}</p>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Sé el primero en puntuar esta semana</p>
-      </div>
-    )
-  }
+  // Re-sort and re-rank client-side based on selected period
+  const ranked = [...liga.miembros]
+    .sort((a, b) => period === 'total' ? b.total_xp - a.total_xp : b.weekly_xp - a.weekly_xp)
+    .map((m, i) => ({ ...m, rank: i + 1, displayXp: period === 'total' ? m.total_xp : m.weekly_xp }))
+
+  const allZero = period === 'week' && ranked.every(m => m.weekly_xp === 0)
+
+  const myIndex = ranked.findIndex(m => m.name === 'Tú')
+  const above = myIndex > 0 ? ranked[myIndex - 1] : null
+  const myXp = ranked[myIndex]?.displayXp ?? 0
+  const nextTarget = above && above.displayXp > myXp ? { name: above.name, xpNeeded: above.displayXp - myXp } : null
 
   return (
     <div>
-      <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-        {liga.nombre} · XP esta semana
+      <PeriodToggle period={period} onChange={setPeriod} />
+      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+        {liga.nombre}
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {liga.miembros.map(m => (
-          <Row key={m.user_id} rank={m.rank} name={m.name} xp={m.weekly_xp} isMe={m.name === 'Tú'} />
-        ))}
-      </div>
-      {liga.nextTarget && <Hint xpNeeded={liga.nextTarget.xpNeeded} name={liga.nextTarget.name} />}
+      {allZero ? (
+        <div style={{ textAlign: 'center', padding: '32px 0' }}>
+          <p style={{ fontSize: 28, marginBottom: 8 }}>✨</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Sé el primero en puntuar esta semana</p>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {ranked.map(m => (
+              <Row key={m.user_id} rank={m.rank} name={m.name} xp={m.displayXp} isMe={m.name === 'Tú'} />
+            ))}
+          </div>
+          {nextTarget && <Hint xpNeeded={nextTarget.xpNeeded} name={nextTarget.name} />}
+        </>
+      )}
       <button
         onClick={onCopyInvite}
         style={{ marginTop: 20, width: '100%', padding: '12px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'color 200ms' }}
@@ -110,12 +162,12 @@ function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
 
   return (
     <div>
-      <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
         Top Kairo · XP total histórico
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {data.top3.map((u, i) => (
-          <Row key={i} rank={u.rank} name={u.name} xp={u.xp} isMe={u.isCurrentUser} medal={MEDALS[i]} />
+          <GlobalRow key={i} user={u} medal={MEDALS[i]} />
         ))}
       </div>
       {!myInTop3 && data.neighbors.length > 0 && (
@@ -123,7 +175,7 @@ function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
           <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.18)', fontSize: 16, letterSpacing: '0.3em', margin: '12px 0' }}>···</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {data.neighbors.map((u, i) => (
-              <Row key={i} rank={u.rank} name={u.name} xp={u.xp} isMe={u.isCurrentUser} />
+              <GlobalRow key={i} user={u} />
             ))}
           </div>
         </>
@@ -156,8 +208,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
 
   async function copyInvite() {
     if (!liga) return
-    const url = `${window.location.origin}/liga/${liga.codigo}`
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(`${window.location.origin}/liga/${liga.codigo}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2200)
   }
@@ -189,7 +240,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Main tabs */}
         <div style={{ padding: '14px 20px 0', display: 'flex', gap: 6, flexShrink: 0 }}>
           {(['liga', 'global'] as const).map(t => (
             <button

@@ -1,9 +1,0 @@
-<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="160" height="160" fill="#0f0f0f"/>
-  <!-- outer legs: wide V -->
-  <path d="M80 20 L6 148" stroke="white" stroke-width="7" stroke-linecap="round"/>
-  <path d="M80 20 L154 148" stroke="white" stroke-width="7" stroke-linecap="round"/>
-  <!-- inner legs: narrower V, same apex -->
-  <path d="M80 20 L44 155" stroke="white" stroke-width="7" stroke-linecap="round"/>
-  <path d="M80 20 L116 155" stroke="white" stroke-width="7" stroke-linecap="round"/>
-</svg>

@@ -1,5 +1,7 @@
-<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kairo">
-  <path d="M68 42L30 82H72V42H68Z" fill="#6AAFEA"/>
-  <path d="M74 42H126V87L90 124V82H74V42Z" fill="#075199"/>
-  <path d="M50 98L82 94V123L44 128L50 98Z" fill="#075199"/>
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="160" fill="#0a0a0a"/>
+  <!-- Outer triangle: wide base -->
+  <path d="M80 14 L8 148 M80 14 L152 148" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Inner triangle: same apex, narrower and extends below outer -->
+  <path d="M80 14 L46 156 M80 14 L114 156" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
-import { getCurrentRoundXpByUser } from '@/app/lib/camino/leagueRounds'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -33,11 +33,14 @@ export async function GET(
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', liga.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
 
-  // Misma fuente que /api/ligas/rankings y /api/ligas (getCurrentRoundXpByUser,
-  // filtra por camino_xp_events.mission_date) — antes esta ruta recalculaba
-  // el XP a mano filtrando por created_at + un fallback sobre camino_calendar,
-  // lo que podía divergir del cálculo canónico.
-  const xpByUser = await getCurrentRoundXpByUser(db, memberIds)
+  const { data: progressRows } = await db
+    .from('camino_user_progress')
+    .select('user_id, xp_total')
+    .in('user_id', memberIds)
+  const xpByUser = new Map<string, number>()
+  for (const row of progressRows ?? []) {
+    xpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
+  }
 
   const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
   const nameById = new Map<string, string>()

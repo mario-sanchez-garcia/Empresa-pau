@@ -31,6 +31,16 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
     if (name && !name.includes('@')) nameById.set(p.id as string, name)
   }
 
+  // Fallback to email prefix for members without a profile name
+  const missingIds = memberIds.filter(uid => uid !== currentUserId && !nameById.has(uid))
+  if (missingIds.length > 0) {
+    const results = await Promise.all(missingIds.map(uid => db.auth.admin.getUserById(uid)))
+    for (let i = 0; i < missingIds.length; i++) {
+      const email = results[i].data?.user?.email
+      if (email) nameById.set(missingIds[i], email.split('@')[0])
+    }
+  }
+
   const miembros = memberIds.map(uid => ({
     user_id: uid,
     name: uid === currentUserId ? 'Tú' : (nameById.get(uid) || 'Alumno PAU'),

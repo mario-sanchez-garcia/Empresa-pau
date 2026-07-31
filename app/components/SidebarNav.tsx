@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ClipboardList, Clock, GraduationCap, LayoutDashboard, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
+import { ClipboardList, Clock, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, MessageCircle, UserRound, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { label: 'Chat con Kairo',  href: '/examenes?view=chat',      icon: MessageCircle },
   { label: 'Historial',       href: '/examenes?view=historial', icon: Clock },
   { label: 'Mi Perfil',       href: '/settings',                icon: UserRound },
+  { label: 'Ayuda',           href: '/ayuda',                   icon: HelpCircle },
 ]
 
 // The 5 items shown in the mobile bottom bar (most-used first)
@@ -31,6 +32,7 @@ function isActive(href: string, pathname: string): boolean {
   if (href === '/settings')   return pathname === '/settings'
   if (href === '/examenes')   return pathname === '/examenes'
   if (href === '/admin')      return pathname.startsWith('/admin')
+  if (href === '/ayuda')      return pathname === '/ayuda'
   return false
 }
 

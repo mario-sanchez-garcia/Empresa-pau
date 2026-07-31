@@ -2442,10 +2442,13 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
 
           {/* Week grid */}
           <div className="grid grid-cols-7 gap-1.5">
-            {orderedDraft.map(day => {
+            {orderedDraft.map((day, idx) => {
               const isSelected = day.date === selectedDayDate
               const isToday = day.isToday
               const dayMains = day.missions.filter(m => m.role === 'main')
+              const dayDate = new Date(day.date + 'T12:00:00')
+              const prevDate = idx > 0 ? new Date(orderedDraft[idx - 1].date + 'T12:00:00') : null
+              const showMonth = idx === 0 || (prevDate && dayDate.getMonth() !== prevDate.getMonth())
               return (
                 <button
                   key={day.date}
@@ -2460,12 +2463,17 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     cursor: 'pointer',
                   }}
                 >
-                  <div className="mb-1 text-[7px] font-black uppercase tracking-[.16em]" style={{ color: isSelected ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.22)' }}>
-                    {new Date(day.date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase().slice(0, 3)}
+                  <div className="mb-1 text-[8px] font-black uppercase tracking-[.12em]" style={{ color: isSelected ? 'rgba(255,255,255,.65)' : 'rgba(255,255,255,.3)' }}>
+                    {dayDate.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase().slice(0, 3)}
                   </div>
-                  <div className="text-[20px] font-bold leading-none" style={{ color: isSelected ? 'white' : isToday ? '#60a5fa' : '#475569' }}>
+                  <div className="text-[20px] font-bold leading-none" style={{ color: isSelected ? 'white' : isToday ? '#60a5fa' : '#cbd5e1' }}>
                     {parseInt(day.date.slice(-2), 10)}
                   </div>
+                  {showMonth && (
+                    <div className="mt-0.5 text-[7px] font-black uppercase tracking-[.1em]" style={{ color: isSelected ? 'rgba(255,255,255,.5)' : 'rgba(148,163,184,.55)' }}>
+                      {dayDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
+                    </div>
+                  )}
                   <div className="mt-1.5 flex justify-center gap-1" style={{ minHeight: 5 }}>
                     {dayMains.slice(0, 3).map((m, i) => (
                       <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: isSelected ? 'rgba(255,255,255,.45)' : themeFor(m.subject).text }} />
@@ -2477,11 +2485,11 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
           </div>
 
           {/* Week nav */}
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.11]"><ChevronLeft size={11} /> Anterior</button>
-            <span className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-black text-slate-500">{weekRangeLabel(editorWeekStart)}</span>
-            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.11]"><RotateCcw size={10} /> Hoy</button>
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.11]">Siguiente <ArrowRight size={11} /></button>
+          <div className="mt-3 flex items-center gap-2">
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><ChevronLeft size={13} /> Ant</button>
+            <span className="flex-1 text-center text-[11px] font-black text-slate-400">{weekRangeLabel(editorWeekStart)}</span>
+            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><RotateCcw size={11} /> Hoy</button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Sig <ArrowRight size={13} /></button>
           </div>
         </header>
 
@@ -2500,14 +2508,16 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     {selectedDay?.date ? new Date(selectedDay.date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase()) : ''}
                   </span>
                 </div>
-                <div className="font-black text-slate-900 leading-none" style={{ fontSize: 64, letterSpacing: '-0.04em', lineHeight: 0.88 }}>
-                  {selectedDay?.date ? parseInt(selectedDay.date.slice(-2), 10) : ''}
-                </div>
-                <div className="mt-1.5 text-[13px] font-800 uppercase tracking-[0em]" style={{ fontWeight: 800, color: '#64748b' }}>
-                  {selectedDay?.date ? 'de ' + new Date(selectedDay.date + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long' }) : ''}
+                <div className="flex items-baseline gap-2">
+                  <div className="font-black text-slate-900 leading-none" style={{ fontSize: 48, letterSpacing: '-0.04em', lineHeight: 0.88 }}>
+                    {selectedDay?.date ? parseInt(selectedDay.date.slice(-2), 10) : ''}
+                  </div>
+                  <div className="text-[13px] uppercase tracking-[0em]" style={{ fontWeight: 800, color: '#64748b' }}>
+                    {selectedDay?.date ? new Date(selectedDay.date + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long' }) : ''}
+                  </div>
                 </div>
                 <p className="mt-2 text-[9px] font-black uppercase tracking-[.12em] text-slate-300">
-                  {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} misiones principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
+                  {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
                 </p>
               </div>
               <button
@@ -2603,8 +2613,15 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                         <span className="text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min</span>
                         <span className="text-[10px] font-black text-blue-600">+{mission.baseXP} XP</span>
                       </div>
-                      <select value={selectedDay?.date ?? ''} onChange={e => moveMission(mission.id, e.target.value)} className="inputish mt-2.5">
-                        {orderedDraft.map(d => <option key={d.date} value={d.date}>Mover a {d.label}</option>)}
+                      <select
+                        value=""
+                        onChange={e => { if (e.target.value) moveMission(mission.id, e.target.value) }}
+                        className="inputish mt-2.5"
+                      >
+                        <option value="" disabled>Mover a otro día...</option>
+                        {orderedDraft.filter(d => d.date !== selectedDay?.date).map(d => (
+                          <option key={d.date} value={d.date}>{d.label}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

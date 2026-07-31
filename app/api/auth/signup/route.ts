@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 const SIGNUP_IP_RATE_LIMIT = 10
 const SIGNUP_EMAIL_RATE_LIMIT = 5
 const SIGNUP_WINDOW_SECONDS = 3600
+const EXISTING_ACCOUNT_ERROR =
+  'Ya existe una cuenta con este email. Inicia sesión o usa otra contraseña.'
 
 // x-real-ip is set by Vercel's edge to the actual connecting client IP and cannot
 // be injected by clients. x-forwarded-for[0] is spoofable, so it is only used as
@@ -16,11 +18,28 @@ function getSignupIp(headers: Headers): string {
   )
 }
 
-export async function POST(req: NextRequest) {
-  const { email, password } = await req.json()
-  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+function isAlreadyRegisteredError(error: { message?: string } | null) {
+  const message = error?.message?.toLowerCase() ?? ''
+  return (
+    message.includes('already been registered') ||
+    message.includes('already registered') ||
+    message.includes('user already exists')
+  )
+}
 
-  if (!normalizedEmail || !password) {
+export async function POST(req: NextRequest) {
+  let body: { email?: unknown; password?: unknown }
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Solicitud inválida' }, { status: 400 })
+  }
+
+  const { email, password } = body
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+  const normalizedPassword = typeof password === 'string' ? password : ''
+
+  if (!normalizedEmail || !normalizedPassword) {
     return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
   }
 
@@ -63,18 +82,31 @@ export async function POST(req: NextRequest) {
   // Create user with email already confirmed (bypasses email confirmation requirement)
   const { error: createError } = await adminSupabase.auth.admin.createUser({
     email: normalizedEmail,
-    password,
+    password: normalizedPassword,
     email_confirm: true,
   })
 
   if (createError) {
-    return NextResponse.json({ error: createError.message }, { status: 400 })
+    if (isAlreadyRegisteredError(createError)) {
+      const { data: existingSignInData, error: existingSignInError } = await adminSupabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password: normalizedPassword,
+      })
+
+      if (!existingSignInError && existingSignInData.session) {
+        return NextResponse.json({ session: existingSignInData.session, existingAccount: true })
+      }
+
+      return NextResponse.json({ error: EXISTING_ACCOUNT_ERROR }, { status: 409 })
+    }
+
+    return NextResponse.json({ error: 'No se pudo crear la cuenta. Inténtalo de nuevo.' }, { status: 400 })
   }
 
   // Sign in immediately to get a session
   const { data: signInData, error: signInError } = await adminSupabase.auth.signInWithPassword({
     email: normalizedEmail,
-    password,
+    password: normalizedPassword,
   })
 
   if (signInError || !signInData.session) {

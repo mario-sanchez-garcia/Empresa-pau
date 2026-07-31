@@ -63,14 +63,14 @@ export default function Login() {
       })
       const result = await res.json()
       if (!res.ok) {
-        setMensaje(result.error ?? 'No se pudo crear la cuenta. Inténtalo de nuevo.')
+        setMensaje(mensajeAuthLegible(result.error))
       } else {
         await supabase.auth.setSession(result.session)
         window.location.href = '/onboarding'
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setMensaje(error.message)
+      if (error) setMensaje(mensajeAuthLegible(error.message))
       else window.location.href = returnTo
     }
     setCargando(false)
@@ -84,6 +84,17 @@ export default function Login() {
     setModo(m => m === 'login' ? 'registro' : 'login')
     setMensaje('')
     setAceptaTerminos(false)
+  }
+
+  function mensajeAuthLegible(error?: string) {
+    const text = error?.toLowerCase() ?? ''
+    if (text.includes('already been registered') || text.includes('already registered')) {
+      return 'Ya existe una cuenta con este email. Inicia sesión o usa otra contraseña.'
+    }
+    if (text.includes('invalid login credentials')) {
+      return 'Email o contraseña incorrectos.'
+    }
+    return error ?? 'No se pudo completar la operación. Inténtalo de nuevo.'
   }
 
   return (

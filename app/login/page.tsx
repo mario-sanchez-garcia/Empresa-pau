@@ -5,6 +5,7 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { supabase } from '../lib/supabase'
 import { Eye, EyeOff } from 'lucide-react'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
+import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -65,6 +66,7 @@ export default function Login() {
       if (!res.ok) {
         setMensaje(mensajeAuthLegible(result.error))
       } else {
+        clearOnboarding()
         await supabase.auth.setSession(result.session)
         window.location.href = '/onboarding'
       }

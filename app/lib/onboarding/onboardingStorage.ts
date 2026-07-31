@@ -54,6 +54,11 @@ export function saveOnboarding(data: Partial<OnboardingData>) {
   window.localStorage.setItem(KEY, JSON.stringify({ ...current, ...data }))
 }
 
+export function clearOnboarding() {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem(KEY)
+}
+
 export function syncOnboardingCommunity(data: Partial<OnboardingData>) {
   if (typeof window === 'undefined') return
   if (data.community === 'Madrid' || data.community === 'Cataluña') {

@@ -246,7 +246,10 @@ export default function OnboardingFlow() {
     setUsernameStatus('checking')
     setUsernameError('')
     try {
-      const res = await fetch(`/api/username/check?u=${encodeURIComponent(u)}`)
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {}
+      const res = await fetch(`/api/username/check?u=${encodeURIComponent(u)}`, { headers })
       if (usernameCheckId.current !== id) return false // stale
       const json = await res.json() as { available?: boolean; error?: string; suggestions?: string[] }
       if (json.error && !json.available) {

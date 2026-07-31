@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { validateUsername, normalizeUsername, generateCandidates } from '@/app/lib/username'
 
@@ -35,12 +36,26 @@ export async function GET(request: NextRequest) {
 
   const normalized = normalizeUsername(u)
 
+  // If the caller is authenticated, exclude their own row so they can
+  // always claim back a username they already own
+  let ownUserId: string | null = null
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    try {
+      const anonClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      )
+      const { data: { user } } = await anonClient.auth.getUser(authHeader.slice(7))
+      ownUserId = user?.id ?? null
+    } catch { /* optional — unauthenticated check still works */ }
+  }
+
   const db = createServiceClient()
-  const { data, error } = await db
-    .from('perfiles')
-    .select('id')
-    .eq('username_normalized', normalized)
-    .maybeSingle()
+  let checkQuery = db.from('perfiles').select('id').eq('username_normalized', normalized)
+  if (ownUserId) checkQuery = checkQuery.neq('id', ownUserId)
+  const { data, error } = await checkQuery.maybeSingle()
 
   if (error) {
     return NextResponse.json({ error: 'Error al verificar disponibilidad' }, { status: 500 })

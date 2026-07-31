@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
     ? (body.weeklyStudyDaysValue as number) : null
   const schoolSource = VALID_SCHOOL_SOURCES.includes(body.schoolSource as typeof VALID_SCHOOL_SOURCES[number])
     ? (body.schoolSource as string) : null
+  const displayName = typeof body.displayName === 'string' ? body.displayName.trim().slice(0, 32) || null : null
   const schoolName = cleanString(body.schoolName)
   const subjects = cleanStringArray(body.subjects)
   const preparationFeeling = cleanString(body.preparationFeeling)
@@ -99,11 +100,14 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Fuente de verdad server-side para agrupar ligas por comunidad
-      // (billing_events.payload.community sigue existiendo abajo como log,
-      // pero ya no es la única fuente — ver leaderboard/rankings).
       await serviceDb.from('perfiles').upsert({ id: user.id, comunidad: community }, { onConflict: 'id' })
     } catch { /* non-critical */ }
+
+    if (displayName) {
+      try {
+        await serviceDb.from('perfiles').upsert({ id: user.id, display_name: displayName }, { onConflict: 'id' })
+      } catch { /* non-critical */ }
+    }
 
     if (Array.isArray(body.subjects)) {
       try {

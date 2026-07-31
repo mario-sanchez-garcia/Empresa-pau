@@ -21,15 +21,16 @@ import {
   type OnboardingStudentExam,
 } from '@/app/lib/onboarding/onboardingStorage'
 
-type Step = 'welcome' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
+type Step = 'welcome' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
 
-const STEPS: Step[] = ['community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'confirm']
+const STEPS: Step[] = ['name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'confirm']
 
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
 const HF_EQUATIONS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125527_d366f113-8e29-4f93-b91c-7a6c40bfe1d1.png'
 
 const STEP_PHOTO: Partial<Record<Step, string>> = {
+  name: HF_FLATLAY,
   community: HF_FLATLAY,
   school: HF_EQUATIONS,
   subjects: HF_FLATLAY,
@@ -41,6 +42,7 @@ const STEP_PHOTO: Partial<Record<Step, string>> = {
 }
 
 const STEP_HEADLINE: Partial<Record<Step, string[]>> = {
+  name: ['¿Cómo', 'te', 'llamas?'],
   community: ['¿Dónde', 'haces la', 'PAU?'],
   school: ['¿Cuál es', 'tu', 'centro?'],
   subjects: ['¿Qué', 'asigna-', 'turas?'],
@@ -101,6 +103,7 @@ const WEEKLY_DAY_OPTS = [
 
 const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   welcome: { title: 'Crea tu Camino PAU', help: 'Te haremos unas preguntas rápidas para adaptar Kairo a tu comunidad, centro y ritmo real.' },
+  name: { title: '¿Cómo quieres que te llamemos?', help: 'Usaremos tu nombre para personalizar la experiencia dentro de la app.' },
   community: { title: '¿Dónde haces la PAU?', help: 'Así ajustamos la experiencia a tu comunidad autónoma.' },
   school: { title: '¿Cuál es tu centro educativo?', help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.' },
   subjects: { title: '¿Qué asignaturas quieres preparar?', help: 'Elige todas las que entran en tu PAU. Puedes cambiarlo más adelante.' },
@@ -113,7 +116,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
 }
 
-const SIDEBAR_STEPS = ['Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
+const SIDEBAR_STEPS = ['Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
 
@@ -260,6 +263,7 @@ export default function OnboardingFlow() {
   const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
 
   const canContinue = (() => {
+    if (step === 'name') return Boolean(data.displayName?.trim())
     if (step === 'community') return Boolean(data.community)
     if (step === 'school') return Boolean(data.schoolName?.trim())
     if (step === 'subjects') return data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
@@ -278,13 +282,13 @@ export default function OnboardingFlow() {
   }
 
   function goNext() {
-    if (step === 'welcome') { setStep('community'); return }
+    if (step === 'welcome') { setStep('name'); return }
     if (stepIndex >= 0 && stepIndex < STEPS.length - 1 && canContinue) setStep(STEPS[stepIndex + 1])
   }
 
   function goBack() {
     if (stepIndex > 0) setStep(STEPS[stepIndex - 1])
-    else if (step === 'community') setStep('welcome')
+    else if (step === 'name') setStep('welcome')
   }
 
   function selectCommunity(community: OnboardingCommunity) {
@@ -353,6 +357,7 @@ export default function OnboardingFlow() {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             routeId: 'completa',
+            displayName: data.displayName?.trim() || null,
             community: data.community,
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,
@@ -401,7 +406,7 @@ export default function OnboardingFlow() {
 
   const isSaving = step === 'saving'
   const isDone = step === 'done'
-  const showBack = !isDone && !isSaving && (step === 'community' || stepIndex > 0)
+  const showBack = !isDone && !isSaving && (step === 'name' || stepIndex > 0)
   const showContinue = !isDone && !isSaving && stepIndex >= 0 && step !== 'confirm'
   const showConfirm = !isDone && !isSaving && step === 'confirm'
 
@@ -704,6 +709,26 @@ export default function OnboardingFlow() {
 
   // ─── Step content ─────────────────────────────────────────────────────────────
   function renderStep() {
+    if (step === 'name') {
+      return (
+        <div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #e0e0e0', background: '#fff', padding: '13px 16px' }}>
+            <input
+              type="text"
+              value={data.displayName ?? ''}
+              onChange={e => update({ displayName: e.target.value.slice(0, 32) })}
+              onKeyDown={e => { if (e.key === 'Enter' && data.displayName?.trim()) goNext() }}
+              placeholder="Tu nombre o como quieras que te llamemos"
+              className="onb-input"
+              autoFocus
+              autoComplete="given-name"
+            />
+          </label>
+          <p style={{ marginTop: 10, fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>Máx. 32 caracteres · Puedes cambiarlo después en tu perfil.</p>
+        </div>
+      )
+    }
+
     if (step === 'community') {
       return (
         <EditorialGrid cols={3}>
@@ -925,6 +950,7 @@ export default function OnboardingFlow() {
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
             {[
+              ['Nombre', data.displayName || '—'],
               ['Comunidad', data.community || '—'],
               ['Centro educativo', data.schoolName || '—'],
               ['Asignaturas', data.subjects.join(', ') || '—'],

@@ -18,6 +18,7 @@ export interface OnboardingStudentExam {
 }
 
 export interface OnboardingData {
+  displayName: string | null
   community: OnboardingCommunity | null
   schoolName: string | null
   schoolSource: OnboardingSchoolSource
@@ -124,6 +125,7 @@ export function isOnboardingComplete(): boolean {
 
 function emptyOnboarding(): OnboardingData {
   return {
+    displayName: null,
     community: null,
     schoolName: null,
     schoolSource: null,

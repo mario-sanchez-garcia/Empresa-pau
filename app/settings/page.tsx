@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
-import { validateUsername } from '@/app/lib/username'
+import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profilePreferences'
 import SidebarNav from '@/app/components/SidebarNav'
 
@@ -67,7 +67,10 @@ export default function SettingsPage() {
   const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
   const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
   const [username, setUsername] = useState('')
-  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'saved'>('idle')
+  const [usernameEditMode, setUsernameEditMode] = useState(false)
+  const [usernameInput, setUsernameInput] = useState('')
+  const [originalUsername, setOriginalUsername] = useState('')
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'saving' | 'saved'>('idle')
   const [usernameError, setUsernameError] = useState('')
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
   const usernameCheckId = useRef(0)
@@ -95,7 +98,7 @@ export default function SettingsPage() {
             const json = await res.json() as { email_notifications: boolean; username?: string }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
-            if (json.username) { setUsername(json.username); setUsernameStatus('saved') }
+            if (json.username) setUsername(json.username)
           }
         } catch { /* silent */ }
         try {
@@ -120,6 +123,10 @@ export default function SettingsPage() {
   const checkUsernameSettings = useCallback(async (u: string) => {
     const err = validateUsername(u)
     if (err) { setUsernameStatus('invalid'); setUsernameError(err); return }
+    // Own current username is always available — avoid false "taken"
+    if (username && normalizeUsername(u) === normalizeUsername(username)) {
+      setUsernameStatus('available'); setUsernameSuggestions([]); setUsernameError(''); return
+    }
     const id = ++usernameCheckId.current
     setUsernameStatus('checking')
     setUsernameError('')
@@ -135,16 +142,61 @@ export default function SettingsPage() {
       if (usernameCheckId.current !== id) return
       setUsernameStatus('idle')
     }
-  }, [])
+  }, [username])
 
   function onUsernameInputChange(raw: string) {
     const val = raw.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 20)
-    setUsername(val)
+    setUsernameInput(val)
     setUsernameStatus('idle')
     setUsernameError('')
     if (usernameTimer.current) clearTimeout(usernameTimer.current)
     if (val.length >= 3) {
       usernameTimer.current = setTimeout(() => void checkUsernameSettings(val), 350)
+    }
+  }
+
+  function enterUsernameEditMode() {
+    setOriginalUsername(username)
+    setUsernameInput(username)
+    setUsernameEditMode(true)
+    setUsernameError('')
+    setUsernameSuggestions([])
+    setUsernameStatus(username ? 'available' : 'idle')
+  }
+
+  function cancelUsernameEdit() {
+    if (usernameTimer.current) clearTimeout(usernameTimer.current)
+    setUsernameInput(originalUsername)
+    setUsernameEditMode(false)
+    setUsernameStatus('idle')
+    setUsernameError('')
+    setUsernameSuggestions([])
+  }
+
+  async function saveUsernameNow() {
+    if (usernameStatus !== 'available' || !usernameInput.trim()) return
+    setUsernameStatus('saving')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) { setUsernameStatus('available'); return }
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ username: usernameInput.trim() }),
+      })
+      if (!res.ok) {
+        const json = await res.json().catch(() => null) as { error?: string } | null
+        setUsernameStatus('invalid')
+        setUsernameError(json?.error ?? 'No se ha podido guardar el nombre')
+        return
+      }
+      setUsername(usernameInput.trim())
+      setUsernameEditMode(false)
+      setUsernameStatus('idle')
+    } catch {
+      setUsernameStatus('invalid')
+      setUsernameError('No se ha podido guardar el nombre. Revisa la conexión.')
     }
   }
 
@@ -182,18 +234,6 @@ export default function SettingsPage() {
       window.setTimeout(() => setSaved(false), 2200)
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      if (username.trim() && (usernameStatus === 'available' || usernameStatus === 'saved') && token) {
-        const patchRes = await fetch('/api/profile', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ username: username.trim() }),
-        })
-        if (!patchRes.ok) {
-          const json = await patchRes.json().catch(() => null) as { error?: string } | null
-          throw new Error(json?.error ?? 'username_save_failed')
-        }
-        setUsernameStatus('saved')
-      }
       if (token && onboarding?.completedAt) {
         const nextOnboarding: OnboardingData = {
           ...onboarding,
@@ -369,47 +409,79 @@ export default function SettingsPage() {
 
           {/* Identidad */}
           <Section label="Identidad" />
-          <div className="settings-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
-            <Field label="Nombre de usuario">
-              <div style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${usernameStatus === 'available' || usernameStatus === 'saved' ? '#16a34a' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#dc2626' : '#e2e8f0'}`, borderRadius: 8, background: 'white', paddingLeft: 10, transition: 'border-color .15s' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', flexShrink: 0, fontFamily: 'monospace' }}>@</span>
-                  <input
-                    value={username}
-                    onChange={e => onUsernameInputChange(e.target.value)}
-                    placeholder="tu_usuario"
-                    spellCheck={false}
-                    autoComplete="username"
-                    style={{ ...inputStyle, border: 'none', paddingLeft: 6, borderRadius: 0 }}
-                  />
-                  <div style={{ paddingRight: 10, flexShrink: 0 }}>
-                    {usernameStatus === 'checking' && <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #e2e8f0', borderTopColor: '#2563eb', animation: 'spin .6s linear infinite' }} />}
-                    {(usernameStatus === 'available' || usernameStatus === 'saved') && <span style={{ color: '#16a34a', fontSize: 14 }}>✓</span>}
-                    {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <span style={{ color: '#dc2626', fontSize: 14 }}>✗</span>}
+
+          {/* Username — full-width block with display/edit toggle */}
+          <div style={{ marginBottom: 12 }}>
+            <span style={{ display: 'block', marginBottom: 5, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Nombre de usuario</span>
+            <div style={{ border: `1px solid ${usernameEditMode && (usernameStatus === 'taken' || usernameStatus === 'invalid') ? '#dc2626' : usernameEditMode && usernameStatus === 'available' ? '#16a34a' : '#e2e8f0'}`, borderRadius: 10, background: 'white', overflow: 'hidden', transition: 'border-color .15s' }}>
+              {!usernameEditMode ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: username ? '#0f172a' : '#94a3b8', fontFamily: username ? 'monospace' : 'inherit' }}>
+                    {username ? `@${username}` : 'Sin nombre de usuario aún'}
+                  </span>
+                  <button type="button" onClick={enterUsernameEditMode}
+                    style={{ padding: '5px 12px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 900, color: '#0f172a', cursor: 'pointer' }}>
+                    {username ? 'Cambiar →' : 'Añadir →'}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${usernameStatus === 'available' ? '#16a34a' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#dc2626' : '#e2e8f0'}`, borderRadius: 8, background: 'white', paddingLeft: 10, transition: 'border-color .15s' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', flexShrink: 0, fontFamily: 'monospace' }}>@</span>
+                    <input
+                      value={usernameInput}
+                      onChange={e => onUsernameInputChange(e.target.value)}
+                      placeholder="tu_usuario"
+                      spellCheck={false}
+                      autoComplete="username"
+                      autoFocus
+                      style={{ ...inputStyle, border: 'none', paddingLeft: 6, borderRadius: 0 }}
+                    />
+                    <div style={{ paddingRight: 10, flexShrink: 0 }}>
+                      {usernameStatus === 'checking' && <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #e2e8f0', borderTopColor: '#2563eb', animation: 'spin .6s linear infinite' }} />}
+                      {usernameStatus === 'available' && <span style={{ color: '#16a34a', fontSize: 14 }}>✓</span>}
+                      {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <span style={{ color: '#dc2626', fontSize: 14 }}>✗</span>}
+                    </div>
+                  </div>
+                  {usernameStatus === 'invalid' && usernameError && (
+                    <p style={{ margin: '4px 0 0', fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{usernameError}</p>
+                  )}
+                  {usernameStatus === 'taken' && (
+                    <div style={{ marginTop: 6 }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: '#dc2626', marginBottom: 4 }}>Nombre en uso</p>
+                      {usernameSuggestions.length > 0 && (
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          {usernameSuggestions.map(s => (
+                            <button key={s} type="button" onClick={() => { setUsernameInput(s); void checkUsernameSettings(s) }}
+                              style={{ padding: '3px 10px', border: '1px solid #e2e8f0', borderRadius: 6, background: '#f8fafc', fontSize: 11, fontWeight: 700, color: '#0f172a', cursor: 'pointer', fontFamily: 'monospace' }}>
+                              @{s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {usernameStatus === 'available' && usernameInput && (
+                    <p style={{ margin: '4px 0 0', fontSize: 11, fontWeight: 600, color: '#16a34a' }}>@{usernameInput} está disponible</p>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                    <button type="button" onClick={cancelUsernameEdit}
+                      style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', fontSize: 11, fontWeight: 900, color: '#64748b', cursor: 'pointer' }}>
+                      Cancelar
+                    </button>
+                    <button type="button" onClick={saveUsernameNow}
+                      disabled={usernameStatus === 'saving' || usernameStatus !== 'available' || !usernameInput.trim()}
+                      style={{ padding: '7px 14px', borderRadius: 8, border: 'none', background: (usernameStatus === 'available' || usernameStatus === 'saving') && usernameInput.trim() ? '#0f172a' : '#e2e8f0', color: (usernameStatus === 'available' || usernameStatus === 'saving') && usernameInput.trim() ? 'white' : '#94a3b8', fontSize: 11, fontWeight: 900, cursor: usernameStatus === 'available' && usernameInput.trim() ? 'pointer' : 'not-allowed' }}>
+                      {usernameStatus === 'saving' ? 'Guardando…' : 'Guardar cambio'}
+                    </button>
                   </div>
                 </div>
-                {usernameStatus === 'invalid' && usernameError && (
-                  <p style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{usernameError}</p>
-                )}
-                {usernameStatus === 'taken' && (
-                  <div style={{ marginTop: 4 }}>
-                    <p style={{ fontSize: 11, fontWeight: 600, color: '#dc2626', marginBottom: 4 }}>Nombre en uso</p>
-                    {usernameSuggestions.length > 0 && (
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {usernameSuggestions.map(s => (
-                          <button key={s} type="button" onClick={() => { setUsername(s); void checkUsernameSettings(s) }}
-                            style={{ padding: '3px 10px', border: '1px solid #e2e8f0', borderRadius: 6, background: '#f8fafc', fontSize: 11, fontWeight: 700, color: '#0f172a', cursor: 'pointer', fontFamily: 'monospace' }}>
-                            @{s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {usernameStatus === 'saved' && <p style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: '#16a34a' }}>Nombre de usuario guardado</p>}
-              </div>
-              <Hint>Único en Kairo · 3–20 caracteres · Aparece en clasificaciones</Hint>
-            </Field>
+              )}
+            </div>
+            <small style={{ display: 'block', marginTop: 6, fontSize: 10, lineHeight: 1.4, color: '#94a3b8', fontWeight: 650 }}>Único en Kairo · 3–20 caracteres · Aparece en clasificaciones</small>
+          </div>
+
+          <div className="settings-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
             <Field label="Email">
               <input value={email} readOnly style={{ ...inputStyle, background: '#f8fafc', color: '#94a3b8', cursor: 'not-allowed' }} />
             </Field>

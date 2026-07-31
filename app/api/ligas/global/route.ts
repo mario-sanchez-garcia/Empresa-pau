@@ -41,12 +41,12 @@ export async function GET(request: NextRequest) {
   // Profile names
   const { data: profiles } = await db
     .from('perfiles')
-    .select('id, display_name, nombre')
+    .select('id, username')
     .in('id', allIds)
 
   const nameById = new Map<string, string>()
   for (const p of profiles ?? []) {
-    const name = safeName(p.display_name) || safeName(p.nombre)
+    const name = safeName(p.username)
     if (name) nameById.set(p.id as string, name)
   }
 
@@ -70,5 +70,6 @@ export async function GET(request: NextRequest) {
     ? { name: above.name, xpNeeded: above.xp - myXp }
     : null
 
-  return NextResponse.json({ entries, nextTarget, activeCount: entries.length })
+  const currentUserNeedsUsername = !nameById.has(user.id)
+  return NextResponse.json({ entries, nextTarget, activeCount: entries.length, currentUserNeedsUsername })
 }

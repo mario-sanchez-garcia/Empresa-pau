@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Check, Lock, Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
@@ -160,6 +161,12 @@ export default function OnboardingFlow() {
   const [dbInstitutes, setDbInstitutes] = useState<string[]>([])
   const [examDraft, setExamDraft] = useState({ subject: '', date: inputDate(addDays(new Date(), 10)), block: '', topic: '', name: '', priority: 'normal' as const })
   const generateRetriesRef = useRef(0)
+  const [userEmail, setUserEmail] = useState('')
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
+  const [usernameError, setUsernameError] = useState('')
+  const usernameCheckId = useRef(0)
+  const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // On mount: redirect already-completed users; restore last step for interrupted sessions
   useEffect(() => {
@@ -203,6 +210,76 @@ export default function OnboardingFlow() {
   useEffect(() => {
     if (step !== 'saving' && step !== 'done') saveOnboarding({ lastStep: step })
   }, [step])
+
+  // Fetch user email once for username pre-fill
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: d }) => {
+      if (d?.user?.email) setUserEmail(d.user.email)
+    }).catch(() => undefined)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pre-fill username when entering the name step
+  useEffect(() => {
+    if (step !== 'name') return
+    const current = data.username
+    if (current && current.length >= 3) {
+      void checkUsername(current)
+      return
+    }
+    if (!userEmail) return
+    const base = userEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').slice(0, 17)
+    if (!base || base.length < 3) return
+    void checkUsername(base).then(ok => {
+      if (ok) update({ username: base })
+    })
+  }, [step, userEmail]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function checkUsername(u: string): Promise<boolean> {
+    const err = validateUsername(u)
+    if (err) {
+      setUsernameStatus('invalid')
+      setUsernameError(err)
+      setUsernameSuggestions([])
+      return false
+    }
+    const id = ++usernameCheckId.current
+    setUsernameStatus('checking')
+    setUsernameError('')
+    try {
+      const res = await fetch(`/api/username/check?u=${encodeURIComponent(u)}`)
+      if (usernameCheckId.current !== id) return false // stale
+      const json = await res.json() as { available?: boolean; error?: string; suggestions?: string[] }
+      if (json.error && !json.available) {
+        setUsernameStatus('invalid')
+        setUsernameError(json.error)
+        setUsernameSuggestions([])
+        return false
+      }
+      if (json.available) {
+        setUsernameStatus('available')
+        setUsernameSuggestions([])
+        return true
+      }
+      setUsernameStatus('taken')
+      setUsernameSuggestions(json.suggestions ?? [])
+      return false
+    } catch {
+      if (usernameCheckId.current !== id) return false
+      setUsernameStatus('idle')
+      return false
+    }
+  }
+
+  function onUsernameChange(raw: string) {
+    const val = raw.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 20)
+    update({ username: val })
+    setUsernameStatus('idle')
+    setUsernameError('')
+    if (usernameTimer.current) clearTimeout(usernameTimer.current)
+    if (val.length >= 3) {
+      usernameTimer.current = setTimeout(() => void checkUsername(val), 350)
+    }
+  }
 
   const centers = useMemo(
     () => data.community === 'Madrid' ? CENTROS_MADRID : data.community === 'Cataluña' ? CENTROS_CATALUNA : [],
@@ -263,7 +340,7 @@ export default function OnboardingFlow() {
   const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
 
   const canContinue = (() => {
-    if (step === 'name') return Boolean(data.displayName?.trim())
+    if (step === 'name') return usernameStatus === 'available' && Boolean(data.username?.trim())
     if (step === 'community') return Boolean(data.community)
     if (step === 'school') return Boolean(data.schoolName?.trim())
     if (step === 'subjects') return data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
@@ -357,7 +434,7 @@ export default function OnboardingFlow() {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             routeId: 'completa',
-            displayName: data.displayName?.trim() || null,
+            username: data.username?.trim() || null,
             community: data.community,
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,
@@ -710,21 +787,65 @@ export default function OnboardingFlow() {
   // ─── Step content ─────────────────────────────────────────────────────────────
   function renderStep() {
     if (step === 'name') {
+      const borderColor = usernameStatus === 'available' ? '#16a34a'
+        : (usernameStatus === 'taken' || usernameStatus === 'invalid') ? '#dc2626'
+        : '#e0e0e0'
       return (
         <div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #e0e0e0', background: '#fff', padding: '13px 16px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, border: `1px solid ${borderColor}`, background: '#fff', padding: '13px 16px', transition: 'border-color .15s' }}>
+            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: '#94a3b8', flexShrink: 0 }}>@</span>
             <input
               type="text"
-              value={data.displayName ?? ''}
-              onChange={e => update({ displayName: e.target.value.slice(0, 32) })}
-              onKeyDown={e => { if (e.key === 'Enter' && data.displayName?.trim()) goNext() }}
-              placeholder="Tu nombre o como quieras que te llamemos"
+              value={data.username ?? ''}
+              onChange={e => onUsernameChange(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && usernameStatus === 'available') goNext() }}
+              placeholder="tu_usuario"
               className="onb-input"
               autoFocus
-              autoComplete="given-name"
+              autoComplete="username"
+              spellCheck={false}
             />
+            {usernameStatus === 'checking' && (
+              <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #e0e0e0', borderTopColor: '#2563eb', animation: 'spin .6s linear infinite', flexShrink: 0 }} />
+            )}
+            {usernameStatus === 'available' && (
+              <svg viewBox="0 0 20 20" fill="none" style={{ width: 18, height: 18, flexShrink: 0 }}><circle cx="10" cy="10" r="9" fill="#16a34a"/><path d="M6 10l3 3 5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            )}
+            {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
+              <svg viewBox="0 0 20 20" fill="none" style={{ width: 18, height: 18, flexShrink: 0 }}><circle cx="10" cy="10" r="9" fill="#dc2626"/><path d="M7 7l6 6M13 7l-6 6" stroke="white" strokeWidth="1.8" strokeLinecap="round"/></svg>
+            )}
           </label>
-          <p style={{ marginTop: 10, fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>Máx. 32 caracteres · Puedes cambiarlo después en tu perfil.</p>
+
+          {usernameStatus === 'available' && (
+            <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#16a34a' }}>@{data.username} está disponible ✓</p>
+          )}
+          {usernameStatus === 'invalid' && usernameError && (
+            <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>{usernameError}</p>
+          )}
+          {usernameStatus === 'taken' && (
+            <div style={{ marginTop: 8 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#dc2626', marginBottom: 8 }}>Ese nombre ya está cogido</p>
+              {usernameSuggestions.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', color: '#94a3b8' }}>PRUEBA:</span>
+                  {usernameSuggestions.map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => { update({ username: s }); void checkUsername(s) }}
+                      style={{ padding: '4px 12px', border: '1px solid #e0e0e0', background: '#f9fafb', fontSize: 12, fontWeight: 700, color: '#1c1c1c', cursor: 'pointer', fontFamily: "'DM Mono', monospace" }}
+                    >
+                      @{s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <p style={{ marginTop: 12, fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
+            Letras, números, punto y guion bajo · 3–20 caracteres · Único en Kairo · Aparece en clasificaciones
+          </p>
         </div>
       )
     }
@@ -950,7 +1071,7 @@ export default function OnboardingFlow() {
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
             {[
-              ['Nombre', data.displayName || '—'],
+              ['Usuario', data.username ? `@${data.username}` : '—'],
               ['Comunidad', data.community || '—'],
               ['Centro educativo', data.schoolName || '—'],
               ['Asignaturas', data.subjects.join(', ') || '—'],

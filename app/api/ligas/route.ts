@@ -24,11 +24,11 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
     totalXpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
   }
 
-  const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
+  const { data: profiles } = await db.from('perfiles').select('id, username').in('id', memberIds)
   const nameById = new Map<string, string>()
   for (const p of profiles ?? []) {
-    const name = ((p.display_name || p.nombre || '') as string).trim()
-    if (name && !name.includes('@')) nameById.set(p.id as string, name)
+    const name = (p.username as string | null)?.trim() ?? ''
+    if (name) nameById.set(p.id as string, name)
   }
 
   const miembros = memberIds.map(uid => ({

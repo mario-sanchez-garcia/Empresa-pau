@@ -1,18 +1,19 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Camera, LogOut, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
+import { validateUsername } from '@/app/lib/username'
 import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profilePreferences'
 import SidebarNav from '@/app/components/SidebarNav'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
 
 type Preferences = {
-  displayName: string
+  displayName: string // kept for local prefs compat; username is separate
   photo: string
   dailyGoal: number
   educationLevel: string
@@ -65,6 +66,12 @@ export default function SettingsPage() {
   const [caminoDailyMinutes, setCaminoDailyMinutes] = useState(60)
   const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
   const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
+  const [username, setUsername] = useState('')
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'saved'>('idle')
+  const [usernameError, setUsernameError] = useState('')
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
+  const usernameCheckId = useRef(0)
+  const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -85,9 +92,10 @@ export default function SettingsPage() {
         try {
           const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           if (res.ok) {
-            const json = await res.json() as { email_notifications: boolean; display_name?: string }
+            const json = await res.json() as { email_notifications: boolean; username?: string }
             setEmailNotifications(json.email_notifications ?? true)
-            serverDisplayName = json.display_name ?? ''
+            serverDisplayName = json.username ?? ''
+            if (json.username) { setUsername(json.username); setUsernameStatus('saved') }
           }
         } catch { /* silent */ }
         try {
@@ -108,6 +116,37 @@ export default function SettingsPage() {
       setPreferences({ ...defaults, ...storedPreferences, displayName: serverDisplayName || storedPreferences.displayName || '' })
     })
   }, [router])
+
+  const checkUsernameSettings = useCallback(async (u: string) => {
+    const err = validateUsername(u)
+    if (err) { setUsernameStatus('invalid'); setUsernameError(err); return }
+    const id = ++usernameCheckId.current
+    setUsernameStatus('checking')
+    setUsernameError('')
+    try {
+      const res = await fetch(`/api/username/check?u=${encodeURIComponent(u)}`)
+      if (usernameCheckId.current !== id) return
+      const json = await res.json() as { available?: boolean; error?: string; suggestions?: string[] }
+      if (json.error && !json.available) { setUsernameStatus('invalid'); setUsernameError(json.error ?? ''); return }
+      if (json.available) { setUsernameStatus('available'); setUsernameSuggestions([]); return }
+      setUsernameStatus('taken')
+      setUsernameSuggestions(json.suggestions ?? [])
+    } catch {
+      if (usernameCheckId.current !== id) return
+      setUsernameStatus('idle')
+    }
+  }, [])
+
+  function onUsernameInputChange(raw: string) {
+    const val = raw.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 20)
+    setUsername(val)
+    setUsernameStatus('idle')
+    setUsernameError('')
+    if (usernameTimer.current) clearTimeout(usernameTimer.current)
+    if (val.length >= 3) {
+      usernameTimer.current = setTimeout(() => void checkUsernameSettings(val), 350)
+    }
+  }
 
   function choosePhoto(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -143,14 +182,17 @@ export default function SettingsPage() {
       window.setTimeout(() => setSaved(false), 2200)
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      if (preferences.displayName.trim()) {
-        if (token) {
-          fetch('/api/profile', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ display_name: preferences.displayName.trim() }),
-          }).catch(() => {})
+      if (username.trim() && (usernameStatus === 'available' || usernameStatus === 'saved') && token) {
+        const patchRes = await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ username: username.trim() }),
+        })
+        if (!patchRes.ok) {
+          const json = await patchRes.json().catch(() => null) as { error?: string } | null
+          throw new Error(json?.error ?? 'username_save_failed')
         }
+        setUsernameStatus('saved')
       }
       if (token && onboarding?.completedAt) {
         const nextOnboarding: OnboardingData = {
@@ -235,7 +277,7 @@ export default function SettingsPage() {
     router.push('/login')
   }
 
-  const displayName = preferences.displayName || email.split('@')[0] || '?'
+  const displayName = username || preferences.displayName || email.split('@')[0] || '?'
   const initial = displayName[0]?.toUpperCase() ?? '?'
 
   return (
@@ -328,8 +370,45 @@ export default function SettingsPage() {
           {/* Identidad */}
           <Section label="Identidad" />
           <div className="settings-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
-            <Field label="Nombre visible">
-              <input value={preferences.displayName} onChange={e => setPreferences(cur => ({ ...cur, displayName: e.target.value }))} placeholder="¿Cómo quieres que te llamemos?" style={inputStyle} />
+            <Field label="Nombre de usuario">
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${usernameStatus === 'available' || usernameStatus === 'saved' ? '#16a34a' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#dc2626' : '#e2e8f0'}`, borderRadius: 8, background: 'white', paddingLeft: 10, transition: 'border-color .15s' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', flexShrink: 0, fontFamily: 'monospace' }}>@</span>
+                  <input
+                    value={username}
+                    onChange={e => onUsernameInputChange(e.target.value)}
+                    placeholder="tu_usuario"
+                    spellCheck={false}
+                    autoComplete="username"
+                    style={{ ...inputStyle, border: 'none', paddingLeft: 6, borderRadius: 0 }}
+                  />
+                  <div style={{ paddingRight: 10, flexShrink: 0 }}>
+                    {usernameStatus === 'checking' && <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #e2e8f0', borderTopColor: '#2563eb', animation: 'spin .6s linear infinite' }} />}
+                    {(usernameStatus === 'available' || usernameStatus === 'saved') && <span style={{ color: '#16a34a', fontSize: 14 }}>✓</span>}
+                    {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <span style={{ color: '#dc2626', fontSize: 14 }}>✗</span>}
+                  </div>
+                </div>
+                {usernameStatus === 'invalid' && usernameError && (
+                  <p style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{usernameError}</p>
+                )}
+                {usernameStatus === 'taken' && (
+                  <div style={{ marginTop: 4 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: '#dc2626', marginBottom: 4 }}>Nombre en uso</p>
+                    {usernameSuggestions.length > 0 && (
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {usernameSuggestions.map(s => (
+                          <button key={s} type="button" onClick={() => { setUsername(s); void checkUsernameSettings(s) }}
+                            style={{ padding: '3px 10px', border: '1px solid #e2e8f0', borderRadius: 6, background: '#f8fafc', fontSize: 11, fontWeight: 700, color: '#0f172a', cursor: 'pointer', fontFamily: 'monospace' }}>
+                            @{s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {usernameStatus === 'saved' && <p style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: '#16a34a' }}>Nombre de usuario guardado</p>}
+              </div>
+              <Hint>Único en Kairo · 3–20 caracteres · Aparece en clasificaciones</Hint>
             </Field>
             <Field label="Email">
               <input value={email} readOnly style={{ ...inputStyle, background: '#f8fafc', color: '#94a3b8', cursor: 'not-allowed' }} />

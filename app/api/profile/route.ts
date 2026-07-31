@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { validateUsername, normalizeUsername } from '@/app/lib/username'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications, student_exams, display_name')
+    .select('email_notifications, student_exams, username')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     email_notifications: data?.email_notifications ?? true,
     student_exams: data?.student_exams ?? [],
-    display_name: data?.display_name ?? '',
+    username: data?.username ?? '',
   })
 }
 
@@ -50,13 +51,33 @@ export async function PATCH(request: NextRequest) {
   let body: Record<string, unknown> = {}
   try { body = await request.json() } catch { /* ok */ }
 
+  const db = createServiceClient()
   const allowed: Record<string, unknown> = {}
+
   if (typeof body.email_notifications === 'boolean') allowed.email_notifications = body.email_notifications
   if (Array.isArray(body.student_exams)) allowed.student_exams = body.student_exams
-  if (typeof body.display_name === 'string') allowed.display_name = body.display_name.trim().slice(0, 32)
+
+  if (typeof body.username === 'string') {
+    const u = body.username.trim()
+    const validationError = validateUsername(u)
+    if (validationError) return NextResponse.json({ error: validationError }, { status: 400 })
+
+    const normalized = normalizeUsername(u)
+    // Check uniqueness (excluding current user)
+    const { data: existing } = await db
+      .from('perfiles')
+      .select('id')
+      .eq('username_normalized', normalized)
+      .neq('id', user.id)
+      .maybeSingle()
+    if (existing) return NextResponse.json({ error: 'Ese nombre de usuario ya está en uso' }, { status: 409 })
+
+    allowed.username = u
+    allowed.username_normalized = normalized
+  }
+
   if (Object.keys(allowed).length === 0) return NextResponse.json({ error: 'Sin campos válidos' }, { status: 400 })
 
-  const db = createServiceClient()
   const { error: upsertError } = await db
     .from('perfiles')
     .upsert({ id: user.id, ...allowed }, { onConflict: 'id' })

@@ -17,6 +17,7 @@ import { DIVISIONS } from '@/app/lib/camino/leagues'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
+import KairoMapCard from '@/components/shared/KairoMapCard'
 import MathEditor from '@/components/shared/MathEditor'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 
@@ -260,6 +261,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const params = useSearchParams()
   const missionId = params.get('missionId')
   const shouldStartExercise = params.get('start') === 'exercise'
+  const isFirstSession = params.get('first_session') === '1'
   const exerciseRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [toast, setToast] = useState('')
@@ -270,6 +272,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [correction, setCorrection] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [xpAwarded, setXpAwarded] = useState<number | null>(null)
+  const [firstSessionMarked, setFirstSessionMarked] = useState(false)
   const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
   const [correcting, setCorrecting] = useState(false)
   const [diegoContent, setDiegoContent] = useState<string | null>(null)
@@ -295,6 +298,19 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [shouldStartExercise])
+
+  useEffect(() => {
+    if (!isFirstSession || score === null || !correction || firstSessionMarked) return
+    setFirstSessionMarked(true)
+    supabase.auth.getSession().then(({ data }) => {
+      const token = data.session?.access_token
+      if (!token) return
+      fetch('/api/onboarding/first-session-seen', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => undefined)
+    })
+  }, [isFirstSession, score, correction, firstSessionMarked])
 
   useEffect(() => {
     if (!topic) {
@@ -1064,6 +1080,25 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               </p>
             )}
             {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
+            {isFirstSession && score !== null && correction && (
+              <div style={{ marginTop: 20, borderRadius: 12, background: '#0f172a', padding: '20px 22px', color: 'white' }}>
+                <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
+                  {score < 5
+                    ? 'Este es tu punto de partida. Kairo ya sabe en qué tienes que trabajar y va a empezar por ahí.'
+                    : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
+                </p>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
+                  Cada día Kairo te prepara una misión adaptada a tu nivel. Por cada ejercicio que corriges ganas XP y subes en el ranking de tu liga. Y si estudias varios días seguidos, construyes una racha.
+                </p>
+                <a
+                  href="/camino"
+                  style={{ display: 'inline-block', padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
+                >
+                  Ver mi Camino →
+                </a>
+              </div>
+            )}
+            {isFirstSession && score !== null && correction && <KairoMapCard />}
           </article>
         </main>
 

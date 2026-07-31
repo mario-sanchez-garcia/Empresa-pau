@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
-import NextTopLoader from 'nextjs-toploader';
+import NextTopLoader from 'nextjs-toploader'
+import { HintsProvider } from '@/app/lib/onboarding/HintsContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextTopLoader color="#2563eb" height={3} showSpinner={false} shadow={false} />
-        {children}
+        <HintsProvider>
+          {children}
+        </HintsProvider>
       </body>
     </html>
   );

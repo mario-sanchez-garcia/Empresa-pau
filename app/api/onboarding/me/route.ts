@@ -87,6 +87,14 @@ export async function GET(request: NextRequest) {
 
   const subjects = Array.isArray(perfil?.subjects) ? cleanSubjects(perfil.subjects) : cleanSubjects(payload.subjects)
 
+  const { data: seenRow } = await db
+    .from('billing_events')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('event_type', 'first_session_seen')
+    .limit(1)
+    .maybeSingle()
+
   return NextResponse.json({
     onboarding: {
       community: cleanCommunity(payload.community),
@@ -100,6 +108,7 @@ export async function GET(request: NextRequest) {
       weeklyStudyDaysValue: cleanWeeklyDays(payload.weekly_study_days_value),
       completedAt: data.created_at,
       lastStep: null,
+      firstSessionSeen: Boolean(seenRow),
     },
   })
 }

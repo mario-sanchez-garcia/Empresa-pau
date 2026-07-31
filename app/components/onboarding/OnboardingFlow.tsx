@@ -393,7 +393,7 @@ export default function OnboardingFlow() {
       // Ensure kairo_ccaa is in sync at completion (covers edge cases where
       // selectCommunity ran on a previous session)
       syncOnboardingCommunity(data)
-      router.push('/camino')
+      router.push('/camino?first_session=1')
     } catch {
       setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
     }

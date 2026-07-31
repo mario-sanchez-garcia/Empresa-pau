@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Medal, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
@@ -764,6 +764,8 @@ function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingDa
 
 export default function CaminoCalendarClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isFirstSession = searchParams.get('first_session') === '1'
   const calendarSourceEventsRef = useRef<Set<string>>(new Set())
   const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
@@ -788,7 +790,6 @@ export default function CaminoCalendarClient() {
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
-  const [showOnboarding, setShowOnboarding] = useState(false)
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
   const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
@@ -805,6 +806,19 @@ export default function CaminoCalendarClient() {
   const [sundayMockSession, setSundayMockSession] = useState<{ id: string; nota_final: number | null } | null | undefined>(undefined)
   const [monthlySimsUsed, setMonthlySimsUsed] = useState(0)
   const isSunday = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' }) === 'Sun'
+
+  // First-session redirect: when calendar is ready, send new users to their first mission
+  useEffect(() => {
+    if (!isFirstSession || caminoReadyStatus !== 'ready' || calendar.length === 0) return
+    const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+    const todayDay = calendar.find(d => d.date === realTodayStr)
+    const firstMission = todayDay?.missions.find(m => m.role === 'main')
+    if (!firstMission) return
+    const target = hrefForMission(firstMission)
+    if (!target.href) return
+    const sep = target.href.includes('?') ? '&' : '?'
+    router.replace(`${target.href}${sep}first_session=1`)
+  }, [isFirstSession, caminoReadyStatus, calendar, router])
 
   function recordCalendarSource(source: CalendarSource, context: CalendarSourceContext, details: { weekStart?: string; missionCount?: number; reason?: string } = {}) {
     const weekStart = details.weekStart ?? selectedWeekStart
@@ -845,7 +859,6 @@ export default function CaminoCalendarClient() {
       setCalendarExpanded(loadedCalendarExpanded)
       setSelectedWeekStart(currentWeekStartISO())
       setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
-      if (!loadedOnboarding.completedAt && !window.localStorage.getItem('kairo_camino_onboarding_done')) setShowOnboarding(true)
       fetchCurriculumItems(loadedOnboarding.subjects)
         .then(items => { if (!cancelled) setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM) })
         .catch(() => { if (!cancelled) setCurriculumItems(FALLBACK_CURRICULUM) })
@@ -2045,7 +2058,6 @@ export default function CaminoCalendarClient() {
         })()}
       </AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
-      <AnimatePresence>{showOnboarding && <CaminoOnboardingModal onClose={() => { window.localStorage.setItem('kairo_camino_onboarding_done', 'true'); setShowOnboarding(false) }} />}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>
     </Shell>
   )
@@ -3176,78 +3188,6 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
       </div>
       {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
     </div>
-  )
-}
-
-function CaminoOnboardingModal({ onClose }: { onClose: () => void }) {
-  const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
-  const rows = [
-    { num: '01', title: 'Una misión al día', desc: 'Empieza siempre por ella. Todo lo demás puede esperar.' },
-    { num: '02', title: 'XP por cada práctica', desc: 'Cuanto más practicas, más subes en el ranking de tu liga.' },
-    { num: '03', title: 'Kairo IA te corrige', desc: 'Corrección instantánea con feedback por ejercicio.' },
-  ]
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'grid', placeItems: 'center', background: 'rgba(5,10,20,0.72)', backdropFilter: 'blur(8px)', padding: 16 }}
-    >
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');`}</style>
-      <motion.div
-        initial={{ scale: 0.94, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.94, y: 20, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 26 }}
-        style={{ width: '100%', maxWidth: 640, borderRadius: 20, overflow: 'hidden', display: 'grid', gridTemplateColumns: '220px 1fr', boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)' }}
-      >
-        {/* LEFT: image panel */}
-        <div style={{ position: 'relative', background: '#050d1a', overflow: 'hidden', minHeight: 340 }}>
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HF_LIBRARY})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, rgba(5,13,26,0.45) 0%, rgba(5,13,26,0.82) 100%)' }} />
-          <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '24px 20px' }}>
-            <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: '.32em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)' }}>
-              Camino PAU
-            </span>
-            <div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 58, lineHeight: 0.84, color: '#fff', letterSpacing: '0.01em' }}>
-                Tu<br />camino<br /><span style={{ color: '#2563eb' }}>empieza.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT: content panel */}
-        <div style={{ background: '#060e1e', display: 'flex', flexDirection: 'column', padding: '28px 24px 24px' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', marginBottom: 4 }}>
-            Bienvenido a Kairo
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.35)', marginBottom: 24, lineHeight: 1.5 }}>
-            Tu coach de estudio diario para la PAU.
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1 }}>
-            {rows.map((row, i) => (
-              <div key={i} style={{ display: 'flex', gap: 14, paddingTop: 14, paddingBottom: 14, borderTop: i === 0 ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#2563eb', lineHeight: 1, flexShrink: 0, width: 24 }}>
-                  {row.num}
-                </span>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 900, color: '#fff', marginBottom: 2 }}>{row.title}</div>
-                  <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{row.desc}</div>
-                </div>
-              </div>
-            ))}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
-          </div>
-
-          <button
-            onClick={onClose}
-            style={{ marginTop: 20, width: '100%', padding: '13px 0', borderRadius: 10, background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 900, border: 'none', cursor: 'pointer', letterSpacing: '-0.01em', boxShadow: '0 8px 24px rgba(37,99,235,0.35)', transition: 'transform 160ms ease-out, box-shadow 160ms ease-out' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 28px rgba(37,99,235,0.45)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'none'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 24px rgba(37,99,235,0.35)' }}
-          >
-            Empezar mi Camino PAU →
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
   )
 }
 

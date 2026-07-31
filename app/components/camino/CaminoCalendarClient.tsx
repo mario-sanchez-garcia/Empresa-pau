@@ -1518,37 +1518,44 @@ export default function CaminoCalendarClient() {
 
   if (onboarding === null || !hasProfile) return null
 
+  const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
+
   if (caminoReadyStatus === 'no_queue') return (
     <Shell>
-      <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
-        <section className="w-full rounded-[32px] border border-amber-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
-            <RotateCcw size={30} />
-          </div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-950">Tu Camino PAU aún no está listo</h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Algo fue mal al generar tu plan. Vamos a intentarlo de nuevo.</p>
+      <main style={{ position: 'relative', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src={HF_LIBRARY} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(5,12,26,0.92) 0%, rgba(5,12,26,0.68) 50%, rgba(5,12,26,0.88) 100%)' }} />
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 20 }}>Camino PAU · Kairo</p>
+          <h1 style={{ fontSize: 52, fontWeight: 900, color: '#fff', letterSpacing: '-.04em', lineHeight: .88, marginBottom: 18 }}>Tu plan<br/>aún no<br/>está listo.</h1>
+          <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,.5)', lineHeight: 1.6, maxWidth: 360, marginBottom: 32 }}>Algo fue mal al generar tu Camino. Vamos a intentarlo de nuevo.</p>
           <button
             onClick={generateCamino}
             disabled={isGenerating}
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] disabled:opacity-60"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: isGenerating ? 'rgba(37,99,235,.18)' : '#2563eb', color: isGenerating ? 'rgba(255,255,255,.7)' : '#fff', border: isGenerating ? '1px solid rgba(37,99,235,.35)' : 'none', borderRadius: 10, padding: '14px 26px', fontSize: 13, fontWeight: 900, cursor: isGenerating ? 'default' : 'pointer', boxShadow: isGenerating ? 'none' : '0 12px 32px rgba(37,99,235,.4)', letterSpacing: '-.01em' }}
           >
             {isGenerating
-              ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Generando...</>
+              ? <><div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,.2)', borderTopColor: 'rgba(255,255,255,.75)', animation: 'spin .8s linear infinite' }} /> Generando tu plan...</>
               : <>Generar mi Camino PAU <ArrowRight size={16} /></>}
           </button>
-        </section>
+        </div>
       </main>
     </Shell>
   )
 
   if (caminoReadyStatus === 'no_future') return (
     <Shell>
-      <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10">
-        <section className="w-full rounded-[32px] border border-blue-100 bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.10)]">
-          <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
-          <h1 className="text-2xl font-black tracking-tight text-slate-950">Preparando tus próximas misiones...</h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">Esto solo tarda un momento.</p>
-        </section>
+      <main style={{ position: 'relative', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src={HF_LIBRARY} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(5,12,26,0.92) 0%, rgba(5,12,26,0.68) 50%, rgba(5,12,26,0.88) 100%)' }} />
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 20 }}>Camino PAU · Kairo</p>
+          <h1 style={{ fontSize: 52, fontWeight: 900, color: '#fff', letterSpacing: '-.04em', lineHeight: .88, marginBottom: 18 }}>Preparando<br/>tu Camino<br/>PAU.</h1>
+          <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,.5)', lineHeight: 1.6, maxWidth: 360, marginBottom: 32 }}>Kairo está analizando tu perfil y construyendo tu plan. Tarda unos segundos.</p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(37,99,235,.18)', color: 'rgba(255,255,255,.7)', border: '1px solid rgba(37,99,235,.35)', borderRadius: 10, padding: '14px 26px', fontSize: 13, fontWeight: 700 }}>
+            <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,.2)', borderTopColor: 'rgba(255,255,255,.75)', animation: 'spin .8s linear infinite' }} /> Generando tu plan...
+          </div>
+        </div>
       </main>
     </Shell>
   )

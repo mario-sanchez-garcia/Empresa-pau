@@ -8,7 +8,7 @@ import { supabase } from '@/app/lib/supabase'
 
 type Miembro = { user_id: string; name: string; weekly_xp: number; rank: number }
 type LigaPayload = {
-  liga: { id: string; codigo: string; nombre: string; miembros: Miembro[] }
+  liga: { id?: string; codigo?: string; nombre: string; miembros?: Miembro[] }
   isMember: boolean
   isAuthenticated: boolean
   memberCount: number
@@ -66,6 +66,8 @@ export default function LigaPublicPage() {
   )
 
   const { liga, isMember, isAuthenticated } = data
+  const memberCount = data.memberCount ?? liga.miembros?.length ?? 0
+  const miembros = liga.miembros ?? []
 
   return (
     <div style={{ minHeight: '100dvh', background: '#f4f7fb', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -80,7 +82,7 @@ export default function LigaPublicPage() {
         </div>
         <h1 style={{ margin: '4px 0 4px', fontSize: 24, fontWeight: 900, color: '#111827', letterSpacing: '-0.025em' }}>{liga.nombre}</h1>
         <p style={{ margin: '0 0 20px', fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
-          Código: {liga.codigo} · {liga.miembros.length} miembro{liga.miembros.length !== 1 ? 's' : ''}
+          Código: {codigo?.toUpperCase()} · {memberCount} miembro{memberCount !== 1 ? 's' : ''}
         </p>
 
         {/* Ranking semanal */}
@@ -91,11 +93,15 @@ export default function LigaPublicPage() {
               Ranking semanal
             </p>
           </div>
-          {liga.miembros.length === 0 ? (
+          {!isMember ? (
+            <p style={{ margin: 0, fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>
+              Únete a la liga para ver el ranking de miembros.
+            </p>
+          ) : miembros.length === 0 ? (
             <p style={{ margin: 0, fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>Sin actividad esta semana.</p>
           ) : (
             <div style={{ display: 'grid', gap: 6 }}>
-              {liga.miembros.map(m => (
+              {miembros.map(m => (
                 <div key={m.user_id} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
                   borderRadius: 12, padding: '8px 12px',

@@ -32,6 +32,16 @@ export async function GET(
 
   const { data: members } = await db.from('liga_miembros').select('user_id').eq('liga_id', liga.id)
   const memberIds = (members ?? []).map(m => m.user_id as string)
+  const isMember = currentUserId ? memberIds.includes(currentUserId) : false
+
+  if (!isMember) {
+    return NextResponse.json({
+      liga: { nombre: liga.nombre },
+      isMember: false,
+      isAuthenticated: Boolean(currentUserId),
+      memberCount: memberIds.length,
+    })
+  }
 
   const { data: progressRows } = await db
     .from('camino_user_progress')
@@ -60,7 +70,7 @@ export async function GET(
 
   return NextResponse.json({
     liga: { id: liga.id, codigo: liga.codigo, nombre: liga.nombre, miembros },
-    isMember: currentUserId ? memberIds.includes(currentUserId) : false,
+    isMember: true,
     isAuthenticated: Boolean(currentUserId),
     memberCount: memberIds.length,
   })

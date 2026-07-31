@@ -36,6 +36,7 @@ import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import WhyExplanation from '@/components/shared/WhyExplanation'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import KairoBrand from '@/components/shared/KairoBrand'
+import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import RichTextArea from '@/components/shared/RichTextArea'
 import {
   ArrowUpRight,
@@ -3236,6 +3237,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             </div>
             <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
+            <SectionIntroCard
+              hintKey="hint_examenes"
+              line1="Práctica ejercicio a ejercicio, sin tiempo ni reloj."
+              line2="Elige asignatura y tema, responde y lo corriges al momento. Para trabajar una parte del temario en profundidad."
+            />
+
             {/* ── Search bar ──────────────────────────────── */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
               <div className="exams-search-bar pau-reveal pau-reveal-delay-1">
@@ -3943,6 +3950,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
             </div>
 
+            {/* Tutor intro card */}
+            <div style={{ padding: '12px 28px 0' }}>
+              <SectionIntroCard
+                hintKey="hint_tutor"
+                line1="Pregúntale a Kairo lo que no entiendes, como si fuera un profesor."
+                line2="Explica, da ejemplos y resuelve dudas concretas. Para cuando estás atascado y necesitas entender el porqué."
+              />
+            </div>
+
             {/* Controls bar */}
             <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
@@ -4052,6 +4068,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         {seccion === 'historial' && (
           <>
+            <div style={{ padding: '16px 24px 0' }}>
+              <SectionIntroCard
+                hintKey="hint_historial"
+                line1="Todo lo que has practicado y tus notas, ordenado por fecha."
+                line2="Para ver en qué asignaturas estás mejorando y cuáles necesitan más trabajo."
+              />
+            </div>
             {cargandoHistorial ? (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center', color: WARM.muted }}>Cargando historial...</div>

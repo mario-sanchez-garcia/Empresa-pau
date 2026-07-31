@@ -9,6 +9,7 @@ import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
+import SectionIntroCard from '@/components/shared/SectionIntroCard'
 
 type SimulacroMode = 'normal' | 'errores' | 'personalizado'
 type YearChoice = 'all' | 'recent' | 'middle' | 'classic'
@@ -277,6 +278,14 @@ function SimulacrosPage() {
 
     {/* ── CONTENT ── */}
     <div style={{ background: 'white', borderTop: '2px solid #0f172a', flex: 1 }}>
+
+      <div style={{ padding: '16px 24px 0' }}>
+        <SectionIntroCard
+          hintKey="hint_simulacros"
+          line1="Exámenes cronometrados como el día real."
+          line2="Elige asignatura y tiempo, responde todo y Kairo lo corrige al terminar. Úsalo para entrenar bajo presión."
+        />
+      </div>
 
       {/* Camino parcial banner */}
       {isCaminoPartial && caminoBlock && (

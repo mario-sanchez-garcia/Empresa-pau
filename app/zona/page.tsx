@@ -8,6 +8,7 @@ import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
 import Flashcards from '@/components/zona/Flashcards'
+import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import type { Flashcard, ZonaUser } from '@/components/zona/types'
 
 const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
@@ -107,6 +108,11 @@ export default function ZonaPage() {
 
         {/* Content */}
         <main className="kairo-page-scroll zona-main" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
+          <SectionIntroCard
+            hintKey="hint_zona"
+            line1="Repasa con flashcards lo que más se te resiste."
+            line2="Para pasar de saber la teoría a recordarla de verdad."
+          />
           <Flashcards userId={user.id} initialCards={cards} externalSubject={activeSubject} />
         </main>
       </div>

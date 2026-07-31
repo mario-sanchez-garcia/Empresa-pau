@@ -50,19 +50,9 @@ export async function GET(request: NextRequest) {
     if (name) nameById.set(p.id as string, name)
   }
 
-  // Email prefix fallback for users without a profile name
-  const missingIds = allIds.filter(uid => uid !== user.id && !nameById.has(uid))
-  if (missingIds.length > 0) {
-    const results = await Promise.all(missingIds.map(uid => db.auth.admin.getUserById(uid)))
-    for (let i = 0; i < missingIds.length; i++) {
-      const email = results[i].data?.user?.email
-      if (email) nameById.set(missingIds[i], email.split('@')[0])
-    }
-  }
-
   function getName(uid: string): string {
     if (uid === user.id) return 'Tú'
-    return nameById.get(uid) || 'Alumno PAU'
+    return nameById.get(uid) || 'Alumno Kairo'
   }
 
   const entries = allRows.map((row, i) => ({

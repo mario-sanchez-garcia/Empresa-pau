@@ -1090,15 +1090,15 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
                   Cada día Kairo te prepara una misión adaptada a tu nivel. Por cada ejercicio que corriges ganas XP y subes en el ranking de tu liga. Y si estudias varios días seguidos, construyes una racha.
                 </p>
+                <KairoMapCard embedded />
                 <a
                   href="/camino"
-                  style={{ display: 'inline-block', padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
+                  style={{ display: 'inline-block', marginTop: 18, padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
                 >
                   Ver mi Camino →
                 </a>
               </div>
             )}
-            {isFirstSession && score !== null && correction && <KairoMapCard />}
           </article>
         </main>
 

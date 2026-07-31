@@ -6,11 +6,10 @@ import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
+import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profilePreferences'
 import SidebarNav from '@/app/components/SidebarNav'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
-const STORAGE_KEY = 'kairo_profile_preferences'
-const CHANGE_EVENT = 'kairo_profile_preferences_change'
 
 type Preferences = {
   displayName: string
@@ -55,6 +54,7 @@ function weeklyDaysLabel(days: number | null) {
 export default function SettingsPage() {
   const router = useRouter()
   const { ccaa, setCCAA } = useCCAA()
+  const [userId, setUserId] = useState('')
   const [email, setEmail] = useState('')
   const [preferences, setPreferences] = useState<Preferences>(defaults)
   const [saved, setSaved] = useState(false)
@@ -74,15 +74,20 @@ export default function SettingsPage() {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
+      const currentUserId = data.user.id
+      setUserId(currentUserId)
       setEmail(data.user.email ?? '')
+      const storedPreferences = loadProfilePreferences(currentUserId)
+      let serverDisplayName = ''
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
       if (token) {
         try {
           const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           if (res.ok) {
-            const json = await res.json() as { email_notifications: boolean }
+            const json = await res.json() as { email_notifications: boolean; display_name?: string }
             setEmailNotifications(json.email_notifications ?? true)
+            serverDisplayName = json.display_name ?? ''
           }
         } catch { /* silent */ }
         try {
@@ -100,12 +105,8 @@ export default function SettingsPage() {
           }
         } catch { /* silent */ }
       }
+      setPreferences({ ...defaults, ...storedPreferences, displayName: serverDisplayName || storedPreferences.displayName || '' })
     })
-    try {
-      setPreferences({ ...defaults, ...JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}') })
-    } catch {
-      setPreferences(defaults)
-    }
   }, [router])
 
   function choosePhoto(event: React.ChangeEvent<HTMLInputElement>) {
@@ -135,8 +136,7 @@ export default function SettingsPage() {
 
   async function save() {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
-      window.dispatchEvent(new Event(CHANGE_EVENT))
+      saveProfilePreferences(userId, preferences)
       setSaveError('')
       setCaminoPrefsStatus('')
       setSaved(true)

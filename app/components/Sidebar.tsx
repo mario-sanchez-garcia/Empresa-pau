@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
+import { loadProfilePreferences, PROFILE_PREFERENCES_CHANGE_EVENT } from '@/app/lib/profilePreferences'
 import KairoBrand from '@/components/shared/KairoBrand'
 
 export type SidebarItemId = 'camino' | 'examenes' | 'simulacros' | 'zona' | 'chat' | 'historial' | 'settings'
@@ -49,6 +50,7 @@ function routeItem(pathname: string): SidebarItemId {
 export default function Sidebar({ activeItem, email, onNavigate, onLogout }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [userId, setUserId] = useState('')
   const [sessionEmail, setSessionEmail] = useState('')
   const [profile, setProfile] = useState<{ displayName?: string; photo?: string }>({})
   const [isAdmin, setIsAdmin] = useState(false)
@@ -57,7 +59,10 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
   const { ccaa, setCCAA } = useCCAA()
 
   useEffect(() => {
-    if (email === undefined) supabase.auth.getUser().then(({ data }) => setSessionEmail(data.user?.email ?? ''))
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? '')
+      if (email === undefined) setSessionEmail(data.user?.email ?? '')
+    })
   }, [email])
 
   useEffect(() => {
@@ -71,18 +76,32 @@ export default function Sidebar({ activeItem, email, onNavigate, onLogout }: Sid
   }, [])
 
   useEffect(() => {
-    function readProfile() {
-      try { setProfile(JSON.parse(window.localStorage.getItem('kairo_profile_preferences') ?? '{}')) }
-      catch { setProfile({}) }
+    if (!userId) {
+      setProfile({})
+      return
+    }
+    async function readProfile() {
+      const localProfile = loadProfilePreferences(userId)
+      setProfile(localProfile)
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) return
+      fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then((remote: { display_name?: string } | null) => {
+          if (!remote?.display_name) return
+          setProfile(current => ({ ...current, displayName: remote.display_name }))
+        })
+        .catch(() => {})
     }
     readProfile()
-    window.addEventListener('kairo_profile_preferences_change', readProfile)
+    window.addEventListener(PROFILE_PREFERENCES_CHANGE_EVENT, readProfile)
     window.addEventListener('storage', readProfile)
     return () => {
-      window.removeEventListener('kairo_profile_preferences_change', readProfile)
+      window.removeEventListener(PROFILE_PREFERENCES_CHANGE_EVENT, readProfile)
       window.removeEventListener('storage', readProfile)
     }
-  }, [])
+  }, [userId])
 
   async function logout() {
     if (onLogout) { await onLogout(); return }

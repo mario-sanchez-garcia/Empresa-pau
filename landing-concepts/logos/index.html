@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logos Kairo — 5 versiones</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0d0d0d; font-family: 'DM Mono', monospace; color: #fff; padding: 48px 40px; }
+
+h1 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: .1em; color: rgba(255,255,255,.25); margin-bottom: 4px; }
+.sub { font-size: 10px; color: rgba(255,255,255,.15); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 48px; }
+
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+
+.card { display: flex; flex-direction: column; }
+
+.logo-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #111;
+  cursor: pointer;
+  transition: outline 120ms;
+}
+.logo-wrap:hover { outline: 1px solid rgba(255,255,255,.3); }
+
+.logo-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Context strips — show logo on landing-like sections */
+.ctx-strip {
+  display: flex;
+  height: 36px;
+  overflow: hidden;
+}
+.ctx-dark {
+  flex: 1;
+  background: #111;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.ctx-light {
+  flex: 1;
+  background: #f9f9f9;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid #e0e0e0;
+}
+.ctx-dark img, .ctx-light img {
+  height: 22px; width: auto; object-fit: contain;
+  mix-blend-mode: normal;
+}
+.ctx-light img { filter: invert(1); mix-blend-mode: multiply; }
+
+.meta { padding: 12px 0 24px; }
+.meta-n { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 5px; }
+.meta-desc { font-size: 11px; color: rgba(255,255,255,.5); line-height: 1.55; }
+
+/* Full-screen preview */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.92); align-items: center; justify-content: center;
+  cursor: zoom-out;
+}
+.overlay.active { display: flex; }
+.overlay img { max-width: 80vmin; max-height: 80vmin; object-fit: contain; }
+</style>
+</head>
+<body>
+
+<h1>KAIRO — Logos</h1>
+<p class="sub">5 versiones generadas con Higgsfield · haz clic para ampliar</p>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="logo-wrap" onclick="preview('logo_01.png')">
+      <img src="logo_01.png" alt="Logo 01">
+    </div>
+    <div class="ctx-strip">
+      <div class="ctx-dark"><img src="logo_01.png" alt=""></div>
+      <div class="ctx-light"><img src="logo_01.png" alt=""></div>
+    </div>
+    <div class="meta">
+      <p class="meta-n">01 — K geométrica desglosada</p>
+      <p class="meta-desc">Mark de 3 líneas + wordmark condensado. Swiss modernista, sin ornamentos.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="logo-wrap" onclick="preview('logo_02.png')">
+      <img src="logo_02.png" alt="Logo 02">
+    </div>
+    <div class="ctx-strip">
+      <div class="ctx-dark"><img src="logo_02.png" alt=""></div>
+      <div class="ctx-light"><img src="logo_02.png" alt=""></div>
+    </div>
+    <div class="meta">
+      <p class="meta-n">02 — Tipográfico brutal</p>
+      <p class="meta-desc">KAIRO pesado ancho completo, reglas horizontales, PAU 2026 monospace.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="logo-wrap" onclick="preview('logo_03.png')">
+      <img src="logo_03.png" alt="Logo 03">
+    </div>
+    <div class="ctx-strip">
+      <div class="ctx-dark"><img src="logo_03.png" alt=""></div>
+      <div class="ctx-light"><img src="logo_03.png" alt=""></div>
+    </div>
+    <div class="meta">
+      <p class="meta-n">03 — Flecha / progreso</p>
+      <p class="meta-desc">Chevron hacia arriba + wordmark horizontal. Aspiracional y direccional.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="logo-wrap" onclick="preview('logo_04.png')">
+      <img src="logo_04.png" alt="Logo 04">
+    </div>
+    <div class="ctx-strip">
+      <div class="ctx-dark"><img src="logo_04.png" alt=""></div>
+      <div class="ctx-light"><img src="logo_04.png" alt=""></div>
+    </div>
+    <div class="meta">
+      <p class="meta-n">04 — Emblema circular</p>
+      <p class="meta-desc">Sello circular con KAIRO centrado, estrella y EBAU. Institucional y clásico.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="logo-wrap" onclick="preview('logo_05.png')">
+      <img src="logo_05.png" alt="Logo 05">
+    </div>
+    <div class="ctx-strip">
+      <div class="ctx-dark"><img src="logo_05.png" alt=""></div>
+      <div class="ctx-light"><img src="logo_05.png" alt=""></div>
+    </div>
+    <div class="meta">
+      <p class="meta-n">05 — K con badge de nota</p>
+      <p class="meta-desc">K cursiva con "10" en círculo superpuesto. Tech educativo, confianza inmediata.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Full-screen overlay -->
+<div class="overlay" id="overlay" onclick="closePreview()">
+  <img id="overlay-img" src="" alt="">
+</div>
+
+<script>
+function preview(src) {
+  document.getElementById('overlay-img').src = src
+  document.getElementById('overlay').classList.add('active')
+}
+function closePreview() {
+  document.getElementById('overlay').classList.remove('active')
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview() })
+</script>
+
+</body>
+</html>

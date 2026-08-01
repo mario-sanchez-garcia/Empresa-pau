@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — Prepara la PAU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,700;0,900;1,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION CONTRACT — V2
+  THESIS: La presión silenciosa de la sala de examen. Rechaza por completo
+  cualquier color — la urgencia se construye solo con valor, contraste y escala.
+  OWN-WORLD: Escala #111→#f0f0f0; cero hue en ningún elemento;
+  tipografía de máxima resolución negra sobre blanco y blanca sobre negro.
+  STORY: La atmósfera densa del hero crea urgencia antes de leer; los stats
+  prueban escala; la card flotante hace la oferta; el copy cierra.
+  FIRST VIEWPORT: Full-bleed 100vh dark (image slot); card oscura flotante
+  bottom-left con headline + CTAs; fila de stats pegada al borde inferior.
+  FORM: Editorial cinematográfico B&W; tipografía a extremos — monumental o micro.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:   #111111;
+  --ink:     #1a1a1a;
+  --ink2:    #2e2e2e;
+  --mid:     #5a5a5a;
+  --soft:    #909090;
+  --border:  #d4d4d4;
+  --light:   #f0f0f0;
+  --white:   #fafafa;
+  --r:       10px;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Hanken Grotesk', sans-serif; background: var(--white); color: var(--ink); min-height: 100vh; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 60px;
+  background: rgba(250,250,250,.82); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 20px; color: var(--black); text-decoration: none; letter-spacing: -.02em; }
+.nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+.nav-links a { font-size: 13px; font-weight: 600; color: var(--mid); text-decoration: none; transition: color 140ms; }
+.nav-links a:hover { color: var(--black); }
+.btn-nav-dark {
+  padding: 7px 18px; background: var(--black); border-radius: 6px;
+  font-size: 12px; font-weight: 700; color: #fff; text-decoration: none;
+  transition: background 140ms;
+}
+.btn-nav-dark:hover { background: var(--ink2); }
+
+/* ── HERO ── */
+.hero {
+  height: 100vh; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+/* Image slot — full viewport */
+.hero-bg {
+  position: absolute; inset: 0;
+  /* CSS STAND-IN: reemplazar con foto B&W de biblioteca vacía a las 2am
+     o escritorio con luz fría, procesado con grain fuerte o halftone.
+     El tratamiento es lo que importa, no el sujeto exacto. */
+  background: #181818;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 30% 40%, #222 0%, #111 100%);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(17,17,17,.96) 0%, rgba(17,17,17,.55) 40%, rgba(17,17,17,.2) 100%);
+}
+.img-note {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 10px; font-family: monospace; color: rgba(255,255,255,.1);
+  letter-spacing: .1em; text-transform: uppercase; text-align: center; line-height: 2;
+  z-index: 2;
+}
+
+/* Floating card bottom-left */
+.hero-card {
+  position: relative; z-index: 10;
+  max-width: 440px; margin: 0 64px 0;
+  background: var(--black); padding: 40px 40px 36px;
+  border-radius: 0 12px 0 0;
+}
+.hero-card-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.36); margin-bottom: 18px;
+}
+.hero-h1 {
+  font-family: 'Archivo', sans-serif; font-weight: 900;
+  font-size: clamp(34px, 4vw, 52px); line-height: 1.02;
+  letter-spacing: -.03em; color: #fff; margin-bottom: 20px;
+  text-wrap: balance;
+}
+.hero-sub {
+  font-size: 14px; line-height: 1.65; color: rgba(255,255,255,.52);
+  max-width: 36ch; margin-bottom: 28px;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-white {
+  padding: 12px 26px; background: #fff; color: var(--black);
+  font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 6px;
+  transition: background 140ms, transform 110ms;
+}
+.btn-white:hover { background: var(--light); transform: translateY(-1px); }
+.btn-white:active { transform: scale(.98); }
+.btn-outline-white {
+  padding: 11px 22px; border: 1px solid rgba(255,255,255,.25);
+  color: #fff; font-size: 14px; font-weight: 600;
+  text-decoration: none; border-radius: 6px;
+  transition: border-color 140ms, background 140ms;
+}
+.btn-outline-white:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.06); }
+
+/* Stats row at hero bottom */
+.hero-stats {
+  position: relative; z-index: 10;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--black);
+}
+.hs {
+  padding: 24px 28px;
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+.hs:last-child { border-right: none; }
+.hs-n {
+  font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 28px;
+  color: #fff; letter-spacing: -.03em; line-height: 1; margin-bottom: 3px;
+}
+.hs-l { font-size: 11px; color: rgba(255,255,255,.38); font-weight: 600; letter-spacing: .02em; }
+
+/* ── MANIFESTO ── */
+.manifesto {
+  padding: 100px 64px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  align-items: start; max-width: 1200px; margin: 0 auto;
+}
+.manifesto-left {}
+.manifesto-h {
+  font-family: 'Archivo', sans-serif; font-weight: 900;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02;
+  letter-spacing: -.03em; color: var(--black); text-wrap: balance;
+}
+.manifesto-right { padding-top: 8px; }
+.manifesto-p { font-size: 16px; line-height: 1.75; color: var(--ink2); margin-bottom: 20px; max-width: 48ch; }
+.manifesto-p:last-child { margin-bottom: 0; }
+
+/* ── HOW IT WORKS ── */
+.how {
+  padding: 0 64px 100px;
+  max-width: 1200px; margin: 0 auto;
+  border-top: 1px solid var(--border);
+}
+.how-header { padding: 64px 0 56px; display: flex; align-items: baseline; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.how-h { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: clamp(28px, 3vw, 40px); letter-spacing: -.03em; color: var(--black); }
+.how-meta { font-size: 12px; font-weight: 600; color: var(--soft); letter-spacing: .06em; text-transform: uppercase; }
+
+.how-steps { display: flex; flex-direction: column; }
+.step {
+  display: grid; grid-template-columns: 72px 1fr;
+  gap: 0; padding: 36px 0; border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+.step:first-child { border-top: 1px solid var(--border); }
+.step-n {
+  font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 48px;
+  color: var(--light); letter-spacing: -.04em; line-height: 1; padding-top: 4px;
+}
+.step-body {}
+.step-h { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 20px; color: var(--black); margin-bottom: 8px; letter-spacing: -.02em; }
+.step-p { font-size: 14px; line-height: 1.65; color: var(--mid); max-width: 52ch; }
+
+/* ── PROOF (testimonial) ── */
+.proof {
+  background: var(--black); padding: 80px 64px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  align-items: center;
+}
+.proof-q {
+  font-family: 'Archivo', sans-serif; font-weight: 900;
+  font-size: clamp(24px, 2.8vw, 36px); line-height: 1.2;
+  letter-spacing: -.025em; color: #fff; text-wrap: balance;
+  font-style: italic;
+}
+.proof-q::before { content: '\201C'; }
+.proof-q::after  { content: '\201D'; }
+.proof-attr { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,.4); font-weight: 600; }
+.proof-attr strong { color: rgba(255,255,255,.75); display: block; margin-bottom: 2px; font-size: 14px; }
+
+.proof-right {}
+.proof-score-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 12px; }
+.proof-score-change {
+  font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 56px;
+  color: #fff; letter-spacing: -.04em; line-height: 1; margin-bottom: 4px;
+}
+.proof-score-sub { font-size: 14px; color: rgba(255,255,255,.45); }
+.proof-note { font-size: 10px; color: rgba(255,255,255,.2); margin-top: 16px; font-style: italic; }
+
+/* ── PRICING ── */
+.pricing {
+  padding: 100px 64px;
+  max-width: 1200px; margin: 0 auto;
+}
+.pricing-top { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 52px; flex-wrap: wrap; }
+.pricing-h { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: clamp(28px, 3vw, 40px); letter-spacing: -.03em; color: var(--black); }
+.pricing-note { font-size: 13px; color: var(--soft); }
+
+.p-row { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.p-col { padding: 36px 28px; border-right: 1px solid var(--border); }
+.p-col:last-child { border-right: none; }
+.p-col.featured { background: var(--black); }
+
+.p-name { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--soft); margin-bottom: 16px; }
+.p-col.featured .p-name { color: rgba(255,255,255,.4); }
+.p-price { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 44px; letter-spacing: -.04em; color: var(--black); line-height: 1; margin-bottom: 3px; }
+.p-col.featured .p-price { color: #fff; }
+.p-period { font-size: 12px; color: var(--soft); margin-bottom: 24px; }
+.p-col.featured .p-period { color: rgba(255,255,255,.45); }
+
+.p-list { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 7px; }
+.p-list li { font-size: 13px; color: var(--mid); padding-left: 16px; position: relative; line-height: 1.4; }
+.p-list li::before { content: '—'; position: absolute; left: 0; color: var(--border); font-size: 11px; }
+.p-col.featured .p-list li { color: rgba(255,255,255,.65); }
+.p-col.featured .p-list li::before { color: rgba(255,255,255,.2); }
+
+.btn-black { display: block; text-align: center; padding: 11px 20px; background: var(--black); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; transition: background 140ms; }
+.btn-black:hover { background: var(--ink2); }
+.btn-b-outline { display: block; text-align: center; padding: 10px 20px; border: 1px solid var(--border); color: var(--ink); border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; transition: border-color 140ms, background 140ms; }
+.btn-b-outline:hover { border-color: var(--ink); background: var(--light); }
+.btn-b-outline-w { display: block; text-align: center; padding: 10px 20px; border: 1px solid rgba(255,255,255,.22); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; transition: border-color 140ms, background 140ms; }
+.btn-b-outline-w:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.06); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 40px 64px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.f-logo { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 19px; color: var(--black); letter-spacing: -.02em; }
+.f-links { display: flex; gap: 20px; list-style: none; }
+.f-links a { font-size: 12px; color: var(--soft); text-decoration: none; transition: color 140ms; }
+.f-links a:hover { color: var(--black); }
+.f-copy { font-size: 11px; color: rgba(0,0,0,.22); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .hero-card { margin: 0 24px 0; padding: 32px 28px 28px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hs:nth-child(2) { border-right: none; }
+  .hs:nth-child(3) { border-right: 1px solid rgba(255,255,255,.08); }
+  .manifesto { grid-template-columns: 1fr; gap: 32px; padding: 72px 28px; }
+  .how { padding: 0 28px 72px; }
+  .proof { grid-template-columns: 1fr; gap: 48px; padding: 64px 28px; }
+  .proof-score-change { font-size: 40px; }
+  .pricing { padding: 72px 28px; }
+  .p-row { grid-template-columns: 1fr; border-radius: 12px; }
+  .p-col { border-right: none; border-bottom: 1px solid var(--border); }
+  .p-col:last-child { border-bottom: none; }
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  footer { padding: 36px 24px; }
+  .step { grid-template-columns: 52px 1fr; }
+  .step-n { font-size: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-white, .btn-b-outline, .btn-black, .btn-b-outline-w { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Kairo</a>
+  <ul class="nav-links">
+    <li><a href="#">Cómo funciona</a></li>
+    <li><a href="#">Precios</a></li>
+    <li><a href="#">Para padres</a></li>
+  </ul>
+  <a class="btn-nav-dark" href="#">Entrar</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <p class="img-note">
+      [ IMAGEN: Biblioteca vacía, 2 AM.<br>
+      Luz fría sobre mesa. B&W.<br>
+      Grain 35mm. Sin personas. ]
+    </p>
+  </div>
+
+  <!-- Floating card bottom-left -->
+  <div class="hero-card">
+    <p class="hero-card-eyebrow">Preparación PAU · Madrid · Cataluña</p>
+    <h1 class="hero-h1">La corrección<br>que te<br>faltaba.</h1>
+    <p class="hero-sub">
+      Exámenes oficiales reales. Corrección IA con la rúbrica exacta del profesor.
+      Desde 9,99&nbsp;€ al mes.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-white" href="#">Empezar gratis</a>
+      <a class="btn-outline-white" href="#">Ver demo →</a>
+    </div>
+  </div>
+
+  <!-- Stats at hero bottom -->
+  <div class="hero-stats">
+    <div class="hs"><p class="hs-n">1.200+</p><p class="hs-l">ejercicios estructurados</p></div>
+    <div class="hs"><p class="hs-n">38</p><p class="hs-l">semanas de currículum</p></div>
+    <div class="hs"><p class="hs-n">&lt;&nbsp;30s</p><p class="hs-l">para recibir corrección</p></div>
+    <div class="hs"><p class="hs-n">2015–25</p><p class="hs-l">exámenes reales</p></div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="manifesto-left">
+    <h2 class="manifesto-h">La PAU es el examen más importante hasta ese momento. La mayoría llega sin corrección real.</h2>
+  </div>
+  <div class="manifesto-right">
+    <p class="manifesto-p">Las academias cuestan 100–200&nbsp;€ al mes y requieren horarios fijos. Los PDFs de exámenes no corrigen. Los apuntes no dicen en qué fallaste.</p>
+    <p class="manifesto-p">Kairo hace las tres cosas que no hacía nada: exámenes reales, corrección inmediata con la rúbrica oficial, y un plan diario que te obliga a estudiar un poco cada día en vez de empollar el domingo.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="how-header">
+    <h2 class="how-h">Cómo funciona</h2>
+    <span class="how-meta">Tres pasos</span>
+  </div>
+  <div class="how-steps">
+    <div class="step">
+      <span class="step-n">01</span>
+      <div class="step-body">
+        <h3 class="step-h">Recibes tu Camino PAU</h3>
+        <p class="step-p">Dinos tu fecha de examen y tus asignaturas. Kairo genera un plan de misiones diarias de 15 minutos personalizado a tu punto de partida.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-n">02</span>
+      <div class="step-body">
+        <h3 class="step-h">Resuelves exámenes reales</h3>
+        <p class="step-p">Los exámenes oficiales de Selectividad de Madrid y Cataluña de 2015 a 2025, organizados por asignatura, bloque y dificultad. A mano, como en el examen real.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-n">03</span>
+      <div class="step-body">
+        <h3 class="step-h">La IA te corrige en segundos</h3>
+        <p class="step-p">Subes una foto de tu respuesta. La IA aplica la rúbrica oficial exacta: te dice cuántos puntos sacas, dónde fallaste y cómo mejorar. Como correría el profesor de tu comunidad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section class="proof">
+  <div>
+    <p class="proof-q">El desglose de cada respuesta es lo que marca la diferencia. Supe exactamente en qué fallaba y no volví a cometer el mismo error.</p>
+    <p class="proof-attr">
+      <strong>Lucía M.</strong>
+      2º Bachillerato — Madrid, 2024 · Matemáticas II
+      <span style="display:block;margin-top:4px;font-size:11px;color:rgba(255,255,255,.2);font-style:italic;">Contenido sintético — resultado ilustrativo</span>
+    </p>
+  </div>
+  <div class="proof-right">
+    <p class="proof-score-label">Evolución nota</p>
+    <p class="proof-score-change">5,2 → 8,1</p>
+    <p class="proof-score-sub">Matemáticas II · 2 meses</p>
+    <p class="proof-note">Contenido sintético — resultado ilustrativo</p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="pricing-top">
+    <h2 class="pricing-h">Precios</h2>
+    <span class="pricing-note">Todos los planes incluyen IVA.</span>
+  </div>
+  <div class="p-row">
+    <div class="p-col">
+      <p class="p-name">Free</p>
+      <p class="p-price">0&nbsp;€</p>
+      <p class="p-period">sin tarjeta de crédito</p>
+      <ul class="p-list">
+        <li>25 correcciones al mes</li>
+        <li>3 fotos al mes</li>
+        <li>1 simulacro al mes</li>
+        <li>Camino PAU limitado</li>
+      </ul>
+      <a class="btn-b-outline" href="#">Empezar gratis</a>
+    </div>
+    <div class="p-col featured">
+      <p class="p-name">Premium</p>
+      <p class="p-price">9,99&nbsp;€</p>
+      <p class="p-period">/mes · cancela cuando quieras</p>
+      <ul class="p-list">
+        <li>200 correcciones al mes</li>
+        <li>80 fotos al mes</li>
+        <li>5 simulacros al mes</li>
+        <li>Camino PAU completo</li>
+        <li>Ranking de clase</li>
+      </ul>
+      <a class="btn-b-outline-w" href="#">Probar Premium</a>
+    </div>
+    <div class="p-col">
+      <p class="p-name">Curso PAU <span style="background:#f0f0f0;color:#5a5a5a;font-size:9px;padding:2px 7px;border-radius:4px;letter-spacing:.04em;margin-left:4px;">EARLY BIRD</span></p>
+      <p class="p-price">59&nbsp;€</p>
+      <p class="p-period">pago único · septiembre a junio</p>
+      <ul class="p-list">
+        <li>Todo lo de Premium</li>
+        <li>Acceso completo hasta junio</li>
+        <li>Sin renovación mensual</li>
+        <li>Precio sube el 30 sept.</li>
+      </ul>
+      <a class="btn-black" href="#">Reservar Curso PAU</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="f-logo">Kairo</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+    <li><a href="#">Para centros</a></li>
+  </ul>
+  <span class="f-copy">© 2026 Kairo</span>
+</footer>
+
+</body>
+</html>

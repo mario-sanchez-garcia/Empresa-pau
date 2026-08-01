@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hero picker — v4c</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; font-family: 'Helvetica Neue', sans-serif; color: #fff; padding: 40px; }
+h1 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 8px; }
+.subtitle { font-size: 11px; color: rgba(255,255,255,.2); margin-bottom: 32px; letter-spacing: .06em; }
+.section-label { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.2); margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.section-label:first-of-type { margin-top: 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.card { cursor: pointer; }
+.label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 8px; }
+.preview { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+.preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.preview::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(17,17,17,.72) 0%, rgba(17,17,17,.55) 50%, rgba(17,17,17,.9) 100%);
+  pointer-events: none;
+}
+.hero-sim {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.hero-sim-h {
+  font-weight: 900; font-size: clamp(24px, 4vw, 44px);
+  letter-spacing: .01em; color: #fff; text-align: center;
+  line-height: .92; text-transform: uppercase;
+}
+.hero-sim-cta {
+  margin-top: 14px; width: 52px; height: 52px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; font-weight: 700; color: #111;
+  letter-spacing: .06em; text-transform: uppercase; text-align: center; line-height: 1.2;
+}
+.desc { margin-top: 8px; font-size: 11px; color: rgba(255,255,255,.4); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h1>Hero candidates — v4c · Kairo</h1>
+<p class="subtitle">Todas con el overlay real del hero encima</p>
+
+<p class="section-label">Ronda 2 — Con color y vida</p>
+<div class="grid">
+  <div class="card">
+    <p class="label">E — Mesa moderna, luz dorada</p>
+    <div class="preview">
+      <img src="hero_e.png" alt="E">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Espacio de estudio vibrante, luz de tarde, plantas</p>
+  </div>
+  <div class="card">
+    <p class="label">F — Pasillo universitario, hora dorada</p>
+    <div class="preview">
+      <img src="hero_f.png" alt="F">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Arcos, luz ámbar, siluetas — aspiracional y cinematográfico</p>
+  </div>
+  <div class="card">
+    <p class="label">G — Apuntes y subrayadores</p>
+    <div class="preview">
+      <img src="hero_g.png" alt="G">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Macro de notas, teal y naranja, energía y foco</p>
+  </div>
+  <div class="card">
+    <p class="label">H — Biblioteca colorida, laptop</p>
+    <div class="preview">
+      <img src="hero_h.png" alt="H">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Estanterías de colores, luz de tarde, laptop abierto</p>
+  </div>
+</div>
+
+<p class="section-label">Ronda 1 — B&W originales (referencia)</p>
+<div class="grid">
+  <div class="card">
+    <p class="label">A — Vista cenital, mesa</p>
+    <div class="preview">
+      <img src="hero_a.png" alt="A">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="label">B — Sala de examen ★ actual</p>
+    <div class="preview">
+      <img src="hero_b.png" alt="B">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="label">C — Mano escribiendo</p>
+    <div class="preview">
+      <img src="hero_c.png" alt="C">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="label">D — Biblioteca 3am</p>
+    <div class="preview">
+      <img src="hero_d.png" alt="D">
+      <div class="hero-sim"><p class="hero-sim-h">Prepara<br>la PAU.</p><div class="hero-sim-cta">Empieza<br>gratis</div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

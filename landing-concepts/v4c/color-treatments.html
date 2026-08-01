@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tratamientos de color — var_2</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; font-family: 'Helvetica Neue', sans-serif; color: #fff; padding: 40px; }
+h1 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 6px; }
+p.sub { font-size: 11px; color: rgba(255,255,255,.18); margin-bottom: 36px; letter-spacing: .04em; }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.card {}
+.num { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 7px; }
+.preview { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+
+/* La imagen con su filtro */
+.preview img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+
+/* Overlay del hero encima */
+.preview::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(17,17,17,.65) 0%, rgba(17,17,17,.4) 45%, rgba(17,17,17,.85) 100%);
+}
+
+/* Texto hero simulado */
+.hero-sim {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.sim-h {
+  font-weight: 900; font-size: clamp(20px, 3.2vw, 38px);
+  letter-spacing: .01em; color: #fff; text-align: center;
+  line-height: .88; text-transform: uppercase;
+}
+.sim-cta {
+  margin-top: 12px; width: 46px; height: 46px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font-size: 6px; font-weight: 700; color: #111;
+  letter-spacing: .06em; text-transform: uppercase; text-align: center; line-height: 1.2;
+}
+.desc { margin-top: 9px; font-size: 11px; color: rgba(255,255,255,.38); line-height: 1.5; }
+.filter-code { font-size: 9px; color: rgba(255,255,255,.18); font-family: monospace; margin-top: 3px; }
+
+/* ── FILTROS ── */
+.f-original    img { filter: none; }
+.f-vibrant     img { filter: saturate(1.6) brightness(1.1) contrast(1.05); }
+.f-golden      img { filter: saturate(1.4) brightness(1.15) sepia(0.2) contrast(1.08); }
+.f-warm-boost  img { filter: saturate(1.8) brightness(1.2) hue-rotate(-10deg) contrast(1.1); }
+.f-cinematic   img { filter: saturate(1.3) brightness(1.05) contrast(1.2) sepia(0.1); }
+.f-sunrise     img { filter: saturate(2) brightness(1.25) hue-rotate(-15deg) contrast(1.05); }
+.f-cool-vivid  img { filter: saturate(1.7) brightness(1.1) hue-rotate(10deg) contrast(1.08); }
+.f-overexposed img { filter: saturate(1.5) brightness(1.4) contrast(0.95); }
+.f-rich        img { filter: saturate(1.9) brightness(1.0) contrast(1.15); }
+</style>
+</head>
+<body>
+
+<h1>Tratamientos de color — misma imagen</h1>
+<p class="sub">var_2 · atardecer en ventana · distintos filtros de luz y saturación</p>
+
+<div class="grid">
+
+  <div class="card f-original">
+    <p class="num">00 — Original (sin filtro)</p>
+    <div class="preview">
+      <img src="var_2.png" alt="original">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Tal cual generada</p>
+    <p class="filter-code">filter: none</p>
+  </div>
+
+  <div class="card f-vibrant">
+    <p class="num">01 — Vibrante</p>
+    <div class="preview">
+      <img src="var_2.png" alt="vibrant">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">+saturación +brillo suave · colores más vivos sin perder naturalidad</p>
+    <p class="filter-code">saturate(1.6) brightness(1.1) contrast(1.05)</p>
+  </div>
+
+  <div class="card f-golden">
+    <p class="num">02 — Dorado cálido</p>
+    <div class="preview">
+      <img src="var_2.png" alt="golden">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Tono dorado + ligero sepia · sensación de hora mágica intensa</p>
+    <p class="filter-code">saturate(1.4) brightness(1.15) sepia(0.2) contrast(1.08)</p>
+  </div>
+
+  <div class="card f-warm-boost">
+    <p class="num">03 — Naranja intenso</p>
+    <div class="preview">
+      <img src="var_2.png" alt="warm">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Saturación alta + hue hacia naranja · más energético y explosivo</p>
+    <p class="filter-code">saturate(1.8) brightness(1.2) hue-rotate(-10deg) contrast(1.1)</p>
+  </div>
+
+  <div class="card f-cinematic">
+    <p class="num">04 — Cinemático</p>
+    <div class="preview">
+      <img src="var_2.png" alt="cinematic">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Contraste alto + sepia suave · look de película, más dramático</p>
+    <p class="filter-code">saturate(1.3) brightness(1.05) contrast(1.2) sepia(0.1)</p>
+  </div>
+
+  <div class="card f-sunrise">
+    <p class="num">05 — Amanecer</p>
+    <div class="preview">
+      <img src="var_2.png" alt="sunrise">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Saturación máxima + mucho brillo + hue cálido · el más impactante</p>
+    <p class="filter-code">saturate(2) brightness(1.25) hue-rotate(-15deg) contrast(1.05)</p>
+  </div>
+
+  <div class="card f-cool-vivid">
+    <p class="num">06 — Frío vívido</p>
+    <div class="preview">
+      <img src="var_2.png" alt="cool">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Saturación alta + hue hacia azul/verde · más fresco y contemporáneo</p>
+    <p class="filter-code">saturate(1.7) brightness(1.1) hue-rotate(10deg) contrast(1.08)</p>
+  </div>
+
+  <div class="card f-overexposed">
+    <p class="num">07 — Sobreexpuesto</p>
+    <div class="preview">
+      <img src="var_2.png" alt="overexposed">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Muy brillante + saturación · sensación de verano, luz estallando</p>
+    <p class="filter-code">saturate(1.5) brightness(1.4) contrast(0.95)</p>
+  </div>
+
+  <div class="card f-rich">
+    <p class="num">08 — Colores ricos</p>
+    <div class="preview">
+      <img src="var_2.png" alt="rich">
+      <div class="hero-sim"><p class="sim-h">Prepara<br>la PAU.</p><div class="sim-cta">Empieza<br>gratis</div></div>
+    </div>
+    <p class="desc">Saturación muy alta + contraste · colores densos y profundos</p>
+    <p class="filter-code">saturate(1.9) brightness(1.0) contrast(1.15)</p>
+  </div>
+
+</div>
+</body>
+</html>

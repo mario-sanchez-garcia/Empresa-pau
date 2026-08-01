@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — v4b · Dos columnas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  V4-B — DOS COLUMNAS ANCLADAS
+  Hero idéntico a v4. Cuerpo: grid 2-col persistente donde la izquierda
+  es siempre una etiqueta fija/grande y la derecha es el contenido.
+  Produce un efecto de "índice editorial" — todo en la misma rejilla,
+  secciones delimitadas por líneas horizontales, sin cajas ni sombras.
+  Pricing: tabla comparativa de 3 columnas, pura tipografía.
+*/
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #111;
+  --ink:   #1c1c1c;
+  --mid:   #5a5a5a;
+  --soft:  #999;
+  --border:#ddd;
+  --white: #f9f9f9;
+}
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 54px; }
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fff; text-decoration: none; letter-spacing: .08em; }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.5); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; }
+.nav-link:hover { color: #fff; }
+.btn-nav { padding: 7px 16px; border: 1px solid rgba(255,255,255,.3); font-size: 11px; color: #fff; text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: background 140ms; }
+.btn-nav:hover { background: rgba(255,255,255,.1); }
+
+/* HERO */
+.hero { height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.hero-bg { position: absolute; inset: 0; background: var(--black); background-image: radial-gradient(ellipse 90% 80% at 50% 40%, #2a2a2a 0%, #111 100%); }
+.hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17,17,17,.72) 0%, rgba(17,17,17,.55) 50%, rgba(17,17,17,.9) 100%); }
+.img-note { position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); font-size: 10px; font-family: monospace; color: rgba(255,255,255,.07); letter-spacing: .1em; text-transform: uppercase; text-align: center; line-height: 2; z-index: 2; pointer-events: none; }
+.hero-text { position: relative; z-index: 10; text-align: center; padding: 0 32px; }
+.hero-pre { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.35); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 18px; }
+.hero-h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px, 14vw, 184px); line-height: .92; letter-spacing: .01em; color: #fff; margin-bottom: 40px; }
+.hero-h1 .line2 { display: block; letter-spacing: -.01em; }
+.cta-circle-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+.cta-circle { width: 140px; height: 140px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; flex-direction: column; gap: 4px; transition: transform 160ms cubic-bezier(0.23,1,0.32,1); }
+.cta-circle:hover { transform: scale(1.06); }
+.cta-circle:active { transform: scale(.97); }
+.cta-circle-label { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: .06em; color: var(--black); text-align: center; line-height: 1.1; }
+.cta-circle-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(0,0,0,.45); letter-spacing: .1em; text-transform: uppercase; }
+.hero-secondary { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.35); letter-spacing: .12em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.15); padding-bottom: 2px; display: inline-block; }
+.hero-secondary:hover { color: rgba(255,255,255,.7); }
+.hero-cards { position: absolute; bottom: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 48px; pointer-events: none; }
+.mini-card { background: rgba(249,249,249,.07); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(14px); border-radius: 10px 10px 0 0; padding: 20px 22px; width: 220px; pointer-events: all; }
+.mc-tag { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+.mc-title { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 12px; line-height: 1.35; }
+.mc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #fff; line-height: 1; }
+.mc-score-label { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.35); margin-top: 2px; }
+.mc-bar-wrap { height: 3px; background: rgba(255,255,255,.12); border-radius: 2px; margin: 12px 0 6px; }
+.mc-bar { height: 3px; background: #fff; border-radius: 2px; width: 78%; }
+.mc-detail { font-size: 10px; color: rgba(255,255,255,.4); line-height: 1.4; }
+
+/* ── CUERPO: 2-col anchored ── */
+.page-grid {
+  max-width: 1100px; margin: 0 auto;
+  padding: 0 60px;
+}
+
+/* Section row */
+.row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0 80px;
+  padding: 72px 0;
+  border-top: 1px solid var(--border);
+  align-items: start;
+}
+.row:first-child { border-top: none; padding-top: 100px; }
+
+/* Left col — fixed label */
+.row-label {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft);
+  letter-spacing: .18em; text-transform: uppercase; padding-top: 4px;
+  position: sticky; top: 80px;
+}
+
+/* Right col content varies per section */
+
+/* Problem */
+.problem-h {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 4.5vw, 56px); letter-spacing: .01em;
+  color: var(--black); line-height: .95; margin-bottom: 24px;
+}
+.problem-p { font-size: 15px; line-height: 1.8; color: var(--mid); max-width: 54ch; }
+
+/* Features: numbered list, tight */
+.feat-list { display: flex; flex-direction: column; }
+.feat-item { display: grid; grid-template-columns: 24px 1fr; gap: 0 20px; padding: 20px 0; border-bottom: 1px solid var(--border); align-items: baseline; }
+.feat-item:first-child { padding-top: 0; }
+.feat-item:last-child { border-bottom: none; }
+.feat-num { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(0,0,0,.22); padding-top: 3px; }
+.feat-body {}
+.feat-h { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.feat-p { font-size: 13px; line-height: 1.65; color: var(--mid); max-width: 50ch; }
+
+/* Stats: 4 numbers in a 2x2 compact grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.stat-cell { padding: 20px 24px 20px 0; }
+.stat-cell:nth-child(odd) { padding-left: 0; }
+.stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--black); letter-spacing: .01em; line-height: 1; }
+.stat-l { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--soft); letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
+
+/* Pricing: minimal 3-col comparison */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+}
+.plan-col { padding-right: 40px; }
+.plan-col:last-child { padding-right: 0; }
+.plan-name { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; display: block; }
+.plan-price { font-family: 'Bebas Neue', sans-serif; font-size: 44px; color: var(--black); letter-spacing: .01em; line-height: 1; margin-bottom: 2px; }
+.plan-period { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--soft); margin-bottom: 20px; display: block; }
+.plan-divider { height: 1px; background: var(--border); margin-bottom: 16px; }
+.plan-items { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.plan-items li { font-size: 12px; color: var(--mid); line-height: 1.4; padding-left: 10px; position: relative; }
+.plan-items li::before { content: '—'; position: absolute; left: 0; color: var(--border); font-size: 10px; }
+.plan-cta {
+  display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--black); letter-spacing: .1em; text-transform: uppercase;
+  text-decoration: none; border-bottom: 1px solid var(--black); padding-bottom: 1px;
+  transition: opacity 140ms;
+}
+.plan-cta:hover { opacity: .5; }
+.plan-note { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--soft); margin-top: 32px; letter-spacing: .04em; }
+
+/* Testimonial: blockquote stripped */
+.quote-text { font-size: 18px; line-height: 1.65; color: var(--ink); font-weight: 300; margin-bottom: 20px; max-width: 56ch; }
+.quote-text::before { content: '\201C'; }
+.quote-text::after  { content: '\201D'; }
+.quote-attr { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); letter-spacing: .06em; text-transform: uppercase; }
+.quote-attr strong { color: var(--ink); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; display: block; margin-bottom: 2px; letter-spacing: 0; text-transform: none; }
+
+/* CTA: inline, no banner */
+.cta-row {
+  display: flex; align-items: center; gap: 40px;
+  flex-wrap: wrap;
+}
+.cta-big-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px, 4vw, 52px); letter-spacing: .01em; color: var(--black); line-height: .95; }
+.cta-circle-sm { width: 120px; height: 120px; border-radius: 50%; border: 1.5px solid var(--black); display: flex; align-items: center; justify-content: center; text-decoration: none; flex-direction: column; gap: 3px; flex-shrink: 0; transition: background 160ms, transform 160ms cubic-bezier(0.23,1,0.32,1); }
+.cta-circle-sm:hover { background: var(--black); transform: scale(1.05); }
+.cta-circle-sm:hover .cs-label, .cta-circle-sm:hover .cs-sub { color: #fff; }
+.cs-label { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: .06em; color: var(--black); text-align: center; line-height: 1.1; transition: color 160ms; }
+.cs-sub { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--soft); letter-spacing: .1em; text-transform: uppercase; transition: color 160ms; }
+
+/* Footer */
+footer { padding: 32px 60px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; max-width: 1100px; margin: 0 auto; }
+.f-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--black); letter-spacing: .06em; }
+.f-links { display: flex; gap: 20px; list-style: none; }
+.f-links a { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: color 140ms; }
+.f-links a:hover { color: var(--black); }
+.f-copy { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(0,0,0,.22); }
+footer-wrap { border-top: 1px solid var(--border); }
+
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-link { display: none; }
+  .hero-cards { padding: 0 20px; }
+  .mini-card { width: 160px; padding: 16px; }
+  .page-grid { padding: 0 24px; }
+  .row { grid-template-columns: 1fr; gap: 16px; }
+  .row-label { position: static; padding-top: 0; margin-bottom: 4px; }
+  .pricing-grid { grid-template-columns: 1fr; gap: 40px; }
+  .plan-col { padding-right: 0; }
+  .stats-grid { grid-template-columns: repeat(4,1fr); }
+  footer { padding: 28px 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .cta-circle, .cta-circle-sm { transition: none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">KAIRO</a>
+  <div class="nav-right">
+    <a class="nav-link" href="#">Precios</a>
+    <a class="btn-nav" href="#">Entrar →</a>
+  </div>
+</nav>
+
+<!-- HERO — idéntico v4 -->
+<section class="hero">
+  <div class="hero-bg">
+    <p class="img-note">[ IMAGEN: Mesa de examen vacía. Vista cenital.<br>Folios, bolígrafo, borrador. B&W. Overlay 75%. ]</p>
+  </div>
+  <div class="hero-text">
+    <p class="hero-pre">Selectividad · Madrid · Cataluña · 2026</p>
+    <h1 class="hero-h1">Prepara<span class="line2">la PAU.</span></h1>
+    <div class="cta-circle-wrap">
+      <a class="cta-circle" href="#">
+        <span class="cta-circle-label">Empieza<br>gratis</span>
+        <span class="cta-circle-sub">sin tarjeta</span>
+      </a>
+    </div>
+    <a class="hero-secondary" href="#">Ver cómo funciona</a>
+  </div>
+  <div class="hero-cards">
+    <div class="mini-card">
+      <p class="mc-tag">Examen real</p>
+      <p class="mc-title">Matemáticas II · Madrid 2023<br>Bloque análisis · Ejercicio 2</p>
+      <p class="mc-detail">Calcula la derivada de f(x) = x³·ln(x) y estudia su monotonía…</p>
+    </div>
+    <div class="mini-card">
+      <p class="mc-tag">Corrección IA</p>
+      <p class="mc-score">7,8<span style="font-size:14px;opacity:.5">/10</span></p>
+      <p class="mc-score-label">resultado sintético</p>
+      <div class="mc-bar-wrap"><div class="mc-bar"></div></div>
+      <p class="mc-detail">Derivada correcta. Signo monotonía: falta el intervalo (0,1/e). −1,2 pts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BODY: 2-col grid layout -->
+<div class="page-grid">
+
+  <!-- Problema -->
+  <div class="row">
+    <span class="row-label">El problema</span>
+    <div>
+      <h2 class="problem-h">Lo que tenías antes no te corregía.</h2>
+      <p class="problem-p">Las academias cuestan 100–200&nbsp;€ al mes y requieren horarios fijos. Los PDFs de exámenes no dicen dónde fallaste. Los apuntes no son correcciones. Kairo es lo que faltaba: la rúbrica oficial exacta, en tu móvil, en 30 segundos.</p>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="row">
+    <span class="row-label">Cómo funciona</span>
+    <div class="feat-list">
+      <div class="feat-item">
+        <span class="feat-num">01</span>
+        <div class="feat-body">
+          <p class="feat-h">Exámenes reales de Selectividad</p>
+          <p class="feat-p">Todos los exámenes oficiales de Madrid y Cataluña de 2015 a 2025, organizados por asignatura, bloque y dificultad. Exactamente lo que te encontrarás en junio.</p>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-num">02</span>
+        <div class="feat-body">
+          <p class="feat-h">Corrección IA con rúbrica oficial</p>
+          <p class="feat-p">Subes una foto de tu respuesta escrita a mano. La IA aplica el criterio exacto del corrector y te dice cuántos puntos tienes y dónde fallaste. Menos de 30 segundos.</p>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-num">03</span>
+        <div class="feat-body">
+          <p class="feat-h">Tu Camino PAU personalizado</p>
+          <p class="feat-p">Un plan de misiones diarias de 15 minutos calculado a partir de tu fecha de examen. Flexible, adaptado a tu punto de partida.</p>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-num">04</span>
+        <div class="feat-body">
+          <p class="feat-h">Simulacros cronometrados</p>
+          <p class="feat-p">Exámenes completos en condiciones reales de tiempo. Corrección detallada al terminar. Para saber si estás listo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row">
+    <span class="row-label">En números</span>
+    <div class="stats-grid">
+      <div class="stat-cell"><p class="stat-n">1200+</p><p class="stat-l">ejercicios</p></div>
+      <div class="stat-cell"><p class="stat-n">38</p><p class="stat-l">semanas de plan</p></div>
+      <div class="stat-cell"><p class="stat-n">&lt;30s</p><p class="stat-l">tiempo corrección</p></div>
+      <div class="stat-cell"><p class="stat-n">2015–25</p><p class="stat-l">exámenes reales</p></div>
+    </div>
+  </div>
+
+  <!-- Testimonial -->
+  <div class="row">
+    <span class="row-label">Resultados</span>
+    <div>
+      <p class="quote-text">El desglose de puntos por apartado fue una revelación. Nunca había sabido exactamente qué estaba mal y cómo corregirlo.</p>
+      <p class="quote-attr">
+        <strong>Lucía M.</strong>
+        2º Bach. Madrid · Matemáticas II · 5,0 → 7,8
+        <span style="display:block;margin-top:2px;font-size:9px;">(contenido ilustrativo)</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Pricing -->
+  <div class="row">
+    <span class="row-label">Planes</span>
+    <div>
+      <div class="pricing-grid">
+        <div class="plan-col">
+          <span class="plan-name">Free</span>
+          <p class="plan-price">0&thinsp;€</p>
+          <span class="plan-period">sin tarjeta</span>
+          <div class="plan-divider"></div>
+          <ul class="plan-items">
+            <li>25 correcciones/mes</li>
+            <li>3 fotos/mes</li>
+            <li>1 simulacro/mes</li>
+            <li>Camino limitado</li>
+          </ul>
+          <a class="plan-cta" href="#">Empezar →</a>
+        </div>
+        <div class="plan-col">
+          <span class="plan-name">Premium</span>
+          <p class="plan-price">9,99&thinsp;€</p>
+          <span class="plan-period">/mes · cancela cuando quieras</span>
+          <div class="plan-divider"></div>
+          <ul class="plan-items">
+            <li>200 correcciones/mes</li>
+            <li>80 fotos/mes</li>
+            <li>5 simulacros/mes</li>
+            <li>Camino PAU completo</li>
+            <li>Ranking de clase</li>
+          </ul>
+          <a class="plan-cta" href="#">Elegir →</a>
+        </div>
+        <div class="plan-col">
+          <span class="plan-name">Curso PAU</span>
+          <p class="plan-price">59&thinsp;€</p>
+          <span class="plan-period">pago único · sept.–junio</span>
+          <div class="plan-divider"></div>
+          <ul class="plan-items">
+            <li>Todo Premium</li>
+            <li>Acceso hasta junio</li>
+            <li>Sin renovación mensual</li>
+          </ul>
+          <a class="plan-cta" href="#">Reservar →</a>
+          <p class="plan-note">Precio early bird. Sube a 69&nbsp;€ el 1 oct.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA inline -->
+  <div class="row" style="border-bottom:1px solid var(--border);padding-bottom:80px;">
+    <span class="row-label">Empieza hoy</span>
+    <div class="cta-row">
+      <h2 class="cta-big-h">Sin academia.<br>Sin horario.<br>Sin excusas.</h2>
+      <a class="cta-circle-sm" href="#">
+        <span class="cs-label">Gratis<br>→</span>
+        <span class="cs-sub">sin tarjeta</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span class="f-logo">KAIRO</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+  </ul>
+  <span class="f-copy">© 2026 KAIRO</span>
+</footer>
+
+</body>
+</html>

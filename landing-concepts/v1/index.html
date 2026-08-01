@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — Prepara la PAU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION CONTRACT — V1
+  THESIS: Kairo como sala de control de la PAU. Rechaza la paleta edtech suave,
+  los grids de cursos y cualquier mascota. El producto se ve antes de leerlo.
+  OWN-WORLD: Fondo near-black #0d0f12; tipo blanco; glassmorphism aplicado
+  solo a las tres cards de producto en la columna derecha.
+  STORY: En 3 segundos el alumno ve la interfaz en uso: examen real, nota IA,
+  misión pendiente. El copy de la izquierda cierra el argumento.
+  FIRST VIEWPORT: Split 60/40. Izquierda: image slot + headline + CTAs.
+  Derecha: 3 glass-cards mostrando UI sintética del producto.
+  FORM: Dark dramatic split; cards con blur backdrop; ghost CTA secundaria.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0d0f12;
+  --ink:     #ffffff;
+  --muted:   rgba(255,255,255,.52);
+  --soft:    rgba(255,255,255,.22);
+  --accent:  #2563eb;
+  --green:   #22c55e;
+  --surface: rgba(255,255,255,.055);
+  --sborder: rgba(255,255,255,.10);
+  --r:       14px;
+  --pill:    9999px;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 64px;
+  background: rgba(13,15,18,.75); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.nav-logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px; letter-spacing: -.01em; color: var(--ink); text-decoration: none; }
+.nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 140ms; }
+.nav-links a:hover { color: var(--ink); }
+.btn-nav {
+  padding: 7px 18px; border: 1px solid rgba(255,255,255,.22); border-radius: var(--pill);
+  font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none;
+  transition: background 140ms, border-color 140ms;
+}
+.btn-nav:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.38); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: grid; grid-template-columns: 60fr 40fr;
+  position: relative;
+}
+
+/* LEFT — image slot */
+.hero-left {
+  /* CSS STAND-IN: reemplazar con <img> de biblioteca vacía de madrugada
+     o escritorio con luz fría, procesado con halftone o grain */
+  background: #0d0f12;
+  background-image:
+    radial-gradient(ellipse 90% 80% at 15% 60%, rgba(37,99,235,.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 80% at 0% 100%, rgba(0,0,0,.7) 0%, transparent 60%);
+  position: relative;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 104px 64px 72px;
+  overflow: hidden;
+}
+.hero-left::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, rgba(13,15,18,.82) 0%, rgba(13,15,18,.38) 100%);
+  pointer-events: none;
+}
+.img-placeholder-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 10px; font-family: 'Barlow Condensed', monospace;
+  color: rgba(255,255,255,.12); letter-spacing: .12em; text-transform: uppercase;
+  text-align: center; pointer-events: none; z-index: 0; line-height: 1.8;
+}
+
+.hero-content { position: relative; z-index: 2; max-width: 560px; }
+
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 24px;
+}
+.hero-eyebrow::before { content: ''; width: 22px; height: 1px; background: var(--accent); flex-shrink: 0; }
+
+h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900; font-size: clamp(52px, 5.5vw, 82px);
+  line-height: .96; letter-spacing: -.025em;
+  color: var(--ink); margin-bottom: 24px; text-wrap: balance;
+}
+
+.hero-sub {
+  font-size: 17px; font-weight: 400; line-height: 1.65;
+  color: rgba(255,255,255,.62); max-width: 44ch; margin-bottom: 44px;
+}
+
+.hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.btn-primary {
+  padding: 14px 32px; background: var(--accent); color: #fff;
+  font-size: 15px; font-weight: 700; text-decoration: none; border-radius: var(--pill);
+  transition: background 140ms, transform 110ms;
+}
+.btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+.btn-primary:active { transform: scale(.98); }
+
+.btn-ghost {
+  padding: 13px 24px; border: 1px solid rgba(255,255,255,.22);
+  color: var(--ink); font-size: 15px; font-weight: 600;
+  text-decoration: none; border-radius: var(--pill);
+  transition: background 140ms, border-color 140ms;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.35); }
+
+/* RIGHT — glass cards */
+.hero-right {
+  background: rgba(0,0,0,.28);
+  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  padding: 100px 40px 72px 20px;
+}
+
+.glass-card {
+  background: var(--surface); border: 1px solid var(--sborder);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border-radius: var(--r); padding: 20px 22px;
+  transition: background 180ms, transform 180ms;
+}
+.glass-card:hover { background: rgba(255,255,255,.08); transform: translateY(-2px); }
+
+.card-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.36); margin-bottom: 11px;
+}
+
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; line-height: 1.15;
+}
+
+/* Card 1: Exam */
+.exam-badge {
+  display: inline-block; background: rgba(37,99,235,.14);
+  border: 1px solid rgba(37,99,235,.28); border-radius: var(--pill);
+  padding: 2px 9px; font-size: 10px; font-weight: 700; color: #93c5fd;
+  margin-bottom: 9px;
+}
+.exam-excerpt {
+  font-size: 11.5px; color: rgba(255,255,255,.36); line-height: 1.55;
+  border-left: 2px solid rgba(255,255,255,.08); padding-left: 9px; font-style: italic;
+}
+.exam-status {
+  margin-top: 10px; font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--green);
+  display: flex; align-items: center; gap: 5px;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+/* Card 2: Correction */
+.score-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 10px; }
+.score-big { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 900; color: var(--green); line-height: 1; }
+.score-of { font-size: 14px; color: rgba(255,255,255,.3); }
+
+.correction-item {
+  font-size: 11.5px; color: rgba(255,255,255,.48); line-height: 1.5;
+  padding: 6px 9px; background: rgba(255,255,255,.04); border-radius: 7px; margin-bottom: 5px;
+}
+.correction-item strong { color: rgba(255,255,255,.72); font-weight: 600; }
+.correction-time { font-size: 10px; color: rgba(255,255,255,.25); margin-top: 7px; text-align: right; }
+
+/* Card 3: Mission */
+.mission-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
+.mission-pill {
+  background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.22);
+  border-radius: var(--pill); padding: 2px 9px;
+  font-size: 9px; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--green);
+}
+.mission-meta { font-size: 11.5px; color: rgba(255,255,255,.4); margin-bottom: 11px; }
+.progress-bar { height: 3px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; margin-bottom: 5px; }
+.progress-fill { height: 100%; width: 66%; background: var(--green); border-radius: 999px; }
+.progress-label { font-size: 10px; color: rgba(255,255,255,.28); display: flex; justify-content: space-between; }
+
+/* ── STATS ── */
+.stats-band {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.stat {
+  padding: 36px 28px;
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+.stat:last-child { border-right: none; }
+.stat-n {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 38px; font-weight: 900; color: var(--ink);
+  letter-spacing: -.025em; line-height: 1; margin-bottom: 4px;
+}
+.stat-l { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+/* ── FEATURES ── */
+.features { padding: 100px 64px; max-width: 1200px; margin: 0 auto; }
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.section-h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(30px, 3vw, 46px); font-weight: 700;
+  letter-spacing: -.025em; color: var(--ink);
+  margin-bottom: 60px; max-width: 26ch; text-wrap: balance;
+}
+
+.feat-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.feat {
+  padding: 40px 32px; background: rgba(255,255,255,.025);
+  transition: background 180ms;
+}
+.feat:first-child { border-radius: 14px 0 0 14px; }
+.feat:last-child  { border-radius: 0 14px 14px 0;  }
+.feat:hover { background: rgba(255,255,255,.04); }
+
+.feat-n {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,.18);
+  letter-spacing: .1em; margin-bottom: 28px;
+}
+.feat-h {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--ink);
+  margin-bottom: 10px; line-height: 1.12;
+}
+.feat-p { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,.48); max-width: 30ch; }
+
+/* ── PRICING ── */
+.pricing { padding: 100px 64px; max-width: 1200px; margin: 0 auto; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 56px; }
+
+.p-card { padding: 36px 28px; background: rgba(255,255,255,.025); position: relative; }
+.p-card:first-child { border-radius: 14px 0 0 14px; }
+.p-card:last-child  { border-radius: 0 14px 14px 0;  }
+.p-card.featured { background: var(--accent); }
+
+.p-name {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+}
+.p-card.featured .p-name { color: rgba(255,255,255,.7); }
+
+.p-price {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 46px; font-weight: 900; letter-spacing: -.025em;
+  color: var(--ink); line-height: 1; margin-bottom: 3px;
+}
+.p-per { font-size: 13px; color: var(--muted); margin-bottom: 26px; }
+.p-card.featured .p-per { color: rgba(255,255,255,.65); }
+
+.p-list { list-style: none; margin-bottom: 30px; display: flex; flex-direction: column; gap: 7px; }
+.p-list li { font-size: 13px; color: rgba(255,255,255,.55); padding-left: 14px; position: relative; }
+.p-list li::before { content: '→'; position: absolute; left: 0; color: rgba(255,255,255,.22); font-size: 11px; top: 1px; }
+.p-card.featured .p-list li { color: rgba(255,255,255,.85); }
+.p-card.featured .p-list li::before { color: rgba(255,255,255,.45); }
+
+.btn-p {
+  display: block; text-align: center; padding: 11px 20px;
+  border-radius: var(--pill); font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: background 140ms, transform 110ms;
+}
+.btn-p-outline { border: 1px solid rgba(255,255,255,.18); color: var(--ink); }
+.btn-p-outline:hover { background: rgba(255,255,255,.06); }
+.btn-p-white { background: #fff; color: var(--accent); }
+.btn-p-white:hover { background: rgba(255,255,255,.92); transform: translateY(-1px); }
+
+/* ── CTA BANNER ── */
+.cta-band {
+  margin: 0 64px 100px;
+  background: rgba(37,99,235,.1); border: 1px solid rgba(37,99,235,.2);
+  border-radius: 16px; padding: 56px 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 32px;
+  flex-wrap: wrap;
+}
+.cta-band-h {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(28px, 3vw, 40px); font-weight: 700;
+  letter-spacing: -.02em; color: var(--ink); max-width: 36ch; text-wrap: balance;
+}
+.cta-band-sub { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 40px 64px; border-top: 1px solid rgba(255,255,255,.06);
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 100%; flex-wrap: wrap; gap: 16px;
+}
+.f-logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 20px; color: var(--ink); }
+.f-links { display: flex; gap: 22px; list-style: none; }
+.f-links a { font-size: 12px; color: rgba(255,255,255,.3); text-decoration: none; transition: color 140ms; }
+.f-links a:hover { color: rgba(255,255,255,.65); }
+.f-copy { font-size: 12px; color: rgba(255,255,255,.18); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-left { min-height: 65vh; padding: 100px 28px 52px; }
+  .hero-right { padding: 36px 28px 52px; gap: 12px; }
+  .stats-band { grid-template-columns: repeat(2, 1fr); }
+  .stat:nth-child(2) { border-right: none; }
+  .features, .pricing { padding: 72px 28px; }
+  .feat-strip { grid-template-columns: 1fr; gap: 2px; }
+  .feat:first-child { border-radius: 14px 14px 0 0; }
+  .feat:last-child  { border-radius: 0 0 14px 14px; }
+  .pricing-grid { grid-template-columns: 1fr; gap: 2px; }
+  .p-card:first-child { border-radius: 14px 14px 0 0; }
+  .p-card:last-child  { border-radius: 0 0 14px 14px; }
+  .cta-band { margin: 0 28px 72px; padding: 40px 28px; }
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  footer { padding: 36px 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary, .btn-ghost, .glass-card, .feat, .btn-p-white { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Kairo</a>
+  <ul class="nav-links">
+    <li><a href="#">Cómo funciona</a></li>
+    <li><a href="#">Precios</a></li>
+    <li><a href="#">Para padres</a></li>
+  </ul>
+  <a class="btn-nav" href="#">Entrar →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- LEFT: image slot + copy -->
+  <div class="hero-left">
+    <span class="img-placeholder-label">
+      [ IMAGEN: Escritorio con foco de luz frío,<br>
+      cuaderno abierto, madrugada.<br>
+      Procesado: grain + contraste alto ]
+    </span>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Preparación PAU</p>
+      <h1>Prepara<br>la PAU.</h1>
+      <p class="hero-sub">
+        Los exámenes oficiales de 2015 a 2025, corregidos por IA en segundos
+        con la rúbrica exacta del profesor. Por 9,99&nbsp;€ al mes.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#">Empezar gratis</a>
+        <a class="btn-ghost" href="#">Ver cómo funciona →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: glass cards -->
+  <div class="hero-right">
+
+    <!-- Card 1: Real exam -->
+    <div class="glass-card">
+      <p class="card-tag">Examen real</p>
+      <p class="card-title">Matemáticas II — Madrid 2023</p>
+      <span class="exam-badge">Opción B · Bloque 4</span>
+      <p class="exam-excerpt">
+        Sea f(x)&nbsp;= x³&nbsp;−&nbsp;3x&nbsp;+&nbsp;2. Determina los intervalos
+        de crecimiento y decrecimiento y los extremos relativos…
+      </p>
+      <p class="exam-status"><span class="dot"></span>Completado</p>
+    </div>
+
+    <!-- Card 2: AI correction -->
+    <div class="glass-card">
+      <p class="card-tag">Corrección IA · rúbrica oficial</p>
+      <div class="score-row">
+        <span class="score-big">7,8</span>
+        <span class="score-of">/ 10</span>
+      </div>
+      <div class="correction-item"><strong>Apt. a) 2,5/3 —</strong> Derivada correcta. Falta justificar el dominio de crecimiento.</div>
+      <div class="correction-item"><strong>Apt. b) 3/4 —</strong> Tabla de variación incompleta: falta el punto de inflexión.</div>
+      <p class="correction-time">Corregido en 21 s</p>
+    </div>
+
+    <!-- Card 3: Daily mission -->
+    <div class="glass-card">
+      <div class="mission-top">
+        <p class="card-tag" style="margin:0">Misión de hoy</p>
+        <span class="mission-pill">En curso</span>
+      </div>
+      <p class="card-title">Análisis de funciones</p>
+      <p class="mission-meta">Matemáticas II · Examen 2021 · Bloque 3</p>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+      <div class="progress-label"><span>2 de 3 ejercicios</span><span>≈ 8 min restantes</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-band">
+  <div class="stat"><p class="stat-n">1.200+</p><p class="stat-l">ejercicios estructurados</p></div>
+  <div class="stat"><p class="stat-n">38</p><p class="stat-l">semanas de currículum PAU</p></div>
+  <div class="stat"><p class="stat-n">&lt;&nbsp;30s</p><p class="stat-l">para recibir tu corrección</p></div>
+  <div class="stat"><p class="stat-n">2015–25</p><p class="stat-l">exámenes reales de Madrid y Cataluña</p></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <p class="section-label">Por qué Kairo</p>
+  <h2 class="section-h2">Tres cosas que ningún apunte ni academia hace a la vez.</h2>
+
+  <div class="feat-strip">
+    <div class="feat">
+      <p class="feat-n">01</p>
+      <h3 class="feat-h">Exámenes reales,<br>no inventados.</h3>
+      <p class="feat-p">Los exámenes oficiales de la Selectividad de Madrid y Cataluña de 2015 a 2025. El mismo material que va a caer.</p>
+    </div>
+    <div class="feat">
+      <p class="feat-n">02</p>
+      <h3 class="feat-h">Corrección IA<br>con rúbrica oficial.</h3>
+      <p class="feat-p">Subes una foto de tu respuesta escrita a mano. La IA te dice exactamente cuántos puntos sacas y por qué, con el criterio oficial.</p>
+    </div>
+    <div class="feat">
+      <p class="feat-n">03</p>
+      <h3 class="feat-h">Misiones diarias<br>de 15 minutos.</h3>
+      <p class="feat-p">Un Camino PAU personalizado según tu fecha de examen, tus asignaturas flojas y tu historial. Un poco cada día gana al empolle del domingo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <p class="section-label">Precios</p>
+  <h2 class="section-h2">Menos que una clase particular. Sin horarios ni desplazamientos.</h2>
+
+  <div class="pricing-grid">
+    <div class="p-card">
+      <p class="p-name">Free</p>
+      <p class="p-price">0&nbsp;€</p>
+      <p class="p-per">sin tarjeta</p>
+      <ul class="p-list">
+        <li>25 correcciones al mes</li>
+        <li>3 fotos al mes</li>
+        <li>1 simulacro al mes</li>
+        <li>Camino PAU limitado</li>
+      </ul>
+      <a class="btn-p btn-p-outline" href="#">Empezar gratis</a>
+    </div>
+    <div class="p-card featured">
+      <p class="p-name">Premium</p>
+      <p class="p-price">9,99&nbsp;€</p>
+      <p class="p-per">/mes</p>
+      <ul class="p-list">
+        <li>200 correcciones al mes</li>
+        <li>80 fotos al mes</li>
+        <li>5 simulacros al mes</li>
+        <li>Camino PAU completo</li>
+        <li>Ranking de clase</li>
+      </ul>
+      <a class="btn-p btn-p-white" href="#">Probar Premium</a>
+    </div>
+    <div class="p-card">
+      <p class="p-name">Curso PAU <span style="font-size:10px;background:rgba(37,99,235,.18);color:#93c5fd;padding:2px 7px;border-radius:999px;letter-spacing:.04em;">EARLY BIRD</span></p>
+      <p class="p-price">59&nbsp;€</p>
+      <p class="p-per">pago único · septiembre–junio</p>
+      <ul class="p-list">
+        <li>Todo lo de Premium</li>
+        <li>Acceso completo hasta junio</li>
+        <li>Sin renovación mensual</li>
+        <li>Precio sube el 30 de sept.</li>
+      </ul>
+      <a class="btn-p btn-p-outline" href="#">Reservar Curso PAU</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <div>
+    <h2 class="cta-band-h">Empieza esta noche. Tu primer examen corregido en 30 segundos.</h2>
+    <p class="cta-band-sub">Gratis. Sin tarjeta. Sin compromiso.</p>
+  </div>
+  <a class="btn-primary" href="#" style="flex-shrink:0;font-size:16px;padding:16px 40px;">Empezar gratis →</a>
+</div>
+
+<footer>
+  <span class="f-logo">Kairo</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+    <li><a href="#">Para centros</a></li>
+  </ul>
+  <span class="f-copy">© 2026 Kairo</span>
+</footer>
+
+</body>
+</html>

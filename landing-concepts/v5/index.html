@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — Prepara la PAU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,700;0,800;0,900;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION CONTRACT — V5
+  THESIS: La energía cruda de la temporada de exámenes. No hay limpidez o calma
+  — hay tensión, voluntad y velocidad. La cuadrícula se rompe intencionalmente;
+  la foto invade el 60% derecho; el texto sale del marco con outline+filled.
+  El "2026" semitransparente en el fondo marca el año como campo de batalla.
+  Rechaza el elegante portfolio y el SaaS limpio — esto es cartelería de campaña.
+  OWN-WORLD: Blanco crudo #f8f7f3 + negro #0e0e0e + acento eléctrico #ff3b1f.
+  Barlow Condensed 900 para display (outline alterno con filled); Barlow regular
+  para body. El "2026" como texto oversized semitransparente en el hero.
+  Grid asimétrico: col izq. con copy ~40%, col dcha. con foto ~60%.
+  STORY: El visitante ve la asimetría antes de leer; el copy es un grito de
+  campaña más que marketing; los bloques de features rompen la rejilla regular;
+  la foto no está encuadrada — se va al borde.
+  FIRST VIEWPORT: Split asimétrico CSS grid (40/60). Izq: "2026" semitransparente
+  de fondo, headline outline+filled, CTA. Dcha: foto full-height pegada a borde.
+  FORM: Streetwear brand / fanzine de campaña política. Tipografía a extremos
+  de escala; composición que viola el grid con intención; energía, no pulcritud.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --raw:   #f8f7f3;
+  --black: #0e0e0e;
+  --ink:   #1a1a1a;
+  --red:   #ff3b1f;
+  --mid:   #555;
+  --soft:  #999;
+  --border:#d0cfc9;
+  --ghost: rgba(14,14,14,.055);
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Barlow', sans-serif; background: var(--raw); color: var(--black); min-height: 100vh; overflow-x: hidden; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; height: 52px;
+  mix-blend-mode: multiply;
+}
+.nav-logo {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px;
+  color: var(--black); text-decoration: none; letter-spacing: .04em; text-transform: uppercase;
+}
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-link { font-size: 11px; font-weight: 600; color: var(--mid); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; transition: color 140ms; }
+.nav-link:hover { color: var(--black); }
+.btn-nav {
+  padding: 6px 14px; background: var(--black); color: var(--raw);
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 13px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase;
+  transition: background 140ms;
+}
+.btn-nav:hover { background: var(--ink); }
+
+/* ── HERO — asymmetric broken grid ── */
+.hero {
+  min-height: 100vh; display: grid;
+  grid-template-columns: 40fr 60fr;
+  grid-template-rows: 1fr;
+  position: relative; overflow: hidden;
+}
+
+/* Left col — copy side */
+.hero-left {
+  background: var(--raw);
+  padding: 72px 40px 60px 40px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  position: relative; z-index: 10;
+  min-height: 100vh;
+}
+
+/* Oversized "2026" background */
+.bg-year {
+  position: absolute; bottom: -60px; left: -20px;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: clamp(160px, 22vw, 280px); line-height: 1;
+  color: var(--ghost); letter-spacing: -.02em;
+  pointer-events: none; user-select: none;
+  white-space: nowrap;
+}
+
+.hero-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 20px; position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-eyebrow::before { content: ''; width: 24px; height: 2px; background: var(--red); }
+
+/* Headline — mixed outline + filled */
+.hero-h1 {
+  position: relative; z-index: 2;
+  font-family: 'Barlow Condensed', sans-serif;
+  line-height: .9; letter-spacing: -.01em;
+  margin-bottom: 32px;
+}
+.h1-outline {
+  display: block;
+  font-size: clamp(56px, 7vw, 96px); font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 2.5px var(--black);
+}
+.h1-filled {
+  display: block;
+  font-size: clamp(72px, 9.5vw, 132px); font-weight: 900;
+  color: var(--black); margin-top: -10px;
+}
+.h1-filled-red {
+  display: block;
+  font-size: clamp(56px, 7vw, 96px); font-weight: 900;
+  color: var(--red); margin-top: -8px;
+}
+
+.hero-sub {
+  position: relative; z-index: 2;
+  font-size: 14px; line-height: 1.7; color: var(--mid);
+  max-width: 36ch; margin-bottom: 36px;
+}
+
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; position: relative; z-index: 2; }
+.btn-filled-red {
+  padding: 14px 32px; background: var(--red); color: #fff;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 16px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase;
+  transition: background 140ms, transform 110ms;
+}
+.btn-filled-red:hover { background: #e62d0e; transform: translateY(-1px); }
+.btn-filled-red:active { transform: scale(.97); }
+.btn-outline-black {
+  padding: 13px 24px; border: 2px solid var(--black); color: var(--black);
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 16px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase;
+  transition: background 140ms, color 140ms;
+}
+.btn-outline-black:hover { background: var(--black); color: var(--raw); }
+
+/* Stats strip below CTAs */
+.hero-stats-inline {
+  margin-top: 40px; padding-top: 28px;
+  border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+  position: relative; z-index: 2;
+}
+.hs { }
+.hs-n {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 30px; color: var(--black); letter-spacing: -.01em; line-height: 1;
+  margin-bottom: 1px;
+}
+.hs-l { font-size: 11px; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
+
+/* Right col — photo slot */
+.hero-right {
+  position: relative; overflow: hidden;
+  min-height: 100vh;
+}
+.hero-photo {
+  position: absolute; inset: 0;
+  /* CSS STAND-IN: foto en color o B&W de un estudiante en acción —
+     ángulo dinámico (diagonal, picado), enfoque en el bolígrafo o la hoja,
+     desenfoque de fondo si hay. Alta energía visual, no pose estática.
+     Alternativa: foto abstacta de textura de papel con luz lateral fuerte.
+     Sin tratamiento monocromático obligatorio — color permitido en v5. */
+  background: #2a2423;
+  background-image: linear-gradient(135deg, #3a2018 0%, #1a1210 50%, #0e0e0e 100%);
+}
+.hero-photo::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(248,247,243,.08) 0%, transparent 30%);
+}
+.photo-note {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 10px; font-family: monospace; color: rgba(255,255,255,.08);
+  letter-spacing: .1em; text-transform: uppercase; text-align: center; line-height: 2;
+  z-index: 2; pointer-events: none;
+}
+
+/* ── MARQUEE TICKER ── */
+.ticker {
+  background: var(--black); padding: 14px 0; overflow: hidden;
+  white-space: nowrap; display: flex;
+}
+.ticker-track {
+  display: inline-flex; gap: 0;
+  animation: marquee 22s linear infinite;
+}
+.ticker-item {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.7); padding: 0 32px;
+  display: flex; align-items: center; gap: 12px;
+}
+.ticker-sep { color: var(--red); }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
+
+/* ── FEATURES — broken grid ── */
+.features { padding: 80px 0; }
+.features-intro {
+  padding: 0 48px 56px; border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 1fr 1.6fr; gap: 0; align-items: end;
+}
+.feat-big-h {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: clamp(52px, 7vw, 96px); line-height: .88;
+  letter-spacing: -.01em; color: var(--black); padding-bottom: 8px;
+}
+.feat-intro-p { font-size: 15px; line-height: 1.75; color: var(--mid); max-width: 46ch; padding-left: 48px; }
+
+.feat-blocks {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+}
+.feat-block {
+  padding: 48px; border-right: 1px solid var(--border); border-top: 1px solid var(--border);
+}
+.feat-block:last-child { border-right: none; }
+.feat-tag {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 20px; display: block;
+}
+.feat-h {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 28px; color: var(--black); letter-spacing: -.01em;
+  margin-bottom: 12px; line-height: 1;
+}
+.feat-p { font-size: 13px; line-height: 1.7; color: var(--mid); }
+
+/* ── SPLIT PROOF ── */
+.proof {
+  display: grid; grid-template-columns: 60fr 40fr;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.proof-img-slot {
+  background: #1a1a1a; min-height: 400px; position: relative; overflow: hidden;
+  /* CSS STAND-IN: segunda foto — otra perspectiva del ambiente de estudio.
+     O detalle de la mano escribiendo sobre el folio. Contraste alto. */
+}
+.proof-img-note {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 9px; font-family: monospace; color: rgba(255,255,255,.08);
+  letter-spacing: .1em; text-transform: uppercase; text-align: center; line-height: 2;
+}
+.proof-right { padding: 56px 48px; display: flex; flex-direction: column; justify-content: center; }
+.proof-q {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-style: italic;
+  font-size: clamp(24px, 2.8vw, 36px); line-height: 1.15; color: var(--black);
+  margin-bottom: 20px;
+}
+.proof-q::before { content: '\201C'; color: var(--red); }
+.proof-q::after  { content: '\201D'; color: var(--red); }
+.proof-attr { font-size: 12px; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
+.proof-attr strong { color: var(--ink); display: block; margin-bottom: 2px; font-size: 13px; letter-spacing: .02em; }
+.proof-score {
+  margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+  display: flex; align-items: baseline; gap: 12px;
+}
+.proof-score-n { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 56px; color: var(--black); letter-spacing: -.02em; line-height: 1; }
+.proof-score-l { font-size: 12px; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
+.proof-note { font-size: 10px; color: rgba(0,0,0,.28); font-style: italic; margin-top: 8px; }
+
+/* ── PRICING ── */
+.pricing {
+  padding: 80px 48px;
+}
+.pricing-top { margin-bottom: 48px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.pricing-h {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: clamp(44px, 6vw, 80px); color: var(--black); letter-spacing: -.01em; line-height: .9;
+}
+.pricing-h .outline { -webkit-text-stroke: 2px var(--black); color: transparent; }
+.pricing-meta { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; color: var(--soft); letter-spacing: .1em; text-transform: uppercase; }
+
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); }
+.plan { padding: 40px 36px; border-right: 1px solid var(--border); }
+.plan:last-child { border-right: none; }
+.plan.featured { background: var(--black); }
+
+.plan-tag {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--soft); margin-bottom: 20px; display: block;
+}
+.plan.featured .plan-tag { color: rgba(255,255,255,.4); }
+.plan-price {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 60px; color: var(--black); letter-spacing: -.02em; line-height: 1; margin-bottom: 2px;
+}
+.plan.featured .plan-price { color: #fff; }
+.plan-period { font-size: 12px; color: var(--soft); margin-bottom: 24px; }
+.plan.featured .plan-period { color: rgba(255,255,255,.4); }
+.plan-sep { height: 1px; background: var(--border); margin-bottom: 20px; }
+.plan.featured .plan-sep { background: rgba(255,255,255,.1); }
+.plan-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+.plan-list li { font-size: 13px; color: var(--mid); padding-left: 12px; position: relative; line-height: 1.4; }
+.plan-list li::before { content: '—'; position: absolute; left: 0; color: var(--border); font-size: 11px; }
+.plan.featured .plan-list li { color: rgba(255,255,255,.65); }
+.plan.featured .plan-list li::before { color: rgba(255,255,255,.2); }
+
+.btn-plan-red { display: block; text-align: center; padding: 12px 20px; background: var(--red); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: background 140ms; }
+.btn-plan-red:hover { background: #e62d0e; }
+.btn-plan-outline { display: block; text-align: center; padding: 11px 20px; border: 2px solid var(--border); color: var(--ink); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: border-color 140ms, background 140ms; }
+.btn-plan-outline:hover { border-color: var(--black); background: var(--black); color: var(--raw); }
+.btn-plan-outline-w { display: block; text-align: center; padding: 11px 20px; border: 2px solid rgba(255,255,255,.2); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: border-color 140ms, background 140ms; }
+.btn-plan-outline-w:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.08); }
+
+.pricing-footnote { margin-top: 16px; font-size: 11px; color: var(--soft); letter-spacing: .02em; }
+
+/* ── CTA BANNER ── */
+.cta-banner {
+  background: var(--red); padding: 80px 48px;
+  display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap;
+}
+.cta-banner-h {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: clamp(44px, 6vw, 80px); color: #fff; letter-spacing: -.01em; line-height: .9;
+}
+.cta-banner-h .outline { -webkit-text-stroke: 2.5px #fff; color: transparent; }
+.btn-cta-white {
+  padding: 16px 40px; background: #fff; color: var(--red);
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 18px; text-decoration: none; letter-spacing: .06em; text-transform: uppercase;
+  flex-shrink: 0; transition: background 140ms, transform 110ms;
+}
+.btn-cta-white:hover { background: var(--raw); transform: translateY(-1px); }
+.btn-cta-white:active { transform: scale(.97); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--black); padding: 32px 48px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.f-logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 20px; color: var(--raw); letter-spacing: .06em; text-transform: uppercase; }
+.f-links { display: flex; gap: 20px; list-style: none; }
+.f-links a { font-size: 11px; color: rgba(255,255,255,.35); text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: color 140ms; }
+.f-links a:hover { color: var(--raw); }
+.f-copy { font-size: 10px; color: rgba(255,255,255,.2); letter-spacing: .04em; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  nav { padding: 0 20px; }
+  .hero { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .hero-left { min-height: auto; padding: 88px 28px 56px; }
+  .hero-right { display: none; }
+  .bg-year { font-size: 140px; left: -10px; bottom: -40px; }
+  .features-intro { grid-template-columns: 1fr; padding: 0 28px 40px; }
+  .feat-intro-p { padding-left: 0; margin-top: 16px; }
+  .feat-blocks { grid-template-columns: 1fr; }
+  .feat-block { border-right: none; }
+  .proof { grid-template-columns: 1fr; }
+  .proof-img-slot { min-height: 240px; }
+  .proof-right { padding: 40px 28px; }
+  .pricing { padding: 56px 24px; }
+  .plans { grid-template-columns: 1fr; }
+  .plan { border-right: none; border-bottom: 1px solid var(--border); }
+  .plan.featured { border-bottom-color: rgba(255,255,255,.1); }
+  .plan:last-child { border-bottom: none; }
+  .cta-banner { padding: 56px 24px; flex-direction: column; }
+  footer { padding: 28px 20px; }
+  .hero-stats-inline { grid-template-columns: repeat(2, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+  .btn-filled-red, .btn-cta-white { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Kairo</a>
+  <div class="nav-right">
+    <a class="nav-link" href="#">Precios</a>
+    <a class="btn-nav" href="#">Entrar</a>
+  </div>
+</nav>
+
+<!-- HERO — asymmetric broken grid -->
+<section class="hero">
+  <!-- Left: copy -->
+  <div class="hero-left">
+    <span class="bg-year">2026</span>
+
+    <p class="hero-eyebrow">PAU · Madrid · Cataluña</p>
+
+    <h1 class="hero-h1">
+      <span class="h1-outline">Prepara la</span>
+      <span class="h1-filled">PAU.</span>
+      <span class="h1-filled-red">En serio.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Exámenes reales. Corrección IA con la rúbrica oficial. Un plan de 15 minutos al día que funciona.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn-filled-red" href="#">Empezar gratis</a>
+      <a class="btn-outline-black" href="#">Ver demo</a>
+    </div>
+
+    <div class="hero-stats-inline">
+      <div class="hs"><p class="hs-n">1200+</p><p class="hs-l">ejercicios</p></div>
+      <div class="hs"><p class="hs-n">&lt;30s</p><p class="hs-l">corrección</p></div>
+      <div class="hs"><p class="hs-n">38</p><p class="hs-l">semanas</p></div>
+      <div class="hs"><p class="hs-n">2015–25</p><p class="hs-l">real exams</p></div>
+    </div>
+  </div>
+
+  <!-- Right: photo slot (60% width) -->
+  <div class="hero-right">
+    <div class="hero-photo">
+      <p class="photo-note">
+        [ IMAGEN: estudiante en ángulo diagonal.<br>
+        Mano con bolígrafo sobre folio. Desenfoque fondo.<br>
+        Color permitido. Energía, no pose. ]
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-item">Exámenes reales <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Corrección IA en 30 segundos <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Rúbrica oficial exacta <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Madrid y Cataluña 2015–2025 <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Tu Camino PAU personalizado <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">15 minutos al día <span class="ticker-sep">★</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">Exámenes reales <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Corrección IA en 30 segundos <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Rúbrica oficial exacta <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Madrid y Cataluña 2015–2025 <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">Tu Camino PAU personalizado <span class="ticker-sep">★</span></span>
+    <span class="ticker-item">15 minutos al día <span class="ticker-sep">★</span></span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-intro">
+    <h2 class="feat-big-h">Lo que<br>cambia<br>todo.</h2>
+    <p class="feat-intro-p">Hasta ahora había dos opciones: academia cara con horario fijo, o PDFs de exámenes que no te dicen si estás equivocado. Kairo es la tercera opción: el rigor del corrector de verdad, en tu móvil, cuando tú puedas.</p>
+  </div>
+  <div class="feat-blocks">
+    <div class="feat-block">
+      <span class="feat-tag">01 — Exámenes</span>
+      <h3 class="feat-h">Real. Oficial. Tuyo.</h3>
+      <p class="feat-p">Todos los exámenes de Selectividad de Madrid y Cataluña de 2015 a 2025. Organizados por asignatura, bloque y dificultad. El mismo examen que te encontrarás en junio.</p>
+    </div>
+    <div class="feat-block">
+      <span class="feat-tag">02 — Corrección</span>
+      <h3 class="feat-h">Nota real en 30 segundos.</h3>
+      <p class="feat-p">Subes una foto de tu respuesta a mano. La IA aplica la rúbrica oficial exacta — la misma que usa tu corrector — y te dice cuántos puntos tienes y dónde fallaste.</p>
+    </div>
+    <div class="feat-block">
+      <span class="feat-tag">03 — Plan</span>
+      <h3 class="feat-h">15 minutos al día.</h3>
+      <p class="feat-p">Tu Camino PAU: misiones diarias calculadas a partir de tu fecha de examen y tus asignaturas. Flexible, personal, y que funciona aunque estudies en el autobús.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section class="proof">
+  <div class="proof-img-slot">
+    <p class="proof-img-note">
+      [ IMAGEN 2: detalle mano + folio.<br>
+      Ejercicio escrito a mano. Macro o picado. ]
+    </p>
+  </div>
+  <div class="proof-right">
+    <p class="proof-q">Ver el desglose de puntos por apartado fue una revelación. Nunca había sabido exactamente qué estaba mal.</p>
+    <p class="proof-attr">
+      <strong>Lucía M.</strong>
+      2º Bach. Madrid · Matemáticas II
+      <span style="display:block;margin-top:4px;font-size:10px;opacity:.55;font-style:italic;">Contenido ilustrativo</span>
+    </p>
+    <div class="proof-score">
+      <span class="proof-score-n">5→7,8</span>
+      <span class="proof-score-l">2 meses<br>Mat. II</span>
+    </div>
+    <p class="proof-note">Resultado ilustrativo</p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="pricing-top">
+    <h2 class="pricing-h">
+      <span class="outline">Elige</span><br>tu plan.
+    </h2>
+    <span class="pricing-meta">IVA incluido — sin permanencia</span>
+  </div>
+  <div class="plans">
+    <div class="plan">
+      <span class="plan-tag">Free</span>
+      <p class="plan-price">0&thinsp;€</p>
+      <p class="plan-period">sin tarjeta de crédito</p>
+      <div class="plan-sep"></div>
+      <ul class="plan-list">
+        <li>25 correcciones al mes</li>
+        <li>3 fotos al mes</li>
+        <li>1 simulacro mensual</li>
+        <li>Camino PAU limitado</li>
+      </ul>
+      <a class="btn-plan-outline" href="#">Empezar gratis</a>
+    </div>
+    <div class="plan featured">
+      <span class="plan-tag">Premium</span>
+      <p class="plan-price">9,99&thinsp;€</p>
+      <p class="plan-period">/mes · cancela cuando quieras</p>
+      <div class="plan-sep"></div>
+      <ul class="plan-list">
+        <li>200 correcciones al mes</li>
+        <li>80 fotos al mes</li>
+        <li>5 simulacros al mes</li>
+        <li>Camino PAU completo</li>
+        <li>Ranking de clase</li>
+      </ul>
+      <a class="btn-plan-outline-w" href="#">Elegir Premium</a>
+    </div>
+    <div class="plan">
+      <span class="plan-tag">Curso PAU <span style="background:#f3f2ee;color:#888;font-size:9px;padding:2px 6px;border-radius:3px;letter-spacing:.06em;margin-left:4px;">EARLY BIRD</span></span>
+      <p class="plan-price">59&thinsp;€</p>
+      <p class="plan-period">pago único · sept. a junio</p>
+      <div class="plan-sep"></div>
+      <ul class="plan-list">
+        <li>Todo Premium incluido</li>
+        <li>Acceso completo hasta junio</li>
+        <li>Sin renovación mensual</li>
+        <li>Precio sube el 30 sept.</li>
+      </ul>
+      <a class="btn-plan-red" href="#">Reservar Curso PAU</a>
+    </div>
+  </div>
+  <p class="pricing-footnote">El Curso PAU pasará a 69&nbsp;€ a partir del 1 de octubre de 2026.</p>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2 class="cta-banner-h">
+    <span class="outline">Empieza</span><br>hoy.
+  </h2>
+  <a class="btn-cta-white" href="#">Gratis — sin tarjeta →</a>
+</section>
+
+<footer>
+  <span class="f-logo">Kairo</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+    <li><a href="#">Centros</a></li>
+  </ul>
+  <span class="f-copy">© 2026 KAIRO</span>
+</footer>
+
+</body>
+</html>

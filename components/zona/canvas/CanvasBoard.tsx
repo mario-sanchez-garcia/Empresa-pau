@@ -76,7 +76,7 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
   } = useCanvas(userId, initialCanvases)
 
   return (
-    <div className="relative flex h-[calc(100vh-78px)] min-h-[680px] overflow-hidden rounded-3xl border border-[#dbe7fb] bg-white shadow-[0_24px_70px_rgba(37,99,235,0.12)] max-md:block">
+    <div className="relative flex h-[calc(100vh-78px)] min-h-[680px] overflow-hidden rounded border border-[#e2e8f0] bg-white max-md:block">
       <CanvasToolbar
         canvases={canvases}
         activeId={activeId}
@@ -170,14 +170,14 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
           ))}
 
           {selectionBox && (
-            <div className="pointer-events-none absolute border-2 border-dashed border-[#2563eb] bg-[#2563eb]/10" style={selectionBox} />
+            <div className="pointer-events-none absolute border-2 border-dashed border-[#0f172a] bg-[#0f172a]/10" style={selectionBox} />
           )}
         </div>
 
         {!elements.length && (
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-6">
-            <div className="pointer-events-auto max-w-md rounded-3xl border border-blue-100 bg-white/95 p-7 text-center shadow-[0_24px_65px_rgba(37,99,235,0.14)] backdrop-blur-xl">
-              <h2 className="text-xl font-black text-slate-900">Empieza tu mapa de estudio</h2>
+            <div className="pointer-events-auto max-w-md rounded border border-[#e2e8f0] bg-white p-8 text-center">
+              <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a' }}>Empieza tu mapa de estudio</h2>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Añade notas, fórmulas o ideas y organízalas como en un tablero.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <QuickButton onClick={() => addQuickElement('sticky')} icon={<StickyNote size={15} />} label="Añadir nota" />
@@ -189,20 +189,20 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
         )}
 
         <div className="absolute bottom-4 right-4 z-40 grid gap-2">
-          <div className="flex items-center gap-1 rounded-2xl border border-[#dbe7fb] bg-white/95 p-1.5 shadow-[0_18px_45px_rgba(37,99,235,0.14)]">
+          <div className="flex items-center gap-1 rounded border border-[#e2e8f0] bg-white p-1">
             <CanvasControl title="Alejar" onClick={() => setZoomValue(zoom - 0.1)}><Minus size={16} /></CanvasControl>
-            <button type="button" title="Restablecer al 100%" onClick={() => setZoomValue(1)} className="min-w-16 rounded-xl px-2 py-2 text-xs font-black text-blue-700 hover:bg-blue-50">{Math.round(zoom * 100)}%</button>
+            <button type="button" title="Restablecer al 100%" onClick={() => setZoomValue(1)} className="min-w-16 rounded px-2 py-2 text-xs font-black text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
             <CanvasControl title="Acercar" onClick={() => setZoomValue(zoom + 0.1)}><Plus size={16} /></CanvasControl>
             <CanvasControl title="Ajustar vista" onClick={fitToScreen}><Focus size={16} /></CanvasControl>
           </div>
-          <div className="max-w-72 rounded-xl border border-blue-100 bg-white/90 px-3 py-2 text-[11px] font-bold text-slate-500 shadow-sm">Rueda para moverte · Ctrl/trackpad para zoom · arrastra el fondo para desplazarte</div>
+          <div className="max-w-72 rounded border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-bold text-slate-500">Rueda para moverte · Ctrl/trackpad para zoom · arrastra el fondo para desplazarte</div>
         </div>
 
-        <div className="absolute bottom-24 right-4 z-30 overflow-hidden rounded-2xl border border-[#dbe7fb] bg-white/95 shadow-[0_18px_45px_rgba(37,99,235,0.12)] max-sm:hidden" style={{ width: minimap.width, height: minimap.height }}>
+        <div className="absolute bottom-24 right-4 z-30 overflow-hidden rounded border border-[#e2e8f0] bg-white max-sm:hidden" style={{ width: minimap.width, height: minimap.height }}>
           {elements.filter(element => element.type !== 'connector').map(element => (
             <span
               key={element.id}
-              className="absolute rounded bg-[#2563eb]/25"
+              className="absolute rounded bg-slate-400/40"
               style={{
                 left: (element.x - minimap.bounds.x) * minimap.scale,
                 top: (element.y - minimap.bounds.y) * minimap.scale,
@@ -211,7 +211,7 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
               }}
             />
           ))}
-          <div className="absolute rounded-md border-2 border-[#2563eb] bg-[#2563eb]/10" style={minimap.view} />
+          <div className="absolute rounded border-2 border-[#0f172a] bg-[#0f172a]/10" style={minimap.view} />
         </div>
       </div>
     </div>
@@ -219,9 +219,9 @@ export default function CanvasBoard({ userId, initialCanvases }: CanvasBoardProp
 }
 
 function CanvasControl({ children, onClick, title }: { children: React.ReactNode; onClick: () => void; title: string }) {
-  return <button type="button" title={title} onClick={onClick} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-600 transition hover:bg-blue-50 hover:text-blue-700">{children}</button>
+  return <button type="button" title={title} onClick={onClick} className="flex h-9 w-9 items-center justify-center rounded text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">{children}</button>
 }
 
 function QuickButton({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-white">{icon}{label}</button>
+  return <button type="button" onClick={onClick} className="flex items-center gap-2 rounded border border-[#e2e8f0] bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300">{icon}{label}</button>
 }

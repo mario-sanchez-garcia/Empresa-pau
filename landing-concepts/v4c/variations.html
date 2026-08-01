@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Variaciones cuaderno — v4c</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; font-family: 'Helvetica Neue', sans-serif; color: #fff; padding: 40px; }
+h1 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 6px; }
+p.sub { font-size: 11px; color: rgba(255,255,255,.18); margin-bottom: 36px; letter-spacing: .04em; }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.card {}
+.num { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 7px; }
+.preview { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+.preview img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 400ms ease; }
+.card:hover .preview img { transform: scale(1.03); }
+.preview::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(17,17,17,.68) 0%, rgba(17,17,17,.45) 45%, rgba(17,17,17,.88) 100%);
+}
+.hero-sim {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+}
+.sim-h {
+  font-weight: 900; font-size: clamp(20px, 3.2vw, 38px);
+  letter-spacing: .01em; color: #fff; text-align: center;
+  line-height: .88; text-transform: uppercase;
+}
+.sim-cta {
+  margin-top: 12px; width: 46px; height: 46px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font-size: 6px; font-weight: 700; color: #111;
+  letter-spacing: .06em; text-transform: uppercase; text-align: center; line-height: 1.2;
+}
+.desc { margin-top: 9px; font-size: 11px; color: rgba(255,255,255,.38); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h1>Variaciones — cuaderno con vida</h1>
+<p class="sub">Con overlay + headline del hero real encima · elige la que más te guste</p>
+
+<div class="grid">
+
+  <div class="card">
+    <p class="num">01 — Flat lay cenital</p>
+    <div class="preview">
+      <img src="var_1.png" alt="1">
+      <div class="hero-sim">
+        <p class="sim-h">Prepara<br>la PAU.</p>
+        <div class="sim-cta">Empieza<br>gratis</div>
+      </div>
+    </div>
+    <p class="desc">Overhead: cuaderno, subrayadores, café, auriculares · luz dorada lateral</p>
+  </div>
+
+  <div class="card">
+    <p class="num">02 — Atardecer en la ventana</p>
+    <div class="preview">
+      <img src="var_2.png" alt="2">
+      <div class="hero-sim">
+        <p class="sim-h">Prepara<br>la PAU.</p>
+        <div class="sim-cta">Empieza<br>gratis</div>
+      </div>
+    </div>
+    <p class="desc">Luz naranja/rosa entrando · partículas de polvo · libretas apiladas</p>
+  </div>
+
+  <div class="card">
+    <p class="num">03 — Sala de estudio moderna</p>
+    <div class="preview">
+      <img src="var_3.png" alt="3">
+      <div class="hero-sim">
+        <p class="sim-h">Prepara<br>la PAU.</p>
+        <div class="sim-cta">Empieza<br>gratis</div>
+      </div>
+    </div>
+    <p class="desc">Ángulo ancho · ventana grande · plantas · estantería de colores</p>
+  </div>
+
+  <div class="card">
+    <p class="num">04 — Mapa mental en color</p>
+    <div class="preview">
+      <img src="var_4.png" alt="4">
+      <div class="hero-sim">
+        <p class="sim-h">Prepara<br>la PAU.</p>
+        <div class="sim-cta">Empieza<br>gratis</div>
+      </div>
+    </div>
+    <p class="desc">Close-up lateral · apuntes con colores teal y coral · sombras largas</p>
+  </div>
+
+  <div class="card">
+    <p class="num">05 — Café con libretas</p>
+    <div class="preview">
+      <img src="var_5.png" alt="5">
+      <div class="hero-sim">
+        <p class="sim-h">Prepara<br>la PAU.</p>
+        <div class="sim-cta">Empieza<br>gratis</div>
+      </div>
+    </div>
+    <p class="desc">Rincón de cafetería · bokeh cálido ámbar · café humeante</p>
+  </div>
+
+  <div class="card">
+    <p class="num">06 — Contraluz dramático</p>
+    <div class="preview">
+      <img src="var_6.png" alt="6">
+      <div class="hero-sim">
+        <p class="sim-h">Prepara<br>la PAU.</p>
+        <div class="sim-cta">Empieza<br>gratis</div>
+      </div>
+    </div>
+    <p class="desc">Ángulo bajo · libretas abiertas en abanico · contraluz cálido intenso</p>
+  </div>
+
+</div>
+</body>
+</html>

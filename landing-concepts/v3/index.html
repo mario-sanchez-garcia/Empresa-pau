@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — Prepara la PAU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION CONTRACT — V3
+  THESIS: La elegancia de la preparación como rito. El lujo tranquilo de quien
+  sabe que está preparado. Rechaza la urgencia nerviosa en favor de la confianza
+  ganada con método.
+  OWN-WORLD: Navy profundo #0a1628 + oro pulido #c9a84c. Tipografía: Cormorant
+  Garamond display (peso editorial) + Outfit body (legible, moderno). Bordes dorados
+  en píldoras CTA; texto blanco sobre oscuro; separadores dorados sutiles.
+  STORY: El visitante aterriza en una atmósfera de club de estudio — seria, segura.
+  Las estadísticas se leen sobre la imagen, probando escala. La propuesta se
+  articula en tres columnas. El precio remata la decisión.
+  FIRST VIEWPORT: 100vh hero con foto de fondo; overlay navy oscuro; estadísticas
+  blancas superpuestas abajo; headline display grande centrado en el tercio superior.
+  FORM: Arquitectura de portfolio / editorial de alto presupuesto. Proportions
+  monumentales, espaciado generoso, detalles dorados como firma.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0a1628;
+  --navy2:   #0f1f3d;
+  --navy3:   #182d52;
+  --gold:    #c9a84c;
+  --gold2:   #e2c26a;
+  --gold-l:  rgba(201,168,76,.15);
+  --gold-b:  rgba(201,168,76,.35);
+  --white:   #ffffff;
+  --off:     #f5f3ef;
+  --muted:   rgba(255,255,255,.55);
+  --divider: rgba(201,168,76,.2);
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Outfit', sans-serif; background: var(--off); color: var(--navy); min-height: 100vh; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 52px; height: 64px;
+  background: rgba(10,22,40,.88); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--divider);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 22px;
+  color: var(--gold); text-decoration: none; letter-spacing: .02em;
+}
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.6); text-decoration: none; letter-spacing: .04em; text-transform: uppercase; transition: color 180ms; }
+.nav-links a:hover { color: var(--gold); }
+.btn-gold-pill {
+  padding: 9px 22px; border: 1px solid var(--gold); border-radius: 100px;
+  font-size: 12px; font-weight: 600; color: var(--gold); text-decoration: none;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: background 200ms, color 200ms;
+}
+.btn-gold-pill:hover { background: var(--gold); color: var(--navy); }
+
+/* ── HERO ── */
+.hero {
+  height: 100vh; position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* Image slot */
+.hero-bg {
+  position: absolute; inset: 0;
+  /* CSS STAND-IN: foto de estudio de arquitectura — biblioteca con pilares altos,
+     luz filtrada por ventanales altos, tonos cálidos de madera y piedra.
+     Tratamiento: exposición media-baja, detalles en sombras preservados.
+     Paleta que case con navy + oro sin desaturar del todo. */
+  background: var(--navy);
+  background-image:
+    radial-gradient(ellipse 80% 70% at 35% 35%, #182d52 0%, #0a1628 100%);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(10,22,40,.65) 0%,
+    rgba(10,22,40,.45) 40%,
+    rgba(10,22,40,.82) 100%
+  );
+}
+.img-note {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 10px; font-family: monospace; color: rgba(255,255,255,.08);
+  letter-spacing: .1em; text-transform: uppercase; text-align: center; line-height: 2;
+  z-index: 2; pointer-events: none;
+}
+
+/* Hero content */
+.hero-content {
+  position: relative; z-index: 10;
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 120px 52px 0;
+  text-align: center;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; width: 40px; height: 1px; background: var(--divider);
+}
+.hero-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px, 7.5vw, 104px); font-weight: 600;
+  line-height: 1; letter-spacing: -.01em;
+  color: var(--white); margin-bottom: 24px; text-wrap: balance;
+}
+.hero-h1 em { font-style: italic; color: var(--gold); }
+.hero-sub {
+  font-size: 16px; line-height: 1.65; color: var(--muted);
+  max-width: 52ch; margin: 0 auto 40px;
+}
+.hero-actions { display: flex; align-items: center; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-gold-solid {
+  padding: 14px 36px; background: var(--gold); color: var(--navy);
+  border-radius: 100px; font-size: 14px; font-weight: 700;
+  text-decoration: none; letter-spacing: .04em;
+  transition: background 200ms, transform 120ms;
+}
+.btn-gold-solid:hover { background: var(--gold2); transform: translateY(-1px); }
+.btn-gold-solid:active { transform: scale(.97); }
+.btn-outline-gold {
+  padding: 13px 28px; border: 1px solid var(--gold-b);
+  color: rgba(255,255,255,.8); border-radius: 100px; font-size: 14px; font-weight: 500;
+  text-decoration: none; letter-spacing: .04em;
+  transition: border-color 200ms, color 200ms;
+}
+.btn-outline-gold:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Stats overlaid on image — bottom of hero */
+.hero-stats {
+  position: relative; z-index: 10;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--divider);
+}
+.hs {
+  padding: 28px 36px; border-right: 1px solid var(--divider);
+  position: relative;
+}
+.hs:last-child { border-right: none; }
+.hs-n {
+  font-family: 'Cormorant Garamond', serif; font-weight: 600;
+  font-size: 38px; color: var(--white); letter-spacing: -.01em;
+  line-height: 1; margin-bottom: 4px;
+}
+.hs-n span { color: var(--gold); }
+.hs-l { font-size: 11px; color: rgba(255,255,255,.45); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ── VALUE PROPS ── */
+.props {
+  background: var(--off); padding: 100px 52px;
+  max-width: 1280px; margin: 0 auto;
+}
+.props-header { margin-bottom: 64px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.props-h {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600; letter-spacing: -.01em; color: var(--navy); line-height: 1.1;
+  text-wrap: balance;
+}
+.props-note { font-size: 13px; color: rgba(10,22,40,.4); letter-spacing: .04em; text-transform: uppercase; }
+
+.props-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--divider); border: 1px solid rgba(201,168,76,.15); border-radius: 12px; overflow: hidden; }
+.prop {
+  background: var(--off); padding: 44px 36px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.prop-icon {
+  width: 44px; height: 44px; border: 1px solid var(--divider);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--gold);
+}
+.prop-h { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 22px; color: var(--navy); letter-spacing: -.01em; }
+.prop-p { font-size: 14px; line-height: 1.7; color: rgba(10,22,40,.6); }
+
+/* ── HOW ── */
+.how {
+  background: var(--navy); padding: 100px 52px;
+}
+.how-inner { max-width: 1280px; margin: 0 auto; }
+.how-h {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600; letter-spacing: -.01em; color: var(--white); margin-bottom: 64px;
+  text-wrap: balance;
+}
+.how-steps {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--divider);
+}
+.step { background: var(--navy); padding: 40px 36px; }
+.step-n {
+  font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 600;
+  color: var(--gold-b); line-height: 1; margin-bottom: 20px; display: block;
+}
+.step-h { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 22px; color: var(--white); margin-bottom: 10px; letter-spacing: -.01em; }
+.step-p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.5); }
+
+/* ── TESTIMONIAL ── */
+.testimonial {
+  padding: 100px 52px;
+  background: var(--off);
+  max-width: 1280px; margin: 0 auto;
+}
+.testimonial-inner {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 80px; align-items: center;
+  border: 1px solid var(--divider); border-radius: 12px;
+  padding: 64px; background: var(--white);
+}
+.testimonial-q {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: clamp(22px, 2.5vw, 30px); line-height: 1.45;
+  color: var(--navy); letter-spacing: -.01em;
+}
+.testimonial-q::before { content: '\201C'; color: var(--gold); font-size: 1.3em; }
+.testimonial-q::after  { content: '\201D'; color: var(--gold); font-size: 1.3em; }
+.testimonial-attr { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--divider); }
+.testimonial-attr strong { font-size: 14px; font-weight: 600; color: var(--navy); display: block; }
+.testimonial-attr span { font-size: 12px; color: rgba(10,22,40,.45); margin-top: 2px; display: block; }
+
+.testimonial-right {}
+.t-stat-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.t-stat-big { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 72px; color: var(--navy); line-height: 1; letter-spacing: -.02em; }
+.t-stat-sub { font-size: 13px; color: rgba(10,22,40,.45); margin-top: 4px; }
+.t-note { font-size: 10px; color: rgba(10,22,40,.25); font-style: italic; margin-top: 12px; }
+.t-divider { width: 1px; height: 60px; background: var(--divider); margin: 28px 0; }
+.t-quote-mini { font-size: 13px; color: rgba(10,22,40,.55); font-style: italic; }
+
+/* ── PRICING ── */
+.pricing {
+  background: var(--navy); padding: 100px 52px;
+}
+.pricing-inner { max-width: 1280px; margin: 0 auto; }
+.pricing-h {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600; letter-spacing: -.01em; color: var(--white); margin-bottom: 16px;
+}
+.pricing-sub { font-size: 14px; color: var(--muted); max-width: 48ch; margin-bottom: 52px; }
+
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--divider); border: 1px solid var(--divider); border-radius: 12px; overflow: hidden; }
+.plan { background: var(--navy2); padding: 44px 36px; }
+.plan.featured { background: var(--navy3); position: relative; }
+.plan-badge {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold); background: var(--gold-l); border: 1px solid var(--gold-b);
+  padding: 4px 10px; border-radius: 100px; display: inline-block; margin-bottom: 24px;
+}
+.plan-name { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.plan-price {
+  font-family: 'Cormorant Garamond', serif; font-weight: 600;
+  font-size: 56px; color: var(--white); line-height: 1; letter-spacing: -.02em; margin-bottom: 4px;
+}
+.plan-period { font-size: 13px; color: rgba(255,255,255,.35); margin-bottom: 28px; }
+.plan-divider { height: 1px; background: var(--divider); margin-bottom: 24px; }
+.plan-list { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 10px; }
+.plan-list li { font-size: 13px; color: rgba(255,255,255,.65); display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; }
+.plan-list li::before { content: '✦'; color: var(--gold-b); font-size: 8px; margin-top: 4px; flex-shrink: 0; }
+
+.btn-gp-solid {
+  display: block; text-align: center; padding: 13px 24px;
+  background: var(--gold); color: var(--navy); border-radius: 100px;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  letter-spacing: .04em; transition: background 200ms;
+}
+.btn-gp-solid:hover { background: var(--gold2); }
+.btn-gp-outline {
+  display: block; text-align: center; padding: 12px 24px;
+  border: 1px solid rgba(201,168,76,.3); color: rgba(255,255,255,.7);
+  border-radius: 100px; font-size: 14px; font-weight: 500;
+  text-decoration: none; transition: border-color 200ms, color 200ms;
+}
+.btn-gp-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+.pricing-note { margin-top: 24px; font-size: 12px; color: rgba(255,255,255,.25); text-align: center; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--navy); border-top: 1px solid var(--divider);
+  padding: 40px 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.f-logo { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 20px; color: var(--gold); letter-spacing: .02em; }
+.f-links { display: flex; gap: 24px; list-style: none; }
+.f-links a { font-size: 12px; color: rgba(255,255,255,.35); text-decoration: none; letter-spacing: .04em; text-transform: uppercase; transition: color 180ms; }
+.f-links a:hover { color: var(--gold); }
+.f-copy { font-size: 11px; color: rgba(255,255,255,.18); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .hero-content { padding: 100px 28px 0; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hs:nth-child(2) { border-right: none; }
+  .hs:nth-child(3) { border-right: 1px solid var(--divider); }
+  .props { padding: 72px 24px; }
+  .props-grid { grid-template-columns: 1fr; }
+  .how { padding: 72px 24px; }
+  .how-steps { grid-template-columns: 1fr; }
+  .testimonial { padding: 72px 24px; }
+  .testimonial-inner { grid-template-columns: 1fr; gap: 40px; padding: 40px 32px; }
+  .t-stat-big { font-size: 52px; }
+  .pricing { padding: 72px 24px; }
+  .plans { grid-template-columns: 1fr; }
+  footer { padding: 36px 24px; }
+  .plan-price { font-size: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-gold-solid, .btn-gold-pill, .btn-gp-solid, .btn-gp-outline, .btn-outline-gold { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Kairo</a>
+  <ul class="nav-links">
+    <li><a href="#">Método</a></li>
+    <li><a href="#">Precios</a></li>
+    <li><a href="#">Para centros</a></li>
+  </ul>
+  <a class="btn-gold-pill" href="#">Entrar</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <p class="img-note">
+      [ IMAGEN: Biblioteca de arquitectura clásica.<br>
+      Pilares altos, ventanales, luz de tarde.<br>
+      Tonos madera y piedra. Sin personas. ]
+    </p>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">Preparación PAU · Madrid · Cataluña</p>
+    <h1 class="hero-h1">La preparación<br>que <em>merece</em><br>tu nota.</h1>
+    <p class="hero-sub">
+      Exámenes reales. Corrección IA con la rúbrica oficial exacta. Un plan de 15 minutos al día que te lleva de donde estás a donde quieres llegar.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-gold-solid" href="#">Empezar gratis</a>
+      <a class="btn-outline-gold" href="#">Ver cómo funciona</a>
+    </div>
+  </div>
+
+  <!-- Stats overlaid on image -->
+  <div class="hero-stats">
+    <div class="hs"><p class="hs-n">1.200<span>+</span></p><p class="hs-l">ejercicios estructurados</p></div>
+    <div class="hs"><p class="hs-n">38</p><p class="hs-l">semanas de currículum</p></div>
+    <div class="hs"><p class="hs-n">&lt;&nbsp;30<span>s</span></p><p class="hs-l">para recibir corrección IA</p></div>
+    <div class="hs"><p class="hs-n">2015<span>–25</span></p><p class="hs-l">exámenes oficiales reales</p></div>
+  </div>
+</section>
+
+<!-- VALUE PROPS -->
+<section style="background:var(--off);padding:0">
+  <div class="props">
+    <div class="props-header">
+      <h2 class="props-h">Tres pilares.<br>Un objetivo.</h2>
+      <span class="props-note">Diferencial Kairo</span>
+    </div>
+    <div class="props-grid">
+      <div class="prop">
+        <div class="prop-icon">📋</div>
+        <h3 class="prop-h">Exámenes reales</h3>
+        <p class="prop-p">Todos los exámenes oficiales de Selectividad de Madrid y Cataluña entre 2015 y 2025, organizados por asignatura, bloque temático y nivel de dificultad. Exactamente lo que entrará en tu PAU.</p>
+      </div>
+      <div class="prop">
+        <div class="prop-icon">🎯</div>
+        <h3 class="prop-h">Corrección con rúbrica oficial</h3>
+        <p class="prop-p">La IA aplica la misma rúbrica que usará tu profesor. No solo te dice si está bien — te desglosa puntos por apartado, señala dónde fallaste y explica cómo mejorar. En menos de 30 segundos.</p>
+      </div>
+      <div class="prop">
+        <div class="prop-icon">📅</div>
+        <h3 class="prop-h">Tu Camino PAU</h3>
+        <p class="prop-p">Un plan de misiones diarias de 15 minutos calculado a partir de tu fecha de examen y tus asignaturas. Sin horarios fijos. Sin martes de academia. Donde tú estés y cuando tú puedas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="how-inner">
+    <h2 class="how-h">Del primer día<br>al 10 de junio.</h2>
+    <div class="how-steps">
+      <div class="step">
+        <span class="step-n">I</span>
+        <h3 class="step-h">Configura tu Camino</h3>
+        <p class="step-p">Dinos tu fecha de PAU y tus asignaturas. Kairo distribuye el currículum en misiones diarias adaptadas a tu tiempo disponible.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">II</span>
+        <h3 class="step-h">Resuelve y fotografía</h3>
+        <p class="step-p">Cada día recibes ejercicios de exámenes reales. Los resuelves a mano — como en el examen de verdad — y subes una foto de tu respuesta.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">III</span>
+        <h3 class="step-h">Corrige y avanza</h3>
+        <p class="step-p">En menos de 30 segundos tienes tu corrección con la rúbrica oficial. Cada corrección alimenta tu progreso y ajusta el plan si es necesario.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section style="background:var(--off);padding:0">
+  <div class="testimonial">
+    <div class="testimonial-inner">
+      <div>
+        <p class="testimonial-q">Nunca había entendido del todo qué criterios seguía el examinador. Con Kairo vi exactamente cuántos puntos perdía en cada apartado y por qué. Pasé de sacar un 5 a un 7,8 en Matemáticas.</p>
+        <div class="testimonial-attr">
+          <strong>Lucía M.</strong>
+          <span>2º Bachillerato — Madrid, 2024 · Matemáticas II <em style="opacity:.55;font-style:italic;">(contenido ilustrativo)</em></span>
+        </div>
+      </div>
+      <div class="testimonial-right">
+        <p class="t-stat-label">Evolución nota</p>
+        <p class="t-stat-big">5,0→7,8</p>
+        <p class="t-stat-sub">Matemáticas II · 2 meses</p>
+        <p class="t-note">Resultado ilustrativo</p>
+        <div class="t-divider"></div>
+        <p class="t-quote-mini">"Lo usé 15 minutos al día en el bus de vuelta del instituto."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="pricing-inner">
+    <h2 class="pricing-h">Elige tu plan.</h2>
+    <p class="pricing-sub">Sin compromisos. Sin academia. Sin horarios. Cancela cuando quieras.</p>
+    <div class="plans">
+      <div class="plan">
+        <p class="plan-name">Free</p>
+        <p class="plan-price">0&thinsp;€</p>
+        <p class="plan-period">Sin tarjeta de crédito</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-list">
+          <li>25 correcciones al mes</li>
+          <li>3 fotos al mes</li>
+          <li>1 simulacro mensual</li>
+          <li>Camino PAU limitado</li>
+        </ul>
+        <a class="btn-gp-outline" href="#">Empezar gratis</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">Más elegido</div>
+        <p class="plan-name">Premium</p>
+        <p class="plan-price">9,99&thinsp;€</p>
+        <p class="plan-period">/mes · cancela cuando quieras</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-list">
+          <li>200 correcciones al mes</li>
+          <li>80 fotos al mes</li>
+          <li>5 simulacros al mes</li>
+          <li>Camino PAU completo</li>
+          <li>Ranking de clase</li>
+        </ul>
+        <a class="btn-gp-solid" href="#">Elegir Premium</a>
+      </div>
+      <div class="plan">
+        <div class="plan-badge" style="background:transparent;color:var(--gold);border-color:var(--gold-b);">Early Bird</div>
+        <p class="plan-name">Curso PAU</p>
+        <p class="plan-price">59&thinsp;€</p>
+        <p class="plan-period">pago único · septiembre a junio</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-list">
+          <li>Todo Premium incluido</li>
+          <li>Acceso completo hasta junio</li>
+          <li>Sin renovación mensual</li>
+          <li>Precio sube el 30 sept.</li>
+        </ul>
+        <a class="btn-gp-outline" href="#">Reservar Curso PAU</a>
+      </div>
+    </div>
+    <p class="pricing-note">Precio de lanzamiento. El Curso PAU pasará a 69&nbsp;€ el 1 de octubre.</p>
+  </div>
+</section>
+
+<footer>
+  <span class="f-logo">Kairo</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+    <li><a href="#">Para centros</a></li>
+  </ul>
+  <span class="f-copy">© 2026 Kairo</span>
+</footer>
+
+</body>
+</html>

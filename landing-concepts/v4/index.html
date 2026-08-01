@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — Prepara la PAU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION CONTRACT — V4
+  THESIS: La urgencia sin grietas. El examen se acerca — no hay tiempo para gradients
+  decorativos. Solo la verdad: texto a máxima escala, acción circular en el centro,
+  y dos mini-cards de prueba ancladas al borde inferior del hero. Rechaza la
+  narrativa en secciones; todo ocurre en el primer viewport o en la bajada inmediata.
+  OWN-WORLD: B&W absoluto en el hero — negro #111 + blanco #f9f9f9, sin ningún hue.
+  Bebas Neue para display (tracking 0 a -0.02em, nunca tight), DM Mono para labels
+  y datos, Inter para body. CTA circular es el único botón del hero.
+  STORY: El visitante ve UNA pregunta en grande ("¿Listo para la PAU?"), la imagen
+  de fondo sugiere el campo de batalla, el botón circular invita. Las dos mini-cards
+  (exam UI + score) prueban el producto antes del scroll. Abajo: features en lista
+  tipográfica densa, pricing minimalista.
+  FIRST VIEWPORT: 100vh full-bleed dark photo; headline centrado escalonado a
+  máxima escala; CTA circular centrado bajo el headline; dos mini-cards pegadas
+  al borde inferior, uno a cada lado del centro.
+  FORM: Estudio de arquitectura o firma de diseño gráfico; tipografía de cartel;
+  monumental + sin ornamento; el ritmo visual viene de la escala, no del color.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black: #111111;
+  --ink:   #1c1c1c;
+  --ink2:  #2a2a2a;
+  --mid:   #555;
+  --soft:  #888;
+  --border:#d8d8d8;
+  --white: #f9f9f9;
+  --pure:  #ffffff;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); min-height: 100vh; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 54px;
+  mix-blend-mode: normal;
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 24px;
+  color: #fff; text-decoration: none; letter-spacing: .08em;
+}
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.55); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; transition: color 150ms; }
+.nav-link:hover { color: #fff; }
+.btn-nav {
+  padding: 7px 16px; border: 1px solid rgba(255,255,255,.3);
+  font-size: 11px; font-weight: 500; color: #fff; text-decoration: none;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: background 150ms, border-color 150ms;
+}
+.btn-nav:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.5); }
+
+/* ── HERO ── */
+.hero {
+  height: 100vh; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+
+/* Image slot */
+.hero-bg {
+  position: absolute; inset: 0;
+  /* CSS STAND-IN: foto B&W con overlay oscuro.
+     Sujeto: mesa de examen vacía, papeles, boligrafo. Vista cenital o picada.
+     Tratamiento: desaturado total, contraste alto, overlay negro 70-80%.
+     Efecto: atmósfera de sala de examen, severa y limpia. */
+  background: var(--black);
+  background-image: radial-gradient(ellipse 90% 80% at 50% 40%, #2a2a2a 0%, #111 100%);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(17,17,17,.72) 0%, rgba(17,17,17,.55) 50%, rgba(17,17,17,.9) 100%);
+}
+.img-note {
+  position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 10px; font-family: monospace; color: rgba(255,255,255,.07);
+  letter-spacing: .1em; text-transform: uppercase; text-align: center; line-height: 2;
+  z-index: 2; pointer-events: none;
+}
+
+/* Headline — centered, monumental */
+.hero-text { position: relative; z-index: 10; text-align: center; padding: 0 32px; }
+.hero-pre {
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+  color: rgba(255,255,255,.35); letter-spacing: .2em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hero-h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(72px, 14vw, 184px);
+  line-height: .92; letter-spacing: .01em;
+  color: #fff; margin-bottom: 40px;
+  white-space: nowrap;
+}
+.hero-h1 .line2 { display: block; letter-spacing: -.01em; }
+
+/* Circular CTA */
+.cta-circle-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+.cta-circle {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: #fff; color: var(--black);
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; flex-direction: column; gap: 4px;
+  transition: transform 160ms cubic-bezier(0.23,1,0.32,1), background 160ms;
+  border: 2px solid transparent;
+}
+.cta-circle:hover { transform: scale(1.06); }
+.cta-circle:active { transform: scale(.97); }
+.cta-circle-label {
+  font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: .06em;
+  color: var(--black); text-align: center; line-height: 1.1;
+}
+.cta-circle-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(0,0,0,.45); letter-spacing: .1em; text-transform: uppercase; }
+
+/* Ghost secondary CTA below */
+.hero-secondary {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.35);
+  letter-spacing: .12em; text-transform: uppercase;
+  text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.15);
+  padding-bottom: 2px; display: inline-block; margin-top: 0;
+  transition: color 150ms, border-color 150ms;
+}
+.hero-secondary:hover { color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.4); }
+
+/* Mini cards pinned to bottom */
+.hero-cards {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 0 48px;
+  pointer-events: none;
+}
+.mini-card {
+  background: rgba(249,249,249,.07); border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(14px); border-radius: 10px 10px 0 0;
+  padding: 20px 22px; width: 220px;
+  pointer-events: all;
+}
+.mc-tag { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+.mc-title { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 12px; line-height: 1.35; }
+.mc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #fff; line-height: 1; }
+.mc-score-label { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.35); margin-top: 2px; }
+.mc-bar-wrap { height: 3px; background: rgba(255,255,255,.12); border-radius: 2px; margin: 12px 0 6px; }
+.mc-bar { height: 3px; background: #fff; border-radius: 2px; width: 78%; }
+.mc-detail { font-size: 10px; color: rgba(255,255,255,.4); line-height: 1.4; }
+
+/* ── CONTENT AREA — typographic density ── */
+.content { background: var(--white); }
+
+/* Features — list style, no cards */
+.features { padding: 80px 64px; border-bottom: 1px solid var(--border); max-width: 1280px; margin: 0 auto; }
+.features-top { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; margin-bottom: 64px; }
+.feat-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 5vw, 68px); letter-spacing: .01em; color: var(--black); line-height: 1; }
+.feat-intro { font-size: 15px; line-height: 1.75; color: var(--mid); padding-top: 8px; max-width: 44ch; }
+
+.feat-list { display: flex; flex-direction: column; }
+.feat-item { display: grid; grid-template-columns: 32px 1fr; gap: 0 24px; padding: 24px 0; border-top: 1px solid var(--border); align-items: baseline; }
+.feat-n { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(0,0,0,.22); }
+.feat-body {}
+.feat-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.feat-desc { font-size: 13px; color: var(--mid); line-height: 1.6; max-width: 52ch; }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  background: var(--black); padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a;
+}
+.sb { padding: 36px 44px; border-right: 1px solid rgba(255,255,255,.06); }
+.sb:last-child { border-right: none; }
+.sb-n { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: #fff; letter-spacing: .02em; line-height: 1; }
+.sb-l { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.3); letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
+
+/* ── PRICING ── */
+.pricing { padding: 80px 64px; max-width: 1280px; margin: 0 auto; }
+.pricing-header { margin-bottom: 48px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.pricing-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 5vw, 60px); letter-spacing: .01em; color: var(--black); }
+.pricing-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--soft); letter-spacing: .06em; }
+
+.plans-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); }
+.plans-table th { background: var(--black); color: #fff; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 16px 24px; text-align: left; border-right: 1px solid rgba(255,255,255,.08); font-weight: 500; }
+.plans-table th:last-child { border-right: none; }
+.plans-table td { padding: 18px 24px; border-right: 1px solid var(--border); border-top: 1px solid var(--border); vertical-align: top; }
+.plans-table td:last-child { border-right: none; }
+.plans-table tr:last-child td { border-bottom: none; }
+
+.td-name { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); letter-spacing: .1em; text-transform: uppercase; }
+.td-price { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--black); letter-spacing: .01em; line-height: 1; }
+.td-period { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--soft); letter-spacing: .06em; }
+.td-feature { font-size: 13px; color: var(--ink); }
+.td-feature.muted { color: rgba(0,0,0,.28); }
+.td-cta {
+  display: inline-block; padding: 9px 20px; border: 1px solid var(--black);
+  font-size: 12px; font-weight: 600; color: var(--black); text-decoration: none;
+  letter-spacing: .04em; transition: background 150ms, color 150ms;
+}
+.td-cta:hover { background: var(--black); color: #fff; }
+.td-cta.primary { background: var(--black); color: #fff; }
+.td-cta.primary:hover { background: var(--ink2); }
+.td-highlight { background: #f3f3f3; }
+
+.plans-footer { margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); letter-spacing: .04em; }
+
+/* ── CTA BANNER ── */
+.cta-banner {
+  background: var(--black); padding: 80px 64px;
+  text-align: center;
+}
+.cta-banner-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 6vw, 84px); color: #fff; letter-spacing: .01em; line-height: 1; margin-bottom: 32px; }
+.btn-cta-circle-lg {
+  width: 180px; height: 180px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3);
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; flex-direction: column; gap: 4px;
+  transition: border-color 160ms, transform 160ms cubic-bezier(0.23,1,0.32,1), background 160ms;
+}
+.btn-cta-circle-lg:hover { border-color: rgba(255,255,255,.7); transform: scale(1.04); background: rgba(255,255,255,.06); }
+.btn-cta-circle-lg:active { transform: scale(.97); }
+.circle-label { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .06em; color: #fff; text-align: center; }
+.circle-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 64px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.f-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--black); letter-spacing: .06em; }
+.f-links { display: flex; gap: 20px; list-style: none; }
+.f-links a { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: color 140ms; }
+.f-links a:hover { color: var(--black); }
+.f-copy { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(0,0,0,.22); letter-spacing: .04em; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .hero-h1 { font-size: clamp(52px, 16vw, 120px); white-space: normal; }
+  .hero-cards { padding: 0 20px; }
+  .mini-card { width: 160px; padding: 16px; }
+  .features { padding: 56px 24px; }
+  .features-top { grid-template-columns: 1fr; gap: 24px; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .sb:nth-child(2) { border-right: none; }
+  .sb:nth-child(3) { border-right: 1px solid rgba(255,255,255,.06); }
+  .pricing { padding: 56px 24px; }
+  .plans-table { font-size: 13px; }
+  .plans-table th, .plans-table td { padding: 12px 14px; }
+  .cta-banner { padding: 56px 24px; }
+  footer { padding: 28px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-circle, .cta-circle-lg, .btn-cta-circle-lg { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">KAIRO</a>
+  <div class="nav-right">
+    <a class="nav-link" href="#">Precios</a>
+    <a class="btn-nav" href="#">Entrar →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <p class="img-note">
+      [ IMAGEN: Mesa de examen vacía. Vista cenital.<br>
+      Folios, bolígrafo, borrador. B&W. Overlay 75%. ]
+    </p>
+  </div>
+
+  <div class="hero-text">
+    <p class="hero-pre">Selectividad · Madrid · Cataluña · 2026</p>
+    <h1 class="hero-h1">Prepara<span class="line2">la PAU.</span></h1>
+    <div class="cta-circle-wrap">
+      <a class="cta-circle" href="#">
+        <span class="cta-circle-label">Empieza<br>gratis</span>
+        <span class="cta-circle-sub">sin tarjeta</span>
+      </a>
+    </div>
+    <a class="hero-secondary" href="#">Ver cómo funciona</a>
+  </div>
+
+  <!-- Mini cards bottom -->
+  <div class="hero-cards">
+    <div class="mini-card">
+      <p class="mc-tag">Examen real</p>
+      <p class="mc-title">Matemáticas II · Madrid 2023<br>Bloque análisis · Ejercicio 2</p>
+      <p class="mc-detail">Calcula la derivada de f(x) = x³·ln(x) y estudia su monotonía…</p>
+    </div>
+    <div class="mini-card">
+      <p class="mc-tag">Corrección IA</p>
+      <p class="mc-score">7,8<span style="font-size:14px;opacity:.5">/10</span></p>
+      <p class="mc-score-label">resultado sintético</p>
+      <div class="mc-bar-wrap"><div class="mc-bar"></div></div>
+      <p class="mc-detail">Derivada correcta. Signo monotonía: falta el intervalo (0,1/e). −1,2 pts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="content">
+  <div class="features">
+    <div class="features-top">
+      <h2 class="feat-h">Lo que no tenías<br>hasta ahora.</h2>
+      <p class="feat-intro">Las academias corrigen tarde y cuestan 100–200&nbsp;€ al mes. Los PDF de exámenes no dicen dónde fallaste. Kairo lo hace todo — en el móvil, en 15 minutos al día.</p>
+    </div>
+    <div class="feat-list">
+      <div class="feat-item">
+        <span class="feat-n">01</span>
+        <div class="feat-body">
+          <p class="feat-title">Exámenes reales de Selectividad</p>
+          <p class="feat-desc">Todos los exámenes oficiales de Madrid y Cataluña de 2015 a 2025, organizados por asignatura, bloque y dificultad.</p>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">02</span>
+        <div class="feat-body">
+          <p class="feat-title">Corrección IA con rúbrica oficial</p>
+          <p class="feat-desc">Subes una foto de tu respuesta escrita a mano. La IA aplica la rúbrica exacta del corrector y te da tu nota en menos de 30 segundos.</p>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">03</span>
+        <div class="feat-body">
+          <p class="feat-title">Tu Camino PAU personalizado</p>
+          <p class="feat-desc">Un plan de misiones diarias de 15 minutos, calculado a partir de tu fecha de examen. Se adapta si fallas o si vas adelantado.</p>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">04</span>
+        <div class="feat-body">
+          <p class="feat-title">Simulacros completos cronometrados</p>
+          <p class="feat-desc">Exámenes completos en condiciones reales de tiempo. Corrección detallada al terminar. Para saber si estás listo de verdad.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="sb"><p class="sb-n">1200+</p><p class="sb-l">ejercicios</p></div>
+  <div class="sb"><p class="sb-n">38</p><p class="sb-l">semanas currículum</p></div>
+  <div class="sb"><p class="sb-n">30s</p><p class="sb-l">tiempo corrección</p></div>
+  <div class="sb"><p class="sb-n">2015–25</p><p class="sb-l">exámenes reales</p></div>
+</div>
+
+<!-- PRICING -->
+<section class="content">
+  <div class="pricing">
+    <div class="pricing-header">
+      <h2 class="pricing-h">Precios.</h2>
+      <span class="pricing-note">IVA incluido — cancela cuando quieras</span>
+    </div>
+    <table class="plans-table">
+      <thead>
+        <tr>
+          <th style="width:18%">Plan</th>
+          <th style="width:18%">Precio</th>
+          <th>Incluye</th>
+          <th style="width:14%">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="td-name">Free</span></td>
+          <td><span class="td-price">0&thinsp;€</span><br><span class="td-period">sin tarjeta</span></td>
+          <td class="td-feature">25 correcciones · 3 fotos · 1 simulacro · Camino limitado</td>
+          <td><a class="td-cta" href="#">Empezar</a></td>
+        </tr>
+        <tr class="td-highlight">
+          <td><span class="td-name">Premium</span></td>
+          <td><span class="td-price">9,99&thinsp;€</span><br><span class="td-period">/mes</span></td>
+          <td class="td-feature">200 correcciones · 80 fotos · 5 simulacros · Camino PAU completo · Ranking</td>
+          <td><a class="td-cta primary" href="#">Elegir</a></td>
+        </tr>
+        <tr>
+          <td><span class="td-name">Curso PAU</span><br><span style="font-family:'DM Mono',monospace;font-size:9px;color:#888;letter-spacing:.06em">EARLY BIRD</span></td>
+          <td><span class="td-price">59&thinsp;€</span><br><span class="td-period">pago único</span></td>
+          <td class="td-feature">Todo Premium · Septiembre a junio · Sin renovación</td>
+          <td><a class="td-cta" href="#">Reservar</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="plans-footer">El Curso PAU pasará a 69&nbsp;€ el 1 de octubre de 2026.</p>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2 class="cta-banner-h">¿A qué<br>esperas?</h2>
+  <a class="btn-cta-circle-lg" href="#">
+    <span class="circle-label">Empezar<br>gratis</span>
+    <span class="circle-sub">sin tarjeta</span>
+  </a>
+</section>
+
+<footer>
+  <span class="f-logo">KAIRO</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+  </ul>
+  <span class="f-copy">© 2026 KAIRO</span>
+</footer>
+
+</body>
+</html>

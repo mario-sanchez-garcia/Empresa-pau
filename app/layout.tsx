@@ -20,9 +20,44 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
+const DESCRIPTION =
+  'Tu plan de estudio diario para la PAU, exámenes oficiales reales y corrección con IA que te dice dónde pierdes puntos. Madrid y Cataluña.'
+
 export const metadata: Metadata = {
-  title: "Kairo — Prepara tu EBAU",
-  description: "Prepara la EBAU Madrid con exámenes oficiales reales y corrección con IA",
+  // metadataBase permite que og:image y demás rutas relativas se resuelvan
+  // a URLs absolutas — sin esto, WhatsApp y Twitter no muestran la imagen.
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: 'Kairo — Prepara tu PAU con corrección por IA',
+    template: '%s · Kairo',
+  },
+  description: DESCRIPTION,
+  applicationName: 'Kairo',
+  keywords: [
+    'PAU', 'EBAU', 'selectividad', 'PAU Madrid', 'PAU Cataluña',
+    'exámenes selectividad', 'corrección IA', 'preparar selectividad',
+  ],
+  authors: [{ name: 'Kairo' }],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'es_ES',
+    url: APP_URL,
+    siteName: 'Kairo',
+    title: 'Kairo — Prepara tu PAU con corrección por IA',
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kairo — Prepara tu PAU con corrección por IA',
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+  },
 };
 
 export default function RootLayout({

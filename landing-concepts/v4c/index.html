@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kairo — v4c · Bloques alternos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  V4-C — BLOQUES ALTERNOS
+  Hero idéntico a v4. Cuerpo: secciones de altura completa que se
+  alternan entre fondo blanco y fondo negro, generando contraste rítmico
+  sin elementos decorativos. Cada sección es un 2-col split donde
+  texto e imagen/dato se alternan de lado. Pricing: negro total con
+  tres columnas en texto blanco. Sin cajas, sin sombras, sin radius.
+*/
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #111;
+  --ink:   #1c1c1c;
+  --mid:   #5a5a5a;
+  --soft:  #999;
+  --border:#e0e0e0;
+  --white: #f9f9f9;
+}
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 54px; }
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fff; text-decoration: none; letter-spacing: .08em; }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.5); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; }
+.nav-link:hover { color: #fff; }
+.btn-nav { padding: 7px 16px; border: 1px solid rgba(255,255,255,.3); font-size: 11px; color: #fff; text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: background 140ms; }
+.btn-nav:hover { background: rgba(255,255,255,.1); }
+
+/* HERO */
+.hero { height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.hero-bg { position: absolute; inset: 0; background: var(--black); background-image: url('hero_b.png'); background-size: cover; background-position: center; }
+.hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17,17,17,.72) 0%, rgba(17,17,17,.55) 50%, rgba(17,17,17,.9) 100%); }
+.hero-text { position: relative; z-index: 10; text-align: center; padding: 0 32px; }
+.hero-pre { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.35); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 18px; }
+.hero-h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px, 14vw, 184px); line-height: .92; letter-spacing: .01em; color: #fff; margin-bottom: 40px; }
+.hero-h1 .line2 { display: block; letter-spacing: -.01em; }
+.cta-circle-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+.cta-circle { width: 140px; height: 140px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; flex-direction: column; gap: 4px; transition: transform 160ms cubic-bezier(0.23,1,0.32,1); }
+.cta-circle:hover { transform: scale(1.06); }
+.cta-circle:active { transform: scale(.97); }
+.cta-circle-label { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: .06em; color: var(--black); text-align: center; line-height: 1.1; }
+.cta-circle-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(0,0,0,.45); letter-spacing: .1em; text-transform: uppercase; }
+.hero-secondary { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.35); letter-spacing: .12em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.15); padding-bottom: 2px; display: inline-block; }
+.hero-secondary:hover { color: rgba(255,255,255,.7); }
+.hero-cards { position: absolute; bottom: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 48px; pointer-events: none; }
+.mini-card { background: rgba(249,249,249,.07); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(14px); border-radius: 10px 10px 0 0; padding: 20px 22px; width: 220px; pointer-events: all; }
+.mc-tag { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+.mc-title { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 12px; line-height: 1.35; }
+.mc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #fff; line-height: 1; }
+.mc-score-label { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.35); margin-top: 2px; }
+.mc-bar-wrap { height: 3px; background: rgba(255,255,255,.12); border-radius: 2px; margin: 12px 0 6px; }
+.mc-bar { height: 3px; background: #fff; border-radius: 2px; width: 78%; }
+.mc-detail { font-size: 10px; color: rgba(255,255,255,.4); line-height: 1.4; }
+
+/* ── CUERPO: alternating full-width sections ── */
+
+/* Base section block */
+.block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 520px;
+}
+.block.dark { background: var(--black); }
+.block.light { background: var(--white); }
+
+/* Shared halves */
+.block-copy {
+  padding: 80px 72px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.block-data {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 80px 72px;
+}
+.block.dark .block-copy,
+.block.dark .block-data { border-left: 1px solid rgba(255,255,255,.07); }
+.block.light .block-copy,
+.block.light .block-data { border-left: 1px solid var(--border); }
+.block > *:first-child { border-left: none !important; }
+
+/* Copy elements on light bg */
+.block-tag { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); letter-spacing: .18em; text-transform: uppercase; margin-bottom: 20px; display: block; }
+.block-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 4vw, 52px); letter-spacing: .01em; color: var(--black); line-height: .95; margin-bottom: 20px; }
+.block-p { font-size: 14px; line-height: 1.8; color: var(--mid); max-width: 44ch; }
+
+/* Copy elements on dark bg */
+.dark .block-tag { color: rgba(255,255,255,.3); }
+.dark .block-h { color: #fff; }
+.dark .block-p { color: rgba(255,255,255,.5); }
+
+/* Data variants */
+
+/* Stats 2x2 */
+.data-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.ds { padding: 24px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+.ds:nth-child(2n) { border-right: none; }
+.ds:nth-child(3), .ds:nth-child(4) { border-bottom: none; }
+.ds-n { font-family: 'Bebas Neue', sans-serif; font-size: 44px; color: var(--black); letter-spacing: .01em; line-height: 1; }
+.ds-l { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--soft); letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
+.dark .ds { border-color: rgba(255,255,255,.08); }
+.dark .ds-n { color: #fff; }
+.dark .ds-l { color: rgba(255,255,255,.3); }
+
+/* Step list (dark) */
+.step-list { display: flex; flex-direction: column; gap: 0; }
+.step-item { display: grid; grid-template-columns: 32px 1fr; gap: 0 16px; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,.06); align-items: start; }
+.step-item:first-child { padding-top: 0; }
+.step-item:last-child { border-bottom: none; }
+.si-n { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.2); padding-top: 2px; }
+.si-body {}
+.si-h { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.si-p { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.6; }
+
+/* Mock UI card (light bg) */
+.mock-ui {
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.mu-header { background: var(--black); padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.mu-dots { display: flex; gap: 5px; }
+.mu-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.2); }
+.mu-title { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.4); letter-spacing: .1em; margin-left: auto; }
+.mu-body { padding: 20px; }
+.mu-question { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 8px; line-height: 1.4; }
+.mu-sub { font-size: 11px; color: var(--mid); margin-bottom: 16px; }
+.mu-score-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.mu-score { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--black); letter-spacing: .01em; line-height: 1; }
+.mu-max { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--soft); }
+.mu-bar-wrap { height: 2px; background: var(--border); margin-bottom: 12px; }
+.mu-bar { height: 2px; background: var(--black); width: 78%; }
+.mu-breakdown { display: flex; flex-direction: column; gap: 5px; }
+.mu-row { display: flex; justify-content: space-between; font-size: 11px; }
+.mu-item { color: var(--mid); }
+.mu-pts { font-family: 'DM Mono', monospace; color: var(--ink); font-size: 10px; }
+
+/* Testimonial (light) */
+.quote-big { font-size: 16px; line-height: 1.7; color: var(--ink); font-weight: 300; margin-bottom: 24px; max-width: 44ch; }
+.quote-big::before { content: '\201C'; font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--border); display: block; line-height: .8; margin-bottom: 12px; }
+.quote-attr { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--soft); letter-spacing: .08em; text-transform: uppercase; }
+.quote-attr strong { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); display: block; letter-spacing: 0; text-transform: none; margin-bottom: 2px; }
+.score-tag { margin-top: 20px; display: inline-block; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--black); letter-spacing: .01em; }
+.score-note { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--soft); display: block; }
+
+/* PRICING — full dark section, 3-col */
+.pricing-block { background: var(--black); padding: 80px 72px; }
+.pricing-block-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px, 4vw, 52px); letter-spacing: .01em; color: #fff; line-height: .95; margin-bottom: 56px; }
+.p-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid rgba(255,255,255,.1); }
+.p-col { padding: 40px 0 40px; border-right: 1px solid rgba(255,255,255,.08); padding-right: 40px; }
+.p-col:first-child { padding-left: 0; }
+.p-col:last-child { border-right: none; padding-right: 0; padding-left: 40px; }
+.p-col:nth-child(2) { padding-left: 40px; }
+.p-name { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.3); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 14px; display: block; }
+.p-price { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: #fff; letter-spacing: .01em; line-height: 1; margin-bottom: 2px; }
+.p-period { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.3); margin-bottom: 24px; display: block; }
+.p-line { height: 1px; background: rgba(255,255,255,.08); margin-bottom: 18px; }
+.p-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 24px; }
+.p-list li { font-size: 12px; color: rgba(255,255,255,.55); line-height: 1.4; padding-left: 10px; position: relative; }
+.p-list li::before { content: '—'; position: absolute; left: 0; color: rgba(255,255,255,.18); font-size: 10px; }
+.p-cta { font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.3); padding-bottom: 1px; display: inline-block; transition: border-color 140ms; }
+.p-cta:hover { border-color: #fff; }
+.pricing-note { margin-top: 32px; font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.2); letter-spacing: .06em; }
+
+/* CTA — full width dark to white split */
+.cta-block {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+}
+.cta-left { padding: 80px 72px; background: var(--white); display: flex; flex-direction: column; justify-content: center; }
+.cta-right { padding: 80px 72px; background: var(--black); display: flex; align-items: center; justify-content: center; border-left: none; }
+.cta-big-h { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 4.5vw, 60px); letter-spacing: .01em; color: var(--black); line-height: .95; margin-bottom: 16px; }
+.cta-sub { font-size: 14px; color: var(--mid); max-width: 34ch; }
+.cta-circle-inv { width: 150px; height: 150px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.35); display: flex; align-items: center; justify-content: center; text-decoration: none; flex-direction: column; gap: 4px; transition: border-color 160ms, transform 160ms cubic-bezier(0.23,1,0.32,1), background 160ms; }
+.cta-circle-inv:hover { border-color: #fff; transform: scale(1.05); background: rgba(255,255,255,.06); }
+.cta-circle-inv:active { transform: scale(.97); }
+.ci-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: .06em; color: #fff; text-align: center; line-height: 1.1; }
+.ci-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; }
+
+/* Footer */
+footer { background: var(--black); padding: 32px 72px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-top: 1px solid rgba(255,255,255,.07); }
+.f-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #fff; letter-spacing: .06em; }
+.f-links { display: flex; gap: 20px; list-style: none; }
+.f-links a { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.3); text-decoration: none; letter-spacing: .06em; text-transform: uppercase; transition: color 140ms; }
+.f-links a:hover { color: #fff; }
+.f-copy { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,.18); }
+
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-link { display: none; }
+  .hero-cards { padding: 0 20px; }
+  .mini-card { width: 160px; padding: 16px; }
+  .block, .cta-block { grid-template-columns: 1fr; }
+  .block > *:nth-child(2) { border-left: none !important; border-top: 1px solid var(--border); }
+  .dark .block > *:nth-child(2) { border-top-color: rgba(255,255,255,.07); }
+  .block-copy, .block-data { padding: 52px 28px; }
+  .pricing-block { padding: 56px 28px; }
+  .p-cols { grid-template-columns: 1fr; }
+  .p-col { border-right: none; padding: 32px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .p-col:last-child { border-bottom: none; }
+  .cta-block { grid-template-columns: 1fr; }
+  .cta-left, .cta-right { padding: 56px 28px; }
+  footer { padding: 28px 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .cta-circle, .cta-circle-inv { transition: none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">KAIRO</a>
+  <div class="nav-right">
+    <a class="nav-link" href="#">Precios</a>
+    <a class="btn-nav" href="#">Entrar →</a>
+  </div>
+</nav>
+
+<!-- HERO — idéntico v4 -->
+<section class="hero">
+  <div class="hero-bg">
+  </div>
+  <div class="hero-text">
+    <p class="hero-pre">Selectividad · Madrid · Cataluña · 2026</p>
+    <h1 class="hero-h1">Prepara<span class="line2">la PAU.</span></h1>
+    <div class="cta-circle-wrap">
+      <a class="cta-circle" href="#">
+        <span class="cta-circle-label">Empieza<br>gratis</span>
+        <span class="cta-circle-sub">sin tarjeta</span>
+      </a>
+    </div>
+    <a class="hero-secondary" href="#">Ver cómo funciona</a>
+  </div>
+  <div class="hero-cards">
+    <div class="mini-card">
+      <p class="mc-tag">Examen real</p>
+      <p class="mc-title">Matemáticas II · Madrid 2023<br>Bloque análisis · Ejercicio 2</p>
+      <p class="mc-detail">Calcula la derivada de f(x) = x³·ln(x) y estudia su monotonía…</p>
+    </div>
+    <div class="mini-card">
+      <p class="mc-tag">Corrección IA</p>
+      <p class="mc-score">7,8<span style="font-size:14px;opacity:.5">/10</span></p>
+      <p class="mc-score-label">resultado sintético</p>
+      <div class="mc-bar-wrap"><div class="mc-bar"></div></div>
+      <p class="mc-detail">Derivada correcta. Signo monotonía: falta el intervalo (0,1/e). −1,2 pts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BLOQUE 1: problema (light) — copy izq, stats dcha -->
+<div class="block light">
+  <div class="block-copy">
+    <span class="block-tag">El problema</span>
+    <h2 class="block-h">Lo que tenías antes no funcionaba.</h2>
+    <p class="block-p">Las academias cuestan hasta 200&nbsp;€ al mes. Los PDFs de exámenes no te corrigen. La IA genérica no usa la rúbrica oficial. Kairo resuelve exactamente eso.</p>
+  </div>
+  <div class="block-data">
+    <div class="data-stats">
+      <div class="ds"><p class="ds-n">1200+</p><p class="ds-l">ejercicios</p></div>
+      <div class="ds"><p class="ds-n">38</p><p class="ds-l">semanas</p></div>
+      <div class="ds"><p class="ds-n">&lt;30s</p><p class="ds-l">corrección</p></div>
+      <div class="ds"><p class="ds-n">10+</p><p class="ds-l">años exámenes</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOQUE 2: cómo funciona (dark) — steps dcha, copy izq -->
+<div class="block dark">
+  <div class="block-copy">
+    <span class="block-tag">Cómo funciona</span>
+    <h2 class="block-h">Tres pasos. Quince minutos.</h2>
+    <p class="block-p">Sin academia. Sin horarios fijos. Desde el móvil, en el autobús, cuando tú puedas.</p>
+  </div>
+  <div class="block-data">
+    <div class="step-list">
+      <div class="step-item">
+        <span class="si-n">01</span>
+        <div class="si-body">
+          <p class="si-h">Recibe tu Camino PAU</p>
+          <p class="si-p">Misiones diarias de 15 min calculadas a partir de tu fecha de examen y asignaturas.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="si-n">02</span>
+        <div class="si-body">
+          <p class="si-h">Resuelve exámenes reales</p>
+          <p class="si-p">Exámenes oficiales de Madrid y Cataluña 2015–2025. A mano, como en el examen real.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="si-n">03</span>
+        <div class="si-body">
+          <p class="si-h">La IA te corrige en 30 segundos</p>
+          <p class="si-p">Subes una foto. Rúbrica oficial exacta. Nota, desglose, y cómo mejorar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOQUE 3: producto (light) — copy izq, mock UI dcha -->
+<div class="block light">
+  <div class="block-copy">
+    <span class="block-tag">La corrección</span>
+    <h2 class="block-h">La rúbrica del profesor. En tu móvil.</h2>
+    <p class="block-p">No es corrección automática genérica. Es la rúbrica oficial de tu comunidad aplicada respuesta a respuesta, con el mismo criterio que usará tu corrector en junio.</p>
+  </div>
+  <div class="block-data" style="background:#f3f3f3;padding:56px 48px;">
+    <div class="mock-ui">
+      <div class="mu-header">
+        <div class="mu-dots"><div class="mu-dot"></div><div class="mu-dot"></div><div class="mu-dot"></div></div>
+        <span class="mu-title">Kairo · Corrección</span>
+      </div>
+      <div class="mu-body">
+        <p class="mu-question">Matemáticas II · Madrid 2023<br>Bloque análisis · Ejercicio 2a</p>
+        <p class="mu-sub">Calcula f'(x) y estudia la monotonía de f(x) = x³·ln(x)</p>
+        <div class="mu-score-row">
+          <span class="mu-score">7,8</span>
+          <span class="mu-max">/ 10 pts</span>
+        </div>
+        <div class="mu-bar-wrap"><div class="mu-bar"></div></div>
+        <div class="mu-breakdown">
+          <div class="mu-row"><span class="mu-item">Derivada calculada</span><span class="mu-pts">3,0 / 3,0</span></div>
+          <div class="mu-row"><span class="mu-item">Puntos críticos</span><span class="mu-pts">2,0 / 2,0</span></div>
+          <div class="mu-row"><span class="mu-item">Tabla de monotonía</span><span class="mu-pts">1,8 / 3,0</span></div>
+          <div class="mu-row" style="margin-top:6px;padding-top:6px;border-top:1px solid #eee;"><span class="mu-item" style="font-size:10px;color:#aaa;">Falta intervalo (0, 1/e)</span><span class="mu-pts" style="color:#aaa;">−1,2</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOQUE 4: prueba social (dark) — quote izq, score dcha -->
+<div class="block dark">
+  <div class="block-copy">
+    <span class="block-tag">Resultados</span>
+    <h2 class="block-h">Los que lo usaron.</h2>
+    <p class="block-p">Estudiantes de 2º de bachillerato de Madrid y Cataluña preparando la PAU de 2024.</p>
+  </div>
+  <div class="block-data">
+    <p class="quote-big" style="color:rgba(255,255,255,.8);font-weight:300;font-size:15px;line-height:1.75;margin-bottom:20px;">El desglose por apartado fue una revelación. Nunca había sabido exactamente qué estaba mal y por cuánto.</p>
+    <p class="quote-attr" style="color:rgba(255,255,255,.35);">
+      <strong style="color:rgba(255,255,255,.8);">Lucía M.</strong>
+      2º Bach. Madrid · Matemáticas II
+    </p>
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);">
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Nota final (ilustrativo)</p>
+      <p style="font-family:'Bebas Neue',sans-serif;font-size:52px;color:#fff;letter-spacing:.01em;line-height:1;">5,0 → 7,8</p>
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);margin-top:2px;">2 meses de uso · resultado ilustrativo</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING — full dark, 3 cols -->
+<div class="pricing-block">
+  <h2 class="pricing-block-h">Planes.</h2>
+  <div class="p-cols">
+    <div class="p-col">
+      <span class="p-name">Free</span>
+      <p class="p-price">0&thinsp;€</p>
+      <span class="p-period">sin tarjeta de crédito</span>
+      <div class="p-line"></div>
+      <ul class="p-list">
+        <li>25 correcciones al mes</li>
+        <li>3 fotos al mes</li>
+        <li>1 simulacro mensual</li>
+        <li>Camino PAU limitado</li>
+      </ul>
+      <a class="p-cta" href="#">Empezar →</a>
+    </div>
+    <div class="p-col">
+      <span class="p-name">Premium</span>
+      <p class="p-price">9,99&thinsp;€</p>
+      <span class="p-period">/mes · cancela cuando quieras</span>
+      <div class="p-line"></div>
+      <ul class="p-list">
+        <li>200 correcciones al mes</li>
+        <li>80 fotos al mes</li>
+        <li>5 simulacros al mes</li>
+        <li>Camino PAU completo</li>
+        <li>Ranking de clase</li>
+      </ul>
+      <a class="p-cta" href="#">Elegir Premium →</a>
+    </div>
+    <div class="p-col">
+      <span class="p-name">Curso PAU · Early Bird</span>
+      <p class="p-price">59&thinsp;€</p>
+      <span class="p-period">pago único · septiembre a junio</span>
+      <div class="p-line"></div>
+      <ul class="p-list">
+        <li>Todo Premium incluido</li>
+        <li>Acceso completo hasta junio</li>
+        <li>Sin renovación mensual</li>
+      </ul>
+      <a class="p-cta" href="#">Reservar →</a>
+    </div>
+  </div>
+  <p class="pricing-note">IVA incluido. El Curso PAU pasará a 69&nbsp;€ a partir del 1 de octubre de 2026.</p>
+</div>
+
+<!-- CTA BLOCK -->
+<div class="cta-block">
+  <div class="cta-left">
+    <h2 class="cta-big-h">Sin academia.<br>Sin horario.<br>Sin excusas.</h2>
+    <p class="cta-sub">Empieza gratis, sin tarjeta. Cancela cuando quieras si pasas a Premium.</p>
+  </div>
+  <div class="cta-right">
+    <a class="cta-circle-inv" href="#">
+      <span class="ci-label">Empieza<br>gratis</span>
+      <span class="ci-sub">sin tarjeta</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <span class="f-logo">KAIRO</span>
+  <ul class="f-links">
+    <li><a href="#">Privacidad</a></li>
+    <li><a href="#">Términos</a></li>
+    <li><a href="#">Contacto</a></li>
+  </ul>
+  <span class="f-copy">© 2026 KAIRO</span>
+</footer>
+
+</body>
+</html>

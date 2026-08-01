@@ -118,7 +118,31 @@ export async function POST(request: NextRequest) {
     // otro dispositivo ni al recargar tras limpiar caché.
     try {
       const { data: perfil } = await db.from('perfiles').select('subjects').eq('id', user.id).maybeSingle()
-      const currentLabels: string[] = Array.isArray(perfil?.subjects) ? perfil.subjects.filter((s: unknown): s is string => typeof s === 'string') : []
+      let currentLabels: string[] = Array.isArray(perfil?.subjects)
+        ? perfil.subjects.filter((s: unknown): s is string => typeof s === 'string')
+        : []
+
+      // La columna perfiles.subjects se creó después de que muchas cuentas
+      // completaran el onboarding, así que para ellas está vacía aunque SÍ
+      // tengan asignaturas. Sin este rescate, el primer add-subject escribía
+      // solo la asignatura nueva y borraba silenciosamente las demás: el
+      // alumno se quedaba con una sola y el selector le ofrecía volver a
+      // añadir las que ya tenía.
+      if (currentLabels.length === 0) {
+        const { data: snapshot } = await db
+          .from('billing_events')
+          .select('payload')
+          .eq('user_id', user.id)
+          .eq('event_type', 'onboarding_completed')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        const previas = (snapshot?.payload as { subjects?: unknown } | null)?.subjects
+        if (Array.isArray(previas)) {
+          currentLabels = previas.filter((s: unknown): s is string => typeof s === 'string')
+        }
+      }
+
       const label = subjectLabelFromSlug(subject)
       if (!currentLabels.includes(label)) {
         await db.from('perfiles').upsert({ id: user.id, subjects: [...currentLabels, label] }, { onConflict: 'id' })

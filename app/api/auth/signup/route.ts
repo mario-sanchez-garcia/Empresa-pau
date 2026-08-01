@@ -1,6 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
+// When Supabase email confirmation is DISABLED (current default):
+//   admin.createUser({ email_confirm: true }) → session returned immediately.
+// When ENABLED (after following docs/SETUP-email-confirmation.md):
+//   signUp() → session === null, confirmation email sent via Resend SMTP.
+//   The flag below switches the behavior — flip it once you've completed the setup guide.
+const EMAIL_CONFIRMATION_ENABLED = process.env.EMAIL_CONFIRMATION_ENABLED === 'true'
+
 const SIGNUP_IP_RATE_LIMIT = 10
 const SIGNUP_EMAIL_RATE_LIMIT = 5
 const SIGNUP_WINDOW_SECONDS = 3600
@@ -80,7 +87,49 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create user with email already confirmed (bypasses email confirmation requirement)
+    const termsVersion = typeof body.terms_version === 'string' ? body.terms_version : null
+    const privacyVersion = typeof body.privacy_version === 'string' ? body.privacy_version : null
+
+    if (EMAIL_CONFIRMATION_ENABLED) {
+      // ── Confirmation flow: signUp via anon client, Supabase sends the email ──
+      const anonSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      )
+      const { data, error: signUpError } = await anonSupabase.auth.signUp({
+        email: normalizedEmail,
+        password: normalizedPassword,
+      })
+
+      if (signUpError) {
+        if (isAlreadyRegisteredError(signUpError)) {
+          return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
+        }
+        return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
+      }
+
+      // identities === [] means the email is already registered (Supabase anti-enumeration quirk)
+      if (!data.session && data.user?.identities?.length === 0) {
+        return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
+      }
+
+      // Confirmation email sent — record consent proof non-blocking
+      const userId = data.user?.id
+      if (userId && termsVersion && privacyVersion) {
+        void adminSupabase.from('billing_events').insert({
+          user_id: userId,
+          event_type: 'consent_accepted',
+          payload: { terms_version: termsVersion, privacy_version: privacyVersion, source: 'email_signup', ip },
+        }).then(({ error: cErr }) => {
+          if (cErr) console.error('[auth/signup] consent record failed:', cErr.message)
+        })
+      }
+
+      return NextResponse.json({ needsConfirmation: true })
+    }
+
+    // ── Immediate session flow (EMAIL_CONFIRMATION_ENABLED = false) ───────────
     const { error: createError } = await adminSupabase.auth.admin.createUser({
       email: normalizedEmail,
       password: normalizedPassword,
@@ -91,11 +140,9 @@ export async function POST(req: NextRequest) {
       if (isAlreadyRegisteredError(createError)) {
         return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
       }
-
       return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
     }
 
-    // Sign in immediately to get a session
     const { data: signInData, error: signInError } = await adminSupabase.auth.signInWithPassword({
       email: normalizedEmail,
       password: normalizedPassword,
@@ -105,10 +152,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Cuenta creada pero no se pudo iniciar sesión. Inténtalo manualmente.' }, { status: 500 })
     }
 
-    // Record RGPD consent proof — non-blocking, never fails the signup
+    // Record RGPD consent proof — non-blocking
     const userId = signInData.session.user.id
-    const termsVersion = typeof body.terms_version === 'string' ? body.terms_version : null
-    const privacyVersion = typeof body.privacy_version === 'string' ? body.privacy_version : null
     if (termsVersion && privacyVersion) {
       void adminSupabase.from('billing_events').insert({
         user_id: userId,

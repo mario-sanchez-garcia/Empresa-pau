@@ -71,6 +71,8 @@ export default function Login() {
       const result = await res.json()
       if (!res.ok) {
         setMensaje(mensajeAuthLegible(result.error))
+      } else if (result.needsConfirmation) {
+        window.location.href = `/confirmar-email?email=${encodeURIComponent(email)}`
       } else {
         clearOnboarding()
         await supabase.auth.setSession(result.session)

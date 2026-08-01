@@ -143,38 +143,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── PASO 4: Idempotency — already scheduled ─────────────────────────────
-    const { count: scheduledCount } = await db
-      .from('user_learning_queue')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .in('subject', subjects)
-      .eq('queue_status', 'scheduled')
-
-    if (scheduledCount && scheduledCount > 0) {
-      await injectOnboardingPartials()
-      await applyCalendarPersonalization(user.id, db)
-
-      const todayIdempotent = getMadridToday()
-      const { data: firstCal } = await db
-        .from('camino_calendar')
-        .select('title, subject, scheduled_date')
-        .eq('user_id', user.id)
-        .eq('status', 'pending')
-        .gte('scheduled_date', todayIdempotent)
-        .order('scheduled_date', { ascending: true })
-        .limit(1)
-        .maybeSingle()
-
-      return NextResponse.json({
-        success: true,
-        daysGenerated: scheduledCount,
-        firstMission: firstCal ?? null,
-      })
-    }
+    // ── Reset: wipe old plan so subjects chosen in onboarding take effect ───
+    // Keep completed calendar rows (user history). Wipe pending future plan
+    // and the full queue so they get rebuilt with the correct subjects below.
+    const resetToday = getMadridToday()
+    await Promise.all([
+      db.from('user_learning_queue').delete().eq('user_id', user.id),
+      db.from('camino_calendar').delete().eq('user_id', user.id).neq('status', 'completed').gte('scheduled_date', resetToday),
+    ])
 
     // ── PASO 2: user_learning_queue ─────────────────────────────────────────
-    // Check per subject — only insert for subjects that have no queue yet
     const { data: existingQueueCheck } = await db
       .from('user_learning_queue')
       .select('subject')

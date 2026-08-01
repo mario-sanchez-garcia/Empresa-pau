@@ -3,8 +3,15 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 import { buildEmailHtml } from '@/app/lib/email/emailTemplate'
+import { listAllUsers } from '@/app/lib/email/listAllUsers'
+import { runInBatches } from '@/app/lib/email/runInBatches'
 
 export const dynamic = 'force-dynamic'
+// 60s is safe on Vercel Hobby without Fluid Compute. Raise to 300 once the
+// project is confirmed on Pro with Fluid Compute enabled — batched sending
+// below is resumable (email_events lock) so a mid-run cutoff at 60s just
+// means the rest goes out on the next scheduled run, not silently dropped.
+export const maxDuration = 60
 
 function getMadridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -51,13 +58,16 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const today = getMadridToday()
 
-  // Users registered >= 2 hours ago with at least 1 pending mission (today or overdue)
+  // Users registered >= 2 hours ago with at least 1 pending mission (today or overdue).
+  // 10_000 matches the cap used elsewhere for this kind of full-table candidate
+  // scan (reengagement's completed-missions query); comfortably above any
+  // realistic beta/early-growth user count while still bounding worst case.
   const { data: candidates, error: candidatesError } = await db
     .from('camino_calendar')
     .select('user_id')
     .eq('status', 'pending')
     .lte('scheduled_date', today)
-    .limit(500)
+    .limit(10_000)
 
   if (candidatesError) {
     console.error('[daily-reminder] candidates query failed:', candidatesError.message)
@@ -97,23 +107,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: 0, skipped: candidateIds.length })
   }
 
-  // Fetch emails from auth.users using service client
-  const { data: usersData, error: usersError } = await db.auth.admin.listUsers({ perPage: 1000 })
-  if (usersError) {
-    console.error('[daily-reminder] listUsers failed:', usersError.message)
-    return NextResponse.json({ error: usersError.message }, { status: 500 })
+  // Fetch emails from auth.users using service client — paginated, so this
+  // sees every user, not just the first 1000.
+  let allUsers
+  try {
+    allUsers = await listAllUsers(db)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[daily-reminder] listAllUsers failed:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 
   const notifySet = new Set(toNotify)
   const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // >= 2 hours ago
 
-  const targets = (usersData?.users ?? []).filter(u =>
+  const targets = [...allUsers.values()].filter(u =>
     notifySet.has(u.id) &&
-    u.email &&
-    u.created_at <= cutoff
+    u.createdAt <= cutoff
   )
   console.log('[daily-reminder] users after account age/email filter', {
-    listedUsers: usersData?.users?.length ?? 0,
+    listedUsers: allUsers.size,
     targets: targets.length,
   })
 
@@ -189,9 +202,11 @@ export async function GET(request: NextRequest) {
   let failed = 0
   let skippedDedup = 0
 
-  for (const user of finalTargets) {
-    // Dedup: try inserting a 'skipped' lock row for today.
-    // If it fails (unique constraint) this user was already handled today — skip.
+  // Batches of 20 in parallel. The per-user lock (atomic insert into
+  // email_events before sending) is what makes this resumable: if the
+  // function gets cut off mid-run, whoever already got their lock row
+  // written is skipped on the next invocation, and only the rest go out.
+  await runInBatches(finalTargets, 20, async user => {
     const isNew = await logEmailEvent({
       userId: user.id,
       emailType: 'daily_reminder',
@@ -200,18 +215,18 @@ export async function GET(request: NextRequest) {
     })
     if (!isNew) {
       skippedDedup++
-      continue
+      return
     }
 
     try {
       const result = await sendEmail({
-        to: user.email!,
+        to: user.email,
         subject: emailSubject,
         html,
         userId: user.id,
       })
       console.log('[daily-reminder] resend accepted email', {
-        to: maskEmail(user.email!),
+        to: maskEmail(user.email),
         resendMessageId: result.id,
       })
       await logEmailEvent({
@@ -225,7 +240,7 @@ export async function GET(request: NextRequest) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       console.error('[daily-reminder] failed to send email', {
-        to: maskEmail(user.email!),
+        to: maskEmail(user.email),
         error: errorMessage,
       })
       await logEmailEvent({
@@ -237,7 +252,7 @@ export async function GET(request: NextRequest) {
       })
       failed++
     }
-  }
+  })
 
   const skipped = candidateIds.length - toNotify.length + optedOutSet.size + skippedDedup
   console.log('[daily-reminder] cron finished', { sent, failed, skipped, skippedDedup })

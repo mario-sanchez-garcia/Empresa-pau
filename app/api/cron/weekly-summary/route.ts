@@ -4,8 +4,15 @@ import { calcularRacha } from '@/app/lib/calcularRacha'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 import { sendWeeklySummaryEmail } from '@/app/lib/email/sendWeeklySummaryEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
+import { listAllUsers } from '@/app/lib/email/listAllUsers'
+import { runInBatches } from '@/app/lib/email/runInBatches'
 
 export const dynamic = 'force-dynamic'
+// 60s is safe on Vercel Hobby without Fluid Compute. Raise to 300 once the
+// project is confirmed on Pro with Fluid Compute enabled — this only runs
+// once a week (Fridays), so unlike the daily crons a cutoff here doesn't get
+// a same-week retry; batching maximizes how many go out in the one window.
+export const maxDuration = 60
 
 function getMadridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -73,18 +80,17 @@ export async function GET(request: NextRequest) {
   const afterOptOut = candidateIds.filter(id => !optedOutSet.has(id))
   if (afterOptOut.length === 0) return NextResponse.json({ sent: 0, skipped: candidateIds.length, reason: 'all_opted_out' })
 
-  // Step 7: fetch emails from auth.users
-  const { data: usersData, error: usersErr } = await db.auth.admin.listUsers({ perPage: 1000 })
-  if (usersErr) {
-    console.error('[weekly-summary] listUsers failed:', usersErr.message)
-    return NextResponse.json({ error: usersErr.message }, { status: 500 })
+  // Step 7: fetch emails from auth.users — paginated, sees every user.
+  let allUsers
+  try {
+    allUsers = await listAllUsers(db)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[weekly-summary] listAllUsers failed:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
   const afterOptOutSet = new Set(afterOptOut)
-  const userMap = new Map(
-    (usersData?.users ?? [])
-      .filter(u => afterOptOutSet.has(u.id) && u.email)
-      .map(u => [u.id, u]),
-  )
+  const userMap = new Map([...allUsers.values()].filter(u => afterOptOutSet.has(u.id)).map(u => [u.id, u]))
 
   // Step 8: completed count this week per user
   const countByUser = new Map<string, number>()
@@ -96,9 +102,12 @@ export async function GET(request: NextRequest) {
   let failed = 0
   let skipped = 0
 
-  for (const userId of afterOptOut) {
+  // Batches of 20 in parallel. The per-user lock (atomic insert into
+  // email_events before sending) is what makes this resumable: whoever
+  // already has a lock row for this Monday is skipped on retry.
+  await runInBatches(afterOptOut, 20, async userId => {
     const authUser = userMap.get(userId)
-    if (!authUser?.email) { skipped++; continue }
+    if (!authUser) { skipped++; return }
 
     // Step 6: dedup check — skip if weekly_summary already sent for this Monday
     const isNew = await logEmailEvent({
@@ -107,7 +116,7 @@ export async function GET(request: NextRequest) {
       dedupeKey: monday,
       status: 'skipped',
     })
-    if (!isNew) { skipped++; continue }
+    if (!isNew) { skipped++; return }
 
     // Step 8b: calculate streak (per user — acceptable for private beta scale)
     const streakDays = await calcularRacha(userId, db)
@@ -116,7 +125,7 @@ export async function GET(request: NextRequest) {
       await sendWeeklySummaryEmail({
         userId,
         userEmail: authUser.email,
-        userName: (authUser.user_metadata?.full_name as string | undefined) ?? authUser.email.split('@')[0],
+        userName: authUser.fullName ?? authUser.email.split('@')[0],
         completedThisWeek: countByUser.get(userId) ?? 0,
         streakDays,
         unsubscribeToken: generateUnsubscribeToken(userId),
@@ -128,7 +137,7 @@ export async function GET(request: NextRequest) {
       console.error('[weekly-summary] failed', { to: maskEmail(authUser.email), error: err instanceof Error ? err.message : String(err) })
       failed++
     }
-  }
+  })
 
   console.log('[weekly-summary] done', { sent, failed, skipped })
   return NextResponse.json({ sent, failed, skipped })

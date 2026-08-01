@@ -4,8 +4,15 @@ import { calcularRacha } from '@/app/lib/calcularRacha'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 import { sendStreakEmail } from '@/app/lib/email/sendStreakEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
+import { listAllUsers } from '@/app/lib/email/listAllUsers'
+import { runInBatches } from '@/app/lib/email/runInBatches'
 
 export const dynamic = 'force-dynamic'
+// 60s is safe on Vercel Hobby without Fluid Compute. Raise to 300 once the
+// project is confirmed on Pro with Fluid Compute enabled — sending below is
+// resumable (email_events lock), so a mid-run cutoff just means the rest
+// goes out on tomorrow's scheduled run instead of being lost.
+export const maxDuration = 60
 
 function getMadridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -33,13 +40,15 @@ export async function GET(request: NextRequest) {
 
   const db = createServiceClient()
 
-  // Step 4a: users with a pending mission today or overdue
+  // Step 4a: users with a pending mission today or overdue. 10_000 matches
+  // the cap used for the equivalent candidate scan in daily-reminder —
+  // comfortably above any realistic beta/early-growth user count.
   const { data: pendingRows, error: pendingErr } = await db
     .from('camino_calendar')
     .select('user_id')
     .eq('status', 'pending')
     .lte('scheduled_date', today)
-    .limit(500)
+    .limit(10_000)
 
   if (pendingErr) {
     console.error('[streak-warning] pending query failed:', pendingErr.message)
@@ -86,27 +95,30 @@ export async function GET(request: NextRequest) {
   const afterOptOut = qualifiedByStreak.filter(u => !optedOutSet.has(u.userId))
   if (afterOptOut.length === 0) return NextResponse.json({ sent: 0, skipped: qualifiedIds.length, reason: 'all_opted_out' })
 
-  // Step 8: fetch emails from auth.users
-  const { data: usersData, error: usersErr } = await db.auth.admin.listUsers({ perPage: 1000 })
-  if (usersErr) {
-    console.error('[streak-warning] listUsers failed:', usersErr.message)
-    return NextResponse.json({ error: usersErr.message }, { status: 500 })
+  // Step 8: fetch emails from auth.users — paginated, sees every user.
+  let allUsers
+  try {
+    allUsers = await listAllUsers(db)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[streak-warning] listAllUsers failed:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
   const afterOptOutIds = new Set(afterOptOut.map(u => u.userId))
   const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
   const userMap = new Map(
-    (usersData?.users ?? [])
-      .filter(u => afterOptOutIds.has(u.id) && u.email && u.created_at <= cutoff)
-      .map(u => [u.id, u]),
+    [...allUsers.values()].filter(u => afterOptOutIds.has(u.id) && u.createdAt <= cutoff).map(u => [u.id, u]),
   )
 
   let sent = 0
   let failed = 0
   let skipped = 0
 
-  for (const { userId, streakDays } of afterOptOut) {
+  // Batches of 20 in parallel; the per-user lock inserted below (before
+  // sending) is what makes this resumable across a mid-run cutoff.
+  await runInBatches(afterOptOut, 20, async ({ userId, streakDays }) => {
     const authUser = userMap.get(userId)
-    if (!authUser?.email) { skipped++; continue }
+    if (!authUser) { skipped++; return }
 
     // Step 7: dedup check via email_events lock
     const isNew = await logEmailEvent({
@@ -115,13 +127,13 @@ export async function GET(request: NextRequest) {
       dedupeKey: today,
       status: 'skipped',
     })
-    if (!isNew) { skipped++; continue }
+    if (!isNew) { skipped++; return }
 
     try {
       await sendStreakEmail({
         userId,
         userEmail: authUser.email,
-        userName: (authUser.user_metadata?.full_name as string | undefined) ?? authUser.email.split('@')[0],
+        userName: authUser.fullName ?? authUser.email.split('@')[0],
         streakDays,
         unsubscribeToken: generateUnsubscribeToken(userId),
       })
@@ -131,7 +143,7 @@ export async function GET(request: NextRequest) {
       console.error('[streak-warning] failed', { to: maskEmail(authUser.email), error: err instanceof Error ? err.message : String(err) })
       failed++
     }
-  }
+  })
 
   console.log('[streak-warning] done', { sent, failed, skipped })
   return NextResponse.json({ sent, failed, skipped })

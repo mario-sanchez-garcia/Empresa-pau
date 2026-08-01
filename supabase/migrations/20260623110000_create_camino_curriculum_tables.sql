@@ -1,40 +1,9 @@
--- Camino PAU personalizado: currículo, plantillas y feedback por instituto.
+-- Camino PAU personalizado: feedback por instituto.
 -- Migración incremental y no destructiva.
-
-create table if not exists public.curriculum_topics (
-  id uuid primary key default gen_random_uuid(),
-  subject text not null,
-  block_slug text not null,
-  block_title text not null,
-  topic_slug text not null,
-  title text not null,
-  order_index integer not null default 0,
-  content_status text not null default 'itinerary_only' check (content_status in ('latex_notes', 'itinerary_only')),
-  explanation text,
-  guided_example text,
-  practice_prompt text,
-  raw_latex text,
-  evau_practice_query jsonb not null default '{}'::jsonb,
-  compatible_subjects text[] not null default '{}',
-  source text not null default 'contenidos_2_bach',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (subject, block_slug, topic_slug)
-);
-
-create table if not exists public.mission_templates (
-  id uuid primary key default gen_random_uuid(),
-  subject text not null,
-  block_slug text not null,
-  topic_slug text not null,
-  mission_type text not null check (mission_type in ('concept_explanation', 'guided_example', 'guided_practice', 'evau_practice', 'error_review', 'exam_focus', 'mock_exam')),
-  title text not null,
-  estimated_minutes integer not null default 20,
-  xp integer not null default 15,
-  target jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now(),
-  unique (subject, block_slug, topic_slug, mission_type)
-);
+--
+-- Esta migración originalmente también creaba curriculum_topics y
+-- mission_templates, pero nunca se llegó a usar ese camino (ninguna query
+-- en el código las toca) ni se aplicó en producción — se retiraron de aquí.
 
 create table if not exists public.school_topic_feedback (
   id uuid primary key default gen_random_uuid(),
@@ -61,16 +30,8 @@ create table if not exists public.school_topic_status (
   unique (school_name, subject, block_slug, topic_slug)
 );
 
-alter table public.curriculum_topics enable row level security;
-alter table public.mission_templates enable row level security;
 alter table public.school_topic_feedback enable row level security;
 alter table public.school_topic_status enable row level security;
-
-create policy "curriculum_topics: read for authenticated"
-  on public.curriculum_topics for select to authenticated using (true);
-
-create policy "mission_templates: read for authenticated"
-  on public.mission_templates for select to authenticated using (true);
 
 create policy "school_topic_feedback: user insert"
   on public.school_topic_feedback for insert to authenticated with check (user_id = auth.uid());

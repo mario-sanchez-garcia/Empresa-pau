@@ -3,8 +3,17 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 import { sendReengagementEmail } from '@/app/lib/email/sendReengagementEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
+import { listAllUsers } from '@/app/lib/email/listAllUsers'
+import { runInBatches } from '@/app/lib/email/runInBatches'
 
 export const dynamic = 'force-dynamic'
+// 60s is safe on Vercel Hobby without Fluid Compute. Raise to 300 once the
+// project is confirmed on Pro with Fluid Compute enabled. Note this cohort
+// is date-specific (last completion exactly 3 days before "today"), so
+// unlike daily-reminder a cutoff here isn't picked back up tomorrow — the
+// pre-send lock below mainly protects against double-sending on a same-day
+// retry; batching maximizes throughput within the one window it gets.
+export const maxDuration = 60
 
 function getMadridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -106,18 +115,17 @@ export async function GET(request: NextRequest) {
   const toContact = afterOptOut.filter(id => !recentlySentSet.has(id))
   if (toContact.length === 0) return NextResponse.json({ sent: 0, skipped: afterOptOut.length, reason: 'all_recent_reengagement' })
 
-  // Step 8: fetch emails + names from auth.users
-  const { data: usersData, error: usersErr } = await db.auth.admin.listUsers({ perPage: 1000 })
-  if (usersErr) {
-    console.error('[reengagement] listUsers failed:', usersErr.message)
-    return NextResponse.json({ error: usersErr.message }, { status: 500 })
+  // Step 8: fetch emails + names from auth.users — paginated, sees every user.
+  let allUsers
+  try {
+    allUsers = await listAllUsers(db)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[reengagement] listAllUsers failed:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
   const toContactSet = new Set(toContact)
-  const userMap = new Map(
-    (usersData?.users ?? [])
-      .filter(u => toContactSet.has(u.id) && u.email)
-      .map(u => [u.id, u]),
-  )
+  const userMap = new Map([...allUsers.values()].filter(u => toContactSet.has(u.id)).map(u => [u.id, u]))
 
   // Step 9: completed mission count per user
   const { data: countRows } = await db
@@ -133,16 +141,31 @@ export async function GET(request: NextRequest) {
   let sent = 0
   let failed = 0
   let skipped = 0
+  let skippedDedup = 0
 
-  for (const userId of toContact) {
+  // Batches of 20 in parallel. The step-7 30-day cooldown query above stops
+  // someone getting a reengagement email too often, but on its own it can't
+  // survive a mid-run cutoff (a send that hadn't logged yet could repeat on
+  // retry). The per-user lock below (dedupe_key = today, same emailType
+  // sendReengagementEmail upserts into) closes that gap the same way the
+  // other three crons do it.
+  await runInBatches(toContact, 20, async userId => {
     const authUser = userMap.get(userId)
-    if (!authUser?.email) { skipped++; continue }
+    if (!authUser) { skipped++; return }
+
+    const isNew = await logEmailEvent({
+      userId,
+      emailType: 'reengagement_d3',
+      dedupeKey: today,
+      status: 'skipped',
+    })
+    if (!isNew) { skippedDedup++; return }
 
     try {
       await sendReengagementEmail({
         userId,
         userEmail: authUser.email,
-        userName: (authUser.user_metadata?.full_name as string | undefined) ?? authUser.email.split('@')[0],
+        userName: authUser.fullName ?? authUser.email.split('@')[0],
         completedCount: countByUser.get(userId) ?? 0,
         unsubscribeToken: generateUnsubscribeToken(userId),
       })
@@ -152,9 +175,9 @@ export async function GET(request: NextRequest) {
       console.error('[reengagement] failed', { to: maskEmail(authUser.email), error: err instanceof Error ? err.message : String(err) })
       failed++
     }
-  }
+  })
 
-  const skippedTotal = (candidateIds.length - filtered.length) + optedOutSet.size + recentlySentSet.size + skipped
-  console.log('[reengagement] done', { sent, failed, skipped: skippedTotal })
-  return NextResponse.json({ sent, failed, skipped: skippedTotal })
+  const skippedTotal = (candidateIds.length - filtered.length) + optedOutSet.size + recentlySentSet.size + skipped + skippedDedup
+  console.log('[reengagement] done', { sent, failed, skipped: skippedTotal, skippedDedup })
+  return NextResponse.json({ sent, failed, skipped: skippedTotal, skippedDedup })
 }

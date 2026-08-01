@@ -14,9 +14,9 @@ const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 // negra encima. Quien llega desde un enlace de WhatsApp sin conocer Kairo ve
 // lo mismo que si hubiera entrado por la home.
 //
-// El original (hero-student.jpg) pesa 1,5 MB a 5184px: inviable para una
-// página que se abre casi siempre en móvil con datos. Estas dos versiones
-// WebP son 66 KB y 26 KB; image-set deja que el navegador elija.
+// El original en JPG pesa 1,5 MB a 5184px: inviable para una página que se
+// abre casi siempre en móvil con datos. Estas dos versiones WebP son 66 KB y
+// 26 KB; la media query deja que el navegador elija.
 const BG_LARGE = '/brand/hero-student-bg.webp'
 const BG_SMALL = '/brand/hero-student-bg-sm.webp'
 const ORANGE = '#f97316'

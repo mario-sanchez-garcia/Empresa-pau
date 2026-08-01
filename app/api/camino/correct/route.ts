@@ -11,6 +11,7 @@ import {
   normalizeTopicSlug,
   subjectLabelFromSlug,
 } from '@/app/lib/camino/caminoCurriculumPlan'
+import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { BILLING_BLOCK_CODE, createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
@@ -166,11 +167,16 @@ export async function POST(request: NextRequest) {
 
   let message
   try {
-    message = await client.messages.create({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      messages: [{ role: 'user', content }],
-    })
+    // Reintenta ante 429/529 (cupo compartido de la organización agotado por
+    // un pico de alumnos corrigiendo a la vez). Ver withAnthropicRetry.
+    message = await withAnthropicRetry(
+      () => client.messages.create({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        messages: [{ role: 'user', content }],
+      }),
+      (intento, status) => console.warn('[camino/correct] reintento por saturación', { intento, status }),
+    )
   } catch (error) {
     await logAiUsageEvent({
       userId: authContext.user.id,
@@ -182,6 +188,19 @@ export async function POST(request: NextRequest) {
       metadata,
       accessToken: authContext.accessToken,
     })
+    // Saturación tras agotar los reintentos: el alumno tiene la foto hecha y
+    // está esperando la nota, así que merece saber que es cuestión de esperar
+    // y no que su respuesta esté mal. 503 + Retry-After para que el cliente
+    // pueda ofrecer "reintentar" en vez de un error genérico.
+    if (isOverloadedError(error)) {
+      return NextResponse.json(
+        {
+          error: 'ai_overloaded',
+          message: 'Hay mucha gente corrigiendo ahora mismo. Espera un minuto y vuelve a intentarlo — tu respuesta no se ha perdido.',
+        },
+        { status: 503, headers: { 'Retry-After': '60' } }
+      )
+    }
     throw error
   }
 

@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
@@ -217,12 +218,17 @@ export async function POST(request: NextRequest) {
 
   let message
   try {
-    message = await client.messages.create({
-      model,
-      max_tokens: maxTokens,
-      system: systemContent,
-      messages: [{ role: 'user', content: contenido }]
-    })
+    // Mismo cupo compartido de organización que las correcciones: 429/529 son
+    // transitorios y se reintentan. Ver withAnthropicRetry.
+    message = await withAnthropicRetry(
+      () => client.messages.create({
+        model,
+        max_tokens: maxTokens,
+        system: systemContent,
+        messages: [{ role: 'user', content: contenido }]
+      }),
+      (intento, status) => console.warn('[chat] reintento por saturación', { intento, status }),
+    )
   } catch (error) {
     await logAiUsageEvent({
       userId: authContext.user.id,
@@ -234,6 +240,15 @@ export async function POST(request: NextRequest) {
       metadata,
       accessToken: authContext.accessToken
     })
+    if (isOverloadedError(error)) {
+      return NextResponse.json(
+        {
+          error: 'ai_overloaded',
+          message: 'El tutor está saturado ahora mismo. Espera un minuto y vuelve a preguntar.',
+        },
+        { status: 503, headers: { 'Retry-After': '60' } }
+      )
+    }
     throw error
   }
 

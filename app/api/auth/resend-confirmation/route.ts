@@ -29,7 +29,15 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  const { error } = await supabase.auth.resend({ type: 'signup', email })
+  // Same emailRedirectTo as the original signUp() call — without it this
+  // link falls back to the Supabase Site URL (the landing page) instead of
+  // /auth/callback?next=/onboarding.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${appUrl}/auth/callback?next=%2Fonboarding` },
+  })
 
   if (error) {
     console.error('[resend-confirmation] error:', error.message)

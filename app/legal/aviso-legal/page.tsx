@@ -4,21 +4,21 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 export const metadata: Metadata = {
-  title: 'Términos y Condiciones · Kairo',
-  description: 'Términos y Condiciones de Uso de Kairo.',
+  title: 'Aviso Legal · Kairo',
+  description: 'Aviso legal e información del titular del servicio Kairo, conforme a la LSSI-CE.',
 }
 
 const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const mono  = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
-export default function TerminosPage() {
+export default function AvisoLegalPage() {
   const B = bebas.style.fontFamily
   const M = mono.style.fontFamily
-  const v = LEGAL_VERSIONS.terminos
+  const v = LEGAL_VERSIONS.aviso
 
   return (
     <div style={{ background: '#111', color: '#fff', minHeight: '100dvh', fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>
-      <LegalNav B={B} M={M} active="terminos" />
+      <LegalNav B={B} M={M} active="aviso" />
 
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px 100px' }}>
         {/* Hero */}
@@ -27,80 +27,67 @@ export default function TerminosPage() {
             Última actualización: {v.label} · v{v.version}
           </p>
           <h1 style={{ fontFamily: B, fontSize: 'clamp(56px, 10vw, 100px)', lineHeight: .92, letterSpacing: '.01em', margin: 0 }}>
-            TÉRMINOS Y<br />CONDICIONES
+            AVISO<br />LEGAL
           </h1>
         </div>
 
         {/* Sections */}
-        <S n="01" title="Información del responsable" M={M}>
-          <P>El presente servicio es ofrecido por los responsables del proyecto Kairo:</P>
-          <ul style={ul}>
-            <li style={li}>Mario Sánchez García</li>
-            <li style={li}>Alejandro Amigo Granja</li>
-            <li style={li}>Marco Martínez Mira</li>
-            <li style={li}>Diego García Verdugo</li>
-          </ul>
-          <P>Contacto: <A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
+        <S n="01" title="Cumplimiento de la LSSI-CE" M={M}>
+          <P>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y del Comercio Electrónico (LSSI-CE), se facilitan a continuación los datos identificativos del titular del sitio web y del servicio Kairo.</P>
         </S>
 
-        <S n="02" title="Descripción del servicio" M={M}>
-          <P>Kairo es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado (Camino PAU), chat educativo con asistente IA e historial de correcciones y progreso.</P>
+        <S n="02" title="Titular del servicio" M={M}>
+          <P>El servicio Kairo es operado por:</P>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 12 }}>
+            <tbody>
+              {[
+                ['Nombre / Razón social', '[PENDIENTE: Nombre o razón social completa]'],
+                ['NIF / CIF',             '[PENDIENTE: NIF o CIF]'],
+                ['Domicilio',             '[PENDIENTE: Calle, número, CP, localidad, provincia]'],
+                ['Correo de contacto',    'legal@kairo.es'],
+                ['Datos registrales',     '[PENDIENTE: si es sociedad — Registro Mercantil, tomo, folio, hoja, sección]'],
+              ].map(([label, value]) => (
+                <tr key={label} style={{ borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+                  <td style={{ padding: '10px 0', fontSize: 13, fontFamily: M, color: 'rgba(255,255,255,.35)', width: '40%', verticalAlign: 'top', paddingRight: 16 }}>{label}</td>
+                  <td style={{ padding: '10px 0', fontSize: 14, color: value.startsWith('[PENDIENTE') ? '#f59e0b' : 'rgba(255,255,255,.75)', fontWeight: value.startsWith('[PENDIENTE') ? 700 : 400, lineHeight: 1.6 }}>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <P>Los campos marcados como <span style={{ color: '#f59e0b', fontWeight: 700 }}>[PENDIENTE]</span> deben ser cumplimentados por el titular antes de la puesta en producción del servicio con facturación a usuarios.</P>
         </S>
 
-        <S n="03" title="Edad mínima y consentimiento parental" M={M}>
-          <P>El Servicio está dirigido a estudiantes de entre 14 y 18 años. Los usuarios de 14 a 17 años deben contar con el conocimiento y consentimiento de sus padres o tutores legales. Al registrarse, el usuario declara que sus padres o tutores conocen y aceptan el uso del Servicio.</P>
+        <S n="03" title="Objeto del sitio web" M={M}>
+          <P>Kairo es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado e historial de progreso, dirigida a estudiantes de bachillerato en España.</P>
+          <P>El acceso y uso del sitio web atribuye la condición de usuario e implica la aceptación plena de los presentes términos, de los <A href="/legal/terminos">Términos y Condiciones</A> y de la <A href="/legal/privacidad">Política de Privacidad</A>.</P>
         </S>
 
-        <S n="04" title="Registro y cuenta de usuario" M={M}>
-          <P>Para usar el Servicio es necesario proporcionar correo electrónico, contraseña, centro escolar, comunidad autónoma y asignaturas de preparación. El usuario es responsable de mantener la confidencialidad de sus credenciales.</P>
+        <S n="04" title="Propiedad intelectual e industrial" M={M}>
+          <P>Todos los elementos del sitio web de Kairo — textos, gráficos, logotipos, iconos, imágenes, software y demás contenidos originales — son propiedad del titular del servicio o de sus legítimos licenciantes, y están protegidos por la legislación española e internacional sobre propiedad intelectual e industrial.</P>
+          <P>Se prohíbe expresamente la reproducción, distribución, comunicación pública o transformación de dichos contenidos sin autorización previa por escrito del titular, salvo en los casos permitidos por la ley.</P>
         </S>
 
-        <S n="05" title="Uso del Servicio" M={M}>
-          <P>El usuario se compromete a:</P>
-          <ul style={ul}>
-            <li style={li}>Usar el Servicio únicamente con fines educativos personales.</li>
-            <li style={li}>No compartir ni distribuir los contenidos sin autorización.</li>
-            <li style={li}>No intentar acceder a cuentas de otros usuarios.</li>
-            <li style={li}>Proporcionar información veraz en el registro.</li>
-          </ul>
+        <S n="05" title="Responsabilidad" M={M}>
+          <P>El titular no se hace responsable de los daños que pudieran derivarse del uso del sitio web o de los servicios prestados a través de él, de las interrupciones del servicio por causas de fuerza mayor o por decisión técnica justificada, ni de los contenidos de terceros a los que el sitio pueda enlazar.</P>
+          <P>Las correcciones generadas por inteligencia artificial tienen carácter orientativo y no constituyen un criterio oficial de corrección PAU. Para más información, consulta la <A href="/legal/ia">Política de uso de IA</A>.</P>
         </S>
 
-        <S n="06" title="Contenido educativo" M={M}>
-          <P>Los exámenes están basados en pruebas oficiales de la PAU/EVAU de acceso público. Las correcciones son generadas por inteligencia artificial y tienen carácter orientativo. Las correcciones de Kairo no garantizan ninguna nota en la PAU/EVAU real.</P>
+        <S n="06" title="Legislación aplicable y jurisdicción" M={M}>
+          <P>Este aviso legal se rige por la legislación española. Para la resolución de cualesquiera controversias derivadas del acceso o uso del sitio web, las partes se someten a los Juzgados y Tribunales competentes conforme a la normativa vigente, con renuncia expresa a cualquier otro fuero que pudiera corresponderles.</P>
         </S>
 
-        <S n="07" title="Planes y precios" M={M}>
-          <P>Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
-        </S>
-
-        <S n="08" title="Propiedad intelectual" M={M}>
-          <P>Todos los contenidos originales de Kairo son propiedad de los responsables del proyecto y están protegidos por la legislación española e internacional sobre propiedad intelectual.</P>
-        </S>
-
-        <S n="09" title="Limitación de responsabilidad" M={M}>
-          <P>Kairo no garantiza la disponibilidad ininterrumpida del Servicio, que las correcciones IA sean equivalentes a las de un docente, ni resultados académicos específicos.</P>
-        </S>
-
-        <S n="10" title="Modificación de los términos" M={M}>
-          <P>Kairo se reserva el derecho a modificar estos Términos. Los cambios serán notificados por correo electrónico con al menos 15 días de antelación.</P>
-        </S>
-
-        <S n="11" title="Legislación aplicable" M={M}>
-          <P>Estos Términos se rigen por la legislación española. Las partes se someten a los Juzgados y Tribunales de Madrid.</P>
-        </S>
-
-        <S n="12" title="Contacto" M={M} last>
-          <P><A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
+        <S n="07" title="Contacto" M={M} last>
+          <P>Para cualquier consulta relacionada con este aviso legal: <A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
         </S>
       </main>
 
-      <LegalFooter M={M} active="terminos" />
+      <LegalFooter M={M} active="aviso" />
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared sub-components
+// Shared sub-components (keep in sync with other legal pages)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function LegalNav({ B, M, active }: { B: string; M: string; active: string }) {
@@ -131,9 +118,9 @@ function LegalNav({ B, M, active }: { B: string; M: string; active: string }) {
 
 function LegalFooter({ M, active }: { M: string; active: string }) {
   const links = [
-    { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
-    { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
-    { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
+    { href: '/legal/terminos',    label: 'Términos',   key: 'terminos'   },
+    { href: '/legal/privacidad',  label: 'Privacidad', key: 'privacidad' },
+    { href: '/legal/reembolsos',  label: 'Reembolsos', key: 'reembolsos' },
     { href: '/legal/ia',          label: 'Uso de IA',  key: 'ia'         },
     { href: '/legal/aviso-legal', label: 'Aviso legal',key: 'aviso'      },
     { href: '/contacto',          label: 'Contacto',   key: 'contacto'   },
@@ -171,6 +158,3 @@ function P({ children }: { children: React.ReactNode }) {
 function A({ href, children }: { href: string; children: React.ReactNode }) {
   return <a href={href} style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>{children}</a>
 }
-
-const ul: React.CSSProperties = { paddingLeft: 18, margin: '0 0 12px', display: 'flex', flexDirection: 'column', gap: 6 }
-const li: React.CSSProperties = { fontSize: 15, color: 'rgba(255,255,255,.6)', lineHeight: 1.75, paddingLeft: 4 }

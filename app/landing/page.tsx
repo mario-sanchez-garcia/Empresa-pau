@@ -594,8 +594,9 @@ export default function LandingPage() {
             { label: 'Camino PAU', href: '/camino'            },
             { label: 'Simulacros', href: '/simulacros'        },
             { label: 'Precios',    href: '/pricing'           },
-            { label: 'Privacidad', href: '/legal/privacidad'  },
-            { label: 'Términos',   href: '/legal/terminos'    },
+            { label: 'Privacidad',  href: '/legal/privacidad'   },
+            { label: 'Términos',    href: '/legal/terminos'     },
+            { label: 'Aviso legal', href: '/legal/aviso-legal'  },
           ].map(({ label, href }) => (
             <li key={label}>
               <Link href={href} className="v4c-footer-link" style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase', transition: 'color 140ms' }}>

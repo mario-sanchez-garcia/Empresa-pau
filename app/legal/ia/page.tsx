@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
+import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 export const metadata: Metadata = {
   title: 'Uso de Inteligencia Artificial · Kairo',
@@ -13,6 +14,7 @@ const mono  = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 export default function IaPage() {
   const B = bebas.style.fontFamily
   const M = mono.style.fontFamily
+  const v = LEGAL_VERSIONS.terminos
 
   return (
     <div style={{ background: '#111', color: '#fff', minHeight: '100dvh', fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>
@@ -21,7 +23,7 @@ export default function IaPage() {
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px 100px' }}>
         <div style={{ paddingTop: 96, paddingBottom: 56, borderBottom: '1px solid rgba(255,255,255,.07)' }}>
           <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 16 }}>
-            Última actualización: junio 2026 · Versión beta privada
+            Última actualización: {v.label} · v{v.version}
           </p>
           <h1 style={{ fontFamily: B, fontSize: 'clamp(56px, 10vw, 100px)', lineHeight: .92, letterSpacing: '.01em', margin: 0 }}>
             USO DE<br />INTELIGENCIA<br />ARTIFICIAL
@@ -69,8 +71,9 @@ function LegalNav({ B, M, active }: { B: string; M: string; active: string }) {
     { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
     { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
     { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
-    { href: '/legal/ia',         label: 'IA',         key: 'ia'         },
-    { href: '/contacto',         label: 'Contacto',   key: 'contacto'   },
+    { href: '/legal/ia',          label: 'IA',         key: 'ia'         },
+    { href: '/legal/aviso-legal', label: 'Aviso',      key: 'aviso'      },
+    { href: '/contacto',          label: 'Contacto',   key: 'contacto'   },
   ]
   return (
     <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(17,17,17,.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '0 24px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -94,8 +97,9 @@ function LegalFooter({ M, active }: { M: string; active: string }) {
     { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
     { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
     { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
-    { href: '/legal/ia',         label: 'Uso de IA',  key: 'ia'         },
-    { href: '/contacto',         label: 'Contacto',   key: 'contacto'   },
+    { href: '/legal/ia',          label: 'Uso de IA',  key: 'ia'         },
+    { href: '/legal/aviso-legal', label: 'Aviso legal',key: 'aviso'      },
+    { href: '/contacto',          label: 'Contacto',   key: 'contacto'   },
   ]
   return (
     <footer style={{ borderTop: '1px solid rgba(255,255,255,.07)', padding: '28px 24px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap' as const, gap: 6 }}>

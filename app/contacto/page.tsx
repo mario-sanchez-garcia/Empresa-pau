@@ -132,11 +132,12 @@ function ContactCard({
 
 function LegalNav({ B, M }: { B: string; M: string }) {
   const links = [
-    { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
-    { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
-    { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
-    { href: '/legal/ia',         label: 'IA',         key: 'ia'         },
-    { href: '/contacto',         label: 'Contacto',   key: 'contacto'   },
+    { href: '/legal/terminos',    label: 'Términos',   key: 'terminos'   },
+    { href: '/legal/privacidad',  label: 'Privacidad', key: 'privacidad' },
+    { href: '/legal/reembolsos',  label: 'Reembolsos', key: 'reembolsos' },
+    { href: '/legal/ia',          label: 'IA',         key: 'ia'         },
+    { href: '/legal/aviso-legal', label: 'Aviso',      key: 'aviso'      },
+    { href: '/contacto',          label: 'Contacto',   key: 'contacto'   },
   ]
   return (
     <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(17,17,17,.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '0 24px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -157,11 +158,12 @@ function LegalNav({ B, M }: { B: string; M: string }) {
 
 function LegalFooter({ M }: { M: string }) {
   const links = [
-    { href: '/legal/terminos',   label: 'Términos',   key: 'terminos'   },
-    { href: '/legal/privacidad', label: 'Privacidad', key: 'privacidad' },
-    { href: '/legal/reembolsos', label: 'Reembolsos', key: 'reembolsos' },
-    { href: '/legal/ia',         label: 'Uso de IA',  key: 'ia'         },
-    { href: '/contacto',         label: 'Contacto',   key: 'contacto'   },
+    { href: '/legal/terminos',    label: 'Términos',   key: 'terminos'   },
+    { href: '/legal/privacidad',  label: 'Privacidad', key: 'privacidad' },
+    { href: '/legal/reembolsos',  label: 'Reembolsos', key: 'reembolsos' },
+    { href: '/legal/ia',          label: 'Uso de IA',  key: 'ia'         },
+    { href: '/legal/aviso-legal', label: 'Aviso legal',key: 'aviso'      },
+    { href: '/contacto',          label: 'Contacto',   key: 'contacto'   },
   ]
   return (
     <footer style={{ borderTop: '1px solid rgba(255,255,255,.07)', padding: '28px 24px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap' as const, gap: 6 }}>

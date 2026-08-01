@@ -1,3 +1,8 @@
+// AVISO DE COOKIES: Kairo solo usa cookies estrictamente necesarias (sesión Supabase).
+// No se requiere banner de consentimiento previo para esas cookies (RGPD art. 5.3 LSSI).
+// Si en el futuro se añade cualquier analítica de terceros (Google Analytics, Meta Pixel,
+// PostHog, Hotjar...) PASA A SER OBLIGATORIO un banner de consentimiento previo y granular
+// que BLOQUEE esos scripts hasta la aceptación explícita del usuario. No omitir este paso.
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

@@ -768,6 +768,7 @@ export default function CaminoCalendarClient() {
   const isFirstSession = searchParams.get('first_session') === '1'
   const calendarSourceEventsRef = useRef<Set<string>>(new Set())
   const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
+  const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
   const [exams, setExams] = useState<StudentExam[]>([])
   const [xpTotal, setXpTotal] = useState(0)
@@ -888,6 +889,7 @@ export default function CaminoCalendarClient() {
           syncLocalOnboardingToServerIfMissing(token, loadedOnboarding)
         }
       } catch { /* si falla, se queda con la copia local ya pintada arriba */ }
+      if (!cancelled) setOnboardingChecked(true)
     }
     loadInitialState()
     return () => { cancelled = true }
@@ -1097,8 +1099,8 @@ export default function CaminoCalendarClient() {
   const hasProfile = Boolean(onboarding?.completedAt && onboarding.community && onboarding.subjects.length)
 
   useEffect(() => {
-    if (onboarding !== null && !hasProfile) router.push('/onboarding')
-  }, [onboarding, hasProfile, router])
+    if (onboardingChecked && !hasProfile) router.push('/onboarding')
+  }, [onboardingChecked, hasProfile, router])
   const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding)
   const realToday = todayMadrid()
   const today = visibleCalendar.find(day => day.date === realToday) ?? { date: realToday, label: calendarDayLabel(realToday), isToday: true, missions: [] }
@@ -1318,6 +1320,7 @@ export default function CaminoCalendarClient() {
   }
 
   async function generateCamino() {
+    if (!hasProfile) { router.push('/onboarding'); return }
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     setIsGenerating(true)
@@ -1519,6 +1522,11 @@ export default function CaminoCalendarClient() {
   if (onboarding === null || !hasProfile) return null
 
   const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
+
+  if (caminoReadyStatus === 'no_queue' && onboardingChecked && !hasProfile) {
+    router.push('/onboarding')
+    return null
+  }
 
   if (caminoReadyStatus === 'no_queue') return (
     <Shell>

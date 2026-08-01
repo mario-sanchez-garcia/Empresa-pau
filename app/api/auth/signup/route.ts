@@ -97,9 +97,16 @@ export async function POST(req: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         { auth: { autoRefreshToken: false, persistSession: false } }
       )
+      // Send the user straight into onboarding after they click the email link.
+      // /auth/callback already parses the hash tokens Supabase appends and then
+      // forwards to `next`, so confirmation lands in the product, not the landing.
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
       const { data, error: signUpError } = await anonSupabase.auth.signUp({
         email: normalizedEmail,
         password: normalizedPassword,
+        options: {
+          emailRedirectTo: `${appUrl}/auth/callback?next=%2Fonboarding`,
+        },
       })
 
       if (signUpError) {

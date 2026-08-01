@@ -5,14 +5,17 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import KairoBrand from '@/components/shared/KairoBrand'
 import KairoLoader from '@/app/components/ui/KairoLoader'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Lock } from 'lucide-react'
+import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 const PLAN_LABELS: Record<string, string> = {
   pack_curso_pau: 'Curso PAU',
   premium: 'Premium',
 }
 
-type State = 'loading' | 'error' | 'already_active'
+const WITHDRAWAL_VERSION = LEGAL_VERSIONS.desistimiento.version
+
+type State = 'loading' | 'ready' | 'paying' | 'error' | 'already_active'
 
 function CheckoutFlow() {
   const searchParams = useSearchParams()
@@ -20,6 +23,8 @@ function CheckoutFlow() {
   const planLabel = PLAN_LABELS[planId] ?? planId
   const [state, setState] = useState<State>('loading')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [withdrawalAccepted, setWithdrawalAccepted] = useState(false)
   const initiated = useRef(false)
 
   useEffect(() => {
@@ -35,43 +40,46 @@ function CheckoutFlow() {
         return
       }
 
-      try {
-        const res = await fetch('/api/checkout/student-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ plan_id: planId }),
-        })
-
-        const data = await res.json()
-
-        if (res.status === 409) {
-          setState('already_active')
-          return
-        }
-
-        if (!res.ok) {
-          setErrorMsg(data.error ?? 'No hemos podido iniciar el pago. Inténtalo de nuevo.')
-          setState('error')
-          return
-        }
-
-        if (data.checkoutUrl) {
-          window.location.href = data.checkoutUrl
-        } else {
-          setErrorMsg('No hemos podido obtener la URL de pago.')
-          setState('error')
-        }
-      } catch {
-        setErrorMsg('Error de conexión. Comprueba tu conexión y vuelve a intentarlo.')
-        setState('error')
-      }
+      setToken(session.access_token)
+      setState('ready')
     }
 
     void start()
   }, [planId])
+
+  async function handlePay() {
+    if (!withdrawalAccepted || !token) return
+    setState('paying')
+    try {
+      const res = await fetch('/api/checkout/student-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          plan_id: planId,
+          withdrawal_accepted: true,
+          withdrawal_version: WITHDRAWAL_VERSION,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.status === 409) { setState('already_active'); return }
+      if (!res.ok) {
+        setErrorMsg(data.error ?? 'No hemos podido iniciar el pago. Inténtalo de nuevo.')
+        setState('error')
+        return
+      }
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      } else {
+        setErrorMsg('No hemos podido obtener la URL de pago.')
+        setState('error')
+      }
+    } catch {
+      setErrorMsg('Error de conexión. Comprueba tu conexión y vuelve a intentarlo.')
+      setState('error')
+    }
+  }
 
   if (state === 'already_active') {
     return (
@@ -106,24 +114,57 @@ function CheckoutFlow() {
     )
   }
 
-  return (
-    <div style={{ position: 'relative' }}>
-      <KairoLoader />
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        paddingBottom: 48, gap: 8,
-        pointerEvents: 'none',
-      }}>
-        <p style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,.55)', margin: 0 }}>
-          Preparando el pago del plan <strong style={{ color: 'white' }}>{planLabel}</strong>
-        </p>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,.28)', margin: 0 }}>
-          No cierres esta ventana
-        </p>
+  if (state === 'ready') {
+    return (
+      <main style={styles.page}>
+        <div style={styles.card}>
+          <KairoBrand subtitle={null} size="md" />
+          <h1 style={styles.title}>Plan {planLabel}</h1>
+          <p style={styles.body}>Antes de ir al pago, confirma lo siguiente:</p>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer', textAlign: 'left', padding: '14px 16px', borderRadius: 12, border: `2px solid ${withdrawalAccepted ? '#2563eb' : '#e2e8f0'}`, background: withdrawalAccepted ? '#eff6ff' : '#f8fafc', transition: 'all 140ms' }}>
+            <input
+              type="checkbox"
+              checked={withdrawalAccepted}
+              onChange={e => setWithdrawalAccepted(e.target.checked)}
+              style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16, accentColor: '#2563eb', cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>
+              Solicito acceso inmediato a Kairo y entiendo que, al empezar a usarlo, pierdo el derecho de desistimiento de 14 días una vez el servicio se haya prestado por completo.{' '}
+              <a href="/legal/terminos#desistimiento" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>Saber más</a>
+            </span>
+          </label>
+          {errorMsg && (
+            <div role="alert" style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fff5f5', padding: '10px 14px', fontSize: 13, color: '#dc2626', fontWeight: 600, width: '100%', textAlign: 'left' }}>{errorMsg}</div>
+          )}
+          <button
+            type="button"
+            onClick={handlePay}
+            disabled={!withdrawalAccepted}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px 24px', borderRadius: 12, border: 'none', background: withdrawalAccepted ? '#2563eb' : '#e2e8f0', color: withdrawalAccepted ? 'white' : '#94a3b8', fontSize: 15, fontWeight: 800, cursor: withdrawalAccepted ? 'pointer' : 'not-allowed', transition: 'all 140ms' }}
+          >
+            <Lock size={16} /> Ir al pago
+          </button>
+          <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, textAlign: 'center' }}>Pago seguro procesado por Stripe</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (state === 'paying') {
+    return (
+      <div style={{ position: 'relative' }}>
+        <KairoLoader />
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 48, gap: 8, pointerEvents: 'none' }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,.55)', margin: 0 }}>
+            Preparando el pago del plan <strong style={{ color: 'white' }}>{planLabel}</strong>
+          </p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,.28)', margin: 0 }}>No cierres esta ventana</p>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+  return <KairoLoader />
 }
 
 export default function CheckoutPage() {

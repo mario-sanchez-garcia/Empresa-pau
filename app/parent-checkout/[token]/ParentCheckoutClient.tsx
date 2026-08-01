@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { BookOpen, CheckCircle2, Lock, Shield, Target, Zap } from 'lucide-react'
 import KairoBrand from '@/components/shared/KairoBrand'
+import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 interface Props {
   token: string
@@ -81,15 +82,21 @@ export default function ParentCheckoutClient({
 }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
+  const [withdrawalAccepted, setWithdrawalAccepted] = useState(false)
 
   async function handleCheckout() {
+    if (!withdrawalAccepted) return
     setLoading(true)
     setError(null)
     try {
       const res  = await fetch('/api/checkout/parent-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({
+          token,
+          withdrawal_accepted: true,
+          withdrawal_version: LEGAL_VERSIONS.desistimiento.version,
+        }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Error al iniciar el pago. Inténtalo de nuevo.'); return }
@@ -221,6 +228,20 @@ export default function ParentCheckoutClient({
             <strong style={{ color: C.blue }}>{price} todo el curso</strong>.
           </p>
 
+          {/* Withdrawal waiver */}
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer', textAlign: 'left', padding: '14px 16px', borderRadius: 14, border: `2px solid ${withdrawalAccepted ? C.blue : C.border}`, background: withdrawalAccepted ? C.blueLight : C.bg, transition: 'all 140ms', marginBottom: 4 }}>
+            <input
+              type="checkbox"
+              checked={withdrawalAccepted}
+              onChange={e => setWithdrawalAccepted(e.target.checked)}
+              style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16, accentColor: C.blue, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 13, color: C.textSub, lineHeight: 1.6 }}>
+              Solicito acceso inmediato a Kairo y entiendo que, al empezar a usarlo, pierdo el derecho de desistimiento de 14 días una vez el servicio se haya prestado por completo.{' '}
+              <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" style={{ color: C.blue, fontWeight: 600, textDecoration: 'none' }}>Saber más</a>
+            </span>
+          </label>
+
           {/* Error */}
           {error && (
             <div role="alert" style={{ background: C.redLight, border: `1px solid ${C.redBorder}`, borderRadius: 14, padding: '12px 16px', marginBottom: 16, fontSize: 14, color: C.red, fontWeight: 600, textAlign: 'left' }}>
@@ -232,7 +253,7 @@ export default function ParentCheckoutClient({
           <button
             type="button"
             onClick={handleCheckout}
-            disabled={loading}
+            disabled={loading || !withdrawalAccepted}
             aria-busy={loading}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,

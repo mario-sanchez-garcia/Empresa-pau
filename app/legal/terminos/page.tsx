@@ -73,23 +73,34 @@ export default function TerminosPage() {
           <P>Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
         </S>
 
-        <S n="08" title="Propiedad intelectual" M={M}>
+        <S n="08" title="Derecho de desistimiento" M={M}>
+          <P><strong style={{ color: 'rgba(255,255,255,.85)' }}>Derecho de desistimiento (14 días)</strong></P>
+          <P>De conformidad con el Real Decreto Legislativo 1/2007 (TRLGDCU) y la Directiva 2011/83/UE, el usuario tiene derecho a desistir del contrato en un plazo de 14 días naturales desde la celebración del mismo, sin necesidad de indicar el motivo, siempre que no haya comenzado la ejecución del servicio durante ese plazo.</P>
+          <P><strong style={{ color: 'rgba(255,255,255,.85)' }}>Excepción para contenido digital de acceso inmediato</strong></P>
+          <P>De acuerdo con el artículo 103.m) TRLGDCU, el derecho de desistimiento <strong style={{ color: 'rgba(255,255,255,.85)' }}>no se aplicará</strong> cuando la ejecución del contrato haya comenzado, con el previo consentimiento expreso del consumidor y con el reconocimiento por su parte de que es consciente de que, una vez que el prestador haya ejecutado completamente el contrato, habrá perdido su derecho de desistimiento.</P>
+          <P>En la práctica: en el momento de completar el pago, se solicita al usuario su consentimiento expreso para comenzar el acceso inmediato al Servicio y el reconocimiento de pérdida del derecho de desistimiento una vez el servicio haya sido prestado en su totalidad. Dicho consentimiento queda registrado con marca de tiempo.</P>
+          <P><strong style={{ color: 'rgba(255,255,255,.85)' }}>Cómo ejercer el desistimiento</strong></P>
+          <P>Si el Servicio no ha comenzado a ejecutarse y deseas ejercer el derecho de desistimiento dentro del plazo de 14 días, comunícanoslo a <A href="mailto:legal@kairo.es">legal@kairo.es</A> indicando en el asunto "Desistimiento" y aportando el número de pedido. Procederemos al reembolso íntegro en el plazo máximo de 14 días mediante el mismo medio de pago empleado.</P>
+          <P>El ejercicio del derecho de desistimiento es independiente de nuestra política comercial de reembolsos, que puede ofrecer condiciones adicionales. Ver <A href="/legal/reembolsos">Política de reembolsos</A>.</P>
+        </S>
+
+        <S n="09" title="Propiedad intelectual" M={M}>
           <P>Todos los contenidos originales de Kairo son propiedad de los responsables del proyecto y están protegidos por la legislación española e internacional sobre propiedad intelectual.</P>
         </S>
 
-        <S n="09" title="Limitación de responsabilidad" M={M}>
+        <S n="10" title="Limitación de responsabilidad" M={M}>
           <P>Kairo no garantiza la disponibilidad ininterrumpida del Servicio, que las correcciones IA sean equivalentes a las de un docente, ni resultados académicos específicos.</P>
         </S>
 
-        <S n="10" title="Modificación de los términos" M={M}>
+        <S n="11" title="Modificación de los términos" M={M}>
           <P>Kairo se reserva el derecho a modificar estos Términos. Los cambios serán notificados por correo electrónico con al menos 15 días de antelación.</P>
         </S>
 
-        <S n="11" title="Legislación aplicable" M={M}>
+        <S n="12" title="Legislación aplicable" M={M}>
           <P>Estos Términos se rigen por la legislación española. Las partes se someten a los Juzgados y Tribunales de Madrid.</P>
         </S>
 
-        <S n="12" title="Contacto" M={M} last>
+        <S n="13" title="Contacto" M={M} last>
           <P><A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
         </S>
       </main>

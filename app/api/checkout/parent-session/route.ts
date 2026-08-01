@@ -34,6 +34,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Token inválido' }, { status: 400 })
   }
 
+  // Require explicit withdrawal waiver
+  if (!body.withdrawal_accepted) {
+    return NextResponse.json({ error: 'Debes aceptar la renuncia al desistimiento antes de pagar.' }, { status: 400 })
+  }
+  const withdrawalVersion = typeof body.withdrawal_version === 'string' ? body.withdrawal_version : 'unknown'
+
   const tokenHash = hashToken(rawToken)
   const tokenLimit = checkServerRateLimit({
     key: `parent-checkout-session:token:${tokenHash}`,
@@ -156,6 +162,15 @@ export async function POST(request: NextRequest) {
     stripe_checkout_session_id: session.id,
     event_type: 'checkout_session_created',
     payload: { plan_id: link.plan_id, price_cents: livePriceCents }
+  })
+
+  // Record withdrawal waiver — mandatory for the digital-content exception (TRLGDCU art. 103.m)
+  await db.from('billing_events').insert({
+    user_id: link.student_user_id,
+    parent_checkout_link_id: link.id,
+    stripe_checkout_session_id: session.id,
+    event_type: 'withdrawal_waiver_accepted',
+    payload: { plan_id: link.plan_id, withdrawal_version: withdrawalVersion, source: 'parent_checkout' },
   })
 
   return NextResponse.json({ checkoutUrl: session.url })

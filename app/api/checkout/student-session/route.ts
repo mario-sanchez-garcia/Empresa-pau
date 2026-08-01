@@ -47,6 +47,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Plan no válido' }, { status: 400 })
   }
 
+  // Require explicit withdrawal waiver before creating the Stripe session
+  if (!body.withdrawal_accepted) {
+    return NextResponse.json({ error: 'Debes aceptar la renuncia al desistimiento antes de pagar.' }, { status: 400 })
+  }
+  const withdrawalVersion = typeof body.withdrawal_version === 'string' ? body.withdrawal_version : 'unknown'
+
   const plan = getPlan(planId)
   if (!plan) return NextResponse.json({ error: 'Plan no reconocido' }, { status: 400 })
 
@@ -99,6 +105,14 @@ export async function POST(request: NextRequest) {
     stripe_checkout_session_id: session.id,
     event_type: 'student_checkout_session_created',
     payload: { plan_id: planId, price_cents: priceCents },
+  })
+
+  // Record withdrawal waiver — mandatory for the digital-content exception (TRLGDCU art. 103.m)
+  await db.from('billing_events').insert({
+    user_id: userId,
+    stripe_checkout_session_id: session.id,
+    event_type: 'withdrawal_waiver_accepted',
+    payload: { plan_id: planId, withdrawal_version: withdrawalVersion, source: 'student_checkout' },
   })
 
   return NextResponse.json({ checkoutUrl: session.url })

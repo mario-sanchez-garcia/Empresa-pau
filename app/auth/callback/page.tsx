@@ -30,16 +30,44 @@ function CallbackHandler() {
     // After auth, always land on the canonical production domain so
     // localStorage (onboarding data) is consistent across Vercel preview and prod.
     const productionBase = process.env.NEXT_PUBLIC_APP_URL
-    function redirectNext() {
+
+    function go(target: string) {
       // El navegador puede tener onboarding local de otra cuenta (misma
       // máquina, distinta sesión); se descarta aquí para que la página de
       // destino reconcilie con el servidor de la cuenta que acaba de entrar.
       clearOnboarding()
       if (productionBase && window.location.origin !== productionBase) {
-        window.location.replace(`${productionBase}${next}`)
+        window.location.replace(`${productionBase}${target}`)
       } else {
-        router.replace(next)
+        router.replace(target)
       }
+    }
+
+    // El destino se decide aquí en vez de confiar en `next`. Dos motivos:
+    //  1. Supabase no siempre conserva los query params en el redirect de
+    //     confirmación de email, así que `next` puede caer a /camino.
+    //  2. Un usuario nuevo de Google tampoco tiene perfil.
+    // En ambos casos /camino se montaría, vería que no hay perfil y rebotaría
+    // a /onboarding — parpadeo visible. Una lectura por clave primaria sale
+    // más barata que renderizar la página equivocada primero.
+    async function redirectNext() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from('perfiles')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle()
+          if (!profile) {
+            go('/onboarding')
+            return
+          }
+        }
+      } catch {
+        // Nunca bloquear el login por esta comprobación.
+      }
+      go(next)
     }
 
     if (code) {

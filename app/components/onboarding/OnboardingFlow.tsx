@@ -11,11 +11,11 @@ import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import {
+  clearOnboarding,
   loadOnboarding,
   markOnboardingComplete,
   restoreOnboardingFromServer,
   saveOnboarding,
-  syncLocalOnboardingToServerIfMissing,
   syncOnboardingCommunity,
   type OnboardingCommunity,
   type OnboardingData,
@@ -168,31 +168,34 @@ export default function OnboardingFlow() {
   const usernameCheckId = useRef(0)
   const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // On mount: redirect already-completed users; restore last step for interrupted sessions
+  // On mount: redirect already-completed users; restore last step for interrupted sessions.
+  // El servidor es la única fuente de verdad de si ESTA cuenta completó
+  // onboarding — `kairo_onboarding_v1` no está vinculado al usuario, así que
+  // en un navegador compartido entre cuentas puede traer un `completedAt` de
+  // otra cuenta. Por eso se consulta el servidor primero y solo se usa la
+  // copia local como fallback si la consulta falla (offline).
   useEffect(() => {
     let cancelled = false
     async function restore() {
       let saved = loadOnboarding()
-      if (saved.completedAt && !isPreview) {
-        supabase.auth.getSession()
-          .then(({ data: sessionData }) => {
-            const token = sessionData.session?.access_token
-            if (token) syncLocalOnboardingToServerIfMissing(token, saved)
-          })
-          .catch(() => undefined)
-        router.replace('/camino')
-        return
-      }
       try {
         const { data: sessionData } = await supabase.auth.getSession()
         const token = sessionData.session?.access_token
         if (token) {
-          const serverOnboarding = await restoreOnboardingFromServer(token)
-          if (serverOnboarding?.completedAt && !isPreview) {
+          const result = await restoreOnboardingFromServer(token)
+          if (result.status === 'found') {
+            if (!isPreview) { router.replace('/camino'); return }
+            saved = result.data
+          } else if (result.status === 'empty' && saved.completedAt) {
+            // Copia local "completada" que no pertenece a esta cuenta.
+            clearOnboarding()
+            saved = loadOnboarding()
+          } else if (result.status === 'error' && saved.completedAt && !isPreview) {
+            // No se pudo consultar el servidor; si ya había onboarding local
+            // (offline / fallo puntual) se respeta como antes.
             router.replace('/camino')
             return
           }
-          if (serverOnboarding) saved = serverOnboarding
         }
       } catch { /* local resume still works */ }
       if (cancelled) return

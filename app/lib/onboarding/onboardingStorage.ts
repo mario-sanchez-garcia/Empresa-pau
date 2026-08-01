@@ -67,52 +67,33 @@ export function syncOnboardingCommunity(data: Partial<OnboardingData>) {
   }
 }
 
-export async function restoreOnboardingFromServer(accessToken: string): Promise<OnboardingData | null> {
-  if (typeof window === 'undefined') return null
+// El servidor (billing_events.onboarding_completed) es la única fuente de
+// verdad de si una cuenta completó onboarding. `kairo_onboarding_v1` vive en
+// localStorage sin estar vinculado al usuario, así que en un navegador
+// compartido entre cuentas (p.ej. varias cuentas de prueba) puede contener
+// datos de OTRA cuenta. Por eso distinguimos "el servidor confirma que no
+// hay onboarding" (status 'empty', autoritativo) de "no se pudo consultar"
+// (status 'error', se ignora y se mantiene el estado local ya pintado).
+export type OnboardingRestoreResult =
+  | { status: 'found'; data: OnboardingData }
+  | { status: 'empty' }
+  | { status: 'error' }
+
+export async function restoreOnboardingFromServer(accessToken: string): Promise<OnboardingRestoreResult> {
+  if (typeof window === 'undefined') return { status: 'error' }
   try {
     const res = await fetch('/api/onboarding/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
-    if (!res.ok) return null
+    if (!res.ok) return { status: 'error' }
     const json = await res.json() as { onboarding?: Partial<OnboardingData> | null }
-    if (!json.onboarding?.completedAt) return null
+    if (!json.onboarding?.completedAt) return { status: 'empty' }
     saveOnboarding(json.onboarding)
     syncOnboardingCommunity(json.onboarding)
-    return loadOnboarding()
+    return { status: 'found', data: loadOnboarding() }
   } catch {
-    return null
+    return { status: 'error' }
   }
-}
-
-export function syncLocalOnboardingToServerIfMissing(accessToken: string, onboarding = loadOnboarding()) {
-  if (typeof window === 'undefined' || !onboarding.completedAt) return
-  void fetch('/api/onboarding/me', {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-    .then(async res => {
-      if (!res.ok) return
-      const json = await res.json() as { onboarding?: Partial<OnboardingData> | null }
-      if (json.onboarding?.completedAt) return
-      await fetch('/api/onboarding/setup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({
-          routeId: 'completa',
-          community: onboarding.community,
-          schoolName: onboarding.schoolName,
-          schoolSource: onboarding.schoolSource,
-          subjects: onboarding.subjects,
-          studentExams: onboarding.studentExams,
-          preparationFeeling: onboarding.preparationFeeling,
-          dailyStudyTime: onboarding.dailyStudyTime,
-          dailyMinutes: onboarding.dailyMinutes,
-          weeklyStudyDays: onboarding.weeklyStudyDays,
-          weeklyStudyDaysValue: onboarding.weeklyStudyDaysValue,
-          onboardingCompleted: true,
-        }),
-      })
-    })
-    .catch(() => undefined)
 }
 
 export function markOnboardingComplete() {

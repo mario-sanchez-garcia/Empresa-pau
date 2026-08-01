@@ -80,8 +80,15 @@ export default function Login() {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setMensaje(mensajeAuthLegible(error.message))
-      else window.location.href = returnTo
+      if (error) {
+        setMensaje(mensajeAuthLegible(error.message))
+      } else {
+        // El navegador puede tener onboarding local de otra cuenta (p.ej.
+        // varias cuentas probadas en el mismo dispositivo); se descarta al
+        // iniciar sesión y se reconcilia con el servidor de la cuenta real.
+        clearOnboarding()
+        window.location.href = returnTo
+      }
     }
     setCargando(false)
   }

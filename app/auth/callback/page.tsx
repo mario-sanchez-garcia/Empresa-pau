@@ -9,6 +9,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
+import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 
 function CallbackHandler() {
   const router = useRouter()
@@ -30,6 +31,10 @@ function CallbackHandler() {
     // localStorage (onboarding data) is consistent across Vercel preview and prod.
     const productionBase = process.env.NEXT_PUBLIC_APP_URL
     function redirectNext() {
+      // El navegador puede tener onboarding local de otra cuenta (misma
+      // máquina, distinta sesión); se descarta aquí para que la página de
+      // destino reconcilie con el servidor de la cuenta que acaba de entrar.
+      clearOnboarding()
       if (productionBase && window.location.origin !== productionBase) {
         window.location.replace(`${productionBase}${next}`)
       } else {

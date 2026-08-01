@@ -9,7 +9,7 @@ import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, C
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
-import { loadOnboarding, restoreOnboardingFromServer, saveOnboarding, syncLocalOnboardingToServerIfMissing, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
+import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
@@ -874,20 +874,23 @@ export default function CaminoCalendarClient() {
         const { data } = await supabase.auth.getSession()
         const token = data.session?.access_token
         if (!token || cancelled) return
-        const restored = await restoreOnboardingFromServer(token)
-        if (restored) {
-          if (cancelled) return
-          setOnboarding(restored)
-          setExamDraft(current => ({ ...current, subject: restored.subjects[0] ?? current.subject }))
-          fetchCurriculumItems(restored.subjects)
+        const result = await restoreOnboardingFromServer(token)
+        if (cancelled) return
+        if (result.status === 'found') {
+          setOnboarding(result.data)
+          setExamDraft(current => ({ ...current, subject: result.data.subjects[0] ?? current.subject }))
+          fetchCurriculumItems(result.data.subjects)
             .then(items => { if (!cancelled) setCurriculumItems(items.length ? items : FALLBACK_CURRICULUM) })
             .catch(() => undefined)
-        } else if (loadedOnboarding.completedAt) {
-          // El servidor no tiene nada pero este navegador sí completó
-          // onboarding — cuenta antigua o fallo de red puntual; sube la
-          // copia local para que quede fijada como fuente de verdad.
-          syncLocalOnboardingToServerIfMissing(token, loadedOnboarding)
+        } else if (result.status === 'empty' && loadedOnboarding.completedAt) {
+          // El servidor confirma que ESTA cuenta no completó onboarding,
+          // aunque el navegador tuviera una copia local "completada" (p.ej.
+          // de otra cuenta probada en el mismo navegador). El servidor manda:
+          // se descarta la copia local para que el guard de redirect actúe.
+          clearOnboarding()
+          setOnboarding(loadOnboarding())
         }
+        // status === 'error': se mantiene la copia local ya pintada arriba.
       } catch { /* si falla, se queda con la copia local ya pintada arriba */ }
       if (!cancelled) setOnboardingChecked(true)
     }

@@ -46,22 +46,35 @@ function CallbackHandler() {
     // El destino se decide aquí en vez de confiar en `next`. Dos motivos:
     //  1. Supabase no siempre conserva los query params en el redirect de
     //     confirmación de email, así que `next` puede caer a /camino.
-    //  2. Un usuario nuevo de Google tampoco tiene perfil.
-    // En ambos casos /camino se montaría, vería que no hay perfil y rebotaría
-    // a /onboarding — parpadeo visible. Una lectura por clave primaria sale
-    // más barata que renderizar la página equivocada primero.
+    //  2. Un usuario nuevo de Google tampoco ha hecho onboarding.
+    // En ambos casos /camino se montaría, vería que falta onboarding y
+    // rebotaría a /onboarding — el parpadeo visible.
+    //
+    // Se consulta /api/onboarding/me, que es la MISMA fuente que usa
+    // CaminoCalendarClient para calcular hasProfile (el estado vive en
+    // billing_events, no en perfiles; billing_events tiene RLS sin políticas
+    // y solo es legible por el service role, de ahí que haya que ir por la
+    // API y no por supabase-js directamente).
     async function redirectNext() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const { data: profile } = await supabase
-            .from('perfiles')
-            .select('id')
-            .eq('id', user.id)
-            .maybeSingle()
-          if (!profile) {
-            go('/onboarding')
-            return
+        const { data: { session } } = await supabase.auth.getSession()
+        const token = session?.access_token
+        if (token) {
+          const res = await fetch('/api/onboarding/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (res.ok) {
+            const { onboarding } = await res.json()
+            // Mismo criterio que hasProfile en CaminoCalendarClient.
+            const completo = Boolean(
+              onboarding?.completedAt &&
+              onboarding?.community &&
+              onboarding?.subjects?.length
+            )
+            if (!completo) {
+              go('/onboarding')
+              return
+            }
           }
         }
       } catch {

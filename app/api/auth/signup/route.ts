@@ -28,7 +28,7 @@ function isAlreadyRegisteredError(error: { message?: string } | null) {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { email?: unknown; password?: unknown }
+  let body: { email?: unknown; password?: unknown; terms_version?: unknown; privacy_version?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -103,6 +103,20 @@ export async function POST(req: NextRequest) {
 
     if (signInError || !signInData.session) {
       return NextResponse.json({ error: 'Cuenta creada pero no se pudo iniciar sesión. Inténtalo manualmente.' }, { status: 500 })
+    }
+
+    // Record RGPD consent proof — non-blocking, never fails the signup
+    const userId = signInData.session.user.id
+    const termsVersion = typeof body.terms_version === 'string' ? body.terms_version : null
+    const privacyVersion = typeof body.privacy_version === 'string' ? body.privacy_version : null
+    if (termsVersion && privacyVersion) {
+      void adminSupabase.from('billing_events').insert({
+        user_id: userId,
+        event_type: 'consent_accepted',
+        payload: { terms_version: termsVersion, privacy_version: privacyVersion, source: 'email_signup', ip },
+      }).then(({ error: cErr }) => {
+        if (cErr) console.error('[auth/signup] consent record failed:', cErr.message)
+      })
     }
 
     return NextResponse.json({ session: signInData.session })

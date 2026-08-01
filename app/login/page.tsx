@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Eye, EyeOff } from 'lucide-react'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
+import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -60,7 +61,12 @@ export default function Login() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          terms_version: LEGAL_VERSIONS.terminos.version,
+          privacy_version: LEGAL_VERSIONS.privacidad.version,
+        }),
       })
       const result = await res.json()
       if (!res.ok) {

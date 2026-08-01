@@ -16,10 +16,12 @@ const C = {
 }
 
 const GALLERY_ITEMS: CircularGalleryItem[] = [
-  { image: '/brand/hero-student.jpg',                        text: 'Campus PAU' },
-  { image: '/brand/scene-exam.jpg',                          text: 'Examen EBAU' },
-  { image: '/brand/scene-laptop.jpg',                        text: 'Con Kairo' },
-  { image: '/brand/scene-books.jpg',                         text: 'Estudio' },
+  // WebP a 1000px de lado mayor: los originales pesaban entre 569 KB y 1,9 MB
+  // cada uno para renderizarse como tiles pequeños en la galería circular.
+  { image: '/brand/scene-student.webp',                      text: 'Campus PAU' },
+  { image: '/brand/scene-exam.webp',                         text: 'Examen EBAU' },
+  { image: '/brand/scene-laptop.webp',                       text: 'Con Kairo' },
+  { image: '/brand/scene-books.webp',                        text: 'Estudio' },
   { image: '/brand/fa-barboza-NWoaoMgMiVY-unsplash.jpg',    text: 'Preparación' },
 ]
 

@@ -291,16 +291,27 @@ export default function LandingPage() {
 
         {/* Background: image + filter + gradient overlay */}
         <div style={{ position: 'absolute', inset: 0 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand/hero-notebook.png"
-            alt=""
-            aria-hidden
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-              filter: 'saturate(1.8) brightness(1.2) hue-rotate(-10deg) contrast(1.1)',
-            }}
-          />
+          {/* El PNG original pesaba 1,6 MB para una foto sin transparencia.
+              Estas dos WebP son 55 KB y 28 KB; el móvil solo pide la pequeña.
+              eslint-disable-next-line @next/next/no-img-element */}
+          <picture>
+            <source
+              media="(max-width: 759px)"
+              srcSet="/brand/hero-notebook-sm.webp"
+              type="image/webp"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/hero-notebook.webp"
+              alt=""
+              aria-hidden
+              fetchPriority="high"
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                filter: 'saturate(1.8) brightness(1.2) hue-rotate(-10deg) contrast(1.1)',
+              }}
+            />
+          </picture>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,17,17,.72) 0%, rgba(17,17,17,.55) 50%, rgba(17,17,17,.9) 100%)' }} />
         </div>
 

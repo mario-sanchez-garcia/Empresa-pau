@@ -6,6 +6,7 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
 import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
+import AuthSessionRedirect from './AuthSessionRedirect'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -100,6 +101,7 @@ export default function LandingPage() {
 
   return (
     <div style={{ fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)', background: '#f9f9f9', color: '#1c1c1c' }}>
+      <AuthSessionRedirect />
 
       <style>{`
         /* ── Reset ── */

@@ -294,10 +294,15 @@ async function fetchLeaderboard(token: string, community: string) {
   }
 }
 
-async function ensureServerCalendar(token: string) {
+// `force` salta el throttle diario del servidor. Solo debe usarse cuando el
+// usuario acaba de provocar un cambio y espera verlo ya (crear el Camino,
+// cambiar preferencias). En las cargas normales se deja en false: el servidor
+// responde { skipped: 'already_ensured_today' } sin tocar camino_calendar.
+async function ensureServerCalendar(token: string, force = false) {
   const res = await fetch('/api/camino/ensure-calendar', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ force }),
   })
   return res.ok
 }
@@ -1336,7 +1341,8 @@ export default function CaminoCalendarClient() {
         body: JSON.stringify({ subjects, startMode: 'zero' }),
       })
       if (res.ok) {
-        await ensureServerCalendar(session.access_token)
+        // Camino recién creado: hay que preparar sí o sí, sin throttle.
+        await ensureServerCalendar(session.access_token, true)
         const calDays = await fetchCaminoCalendar(session.user.id)
         if (calDays && calDays.length > 0) {
           setCalendar(calDays)

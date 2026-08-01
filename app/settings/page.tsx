@@ -266,9 +266,13 @@ export default function SettingsPage() {
         })
         if (!setupRes.ok) throw new Error('onboarding_setup_failed')
 
+        // force: el usuario acaba de cambiar días/minutos y espera que sus
+        // próximas misiones se reajusten ahora, no mañana. Sin esto, el
+        // throttle diario de la ruta se lo saltaría en silencio.
         const ensureRes = await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: true }),
         })
         if (!ensureRes.ok) throw new Error('camino_personalization_failed')
         setCaminoPrefsStatus('Tu Camino se ha ajustado para las próximas misiones.')

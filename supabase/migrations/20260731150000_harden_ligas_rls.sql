@@ -1,7 +1,10 @@
+-- NOTA: ligas.id, liga_miembros.liga_id y ligas_rondas.scope_key son TEXT
+-- en produccion, no uuid. La primera version de esta migracion declaraba
+-- is_liga_member(uuid) y fallaba al crear la funcion, por eso nunca se aplico.
 -- Security hardening: league data must not be enumerable with the public anon key.
 -- Invite-code lookup is handled by server API routes using the service role.
 
-create or replace function public.is_liga_member(target_liga_id uuid)
+create or replace function public.is_liga_member(target_liga_id text)
 returns boolean
 language sql
 stable
@@ -16,8 +19,8 @@ as $$
   );
 $$;
 
-revoke all on function public.is_liga_member(uuid) from public;
-grant execute on function public.is_liga_member(uuid) to authenticated;
+revoke all on function public.is_liga_member(text) from public;
+grant execute on function public.is_liga_member(text) to authenticated;
 
 drop policy if exists "ligas: select authenticated" on public.ligas;
 drop policy if exists "ligas: select own membership" on public.ligas;
@@ -43,7 +46,7 @@ create policy "ligas_rondas: select scoped"
   to authenticated
   using (
     case
-      when scope_type = 'personal' then public.is_liga_member(scope_key::uuid)
+      when scope_type = 'personal' then public.is_liga_member(scope_key)
       when scope_type in ('global', 'comunidad_materia') then true
       else false
     end
@@ -62,7 +65,7 @@ create policy "ligas_rondas_resultados: select scoped"
       from public.ligas_rondas r
       where r.id = ligas_rondas_resultados.ronda_id
         and case
-          when r.scope_type = 'personal' then public.is_liga_member(r.scope_key::uuid)
+          when r.scope_type = 'personal' then public.is_liga_member(r.scope_key)
           else false
         end
     )

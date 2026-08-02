@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { ClipboardList, Clock, CreditCard, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, MoreVertical, Settings, Sparkles, UserRound, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { loadProfilePreferences } from '@/app/lib/profilePreferences'
+import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 
 const NAV = [
   { label: 'Camino PAU', href: '/camino',                  icon: LayoutGrid },
@@ -60,6 +61,7 @@ function isActive(href: string, pathname: string, currentView: string | null): b
 export default function SidebarNav() {
   const [open, setOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const { loading: billingLoading, hasActivePack } = useBillingStatus()
   const [currentView, setCurrentView] = useState<string | null>(null)
   const [profile, setProfile] = useState<{ label: string; comunidad: string | null; curso: string | null } | null>(null)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
@@ -207,32 +209,35 @@ export default function SidebarNav() {
 
           <div style={{ flex: 1, minHeight: 12 }} />
 
-          {/* Plan Pro upsell — purely additive, links to the real /pricing page */}
-          <a
-            href="/pricing"
-            style={{
-              margin: '0 10px 12px', padding: open ? '12px' : '10px 0',
-              borderRadius: 12, textDecoration: 'none',
-              background: 'linear-gradient(135deg, rgba(37,99,235,.22), rgba(37,99,235,.08))',
-              border: '1px solid rgba(37,99,235,.35)',
-              display: 'flex', flexDirection: open ? 'column' : 'row',
-              alignItems: open ? 'flex-start' : 'center', justifyContent: open ? 'flex-start' : 'center',
-              gap: 6, overflow: 'hidden', flexShrink: 0,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Sparkles size={16} color="#60a5fa" />
-              {open && <span style={{ fontSize: 12.5, fontWeight: 800, color: '#e0f2fe', whiteSpace: 'nowrap' }}>Plan Pro</span>}
-            </div>
-            {open && (
-              <>
-                <span style={{ fontSize: 11, color: '#93c5fd', lineHeight: 1.4 }}>
-                  Aprovecha todas las funciones premium.
-                </span>
-                <span style={{ fontSize: 11.5, fontWeight: 700, color: '#60a5fa' }}>Mejorar ahora →</span>
-              </>
-            )}
-          </a>
+          {/* Plan Pro upsell — hidden once we know the user already has an
+              active plan or is admin, so paying users never see it. */}
+          {!billingLoading && !hasActivePack && !isAdmin && (
+            <a
+              href="/pricing"
+              style={{
+                margin: '0 10px 12px', padding: open ? '12px' : '10px 0',
+                borderRadius: 12, textDecoration: 'none',
+                background: 'linear-gradient(135deg, rgba(37,99,235,.22), rgba(37,99,235,.08))',
+                border: '1px solid rgba(37,99,235,.35)',
+                display: 'flex', flexDirection: open ? 'column' : 'row',
+                alignItems: open ? 'flex-start' : 'center', justifyContent: open ? 'flex-start' : 'center',
+                gap: 6, overflow: 'hidden', flexShrink: 0,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Sparkles size={16} color="#60a5fa" />
+                {open && <span style={{ fontSize: 12.5, fontWeight: 800, color: '#e0f2fe', whiteSpace: 'nowrap' }}>Plan Pro</span>}
+              </div>
+              {open && (
+                <>
+                  <span style={{ fontSize: 11, color: '#93c5fd', lineHeight: 1.4 }}>
+                    Aprovecha todas las funciones premium.
+                  </span>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: '#60a5fa' }}>Mejorar ahora →</span>
+                </>
+              )}
+            </a>
+          )}
 
           {/* Account row — single entry point for profile/settings/plan/help/logout */}
           <div data-account-menu style={{ position: 'relative', margin: '0 10px', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.08)', flexShrink: 0 }}>

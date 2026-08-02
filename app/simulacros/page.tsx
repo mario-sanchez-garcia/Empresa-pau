@@ -254,11 +254,11 @@ function SimulacrosPage() {
           flex: 1;
           min-height: 0;
           overflow-y: auto;
-          padding: 22px 18px 40px 20px;
+          padding: 22px 28px 40px;
           font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
           background: #fff;
         }
-        .simu-shell { width: 100%; max-width: none; margin: 0; }
+        .simu-shell { width: 100%; max-width: 1500px; margin: 0 auto; }
         .simu-hero { position: relative; height: 300px; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 18px 50px rgba(37,99,235,.14); }
         .simu-hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.45) saturate(.65); }
         .simu-hero-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 26px 30px; background: linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.25) 60%, transparent 100%); }
@@ -275,14 +275,14 @@ function SimulacrosPage() {
         .simu-hero-link { margin-top: 18px; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 8px 16px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
         .simu-camino-banner { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 12px; border: 1px solid #dbeafe; background: #eff6ff; color: #1e40af; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
         .simu-history-panel { padding: 16px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; margin-bottom: 20px; }
-        .simu-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(252px, 18vw, 292px); gap: 18px; align-items: start; }
+        .simu-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
         .simu-main-col { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
         .simu-card { padding: 20px; }
         .simu-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
         .simu-card-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; color: #0f172a; }
         .simu-step-num { width: 22px; height: 22px; border-radius: 999px; background: #2563eb; color: #fff; font-size: 12px; font-weight: 900; display: grid; place-items: center; flex-shrink: 0; }
         .simu-help-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: #64748b; background: none; border: 0; cursor: pointer; }
-        .simu-subject-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .simu-subject-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
         .simu-subject-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 10px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; cursor: pointer; transition: all .12s; text-align: center; min-height: 100px; }
         .simu-subject-card.is-active { box-shadow: inset 0 0 0 1.5px var(--subj-color); background: var(--subj-light); }
         .simu-subject-card:disabled { cursor: not-allowed; opacity: .5; }

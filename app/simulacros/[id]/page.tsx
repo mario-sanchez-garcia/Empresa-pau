@@ -370,7 +370,7 @@ export default function SimulacroActivoPage() {
         </button>
       }
     >
-      <div className="grid w-full gap-5">
+      <div className="mx-auto grid max-w-6xl gap-5">
 
         {/* Exam header: metadata + ring timer */}
         <section

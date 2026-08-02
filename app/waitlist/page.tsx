@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import KairoBrand from '@/components/shared/KairoBrand'
 import {
   CURSO_PAU_EARLY_PRICE_CENTS,
   CURSO_PAU_STANDARD_PRICE_CENTS,
@@ -250,8 +249,9 @@ function WaitlistContent() {
 
       <div className="wl-content">
         <header className="wl-header">
-          <Link href="/landing" style={{ textDecoration: 'none' }}>
-            <KairoBrand subtitle={null} size="sm" variant="inverse" />
+          <Link href="/landing" aria-label="Inicio">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
           </Link>
           <Link href="/login" className="wl-enter">Entrar</Link>
         </header>

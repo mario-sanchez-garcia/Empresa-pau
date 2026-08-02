@@ -50,7 +50,6 @@ import {
   ClipboardList,
   Check,
   Dna,
-  FileText,
   Flame,
   FlaskConical,
   Globe,
@@ -3082,8 +3081,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           /* Hide the stat badges in the hero on small screens */
           .exams-hero-stats { display: none !important; }
           /* Reduce hero height */
-          .exams-subject-hero { height: 130px !important; }
-          .exams-subject-hero-title { font-size: 28px !important; }
+          .exams-subject-hero,
+          .chat-hero { height: 200px !important; }
+          .exams-subject-hero-title,
+          .chat-hero-title { font-size: 46px !important; }
           /* Main content padding */
           .exams-screen { padding: 14px 16px 40px !important; }
           /* Subject cards — allow 2 per row on mobile */
@@ -3223,12 +3224,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         {seccion === 'examenes' && (
           <>
             {/* V4 Mesa de Trabajo — photo hero */}
-            <div className="exams-subject-hero" style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+            <div className="exams-subject-hero" style={{ position: 'relative', height: 340, flexShrink: 0, overflow: 'hidden' }}>
               <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '28px 32px 32px', background: 'linear-gradient(to bottom, rgba(15,23,42,.16) 0%, rgba(15,23,42,.86) 100%)' }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
-                  <div className="exams-subject-hero-title" style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: .9, letterSpacing: '-.035em' }}>{cfg.label}</div>
+                  <div className="exams-subject-hero-title" style={{ fontSize: 'clamp(48px, 6vw, 76px)', fontWeight: 900, color: 'white', lineHeight: .88, letterSpacing: '-.045em' }}>{cfg.label}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 8, fontWeight: 600 }}>{tipo} · {anioSeleccionado ?? '—'} · {examSystemLabel(ccaa)}</div>
                 </div>
                 {(() => {
@@ -3939,11 +3940,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh', background: 'white' }}>
 
             {/* Photo hero */}
-            <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+            <div className="chat-hero" style={{ position: 'relative', height: 340, flexShrink: 0, overflow: 'hidden' }}>
               <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.45) saturate(.75)', transition: 'opacity 400ms ease' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,.85) 0%, rgba(15,23,42,.3) 55%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px' }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.88) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '28px 32px 32px' }}>
                 <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
-                <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .9, marginBottom: 10 }}>Tutor<br />Inteligente</div>
+                <div className="chat-hero-title" style={{ fontSize: 'clamp(52px, 6vw, 82px)', fontWeight: 900, color: 'white', letterSpacing: '-.045em', lineHeight: .88, marginBottom: 14 }}>Tutor<br />Inteligente</div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {CHAT_SUBJECTS.map(key => {
                     const card = SUBJECT_CARDS[key]

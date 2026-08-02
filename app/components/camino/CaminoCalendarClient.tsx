@@ -1653,26 +1653,26 @@ export default function CaminoCalendarClient() {
         )}
         {isRescueMode && <div style={{ padding: '10px 16px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 12, marginBottom: 14 }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
 
+        {/* ── HERO ── */}
+        <div className="camino-hero" style={{ position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+          <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55) saturate(0.75)', display: 'block', position: 'absolute', inset: 0 }} />
+          <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
+            <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
+            <div style={{ display: 'flex', gap: 20, marginTop: 18 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
+              <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.16)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
+              {heroRank != null && <><div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.16)' }} /><div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div></>}
+            </div>
+          </div>
+        </div>
+
         <div className="camino-grid">
 
         {/* ── LEFT COLUMN ── */}
         <div className="camino-main-col">
-
-          {/* ── HERO ── */}
-          <div className="camino-hero camino-card" style={{ position: 'relative', overflow: 'hidden' }}>
-            <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55) saturate(0.75)', display: 'block', position: 'absolute', inset: 0 }} />
-            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-              <div className="camino-hero-days" style={{ fontSize: 88, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
-              <div style={{ display: 'flex', gap: 20, marginTop: 18 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
-                <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.16)' }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
-                {heroRank != null && <><div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.16)' }} /><div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div></>}
-              </div>
-            </div>
-          </div>
 
           {/* Sunday mock */}
           {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (() => {
@@ -2148,17 +2148,14 @@ function Shell({ children }: { children: React.ReactNode }) {
         }
 
         .camino-hero {
-          height: clamp(230px, 24vw, 300px) !important;
-          border: 1px solid #dbe7fb !important;
-          border-radius: 20px;
-          box-shadow: 0 18px 50px rgba(37,99,235,.12);
+          height: 340px !important;
+          box-shadow: none;
         }
 
         .camino-hero-overlay {
-          padding: clamp(22px, 3vw, 36px) clamp(26px, 4vw, 44px) !important;
+          padding: 28px 32px 32px !important;
           background:
-            linear-gradient(100deg, rgba(9,16,36,.88) 0%, rgba(15,26,58,.55) 48%, rgba(15,26,58,.16) 100%),
-            linear-gradient(to top, rgba(9,16,36,.7) 0%, rgba(9,16,36,.12) 60%, transparent 100%) !important;
+            linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.88) 100%) !important;
         }
 
         @media (max-width: 1024px) {

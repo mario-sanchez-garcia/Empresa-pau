@@ -3,6 +3,7 @@ import { hashToken } from '@/app/lib/billing/tokens'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getStripe, isStripeConfigured, getAppUrl } from '@/app/lib/billing/stripe'
 import { getLivePriceCents, getPlan } from '@/app/lib/billing/plans'
+import { resolverPrecioConReserva } from '@/app/lib/billing/waitlistPrice'
 import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
 
 export const dynamic = 'force-dynamic'
@@ -86,6 +87,17 @@ export async function POST(request: NextRequest) {
   }
 
   const livePriceCents = getLivePriceCents(link.plan_id) ?? link.price_cents
+
+  // El precio bloqueado de la waitlist es del ALUMNO, no del padre que paga.
+  // El link solo guarda student_user_id, así que hay que resolver su email.
+  let studentEmail: string | null = null
+  try {
+    const { data: studentUser } = await db.auth.admin.getUserById(link.student_user_id)
+    studentEmail = studentUser.user?.email ?? null
+  } catch { /* sin email se cobra el precio vigente, como antes */ }
+
+  const precio = await resolverPrecioConReserva(db, studentEmail, link.plan_id, livePriceCents)
+  const priceCents = precio.priceCents
   const appUrl = getAppUrl()
   const stripe = getStripe()
 
@@ -114,7 +126,7 @@ export async function POST(request: NextRequest) {
       {
         price_data: {
           currency: link.currency,
-          unit_amount: livePriceCents,
+          unit_amount: priceCents,
           product_data: {
             name: plan.label,
             description: `Camino PAU${link.student_display_name ? ` para ${link.student_display_name}` : ''}`,
@@ -161,7 +173,13 @@ export async function POST(request: NextRequest) {
     parent_checkout_link_id: link.id,
     stripe_checkout_session_id: session.id,
     event_type: 'checkout_session_created',
-    payload: { plan_id: link.plan_id, price_cents: livePriceCents }
+    payload: {
+      plan_id: link.plan_id,
+      price_cents: priceCents,
+      price_origin: precio.origen,
+      live_price_cents: livePriceCents,
+      waitlist_locked_cents: precio.lockedCents,
+    }
   })
 
   // Record withdrawal waiver — mandatory for the digital-content exception (TRLGDCU art. 103.m)

@@ -1,6 +1,6 @@
 import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
-import { WAITLIST_REFERRAL_TIERS, formatEur } from '@/app/lib/pricing'
+import { WAITLIST_REFERRAL_TIERS, formatEur, getPriceLockDeadlineLabel } from '@/app/lib/pricing'
 
 const SITE_URL = 'https://kairo-pau.com'
 // Tiers ordenados de más a menos referidos: [3+ referidos, 1+ referido, base]
@@ -38,7 +38,7 @@ export async function sendWaitlistConfirmation({
           <p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#2563eb">Early Bird</p>
           <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:#0f172a;line-height:1.3">Tu plaza está reservada 🎟️</h1>
           <p style="margin:0 0 12px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">
-            Precio congelado: <strong style="color:#0f172a">${priceLocked} €</strong> hasta el 15 de octubre.
+            Precio congelado: <strong style="color:#0f172a">${priceLocked} €</strong> hasta el ${getPriceLockDeadlineLabel()}.
             Te avisaremos cuando abra el curso en septiembre.
           </p>
           <p style="margin:0 0 28px;font-size:15px;font-weight:600;color:#475569;line-height:1.6">

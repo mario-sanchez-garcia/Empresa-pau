@@ -38,6 +38,21 @@ export function getCursoPauPriceCents(): number {
     : CURSO_PAU_STANDARD_PRICE_CENTS
 }
 
+/**
+ * Fecha hasta la que se garantiza el precio bloqueado de la waitlist, tal y
+ * como se comunica al alumno por email.
+ *
+ * Existe como constante porque el email tenía "hasta el 15 de octubre" escrito
+ * a mano mientras FOUNDING_DEADLINE_DATE era el 1 de septiembre: entre ambas
+ * fechas se prometía un precio por escrito y se cobraba otro. Derivarla de
+ * getFoundingDeadline() hace imposible que vuelvan a divergir.
+ */
+export function getPriceLockDeadlineLabel(): string {
+  return getFoundingDeadline().toLocaleDateString('es-ES', {
+    day: 'numeric', month: 'long', timeZone: 'Europe/Madrid',
+  })
+}
+
 // ---- Precio estático del resto de planes (en céntimos) ----
 const STATIC_PLAN_PRICE_CENTS: Partial<Record<CaminoPlanId, number>> = {
   free: 0,

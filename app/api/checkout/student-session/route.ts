@@ -3,6 +3,7 @@ import { getAuthUser, createServiceClient } from '@/app/lib/billing/supabase'
 import { getStripe, isStripeConfigured, getAppUrl } from '@/app/lib/billing/stripe'
 import { getPlan, getLivePriceCents } from '@/app/lib/billing/plans'
 import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
+import { resolverPrecioConReserva } from '@/app/lib/billing/waitlistPrice'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Ya tienes un plan activo.' }, { status: 409 })
   }
 
-  const priceCents = getLivePriceCents(planId) ?? plan.priceCents
+  // Respeta el precio prometido por email al reservar plaza. Sin esto se
+  // cobraba el precio vigente e ignoraba el bloqueado — ver waitlistPrice.ts.
+  const livePriceCents = getLivePriceCents(planId) ?? plan.priceCents
+  const precio = await resolverPrecioConReserva(db, data.user.email, planId, livePriceCents)
+  const priceCents = precio.priceCents
   const appUrl = getAppUrl()
   const stripe = getStripe()
 
@@ -104,7 +109,15 @@ export async function POST(request: NextRequest) {
     user_id: userId,
     stripe_checkout_session_id: session.id,
     event_type: 'student_checkout_session_created',
-    payload: { plan_id: planId, price_cents: priceCents },
+    payload: {
+      plan_id: planId,
+      price_cents: priceCents,
+      // Rastro de por qué se cobró esa cifra: si alguien reclama el precio
+      // que le prometimos por email, esto lo demuestra.
+      price_origin: precio.origen,
+      live_price_cents: livePriceCents,
+      waitlist_locked_cents: precio.lockedCents,
+    },
   })
 
   // Record withdrawal waiver — mandatory for the digital-content exception (TRLGDCU art. 103.m)

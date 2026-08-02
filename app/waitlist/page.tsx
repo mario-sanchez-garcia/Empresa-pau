@@ -16,11 +16,6 @@ const CURSO_PAU_STANDARD_PRICE_DISPLAY = formatEur(CURSO_PAU_STANDARD_PRICE_CENT
 // Tiers ordenados de más a menos referidos, ya vienen así de WAITLIST_REFERRAL_TIERS
 const [TIER_3, TIER_1] = WAITLIST_REFERRAL_TIERS
 
-const BLUE = '#2563eb'
-const INK = '#0f172a'
-const MUTED = '#64748b'
-const BORDER = '#e2e8f0'
-const BG_SUB = '#f8fafc'
 const COURSE_START = new Date('2026-09-15T00:00:00+02:00')
 
 function daysUntil(target: Date): number {
@@ -110,281 +105,272 @@ function WaitlistContent() {
     }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    boxSizing: 'border-box',
-    height: 52,
-    border: `1.5px solid ${BORDER}`,
-    borderRadius: 12,
-    padding: '0 16px',
-    fontSize: 16,
-    color: INK,
-    background: '#fff',
-    outline: 'none',
-    transition: 'border-color 150ms ease-out',
-    WebkitAppearance: 'none',
-    appearance: 'none',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: 13,
-    fontWeight: 700,
-    color: INK,
-    marginBottom: 6,
-  }
-
   return (
-    <div style={{ minHeight: '100vh', background: BG_SUB, fontFamily: 'system-ui, sans-serif' }}>
-      {/* Header */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: 64, padding: '0 20px',
-        background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)',
-        borderBottom: `1px solid ${BORDER}`,
-      }}>
-        <Link href="/landing" style={{ textDecoration: 'none' }}>
-          <KairoBrand subtitle={null} size="md" />
-        </Link>
-        <Link href="/login" style={{
-          fontSize: 13, fontWeight: 700, color: BLUE, textDecoration: 'none',
-          padding: '8px 16px', borderRadius: 10, border: `1.5px solid ${BORDER}`,
-          background: '#fff',
-        }}>
-          Entrar
-        </Link>
-      </header>
+    <div className="wl-shell">
+      <style>{`
+        .wl-shell {
+          min-height: 100vh;
+          min-width: 0;
+          width: 100%;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 40vw;
+          background: #0a0a0d;
+          color: #fff;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .wl-content { display: flex; flex-direction: column; padding: 0 6vw; min-width: 0; }
+        .wl-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 28px 0;
+        }
+        .wl-enter {
+          font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); text-decoration: none;
+          padding: 8px 16px; border-radius: 9px; border: 1.5px solid rgba(255,255,255,0.18);
+          transition: border-color 150ms ease-out, background 150ms ease-out;
+        }
+        .wl-enter:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
 
-      <main style={{ maxWidth: 480, margin: '0 auto', padding: '40px 20px 80px' }}>
+        .wl-main { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 480px; padding: 20px 0 60px; min-width: 0; }
 
-        {/* ── FORM SCREEN ─────────────────────────────────────────────────── */}
-        {screen === 'form' && (
-          <div style={{
-            opacity: confirmed ? 1 : 0,
-            transform: confirmed ? 'translateY(0)' : 'translateY(10px)',
-            transition: 'opacity 350ms cubic-bezier(0.23,1,0.32,1), transform 350ms cubic-bezier(0.23,1,0.32,1)',
-          }}>
-            {/* Eyebrow */}
-            <p style={{
-              margin: '0 0 12px',
-              fontSize: 11, fontWeight: 800, letterSpacing: '0.12em',
-              textTransform: 'uppercase', color: BLUE,
-            }}>
-              Early Bird
-            </p>
+        .wl-screen {
+          transition: opacity 350ms cubic-bezier(0.23,1,0.32,1), transform 350ms cubic-bezier(0.23,1,0.32,1);
+        }
+        .wl-screen.wl-hidden { opacity: 0; transform: translateY(10px); }
+        .wl-screen.wl-visible { opacity: 1; transform: translateY(0); }
 
-            <h1 style={{
-              margin: '0 0 16px',
-              fontSize: 'clamp(2rem, 8vw, 2.6rem)',
-              fontWeight: 900, color: INK,
-              lineHeight: 1.1, letterSpacing: '-0.03em',
-            }}>
-              La PAU 2027 empieza ahora.
-            </h1>
+        .wl-eyebrow {
+          margin: 0 0 16px; font-size: 11px; font-weight: 800; letter-spacing: 0.16em;
+          text-transform: uppercase; color: #60a5fa;
+        }
+        .wl-h1 {
+          margin: 0 0 20px; font-size: clamp(2.1rem, 4.6vw, 3.3rem); font-weight: 900; line-height: 1.03;
+          letter-spacing: -0.035em; color: #fff;
+        }
+        .wl-lede {
+          margin: 0 0 26px; font-size: 16.5px; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 40ch;
+        }
+        .wl-lede strong { color: #fff; font-weight: 800; }
+        .wl-strike { color: rgba(255,255,255,0.32); text-decoration: line-through; font-weight: 600; }
 
-            <p style={{ margin: '0 0 20px', fontSize: 17, color: MUTED, lineHeight: 1.6 }}>
-              Reserva tu plaza: Curso PAU completo a <strong style={{ color: INK }}>{formatEur(CURSO_PAU_EARLY_PRICE_CENTS)}</strong> en vez de {CURSO_PAU_STANDARD_PRICE_DISPLAY}.
-              Exámenes reales, corrección IA y tu Camino diario de septiembre a junio.
-            </p>
+        .wl-stat-row {
+          display: flex; align-items: center; gap: 14px;
+          padding: 16px 0; margin-bottom: 28px;
+          border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .wl-stat-row .wl-num { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.02em; flex-shrink: 0; }
+        .wl-stat-row .wl-lbl { font-size: 12.5px; color: rgba(255,255,255,0.45); font-weight: 600; line-height: 1.4; }
 
-            {/* Countdown */}
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: '#eff6ff', border: `1px solid #bfdbfe`,
-              borderRadius: 10, padding: '10px 14px',
-              fontSize: 14, fontWeight: 700, color: '#1d4ed8',
-              marginBottom: 32,
-            }}>
-              ⏳ El curso empieza el 15 de septiembre
-              {daysLeft !== null && ` — quedan ${daysLeft} días`}
-            </div>
+        .wl-form { display: flex; flex-direction: column; gap: 14px; }
+        .wl-field label {
+          display: block; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55);
+          margin-bottom: 7px; letter-spacing: 0.02em;
+        }
+        .wl-field input, .wl-field select {
+          width: 100%; height: 50px; border: 1.5px solid rgba(255,255,255,0.16); border-radius: 11px;
+          padding: 0 15px; font-size: 15px; color: #fff; background: rgba(255,255,255,0.04);
+          font-family: inherit; outline: none; transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background 150ms;
+          -webkit-appearance: none; appearance: none;
+        }
+        .wl-field input::placeholder { color: rgba(255,255,255,0.32); }
+        .wl-field select {
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="%23ffffff" stroke-opacity="0.55" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+          background-repeat: no-repeat; background-position: right 16px center; padding-right: 38px;
+          color: rgba(255,255,255,0.92); cursor: pointer;
+        }
+        .wl-field select option { color: #0a0a0d; }
+        .wl-field input:focus, .wl-field select:focus {
+          border-color: #3b82f6; background: rgba(255,255,255,0.07); box-shadow: 0 0 0 3.5px rgba(59,130,246,0.18);
+        }
+        .wl-row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div>
-                <label style={labelStyle} htmlFor="wl-email">Email</label>
-                <input
-                  id="wl-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={inputStyle}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = BLUE }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = BORDER }}
-                />
-              </div>
+        .wl-error { margin: 0; font-size: 13.5px; color: #f87171; font-weight: 600; }
 
-              <div>
-                <label style={labelStyle} htmlFor="wl-comunidad">Comunidad autónoma</label>
-                <select
-                  id="wl-comunidad"
-                  required
-                  value={comunidad}
-                  onChange={(e) => setComunidad(e.target.value)}
-                  style={{ ...inputStyle, paddingRight: 40, cursor: 'pointer' }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = BLUE }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = BORDER }}
-                >
-                  <option value="">Selecciona tu comunidad</option>
-                  <option value="madrid">Madrid</option>
-                  <option value="cataluna">Cataluña</option>
-                  <option value="otra">Otra</option>
-                </select>
-              </div>
+        .wl-cta {
+          margin-top: 4px; height: 54px; border-radius: 12px; border: none; cursor: pointer;
+          background: #3b82f6; color: #fff; font-size: 16px; font-weight: 800;
+          font-family: inherit; transition: background 150ms ease-out;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .wl-cta:hover:not(:disabled) { background: #2563eb; }
+        .wl-cta:disabled { background: rgba(59,130,246,0.45); cursor: not-allowed; }
 
-              <div>
-                <label style={labelStyle} htmlFor="wl-curso">Curso</label>
-                <select
-                  id="wl-curso"
-                  required
-                  value={curso}
-                  onChange={(e) => setCurso(e.target.value)}
-                  style={{ ...inputStyle, paddingRight: 40, cursor: 'pointer' }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = BLUE }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = BORDER }}
-                >
-                  <option value="">Selecciona tu curso</option>
-                  <option value="1bach">1º Bachillerato</option>
-                  <option value="2bach">2º Bachillerato</option>
-                </select>
-              </div>
+        .wl-foot {
+          margin: 22px 0 0; font-size: 12.5px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.6;
+        }
 
-              {errorMsg && (
-                <p style={{ margin: 0, fontSize: 14, color: '#dc2626', fontWeight: 600 }}>
-                  {errorMsg}
-                </p>
-              )}
+        .wl-photo-wrap { position: relative; padding: 40px 40px 40px 0; display: flex; align-items: center; }
+        .wl-photo {
+          position: relative; width: 100%; height: calc(100vh - 80px); border-radius: 22px; overflow: hidden;
+          background: #000 url('/brand/scene-exam.jpg') center / cover no-repeat;
+          box-shadow: 0 40px 90px -30px rgba(0,0,0,0.7);
+        }
+        .wl-photo::after {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(0deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 40%);
+        }
+        .wl-photo-tag {
+          position: absolute; left: 22px; bottom: 22px; z-index: 2;
+          font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 0.03em;
+        }
 
-              <button
-                type="submit"
-                disabled={formState === 'submitting'}
-                style={{
-                  height: 56, borderRadius: 14,
-                  background: formState === 'submitting' ? '#93c5fd' : BLUE,
-                  color: '#fff', fontSize: 17, fontWeight: 900,
-                  border: 'none', cursor: formState === 'submitting' ? 'not-allowed' : 'pointer',
-                  transition: 'transform 130ms ease-out, background 150ms ease-out',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-                onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)' }}
-                onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-                onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.97)' }}
-                onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-              >
-                {formState === 'submitting' ? 'Reservando…' : 'Reservar mi plaza →'}
-              </button>
-            </form>
+        /* ── Confirmation screen ── */
+        .wl-referral {
+          margin: 24px 0; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.28);
+          border-radius: 16px; padding: 20px 22px;
+        }
+        .wl-referral-title { margin: 0 0 6px; font-size: 14.5px; font-weight: 800; color: #fff; }
+        .wl-referral-tiers { margin: 0 0 16px; font-size: 13px; color: #93c5fd; font-weight: 700; }
+        .wl-share-url {
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.16);
+          border-radius: 10px; padding: 11px 14px; font-size: 13px; color: #93c5fd; font-weight: 600;
+          word-break: break-all; margin-bottom: 16px; user-select: all;
+        }
+        .wl-wa-btn {
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          height: 52px; border-radius: 12px; background: #25d366; color: #fff;
+          font-size: 15px; font-weight: 900; text-decoration: none;
+          transition: transform 130ms ease-out; -webkit-tap-highlight-color: transparent;
+        }
+        .wl-copy-btn {
+          height: 52px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 700;
+          font-family: inherit; transition: background 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out;
+          -webkit-tap-highlight-color: transparent;
+          background: rgba(255,255,255,0.04); color: #fff; border: 1.5px solid rgba(255,255,255,0.18);
+        }
+        .wl-copy-btn.wl-copied { background: rgba(74,222,128,0.1); color: #4ade80; border-color: rgba(74,222,128,0.35); }
 
-            {/* Footer note */}
-            <p style={{ margin: '24px 0 0', fontSize: 13, color: MUTED, textAlign: 'center', lineHeight: 1.6 }}>
-              📱 App para iOS en camino — los de la waitlist la probarán primero.
-            </p>
-          </div>
-        )}
+        @media (max-width: 980px) {
+          .wl-shell { grid-template-columns: minmax(0, 1fr); }
+          .wl-photo-wrap { padding: 0 24px 32px; order: -1; }
+          .wl-photo { height: 40vh; margin-top: 24px; }
+          .wl-content { padding: 0 24px; }
+          .wl-lede { max-width: 100%; }
+        }
+      `}</style>
 
-        {/* ── CONFIRMATION SCREEN ──────────────────────────────────────────── */}
-        {screen === 'confirmed' && (
-          <div style={{
-            opacity: confirmed ? 1 : 0,
-            transform: confirmed ? 'translateY(0)' : 'translateY(10px)',
-            transition: 'opacity 350ms cubic-bezier(0.23,1,0.32,1), transform 350ms cubic-bezier(0.23,1,0.32,1)',
-          }}>
-            <h1 style={{
-              margin: '0 0 12px',
-              fontSize: 'clamp(1.8rem, 7vw, 2.4rem)',
-              fontWeight: 900, color: INK,
-              lineHeight: 1.15, letterSpacing: '-0.03em',
-              animationDelay: '0ms',
-            }}>
-              Plaza reservada 🎟️
-            </h1>
+      <div className="wl-content">
+        <header className="wl-header">
+          <Link href="/landing" style={{ textDecoration: 'none' }}>
+            <KairoBrand subtitle={null} size="sm" variant="inverse" />
+          </Link>
+          <Link href="/login" className="wl-enter">Entrar</Link>
+        </header>
 
-            <p style={{ margin: '0 0 6px', fontSize: 17, color: MUTED, lineHeight: 1.6, animationDelay: '40ms' }}>
-              {alreadyRegistered
-                ? 'Ya tenías tu plaza reservada. Este es tu link:'
-                : <>Tu precio de <strong style={{ color: INK }}>{priceLocked} €</strong> está congelado hasta el 15 de octubre. Te avisaremos por email cuando abra el curso.</>}
-            </p>
-
-            {/* Referral incentive */}
-            <div style={{
-              margin: '24px 0',
-              background: '#eff6ff', border: `1px solid #bfdbfe`,
-              borderRadius: 14, padding: '18px 20px',
-            }}>
-              <p style={{ margin: '0 0 6px', fontSize: 14, fontWeight: 800, color: INK }}>
-                ¿Quieres bajarlo más? Comparte tu link:
-              </p>
-              <p style={{ margin: '0 0 14px', fontSize: 13, color: '#1d4ed8', fontWeight: 700 }}>
-                1 amigo = {formatEur(TIER_1.priceCents)} · 3 amigos = {formatEur(TIER_3.priceCents)}
+        <main className="wl-main">
+          {/* ── FORM SCREEN ─────────────────────────────────────────────────── */}
+          {screen === 'form' && (
+            <div className={`wl-screen ${confirmed ? 'wl-visible' : 'wl-hidden'}`}>
+              <p className="wl-eyebrow">Early Bird</p>
+              <h1 className="wl-h1">La PAU 2027<br />empieza ahora.</h1>
+              <p className="wl-lede">
+                Reserva tu plaza: Curso PAU completo a <strong>{formatEur(CURSO_PAU_EARLY_PRICE_CENTS)}</strong>{' '}
+                <span className="wl-strike">{CURSO_PAU_STANDARD_PRICE_DISPLAY}</span>. Exámenes reales, corrección IA
+                y tu Camino diario de septiembre a junio.
               </p>
 
-              {/* Visible link */}
-              <div style={{
-                background: '#fff', border: `1px solid #bfdbfe`,
-                borderRadius: 10, padding: '10px 14px',
-                fontSize: 13, color: '#1d4ed8', fontWeight: 600,
-                wordBreak: 'break-all', marginBottom: 14,
-                userSelect: 'all',
-              }}>
-                {shareUrl}
+              <div className="wl-stat-row">
+                <span className="wl-num">{daysLeft ?? '—'}</span>
+                <span className="wl-lbl">días para el 15 de septiembre,<br />cuando empieza el curso.</span>
               </div>
 
-              {/* Buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    height: 52, borderRadius: 12,
-                    background: '#25d366', color: '#fff',
-                    fontSize: 15, fontWeight: 900, textDecoration: 'none',
-                    transition: 'transform 130ms ease-out',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                  onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)' }}
-                  onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-                  onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.97)' }}
-                  onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                  Compartir por WhatsApp
-                </a>
+              <form onSubmit={handleSubmit} className="wl-form">
+                <div className="wl-field">
+                  <label htmlFor="wl-email">Email</label>
+                  <input
+                    id="wl-email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-                <button
-                  onClick={handleCopy}
-                  style={{
-                    height: 52, borderRadius: 12,
-                    background: copied ? '#f0fdf4' : '#fff',
-                    color: copied ? '#16a34a' : INK,
-                    border: `1.5px solid ${copied ? '#bbf7d0' : BORDER}`,
-                    fontSize: 15, fontWeight: 700, cursor: 'pointer',
-                    transition: 'background 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, transform 130ms ease-out',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                  onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)' }}
-                  onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-                  onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.97)' }}
-                  onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-                >
-                  {copied ? 'Copiado ✓' : 'Copiar link'}
+                <div className="wl-row2">
+                  <div className="wl-field">
+                    <label htmlFor="wl-comunidad">Comunidad autónoma</label>
+                    <select
+                      id="wl-comunidad"
+                      required
+                      value={comunidad}
+                      onChange={(e) => setComunidad(e.target.value)}
+                    >
+                      <option value="">Selecciona</option>
+                      <option value="madrid">Madrid</option>
+                      <option value="cataluna">Cataluña</option>
+                      <option value="otra">Otra</option>
+                    </select>
+                  </div>
+
+                  <div className="wl-field">
+                    <label htmlFor="wl-curso">Curso</label>
+                    <select
+                      id="wl-curso"
+                      required
+                      value={curso}
+                      onChange={(e) => setCurso(e.target.value)}
+                    >
+                      <option value="">Selecciona</option>
+                      <option value="1bach">1º Bachillerato</option>
+                      <option value="2bach">2º Bachillerato</option>
+                    </select>
+                  </div>
+                </div>
+
+                {errorMsg && <p className="wl-error">{errorMsg}</p>}
+
+                <button type="submit" disabled={formState === 'submitting'} className="wl-cta">
+                  {formState === 'submitting' ? 'Reservando…' : 'Reservar mi plaza →'}
                 </button>
-              </div>
-            </div>
+              </form>
 
-            <p style={{ margin: 0, fontSize: 13, color: MUTED, textAlign: 'center', lineHeight: 1.6 }}>
-              📱 App para iOS en camino — los de la waitlist la probarán primero.
-            </p>
-          </div>
-        )}
-      </main>
+              <p className="wl-foot">📱 App para iOS en camino — los de la waitlist la probarán primero.</p>
+            </div>
+          )}
+
+          {/* ── CONFIRMATION SCREEN ──────────────────────────────────────────── */}
+          {screen === 'confirmed' && (
+            <div className={`wl-screen ${confirmed ? 'wl-visible' : 'wl-hidden'}`}>
+              <p className="wl-eyebrow">Reserva confirmada</p>
+              <h1 className="wl-h1">Plaza reservada 🎟️</h1>
+
+              <p className="wl-lede">
+                {alreadyRegistered
+                  ? 'Ya tenías tu plaza reservada. Este es tu link:'
+                  : <>Tu precio de <strong>{priceLocked} €</strong> está congelado hasta el 15 de octubre. Te avisaremos por email cuando abra el curso.</>}
+              </p>
+
+              <div className="wl-referral">
+                <p className="wl-referral-title">¿Quieres bajarlo más? Comparte tu link:</p>
+                <p className="wl-referral-tiers">
+                  1 amigo = {formatEur(TIER_1.priceCents)} · 3 amigos = {formatEur(TIER_3.priceCents)}
+                </p>
+                <div className="wl-share-url">{shareUrl}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="wl-wa-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    Compartir por WhatsApp
+                  </a>
+                  <button onClick={handleCopy} className={`wl-copy-btn ${copied ? 'wl-copied' : ''}`}>
+                    {copied ? 'Copiado ✓' : 'Copiar link'}
+                  </button>
+                </div>
+              </div>
+
+              <p className="wl-foot">📱 App para iOS en camino — los de la waitlist la probarán primero.</p>
+            </div>
+          )}
+        </main>
+      </div>
+
+      <div className="wl-photo-wrap">
+        <div className="wl-photo">
+          <div className="wl-photo-tag">Examen real · manuscrito</div>
+        </div>
+      </div>
     </div>
   )
 }

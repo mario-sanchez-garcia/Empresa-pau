@@ -2371,25 +2371,51 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     .sort((a, b) => Number(a.average) - Number(b.average))
     .slice(0, 3)
 
-  // Delta mes-en-curso vs mes anterior por asignatura, para la flechita de
-  // tendencia en la tira de asignaturas. null cuando no hay datos en ambos
-  // meses para comparar.
+  // Compara las dos últimas ventanas de correcciones CON datos por asignatura
+  // (no necesariamente "este mes natural" vs "el anterior" — si aún no hay
+  // correcciones en el mes en curso, esto sigue comparando los dos meses más
+  // recientes que sí tienen notas, para no dejar la tarjeta vacía de forma
+  // artificial los primeros días de cada mes).
+  function latestTwoMonthAverages(entries: typeof historialScoredItems): { latest: number | null; previous: number | null } {
+    const buckets = new Map<string, { total: number; count: number }>()
+    for (const entry of entries) {
+      const d = new Date(entry.item.created_at)
+      if (Number.isNaN(d.getTime())) continue
+      const key = `${d.getFullYear()}-${d.getMonth()}`
+      const bucket = buckets.get(key) ?? { total: 0, count: 0 }
+      bucket.total += entry.score10
+      bucket.count += 1
+      buckets.set(key, bucket)
+    }
+    const sortedKeys = [...buckets.keys()].sort((a, b) => {
+      const [ay, am] = a.split('-').map(Number)
+      const [by, bm] = b.split('-').map(Number)
+      return (by * 12 + bm) - (ay * 12 + am)
+    })
+    const avgOf = (key: string | undefined) => {
+      if (!key) return null
+      const bucket = buckets.get(key)!
+      return bucket.total / bucket.count
+    }
+    return { latest: avgOf(sortedKeys[0]), previous: avgOf(sortedKeys[1]) }
+  }
+
+  // Delta entre las dos ventanas mensuales más recientes con datos, por
+  // asignatura, para la flechita de tendencia en la tira de asignaturas.
   const subjectDeltaMap = new Map<Asignatura, number | null>(
     HOME_SUBJECTS.map(subject => {
       const entries = historialScoredItems.filter(e => e.item.asignatura === subject)
-      const thisMonth = scoreAvgInMonth(entries, 0)
-      const prevMonth = scoreAvgInMonth(entries, 1)
-      return [subject, thisMonth !== null && prevMonth !== null ? thisMonth - prevMonth : null]
+      const { latest, previous } = latestTwoMonthAverages(entries)
+      return [subject, latest !== null && previous !== null ? latest - previous : null]
     })
   )
 
   const recentImprovingSubjects = HOME_SUBJECTS
     .map(subject => {
       const entries = historialScoredItems.filter(e => e.item.asignatura === subject)
-      const thisMonth = scoreAvgInMonth(entries, 0)
-      const prevMonth = scoreAvgInMonth(entries, 1)
-      if (thisMonth === null || prevMonth === null) return null
-      return { subject, config: ASIGNATURAS[subject], thisMonth, delta: thisMonth - prevMonth }
+      const { latest, previous } = latestTwoMonthAverages(entries)
+      if (latest === null || previous === null) return null
+      return { subject, config: ASIGNATURAS[subject], thisMonth: latest, delta: latest - previous }
     })
     .filter((entry): entry is { subject: Asignatura; config: typeof ASIGNATURAS[Asignatura]; thisMonth: number; delta: number } => entry !== null && entry.delta > 0)
     .sort((a, b) => b.delta - a.delta)
@@ -3317,10 +3343,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           overflow-y: auto;
           padding: 22px 28px 40px;
           font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-          background:
-            radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.06), transparent 28%),
-            radial-gradient(circle at 92% 12%, rgba(96, 165, 250, 0.07), transparent 26%),
-            #f8fbff;
+          background: #fff;
         }
 
         .history-shell {
@@ -3567,6 +3590,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .history-total-illustration {
           flex-shrink: 0;
+          margin-left: auto;
         }
 
         .history-total-copy > span,
@@ -3692,22 +3716,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           grid-template-columns: minmax(220px, 1fr) 132px 132px 138px 190px auto;
           gap: 10px;
           align-items: center;
-          padding: 16px;
+          padding: 0;
           margin-bottom: 18px;
         }
 
         .history-input,
         .history-select {
           height: 42px;
-          border-radius: 11px;
+          border-radius: 8px;
           border: 1px solid #dbe7fb;
-          background: rgba(255,255,255,.95);
+          background: #fff;
           color: #0f172a;
           padding: 0 13px;
           font-size: 13px;
           font-weight: 750;
           outline: none;
-          box-shadow: 0 10px 26px rgba(15,23,42,.04);
+          box-shadow: 0 8px 20px rgba(15,23,42,.04);
         }
 
         .history-input {
@@ -3761,7 +3785,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         .history-filter-clear {
           height: 42px;
           border: 0;
-          border-radius: 11px;
+          border-radius: 8px;
           background: transparent;
           color: #2563eb;
           font-size: 12px;
@@ -5523,21 +5547,22 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <section className="history-main">
                   <div className="history-card history-summary-bar">
                     <div className="history-summary-zone history-summary-zone-total">
-                      <div className="history-total-illustration" aria-hidden="true">
-                        <svg width="46" height="46" viewBox="0 0 56 56" fill="none">
-                          <rect width="56" height="56" rx="16" fill="#dbeafe" />
-                          <rect x="14" y="10" width="22" height="30" rx="3" fill="#fff" stroke="#93c5fd" strokeWidth="1.5" />
-                          <path d="M19 18h12M19 24h12M19 30h7" stroke="#93c5fd" strokeWidth="1.5" strokeLinecap="round" />
-                          <circle cx="38" cy="38" r="10" fill="#2563eb" />
-                          <path d="M33.5 38l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
                       <div className="history-total-copy">
                         <span>Total correcciones</span>
                         <strong>{historialTotalCount ?? historialItems.length}</strong>
                         {historialActividad.mes > 0 && (
                           <small className="history-total-delta"><TrendingUp size={12} /> {historialActividad.mes} este mes</small>
                         )}
+                      </div>
+                      <div className="history-total-illustration" aria-hidden="true">
+                        <svg width="54" height="54" viewBox="0 0 64 64" fill="none">
+                          <rect x="9" y="7" width="34" height="46" rx="6" fill="#bfdbfe" transform="rotate(-8 26 30)" />
+                          <rect x="15" y="8" width="34" height="46" rx="6" fill="#fff" stroke="#93c5fd" strokeWidth="1.5" />
+                          <path d="M21 19h22M21 26h22M21 33h15" stroke="#60a5fa" strokeWidth="2.25" strokeLinecap="round" />
+                          <rect x="21" y="40" width="11" height="6" rx="2" fill="#eff6ff" />
+                          <circle cx="47" cy="47" r="13.5" fill="#2563eb" />
+                          <path d="M41 47l4.2 4.2L54 42.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
                       </div>
                     </div>
 
@@ -5605,7 +5630,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   </div>
 
                   {historialFiltersOpen && (
-                    <div className="history-card history-filters">
+                    <div className="history-filters">
                       <label className="history-input">
                         <SearchX size={16} />
                         <input value={historialSearch} onChange={(e) => setHistorialSearch(e.target.value)} placeholder="Buscar por tema o título..." />

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bell, ClipboardList, Clock, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, Settings, Sparkles, UserRound, Zap } from 'lucide-react'
+import { ClipboardList, Clock, CreditCard, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, MoreVertical, Settings, Sparkles, UserRound, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { loadProfilePreferences } from '@/app/lib/profilePreferences'
 
 const NAV = [
   { label: 'Camino PAU', href: '/camino',                  icon: LayoutGrid },
@@ -12,8 +13,19 @@ const NAV = [
   { label: 'La Zona',    href: '/zona',                    icon: Zap },
   { label: 'Tutor IA',   href: '/examenes?view=chat',      icon: MessageCircle },
   { label: 'Historial',  href: '/examenes?view=historial', icon: Clock },
-  { label: 'Mi Perfil',  href: '/settings',                icon: UserRound },
-  { label: 'Ayuda',      href: '/ayuda',                   icon: HelpCircle },
+]
+
+// Same labels the Settings page uses for preferences.educationLevel
+const EDUC_LABELS: Record<string, string> = {
+  '1-bachillerato': '1.º Bach', '2-bachillerato': '2.º Bach',
+  'preparacion-pau': 'Prep. PAU', 'otro': 'Otro',
+}
+
+const ACCOUNT_MENU = [
+  { label: 'Mi perfil', href: '/settings', icon: UserRound },
+  { label: 'Ajustes', href: '/settings', icon: Settings },
+  { label: 'Plan y facturación', href: '/pricing', icon: CreditCard },
+  { label: 'Ayuda', href: '/ayuda', icon: HelpCircle },
 ]
 
 // The 5 items shown in the mobile bottom bar (most-used first)
@@ -49,7 +61,8 @@ export default function SidebarNav() {
   const [open, setOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [currentView, setCurrentView] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ label: string; comunidad: string | null } | null>(null)
+  const [profile, setProfile] = useState<{ label: string; comunidad: string | null; curso: string | null } | null>(null)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const pathname = usePathname()
 
   useEffect(() => {
@@ -72,15 +85,26 @@ export default function SidebarNav() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       const fallback = user.email?.split('@')[0] || 'Alumno'
+      const educationLevel = loadProfilePreferences(user.id).educationLevel
+      const curso = educationLevel ? (EDUC_LABELS[educationLevel] ?? null) : null
       try {
         const { data } = await supabase.from('perfiles').select('username, comunidad').eq('id', user.id).maybeSingle()
-        setProfile({ label: data?.username?.trim() || fallback, comunidad: data?.comunidad ?? null })
+        setProfile({ label: data?.username?.trim() || fallback, comunidad: data?.comunidad ?? null, curso })
       } catch {
-        setProfile({ label: fallback, comunidad: null })
+        setProfile({ label: fallback, comunidad: null, curso })
       }
     }
     loadProfile()
   }, [])
+
+  useEffect(() => {
+    if (!accountMenuOpen) return
+    function onDocClick(e: MouseEvent) {
+      if (!(e.target as HTMLElement).closest('[data-account-menu]')) setAccountMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [accountMenuOpen])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -210,38 +234,70 @@ export default function SidebarNav() {
             )}
           </a>
 
-          {/* Profile row */}
-          <div style={{
-            margin: '0 10px', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.08)',
-            display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
-          }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-              background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              {(profile?.label ?? '?')[0]?.toUpperCase()}
-            </div>
-            {open && (
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 700, color: '#e0f2fe', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {profile?.label ?? '…'}
-                </div>
-                {profile?.comunidad && (
-                  <div style={{ fontSize: 10.5, color: '#64748b', whiteSpace: 'nowrap' }}>{profile.comunidad}</div>
-                )}
+          {/* Account row — single entry point for profile/settings/plan/help/logout */}
+          <div data-account-menu style={{ position: 'relative', margin: '0 10px', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.08)', flexShrink: 0 }}>
+            <button
+              onClick={() => setAccountMenuOpen(v => !v)}
+              aria-label="Cuenta"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                background: accountMenuOpen ? 'rgba(255,255,255,.06)' : 'none', border: 'none',
+                borderRadius: 10, padding: '6px', cursor: 'pointer', overflow: 'hidden',
+              }}
+            >
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {(profile?.label ?? '?')[0]?.toUpperCase()}
               </div>
-            )}
-            {open && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-                <a href="/settings" aria-label="Notificaciones" style={{ padding: 6, borderRadius: 8, color: '#64748b', display: 'flex' }}>
-                  <Bell size={15} />
-                </a>
-                <a href="/settings" aria-label="Ajustes" style={{ padding: 6, borderRadius: 8, color: '#64748b', display: 'flex' }}>
-                  <Settings size={15} />
-                </a>
-                <button onClick={handleLogout} aria-label="Cerrar sesión" style={{ padding: 6, borderRadius: 8, color: '#64748b', display: 'flex', background: 'none', border: 'none', cursor: 'pointer' }}>
-                  <LogOut size={15} />
+              {open && (
+                <div style={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: '#e0f2fe', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {profile?.label ?? '…'}
+                  </div>
+                  {(profile?.comunidad || profile?.curso) && (
+                    <div style={{ fontSize: 10.5, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {[profile?.comunidad, profile?.curso].filter(Boolean).join(' · ')}
+                    </div>
+                  )}
+                </div>
+              )}
+              {open && <MoreVertical size={15} color="#64748b" style={{ flexShrink: 0 }} />}
+            </button>
+
+            {accountMenuOpen && (
+              <div style={{
+                position: 'fixed', left: 68, bottom: 16, zIndex: 300,
+                width: 216, borderRadius: 12, background: 'white',
+                boxShadow: '0 18px 44px rgba(0,0,0,.28)', border: '1px solid #e2e8f0',
+                padding: 6, overflow: 'hidden',
+              }}>
+                {ACCOUNT_MENU.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    onClick={() => setAccountMenuOpen(false)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 10px', borderRadius: 8, textDecoration: 'none',
+                      fontSize: 13, fontWeight: 700, color: '#334155',
+                    }}
+                  >
+                    <Icon size={15} color="#64748b" /> {label}
+                  </a>
+                ))}
+                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 6px' }} />
+                <button
+                  onClick={() => { setAccountMenuOpen(false); handleLogout() }}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '9px 10px', borderRadius: 8, border: 'none', background: 'none', cursor: 'pointer',
+                    fontSize: 13, fontWeight: 700, color: '#dc2626',
+                  }}
+                >
+                  <LogOut size={15} /> Cerrar sesión
                 </button>
               </div>
             )}

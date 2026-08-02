@@ -3402,7 +3402,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .history-hero {
           position: relative;
-          height: 340px;
+          height: 200px;
           border-radius: 0;
           overflow: hidden;
           margin: -22px -28px 24px;
@@ -3425,7 +3425,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           align-items: flex-end;
           justify-content: space-between;
           gap: 16px;
-          padding: 28px 32px 32px;
+          padding: 20px 28px;
           background: linear-gradient(to bottom, rgba(15,23,42,.16) 0%, rgba(15,23,42,.86) 100%);
         }
 
@@ -3439,11 +3439,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-hero-title {
-          font-size: clamp(48px, 6vw, 76px);
+          font-size: 40px;
           font-weight: 900;
           color: #fff;
-          line-height: .88;
-          letter-spacing: -.045em;
+          line-height: .9;
+          letter-spacing: -.035em;
         }
 
         .history-hero-sub {
@@ -4489,12 +4489,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
 
           .history-hero {
-            height: 200px;
+            height: 130px;
             margin: -20px -16px 20px;
           }
 
           .history-hero-title {
-            font-size: 46px;
+            font-size: 28px;
           }
 
           .history-hero-count {
@@ -4648,11 +4648,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .tutor-hero {
           position: relative;
-          height: clamp(190px, 18vw, 280px);
-          border-radius: 24px;
+          height: 200px;
+          border-radius: 0;
           overflow: hidden;
-          margin: 0 0 24px;
-          box-shadow: 0 24px 70px rgba(37,99,235,.16);
+          margin: -22px -18px 24px -22px;
+          box-shadow: none;
         }
 
         .tutor-hero img {
@@ -4667,11 +4667,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           position: absolute;
           inset: 0;
           display: flex;
-          align-items: flex-start;
-          padding: clamp(24px, 3vw, 42px) clamp(28px, 4vw, 58px);
-          background:
-            linear-gradient(90deg, rgba(2,6,23,.78) 0%, rgba(2,6,23,.42) 42%, rgba(2,6,23,.1) 100%),
-            linear-gradient(to top, rgba(0,0,0,.66) 0%, rgba(0,0,0,.18) 62%, transparent 100%);
+          align-items: flex-end;
+          padding: 20px 28px;
+          background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%);
         }
 
         .tutor-hero-eyebrow {
@@ -4684,12 +4682,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .tutor-hero-title {
-          font-size: clamp(38px, 5vw, 72px);
+          font-size: 40px;
           font-weight: 900;
           color: #fff;
-          line-height: .95;
-          letter-spacing: -.055em;
-          max-width: 860px;
+          line-height: .9;
+          letter-spacing: -.035em;
         }
 
         .tutor-hero-sub {
@@ -4701,13 +4698,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .tutor-hero-pills {
-          position: absolute;
-          left: clamp(28px, 4vw, 58px);
-          right: clamp(28px, 4vw, 58px);
-          bottom: 22px;
           display: flex;
           gap: 8px;
           flex-wrap: wrap;
+          margin-top: 12px;
         }
 
         .tutor-hero-pill {
@@ -5136,6 +5130,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
           .tutor-hero {
             height: 130px;
+            margin: -20px -16px 20px;
           }
           .tutor-hero-pills {
             display: none;
@@ -5907,18 +5902,18 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     <div className="tutor-hero-eyebrow">Tutor IA</div>
                     <div className="tutor-hero-title">Tutor Inteligente</div>
                     <div className="tutor-hero-sub">Tu IA de estudio para la {examSystemLabel(ccaa)}</div>
+                    <div className="tutor-hero-pills">
+                      {CHAT_SUBJECTS.map(key => {
+                        const card = SUBJECT_CARDS[key]
+                        const isActive = asignatura === key
+                        return (
+                          <button key={key} type="button" className={`tutor-hero-pill ${isActive ? 'is-active' : ''}`} onClick={() => cambiarAsignatura(key)}>
+                            {card.title}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-                <div className="tutor-hero-pills">
-                  {CHAT_SUBJECTS.map(key => {
-                    const card = SUBJECT_CARDS[key]
-                    const isActive = asignatura === key
-                    return (
-                      <button key={key} type="button" className={`tutor-hero-pill ${isActive ? 'is-active' : ''}`} onClick={() => cambiarAsignatura(key)}>
-                        {card.title}
-                      </button>
-                    )
-                  })}
                 </div>
               </div>
 

@@ -48,17 +48,22 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronUp,
+  CheckCircle2,
   ClipboardList,
   Check,
+  Clock3,
+  Copy,
   Dna,
   Download,
   Eye,
+  FileText,
   Filter,
   Flame,
   FlaskConical,
   Globe,
   Landmark,
   LibraryBig,
+  Lightbulb,
   MessageCircle,
   MoreVertical,
   PenLine,
@@ -68,10 +73,13 @@ import {
   Sigma,
   SearchX,
   Target,
+  ThumbsDown,
+  ThumbsUp,
   TrendingDown,
   TrendingUp,
   UploadCloud,
   WandSparkles,
+  Workflow,
   X
 } from 'lucide-react'
 const ASIGNATURAS = {
@@ -444,7 +452,7 @@ function formatEnunciado(enunciado?: string | null) {
 type Asignatura = 'general' | 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
-interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string }
+interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string; ts?: number }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'matematicas_ccss', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
@@ -893,6 +901,8 @@ export default function Home() {
   const [planIA, setPlanIA] = useState('')
   const [cargandoPlan, setCargandoPlan] = useState(false)
   const [contextoChat, setContextoChat] = useState('')
+  const [chatContextTopic, setChatContextTopic] = useState<string | null>(null)
+  const [chatFeedback, setChatFeedback] = useState<Partial<Record<number, 'up' | 'down'>>>({})
   const [caminoExerciseNotice, setCaminoExerciseNotice] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
@@ -1751,6 +1761,18 @@ function nombreAsignatura(a: string) {
   return 'Historia de España'
 }
 
+function formatChatTimestamp(ts: number) {
+  const date = new Date(ts)
+  const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  const now = new Date()
+  const isSameDay = date.toDateString() === now.toDateString()
+  if (isSameDay) return `Hoy, ${time}`
+  const yesterday = new Date(now)
+  yesterday.setDate(now.getDate() - 1)
+  if (date.toDateString() === yesterday.toDateString()) return `Ayer, ${time}`
+  return `${date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}, ${time}`
+}
+
 function reset() {
   setCorreccion(''); setStreamText(''); setTruncated(false)
   setRespuesta('')
@@ -1770,6 +1792,7 @@ function cambiarAsignatura(a: Asignatura) {
   setDiaHistoriaIdx(0)
   setOpcion(0)
   setTipo('Ordinaria')
+  setChatContextTopic(null)
   reset()
 }
 
@@ -2178,7 +2201,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
   async function enviarChat() {
     if (!inputChat.trim()) return
-    const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: inputChat }
+    const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: inputChat, ts: Date.now() }
     const hist = [...mensajes, nuevoMensaje]
     setMensajes(hist)
     setInputChat('')
@@ -2189,7 +2212,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       setCargandoChat(false)
       return
     }
-    setMensajes(prev => [...prev, { rol: 'kairo', texto: '' }])
+    setMensajes(prev => [...prev, { rol: 'kairo', texto: '', ts: Date.now() }])
     const chatSystemIntro = asignatura === 'general'
       ? `Eres Kairo, el asistente de estudio de ${examSystemLabel(ccaa)}. El estudiante está en el modo General del chat: pregúntale con naturalidad sobre lo que necesite, incluidas dudas de organización, técnicas de estudio, motivación, cómo funciona la app, o cualquier cuestión que no encaje en una asignatura concreta. No fuerces la respuesta hacia matemáticas, lengua, historia u otra asignatura salvo que el estudiante lo pida explícitamente.\n` +
         'Responde de forma directa, clara y cercana. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n'
@@ -2207,7 +2230,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       })
       if (!res.ok) {
         const data = await res.json()
-        setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.') }])
+        setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: getApiErrorMessage(data, 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.'), ts: prev[prev.length - 1]?.ts }])
       } else {
         const reader = res.body!.getReader()
         const decoder = new TextDecoder()
@@ -2217,7 +2240,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           if (done) break
           accumulated += decoder.decode(value, { stream: true })
           const safeStream = readSafeStreamText(accumulated)
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: safeStream.visibleText }])
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: safeStream.visibleText, ts: prev[prev.length - 1]?.ts }])
         }
         accumulated += decoder.decode()
         const completedStream = readSafeStreamText(accumulated)
@@ -2225,9 +2248,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           ? `${completedStream.visibleText}\n\n> Respuesta incompleta: se ha alcanzado el límite de longitud. Puedes pedirme que continúe.`
           : accumulated
         if (!finalText) {
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.' }])
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.', ts: prev[prev.length - 1]?.ts }])
         } else {
-          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: finalText }])
+          setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: finalText, ts: prev[prev.length - 1]?.ts }])
         }
       }
     } catch {
@@ -2246,7 +2269,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       'Corrección: ' + correctionPayloadToMarkdown(item.correccion || '') + '\n\n' +
       'El estudiante quiere entender mejor su nota. Ayúdale de forma clara y motivadora.'
     setContextoChat(ctx)
-    setMensajes([{ rol: 'kairo', texto: '¡Hola! Veo que tienes dudas sobre tu corrección de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. ¿Qué parte no te queda clara? Pregúntame lo que quieras.' }])
+    setChatContextTopic(item.bloque || null)
+    setMensajes([{ rol: 'kairo', texto: '¡Hola! Veo que tienes dudas sobre tu corrección de ' + item.bloque + ' donde sacaste ' + item.nota + '/' + item.nota_maxima + '. ¿Qué parte no te queda clara? Pregúntame lo que quieras.', ts: Date.now() }])
     setItemSeleccionado(null)
     navegarASeccion('chat')
   }
@@ -4607,6 +4631,516 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           background: #dbe7fb;
           color: #64748b;
         }
+        .tutor-screen {
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 22px 18px 40px 22px;
+          font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+          background: #fff;
+        }
+
+        .tutor-shell {
+          width: 100%;
+          max-width: none;
+          margin: 0 auto;
+        }
+
+        .tutor-hero {
+          position: relative;
+          height: clamp(190px, 18vw, 280px);
+          border-radius: 24px;
+          overflow: hidden;
+          margin: 0 0 24px;
+          box-shadow: 0 24px 70px rgba(37,99,235,.16);
+        }
+
+        .tutor-hero img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 30%;
+          filter: brightness(.5) saturate(.75);
+        }
+
+        .tutor-hero-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: flex-start;
+          padding: clamp(24px, 3vw, 42px) clamp(28px, 4vw, 58px);
+          background:
+            linear-gradient(90deg, rgba(2,6,23,.78) 0%, rgba(2,6,23,.42) 42%, rgba(2,6,23,.1) 100%),
+            linear-gradient(to top, rgba(0,0,0,.66) 0%, rgba(0,0,0,.18) 62%, transparent 100%);
+        }
+
+        .tutor-hero-eyebrow {
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+          color: #93c5fd;
+          margin-bottom: 6px;
+        }
+
+        .tutor-hero-title {
+          font-size: clamp(38px, 5vw, 72px);
+          font-weight: 900;
+          color: #fff;
+          line-height: .95;
+          letter-spacing: -.055em;
+          max-width: 860px;
+        }
+
+        .tutor-hero-sub {
+          font-size: clamp(12px, 1vw, 15px);
+          font-weight: 600;
+          color: rgba(255,255,255,.55);
+          margin-top: 12px;
+          max-width: 640px;
+        }
+
+        .tutor-hero-pills {
+          position: absolute;
+          left: clamp(28px, 4vw, 58px);
+          right: clamp(28px, 4vw, 58px);
+          bottom: 22px;
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .tutor-hero-pill {
+          padding: 7px 14px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.18);
+          background: rgba(255,255,255,.08);
+          color: rgba(255,255,255,.7);
+          font-size: 11.5px;
+          font-weight: 700;
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          cursor: pointer;
+          transition: all 100ms;
+          font-family: inherit;
+        }
+
+        .tutor-hero-pill.is-active {
+          border-color: rgba(147,197,253,.5);
+          background: rgba(37,99,235,.5);
+          color: #fff;
+        }
+
+        .tutor-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(286px, 19vw);
+          gap: 22px;
+          align-items: start;
+        }
+
+        .tutor-main {
+          min-width: 0;
+        }
+
+        .tutor-chat-card {
+          background: rgba(255,255,255,.94);
+          border: 1px solid #dbe7fb;
+          border-radius: 22px;
+          box-shadow: 0 18px 50px rgba(37,99,235,.08);
+          display: flex;
+          flex-direction: column;
+          height: calc(100vh - 330px);
+          min-height: 520px;
+          overflow: hidden;
+        }
+
+        .tutor-messages {
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 28px clamp(26px, 2.4vw, 42px) 8px;
+        }
+
+        .tutor-welcome {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 20px;
+        }
+
+        .tutor-welcome h2 {
+          margin: 0 0 10px;
+          font-size: 22px;
+          font-weight: 800;
+          color: #0f172a;
+          letter-spacing: -0.02em;
+        }
+
+        .tutor-welcome h2 span {
+          color: #2563eb;
+        }
+
+        .tutor-welcome p {
+          margin: 0 0 22px;
+          font-size: 13px;
+          font-weight: 500;
+          line-height: 1.6;
+          color: #64748b;
+          max-width: 380px;
+        }
+
+        .tutor-quick-actions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          justify-content: center;
+          max-width: 560px;
+        }
+
+        .tutor-quick-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 9px 14px;
+          border-radius: 10px;
+          border: 1px solid #dbe7fb;
+          background: #fff;
+          color: #334155;
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: inherit;
+          transition: border-color 120ms, background 120ms;
+        }
+
+        .tutor-quick-action:hover {
+          border-color: #2563eb;
+          background: #eff6ff;
+          color: #2563eb;
+        }
+
+        .tutor-day-divider {
+          text-align: center;
+          font-size: 11px;
+          font-weight: 700;
+          color: #94a3b8;
+          margin: 4px 0 18px;
+          position: relative;
+        }
+
+        .tutor-day-divider::before,
+        .tutor-day-divider::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          width: calc(50% - 30px);
+          height: 1px;
+          background: #eef2f7;
+        }
+
+        .tutor-day-divider::before { left: 0; }
+        .tutor-day-divider::after { right: 0; }
+
+        .tutor-msg-ai {
+          padding: 10px 0;
+        }
+
+        .tutor-msg-ai-bubble {
+          border-radius: 22px;
+          padding: 20px 22px;
+          background: #fff;
+          border: 1px solid #e8eef7;
+          box-shadow: 0 4px 20px rgba(15,23,42,.06);
+        }
+
+        .tutor-msg-ai-label {
+          font-size: 10px;
+          font-weight: 900;
+          color: #2563eb;
+          margin-bottom: 10px;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+
+        .tutor-msg-footer {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 12px;
+        }
+
+        .tutor-msg-footer small {
+          font-size: 10.5px;
+          font-weight: 600;
+          color: #94a3b8;
+          margin-right: 2px;
+        }
+
+        .tutor-msg-feedback {
+          display: grid;
+          place-items: center;
+          width: 24px;
+          height: 24px;
+          border-radius: 7px;
+          border: 1px solid #e8eef7;
+          background: #fff;
+          color: #94a3b8;
+          cursor: pointer;
+          transition: all 120ms;
+        }
+
+        .tutor-msg-feedback:hover {
+          border-color: #dbe7fb;
+          color: #2563eb;
+        }
+
+        .tutor-msg-feedback.is-active {
+          border-color: #2563eb;
+          background: #eff6ff;
+          color: #2563eb;
+        }
+
+        .tutor-followup-row {
+          display: flex;
+          gap: 7px;
+          flex-wrap: wrap;
+          margin-top: 14px;
+        }
+
+        .tutor-followup-pill {
+          padding: 6px 12px;
+          border-radius: 999px;
+          border: 1px solid #dbe7fb;
+          background: #fff;
+          color: #2563eb;
+          font-size: 11.5px;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: inherit;
+          transition: background 120ms;
+        }
+
+        .tutor-followup-pill:hover {
+          background: #eff6ff;
+        }
+
+        .tutor-msg-user-row {
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-end;
+          gap: 8px;
+          padding: 8px 0;
+        }
+
+        .tutor-msg-user-row > div:first-child {
+          max-width: 65%;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+        }
+
+        .tutor-msg-user-bubble {
+          padding: 13px 18px;
+          border-radius: 18px 18px 4px 18px;
+          background: #eff6ff;
+          border: 1px solid #dbeafe;
+          color: #0f172a;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 1.6;
+        }
+
+        .tutor-msg-user-meta {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          margin-top: 5px;
+          color: #94a3b8;
+        }
+
+        .tutor-msg-user-meta small {
+          font-size: 10.5px;
+          font-weight: 600;
+        }
+
+        .tutor-msg-user-avatar {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: #2563eb;
+          color: #fff;
+          display: grid;
+          place-items: center;
+          font-size: 11px;
+          font-weight: 800;
+          flex-shrink: 0;
+        }
+
+        .tutor-input-zone {
+          flex-shrink: 0;
+          padding: 14px clamp(26px, 2.4vw, 42px) 22px;
+          border-top: 1px solid #eef2f7;
+        }
+
+        .tutor-input-hint {
+          text-align: center;
+          font-size: 10px;
+          color: #94a3b8;
+          margin: 8px 0 0;
+          letter-spacing: .02em;
+        }
+
+        .tutor-side {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          position: sticky;
+          top: 88px;
+          max-height: calc(100vh - 108px);
+          overflow-y: auto;
+          padding-right: 2px;
+        }
+
+        .tutor-side-card {
+          padding: 18px;
+        }
+
+        .tutor-side-card > h2 {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin: 0 0 14px;
+          color: #64748b;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .tutor-context-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #f1f5f9;
+          font-size: 12.5px;
+        }
+
+        .tutor-context-row:last-child {
+          border-bottom: 0;
+          padding-bottom: 0;
+        }
+
+        .tutor-context-row span {
+          color: #94a3b8;
+          font-weight: 600;
+        }
+
+        .tutor-context-row b {
+          color: #0f172a;
+          font-weight: 700;
+          text-align: right;
+        }
+
+        .tutor-shortcut {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          width: 100%;
+          padding: 10px 2px;
+          border: 0;
+          border-bottom: 1px solid #f1f5f9;
+          background: transparent;
+          color: #334155;
+          font-size: 12.5px;
+          font-weight: 700;
+          text-align: left;
+          cursor: pointer;
+          font-family: inherit;
+        }
+
+        .tutor-shortcut:last-child {
+          border-bottom: 0;
+        }
+
+        .tutor-shortcut:hover {
+          color: #2563eb;
+        }
+
+        .tutor-recent-q {
+          padding: 9px 0;
+          border-bottom: 1px solid #f1f5f9;
+        }
+
+        .tutor-recent-q:last-child {
+          border-bottom: 0;
+        }
+
+        .tutor-recent-q span {
+          display: block;
+          font-size: 12px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.4;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+
+        .tutor-recent-q small {
+          display: block;
+          margin-top: 3px;
+          font-size: 10.5px;
+          font-weight: 600;
+          color: #94a3b8;
+        }
+
+        .tutor-recent-empty {
+          margin: 0;
+          font-size: 12px;
+          color: #94a3b8;
+          font-weight: 500;
+        }
+
+        .tutor-recent-viewall {
+          margin-top: 10px;
+          border: 0;
+          background: transparent;
+          color: #2563eb;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          padding: 0;
+          font-family: inherit;
+        }
+
+        @media (max-width: 1024px) {
+          .tutor-layout {
+            grid-template-columns: 1fr;
+          }
+          .tutor-side {
+            position: static;
+            max-height: none;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .tutor-screen {
+            padding: 20px 16px 44px;
+          }
+          .tutor-hero {
+            height: 130px;
+          }
+          .tutor-hero-pills {
+            display: none;
+          }
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -5364,143 +5898,217 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         )}
 
         {seccion === 'chat' && (
-          /* V2 La Sala — full-width with photo hero + controls bar */
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh', background: 'white' }}>
-
-            {/* Photo hero */}
-            <div style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
-              <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.45) saturate(.75)', transition: 'opacity 400ms ease' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,.85) 0%, rgba(15,23,42,.3) 55%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px' }}>
-                <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
-                <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .9, marginBottom: 10 }}>Tutor<br />Inteligente</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <main className="tutor-screen">
+            <div className="tutor-shell">
+              <div className="tutor-hero">
+                <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" />
+                <div className="tutor-hero-overlay">
+                  <div>
+                    <div className="tutor-hero-eyebrow">Tutor IA</div>
+                    <div className="tutor-hero-title">Tutor Inteligente</div>
+                    <div className="tutor-hero-sub">Tu IA de estudio para la {examSystemLabel(ccaa)}</div>
+                  </div>
+                </div>
+                <div className="tutor-hero-pills">
                   {CHAT_SUBJECTS.map(key => {
                     const card = SUBJECT_CARDS[key]
                     const isActive = asignatura === key
                     return (
-                      <button key={key} type="button" onClick={() => cambiarAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1px solid rgba(147,197,253,.5)' : '1px solid rgba(255,255,255,.18)', background: isActive ? 'rgba(37,99,235,.5)' : 'rgba(255,255,255,.08)', color: isActive ? 'white' : 'rgba(255,255,255,.7)', fontSize: 11, fontWeight: 700, backdropFilter: 'blur(8px)', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit' }}>
+                      <button key={key} type="button" className={`tutor-hero-pill ${isActive ? 'is-active' : ''}`} onClick={() => cambiarAsignatura(key)}>
                         {card.title}
                       </button>
                     )
                   })}
                 </div>
               </div>
-            </div>
 
-            {/* Tutor intro card */}
-            <div style={{ padding: '12px 28px 0' }}>
-              <SectionIntroCard
-                hintKey="hint_tutor"
-                line1="Pregúntale a Kairo lo que no entiendes, como si fuera un profesor."
-                line2="Explica, da ejemplos y resuelve dudas concretas. Para cuando estás atascado y necesitas entender el porqué."
-              />
-            </div>
-
-            {/* Controls bar */}
-            <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
-              {CHAT_SUBJECTS.map(key => {
-                const val = ASIGNATURAS[key]
-                const card = SUBJECT_CARDS[key]
-                const isActive = asignatura === key
-                return (
-                  <button key={key} type="button" onClick={() => cambiarAsignatura(key)} style={{ padding: '5px 12px', borderRadius: 999, border: isActive ? '1.5px solid #2563eb' : '1px solid #e2e8f0', background: isActive ? '#eff6ff' : 'white', fontSize: 12, fontWeight: 700, color: isActive ? '#2563eb' : '#475569', cursor: 'pointer', transition: 'all 100ms', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: val.color, flexShrink: 0, display: 'inline-block' }} />
-                    {card.title}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Messages scroll area */}
-            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 28px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-              <div style={{ maxWidth: 820, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
-
-                {mensajes.length === 0 && (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
-                    <div className="chat-avatar-pulse" style={{ margin: '0 auto 28px', display: 'inline-flex', padding: '18px 32px', background: '#0f172a', borderRadius: 20, border: '1px solid rgba(37,99,235,.28)' }}>
-                      <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 46, width: 'auto', display: 'block' }} />
-                    </div>
-                    <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 800, letterSpacing: '0.24em', color: '#94a3b8', textTransform: 'uppercase' }}>Hola, soy</p>
-                    <h2 style={{ margin: '0 0 18px', fontSize: 46, fontWeight: 900, color: '#2563eb', letterSpacing: '-0.045em', lineHeight: 1, textShadow: '0 0 32px rgba(37,99,235,.3)' }}>Kairo</h2>
-                    <p style={{ margin: '0 0 18px', fontSize: 15, color: '#64748b', maxWidth: 340, lineHeight: 1.65, fontWeight: 450 }}>
-                      Tu IA de estudio para la {examSystemLabel(ccaa)}.<br />Pregúntame cualquier cosa.
-                    </p>
-                  </div>
-                )}
-
-                {mensajes.map((msg, i) => (
-                  msg.rol === 'kairo' ? (
-                    <div key={i} className="chat-msg-ai" style={{ padding: '10px 0' }}>
-                      <div style={{ borderRadius: 22, padding: '20px 22px', background: 'white', border: '1px solid #e8eef7', boxShadow: '0 4px 20px rgba(15,23,42,.06)' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                          <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 10, fontWeight: 900, color: '#2563eb', marginBottom: 10, letterSpacing: '.12em', textTransform: 'uppercase' }}>Kairo</div>
-                            {(() => {
-                              const isStreamingMessage = cargandoChat && i === mensajes.length - 1
-                              if (isStreamingMessage) {
-                                return (
-                                  <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
-                                    <MathMarkdown text={msg.texto} isStreaming components={darkMdComponents} />
-                                  </div>
-                                )
-                              }
-                              const { main, why } = splitWhyExplanationMarkdown(msg.texto)
-                              return (
-                                <>
-                                  <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
-                                    <MathMarkdown text={main} format={false} components={darkMdComponents} />
-                                  </div>
-                                  <WhyExplanation markdown={why} components={darkMdComponents} />
-                                </>
-                              )
-                            })()}
+              <div className="tutor-layout">
+                <section className="tutor-main">
+                  <div className="tutor-chat-card">
+                    <div className="tutor-messages">
+                      {mensajes.length === 0 ? (
+                        <div className="tutor-welcome">
+                          <KairoBrand variant="mark" size="lg" style={{ width: 64, height: 64, borderRadius: '50%', marginBottom: 18 }} />
+                          <h2>Hola, soy <span>Kairo</span></h2>
+                          <p>Estoy aquí para ayudarte a entender, practicar y aprobar la {examSystemLabel(ccaa)}.<br />¿Sobre qué te gustaría trabajar hoy?</p>
+                          <div className="tutor-quick-actions">
+                            {[
+                              { label: 'Explícame este ejercicio', icon: PenLine, prompt: 'Explícame este ejercicio: ' },
+                              { label: 'Hazme un esquema', icon: Workflow, prompt: 'Hazme un esquema de: ' },
+                              { label: 'Ponme un ejemplo', icon: Lightbulb, prompt: 'Ponme un ejemplo de: ' },
+                              { label: 'Corrígeme paso a paso', icon: CheckCircle2, prompt: 'Corrígeme esto paso a paso: ' },
+                            ].map(qa => (
+                              <button key={qa.label} type="button" className="tutor-quick-action" onClick={() => { setInputChat(qa.prompt); chatInputRef.current?.focus() }}>
+                                <qa.icon size={15} />
+                                {qa.label}
+                              </button>
+                            ))}
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div key={i} className="chat-msg-user" style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
-                      <div style={{ maxWidth: '65%', padding: '13px 18px', borderRadius: '22px 22px 5px 22px', background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', color: 'white', fontSize: 14, fontWeight: 600, lineHeight: 1.65, boxShadow: '0 8px 24px rgba(37,99,235,.22)' }}>
-                        {msg.texto}
-                      </div>
-                    </div>
-                  )
-                ))}
+                      ) : (
+                        <>
+                          <div className="tutor-day-divider">Hoy</div>
+                          {mensajes.map((msg, i) => {
+                            const isLast = i === mensajes.length - 1
+                            if (msg.rol === 'kairo') {
+                              const isStreamingMessage = cargandoChat && isLast
+                              return (
+                                <div key={i} className="chat-msg-ai tutor-msg-ai">
+                                  <div className="tutor-msg-ai-bubble">
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                                      <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0 }} />
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div className="tutor-msg-ai-label">Kairo</div>
+                                        {(() => {
+                                          if (isStreamingMessage) {
+                                            return (
+                                              <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
+                                                <MathMarkdown text={msg.texto} isStreaming components={darkMdComponents} />
+                                              </div>
+                                            )
+                                          }
+                                          const { main, why } = splitWhyExplanationMarkdown(msg.texto)
+                                          return (
+                                            <>
+                                              <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
+                                                <MathMarkdown text={main} format={false} components={darkMdComponents} />
+                                              </div>
+                                              <WhyExplanation markdown={why} components={darkMdComponents} />
+                                            </>
+                                          )
+                                        })()}
+                                        {msg.texto && !isStreamingMessage && (
+                                          <div className="tutor-msg-footer">
+                                            {msg.ts && <small>{new Date(msg.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</small>}
+                                            <button type="button" className={`tutor-msg-feedback ${chatFeedback[i] === 'up' ? 'is-active' : ''}`} onClick={() => setChatFeedback(prev => { const next = { ...prev }; if (next[i] === 'up') delete next[i]; else next[i] = 'up'; return next })} title="Respuesta útil">
+                                              <ThumbsUp size={12} />
+                                            </button>
+                                            <button type="button" className={`tutor-msg-feedback ${chatFeedback[i] === 'down' ? 'is-active' : ''}`} onClick={() => setChatFeedback(prev => { const next = { ...prev }; if (next[i] === 'down') delete next[i]; else next[i] = 'down'; return next })} title="Respuesta poco útil">
+                                              <ThumbsDown size={12} />
+                                            </button>
+                                            <button type="button" className="tutor-msg-feedback" onClick={() => navigator.clipboard.writeText(msg.texto)} title="Copiar respuesta">
+                                              <Copy size={12} />
+                                            </button>
+                                          </div>
+                                        )}
+                                        {isLast && !cargandoChat && msg.texto && (
+                                          <div className="tutor-followup-row">
+                                            {[
+                                              { label: 'Explícamelo fácil', prompt: 'Explícamelo más fácil, por favor' },
+                                              { label: 'Ponme un ejemplo', prompt: 'Ponme un ejemplo de esto' },
+                                              { label: 'Hazme un resumen', prompt: 'Hazme un resumen de esto' },
+                                              { label: 'Corrígeme este ejercicio', prompt: 'Corrígeme este ejercicio: ' },
+                                            ].map(fu => (
+                                              <button key={fu.label} type="button" className="tutor-followup-pill" onClick={() => { setInputChat(fu.prompt); chatInputRef.current?.focus() }}>
+                                                {fu.label}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return (
+                              <div key={i} className="tutor-msg-user-row">
+                                <div>
+                                  <div className="tutor-msg-user-bubble">{msg.texto}</div>
+                                  <div className="tutor-msg-user-meta">
+                                    {msg.ts && <small>{new Date(msg.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</small>}
+                                    <Check size={11} />
+                                  </div>
+                                </div>
+                                <div className="tutor-msg-user-avatar">T</div>
+                              </div>
+                            )
+                          })}
 
-                {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
-                  <div className="chat-msg-ai" style={{ padding: '16px 0' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                      <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0 }} />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
-                        <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                        <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
-                        <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                          {cargandoChat && mensajes[mensajes.length - 1]?.texto === '' && (
+                            <div className="chat-msg-ai tutor-msg-ai">
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '10px 0' }}>
+                                <KairoBrand variant="mark" size="sm" style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0 }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingTop: 10 }}>
+                                  <span className="chat-dot-1" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                                  <span className="chat-dot-2" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                                  <span className="chat-dot-3" style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    <div className="tutor-input-zone">
+                      <div className="chat-input-wrap">
+                        <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
+                        <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
+                          {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
+                          {cargandoChat ? 'Pensando...' : 'Enviar'}
+                        </button>
                       </div>
+                      <p className="tutor-input-hint">Enter para enviar · Shift + Enter para nueva línea</p>
                     </div>
                   </div>
-                )}
+                </section>
 
-                <div ref={chatEndRef} />
+                <aside className="tutor-side">
+                  <div className="history-card tutor-side-card">
+                    <h2><BookOpen size={14} /> Contexto activo</h2>
+                    <div className="tutor-context-row"><span>Asignatura</span><b>{nombreAsignatura(asignatura)}</b></div>
+                    {chatContextTopic && <div className="tutor-context-row"><span>Bloque</span><b>{chatContextTopic}</b></div>}
+                    <div className="tutor-context-row"><span>Nivel</span><b>{examSystemLabel(ccaa)}</b></div>
+                  </div>
+
+                  <div className="history-card tutor-side-card">
+                    <h2><WandSparkles size={14} /> Acciones rápidas</h2>
+                    {[
+                      { label: 'Generar ejercicios', prompt: 'Genérame ejercicios de práctica sobre este tema' },
+                      { label: 'Crear resumen del tema', prompt: 'Hazme un resumen de este tema' },
+                      { label: 'Explicar concepto', prompt: 'Explícame el concepto principal de este tema' },
+                      { label: 'Autoevaluación rápida', prompt: 'Ponme una autoevaluación rápida sobre este tema' },
+                    ].map(action => (
+                      <button key={action.label} type="button" className="tutor-shortcut" onClick={() => { setInputChat(action.prompt); chatInputRef.current?.focus() }}>
+                        {action.label}
+                        <ChevronRight size={14} />
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="history-card tutor-side-card">
+                    <h2><Clock3 size={14} /> Últimas dudas</h2>
+                    {(() => {
+                      const recentQuestions = mensajes
+                        .filter((m): m is MensajeChat & { ts: number } => m.rol === 'usuario' && m.ts != null)
+                        .slice(-10)
+                        .reverse()
+                      if (!recentQuestions.length) {
+                        return <p className="tutor-recent-empty">Tus preguntas recientes aparecerán aquí.</p>
+                      }
+                      return (
+                        <>
+                          {recentQuestions.slice(0, 3).map((q, i) => (
+                            <div key={i} className="tutor-recent-q">
+                              <span>{q.texto}</span>
+                              <small>{formatChatTimestamp(q.ts)}</small>
+                            </div>
+                          ))}
+                          {recentQuestions.length > 3 && (
+                            <button type="button" className="tutor-recent-viewall" onClick={() => chatEndRef.current?.parentElement?.scrollTo({ top: 0, behavior: 'smooth' })}>
+                              Ver todas
+                            </button>
+                          )}
+                        </>
+                      )
+                    })()}
+                  </div>
+                </aside>
               </div>
             </div>
-
-            {/* Input zone */}
-            <div style={{ flexShrink: 0, background: 'linear-gradient(to top, white 60%, transparent)', padding: '12px 28px 20px' }}>
-              <div style={{ maxWidth: 820, margin: '0 auto' }}>
-                <div style={{ borderTop: '1px solid #e2e8f0', marginBottom: 12 }} />
-                <div className="chat-input-wrap">
-                  <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
-                  <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
-                    {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
-                    {cargandoChat ? 'Pensando...' : 'Enviar'}
-                  </button>
-                </div>
-                <p style={{ textAlign: 'center', fontSize: 10, color: '#94a3b8', marginTop: 8, letterSpacing: '.02em' }}>Enter para enviar · Shift+Enter para nueva línea</p>
-              </div>
-            </div>
-          </div>
+          </main>
         )}
 
         {seccion === 'historial' && (

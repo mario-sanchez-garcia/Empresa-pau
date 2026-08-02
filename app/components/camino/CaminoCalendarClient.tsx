@@ -1615,290 +1615,281 @@ export default function CaminoCalendarClient() {
   return (
     <Shell>
       {/* ── HEADER ── */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #dbe7fb' }}>
-        <div className="camino-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: '14px 24px', maxWidth: 1680, margin: '0 auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #e2e8f0' }}>
+        <div className="camino-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
-            <span className="camino-header-title" style={{ fontSize: 21, fontWeight: 800, color: '#0f172a', lineHeight: 1, letterSpacing: '-0.02em' }}>Tu semana de estudio</span>
-            <div style={{ display: 'flex', gap: 16, marginTop: 6, flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>🔥 {streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>{completedMain}/{Math.min(totalMain, 5)} misiones esta semana</div>
-              {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>+{weeklyXP} XP esta semana</div>}
-              {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>Parcial próximo · {upcomingPartial.subject}</div>}
-            </div>
+            <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
-          <div className="camino-header-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '9px 15px', borderRadius: 10, cursor: 'pointer', border: '1px solid #dbe7fb', background: 'white', color: '#334155', transition: 'all .15s' }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
               <CalendarDays size={13} /> Editar semana
             </button>
-            <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '9px 15px', borderRadius: 10, cursor: 'pointer', border: '1px solid #dbe7fb', background: 'white', color: '#334155', transition: 'all .15s' }}>
+            <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
               <Plus size={13} /> Examen
             </button>
-            <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '9px 15px', borderRadius: 10, cursor: 'pointer', border: 'none', background: '#2563eb', color: 'white', transition: 'all .15s', boxShadow: '0 4px 14px rgba(37,99,235,.24)' }}>
+            <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: 'none', background: '#2563eb', color: 'white', transition: 'all .15s' }}>
               <BookPlus size={13} /> Asignatura
             </button>
           </div>
         </div>
+        {/* Ticker */}
+        <div style={{ background: '#eff6ff', borderBottom: '1px solid #dbeafe', padding: '6px 20px', display: 'flex', gap: 20, overflowX: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />🔥 {streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />{completedMain}/{Math.min(totalMain, 5)} misiones esta semana</div>
+          {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP esta semana</div>}
+          {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial próximo · {upcomingPartial.subject}</div>}
+        </div>
       </header>
 
-      {/* ── CONTENT ── */}
-      <div className="camino-page">
-
-        {/* Banners */}
-        {BETA_FEEDBACK_URL && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 16px', background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: 12, marginBottom: 14 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', margin: 0 }}>Beta privada · Matemáticas II, Matemáticas CCSS, Lengua e Historia.</p>
-            <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'white', borderRadius: 8, padding: '3px 10px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Feedback</a>
-          </div>
-        )}
-        {isRescueMode && <div style={{ padding: '10px 16px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 12, marginBottom: 14 }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
-
-        {/* ── HERO ── */}
-        <div className="camino-hero" style={{ position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55) saturate(0.75)', display: 'block', position: 'absolute', inset: 0 }} />
-          <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-            <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
-            <div style={{ display: 'flex', gap: 20, marginTop: 18 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
-              <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.16)' }} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
-              {heroRank != null && <><div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,.16)' }} /><div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div></>}
-            </div>
-          </div>
-        </div>
-
-        <div className="camino-grid">
+      {/* ── CONTENT GRID ── */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
         {/* ── LEFT COLUMN ── */}
-        <div className="camino-main-col">
+        <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', background: 'white' }}>
+
+          {/* Banners */}
+          {BETA_FEEDBACK_URL && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '8px 20px', background: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', margin: 0 }}>Beta privada · Matemáticas II, Matemáticas CCSS, Lengua e Historia.</p>
+              <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'white', borderRadius: 8, padding: '3px 10px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Feedback</a>
+            </div>
+          )}
+          {isRescueMode && <div style={{ padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
+
+          {/* ── HERO ── */}
+          <div className="camino-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+            <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
+            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
+              <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
+              <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
+                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
+              </div>
+            </div>
+          </div>
 
           {/* Sunday mock */}
           {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (() => {
             const simLimitReached = monthlySimsUsed >= getCaminoPlanLimits(caminoPlanId).partialsPerMonth
-            if (sundayMockSession !== null) {
-              return (
-                <div className="camino-card" style={{ border: '1px solid #bfdbfe', background: 'linear-gradient(135deg,#eff6ff,#eef2ff)', padding: '16px 20px' }}>
-                  <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Simulacro del Domingo</p>
-                  <p style={{ fontSize: 14, fontWeight: 900, color: '#1e293b', margin: '4px 0 0' }}>Simulacro del Domingo hecho ✓</p>
-                  {(() => {
-                    const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
-                    const nota = sundayMockSession.nota_final
-                    const proj = heroProj?.nota_proyectada ?? null
-                    if (nota == null) return null
-                    if (proj != null && heroProj?.confidence !== 'low') {
-                      const delta = Math.round((nota - proj) * 10) / 10
-                      const sign = delta >= 0 ? '+' : ''
-                      return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>{sign}{delta.toFixed(1).replace('.', ',')} vs proyección · {nota.toFixed(1)}/10</p>
-                    }
-                    return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>Sacaste {nota.toFixed(1)}/10 esta semana</p>
-                  })()}
-                </div>
-              )
-            }
-            if (simLimitReached) {
-              return (
-                <div className="camino-card" style={{ background: '#f8fafc', padding: '16px 20px' }}>
-                  <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
-                  <p style={{ fontSize: 15, fontWeight: 900, color: '#64748b', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
-                  <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes.</p>
-                </div>
-              )
-            }
             return (
-              <div className="camino-card camino-row-card" style={{ borderLeft: '3px solid #2563eb', padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 18 }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#eff6ff', border: '1px solid #dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Target size={20} color="#2563eb" />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
-                  <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '4px 0 3px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} <span style={{ color: '#94a3b8', fontWeight: 700 }}>· ~20 min</span></p>
-                  <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
-                </div>
-                <button onClick={startSundayMock} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#2563eb', padding: '10px 18px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}>Empezar simulacro →</button>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                {sundayMockSession !== null ? (
+                  <div style={{ borderRadius: 14, border: '1px solid #bfdbfe', background: 'linear-gradient(135deg,#eff6ff,#eef2ff)', padding: '12px 16px' }}>
+                    <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Simulacro del Domingo</p>
+                    <p style={{ fontSize: 14, fontWeight: 900, color: '#1e293b', margin: '4px 0 0' }}>Simulacro del Domingo hecho ✓</p>
+                    {(() => {
+                      const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
+                      const nota = sundayMockSession.nota_final
+                      const proj = heroProj?.nota_proyectada ?? null
+                      if (nota == null) return null
+                      if (proj != null && heroProj?.confidence !== 'low') {
+                        const delta = Math.round((nota - proj) * 10) / 10
+                        const sign = delta >= 0 ? '+' : ''
+                        return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>{sign}{delta.toFixed(1).replace('.', ',')} vs proyección · {nota.toFixed(1)}/10</p>
+                      }
+                      return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>Sacaste {nota.toFixed(1)}/10 esta semana</p>
+                    })()}
+                  </div>
+                ) : simLimitReached ? (
+                  <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#f8fafc', padding: '16px 20px' }}>
+                    <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
+                    <p style={{ fontSize: 15, fontWeight: 900, color: '#64748b', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                    <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes.</p>
+                  </div>
+                ) : (
+                  <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: 'white', padding: '16px 20px' }}>
+                    <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
+                    <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                    <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
+                    <button onClick={startSundayMock} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#2563eb', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}>Empezar simulacro →</button>
+                  </div>
+                )}
               </div>
             )
           })()}
 
-          {upcomingPartial && <PartialExamBanner exam={upcomingPartial} today={realToday} />}
+          {upcomingPartial && <div style={{ padding: '8px 20px', borderBottom: '1px solid #f1f5f9' }}><PartialExamBanner exam={upcomingPartial} today={realToday} /></div>}
 
-          {/* ── MISIÓN DE HOY ── */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', marginBottom: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>Misión de hoy</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMain}/{Math.min(totalMain, 5)} completadas esta semana</span>
-            </div>
-
-            {mainMission ? (
-              <div className="camino-card camino-mission-card" style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '22px 24px', borderLeft: '4px solid #2563eb' }}>
-                <div className="camino-mission-number" style={{ fontSize: 38, fontWeight: 900, lineHeight: 1, color: '#bfdbfe', flexShrink: 0, width: 52, fontVariantNumeric: 'tabular-nums' }}>01</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, alignItems: 'center' }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
-                    {(formatBlockLabel(mainMission.blockKey) || mainMission.block) && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mainMission.blockKey) || mainMission.block}</span></>}
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Principal</span>
-                    {!!mainMission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡ Exprés</span>}
-                  </div>
-                  <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', lineHeight: 1.3, marginBottom: 8 }}>{mainMission.title}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                    <Clock3 size={13} color="#94a3b8" />
-                    <span style={{ fontSize: 11.5, fontWeight: 600, color: '#94a3b8' }}>{mainMission.estimatedMinutes} min · {mainMission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
-                  </div>
-                  {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#64748b' }}>{mainReason}</div>}
-                  {mainMission.status !== 'done' && (
-                    <div style={{ display: 'flex', gap: 14, marginTop: 10 }}>
-                      <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11.5, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
-                      {mainMission.subjectSlug && mainMission.v2SortOrder != null && (
-                        <button onClick={() => setShowNotSeenConfirm(true)} style={{ fontSize: 11.5, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Aún no lo he dado</button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mainMission.baseXP} XP</span>
-                  {mainMission.status === 'done' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '10px 18px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
-                  ) : mainTarget?.href ? (
-                    <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 800, padding: '10px 20px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.25)' }}>Empezar →</a>
-                  ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '10px 18px', borderRadius: 10, background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#94a3b8' }}>En preparación</span>
-                  )}
-                </div>
-              </div>
-            ) : microMission ? (
-              <div className="camino-card camino-mission-card" style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '22px 24px', borderLeft: '4px solid #2563eb' }}>
-                <div style={{ fontSize: 38, fontWeight: 900, lineHeight: 1, color: '#bfdbfe', flexShrink: 0, width: 52 }}>01</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase' }}>{microMission.subject}</span>
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Reto exprés</span>
-                  </div>
-                  <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>Reto exprés de hoy</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                    <Clock3 size={13} color="#94a3b8" />
-                    <span style={{ fontSize: 11.5, fontWeight: 600, color: '#94a3b8' }}>{microMission.topic} · repaso rápido</span>
-                  </div>
-                </div>
-                <div style={{ flexShrink: 0 }}>
-                  <a href={microMission.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 800, padding: '10px 20px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none' }}>Empezar →</a>
-                </div>
-              </div>
-            ) : (
-              <div className="camino-card" style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '22px 24px' }}>
-                <div style={{ fontSize: 38, fontWeight: 900, lineHeight: 1, color: '#dbeafe', flexShrink: 0, width: 52 }}>01</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: '#94a3b8' }}>Completa tu perfil para empezar</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>Configura tu perfil y construiremos tu Camino PAU.</div>
-                </div>
-              </div>
-            )}
+          {/* ── MISSIONS HEADER ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', background: 'white' }}>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Misiones de hoy</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMain}/{Math.min(totalMain, 5)} completadas esta semana</span>
           </div>
 
-          {/* ── PRÓXIMAS MISIONES (bonus de hoy + próximos días) ── */}
+          {/* ── MISSION 01 — PRINCIPAL ── */}
+          {mainMission ? (
+            <div className="camino-mission-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb', cursor: 'default' }}>
+              <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
+                  {(formatBlockLabel(mainMission.blockKey) || mainMission.block) && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mainMission.blockKey) || mainMission.block}</span></>}
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Principal</span>
+                  {!!mainMission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡ Exprés</span>}
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', lineHeight: 1.3, marginBottom: 8 }}>{mainMission.title}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <div style={{ flex: 1, height: 3, background: '#dbeafe', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: '#2563eb', borderRadius: 2, width: mainMission.status === 'done' ? '100%' : '0%' }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mainMission.estimatedMinutes} min · {mainMission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
+                </div>
+                {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#64748b' }}>{mainReason}</div>}
+                {mainMission.status !== 'done' && (
+                  <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                    <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
+                    {mainMission.subjectSlug && mainMission.v2SortOrder != null && (
+                      <button onClick={() => setShowNotSeenConfirm(true)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Aún no lo he dado</button>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mainMission.baseXP} XP</span>
+                {mainMission.status === 'done' ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                ) : mainTarget?.href ? (
+                  <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.25)' }}>Empezar →</a>
+                ) : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#94a3b8' }}>En preparación</span>
+                )}
+              </div>
+            </div>
+          ) : microMission ? (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb' }}>
+              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48 }}>01</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase' }}>{microMission.subject}</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Reto exprés</span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>Reto exprés de hoy</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>{microMission.topic} · repaso rápido</div>
+              </div>
+              <div style={{ flexShrink: 0 }}>
+                <a href={microMission.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none' }}>Empezar →</a>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#dbeafe', flexShrink: 0, width: 48 }}>01</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: '#94a3b8' }}>Completa tu perfil para empezar</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>Configura tu perfil y construiremos tu Camino PAU.</div>
+              </div>
+            </div>
+          )}
+
+          {/* ── BONUS SECTION (Mañana) ── */}
+          {todayBonus.length > 0 && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', borderTop: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>Mañana</span>
+              </div>
+              {todayBonus.map((mission, idx) => {
+                const bonusTarget = hrefForMission(mission)
+                return (
+                  <div key={mission.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', opacity: mission.status === 'done' ? 0.55 : 1 }}>
+                    <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#dbeafe', flexShrink: 0, width: 48, paddingTop: 2 }}>0{idx + 2}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
+                        {mission.block && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.block}</span></>}
+                        <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f3e8ff', color: '#7c3aed' }}>Extra</span>
+                        {!!mission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡ Exprés</span>}
+                      </div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: mission.status === 'done' ? '#94a3b8' : '#0f172a', lineHeight: 1.3, textDecoration: mission.status === 'done' ? 'line-through' : 'none', marginBottom: 8 }}>{mission.title}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ flex: 1, height: 3, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', background: mission.status === 'done' ? '#34d399' : '#2563eb', borderRadius: 2, width: mission.status === 'done' ? '100%' : '0%' }} />
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mission.estimatedMinutes} min · {mission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mission.baseXP} XP</span>
+                      {mission.status === 'done' ? (
+                        <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                      ) : bonusTarget?.href ? (
+                        <a href={bonusTarget.href} style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', textDecoration: 'none' }}>Ir →</a>
+                      ) : (
+                        <span style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', color: '#94a3b8', border: '1px solid #e2e8f0' }}>Sin pantalla</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
+
+          {/* ── PRÓXIMAS MISIONES ── */}
           {(() => {
             const nextDays = visibleCalendar
               .filter(d => d.date > realToday)
               .slice(0, 2)
               .filter(d => d.missions.some(m => m.role === 'main'))
-            if (todayBonus.length === 0 && nextDays.length === 0) return null
+            if (nextDays.length === 0) return null
             const todayMs = new Date(realToday + 'T00:00:00').getTime()
             return (
-              <div>
-                <div style={{ padding: '0 2px', marginBottom: 10 }}>
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', borderTop: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>Próximas misiones</span>
                 </div>
-                <div className="camino-card">
-                  {todayBonus.map((mission, idx) => {
-                    const bonusTarget = hrefForMission(mission)
-                    return (
-                      <div key={mission.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid #f1f5f9', opacity: mission.status === 'done' ? 0.55 : 0.8 }}>
-                        <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1, color: '#c7d2fe', flexShrink: 0, width: 40, paddingTop: 2 }}>0{idx + 2}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 5, alignItems: 'center' }}>
-                            <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8' }}>Mañana</span>
-                            <span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span>
-                            <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
-                            {mission.block && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.block}</span></>}
-                            <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: '#f3e8ff', color: '#7c3aed' }}>Extra</span>
-                            {!!mission.metadata?.express && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡</span>}
-                          </div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: mission.status === 'done' ? '#94a3b8' : '#334155', lineHeight: 1.3, textDecoration: mission.status === 'done' ? 'line-through' : 'none' }}>{mission.title}</div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
-                            <Clock3 size={11} color="#94a3b8" />
-                            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mission.estimatedMinutes} min · {mission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8' }}>+{mission.baseXP} XP</span>
-                          {mission.status === 'done' ? (
-                            <span style={{ fontSize: 11, fontWeight: 800, padding: '5px 11px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
-                          ) : bonusTarget?.href ? (
-                            <a href={bonusTarget.href} style={{ fontSize: 11, fontWeight: 800, padding: '5px 11px', borderRadius: 8, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', textDecoration: 'none' }}>Ir →</a>
-                          ) : (
-                            <span style={{ fontSize: 11, fontWeight: 800, padding: '5px 11px', borderRadius: 8, background: '#f1f5f9', color: '#94a3b8', border: '1px solid #e2e8f0' }}>Sin pantalla</span>
+                {nextDays.map((day, di) => {
+                  const mission = day.missions.find(m => m.role === 'main')
+                  if (!mission) return null
+                  const diff = Math.round((new Date(day.date + 'T00:00:00').getTime() - todayMs) / 86400000)
+                  const dayName = diff === 1 ? 'Mañana' : diff === 2 ? 'Pasado mañana' : calendarDayLabel(day.date)
+                  const num = String(2 + todayBonus.length + di).padStart(2, '0')
+                  return (
+                    <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid #f1f5f9', borderLeft: `3px solid ${di === 0 ? '#2563eb' : '#8b5cf6'}`, opacity: 0.45 }}>
+                      <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: di === 0 ? '#2563eb' : '#8b5cf6', flexShrink: 0, width: 48, paddingTop: 2 }}>{num}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: di === 0 ? '#2563eb' : '#8b5cf6', marginBottom: 5 }}>{dayName}</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 5, alignItems: 'center' }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: di === 0 ? '#2563eb' : '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
+                          {(formatBlockLabel(mission.blockKey) || mission.block) && (
+                            <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
                           )}
                         </div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{mission.title}</div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginTop: 4 }}>{mission.estimatedMinutes} min</div>
                       </div>
-                    )
-                  })}
-                  {nextDays.map((day, di) => {
-                    const mission = day.missions.find(m => m.role === 'main')
-                    if (!mission) return null
-                    const diff = Math.round((new Date(day.date + 'T00:00:00').getTime() - todayMs) / 86400000)
-                    const dayName = diff === 1 ? 'Mañana' : diff === 2 ? 'Pasado mañana' : calendarDayLabel(day.date)
-                    const num = String(2 + todayBonus.length + di).padStart(2, '0')
-                    const isLastRow = di === nextDays.length - 1
-                    return (
-                      <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: isLastRow ? 'none' : '1px solid #f1f5f9', opacity: 0.8 }}>
-                        <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1, color: '#c7d2fe', flexShrink: 0, width: 40, paddingTop: 2 }}>{num}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 5, alignItems: 'center' }}>
-                            <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8' }}>{dayName}</span>
-                            <span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span>
-                            <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
-                            {(formatBlockLabel(mission.blockKey) || mission.block) && (
-                              <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
-                            )}
-                          </div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: '#334155', lineHeight: 1.3 }}>{mission.title}</div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
-                            <Clock3 size={11} color="#94a3b8" />
-                            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mission.estimatedMinutes} min</span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+                    </div>
+                  )
+                })}
+              </>
             )
           })()}
 
           {/* ── WEEK SECTION ── */}
-          <div className="camino-card" style={{ padding: '18px 20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Esta semana</span>
+          <div style={{ padding: '16px 20px', borderTop: '2px solid #0f172a' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Esta semana</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>← Ant</button>
                 <button onClick={goToCurrentWeek} style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Hoy</button>
                 <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Sig →</button>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
               {weekCalendar.map((day, i) => {
                 const isPast = day.date < realToday
                 const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
                 const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
                 return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{dayLetter}</span>
-                    <div style={{ width: 34, height: 34, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#dbeafe' : isPast ? '#0f172a' : '#f8fafc', color: day.isToday ? '#1d4ed8' : isPast ? 'white' : '#64748b', border: day.isToday ? '1px solid #93c5fd' : isPast ? 'none' : '1px solid #e2e8f0' }}>{dayNum}</div>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: day.isToday || isPast ? 'none' : '1px solid #e2e8f0' }}>{dayNum}</div>
                   </div>
                 )
               })}
             </div>
-            <button onClick={toggleCalendarExpanded} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', marginTop: 12, padding: 7, fontSize: 10, fontWeight: 800, color: '#94a3b8', background: 'none', border: '1px solid #dbe7fb', borderRadius: 8, cursor: 'pointer' }}>
+            <button onClick={toggleCalendarExpanded} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', marginTop: 10, padding: 6, fontSize: 10, fontWeight: 800, color: '#94a3b8', background: 'none', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer' }}>
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
@@ -1906,21 +1897,19 @@ export default function CaminoCalendarClient() {
           </div>
 
           {/* ── EXAMS SECTION ── */}
-          <div className="camino-card" style={{ padding: '18px 20px' }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               Exámenes parciales
-              <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 10, cursor: 'pointer', border: '1px solid #dbe7fb', background: 'white', color: '#334155' }}>+ Añadir</button>
+              <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155' }}>+ Añadir</button>
             </div>
             {activeExams.length ? activeExams.map(exam => (
-              <div key={exam.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
+              <div key={exam.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
                 <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
                 <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
                 <button onClick={() => openEditExam(exam)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Pencil size={13} /></button>
                 <button onClick={() => deleteExam(exam.id)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
               </div>
-            )) : (
-              <p style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', margin: '4px 0 0' }}>No tienes exámenes parciales guardados todavía.</p>
-            )}
+            )) : null}
             {pastExams.length > 0 && (
               <div style={{ marginTop: 4 }}>
                 <button onClick={() => setShowPastExams(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0' }}>
@@ -1935,12 +1924,12 @@ export default function CaminoCalendarClient() {
                 ))}
               </div>
             )}
-            <button onClick={openNewExam} style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', marginTop: 10, padding: 9, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: '1px dashed #dbe7fb', borderRadius: 8, cursor: 'pointer' }}>+ Añadir examen</button>
+            <button onClick={openNewExam} style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', marginTop: 8, padding: 8, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: '1px dashed #e2e8f0', borderRadius: 8, cursor: 'pointer' }}>+ Añadir examen</button>
           </div>
 
           {/* Centro Pulso */}
           {centroPulso && (
-            <div className="camino-card" style={{ padding: '16px 20px' }}>
+            <div style={{ padding: '14px 20px', borderTop: '1px solid #e2e8f0' }}>
               <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8', margin: '0 0 4px' }}>Tu instituto</p>
               <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', margin: 0 }}>Los alumnos de {centroPulso.centroDisplay} van por <span style={{ color: '#2563eb' }}>{centroPulso.topicName}</span></p>
               <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b', margin: '4px 0 0' }}>{centroPulso.position === 'ahead' ? `Vas ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} por delante — mantén el ritmo` : centroPulso.position === 'same' ? 'Vas al ritmo de tu clase' : `Estás a ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} — tu Camino ya lo tiene en cuenta`}</p>
@@ -1950,13 +1939,13 @@ export default function CaminoCalendarClient() {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div className="camino-side-col hidden lg:flex">
+        <div style={{ width: 288, flexShrink: 0, flexDirection: 'column', background: 'white', borderLeft: '1px solid #e2e8f0', position: 'sticky', top: 81, maxHeight: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
 
-          {/* Tarjeta 1 — Tu progreso */}
-          <div className="camino-card" style={{ padding: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu progreso</div>
+          {/* XP + División */}
+          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Tu progreso</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontSize: 34, fontWeight: 900, color: '#2563eb', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXP.toLocaleString('es-ES')}</span>
+              <span style={{ fontSize: 36, fontWeight: 900, color: '#2563eb', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXP.toLocaleString('es-ES')}</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>XP</span>
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: division.bg, color: division.text }}>
@@ -1975,28 +1964,30 @@ export default function CaminoCalendarClient() {
             {caminoPlanId === 'free' && daysSinceReg !== null && (
               <div style={{ marginTop: 8, background: '#eff6ff', borderRadius: 8, padding: '6px 10px', fontSize: 11, fontWeight: 700, color: '#1d4ed8' }}>Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</div>
             )}
-            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{selectedWeekLabel}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
-                {weekCalendar.map((day, i) => {
-                  const isPast = day.date < realToday
-                  const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
-                  const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
-                  return (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                      <span style={{ fontSize: 8, fontWeight: 700, color: '#94a3b8' }}>{dayLetter}</span>
-                      <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#dbeafe' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday ? '#1d4ed8' : isPast ? 'white' : '#64748b' }}>{dayNum}</div>
-                    </div>
-                  )
-                })}
-              </div>
+          </div>
+
+          {/* Mini week */}
+          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>{selectedWeekLabel}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+              {weekCalendar.map((day, i) => {
+                const isPast = day.date < realToday
+                const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
+                const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
+                return (
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                    <span style={{ fontSize: 8, fontWeight: 700, color: '#94a3b8' }}>{dayLetter}</span>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b' }}>{dayNum}</div>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {/* Tarjeta 2 — Mi liga */}
-          <div className="camino-card" style={{ padding: 16 }}>
+          {/* Mi liga */}
+          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Mi liga</div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>Mi liga</div>
               <button
                 onClick={async () => {
                   const { data } = await supabase.auth.getSession()
@@ -2018,10 +2009,10 @@ export default function CaminoCalendarClient() {
             <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
           </div>
 
-          {/* Tarjeta 3 — Tu avance */}
+          {/* Avance por asignatura */}
           {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null) && (
-            <div className="camino-card" style={{ padding: 16 }}>
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tu avance</div>
+            <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Tu avance</div>
               {([
                 { subject: 'matematicas_ii',   label: 'Matemáticas II',  total: 9,  color: '#2563eb' },
                 { subject: 'historia_espana',  label: 'Historia España', total: 10, color: '#b45309' },
@@ -2045,15 +2036,14 @@ export default function CaminoCalendarClient() {
             </div>
           )}
 
-          {/* Tarjeta 4 — Nota proyectada */}
+          {/* Nota proyectada */}
           {filteredProjection && filteredProjection.length > 0 && (
-            <div className="camino-card" style={{ padding: 16 }}>
+            <div style={{ padding: 16 }}>
               <NotaProyectadaCard projections={filteredProjection} heroAsignatura={heroAsignatura} />
             </div>
           )}
 
-          <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: 10, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: '1px dashed #dbe7fb', borderRadius: 14, cursor: 'pointer' }}>+ Añadir asignatura</button>
-        </div>
+          <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: 10, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', borderTop: '1px solid #f1f5f9', cursor: 'pointer' }}>+ Añadir asignatura</button>
         </div>
       </div>
 
@@ -2109,87 +2099,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
-        .camino-page {
-          max-width: 1680px;
-          margin: 0 auto;
-          padding: 20px 24px 44px;
-        }
-
-        .camino-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) 310px;
-          gap: 22px;
-          align-items: start;
-        }
-
-        .camino-main-col {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 18px;
-        }
-
-        .camino-side-col {
-          position: sticky;
-          top: 84px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          max-height: calc(100vh - 104px);
-          overflow-y: auto;
-        }
-
-        .camino-card {
-          background: #fff;
-          border: 1px solid #dbe7fb;
-          border-radius: 18px;
-          box-shadow: 0 14px 36px rgba(37,99,235,.06);
-          overflow: hidden;
-        }
-
-        .camino-hero {
-          height: 340px !important;
-          margin: -20px -24px 22px;
-          box-shadow: none;
-        }
-
-        .camino-hero-overlay {
-          padding: 28px 32px 32px !important;
-          background:
-            linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.88) 100%) !important;
-        }
-
-        @media (max-width: 1024px) {
-          .camino-grid { grid-template-columns: 1fr; }
-          .camino-side-col { position: static; max-height: none; }
-        }
-
         @media (max-width: 767px) {
-          .camino-page { padding: 14px 14px 32px; overflow-x: hidden; }
-          .camino-hero { height: 200px !important; margin: -14px -14px 18px; }
+          .camino-hero { height: 200px !important; }
           .camino-hero-days { font-size: 64px !important; }
           .camino-hero-overlay { padding: 16px 20px !important; }
           .camino-header { padding: 10px 14px !important; }
           .camino-header-title { font-size: 16px !important; }
-          .camino-header-actions { width: 100%; }
-          .camino-header-actions button { flex: 1; justify-content: center; }
-          .camino-mission-card,
-          .camino-row-card {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            padding: 16px !important;
-          }
-          .camino-mission-card > div:last-child,
-          .camino-row-card > button,
-          .camino-row-card > a {
-            align-self: stretch !important;
-            width: 100%;
-          }
-          .camino-mission-card > div:last-child > a,
-          .camino-mission-card > div:last-child > span {
-            width: 100%;
-            justify-content: center;
-          }
+          .camino-mission-card { padding: 14px 16px !important; }
           .camino-mission-number { font-size: 22px !important; width: 36px !important; }
         }
       `}</style>

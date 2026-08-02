@@ -3329,6 +3329,93 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           margin: 0 auto;
         }
 
+        .history-hero {
+          position: relative;
+          height: 190px;
+          border-radius: 20px;
+          overflow: hidden;
+          margin-bottom: 20px;
+          box-shadow: 0 18px 50px rgba(37,99,235,.14);
+        }
+
+        .history-hero img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 30%;
+          filter: brightness(.5) saturate(.75);
+          transition: opacity 400ms ease;
+        }
+
+        .history-hero-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 20px 26px;
+          background: linear-gradient(to top, rgba(0,0,0,.68) 0%, rgba(0,0,0,.15) 60%, transparent 100%);
+        }
+
+        .history-hero-eyebrow {
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+          color: #93c5fd;
+          margin-bottom: 6px;
+        }
+
+        .history-hero-title {
+          font-size: clamp(24px, 2.6vw, 34px);
+          font-weight: 900;
+          color: #fff;
+          line-height: .95;
+          letter-spacing: -.03em;
+        }
+
+        .history-hero-sub {
+          font-size: 11px;
+          font-weight: 600;
+          color: rgba(255,255,255,.55);
+          margin-top: 8px;
+        }
+
+        .history-hero-stats {
+          display: flex;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .history-hero-stats > div {
+          background: rgba(255,255,255,.1);
+          border: 1px solid rgba(255,255,255,.16);
+          border-radius: 8px;
+          padding: 6px 12px;
+          text-align: center;
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
+
+        .history-hero-stats strong {
+          display: block;
+          font-size: 17px;
+          font-weight: 900;
+          color: #fff;
+          line-height: 1;
+        }
+
+        .history-hero-stats span {
+          display: block;
+          margin-top: 3px;
+          font-size: 8px;
+          font-weight: 700;
+          color: rgba(255,255,255,.45);
+          text-transform: uppercase;
+          letter-spacing: .08em;
+        }
+
         .history-topbar {
           display: flex;
           align-items: flex-start;
@@ -4316,6 +4403,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
           .history-screen {
             padding: 20px 16px 44px;
+          }
+
+          .history-hero {
+            height: 150px;
+          }
+
+          .history-hero-stats {
+            display: none;
           }
 
           .history-topbar {
@@ -5354,6 +5449,40 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         {seccion === 'historial' && (
           <main className="history-screen">
             <div className="history-shell">
+              <div className="history-hero">
+                <img
+                  src={historialSubjectFilter === 'todas' ? STUDY_DESK_IMG : (SUBJECT_HERO_IMGS[historialSubjectFilter] ?? STUDY_DESK_IMG)}
+                  alt=""
+                />
+                <div className="history-hero-overlay">
+                  <div>
+                    <div className="history-hero-eyebrow">Historial · {examSystemLabel(ccaa)}</div>
+                    <div className="history-hero-title">
+                      {historialSubjectFilter === 'todas' ? 'Todas las asignaturas' : ASIGNATURAS[historialSubjectFilter].label}
+                    </div>
+                    <div className="history-hero-sub">
+                      {historialSubjectFilter === 'todas' ? 'Todas tus correcciones guardadas' : nombreAsignatura(historialSubjectFilter)}
+                    </div>
+                  </div>
+                  {(() => {
+                    const items = historialTabItems.filter(item => historialSubjectFilter === 'todas' || item.asignatura === historialSubjectFilter)
+                    const scored = items.map(item => normalizedHistoryScore(item)).filter((v): v is number => v !== null)
+                    const media = scored.length ? (scored.reduce((sum, v) => sum + v, 0) / scored.length).toFixed(1) : null
+                    const mejor = scored.length ? Math.max(...scored).toFixed(1) : null
+                    return (
+                      <div className="history-hero-stats">
+                        {[{ val: String(items.length), label: 'Correcciones' }, { val: media ?? '—', label: 'Media' }, { val: mejor ?? '—', label: 'Mejor' }].map(stat => (
+                          <div key={stat.label}>
+                            <strong>{stat.val}</strong>
+                            <span>{stat.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+
               <header className="history-topbar">
                 <div>
                   <h1>Historial de correcciones</h1>

@@ -1,8 +1,25 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle2, Eye, EyeOff, PlayCircle } from 'lucide-react'
+import {
+  Activity,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Eye,
+  EyeOff,
+  FileCheck2,
+  Grid3x3,
+  HelpCircle,
+  Lightbulb,
+  PlayCircle,
+  Rocket,
+  Shuffle,
+  SlidersHorizontal,
+  Star,
+  Trophy,
+} from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
@@ -226,274 +243,410 @@ function SimulacrosPage() {
   }
   const heroImg = SUBJECT_HERO_IMGS[subject] ?? BLACKBOARD_IMG
 
-  const modeBadgeLabel = (m: SimulacroMode) => {
-    if (m === 'normal') return 'Recomendado'
-    if (m === 'errores') return weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'
-    return 'Ajustable'
-  }
-  const modeBadgeColor = (m: SimulacroMode) => {
-    if (m === 'errores') return weakCandidateCount > 0 ? '#15803d' : '#b45309'
-    if (m === 'personalizado') return '#64748b'
-    return cfg.color
-  }
+  const isPersonalizadoOptionToggle = subject !== 'lengua'
+  const mezclaActiva = mode === 'personalizado' ? optionChoice === 'mixed' : true
+  const readyLabel = `${cfg.label} · ${buildConfigLabel(mode, effectiveYearChoiceRender, optionSelectionRender)}`
 
   return (
     <SimulacroShell>
-    {/* ── BLACKBOARD HERO ── */}
-    <div className="sim-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', flexShrink: 0 }}>
-      <img src={heroImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.45) saturate(.6)', display: 'block', transition: 'opacity 400ms ease' }} />
-      <div className="sim-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.2) 0%, rgba(15,23,42,.85) 100%)', padding: '28px 32px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Simulacros PAU · {ccaa}</div>
-        <div className="sim-hero-count" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: .88, letterSpacing: '-.04em', marginBottom: 8 }}>
-          {stats.completedCount > 0 ? stats.completedCount : '—'}
-        </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.5)', letterSpacing: '.12em', textTransform: 'uppercase' }}>
-          {stats.completedCount > 0 ? 'Simulacros completados en tu historial' : 'Completa tu primer simulacro para ver tus estadísticas'}
-        </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-          {stats.completedCount > 0 && <>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatScore(stats.bestScore)}</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Mejor nota</span>
-            </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatScore(stats.averageScore)}</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Media</span>
-            </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{stats.averageTime == null ? '—' : `${stats.averageTime} min`}</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Tiempo medio</span>
-            </div>
-          </>}
-          <button
-            onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 10, padding: '8px 14px', color: 'rgba(255,255,255,.75)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
-          >
-            {historyOpen ? <EyeOff size={13} /> : <Eye size={13} />}
-            {historyOpen ? 'Ocultar historial' : 'Mis simulacros'}
-          </button>
-        </div>
-      </div>
-    </div>
+      <style>{`
+        .simu-screen {
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 22px 28px 40px;
+          font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+          background: #fff;
+        }
+        .simu-shell { width: 100%; max-width: 1500px; margin: 0 auto; }
+        .simu-hero { position: relative; height: 300px; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 18px 50px rgba(37,99,235,.14); }
+        .simu-hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.45) saturate(.65); }
+        .simu-hero-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 26px 30px; background: linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.25) 60%, transparent 100%); }
+        .simu-breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #93c5fd; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+        .simu-breadcrumb span:last-child { color: rgba(255,255,255,.55); }
+        .simu-title { font-size: clamp(26px, 3vw, 38px); font-weight: 900; color: #fff; letter-spacing: -.03em; line-height: 1; margin-bottom: 6px; }
+        .simu-subtitle { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.6); margin-bottom: 18px; }
+        .simu-hero-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; max-width: 720px; }
+        .simu-hero-stat { display: flex; align-items: center; gap: 10px; }
+        .simu-hero-stat-icon { width: 34px; height: 34px; border-radius: 9px; background: #2563eb; display: grid; place-items: center; color: #fff; flex-shrink: 0; }
+        .simu-hero-stat-val { font-size: 19px; font-weight: 900; color: #fff; line-height: 1; }
+        .simu-hero-stat-val em { font-style: normal; font-size: .55em; color: rgba(255,255,255,.5); font-weight: 800; margin-left: 2px; }
+        .simu-hero-stat-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+        .simu-hero-link { margin-top: 18px; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 8px 16px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .simu-camino-banner { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 12px; border: 1px solid #dbeafe; background: #eff6ff; color: #1e40af; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+        .simu-history-panel { padding: 16px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; margin-bottom: 20px; }
+        .simu-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+        .simu-main-col { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+        .simu-card { padding: 20px; }
+        .simu-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+        .simu-card-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; color: #0f172a; }
+        .simu-step-num { width: 22px; height: 22px; border-radius: 999px; background: #2563eb; color: #fff; font-size: 12px; font-weight: 900; display: grid; place-items: center; flex-shrink: 0; }
+        .simu-help-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: #64748b; background: none; border: 0; cursor: pointer; }
+        .simu-subject-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+        .simu-subject-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 10px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; cursor: pointer; transition: all .12s; text-align: center; min-height: 100px; }
+        .simu-subject-card.is-active { box-shadow: inset 0 0 0 1.5px var(--subj-color); background: var(--subj-light); }
+        .simu-subject-card:disabled { cursor: not-allowed; opacity: .5; }
+        .simu-subject-dot { width: 11px; height: 11px; border-radius: 999px; background: var(--subj-color); }
+        .simu-subject-label { font-size: 12.5px; font-weight: 800; color: #0f172a; line-height: 1.25; }
+        .simu-subject-sub { font-size: 10px; font-weight: 700; color: #94a3b8; }
+        .simu-subject-check { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; border-radius: 999px; background: var(--subj-color); color: #fff; display: grid; place-items: center; }
+        .simu-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .simu-mode-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; cursor: pointer; text-align: left; transition: all .12s; }
+        .simu-mode-card.is-active { border-color: #2563eb; background: #eff6ff; }
+        .simu-mode-icon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: #eff6ff; color: #2563eb; }
+        .simu-mode-card.is-active .simu-mode-icon { background: #2563eb; color: #fff; }
+        .simu-mode-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .simu-mode-title { font-size: 13px; font-weight: 800; color: #0f172a; }
+        .simu-mode-badge { font-size: 9.5px; font-weight: 900; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
+        .simu-mode-desc { font-size: 11.5px; font-weight: 500; color: #64748b; line-height: 1.4; }
+        .simu-mode-full { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; cursor: pointer; text-align: left; transition: all .12s; width: 100%; }
+        .simu-mode-full.is-active { border-color: #2563eb; background: #eff6ff; }
+        .simu-auto-info, .simu-personal-panel { margin-top: 12px; padding: 14px 16px; border-radius: 10px; background: #f8fafc; border: 1px solid #f1f5f9; }
+        .simu-auto-info-title { font-size: 12.5px; font-weight: 800; color: #0f172a; }
+        .simu-auto-info-desc { font-size: 12px; font-weight: 500; color: #64748b; margin-top: 4px; line-height: 1.5; }
+        .simu-personal-label { font-size: 11px; font-weight: 700; color: #334155; margin-bottom: 8px; }
+        .simu-pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+        .simu-pill { font-size: 11px; font-weight: 700; padding: 6px 13px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #334155; cursor: pointer; transition: all .12s; }
+        .simu-pill.is-active { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
+        .simu-tip-card { display: flex; align-items: flex-start; gap: 12px; background: #eff6ff; border: 1px solid #dbeafe; }
+        .simu-tip-icon { width: 34px; height: 34px; border-radius: 9px; background: #2563eb; color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+        .simu-tip-title { font-size: 13px; font-weight: 800; color: #0f172a; }
+        .simu-tip-desc { font-size: 12px; font-weight: 500; color: #475569; line-height: 1.5; margin-top: 3px; }
+        .simu-tip-link { border: 0; background: none; color: #2563eb; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0; margin-top: 6px; }
+        .simu-side { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 108px); overflow-y: auto; }
+        .simu-config-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px solid #f1f5f9; }
+        .simu-config-row:last-child { border-bottom: 0; padding-bottom: 0; }
+        .simu-config-icon { width: 26px; height: 26px; border-radius: 7px; background: #eff6ff; color: #2563eb; display: grid; place-items: center; flex-shrink: 0; }
+        .simu-config-label { font-size: 12.5px; font-weight: 800; color: #0f172a; }
+        .simu-config-desc { font-size: 10.5px; font-weight: 500; color: #94a3b8; margin-top: 1px; line-height: 1.3; }
+        .simu-toggle { width: 36px; height: 21px; border-radius: 999px; border: 0; flex-shrink: 0; position: relative; cursor: pointer; background: #e2e8f0; transition: background .15s; }
+        .simu-toggle.is-on { background: #2563eb; }
+        .simu-toggle.is-disabled { cursor: default; opacity: .7; }
+        .simu-toggle::after { content: ''; position: absolute; top: 2.5px; left: 2.5px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: transform .15s; }
+        .simu-toggle.is-on::after { transform: translateX(15px); }
+        .simu-config-static { font-size: 11px; font-weight: 700; color: #94a3b8; flex-shrink: 0; }
+        .simu-cta-card { background: linear-gradient(160deg, #eff6ff, #fff); border: 1px solid #dbeafe; }
+        .simu-cta-icon { width: 38px; height: 38px; border-radius: 10px; background: #2563eb; color: #fff; display: grid; place-items: center; margin-bottom: 10px; }
+        .simu-cta-title { font-size: 14px; font-weight: 800; color: #0f172a; }
+        .simu-cta-desc { font-size: 12px; font-weight: 500; color: #64748b; line-height: 1.5; margin: 6px 0 14px; }
+        .simu-cta-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 800; padding: 14px; border-radius: 11px; background: #2563eb; color: #fff; border: none; box-shadow: 0 8px 22px rgba(37,99,235,.3); cursor: pointer; }
+        .simu-cta-btn:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+        .simu-error { margin-bottom: 4px; padding: 12px 16px; border-radius: 10px; background: #fef2f2; border: 1px solid #fecaca; font-size: 13px; font-weight: 600; color: #b91c1c; }
+        @media (max-width: 1024px) {
+          .simu-layout { grid-template-columns: 1fr; }
+          .simu-side { position: static; max-height: none; }
+        }
+        @media (max-width: 767px) {
+          .simu-screen { padding: 20px 16px 44px; }
+          .simu-hero { height: auto; padding-bottom: 4px; }
+          .simu-hero-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+          .simu-subject-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+          .simu-mode-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
 
-    {/* ── CONTENT ── */}
-    <div style={{ background: 'white', borderTop: '2px solid #0f172a', flex: 1 }}>
+      <div className="simu-screen">
+        <div className="simu-shell">
 
-      <div style={{ padding: '16px 24px 0' }}>
-        <SectionIntroCard
-          hintKey="hint_simulacros"
-          line1="Exámenes cronometrados como el día real."
-          line2="Elige asignatura y tiempo, responde todo y Kairo lo corrige al terminar. Úsalo para entrenar bajo presión."
-        />
-      </div>
-
-      {/* Camino parcial banner */}
-      {isCaminoPartial && caminoBlock && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', borderBottom: '1px solid #dbeafe', background: '#eff6ff', color: '#1e40af', fontSize: 13, fontWeight: 600 }}>
-          <PlayCircle size={15} style={{ flexShrink: 0 }} />
-          Simulacro enfocado en <strong style={{ marginLeft: 4 }}>{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
-          <span style={{ marginLeft: 4, fontWeight: 400, color: '#3b82f6' }}>— generando para tu parcial...</span>
-        </div>
-      )}
-
-      {/* History panel */}
-      {historyOpen && (
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Mis simulacros anteriores</span>
-            <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 10px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>{history.length} total</span>
-          </div>
-          {history.length === 0 ? (
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>Todavía no tienes simulacros guardados.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
-              {history.map(item => (
-                <a
-                  key={item.id}
-                  href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', textDecoration: 'none', color: 'inherit', transition: 'border-color .12s' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLElement).style.background = '#eff6ff' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9'; (e.currentTarget as HTMLElement).style.background = 'white' }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
-                    <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{item.id.slice(0, 8)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
+          {/* HERO */}
+          <div className="simu-hero">
+            <img src={heroImg} alt="" />
+            <div className="simu-hero-overlay">
+              <div className="simu-breadcrumb"><span>Camino PAU</span><ChevronRight size={12} /><span>Simulacros</span></div>
+              <div className="simu-title">Simulacros</div>
+              <div className="simu-subtitle">Practica como en la PAU real y mejora tus resultados.</div>
+              <div className="simu-hero-stats">
+                <div className="simu-hero-stat">
+                  <div className="simu-hero-stat-icon"><FileCheck2 size={16} /></div>
+                  <div>
+                    <div className="simu-hero-stat-val">{stats.completedCount > 0 ? stats.completedCount : '—'}</div>
+                    <div className="simu-hero-stat-label">Simulacros completados</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    {item.estado === 'completado'
-                      ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
-                      : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                </div>
+                <div className="simu-hero-stat">
+                  <div className="simu-hero-stat-icon"><Star size={16} /></div>
+                  <div>
+                    <div className="simu-hero-stat-val">{stats.completedCount > 0 ? formatScore(stats.bestScore) : '—'}<em>/10</em></div>
+                    <div className="simu-hero-stat-label">Mejor nota</div>
                   </div>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="sim-main" style={{ padding: 24, maxWidth: 860, margin: '0 auto' }}>
-
-        {/* Error */}
-        {errorMessage && (
-          <div role="alert" style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 10, background: '#fef2f2', border: '1px solid #fecaca', fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{errorMessage}</div>
-        )}
-
-        {/* ── STEP 1: ASIGNATURA ── */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Asignatura</div>
-            <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }}>{cfg.label}</span>
-          </div>
-          <div className="sim-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-            {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
-              const s = SUBJECTS[key]
-              const isActive = subject === key
-              return (
-                <button
-                  key={key}
-                  disabled={!s.available}
-                  onClick={() => s.available && setSubject(key)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `2px solid ${isActive ? s.color : '#e2e8f0'}`, background: isActive ? s.light : 'white', cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center' }}
-                >
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-                  <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? s.color : '#334155', lineHeight: 1.3 }}>{s.label}</div>
-                  {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}>Pronto</span>}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* ── STEP 2: TIPO ── */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 10 }}>Tipo de simulacro</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {(['normal', 'errores', 'personalizado'] as SimulacroMode[]).map(m => {
-              const isActive = mode === m
-              const labels: Record<SimulacroMode, string> = { normal: 'Simulacro normal', errores: 'Peores notas', personalizado: 'Personalizado' }
-              return (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    gap: 6,
-                    padding: '12px 14px',
-                    borderRadius: 12,
-                    border: `1.5px solid ${isActive ? cfg.color : '#e2e8f0'}`,
-                    background: isActive ? cfg.light : 'white',
-                    cursor: 'pointer',
-                    transition: 'border-color .12s, background .12s',
-                    textAlign: 'left',
-                  }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? cfg.color : '#334155', lineHeight: 1.2 }}>
-                    {labels[m]}
-                  </span>
-                  <span style={{
-                    fontSize: 9,
-                    fontWeight: 900,
-                    letterSpacing: '.08em',
-                    textTransform: 'uppercase',
-                    color: isActive ? cfg.color : modeBadgeColor(m),
-                    opacity: isActive ? 1 : 0.75,
-                  }}>
-                    {modeBadgeLabel(m)}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          {/* Auto info */}
-          {mode !== 'personalizado' && (
-            <div style={{ marginTop: 10, padding: '12px 16px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{autoInfo.title}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 4, lineHeight: 1.5 }}>{autoInfo.description}</div>
-            </div>
-          )}
-        </div>
-
-        {/* ── STEP 3: CONFIG (personalizado) ── */}
-        {mode === 'personalizado' && (
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, marginBottom: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 14 }}>Ajustes personalizados</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Años de convocatoria</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-              {YEAR_CHOICES.map(item => {
-                const isActive = yearChoice === item.id
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setYearChoice(item.id)}
-                    style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#334155', cursor: 'pointer', transition: 'all .12s' }}
-                  >
-                    {item.label}
-                  </button>
-                )
-              })}
-            </div>
-            {yearChoice !== 'all' && (
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 12, padding: '6px 10px', background: 'white', borderRadius: 8, border: '1px solid #f1f5f9' }}>
-                {YEAR_CHOICES.find(y => y.id === yearChoice)?.description}
+                </div>
+                <div className="simu-hero-stat">
+                  <div className="simu-hero-stat-icon"><Clock size={16} /></div>
+                  <div>
+                    <div className="simu-hero-stat-val">{stats.averageTime == null ? '—' : stats.averageTime}<em>min</em></div>
+                    <div className="simu-hero-stat-label">Tiempo medio</div>
+                  </div>
+                </div>
+                <div className="simu-hero-stat">
+                  <div className="simu-hero-stat-icon"><Activity size={16} /></div>
+                  <div>
+                    <div className="simu-hero-stat-val">{stats.completedCount > 0 ? formatScore(stats.averageScore) : '—'}<em>/10</em></div>
+                    <div className="simu-hero-stat-label">Nota media</div>
+                  </div>
+                </div>
               </div>
-            )}
-            {subject !== 'lengua' ? (
-              <>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Opción del examen</div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {OPTION_CHOICES.map(item => {
-                    const isActive = optionChoice === item.id
+              <button type="button" className="simu-hero-link" onClick={() => { setHistoryOpen(!historyOpen); void loadHistory() }}>
+                {historyOpen ? <EyeOff size={13} /> : <Eye size={13} />}
+                {historyOpen ? 'Ocultar historial' : 'Ver mis simulacros'}
+                <ChevronRight size={13} />
+              </button>
+            </div>
+          </div>
+
+          <div style={{ padding: '0 0 20px' }}>
+            <SectionIntroCard
+              hintKey="hint_simulacros"
+              line1="Exámenes cronometrados como el día real."
+              line2="Elige asignatura y tiempo, responde todo y Kairo lo corrige al terminar. Úsalo para entrenar bajo presión."
+            />
+          </div>
+
+          {/* Camino parcial banner */}
+          {isCaminoPartial && caminoBlock && (
+            <div className="simu-camino-banner">
+              <PlayCircle size={15} style={{ flexShrink: 0 }} />
+              Simulacro enfocado en <strong style={{ marginLeft: 4 }}>{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
+              <span style={{ marginLeft: 4, fontWeight: 400, color: '#3b82f6' }}>— generando para tu parcial...</span>
+            </div>
+          )}
+
+          {/* History panel */}
+          {historyOpen && (
+            <div className="simu-history-panel">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Mis simulacros anteriores</span>
+                <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 10px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>{history.length} total</span>
+              </div>
+              {history.length === 0 ? (
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8', margin: 0 }}>Todavía no tienes simulacros guardados.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
+                  {history.map(item => (
+                    <a
+                      key={item.id}
+                      href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', textDecoration: 'none', color: 'inherit', transition: 'border-color .12s' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLElement).style.background = '#eff6ff' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9'; (e.currentTarget as HTMLElement).style.background = 'white' }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
+                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{item.id.slice(0, 8)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        {item.estado === 'completado'
+                          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
+                          : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {errorMessage && <div className="simu-error" role="alert">{errorMessage}</div>}
+
+          {/* MAIN LAYOUT */}
+          <div className="simu-layout">
+            <div className="simu-main-col">
+
+              {/* STEP 1 */}
+              <div className="history-card simu-card">
+                <div className="simu-card-head">
+                  <div className="simu-card-title"><span className="simu-step-num">1</span> Elige la asignatura</div>
+                  <button type="button" className="simu-help-link"><HelpCircle size={13} /> ¿No encuentras tu asignatura?</button>
+                </div>
+                <div className="simu-subject-grid">
+                  {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
+                    const s = SUBJECTS[key]
+                    const isActive = subject === key
                     return (
                       <button
-                        key={item.id}
-                        onClick={() => setOptionChoice(item.id)}
-                        style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#334155', cursor: 'pointer', transition: 'all .12s' }}
+                        key={key}
+                        disabled={!s.available}
+                        onClick={() => s.available && setSubject(key)}
+                        className={`simu-subject-card ${isActive ? 'is-active' : ''}`}
+                        style={{ '--subj-color': s.color, '--subj-light': s.light } as CSSProperties}
                       >
-                        {item.label}
+                        {isActive && <span className="simu-subject-check"><CheckCircle2 size={12} /></span>}
+                        <span className="simu-subject-dot" />
+                        <span className="simu-subject-label">{s.label}</span>
+                        {key === 'mates' && <span className="simu-subject-sub">Obligatoria</span>}
+                        {!s.available && <span className="simu-subject-sub">Pronto</span>}
                       </button>
                     )
                   })}
                 </div>
-              </>
-            ) : (
-              <div style={{ padding: '10px 14px', borderRadius: 10, background: `${cfg.color}0f`, border: `1px solid ${cfg.color}24`, fontSize: 12, fontWeight: 600, color: '#475569', lineHeight: 1.5 }}>
-                Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
               </div>
-            )}
-          </div>
-        )}
 
-        {/* ── SUMMARY + CTA ── */}
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8' }}>Listo para crear</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginTop: 3 }}>
-                {cfg.label} · {buildConfigLabel(mode, effectiveYearChoiceRender, optionSelectionRender)}
+              {/* STEP 2 */}
+              <div className="history-card simu-card">
+                <div className="simu-card-head">
+                  <div className="simu-card-title"><span className="simu-step-num">2</span> Elige el tipo de simulacro</div>
+                </div>
+                <div className="simu-mode-grid">
+                  <button type="button" className={`simu-mode-card ${mode === 'normal' ? 'is-active' : ''}`} onClick={() => setMode('normal')}>
+                    <div className="simu-mode-icon"><Trophy size={16} /></div>
+                    <div className="simu-mode-title-row">
+                      <span className="simu-mode-title">Simulacro normal</span>
+                      <span className="simu-mode-badge" style={{ background: '#eff6ff', color: '#2563eb' }}>Recomendado</span>
+                    </div>
+                    <span className="simu-mode-desc">Simula la PAU completa con tiempo real y corrección.</span>
+                  </button>
+                  <button type="button" className={`simu-mode-card ${mode === 'errores' ? 'is-active' : ''}`} onClick={() => setMode('errores')}>
+                    <div className="simu-mode-icon"><FileCheck2 size={16} /></div>
+                    <div className="simu-mode-title-row">
+                      <span className="simu-mode-title">Peores notas</span>
+                      <span className="simu-mode-badge" style={{ background: weakCandidateCount > 0 ? '#f0fdf4' : '#fffbeb', color: weakCandidateCount > 0 ? '#15803d' : '#b45309' }}>
+                        {weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'}
+                      </span>
+                    </div>
+                    <span className="simu-mode-desc">Practica los exámenes de tus peores resultados.</span>
+                  </button>
+                </div>
+                <button type="button" className={`simu-mode-full ${mode === 'personalizado' ? 'is-active' : ''}`} onClick={() => setMode('personalizado')}>
+                  <div className="simu-mode-icon"><SlidersHorizontal size={16} /></div>
+                  <div>
+                    <div className="simu-mode-title">Personalizado</div>
+                    <span className="simu-mode-desc">Crea tu propio simulacro eligiendo años y opción de examen.</span>
+                  </div>
+                </button>
+
+                {mode !== 'personalizado' && (
+                  <div className="simu-auto-info">
+                    <div className="simu-auto-info-title">{autoInfo.title}</div>
+                    <div className="simu-auto-info-desc">{autoInfo.description}</div>
+                  </div>
+                )}
+
+                {mode === 'personalizado' && (
+                  <div className="simu-personal-panel">
+                    <div className="simu-personal-label">Años de convocatoria</div>
+                    <div className="simu-pill-row">
+                      {YEAR_CHOICES.map(item => (
+                        <button key={item.id} type="button" className={`simu-pill ${yearChoice === item.id ? 'is-active' : ''}`} onClick={() => setYearChoice(item.id)}>
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                    {yearChoice !== 'all' && (
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 12, padding: '6px 10px', background: 'white', borderRadius: 8, border: '1px solid #f1f5f9' }}>
+                        {YEAR_CHOICES.find(y => y.id === yearChoice)?.description}
+                      </div>
+                    )}
+                    {isPersonalizadoOptionToggle ? (
+                      <>
+                        <div className="simu-personal-label">Opción del examen</div>
+                        <div className="simu-pill-row" style={{ marginBottom: 0 }}>
+                          {OPTION_CHOICES.map(item => (
+                            <button key={item.id} type="button" className={`simu-pill ${optionChoice === item.id ? 'is-active' : ''}`} onClick={() => setOptionChoice(item.id)}>
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', lineHeight: 1.5 }}>
+                        Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* TIP */}
+              <div className="history-card simu-card simu-tip-card">
+                <div className="simu-tip-icon"><Lightbulb size={16} /></div>
+                <div>
+                  <div className="simu-tip-title">Consejo Kairo</div>
+                  <div className="simu-tip-desc">Haz simulacros con regularidad y revisa tus resultados para ver tu evolución.</div>
+                  <button type="button" className="simu-tip-link" onClick={() => { setHistoryOpen(true); void loadHistory() }}>Ver mis simulacros →</button>
+                </div>
               </div>
             </div>
-            <span style={{ fontSize: 10, fontWeight: 800, padding: '4px 12px', borderRadius: 999, background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>{ccaa}</span>
+
+            {/* SIDE */}
+            <aside className="simu-side">
+              <div className="history-card simu-card">
+                <div className="simu-card-title" style={{ marginBottom: 16 }}><span className="simu-step-num">3</span> Configuración</div>
+
+                <div className="simu-config-row">
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <div className="simu-config-icon"><Clock size={13} /></div>
+                    <div>
+                      <div className="simu-config-label">Duración total</div>
+                      <div className="simu-config-desc">Según la PAU oficial de cada asignatura</div>
+                    </div>
+                  </div>
+                  <span className="simu-config-static">Auto</span>
+                </div>
+
+                <div className="simu-config-row">
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <div className="simu-config-icon"><CheckCircle2 size={13} /></div>
+                    <div>
+                      <div className="simu-config-label">Corrección</div>
+                      <div className="simu-config-desc">Corrección automática al finalizar</div>
+                    </div>
+                  </div>
+                  <button type="button" className="simu-toggle is-on is-disabled" title="Kairo siempre corrige al finalizar" />
+                </div>
+
+                <div className="simu-config-row">
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <div className="simu-config-icon"><Shuffle size={13} /></div>
+                    <div>
+                      <div className="simu-config-label">Mezcla de opciones A/B</div>
+                      <div className="simu-config-desc">{mode === 'personalizado' ? 'Activa para mezclar cuando esté disponible' : 'Automático fuera del modo personalizado'}</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className={`simu-toggle ${mezclaActiva ? 'is-on' : ''} ${mode === 'personalizado' && isPersonalizadoOptionToggle ? '' : 'is-disabled'}`}
+                    onClick={() => {
+                      if (mode !== 'personalizado' || !isPersonalizadoOptionToggle) return
+                      setOptionChoice(optionChoice === 'mixed' ? 'A' : 'mixed')
+                    }}
+                  />
+                </div>
+
+                <div className="simu-config-row">
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <div className="simu-config-icon"><Grid3x3 size={13} /></div>
+                    <div>
+                      <div className="simu-config-label">Bloques</div>
+                      <div className="simu-config-desc">Todos los bloques incluidos</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="history-card simu-card simu-cta-card">
+                <div className="simu-cta-icon"><Rocket size={18} /></div>
+                <div className="simu-cta-title">Listo para empezar</div>
+                <div className="simu-cta-desc">Revisa tu configuración ({readyLabel}) y comienza tu simulacro en condiciones reales de examen.</div>
+                <button
+                  type="button"
+                  className="simu-cta-btn"
+                  onClick={createSimulacro}
+                  disabled={loading || !userId || !SUBJECTS[subject].available}
+                >
+                  {loading ? <KairoLoadingDot /> : <PlayCircle size={17} />}
+                  {loading
+                    ? 'Generando simulacro...'
+                    : !SUBJECTS[subject].available
+                    ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
+                    : userId
+                    ? ctaLabel(mode, cfg.short)
+                    : 'Cargando sesión...'}
+                </button>
+              </div>
+            </aside>
           </div>
-          <button
-            onClick={createSimulacro}
-            disabled={loading || !userId || !SUBJECTS[subject].available}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 900, padding: '16px', borderRadius: 12, background: loading || !userId || !SUBJECTS[subject].available ? '#94a3b8' : '#2563eb', color: 'white', border: 'none', boxShadow: loading || !userId || !SUBJECTS[subject].available ? 'none' : '0 4px 20px rgba(37,99,235,.32)', cursor: loading || !userId || !SUBJECTS[subject].available ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
-          >
-            {loading ? <KairoLoadingDot /> : <PlayCircle size={18} />}
-            {loading
-              ? 'Generando simulacro...'
-              : !SUBJECTS[subject].available
-              ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
-              : userId
-              ? ctaLabel(mode, cfg.short)
-              : 'Cargando sesión...'}
-          </button>
         </div>
       </div>
-    </div>
     </SimulacroShell>
   )
 }

@@ -69,17 +69,43 @@ export default function ZonaCanvasPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
+      <style>{`
+        .canvas-hero {
+          height: clamp(190px, 18vw, 280px) !important;
+          border: 1px solid rgba(219,231,251,.95);
+          border-radius: 24px;
+          margin: 22px 18px 24px 22px;
+          box-shadow: 0 24px 70px rgba(37,99,235,.16);
+        }
+
+        .canvas-hero > div {
+          padding: clamp(24px, 3vw, 42px) clamp(28px, 4vw, 58px) !important;
+          background:
+            linear-gradient(90deg, rgba(2,6,23,.78) 0%, rgba(2,6,23,.42) 42%, rgba(2,6,23,.1) 100%),
+            linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.15) 62%, transparent 100%) !important;
+        }
+
+        .canvas-hero-title {
+          font-size: clamp(38px, 5vw, 72px) !important;
+          letter-spacing: -.055em !important;
+        }
+
+        @media (max-width: 767px) {
+          .canvas-hero { height: 100px !important; }
+          .canvas-hero-title { font-size: 26px !important; }
+        }
+      `}</style>
       <SidebarNav />
 
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         {/* Hero 155px */}
-        <div style={{ position: 'relative', height: 155, flexShrink: 0, overflow: 'hidden' }}>
+        <div className="canvas-hero" style={{ position: 'relative', height: 155, flexShrink: 0, overflow: 'hidden' }}>
           <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.42) saturate(.6)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '16px 28px' }}>
             <div>
               <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Canvas infinito</div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>Mi Espacio</div>
+              <div className="canvas-hero-title" style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>Mi Espacio</div>
             </div>
           </div>
         </div>

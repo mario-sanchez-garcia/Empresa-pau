@@ -2099,6 +2099,21 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
+        .camino-hero {
+          height: clamp(220px, 22vw, 320px) !important;
+          border: 1px solid rgba(219,231,251,.95) !important;
+          border-radius: 24px;
+          margin: 22px 18px 24px 22px;
+          box-shadow: 0 24px 70px rgba(37,99,235,.16);
+        }
+
+        .camino-hero-overlay {
+          padding: clamp(24px, 3vw, 42px) clamp(28px, 4vw, 58px) !important;
+          background:
+            linear-gradient(90deg, rgba(2,6,23,.82) 0%, rgba(2,6,23,.44) 44%, rgba(2,6,23,.12) 100%),
+            linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.16) 62%, transparent 100%) !important;
+        }
+
         @media (max-width: 767px) {
           .camino-hero { height: 200px !important; }
           .camino-hero-days { font-size: 64px !important; }

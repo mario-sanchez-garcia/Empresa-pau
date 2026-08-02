@@ -56,6 +56,26 @@ export default function ZonaPage() {
   return (
     <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
       <style>{`
+        .zona-hero {
+          height: clamp(190px, 18vw, 280px) !important;
+          border: 1px solid rgba(219,231,251,.95);
+          border-radius: 24px;
+          margin: 22px 18px 24px 22px;
+          box-shadow: 0 24px 70px rgba(37,99,235,.16);
+        }
+
+        .zona-hero > div {
+          padding: clamp(24px, 3vw, 42px) clamp(28px, 4vw, 58px) !important;
+          background:
+            linear-gradient(90deg, rgba(2,6,23,.78) 0%, rgba(2,6,23,.42) 42%, rgba(2,6,23,.1) 100%),
+            linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.15) 62%, transparent 100%) !important;
+        }
+
+        .zona-hero-title {
+          font-size: clamp(38px, 5vw, 72px) !important;
+          letter-spacing: -.055em !important;
+        }
+
         @media (max-width: 767px) {
           .zona-hero { height: 100px !important; }
           .zona-hero-title { font-size: 26px !important; }

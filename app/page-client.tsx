@@ -3039,6 +3039,25 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           margin-bottom: 28px;
         }
 
+        .exams-subject-hero {
+          height: clamp(190px, 18vw, 280px) !important;
+          border-radius: 24px;
+          margin: 22px 18px 24px 22px;
+          box-shadow: 0 24px 70px rgba(37,99,235,.16);
+        }
+
+        .exams-subject-hero > div {
+          padding: clamp(24px, 3vw, 42px) clamp(28px, 4vw, 58px) !important;
+          background:
+            linear-gradient(90deg, rgba(2,6,23,.78) 0%, rgba(2,6,23,.42) 42%, rgba(2,6,23,.1) 100%),
+            linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.15) 62%, transparent 100%) !important;
+        }
+
+        .exams-subject-hero-title {
+          font-size: clamp(38px, 5vw, 72px) !important;
+          letter-spacing: -.055em !important;
+        }
+
         .exams-search-bar {
           position: relative;
           z-index: 110;
@@ -3316,8 +3335,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           position: relative;
           z-index: 1;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 308px;
-          gap: 22px;
+          grid-template-columns: minmax(0, 1fr) clamp(248px, 19vw, 286px);
+          gap: 18px;
           align-items: start;
         }
 
@@ -5214,7 +5233,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 })()}
               </div>
             </div>
-            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
+            <main className="exams-screen" style={{ flex: 1, padding: '20px 18px 56px 20px', maxWidth: 'none', width: '100%', margin: 0 }}>
 
             <SectionIntroCard
               hintKey="hint_examenes"

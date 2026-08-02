@@ -69,6 +69,7 @@ import {
   X
 } from 'lucide-react'
 const ASIGNATURAS = {
+  general: { label: 'General', short: 'General', icon: MessageCircle, color: '#334155', light: '#f1f5f9', accent: '#94a3b8', soft: '#e2e8f0' },
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
   matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', icon: BarChart3, color: '#7c3aed', light: '#f5f3ff', accent: '#a78bfa', soft: '#ddd6fe' },
   fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', soft: '#FEF08A' },
@@ -228,6 +229,12 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
 }
 
 const SUBJECT_CARDS = {
+  general: {
+    title: 'General',
+    subtitle: 'Organización, técnicas de estudio y dudas sobre Kairo',
+    icon: MessageCircle,
+    kicker: 'Modo general'
+  },
   mates: {
     title: 'Matemáticas',
     subtitle: 'Problemas, bloques y pasos limpios',
@@ -429,13 +436,16 @@ function formatEnunciado(enunciado?: string | null) {
   return formatExamText(enunciado)
 }
 
-type Asignatura = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
+type Asignatura = 'general' | 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
 interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'matematicas_ccss', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
+// Asignaturas seleccionables en el Chat con Kairo — incluye "General" (sin temario/apuntes/toolbar de una asignatura concreta),
+// que no es una asignatura con exámenes propios y por eso se mantiene fuera de HOME_SUBJECTS.
+const CHAT_SUBJECTS: Asignatura[] = ['general', ...HOME_SUBJECTS]
 const DEFAULT_PINNED_SUBJECTS: Asignatura[] = ['mates', 'fisica', 'historia']
 const PINNED_SUBJECTS_STORAGE_KEY = 'kairo:pinned-subjects'
 const PROFILE_PREFERENCES_STORAGE_KEY = 'kairo_profile_preferences'
@@ -1594,6 +1604,7 @@ function cambiarBloqueBiologia(i: number, tipoBloque: string) {
 }
 
 function nombreAsignatura(a: string) {
+  if (a === 'general') return 'General'
   if (a === 'mates') return 'Matemáticas II'
   if (a === 'matematicas_ccss') return MATEMATICAS_CCSS_LABEL
   if (a === 'fisica') return 'Física'
@@ -2044,12 +2055,16 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       return
     }
     setMensajes(prev => [...prev, { rol: 'kairo', texto: '' }])
+    const chatSystemIntro = asignatura === 'general'
+      ? `Eres Kairo, el asistente de estudio de ${examSystemLabel(ccaa)}. El estudiante está en el modo General del chat: pregúntale con naturalidad sobre lo que necesite, incluidas dudas de organización, técnicas de estudio, motivación, cómo funciona la app, o cualquier cuestión que no encaje en una asignatura concreta. No fuerces la respuesta hacia matemáticas, lengua, historia u otra asignatura salvo que el estudiante lo pida explícitamente.\n` +
+        'Responde de forma directa, clara y cercana. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n'
+      : `Eres Kairo, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
+        'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Kairo. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n'
     try {
       const res = await fetch('/api/chat?stream=1', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: `Eres Kairo, tutor de ${examSystemLabel(ccaa)}. Responde dudas sobre matemáticas, física, química, biología, inglés, lengua, historia y filosofía.\n` +
-            'Responde como profesor experto PAU: respuesta directa, pasos claros, ejemplo nuevo, aplicación PAU y error típico cuando proceda. Si la duda requiere base conceptual, añade al final una sección Markdown con el encabezado exacto "## ¿Por qué es así?" y contenido específico del ejercicio. No uses los nombres "Teoría desplegable", "Teoría" ni "Más información". No copies apuntes ni libros; explica con palabras propias de Kairo. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n' +
+          pregunta: chatSystemIntro +
             (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
             hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Kairo') + ': ' + m.texto).join('\n') +
             '\nResponde solo como Kairo.'
@@ -3937,7 +3952,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 8 }}>Chat con Kairo · {examSystemLabel(ccaa)}</div>
                 <div style={{ fontSize: 38, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .9, marginBottom: 10 }}>Tutor<br />Inteligente</div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {HOME_SUBJECTS.map(key => {
+                  {CHAT_SUBJECTS.map(key => {
                     const card = SUBJECT_CARDS[key]
                     const isActive = asignatura === key
                     return (
@@ -3962,7 +3977,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             {/* Controls bar */}
             <div style={{ background: 'white', borderBottom: '2px solid #0f172a', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
-              {HOME_SUBJECTS.map(key => {
+              {CHAT_SUBJECTS.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
                 const isActive = asignatura === key

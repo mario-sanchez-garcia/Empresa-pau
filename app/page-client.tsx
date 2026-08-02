@@ -5208,7 +5208,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 })()}
               </div>
             </div>
-            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', width: '100%' }}>
+            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
             <SectionIntroCard
               hintKey="hint_examenes"

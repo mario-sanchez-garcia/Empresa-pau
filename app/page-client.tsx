@@ -78,7 +78,7 @@ import {
 const ASIGNATURAS = {
   general: { label: 'General', short: 'General', icon: MessageCircle, color: '#334155', light: '#f1f5f9', accent: '#94a3b8', soft: '#e2e8f0' },
   mates: { label: 'Matemáticas II', short: 'Mates', icon: Sigma, color: '#2563eb', light: '#eff6ff', accent: '#60a5fa', soft: '#dbeafe' },
-  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Matemáticas CCSS', icon: BarChart3, color: '#7c3aed', light: '#f5f3ff', accent: '#a78bfa', soft: '#ddd6fe' },
+  matematicas_ccss: { label: MATEMATICAS_CCSS_LABEL, short: 'Mates CCSS', icon: BarChart3, color: '#7c3aed', light: '#f5f3ff', accent: '#a78bfa', soft: '#ddd6fe' },
   fisica: { label: 'Física', short: 'Física', icon: Atom, color: '#CA8A04', light: '#FEFCE8', accent: '#FACC15', soft: '#FEF08A' },
   quimica: { label: 'Química', short: 'Química', icon: FlaskConical, color: '#ea580c', light: '#fff7ed', accent: '#fb923c', soft: '#ffedd5' },
   biologia: { label: 'Biología', short: 'Bio', icon: Dna, color: '#4d7c0f', light: '#f7fee7', accent: '#84cc16', soft: '#ecfccb' },
@@ -813,17 +813,28 @@ function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: n
   const areaPath = `${path} L${pathPoints[pathPoints.length - 1][0]},${height} L${pathPoints[0][0]},${height} Z`
   const last = pathPoints[pathPoints.length - 1]
   const lastValue = withData[withData.length - 1].avg
+  const withDataIndexes = points
+    .map((p, i) => (p.avg !== null ? i : null))
+    .filter((i): i is number => i !== null)
   return (
     <div className="history-trend-chart">
       <div className="history-trend-max">10</div>
+      <div className="history-trend-min">0</div>
       <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
         <line x1={padX} y1={padTop} x2={width - padX} y2={padTop} stroke="#eef2f7" strokeWidth={1} />
         <line x1={padX} y1={height - padBottom} x2={width - padX} y2={height - padBottom} stroke="#eef2f7" strokeWidth={1} />
         <path d={areaPath} fill="rgba(37,99,235,0.12)" stroke="none" />
         <path d={path} fill="none" stroke="#2563eb" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round" />
-        {pathPoints.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r={i === pathPoints.length - 1 ? 4 : 3} fill="#2563eb" stroke="#fff" strokeWidth={i === pathPoints.length - 1 ? 2 : 0} />
-        ))}
+        {pathPoints.map(([x, y], i) => {
+          const pointIndex = withDataIndexes[i]
+          const pointLabel = points[pointIndex].label
+          const pointAvg = points[pointIndex].avg as number
+          return (
+            <circle key={i} cx={x} cy={y} r={i === pathPoints.length - 1 ? 4 : 3} fill="#2563eb" stroke="#fff" strokeWidth={i === pathPoints.length - 1 ? 2 : 0}>
+              <title>{pointLabel}: {pointAvg.toFixed(1)}/10</title>
+            </circle>
+          )
+        })}
         <text x={Math.min(last[0] + 6, width - 20)} y={last[1] - 8} fontSize="12" fontWeight={900} fill="#1d4ed8">
           {lastValue.toFixed(1)}
         </text>
@@ -2366,8 +2377,13 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     return inMonth.reduce((s, e) => s + e.score10, 0) / inMonth.length
   }
 
-  const weakestSubjects = historialSubjectStats
-    .filter(stat => stat.count > 0 && stat.average !== null)
+  // Prioriza asignaturas con al menos 2 correcciones para que una única nota
+  // baja aislada no parezca tan urgente como una asignatura con mala media
+  // sostenida en varias correcciones. Si no hay suficientes con 2+, cae a
+  // cualquier asignatura con datos.
+  const weakestSubjectsWithData = historialSubjectStats.filter(stat => stat.count > 0 && stat.average !== null)
+  const weakestSubjectsReliable = weakestSubjectsWithData.filter(stat => stat.count >= 2)
+  const weakestSubjects = (weakestSubjectsReliable.length ? weakestSubjectsReliable : weakestSubjectsWithData)
     .sort((a, b) => Number(a.average) - Number(b.average))
     .slice(0, 3)
 
@@ -2421,11 +2437,20 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     .sort((a, b) => b.delta - a.delta)
     .slice(0, 2)
 
-  // Serie mensual (últimos 4 meses, más antiguo primero) para el gráfico de
-  // "Evolución general". Un mes sin correcciones con nota queda como null —
-  // el gráfico salta ese punto en vez de dibujar un 0 falso.
-  const historialMonthlySeries = [3, 2, 1, 0].map(monthsAgo => {
-    const now = new Date()
+  // Serie mensual para "Evolución general" — solo meses que realmente tienen
+  // notas (hasta los últimos 4), más un mes anterior de contexto aunque esté
+  // vacío. Evita mostrar de fijo los últimos 4 meses naturales cuando la
+  // actividad real es más antigua o más corta (p.ej. MAY/AGO sin datos).
+  const now = new Date()
+  const monthsAgoWithData = Array.from({ length: 12 }, (_, i) => i)
+    .filter(monthsAgo => scoreAvgInMonth(historialScoredItems, monthsAgo) !== null)
+    .sort((a, b) => b - a)
+  const monthsAgoRange = monthsAgoWithData.length
+    ? Array.from({ length: Math.max(...monthsAgoWithData) - Math.min(...monthsAgoWithData) + 2 }, (_, i) => Math.max(...monthsAgoWithData) + 1 - i)
+      .filter(m => m >= 0)
+      .slice(-4)
+    : [1, 0]
+  const historialMonthlySeries = monthsAgoRange.map(monthsAgo => {
     const target = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1)
     return {
       label: target.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '').toUpperCase(),
@@ -3354,7 +3379,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .history-hero {
           position: relative;
-          height: 190px;
+          height: 154px;
           border-radius: 20px;
           overflow: hidden;
           margin-bottom: 20px;
@@ -3405,38 +3430,17 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           margin-top: 8px;
         }
 
-        .history-hero-stats {
-          display: flex;
-          gap: 6px;
+        .history-hero-count {
           flex-shrink: 0;
-        }
-
-        .history-hero-stats > div {
           background: rgba(255,255,255,.1);
           border: 1px solid rgba(255,255,255,.16);
-          border-radius: 8px;
-          padding: 6px 12px;
-          text-align: center;
+          border-radius: 999px;
+          padding: 8px 16px;
+          font-size: 12px;
+          font-weight: 700;
+          color: rgba(255,255,255,.85);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-        }
-
-        .history-hero-stats strong {
-          display: block;
-          font-size: 17px;
-          font-weight: 900;
-          color: #fff;
-          line-height: 1;
-        }
-
-        .history-hero-stats span {
-          display: block;
-          margin-top: 3px;
-          font-size: 8px;
-          font-weight: 700;
-          color: rgba(255,255,255,.45);
-          text-transform: uppercase;
-          letter-spacing: .08em;
         }
 
         .history-topbar {
@@ -3670,8 +3674,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-subject-card.active {
+          border-color: var(--subject-color, #2563eb);
           background: var(--subject-light, #eff6ff);
-          box-shadow: inset 0 0 0 1.5px var(--subject-color, #2563eb);
+          box-shadow: inset 0 0 0 2px var(--subject-color, #2563eb), 0 10px 24px -8px var(--subject-color, #2563eb);
         }
 
         .history-subject-icon {
@@ -3931,6 +3936,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           gap: 14px;
           position: sticky;
           top: 88px;
+          max-height: calc(100vh - 108px);
+          overflow-y: auto;
         }
 
         .history-side-card {
@@ -4021,6 +4028,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           background: var(--subject-color, #2563eb);
         }
 
+        .history-side-row-count {
+          display: block;
+          margin-top: 5px;
+          color: #94a3b8;
+          font-size: 10px;
+          font-weight: 600;
+        }
+
         .history-stat-label {
           display: block;
           margin-bottom: 10px;
@@ -4086,6 +4101,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-recent-item b {
+          display: block;
           min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -4093,6 +4109,17 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           color: #0f172a;
           font-size: 12px;
           font-weight: 800;
+        }
+
+        .history-recent-item-subject {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: #94a3b8;
+          font-size: 9.5px;
+          font-weight: 700;
+          margin-top: 1px;
         }
 
         .history-recent-item span {
@@ -4210,6 +4237,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         .history-trend-max {
           position: absolute;
           top: 0;
+          left: 0;
+          color: #94a3b8;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .history-trend-min {
+          position: absolute;
+          bottom: 22px;
           left: 0;
           color: #94a3b8;
           font-size: 10px;
@@ -4430,10 +4466,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
 
           .history-hero {
-            height: 150px;
+            height: 130px;
           }
 
-          .history-hero-stats {
+          .history-hero-count {
             display: none;
           }
 
@@ -4574,7 +4610,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   borderBottom: '1px solid rgba(219,231,251,0.78)',
   padding: '10px 32px',
   minHeight: '64px',
-  display: (seccion === 'examenes' || seccion === 'chat') ? 'none' : 'flex',
+  display: (seccion === 'examenes' || seccion === 'chat' || seccion === 'historial') ? 'none' : 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '18px',
@@ -5489,18 +5525,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     </div>
                   </div>
                   {(() => {
-                    const items = historialTabItems.filter(item => historialSubjectFilter === 'todas' || item.asignatura === historialSubjectFilter)
-                    const scored = items.map(item => normalizedHistoryScore(item)).filter((v): v is number => v !== null)
-                    const media = scored.length ? (scored.reduce((sum, v) => sum + v, 0) / scored.length).toFixed(1) : null
-                    const mejor = scored.length ? Math.max(...scored).toFixed(1) : null
+                    const count = historialTabItems.filter(item => historialSubjectFilter === 'todas' || item.asignatura === historialSubjectFilter).length
                     return (
-                      <div className="history-hero-stats">
-                        {[{ val: String(items.length), label: 'Correcciones' }, { val: media ?? '—', label: 'Media' }, { val: mejor ?? '—', label: 'Mejor' }].map(stat => (
-                          <div key={stat.label}>
-                            <strong>{stat.val}</strong>
-                            <span>{stat.label}</span>
-                          </div>
-                        ))}
+                      <div className="history-hero-count">
+                        {count} {count === 1 ? 'corrección analizada' : 'correcciones analizadas'}
                       </div>
                     )
                   })()}
@@ -5580,7 +5608,18 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     <div className="history-summary-zone">
                       <span className="history-stat-label">Mejor corrección</span>
                       <strong className="history-stat-big positive">{historialBest ? historialBest.score10.toFixed(1) : '—'}<em>/10</em></strong>
-                      <small className="history-stat-foot">{historialBest ? nombreAsignatura(historialBest.item.asignatura) : 'Sin datos suficientes'}</small>
+                      {historialBest ? (
+                        <>
+                          <small className="history-stat-foot">{nombreAsignatura(historialBest.item.asignatura)}</small>
+                          <small className="history-stat-foot" style={{ marginTop: 1 }}>
+                            {historialBest.item.bloque || historySourceLabel(historialBest.item)}
+                            {' · '}
+                            {(() => { const d = new Date(historialBest.item.created_at); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) })()}
+                          </small>
+                        </>
+                      ) : (
+                        <small className="history-stat-foot">Sin datos suficientes</small>
+                      )}
                     </div>
 
                     <div className="history-summary-zone history-summary-zone-recent">
@@ -5589,7 +5628,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         const d = new Date(item.created_at)
                         return (
                           <button key={item.id ?? i} type="button" className="history-recent-item" onClick={() => setItemSeleccionado(item)}>
-                            <b>{item.bloque || nombreAsignatura(item.asignatura)}</b>
+                            <div style={{ minWidth: 0 }}>
+                              <b>{item.bloque || nombreAsignatura(item.asignatura)}</b>
+                              {item.bloque && (
+                                <div className="history-recent-item-subject">{nombreAsignatura(item.asignatura)}</div>
+                              )}
+                            </div>
                             <span className={
                               (() => { const s = normalizedHistoryScore(item); return s == null ? 'muted' : s >= 7 ? 'good' : s >= 5 ? 'mid' : 'bad' })()
                             }>{historyScoreDisplay(item)}</span>
@@ -5763,7 +5807,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   <div className="history-card history-side-card">
                     <h2>Asignaturas a reforzar</h2>
                     <p>Basado en tu rendimiento guardado</p>
-                    {weakestSubjects.length ? weakestSubjects.map(({ subject, config, average }) => (
+                    {weakestSubjects.length ? weakestSubjects.map(({ subject, config, average, count }) => (
                       <div key={subject} className="history-side-row history-side-row-bar" style={{ '--subject-color': config.color } as CSSProperties}>
                         <div className="history-side-row-top">
                           <span>{config.short}</span>
@@ -5772,6 +5816,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         <div className="history-bar-track">
                           <div className="history-bar-fill" style={{ width: `${Math.max(4, (Number(average) / 10) * 100)}%` }} />
                         </div>
+                        <small className="history-side-row-count">{count} {count === 1 ? 'corrección' : 'correcciones'}</small>
                       </div>
                     )) : <small className="history-stat-foot">No hay suficientes notas todavía.</small>}
                   </div>

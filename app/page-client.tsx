@@ -792,9 +792,10 @@ function HistorialDonut({ value, size = 96 }: { value: number | null; size?: num
 // con nota) se saltan en vez de dibujarse como un 0 falso.
 function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: number | null }> }) {
   const width = 240
-  const height = 84
-  const padX = 4
-  const padY = 10
+  const height = 118
+  const padX = 6
+  const padTop = 14
+  const padBottom = 8
   const withData = points.filter(p => p.avg !== null) as Array<{ label: string; avg: number }>
   if (withData.length < 2) {
     return <p className="history-trend-empty">Aún no hay suficientes meses con notas para ver la evolución.</p>
@@ -802,7 +803,7 @@ function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: n
   const stepX = (width - padX * 2) / (points.length - 1)
   const toXY = (i: number, avg: number) => {
     const x = padX + i * stepX
-    const y = height - padY - (avg / 10) * (height - padY * 2)
+    const y = height - padBottom - (avg / 10) * (height - padTop - padBottom)
     return [x, y]
   }
   const pathPoints = points
@@ -810,12 +811,22 @@ function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: n
     .filter((p): p is [number, number] => p !== null)
   const path = pathPoints.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x},${y}`).join(' ')
   const areaPath = `${path} L${pathPoints[pathPoints.length - 1][0]},${height} L${pathPoints[0][0]},${height} Z`
+  const last = pathPoints[pathPoints.length - 1]
+  const lastValue = withData[withData.length - 1].avg
   return (
     <div className="history-trend-chart">
+      <div className="history-trend-max">10</div>
       <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-        <path d={areaPath} fill="rgba(37,99,235,0.10)" stroke="none" />
-        <path d={path} fill="none" stroke="#2563eb" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        {pathPoints.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={2.5} fill="#2563eb" />)}
+        <line x1={padX} y1={padTop} x2={width - padX} y2={padTop} stroke="#eef2f7" strokeWidth={1} />
+        <line x1={padX} y1={height - padBottom} x2={width - padX} y2={height - padBottom} stroke="#eef2f7" strokeWidth={1} />
+        <path d={areaPath} fill="rgba(37,99,235,0.12)" stroke="none" />
+        <path d={path} fill="none" stroke="#2563eb" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round" />
+        {pathPoints.map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r={i === pathPoints.length - 1 ? 4 : 3} fill="#2563eb" stroke="#fff" strokeWidth={i === pathPoints.length - 1 ? 2 : 0} />
+        ))}
+        <text x={Math.min(last[0] + 6, width - 20)} y={last[1] - 8} fontSize="12" fontWeight={900} fill="#1d4ed8">
+          {lastValue.toFixed(1)}
+        </text>
       </svg>
       <div className="history-trend-labels">
         {points.map(p => <span key={p.label}>{p.label}</span>)}
@@ -3305,6 +3316,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           min-height: 0;
           overflow-y: auto;
           padding: 22px 28px 40px;
+          font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
           background:
             radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.06), transparent 28%),
             radial-gradient(circle at 92% 12%, rgba(96, 165, 250, 0.07), transparent 26%),
@@ -3327,18 +3339,19 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .history-topbar h1 {
           margin: 0;
-          color: #071735;
-          font-size: clamp(24px, 2.4vw, 32px);
-          font-weight: 950;
-          letter-spacing: -0.03em;
-          line-height: 1;
+          color: #0f172a;
+          font-size: 28px;
+          font-weight: 800;
+          letter-spacing: -0.035em;
+          line-height: 1.1;
         }
 
         .history-topbar p {
           margin: 6px 0 0;
           color: #64748b;
-          font-size: 12.5px;
-          font-weight: 650;
+          font-size: 12px;
+          font-weight: 500;
+          line-height: 1.45;
         }
 
         .history-actions {
@@ -3442,7 +3455,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         .history-summary-bar {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
-          margin-bottom: 14px;
+          margin-bottom: 20px;
         }
 
         .history-summary-zone {
@@ -3450,9 +3463,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           flex-direction: column;
           justify-content: center;
           min-width: 0;
-          padding: 16px 20px;
+          padding: 20px 24px;
           border-right: 1px solid #e8eef7;
-          min-height: 128px;
+          min-height: 142px;
         }
 
         .history-summary-zone:last-child {
@@ -3474,19 +3487,20 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           display: block;
           margin: 0 0 8px;
           color: #64748b;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 0.09em;
+          font-size: 10px;
+          font-weight: 700;
+          line-height: 1.2;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
         }
 
         .history-total-copy > strong {
           display: block;
-          color: #071735;
-          font-size: clamp(32px, 3.4vw, 44px);
-          font-weight: 950;
-          letter-spacing: -0.06em;
-          line-height: 0.95;
+          color: #0f172a;
+          font-size: clamp(28px, 3vw, 40px);
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          line-height: 1;
         }
 
         .history-total-delta {
@@ -3500,7 +3514,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-subject-card em,
-        .history-row-score em {
+        .history-row-score em,
+        .history-stat-big em,
+        .history-stat-donut-row strong em {
           font-style: normal;
           color: #94a3b8;
           font-size: 0.45em;
@@ -3513,14 +3529,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           margin: 0 0 14px;
           color: #64748b;
           font-size: 12px;
-          font-weight: 650;
+          font-weight: 500;
+          line-height: 1.45;
         }
 
         .history-subject-row {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-          gap: 10px;
-          margin-bottom: 14px;
+          grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+          gap: 12px;
+          margin-bottom: 20px;
         }
 
         .history-subject-card {
@@ -3529,6 +3546,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           border-radius: 12px;
           background: #fff;
           padding: 12px 12px 11px;
+          min-width: 0;
           text-align: left;
           cursor: pointer;
           box-shadow: 0 8px 20px rgba(15,23,42,.04);
@@ -3546,12 +3564,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-subject-icon {
-          width: 30px;
-          height: 30px;
+          width: 28px;
+          height: 28px;
           border-radius: 9px;
           display: grid;
           place-items: center;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           color: #fff;
           background: var(--subject-color, #2563eb);
         }
@@ -3560,9 +3578,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           display: block;
           margin-bottom: 6px;
           color: #0f172a;
-          font-size: 12px;
+          font-size: 11.5px;
           font-weight: 900;
-          line-height: 1.15;
+          line-height: 1.2;
         }
 
         .history-subject-card strong {
@@ -3809,7 +3827,6 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-side-card > h2 {
-          color: #0f172a;
           margin-bottom: 4px;
         }
 
@@ -3897,8 +3914,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           display: block;
           margin-bottom: 10px;
           color: #64748b;
-          font-size: 10.5px;
-          font-weight: 900;
+          font-size: 10px;
+          font-weight: 700;
+          line-height: 1.2;
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
@@ -3910,18 +3928,18 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-stat-donut-row strong {
-          color: #071735;
+          color: #0f172a;
           font-size: 22px;
-          font-weight: 950;
+          font-weight: 800;
           letter-spacing: -0.04em;
         }
 
         .history-stat-big {
           display: block;
-          color: #071735;
+          color: #0f172a;
           font-size: clamp(26px, 2.6vw, 34px);
-          font-weight: 950;
-          letter-spacing: -0.05em;
+          font-weight: 800;
+          letter-spacing: -0.04em;
         }
 
         .history-stat-big.positive {
@@ -4074,18 +4092,28 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-trend-chart {
-          margin-top: 4px;
+          position: relative;
+          margin-top: 10px;
+        }
+
+        .history-trend-max {
+          position: absolute;
+          top: 0;
+          left: 0;
+          color: #94a3b8;
+          font-size: 10px;
+          font-weight: 800;
         }
 
         .history-trend-labels {
           display: flex;
           justify-content: space-between;
-          margin-top: 4px;
+          margin-top: 6px;
         }
 
         .history-trend-labels span {
           color: #94a3b8;
-          font-size: 9.5px;
+          font-size: 10px;
           font-weight: 800;
           letter-spacing: 0.04em;
         }
@@ -4119,9 +4147,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .history-activity-grid strong {
           display: block;
-          color: #071735;
+          color: #0f172a;
           font-size: 20px;
-          font-weight: 950;
+          font-weight: 800;
           letter-spacing: -0.04em;
         }
 
@@ -4130,10 +4158,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           margin-top: 2px;
           color: #64748b;
           font-size: 9px;
-          font-weight: 800;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.04em;
-          line-height: 1.3;
+          letter-spacing: 0.08em;
+          line-height: 1.2;
         }
 
         .history-empty {
@@ -4251,7 +4279,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
 
           .history-subject-card {
-            flex: 0 0 130px;
+            flex: 0 0 140px;
           }
 
           .history-filters {
@@ -5367,7 +5395,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                   <div className="history-card history-summary-bar">
                     <div className="history-summary-zone history-summary-zone-total">
                       <div className="history-total-illustration" aria-hidden="true">
-                        <svg width="40" height="40" viewBox="0 0 56 56" fill="none">
+                        <svg width="46" height="46" viewBox="0 0 56 56" fill="none">
                           <rect width="56" height="56" rx="16" fill="#dbeafe" />
                           <rect x="14" y="10" width="22" height="30" rx="3" fill="#fff" stroke="#93c5fd" strokeWidth="1.5" />
                           <path d="M19 18h12M19 24h12M19 30h7" stroke="#93c5fd" strokeWidth="1.5" strokeLinecap="round" />
@@ -5418,7 +5446,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     </div>
                   </div>
 
-                  <div className="history-subject-row">
+                  <div className="history-subject-row" style={{ gridTemplateColumns: `repeat(${historialSubjectStats.length}, minmax(0, 1fr))` }}>
                     {historialSubjectStats.map(({ subject, config, average, count }) => {
                       const Icon = config.icon
                       const active = historialSubjectFilter === subject

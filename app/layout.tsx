@@ -4,7 +4,7 @@
 // PostHog, Hotjar...) PASA A SER OBLIGATORIO un banner de consentimiento previo y granular
 // que BLOQUEE esos scripts hasta la aceptación explícita del usuario. No omitir este paso.
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import NextTopLoader from 'nextjs-toploader'
@@ -17,6 +17,13 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// Solo para la pantalla de Historial (ver .history-screen en page-client.tsx) —
+// el resto de Kairo sigue usando Geist Sans como única familia tipográfica.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -68,7 +75,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <NextTopLoader color="#2563eb" height={3} showSpinner={false} shadow={false} />

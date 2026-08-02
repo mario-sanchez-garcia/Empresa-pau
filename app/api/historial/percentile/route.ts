@@ -57,9 +57,11 @@ export async function GET(request: NextRequest) {
   const averages = [...sums.entries()].map(([userId, { total, count }]) => ({ userId, avg: total / count }))
   const mine = averages.find(a => a.userId === user.id)
 
-  if (!mine || averages.length < 3) {
+  if (!mine || averages.length < 5) {
     // Muestra insuficiente para que un percentil signifique algo — mejor no
     // inventar un número que decir "estás por encima de X" sin base real.
+    // (Umbral subido de 3 a 5: con muy pocos usuarios un percentil real
+    // igual sale demasiado extremo/poco significativo para mostrarlo.)
     return NextResponse.json({
       promedio: mine ? Number(mine.avg.toFixed(1)) : null,
       percentil: null,

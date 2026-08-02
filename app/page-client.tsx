@@ -2410,41 +2410,28 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     .sort((a, b) => Number(a.average) - Number(b.average))
     .slice(0, 3)
 
-  // Compara las dos últimas ventanas de correcciones CON datos por asignatura
-  // (no necesariamente "este mes natural" vs "el anterior" — si aún no hay
-  // correcciones en el mes en curso, esto sigue comparando los dos meses más
-  // recientes que sí tienen notas, para no dejar la tarjeta vacía de forma
-  // artificial los primeros días de cada mes).
-  function latestTwoMonthAverages(entries: typeof historialScoredItems): { latest: number | null; previous: number | null } {
-    const buckets = new Map<string, { total: number; count: number }>()
-    for (const entry of entries) {
-      const d = new Date(entry.item.created_at)
-      if (Number.isNaN(d.getTime())) continue
-      const key = `${d.getFullYear()}-${d.getMonth()}`
-      const bucket = buckets.get(key) ?? { total: 0, count: 0 }
-      bucket.total += entry.score10
-      bucket.count += 1
-      buckets.set(key, bucket)
-    }
-    const sortedKeys = [...buckets.keys()].sort((a, b) => {
-      const [ay, am] = a.split('-').map(Number)
-      const [by, bm] = b.split('-').map(Number)
-      return (by * 12 + bm) - (ay * 12 + am)
-    })
-    const avgOf = (key: string | undefined) => {
-      if (!key) return null
-      const bucket = buckets.get(key)!
-      return bucket.total / bucket.count
-    }
-    return { latest: avgOf(sortedKeys[0]), previous: avgOf(sortedKeys[1]) }
+  // Compara la mitad más reciente de las correcciones de una asignatura
+  // contra la mitad anterior, en orden cronológico — no por mes natural.
+  // Comparar por mes natural dejaba esto vacío para casi cualquier alumno
+  // activo (la mayoría de correcciones caen en el mismo mes), incluso con
+  // mejora real y varios ejercicios hechos. Con al menos 3 correcciones ya
+  // se puede trazar una tendencia honesta.
+  function recentTrendAverages(entries: typeof historialScoredItems): { latest: number | null; previous: number | null } {
+    if (entries.length < 3) return { latest: null, previous: null }
+    const sorted = [...entries].sort((a, b) => new Date(a.item.created_at).getTime() - new Date(b.item.created_at).getTime())
+    const mid = Math.floor(sorted.length / 2)
+    const older = sorted.slice(0, mid)
+    const recent = sorted.slice(mid)
+    const avg = (list: typeof sorted) => list.reduce((sum, e) => sum + e.score10, 0) / list.length
+    return { latest: avg(recent), previous: avg(older) }
   }
 
-  // Delta entre las dos ventanas mensuales más recientes con datos, por
+  // Delta entre la mitad reciente y la mitad anterior de correcciones, por
   // asignatura, para la flechita de tendencia en la tira de asignaturas.
   const subjectDeltaMap = new Map<Asignatura, number | null>(
     HOME_SUBJECTS.map(subject => {
       const entries = historialScoredItems.filter(e => e.item.asignatura === subject)
-      const { latest, previous } = latestTwoMonthAverages(entries)
+      const { latest, previous } = recentTrendAverages(entries)
       return [subject, latest !== null && previous !== null ? latest - previous : null]
     })
   )
@@ -2452,7 +2439,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   const recentImprovingSubjects = HOME_SUBJECTS
     .map(subject => {
       const entries = historialScoredItems.filter(e => e.item.asignatura === subject)
-      const { latest, previous } = latestTwoMonthAverages(entries)
+      const { latest, previous } = recentTrendAverages(entries)
       if (latest === null || previous === null) return null
       return { subject, config: ASIGNATURAS[subject], thisMonth: latest, delta: latest - previous }
     })
@@ -6427,7 +6414,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                     {recentImprovingSubjects.length ? recentImprovingSubjects.map(({ subject, config, delta }) => (
                       <div key={subject} className="history-side-row positive" style={{ '--subject-color': config.color } as CSSProperties}>
                         <span>{config.short}</span>
-                        <b><TrendingUp size={13} /> +{delta.toFixed(1)}<em> vs mes anterior</em></b>
+                        <b><TrendingUp size={13} /> +{delta.toFixed(1)}<em> vs correcciones anteriores</em></b>
                       </div>
                     )) : <small className="history-stat-foot">Corrige algunos ejercicios más para ver tendencias.</small>}
                   </div>

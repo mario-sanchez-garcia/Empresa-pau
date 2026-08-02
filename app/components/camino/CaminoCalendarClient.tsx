@@ -280,8 +280,6 @@ function hrefForMission(mission: Mission) {
   const start = mission.kind === 'concept_explanation' || mission.kind === 'guided_example' || mission.kind === 'guided_practice' ? '&start=exercise' : ''
   return { ...target, href: `${target.href}${separator}missionId=${encodeURIComponent(mission.id)}&source=camino_pau${start}` }
 }
-function localCurrentEntry(community: string, xp: number): RankingEntry { return { id: 'local-current-user', name: 'Tú', community, xp, rank: 1, isCurrentUser: true } }
-
 async function fetchLeaderboard(token: string, community: string) {
   try {
     const res = await fetch(`/api/camino/leaderboard?community=${encodeURIComponent(community)}`, {
@@ -1129,11 +1127,21 @@ export default function CaminoCalendarClient() {
   const division = divisionFor(displayedXP)
   const nextDivision = DIVISIONS[DIVISIONS.indexOf(division) + 1]
   const divisionPct = nextDivision ? Math.min(100, Math.round(((displayedXP - division.min) / (nextDivision.min - division.min)) * 100)) : 100
-  const rankingCommunity = leaderboard?.community.name ?? onboarding?.community ?? 'Sin comunidad'
-  const fallbackCurrent = localCurrentEntry(rankingCommunity, displayedXP)
   const rankingTopRows = leaderboard?.global?.top ?? []
-  const currentInTop = rankingTopRows.some(row => row.isCurrentUser)
-  const fixedCurrentRow = currentInTop ? null : (leaderboard?.global?.current ?? fallbackCurrent)
+
+  // Puesto del héroe. Solo se muestra cuando lo sabemos de verdad.
+  //
+  // Antes, mientras cargaba el leaderboard se pintaba localCurrentEntry(), que
+  // devolvía `rank: 1` fijo — así que TODO alumno veía "#1" un instante en cada
+  // carga y luego desaparecía. Y al llegar el dato real, si estabas dentro del
+  // top el badge se ocultaba del todo (para no duplicar el dato de la lista),
+  // lo que remataba el efecto de parpadeo.
+  //
+  // Ahora: null mientras no haya respuesta, y el puesto real siempre que la
+  // haya, estés o no en el top.
+  const heroRank: number | null = leaderboard
+    ? (rankingTopRows.find(row => row.isCurrentUser)?.rank ?? leaderboard.global?.current?.rank ?? null)
+    : null
   const onboardingSubjects = normalizeOnboardingSubjects(onboarding?.subjects ?? [])
   const courseGroups = courseTopicsForSubjects(onboardingSubjects, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
   const caminoPlanLimits = getCaminoPlanLimits(caminoPlanId)
@@ -1659,7 +1667,7 @@ export default function CaminoCalendarClient() {
               <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>🔥 {streak}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
-                {fixedCurrentRow && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{fixedCurrentRow.rank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
+                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
               </div>
             </div>
           </div>

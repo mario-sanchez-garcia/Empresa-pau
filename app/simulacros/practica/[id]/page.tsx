@@ -291,7 +291,7 @@ function PracticaPageInner() {
         </div>
       }
     >
-      <div className="mx-auto grid max-w-6xl gap-5">
+      <div className="grid w-full gap-5">
 
         {/* Progress bar + navigation */}
         <section

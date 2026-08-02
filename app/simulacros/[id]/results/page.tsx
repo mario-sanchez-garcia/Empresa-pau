@@ -186,7 +186,7 @@ export default function SimulacroResultsPage() {
           </Link>
         }
       >
-        <div className="mx-auto grid max-w-6xl gap-6">
+        <div className="grid w-full gap-6">
 
           {/* Score hero */}
           <section

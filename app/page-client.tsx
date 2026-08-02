@@ -3372,17 +3372,17 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
         .history-shell {
           width: 100%;
-          max-width: 1500px;
+          max-width: none;
           margin: 0 auto;
         }
 
         .history-hero {
           position: relative;
-          height: 154px;
-          border-radius: 20px;
+          height: 340px;
+          border-radius: 0;
           overflow: hidden;
-          margin-bottom: 20px;
-          box-shadow: 0 18px 50px rgba(37,99,235,.14);
+          margin: -22px -28px 24px;
+          box-shadow: none;
         }
 
         .history-hero img {
@@ -3401,8 +3401,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           align-items: flex-end;
           justify-content: space-between;
           gap: 16px;
-          padding: 20px 26px;
-          background: linear-gradient(to top, rgba(0,0,0,.68) 0%, rgba(0,0,0,.15) 60%, transparent 100%);
+          padding: 28px 32px 32px;
+          background: linear-gradient(to bottom, rgba(15,23,42,.16) 0%, rgba(15,23,42,.86) 100%);
         }
 
         .history-hero-eyebrow {
@@ -3415,11 +3415,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
 
         .history-hero-title {
-          font-size: clamp(24px, 2.6vw, 34px);
+          font-size: clamp(48px, 6vw, 76px);
           font-weight: 900;
           color: #fff;
-          line-height: .95;
-          letter-spacing: -.03em;
+          line-height: .88;
+          letter-spacing: -.045em;
         }
 
         .history-hero-sub {
@@ -4465,7 +4465,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
 
           .history-hero {
-            height: 130px;
+            height: 200px;
+            margin: -20px -16px 20px;
+          }
+
+          .history-hero-title {
+            font-size: 46px;
           }
 
           .history-hero-count {

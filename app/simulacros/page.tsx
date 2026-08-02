@@ -282,7 +282,7 @@ function SimulacrosPage() {
         .simu-card-title { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; color: #0f172a; }
         .simu-step-num { width: 22px; height: 22px; border-radius: 999px; background: #2563eb; color: #fff; font-size: 12px; font-weight: 900; display: grid; place-items: center; flex-shrink: 0; }
         .simu-help-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: #64748b; background: none; border: 0; cursor: pointer; }
-        .simu-subject-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .simu-subject-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .simu-subject-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 10px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; cursor: pointer; transition: all .12s; text-align: center; min-height: 100px; }
         .simu-subject-card.is-active { box-shadow: inset 0 0 0 1.5px var(--subj-color); background: var(--subj-light); }
         .simu-subject-card:disabled { cursor: not-allowed; opacity: .5; }
@@ -500,7 +500,7 @@ function SimulacrosPage() {
                     <div className="simu-mode-title-row">
                       <span className="simu-mode-title">Peores notas</span>
                       <span className="simu-mode-badge" style={{ background: weakCandidateCount > 0 ? '#f0fdf4' : '#fffbeb', color: weakCandidateCount > 0 ? '#15803d' : '#b45309' }}>
-                        {weakCandidateCount > 0 ? `${weakCandidateCount} detectado${weakCandidateCount === 1 ? '' : 's'}` : 'Necesita historial'}
+                        {weakCandidateCount > 0 ? `${weakCandidateCount} detectados` : 'Necesita historial'}
                       </span>
                     </div>
                     <span className="simu-mode-desc">Practica los exámenes de tus peores resultados.</span>

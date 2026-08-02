@@ -71,23 +71,23 @@ export default function ZonaCanvasPage() {
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f8fafc' }}>
       <style>{`
         .canvas-hero {
-          height: 340px !important;
+          height: 200px !important;
         }
 
         .canvas-hero-overlay {
-          background: linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.86) 100%) !important;
-          padding: 28px 32px 32px !important;
+          background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%) !important;
+          padding: 20px 28px !important;
         }
 
         .canvas-hero-title {
-          font-size: clamp(52px, 6vw, 82px) !important;
-          letter-spacing: -.045em !important;
+          font-size: 40px !important;
+          letter-spacing: -.035em !important;
         }
 
         @media (max-width: 767px) {
-          .canvas-hero { height: 200px !important; }
-          .canvas-hero-title { font-size: 46px !important; }
-          .canvas-hero-overlay { padding: 16px 20px 22px !important; }
+          .canvas-hero { height: 130px !important; }
+          .canvas-hero-title { font-size: 28px !important; }
+          .canvas-hero-overlay { padding: 16px 20px !important; }
         }
       `}</style>
       <SidebarNav />
@@ -95,12 +95,12 @@ export default function ZonaCanvasPage() {
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         {/* Hero */}
-        <div className="canvas-hero" style={{ position: 'relative', height: 340, flexShrink: 0, overflow: 'hidden' }}>
-          <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.42) saturate(.6)' }} />
-          <div className="canvas-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.86) 100%)', display: 'flex', alignItems: 'flex-end', padding: '28px 32px 32px' }}>
+        <div className="canvas-hero" style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+          <img src={BOOKS_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.5) saturate(.7)' }} />
+          <div className="canvas-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '20px 28px' }}>
             <div>
               <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Canvas infinito</div>
-              <div className="canvas-hero-title" style={{ fontSize: 'clamp(52px, 6vw, 82px)', fontWeight: 900, color: 'white', letterSpacing: '-.045em', lineHeight: .88 }}>Mi Espacio</div>
+              <div className="canvas-hero-title" style={{ fontSize: 40, fontWeight: 900, color: 'white', letterSpacing: '-.035em', lineHeight: .9 }}>Mi Espacio</div>
             </div>
           </div>
         </div>

@@ -57,23 +57,23 @@ export default function ZonaPage() {
     <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
       <style>{`
         .zona-hero {
-          height: 340px !important;
+          height: 200px !important;
         }
 
         .zona-hero-overlay {
-          background: linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.86) 100%) !important;
-          padding: 28px 32px 32px !important;
+          background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%) !important;
+          padding: 20px 28px !important;
         }
 
         .zona-hero-title {
-          font-size: clamp(52px, 6vw, 82px) !important;
-          letter-spacing: -.045em !important;
+          font-size: 40px !important;
+          letter-spacing: -.035em !important;
         }
 
         @media (max-width: 767px) {
-          .zona-hero { height: 200px !important; }
-          .zona-hero-title { font-size: 46px !important; }
-          .zona-hero-overlay { padding: 16px 20px 22px !important; }
+          .zona-hero { height: 130px !important; }
+          .zona-hero-title { font-size: 28px !important; }
+          .zona-hero-overlay { padding: 16px 20px !important; }
           .zona-main { padding: 16px 16px 20px !important; }
         }
       `}</style>
@@ -82,12 +82,12 @@ export default function ZonaPage() {
       {/* Main column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         {/* Hero */}
-        <div className="zona-hero" style={{ position: 'relative', height: 340, flexShrink: 0, overflow: 'hidden' }}>
-          <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.4) saturate(.6)' }} />
-          <div className="zona-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,.18) 0%, rgba(15,23,42,.86) 100%)', display: 'flex', alignItems: 'flex-end', padding: '28px 32px 32px' }}>
+        <div className="zona-hero" style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+          <img src={STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', filter: 'brightness(.5) saturate(.7)' }} />
+          <div className="zona-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)', display: 'flex', alignItems: 'flex-end', padding: '20px 28px' }}>
             <div>
               <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Kairo · Tu espacio personal</div>
-              <div className="zona-hero-title" style={{ fontSize: 36, fontWeight: 900, color: 'white', letterSpacing: '-.04em', lineHeight: .95 }}>La Zona</div>
+              <div className="zona-hero-title" style={{ fontSize: 40, fontWeight: 900, color: 'white', letterSpacing: '-.035em', lineHeight: .9 }}>La Zona</div>
             </div>
           </div>
         </div>

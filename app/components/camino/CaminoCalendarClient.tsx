@@ -2333,13 +2333,20 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
 
 function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, planId, onNavigateWeek, onClose, onAddExam, onSave }: { calendar: DayPlan[]; weekStartISO: string; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onSave: (calendar: DayPlan[]) => void }) {
   const safeSubjects: string[] = subjects
-  const [draft, setDraft] = useState<DayPlan[]>(() => calendar.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
-  const [newMission, setNewMission] = useState({ day: calendar[0]?.date ?? todayISO(), subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, bonus: false })
+  // `calendar` is the whole multi-week calendar loaded in the parent, not
+  // just this week — seeding the editor's draft from it directly (instead of
+  // filtering to weekStartISO like onNavigateWeek already does) showed every
+  // loaded week stacked on open. Only a subsequent Ant/Hoy/Sig click (which
+  // does filter) or a lucky reload where the parent happened to have just one
+  // week loaded made it look "fixed".
+  const initialWeek = onNavigateWeek(weekStartISO)
+  const [draft, setDraft] = useState<DayPlan[]>(() => initialWeek.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
+  const [newMission, setNewMission] = useState({ day: initialWeek[0]?.date ?? weekStartISO, subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, bonus: false })
   const [draggedMissionId, setDraggedMissionId] = useState<string | null>(null)
   const [editorNotice, setEditorNotice] = useState('')
   const [editorWeekStart, setEditorWeekStart] = useState(weekStartISO)
   const [missionPanelOpen, setMissionPanelOpen] = useState(false)
-  const [selectedDayDate, setSelectedDayDate] = useState<string>(() => calendar.find(d => d.isToday)?.date ?? calendar[0]?.date ?? todayISO())
+  const [selectedDayDate, setSelectedDayDate] = useState<string>(() => initialWeek.find(d => d.isToday)?.date ?? initialWeek[0]?.date ?? weekStartISO)
   const topics = curriculumForSubject(newMission.subject, curriculum)
   const orderedDraft = draft.slice().sort((a, b) => a.date.localeCompare(b.date))
   const selectedDay = orderedDraft.find(d => d.date === selectedDayDate) ?? orderedDraft[0]

@@ -1954,8 +1954,10 @@ Reglas comunes:
 - Usa LaTeX solo dentro de $...$ o bloques $$...$$. No mezcles $ y $$ en la misma línea.
 - Matrices, determinantes y sistemas deben ir en bloque $$...$$: \\begin{pmatrix}...\\end{pmatrix}, \\begin{vmatrix}...\\end{vmatrix}, \\begin{cases}...\\end{cases}.
 - No dejes comandos sueltos como \\frac, \\tfrac, \\cdot, \\begin o \\end fuera de delimitadores matemáticos.
+- Nunca escribas placeholders visibles como undefined, null o NaN. Si no puedes deducir una parte, escribe una frase útil y honesta.
+- Antes de terminar, revisa que no queda ningún apartado con contenido vacío o técnico.
 - Si haces puntuación por apartados, usa lista Markdown en vez de tabla cuando haya fórmulas.
-- Sé claro, concreto y breve.`
+- Sé claro y concreto. En Exámenes, la prioridad es que la corrección quede completa.`
 
     return [
       {
@@ -2048,11 +2050,20 @@ Devuelve exactamente estas secciones:
     ]
   }
 
-  function buildCompactRetryPrompt(prompt: string) {
+  function buildCorrectionRetryPrompt(prompt: string, validation: ReturnType<typeof validateCorrectionBlock>) {
+    const issues = [
+      validation.truncated ? 'la respuesta anterior se cortó por límite de tokens' : '',
+      validation.missingFields.length ? `faltaban secciones obligatorias: ${validation.missingFields.join(', ')}` : '',
+      validation.forbiddenLiterals.length ? 'aparecieron placeholders técnicos visibles como undefined/null/NaN' : '',
+      validation.parseError ? 'la respuesta tenía estructura incompleta o no renderizable' : '',
+    ].filter(Boolean).join('; ')
+
     return `${prompt}
 
-Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown limpio, LaTeX correcto y cierra la respuesta.
-No escribas valores visibles como undefined, null o NaN. Si falta información, escribe "No disponible" solo si es necesario para entender el punto.`
+Rehaz este bloque completo y cerrado. Problema detectado: ${issues || 'la respuesta anterior no cumplió el contrato de salida'}.
+Mantén Markdown limpio, LaTeX correcto y todas las secciones exigidas.
+No escribas valores visibles como undefined, null o NaN. No dejes líneas vacías como respuesta a un apartado.
+Si falta información, sustituye el hueco por una explicación real basada en el enunciado, la rúbrica o la corrección previa.`
   }
 
   function correctionBlockFallbackMarkdown(title: string) {
@@ -2099,8 +2110,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
       if (!validation.valid) {
         setContinuingCorrection(true)
-        setCorrectionStage(`${chunk.label} Reintentando este bloque en versión breve...`)
-        result = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunkPrompt), {
+        setCorrectionStage(`${chunk.label} Reintentando este bloque completo...`)
+        result = await streamCorrectionRequest(accessToken, buildCorrectionRetryPrompt(chunkPrompt, validation), {
           includeImage: true,
           appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
           blockId: `${chunk.id}:retry`,

@@ -16,10 +16,6 @@ type GlobalPeriod = 'total' | 'month' | 'week'
 // de fiar — mismo problema que el "Percentil P50" del historial con pocos
 // datos: el alumno se lo cree igual aunque la muestra sea minúscula.
 const MIN_PARTICIPANTS_FOR_PERCENTILE = 50
-// Por debajo de esto, una tabla de ranking con 2-4 filas no transmite "esto
-// es un ranking" — mejor explicar qué se verá cuando haya más gente que
-// enseñar una tabla que parece vacía o rota.
-const MIN_PARTICIPANTS_FOR_TABLE = 5
 
 type Medal = 'oro' | 'plata' | 'bronce'
 type PastRound = { periodStart: string; periodEnd: string; scopeType: string; label: string; roundXp: number; rank: number; medal: Medal | null }
@@ -191,14 +187,6 @@ function GlobalTab({ token }: { token: string }) {
           <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>
           <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Kairo acaba de empezar</p>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Sé el primero en completar misiones. En cuanto haya más alumnos, aquí verás el ranking completo.</p>
-        </div>
-      ) : data.activeCount < MIN_PARTICIPANTS_FOR_TABLE ? (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <p style={{ fontSize: 28, marginBottom: 10 }}>🌱</p>
-          <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Todavía sois pocos</p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>
-            Ahora mismo hay {data.activeCount} alumno{data.activeCount === 1 ? '' : 's'} con {PERIOD_LABELS[period].toLowerCase()}. Cuando se una más gente, aquí verás el ranking completo con tu puesto entre todos.
-          </p>
         </div>
       ) : (
         <>

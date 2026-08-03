@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
 import { cached } from '@/app/lib/cache/memoCache'
+import { getXpByUserInRange, currentRoundRange } from '@/app/lib/camino/leagueRounds'
+import { resolveDisplayNames, safeUsername } from '@/app/lib/camino/rankingNames'
 
 export const dynamic = 'force-dynamic'
 
 const TOP_LIMIT = 500
 const NEIGHBORHOOD_SIZE = 3
-// Un ranking de XP acumulado no cambia de forma perceptible en un minuto.
+// El XP de la ronda actual no cambia de forma perceptible en un minuto.
 const RANKING_TTL_SECONDS = 60
 
-function safeName(v: unknown): string {
-  const s = (typeof v === 'string' ? v : '').trim().slice(0, 40)
-  return s.includes('@') ? '' : s
-}
-
-type ProgressRow = { user_id: string; xp_total: number }
+type RankedRow = { user_id: string; xp: number }
 
 export async function GET(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -24,139 +21,70 @@ export async function GET(request: NextRequest) {
   const db = createServiceSupabase()
   if (!db) return NextResponse.json({ error: 'Servicio no disponible' }, { status: 500 })
 
-  // Top 500 y recuento de activos son IDÉNTICOS para todos los usuarios, así
-  // que se cachean 60 s. Lo personalizado (myXp, myRank, vecindario) queda
-  // fuera de la caché y se calcula siempre.
-  const { top, activeCount } = await cached('ligas:global:top', RANKING_TTL_SECONDS, async () => {
-    const [{ data: topRows }, { count: activeCountRaw }] = await Promise.all([
-      db.from('camino_user_progress')
-        .select('user_id, xp_total')
-        .gt('xp_total', 0)
-        .order('xp_total', { ascending: false })
-        .limit(TOP_LIMIT),
-      db.from('camino_user_progress')
-        .select('*', { count: 'exact', head: true })
-        .gt('xp_total', 0),
-    ])
-    return { top: (topRows ?? []) as ProgressRow[], activeCount: activeCountRaw ?? 0 }
+  const { start, end } = currentRoundRange()
+
+  // El ranking de la ronda en curso es IDÉNTICO para todos los usuarios, así
+  // que se cachea 60 s por ronda (la clave incluye el mes, así que rueda
+  // sola al cerrar una ronda y abrir la siguiente).
+  const ranked = await cached(`ligas:global:round:${start}`, RANKING_TTL_SECONDS, async () => {
+    const xpByUser = await getXpByUserInRange(db, { start, end }, null)
+    return Array.from(xpByUser.entries())
+      .filter(([, xp]) => xp > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([user_id, xp]): RankedRow => ({ user_id, xp }))
   })
 
-  const isInTop = top.some(r => r.user_id === user.id)
+  const activeCount = ranked.length
+  const myIndex = ranked.findIndex(r => r.user_id === user.id)
+  const myXp = myIndex >= 0 ? ranked[myIndex].xp : 0
+  const myRank = myIndex >= 0 ? myIndex + 1 : activeCount + 1
 
-  // My own XP (0 if I've never scored / have no progress row yet).
-  const { data: myRow } = await db
-    .from('camino_user_progress')
-    .select('xp_total')
-    .eq('user_id', user.id)
-    .maybeSingle()
-  const myXp = Number(myRow?.xp_total ?? 0)
+  const top = ranked.slice(0, TOP_LIMIT)
+  const isInTop = myIndex >= 0 && myIndex < TOP_LIMIT
 
-  // Real rank: 1 + everyone strictly ahead of me by XP. This is what makes
-  // "aunque seas el 4.000, que salga tu puesto" work — it no longer depends
-  // on being inside the top-500 page.
-  const { count: aheadCountRaw } = await db
-    .from('camino_user_progress')
-    .select('*', { count: 'exact', head: true })
-    .gt('xp_total', myXp)
-  const myRank = (aheadCountRaw ?? 0) + 1
-
-  // If I'm outside the top 500, fetch a small "neighborhood" around me —
-  // two bounded queries by xp_total (not a scan of the top-500 array, which
-  // wouldn't even contain me).
-  let neighborhood: ProgressRow[] = []
+  // Si no estoy en el top, un pequeño "vecindario" alrededor de mi puesto —
+  // ya lo tenemos todo en memoria (viene de un solo agregado acotado a
+  // 50.000 eventos), así que es un slice, no queries nuevas.
+  let neighborhood: RankedRow[] = []
   if (!isInTop) {
-    const [{ data: aboveRows }, { data: belowRows }] = await Promise.all([
-      db.from('camino_user_progress')
-        .select('user_id, xp_total')
-        .gt('xp_total', myXp)
-        .order('xp_total', { ascending: true }) // closest above first
-        .limit(NEIGHBORHOOD_SIZE),
-      db.from('camino_user_progress')
-        .select('user_id, xp_total')
-        .lt('xp_total', myXp)
-        .order('xp_total', { ascending: false }) // closest below first
-        .limit(NEIGHBORHOOD_SIZE),
-    ])
-
-    const topIds = new Set(top.map(r => r.user_id))
-    // Furthest-above → closest-above → me → closest-below → furthest-below.
-    // Dedup against `top`: with a small active user base the top-500 page
-    // can already contain everyone, and these neighborhood queries would
-    // otherwise re-fetch the same rows and double them up in `entries`.
-    neighborhood = [
-      ...[...(aboveRows ?? [])].reverse().filter(r => !topIds.has(r.user_id)),
-      { user_id: user.id, xp_total: myXp },
-      ...(belowRows ?? []).filter(r => !topIds.has(r.user_id)),
-    ]
-  }
-
-  // Los nombres del top también son compartidos: se cachean junto al top.
-  // Los del vecindario (7 ids como mucho) se piden frescos, porque dependen
-  // de quién esté consultando.
-  const nameById = new Map<string, string>()
-
-  const topNames = await cached('ligas:global:topNames', RANKING_TTL_SECONDS, async () => {
-    const { data } = await db
-      .from('perfiles')
-      .select('id, username')
-      .in('id', top.map(r => r.user_id))
-    const pares: Array<[string, string]> = []
-    for (const p of data ?? []) {
-      const name = safeName(p.username)
-      if (name) pares.push([p.id as string, name])
-    }
-    return pares
-  })
-  for (const [id, name] of topNames) nameById.set(id, name)
-
-  const idsPendientes = neighborhood.map(r => r.user_id).filter(id => !nameById.has(id))
-  if (idsPendientes.length > 0) {
-    const { data } = await db
-      .from('perfiles')
-      .select('id, username')
-      .in('id', idsPendientes)
-    for (const p of data ?? []) {
-      const name = safeName(p.username)
-      if (name) nameById.set(p.id as string, name)
+    if (myIndex >= 0) {
+      neighborhood = ranked.slice(Math.max(0, myIndex - NEIGHBORHOOD_SIZE), Math.min(ranked.length, myIndex + NEIGHBORHOOD_SIZE + 1))
+    } else {
+      // Sin XP esta ronda todavía: me sitúo al final, sin vecinos.
+      neighborhood = [{ user_id: user.id, xp: 0 }]
     }
   }
 
-  function getName(uid: string): string {
-    if (uid === user.id) return 'Tú'
-    return nameById.get(uid) || 'Alumno Kairo'
-  }
+  const idsForNames = Array.from(new Set([...top, ...neighborhood].map(r => r.user_id)))
+  const nameById = await resolveDisplayNames(db, idsForNames, user.id)
 
   const entries = top.map((row, i) => ({
-    name: getName(row.user_id),
-    xp: Number(row.xp_total),
+    name: nameById.get(row.user_id) ?? 'Alumno Kairo',
+    xp: row.xp,
     rank: i + 1,
     isCurrentUser: row.user_id === user.id,
   }))
 
   if (!isInTop) {
-    // Ranks radiate out from my real rank (computed above via COUNT), not
-    // from array position — e.g. the row directly above me is myRank - 1.
-    // This assumes no XP ties right at my boundary; an acceptable
-    // approximation for a "who's around me" strip, since the authoritative
-    // number is myRank itself, not these neighbors' individual ranks.
     const myPosition = neighborhood.findIndex(r => r.user_id === user.id)
     neighborhood.forEach((row, i) => {
       entries.push({
-        name: getName(row.user_id),
-        xp: Number(row.xp_total),
+        name: nameById.get(row.user_id) ?? 'Alumno Kairo',
+        xp: row.xp,
         rank: myRank + (i - myPosition),
         isCurrentUser: row.user_id === user.id,
       })
     })
   }
 
-  // Person just above me, for the "a X XP de adelantar a Y" hint.
   const myEntryIndex = entries.findIndex(e => e.isCurrentUser)
   const aboveEntry = myEntryIndex > 0 ? entries[myEntryIndex - 1] : null
   const nextTarget = aboveEntry && aboveEntry.xp > myXp
     ? { name: aboveEntry.name, xpNeeded: aboveEntry.xp - myXp }
     : null
 
-  const currentUserNeedsUsername = !nameById.has(user.id)
+  const { data: myProfile } = await db.from('perfiles').select('username').eq('id', user.id).maybeSingle()
+  const currentUserNeedsUsername = !safeUsername(myProfile?.username)
+
   return NextResponse.json({ entries, nextTarget, activeCount, myRank, currentUserNeedsUsername })
 }

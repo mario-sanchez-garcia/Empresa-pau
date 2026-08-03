@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { RankingRow } from './RankingRow'
 
 type LigaMember = { user_id: string; name: string; weekly_xp: number; total_xp: number }
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMember[] }
@@ -10,54 +11,11 @@ type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMemb
 type GlobalEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
 type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number }
 
-const MEDALS = ['🥇', '🥈', '🥉']
-
 function Loading() {
   return (
     <div style={{ textAlign: 'center', padding: '48px 0' }}>
       <div style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.1)', borderTopColor: 'rgba(255,255,255,0.5)', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-    </div>
-  )
-}
-
-function Row({ rank, name, xp, isMe }: { rank: number; name: string; xp: number; isMe: boolean }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12,
-      background: isMe ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
-      border: isMe ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-    }}>
-      <span style={{ fontSize: 12, fontWeight: 900, color: 'rgba(255,255,255,0.35)', minWidth: 26, textAlign: 'center' }}>
-        #{rank}
-      </span>
-      <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 800 : 600, color: isMe ? 'white' : 'rgba(255,255,255,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {name}
-      </span>
-      <span style={{ fontSize: 13, fontWeight: 800, color: isMe ? '#60a5fa' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
-        {xp.toLocaleString('es-ES')} XP
-      </span>
-    </div>
-  )
-}
-
-function GlobalRow({ entry }: { entry: GlobalEntry }) {
-  const medal = entry.rank <= 3 ? MEDALS[entry.rank - 1] : null
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12,
-      background: entry.isCurrentUser ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
-      border: entry.isCurrentUser ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-    }}>
-      <span style={{ fontSize: medal ? 17 : 12, fontWeight: 900, color: 'rgba(255,255,255,0.35)', minWidth: 26, textAlign: 'center', lineHeight: 1 }}>
-        {medal ?? `#${entry.rank}`}
-      </span>
-      <span style={{ flex: 1, fontSize: 14, fontWeight: entry.isCurrentUser ? 800 : 600, color: entry.isCurrentUser ? 'white' : 'rgba(255,255,255,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {entry.name}
-      </span>
-      <span style={{ fontSize: 13, fontWeight: 800, color: entry.isCurrentUser ? '#60a5fa' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
-        {entry.xp.toLocaleString('es-ES')} XP
-      </span>
     </div>
   )
 }
@@ -130,7 +88,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {ranked.map(m => (
-              <Row key={m.user_id} rank={m.rank} name={m.name} xp={m.displayXp} isMe={m.name === 'Tú'} />
+              <RankingRow key={m.user_id} rank={m.rank} name={m.name} xp={m.displayXp} isMe={m.name === 'Tú'} theme="dark" />
             ))}
           </div>
           {nextTarget && <Hint xpNeeded={nextTarget.xpNeeded} name={nextTarget.name} />}
@@ -162,11 +120,11 @@ function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
   return (
     <div>
       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-        {data.activeCount} alumnos · XP total histórico
+        {data.activeCount} alumnos · XP de la ronda actual
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {data.entries.map((e, i) => (
-          <GlobalRow key={i} entry={e} />
+          <RankingRow key={i} rank={e.rank} name={e.name} xp={e.xp} isMe={e.isCurrentUser} theme="dark" />
         ))}
       </div>
       {data.nextTarget && <Hint xpNeeded={data.nextTarget.xpNeeded} name={data.nextTarget.name} />}

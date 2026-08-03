@@ -1159,20 +1159,23 @@ export default function CaminoCalendarClient() {
   const division = divisionFor(displayedXP)
   const nextDivision = DIVISIONS[DIVISIONS.indexOf(division) + 1]
   const divisionPct = nextDivision ? Math.min(100, Math.round(((displayedXP - division.min) / (nextDivision.min - division.min)) * 100)) : 100
-  const rankingTopRows = leaderboard?.global?.top ?? []
 
   // Puesto del héroe. Solo se muestra cuando lo sabemos de verdad.
   //
-  // Antes, mientras cargaba el leaderboard se pintaba localCurrentEntry(), que
-  // devolvía `rank: 1` fijo — así que TODO alumno veía "#1" un instante en cada
-  // carga y luego desaparecía. Y al llegar el dato real, si estabas dentro del
-  // top el badge se ocultaba del todo (para no duplicar el dato de la lista),
-  // lo que remataba el efecto de parpadeo.
-  //
-  // Ahora: null mientras no haya respuesta, y el puesto real siempre que la
-  // haya, estés o no en el top.
-  const heroRank: number | null = leaderboard
-    ? (rankingTopRows.find(row => row.isCurrentUser)?.rank ?? leaderboard.global?.current?.rank ?? null)
+  // Antes leía /api/camino/leaderboard, que resuelve el nombre público
+  // mirando perfiles.display_name/nombre/name — campos que no existen en el
+  // esquema real (el nombre público vive en perfiles.username). Como
+  // resultado, cualquier otro alumno sin esos campos se filtraba del
+  // ranking entero, así que casi todo el mundo aparecía solo consigo mismo y
+  // salía "#1" sin importar su XP real — contradiciendo el puesto correcto
+  // que ya se ve justo debajo en "Mi liga". Ahora usamos esa misma fuente
+  // (liga.miembros, ya con el username correcto) para que el héroe y la
+  // lista de abajo nunca discrepen.
+  const heroRank: number | null = liga
+    ? (() => {
+        const idx = [...liga.miembros].sort((a, b) => b.total_xp - a.total_xp).findIndex(m => m.name === 'Tú')
+        return idx >= 0 ? idx + 1 : null
+      })()
     : null
   const onboardingSubjects = normalizeOnboardingSubjects(onboarding?.subjects ?? [])
   const courseGroups = courseTopicsForSubjects(onboardingSubjects, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)

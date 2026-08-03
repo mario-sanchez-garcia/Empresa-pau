@@ -1,4 +1,4 @@
-export type RateLimitAction = 'chat' | 'image_correction' | 'simulacro_correction' | 'parcial_correction' | 'planning_generation'
+export type RateLimitAction = 'chat' | 'image_correction' | 'simulacro_correction' | 'parcial_correction' | 'planning_generation' | 'parciales_plan_intensity'
 
 export const RATE_LIMIT_CODE = 'RATE_LIMIT_EXCEEDED'
 export const BILLING_BLOCK_CODE = 'BILLING_REQUIRED'
@@ -9,7 +9,8 @@ const RATE_LIMIT_MESSAGES: Record<RateLimitAction, string> = {
   image_correction: 'Has usado tus correcciones disponibles por hoy. Vuelve mañana para seguir practicando con feedback.',
   simulacro_correction: 'Ya has completado el simulacro disponible de hoy. Vuelve mañana para hacer otro.',
   parcial_correction: 'Ya has completado la práctica parcial disponible de hoy. Vuelve mañana para hacer otra.',
-  planning_generation: 'Ya has generado tu plan de esta semana. Puedes seguir usando el plan actual y volver a generarlo la próxima semana.'
+  planning_generation: 'Ya has generado tu plan de esta semana. Puedes seguir usando el plan actual y volver a generarlo la próxima semana.',
+  parciales_plan_intensity: 'Has ajustado muchos parciales hoy. El plan se ha creado con un cálculo estándar; vuelve mañana para que la IA lo ajuste de nuevo.'
 }
 
 export function getRateLimitMessage(action: RateLimitAction) {

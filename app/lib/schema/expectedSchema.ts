@@ -48,6 +48,8 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'Nombre mostrado en rankings; sin ella se ve "Alumno Kairo" a todos' },
   { table: 'perfiles', column: 'subjects',
     porque: 'Fuente de verdad de asignaturas tras el onboarding' },
+  { table: 'perfiles', column: 'custom_instructions',
+    porque: 'Sin ella, Ajustes no puede guardar instrucciones personalizadas ni el generador de parciales leerlas' },
 ]
 
 /** Funciones que alguna política RLS o ruta invoca. */

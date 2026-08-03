@@ -27,7 +27,8 @@ const ROUTE_ACTION_LABELS: Record<string, string> = {
   '/api/chat|correction': 'Corrección texto',
   '/api/planning|planning_generation': 'Mi Plan',
   '/api/simulacro|simulacro_correction': 'Simulacro',
-  '/api/simulacro|parcial_correction': 'Práctica parcial'
+  '/api/simulacro|parcial_correction': 'Práctica parcial',
+  '/api/parciales/plan-intensity|parciales_plan_intensity': 'Plan de parcial (IA)'
 }
 
 function routeActionLabel(route: string, action: string): string {

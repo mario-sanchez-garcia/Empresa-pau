@@ -4,6 +4,10 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { VALID_EXAM_CONFIDENCE, VALID_EXAM_PRIORITIES, type ExamConfidence, type ExamPriority } from '@/app/lib/camino/cleanStudentExams'
+import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { isInternalUser } from '@/app/lib/internalUsers'
+import { createRateLimitPayload, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,6 +46,35 @@ export async function POST(request: NextRequest) {
 
   const fallback = fallbackSessionCount(priority, confidence)
 
+  // Same gate every other AI-calling route in the app enforces — this one
+  // had none, so it could be scripted to hammer Anthropic with no cap.
+  // The caller (saveExam) already treats any non-200 as "use the
+  // deterministic fallback", so blocking here never breaks exam creation.
+  if (!isInternalUser(user.email)) {
+    const billing = await getUserBillingContext(user.id, user.created_at, user.email)
+    if (!billing.hasActivePack && billing.daysSince >= 7) {
+      return NextResponse.json(
+        { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
+        { status: 403 }
+      )
+    }
+
+    const rateLimit = await checkAiRateLimit({
+      userId: user.id,
+      route: '/api/parciales/plan-intensity',
+      action: 'parciales_plan_intensity',
+      limit: 20,
+      windowSeconds: 24 * 60 * 60,
+      accessToken: authContext.accessToken,
+    })
+    if (!rateLimit.allowed) {
+      return NextResponse.json(createRateLimitPayload('parciales_plan_intensity', rateLimit), {
+        status: 429,
+        headers: rateLimit.retryAfterSeconds ? { 'Retry-After': String(rateLimit.retryAfterSeconds) } : undefined,
+      })
+    }
+  }
+
   let customInstructions = ''
   try {
     const db = createServiceClient()
@@ -76,9 +109,33 @@ Decide cuántas sesiones de preparación dedicarle a este parcial (entero de 1 a
       : fallback
     const focusNote = typeof parsed.focusNote === 'string' ? parsed.focusNote.slice(0, 140) : ''
 
+    const usage = extractAnthropicTokenUsage(response)
+    logAiUsageEvent({
+      userId: user.id,
+      route: '/api/parciales/plan-intensity',
+      action: 'parciales_plan_intensity',
+      model: MODEL,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      totalTokens: usage.totalTokens,
+      status: 'success',
+      metadata: { subject, priority, confidence },
+      accessToken: authContext.accessToken,
+    }).catch(() => {})
+
     return NextResponse.json({ sessionCount, focusNote, source: 'ai' })
   } catch (err) {
     console.error('[parciales/plan-intensity] falling back to deterministic sizing:', err)
+    logAiUsageEvent({
+      userId: user.id,
+      route: '/api/parciales/plan-intensity',
+      action: 'parciales_plan_intensity',
+      model: MODEL,
+      status: 'error',
+      errorCode: getAiErrorCode(err),
+      metadata: { subject, priority, confidence },
+      accessToken: authContext.accessToken,
+    }).catch(() => {})
     return NextResponse.json({ sessionCount: fallback, focusNote: '', source: 'fallback' })
   }
 }

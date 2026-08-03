@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Check, X } from 'lucide-react'
-import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
+import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -10,6 +10,7 @@ const PLANS = [
   {
     name: PLAN_COPY.free.label,
     price: getPlanPriceDisplay('free'),
+    previousPrice: null,
     period: PLAN_COPY.free.periodDisplay,
     description: PLAN_COPY.free.description,
     features: PLAN_COPY.free.features.map((text) => ({ text, included: true })),
@@ -21,6 +22,7 @@ const PLANS = [
   {
     name: PLAN_COPY.premium.label,
     price: getPlanPriceDisplay('premium'),
+    previousPrice: null,
     period: PLAN_COPY.premium.periodDisplay,
     description: PLAN_COPY.premium.description,
     features: PLAN_COPY.premium.features.map((text) => ({ text, included: true })),
@@ -32,13 +34,14 @@ const PLANS = [
   {
     name: PLAN_COPY.curso_pau.label,
     price: getPlanPriceDisplay('curso_pau'),
+    previousPrice: formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS),
     period: PLAN_COPY.curso_pau.periodDisplay,
     description: PLAN_COPY.curso_pau.description,
     features: PLAN_COPY.curso_pau.features.map((text) => ({ text, included: true })),
     cta: 'Reservar →',
     href: '/checkout?plan=pack_curso_pau',
     dark: false,
-    badge: 'Early Bird',
+    badge: 'Plazas limitadas',
   },
 ]
 
@@ -203,6 +206,15 @@ export default function PricingPage() {
                 </p>
 
                 {/* Price */}
+                {plan.previousPrice && (
+                  <p style={{
+                    fontFamily: M, fontSize: 14, fontWeight: 500,
+                    color: plan.dark ? 'rgba(255,255,255,.35)' : '#999',
+                    textDecoration: 'line-through', marginBottom: 4,
+                  }}>
+                    {plan.previousPrice}
+                  </p>
+                )}
                 <p style={{
                   fontFamily: B,
                   fontSize: 'clamp(48px, 5vw, 68px)',

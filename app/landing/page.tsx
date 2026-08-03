@@ -5,7 +5,7 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LABEL,
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
-import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
+import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
 import AuthSessionRedirect from './AuthSessionRedirect'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
@@ -73,6 +73,8 @@ const PLANS = [
   {
     name: PLAN_COPY.free.label,
     price: getPlanPriceDisplay('free'),
+    previousPrice: null as string | null,
+    badge: null as string | null,
     period: PLAN_COPY.free.periodDisplay,
     bullets: ['25 correcciones/mes', '3 fotos/mes', '1 parcial/mes', 'Camino PAU limitado'],
     cta: 'Empezar →',
@@ -80,13 +82,17 @@ const PLANS = [
   {
     name: PLAN_COPY.premium.label,
     price: getPlanPriceDisplay('premium'),
+    previousPrice: null as string | null,
+    badge: null as string | null,
     period: PLAN_COPY.premium.periodDisplay,
     bullets: ['200 correcciones/mes', '80 fotos/mes', '5 simulacros/mes', 'Camino PAU completo', 'Ranking de clase'],
     cta: 'Elegir Premium →',
   },
   {
-    name: `${PLAN_COPY.curso_pau.label} · Early Bird`,
+    name: PLAN_COPY.curso_pau.label,
     price: getPlanPriceDisplay('curso_pau'),
+    previousPrice: formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS) as string | null,
+    badge: 'Plazas limitadas' as string | null,
     period: 'pago único · septiembre a junio',
     bullets: ['Todo Premium incluido', 'Acceso completo hasta junio', 'Sin renovación mensual'],
     cta: 'Reservar →',
@@ -550,7 +556,17 @@ export default function LandingPage() {
           <div className="v4c-p-cols">
             {PLANS.map((plan) => (
               <div key={plan.name} className="v4c-p-col">
+                {plan.badge && (
+                  <p style={{ fontFamily: M, fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,.4)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 10 }}>
+                    ● {plan.badge}
+                  </p>
+                )}
                 <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{plan.name}</span>
+                {plan.previousPrice && (
+                  <p style={{ fontFamily: M, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,.35)', textDecoration: 'line-through', marginBottom: 2 }}>
+                    {plan.previousPrice}
+                  </p>
+                )}
                 <p style={{ fontFamily: B, fontSize: 52, color: '#fff', letterSpacing: '.01em', lineHeight: 1, marginBottom: 2 }}>{plan.price}</p>
                 <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.3)', marginBottom: 24, display: 'block' }}>{plan.period}</span>
                 <div style={{ height: 1, background: 'rgba(255,255,255,.08)', marginBottom: 18 }} />

@@ -26,6 +26,12 @@ export function formatEur(cents: number): string {
 export const CURSO_PAU_EARLY_PRICE_CENTS = 5900    // 59 €, precio fundador
 export const CURSO_PAU_STANDARD_PRICE_CENTS = 7900 // 79 €, precio estándar tras la fecha límite
 
+// Precio de referencia tachado junto al 59 € en /pricing y /landing — es
+// copy de urgencia/escasez (FOMO), NO un precio real de Stripe. No confundir
+// con CURSO_PAU_STANDARD_PRICE_CENTS (79 €), que sí es el precio real que se
+// cobra tras la fecha límite del precio de lanzamiento.
+export const CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS = 6900 // 69 €, solo presentación
+
 // ISO date string. Configurable vía env var; por defecto 2026-09-01.
 export function getFoundingDeadline(): Date {
   const raw = process.env.FOUNDING_DEADLINE_DATE ?? '2026-09-01'

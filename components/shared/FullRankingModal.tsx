@@ -10,7 +10,18 @@ type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMemb
 
 type GlobalEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
 type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number }
-type GlobalPeriod = 'total' | 'month'
+type GlobalPeriod = 'total' | 'month' | 'week' | 'day'
+
+type Medal = 'oro' | 'plata' | 'bronce'
+type PastRound = { periodStart: string; periodEnd: string; scopeType: string; label: string; roundXp: number; rank: number; medal: Medal | null }
+type EtapasData = { medals: Record<Medal, number>; currentRoundXp: number; currentRoundRange: { start: string; end: string }; pastRounds: PastRound[] }
+const MEDAL_EMOJI: Record<Medal, string> = { oro: '🥇', plata: '🥈', bronce: '🥉' }
+
+function formatMonthLabel(dateISO: string): string {
+  const d = new Date(dateISO + 'T12:00:00Z')
+  const label = d.toLocaleDateString('es-ES', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  return label.charAt(0).toUpperCase() + label.slice(1)
+}
 
 function Loading() {
   return (
@@ -107,7 +118,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
 
 function GlobalTab({ token }: { token: string }) {
   const [period, setPeriod] = useState<GlobalPeriod>('total')
-  const [dataByPeriod, setDataByPeriod] = useState<Record<GlobalPeriod, GlobalData | null | undefined>>({ total: undefined, month: undefined })
+  const [dataByPeriod, setDataByPeriod] = useState<Record<GlobalPeriod, GlobalData | null | undefined>>({ total: undefined, month: undefined, week: undefined, day: undefined })
 
   useEffect(() => {
     if (dataByPeriod[period] !== undefined) return
@@ -119,9 +130,11 @@ function GlobalTab({ token }: { token: string }) {
 
   const data = dataByPeriod[period]
 
+  const PERIOD_LABELS: Record<GlobalPeriod, string> = { total: 'XP de siempre', month: 'XP de este mes', week: 'XP de esta semana', day: 'XP de hoy' }
+
   return (
     <div>
-      <PeriodToggle period={period} options={[{ value: 'total', label: 'Todo el tiempo' }, { value: 'month', label: 'Este mes' }]} onChange={setPeriod} />
+      <PeriodToggle period={period} options={[{ value: 'total', label: 'Total' }, { value: 'month', label: 'Mes' }, { value: 'week', label: 'Semana' }, { value: 'day', label: 'Hoy' }]} onChange={setPeriod} />
       {data === undefined ? <Loading /> : !data || data.activeCount === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>
@@ -131,7 +144,7 @@ function GlobalTab({ token }: { token: string }) {
       ) : (
         <>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-            {data.activeCount} alumnos · {period === 'total' ? 'XP de siempre' : 'XP de este mes'}
+            {data.activeCount} alumnos · {PERIOD_LABELS[period]}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {data.entries.map((e, i) => (
@@ -145,8 +158,76 @@ function GlobalTab({ token }: { token: string }) {
   )
 }
 
+function EtapasTab({ token }: { token: string }) {
+  const [data, setData] = useState<EtapasData | null | undefined>(undefined)
+
+  useEffect(() => {
+    fetch('/api/ligas/etapas', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setData(d as EtapasData))
+      .catch(() => setData(null))
+  }, [token])
+
+  if (data === undefined) return <Loading />
+  if (!data) {
+    return (
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1.6 }}>No se pudo cargar tu medallero.</p>
+      </div>
+    )
+  }
+
+  const { medals, currentRoundXp, currentRoundRange, pastRounds } = data
+
+  return (
+    <div>
+      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+        Medallero
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
+        {(['oro', 'plata', 'bronce'] as const).map(medal => (
+          <div key={medal} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '14px 8px', textAlign: 'center' }}>
+            <div style={{ fontSize: 24, marginBottom: 4 }}>{MEDAL_EMOJI[medal]}</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: 'white' }}>{medals[medal]}</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{medal}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Etapa actual · {formatMonthLabel(currentRoundRange.start)}</p>
+        <p style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>{currentRoundXp.toLocaleString('es-ES')} <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>XP</span></p>
+        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Se cierra el día 1 del próximo mes — entonces se reparten medallas.</p>
+      </div>
+
+      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+        Etapas anteriores
+      </p>
+      {pastRounds.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '24px 0' }}>
+          <p style={{ fontSize: 24, marginBottom: 8 }}>🏁</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Aún no se ha cerrado ninguna etapa.<br />Vuelve el día 1 del próximo mes.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {pastRounds.map((r, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
+              <span style={{ fontSize: 17, minWidth: 26, textAlign: 'center' }}>{r.medal ? MEDAL_EMOJI[r.medal] : '—'}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{formatMonthLabel(r.periodStart)} · #{r.rank}</div>
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#60a5fa', flexShrink: 0 }}>{r.roundXp.toLocaleString('es-ES')} XP</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function FullRankingModal({ token, onClose }: { token: string; onClose: () => void }) {
-  const [tab, setTab] = useState<'liga' | 'global'>('liga')
+  const [tab, setTab] = useState<'liga' | 'global' | 'etapas'>('liga')
   const [liga, setLiga] = useState<LigaInfo | null | undefined>(undefined)
   const [copied, setCopied] = useState(false)
 
@@ -193,7 +274,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
 
         {/* Main tabs */}
         <div style={{ padding: '14px 20px 0', display: 'flex', gap: 6, flexShrink: 0 }}>
-          {(['liga', 'global'] as const).map(t => (
+          {(['liga', 'global', 'etapas'] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -205,7 +286,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
                 transition: 'background 150ms, color 150ms',
               }}
             >
-              {t === 'liga' ? 'Mi liga' : 'Global'}
+              {t === 'liga' ? 'Mi liga' : t === 'global' ? 'Global' : 'Etapas'}
             </button>
           ))}
         </div>
@@ -222,7 +303,9 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
             >
               {tab === 'liga'
                 ? <LigaTab liga={liga} onCopyInvite={copyInvite} copied={copied} />
-                : <GlobalTab token={token} />
+                : tab === 'global'
+                  ? <GlobalTab token={token} />
+                  : <EtapasTab token={token} />
               }
             </motion.div>
           </AnimatePresence>

@@ -61,6 +61,7 @@ type LeaderboardPayload = {
 }
 type LigaMiembro = { user_id: string; name: string; weekly_xp: number; total_xp: number }
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMiembro[] }
+type GlobalTopEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
 type SchoolTopicAdjustment = { schoolName: string | null; community: string | null; subject: string; blockSlug: string | null; topicSlug: string; feedbackType: 'not_seen_in_class'; status: 'not_seen' | 'delayed_for_school'; notSeenCount: number; date: string }
 type LegacySchoolFeedback = { schoolName: string | null; community: string | null; subject: string; block: string; topic: string; reason: 'not_seen_in_class'; date: string }
 type CalendarWeekCache = Record<string, DayPlan[]>
@@ -841,6 +842,7 @@ export default function CaminoCalendarClient() {
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
+  const [globalTop, setGlobalTop] = useState<GlobalTopEntry[] | null>(null)
   const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
   const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
   const [streak, setStreak] = useState(0)
@@ -1144,6 +1146,22 @@ export default function CaminoCalendarClient() {
       if (!cancelled && res.ok) { const d = await res.json(); setLiga(d.liga ?? null) }
       if (!cancelled) setLigaLoading(false)
     }).catch(() => { if (!cancelled) setLigaLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  // Top 5 Global junto a Mi liga — mismo endpoint/campos que la pestaña
+  // Global del modal completo, sin lógica de XP propia.
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token ?? null
+      if (!token || cancelled) return
+      const res = await fetch('/api/ligas/global?period=total', { headers: { Authorization: `Bearer ${token}` } })
+      if (!cancelled && res.ok) {
+        const d = await res.json() as { entries?: GlobalTopEntry[] }
+        setGlobalTop((d.entries ?? []).slice(0, 5))
+      }
+    }).catch(() => undefined)
     return () => { cancelled = true }
   }, [])
 
@@ -2083,6 +2101,16 @@ export default function CaminoCalendarClient() {
               )}
             </AnimatePresence>
             <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+            {globalTop && globalTop.length > 0 && (
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Top 5 Global</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {globalTop.map(entry => (
+                    <RankingRow key={entry.rank} rank={entry.rank} name={entry.name} xp={entry.xp} isMe={entry.isCurrentUser} theme="light" />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Avance por asignatura */}

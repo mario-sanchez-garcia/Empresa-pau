@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
+import { getXpByUserInRange, currentWeekRange } from '@/app/lib/camino/leagueRounds'
+import { resolveDisplayNames } from '@/app/lib/camino/rankingNames'
 
 
 export const dynamic = 'force-dynamic'
@@ -43,26 +45,21 @@ export async function GET(
     })
   }
 
-  const { data: progressRows } = await db
-    .from('camino_user_progress')
-    .select('user_id, xp_total')
-    .in('user_id', memberIds)
-  const xpByUser = new Map<string, number>()
-  for (const row of progressRows ?? []) {
-    xpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
-  }
-
-  const { data: profiles } = await db.from('perfiles').select('id, display_name, nombre').in('id', memberIds)
-  const nameById = new Map<string, string>()
-  for (const p of profiles ?? []) {
-    const name = ((p.display_name || p.nombre || '') as string).trim()
-    if (name) nameById.set(p.id as string, name)
-  }
+  // Misma fuente que /api/ligas (Mi liga): XP semanal por rango de fechas
+  // sobre camino_xp_events, y nombres resueltos vía resolveDisplayNames —
+  // antes esta ruta leía camino_user_progress.xp_total (total histórico, no
+  // semanal, pese a llamarse weekly_xp) y perfiles.display_name/nombre
+  // (columnas que no existen), así que todo miembro sin ser "Tú" mostraba el
+  // fallback fijo "Alumno PAU".
+  const [xpByUser, nameById] = await Promise.all([
+    getXpByUserInRange(db, currentWeekRange(), memberIds),
+    resolveDisplayNames(db, memberIds, currentUserId ?? ''),
+  ])
 
   const miembros = memberIds
     .map(uid => ({
       user_id: uid,
-      name: uid === currentUserId ? 'Tú' : (nameById.get(uid) || 'Alumno PAU'),
+      name: nameById.get(uid) ?? 'Alumno Kairo',
       weekly_xp: xpByUser.get(uid) ?? 0,
     }))
     .sort((a, b) => b.weekly_xp - a.weekly_xp)

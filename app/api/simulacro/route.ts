@@ -7,6 +7,8 @@ import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { awardXp } from '@/app/lib/camino/awardXp'
+import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     const { data: simulacroRecord, error: simulacroError } = await authContext.supabase
       .from('historial_simulacros')
-      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques')
+      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at')
       .eq('id', simulacro_id)
       .eq('user_id', authContext.user.id)
       .maybeSingle()
@@ -408,8 +410,36 @@ export async function POST(request: NextRequest) {
         message: 'No hemos podido guardar la corrección del simulacro.'
       }), { status: 500 })
     }
+
+    // XP best-effort: si falla, la corrección ya está guardada y devuelta al
+    // alumno — no tiene sentido convertir esto en un error 500 de la petición.
+    // mission_date viene de la creación del simulacro (no "hoy") para que un
+    // reintento en otro día natural no rompa la deduplicación por unique
+    // constraint en camino_xp_events.
+    let xpResult: Awaited<ReturnType<typeof awardXp>> | null = null
+    try {
+      const missionDate = typeof simulacroRecord.created_at === 'string'
+        ? simulacroRecord.created_at.slice(0, 10)
+        : new Date().toISOString().slice(0, 10)
+      xpResult = await awardXp(authContext.supabase, authContext.user.id, {
+        xp: isPracticeSession ? 30 : 50,
+        sourceType: isPracticeSession ? 'parcial_completion' : 'simulacro_completion',
+        sourceId: simulacro_id,
+        subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
+        missionDate
+      })
+    } catch (xpError) {
+      console.error('[simulacro] xp_award_failed', { simulacroId: simulacro_id, message: (xpError as Error)?.message })
+    }
+
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })
-    return NextResponse.json(result)
+    return NextResponse.json({
+      ...result,
+      xpAwarded: xpResult?.xpAwarded ?? 0,
+      totalXp: xpResult?.totalXp ?? null,
+      streakDays: xpResult?.streakDays ?? null,
+      leagueUpgrade: xpResult?.leagueUpgrade ?? null
+    })
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'

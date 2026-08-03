@@ -29,3 +29,14 @@ export const SIMULACRO_SUBJECT: Record<string, string> = {
 export function examSubjectSlug(subject: string): string {
   return EXAM_SUBJECT_SLUG[subject] ?? subject
 }
+
+// Inverso de SIMULACRO_SUBJECT: dado el slug guardado en
+// historial_simulacros.asignatura (p.ej. 'mates'), devuelve el slug canónico
+// de Camino (p.ej. 'matematicas_ii') para el rollup de camino_subject_xp.
+const CAMINO_SUBJECT_FROM_SIMULACRO: Record<string, string> = Object.fromEntries(
+  Object.entries(SIMULACRO_SUBJECT).map(([caminoSlug, simulacroSlug]) => [simulacroSlug, caminoSlug]),
+)
+
+export function caminoSubjectFromSimulacro(simulacroAsignatura: string): string {
+  return CAMINO_SUBJECT_FROM_SIMULACRO[simulacroAsignatura] ?? simulacroAsignatura
+}

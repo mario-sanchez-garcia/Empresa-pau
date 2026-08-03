@@ -2168,22 +2168,37 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           detected_concepts: whyContext?.detectedConcepts ?? [],
           curriculum_source_ids: whyContext?.sourceIds ?? []
         }
-        supabase.from('historial_examenes').insert(historyPayload).then(async ({ error }) => {
-          if (!error) return
-          const legacyPayload = {
-            user_id: historyPayload.user_id,
-            asignatura: historyPayload.asignatura,
-            tipo: historyPayload.tipo,
-            año: historyPayload.año,
-            bloque: historyPayload.bloque,
-            opcion: historyPayload.opcion,
-            nota: historyPayload.nota,
-            nota_maxima: historyPayload.nota_maxima,
-            enunciado: historyPayload.enunciado,
-            respuesta: historyPayload.respuesta,
-            correccion: historyPayload.correccion
+        supabase.from('historial_examenes').insert(historyPayload).select('id').single().then(async ({ data, error }) => {
+          let insertedId = data?.id ?? null
+          if (error) {
+            const legacyPayload = {
+              user_id: historyPayload.user_id,
+              asignatura: historyPayload.asignatura,
+              tipo: historyPayload.tipo,
+              año: historyPayload.año,
+              bloque: historyPayload.bloque,
+              opcion: historyPayload.opcion,
+              nota: historyPayload.nota,
+              nota_maxima: historyPayload.nota_maxima,
+              enunciado: historyPayload.enunciado,
+              respuesta: historyPayload.respuesta,
+              correccion: historyPayload.correccion
+            }
+            const legacyResult = await supabase.from('historial_examenes').insert(legacyPayload).select('id').single()
+            insertedId = legacyResult.data?.id ?? null
           }
-          await supabase.from('historial_examenes').insert(legacyPayload)
+          // XP solo si hay nota evaluable — el servidor también lo comprueba,
+          // pero evitamos la llamada de red cuando ya sabemos que no aplica.
+          if (insertedId && nota != null) {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+              fetch('/api/camino/award-exam-xp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+                body: JSON.stringify({ historialExamenId: insertedId })
+              }).catch(() => {})
+            }
+          }
         })
       }
     } catch (error) {

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
-import { divisionFor } from '@/app/lib/camino/leagues'
-import { calcularRacha } from '@/app/lib/calcularRacha'
+import { awardXp } from '@/app/lib/camino/awardXp'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,39 +91,6 @@ export async function POST(request: NextRequest) {
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
 
-    // PASO 2c — Registrar XP event (con subject, para el ámbito de liga
-    // Comunidad+Materia — ver docs/plan de rediseño de Ligas)
-    const { error: xpError } = await db.from('camino_xp_events').insert({
-      user_id: user.id,
-      xp_amount: xp,
-      source_type: 'mission_completion',
-      source_id: String(updated[0].id),
-      mission_date: new Date().toISOString().slice(0, 10),
-      subject,
-    })
-    if (xpError) {
-      console.error('[camino/complete-mission] xp_event insert failed', xpError)
-    }
-
-    // PASO 2d — Rollup de XP por asignatura (mismo evento de XP, derivado
-    // sin duplicar el dato de origen; alimenta el ranking "XP total" del
-    // ámbito Comunidad+Materia)
-    const { data: currentSubjectXp } = await db
-      .from('camino_subject_xp')
-      .select('xp_total')
-      .eq('user_id', user.id)
-      .eq('subject', subject)
-      .maybeSingle()
-
-    const { error: subjectXpError } = await db.from('camino_subject_xp').upsert({
-      user_id: user.id,
-      subject,
-      xp_total: (Number(currentSubjectXp?.xp_total) || 0) + xp,
-      updated_at: now,
-    }, { onConflict: 'user_id,subject' })
-    if (subjectXpError) {
-      console.error('[camino/complete-mission] camino_subject_xp upsert failed', subjectXpError)
-    }
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,
       v2_sort_order: v2SortOrder,
@@ -140,53 +106,19 @@ export async function POST(request: NextRequest) {
       xp,
     })
 
-    // PASO 3 — Actualizar camino_user_progress
-    const { data: currentProgress } = await db
-      .from('camino_user_progress')
-      .select('xp_total, missions_completed, longest_streak')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
-    const oldXpTotal = Number(currentProgress?.xp_total) || 0
-    const newXpTotal = oldXpTotal + xp
-    const newMissionsCompleted = (Number(currentProgress?.missions_completed) || 0) + 1
-    const newStreakDays = await calcularRacha(user.id, db).catch(() => null)
-    const newLongestStreak = newStreakDays == null
-      ? Number(currentProgress?.longest_streak ?? 0)
-      : Math.max(Number(currentProgress?.longest_streak ?? 0), newStreakDays)
-    const oldDivision = divisionFor(oldXpTotal)
-    const newDivision = divisionFor(newXpTotal)
-    const leagueUpgrade = newDivision.name !== oldDivision.name
-      ? { from: oldDivision.name, to: newDivision.name }
-      : null
-
-    if (!currentProgress) {
-      await db.from('camino_user_progress').insert({
-        user_id: user.id,
-        xp_total: xp,
-        streak_days: newStreakDays ?? 0,
-        longest_streak: newLongestStreak,
-        missions_completed: 1,
-        level_mates: 1,
-        level_historia: 1,
-        level_ingles: 1,
-        progress_towards_pau: 1,
-        updated_at: now,
-      })
-    } else {
-      await db
-        .from('camino_user_progress')
-        .update({
-          xp_total: newXpTotal,
-          missions_completed: newMissionsCompleted,
-          ...(newStreakDays == null ? {} : { streak_days: newStreakDays, longest_streak: newLongestStreak }),
-          updated_at: now,
-        })
-        .eq('user_id', user.id)
-    }
+    // PASO 3 — Registrar XP y actualizar camino_user_progress (un mismo
+    // helper compartido con exam_correction/simulacro_completion/parcial_completion)
+    const result = await awardXp(db, user.id, {
+      xp,
+      sourceType: 'mission_completion',
+      sourceId: String(updated[0].id),
+      subject,
+      missionDate: now.slice(0, 10),
+      missionsCompletedDelta: 1,
+    })
 
     // PASO 5 — Respuesta
-    return NextResponse.json({ success: true, xpAwarded: xp, totalXp: newXpTotal, streakDays: newStreakDays, leagueUpgrade })
+    return NextResponse.json({ success: true, xpAwarded: result.xpAwarded, totalXp: result.totalXp, streakDays: result.streakDays, leagueUpgrade: result.leagueUpgrade })
   } catch (err) {
     console.error('[camino/complete-mission]', err)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

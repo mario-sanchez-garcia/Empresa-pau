@@ -45,12 +45,12 @@ export async function POST(request: NextRequest) {
     }
 
     const planLimits = getCaminoPlanLimits(billing.planId)
-    const monthlySimulacros = await getMonthlyActionCount(user.id, ['simulacro_correction'])
-    if (monthlySimulacros >= planLimits.partialsPerMonth) {
+    const monthlyParciales = await getMonthlyActionCount(user.id, ['parcial_correction'])
+    if (monthlyParciales >= planLimits.partialsPerMonth) {
       return NextResponse.json(
         {
-          error: 'simulacro_limit_reached',
-          message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} simulacro${planLimits.partialsPerMonth !== 1 ? 's' : ''} este mes.`,
+          error: 'parcial_limit_reached',
+          message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} práctica${planLimits.partialsPerMonth !== 1 ? 's' : ''} parcial${planLimits.partialsPerMonth !== 1 ? 'es' : ''} este mes.`,
           code: BILLING_BLOCK_CODE
         },
         { status: 429 }

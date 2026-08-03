@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
           </p>
         `,
         ctaText: 'Empezar simulacro →',
-        ctaUrl: 'https://empresa-pau.vercel.app/camino',
+        ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'}/camino`,
         stats: [
           { label: 'Ejercicios', value: '3' },
           { label: 'Tiempo', value: '20 min' },
@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
           </p>
         `,
         ctaText: 'Ver mi misión →',
-        ctaUrl: 'https://empresa-pau.vercel.app/camino',
+        ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'}/camino`,
         stats: [
           { label: 'Tiempo', value: '25 min' },
           { label: 'Tipo', value: 'Misión' },

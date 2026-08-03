@@ -66,6 +66,15 @@ export function getPlan(planId: string): BillingPlan | null {
   return PLANS[planId] ?? null
 }
 
+// Plans billed as a real recurring Stripe subscription (auto-renews monthly)
+// rather than a one-off payment. Drives mode:'subscription' at checkout and
+// which webhook events keep the entitlement's expires_at in sync.
+const RECURRING_PLAN_IDS: readonly string[] = ['premium']
+
+export function isRecurringPlan(planId: string): boolean {
+  return RECURRING_PLAN_IDS.includes(planId)
+}
+
 // Returns the live price for a plan (may differ from PLANS[id].priceCents after founding period).
 export function getLivePriceCents(planId: string): number | null {
   if (planId === 'pack_curso_pau') return getPackCursoPauPriceCents()

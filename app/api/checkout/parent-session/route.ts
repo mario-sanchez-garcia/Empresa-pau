@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { hashToken } from '@/app/lib/billing/tokens'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getStripe, isStripeConfigured, getAppUrl } from '@/app/lib/billing/stripe'
-import { getLivePriceCents, getPlan } from '@/app/lib/billing/plans'
+import { getLivePriceCents, getPlan, isRecurringPlan } from '@/app/lib/billing/plans'
 import { resolverPrecioConReserva } from '@/app/lib/billing/waitlistPrice'
 import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
 
@@ -119,14 +119,17 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const recurring = isRecurringPlan(link.plan_id)
+
   const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
+    mode: recurring ? 'subscription' : 'payment',
     payment_method_types: ['card'],
     line_items: [
       {
         price_data: {
           currency: link.currency,
           unit_amount: priceCents,
+          ...(recurring ? { recurring: { interval: 'month' } } : {}),
           product_data: {
             name: plan.label,
             description: `Camino PAU${link.student_display_name ? ` para ${link.student_display_name}` : ''}`,
@@ -135,6 +138,7 @@ export async function POST(request: NextRequest) {
         quantity: 1,
       },
     ],
+    ...(recurring ? { subscription_data: { metadata: { student_user_id: link.student_user_id, plan_id: link.plan_id } } } : {}),
     metadata: {
       student_user_id: link.student_user_id,
       parent_checkout_link_id: link.id,

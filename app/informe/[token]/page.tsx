@@ -262,7 +262,7 @@ export default async function InformePage({ params }: Props) {
     checkPremium(db, payload.userId),
   ])
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://empresa-pau.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
 
   return <ReportPage report={report} isPremium={isPremium} appUrl={appUrl} />
 }

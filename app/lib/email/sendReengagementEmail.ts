@@ -2,7 +2,7 @@ import { sendEmail } from '@/app/lib/sendEmail'
 import { logEmailEvent } from '@/app/lib/email/logEmailEvent'
 import { buildEmailHtml, unsubUrl } from '@/app/lib/email/emailTemplate'
 
-const APP_URL = 'https://empresa-pau.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
 
 interface SendReengagementEmailParams {
   userId: string

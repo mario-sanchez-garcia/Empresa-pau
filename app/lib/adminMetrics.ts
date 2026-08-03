@@ -26,7 +26,8 @@ const ROUTE_ACTION_LABELS: Record<string, string> = {
   '/api/chat|image_correction': 'Corrección imagen',
   '/api/chat|correction': 'Corrección texto',
   '/api/planning|planning_generation': 'Mi Plan',
-  '/api/simulacro|simulacro_correction': 'Simulacro'
+  '/api/simulacro|simulacro_correction': 'Simulacro',
+  '/api/simulacro|parcial_correction': 'Práctica parcial'
 }
 
 function routeActionLabel(route: string, action: string): string {

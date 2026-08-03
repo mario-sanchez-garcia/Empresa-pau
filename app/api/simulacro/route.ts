@@ -96,6 +96,11 @@ export async function POST(request: NextRequest) {
 
     const blocks = Array.isArray(simulacroRecord.bloques) ? simulacroRecord.bloques : Array.isArray(bloques) ? bloques : []
     const storedAnswers = isPlainRecord(simulacroRecord.respuestas_parciales) ? simulacroRecord.respuestas_parciales : {}
+    // practica-parcial marca sus sesiones con __practice_session al crearlas — así
+    // distinguimos una práctica parcial de un simulacro completo para aplicar la
+    // cuota mensual correcta (partialsPerMonth vs fullMocksPerMonth) por separado.
+    const isPracticeSession = isPlainRecord(simulacroRecord.resultado_json) && simulacroRecord.resultado_json.__practice_session === true
+    const correctionAction: RateLimitAction = isPracticeSession ? 'parcial_correction' : 'simulacro_correction'
     const correctionCommunity = getCorrectionCommunity(comunidad, blocks)
     const storedCommunity = getCorrectionCommunity(null, blocks)
     const subject = SUBJECT_LABELS[String(simulacroRecord.asignatura)] ?? String(asignatura ?? simulacroRecord.asignatura ?? 'Simulacro')
@@ -140,14 +145,14 @@ export async function POST(request: NextRequest) {
       const rateLimit = await checkAiRateLimit({
         userId: authContext.user.id,
         route: '/api/simulacro',
-        action: 'simulacro_correction',
+        action: correctionAction,
         limit: 1,
         windowSeconds: 24 * 60 * 60,
         accessToken: authContext.accessToken
       })
 
       if (!rateLimit.allowed) {
-        return rateLimitResponse('simulacro_correction', rateLimit)
+        return rateLimitResponse(correctionAction, rateLimit)
       }
 
       const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at)
@@ -160,12 +165,14 @@ export async function POST(request: NextRequest) {
       }
 
       const planLimits = getCaminoPlanLimits(billing.planId)
-      const monthlySimulacros = await getMonthlyActionCount(authContext.user.id, ['simulacro_correction'])
-      if (monthlySimulacros >= planLimits.partialsPerMonth) {
+      const monthlyLimit = isPracticeSession ? planLimits.partialsPerMonth : planLimits.fullMocksPerMonth
+      const monthlyUsed = await getMonthlyActionCount(authContext.user.id, [correctionAction])
+      if (monthlyUsed >= monthlyLimit) {
+        const noun = isPracticeSession ? 'práctica' : 'simulacro'
         return NextResponse.json(
           {
-            error: 'simulacro_limit_reached',
-            message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} simulacro${planLimits.partialsPerMonth !== 1 ? 's' : ''} este mes.`,
+            error: isPracticeSession ? 'parcial_limit_reached' : 'simulacro_limit_reached',
+            message: `Has alcanzado el límite de ${monthlyLimit} ${noun}${monthlyLimit !== 1 ? 's' : ''} este mes.`,
             code: BILLING_BLOCK_CODE
           },
           { status: 429 }
@@ -265,7 +272,7 @@ export async function POST(request: NextRequest) {
           logAiUsageEvent({
             userId: authContext.user.id,
             route: '/api/simulacro',
-            action: 'simulacro_correction',
+            action: correctionAction,
             model,
             inputTokens: usage.inputTokens,
             outputTokens: usage.outputTokens,
@@ -296,7 +303,7 @@ export async function POST(request: NextRequest) {
           logAiUsageEvent({
             userId: authContext.user.id,
             route: '/api/simulacro',
-            action: 'simulacro_correction',
+            action: correctionAction,
             model,
             status: 'error',
             errorCode: getAiErrorCode(error),

@@ -1,4 +1,4 @@
-const APP_URL = 'https://empresa-pau.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
 
 export interface EmailTemplateOptions {
   number: string

@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
       await handleSubscriptionDeleted(event.data.object as Stripe.Subscription, db)
     } else if (event.type === 'invoice.payment_failed') {
       await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice, db)
+    } else if (event.type === 'invoice.paid') {
+      await handleInvoicePaid(event.data.object as Stripe.Invoice, db)
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error'
@@ -67,10 +69,30 @@ async function handleCheckoutCompleted(
 
   const now = new Date().toISOString()
   const stripeCustomerId = typeof session.customer === 'string' ? session.customer : null
-  const expiresAt =
-    planId === 'pack_curso_pau' ? cursoPauExpiresAt() :
-    planId === 'premium' ? premiumExpiresAt() :
-    null
+  const subscriptionId = typeof session.subscription === 'string' ? session.subscription : null
+
+  // For real Stripe subscriptions (mode:'subscription'), expires_at should mirror
+  // the actual billing period end rather than a flat "+30 days" guess — this is
+  // what keeps access in sync as the subscription auto-renews each month.
+  let expiresAt: string | null = null
+  if (subscriptionId) {
+    try {
+      const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
+      expiresAt = stripeTimestampToIso((subscription as unknown as { current_period_end?: unknown }).current_period_end)
+    } catch (err) {
+      console.error('[stripe/webhook] could not retrieve subscription at checkout completion', {
+        sessionId,
+        subscriptionId,
+        message: err instanceof Error ? err.message : 'unknown error',
+      })
+    }
+  }
+  if (!expiresAt) {
+    expiresAt =
+      planId === 'pack_curso_pau' ? cursoPauExpiresAt() :
+      planId === 'premium' ? premiumExpiresAt() :
+      null
+  }
 
   // ── Step 1: Idempotency check ─────────────────────────────────────────────
   // If an entitlement already exists for this Stripe session, a prior webhook
@@ -116,7 +138,7 @@ async function handleCheckoutCompleted(
       parent_checkout_link_id: parentCheckoutLinkId ?? null,
       metadata: {
         stripe_payment_intent: session.payment_intent,
-        stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+        stripe_subscription_id: subscriptionId,
         amount_total: session.amount_total,
         currency: session.currency,
       }
@@ -358,6 +380,86 @@ async function handleInvoicePaymentFailed(
         stripe_customer_id: stripeCustomerId,
         stripe_invoice_id: invoiceId,
         stripe_subscription_id: subscriptionId,
+      },
+    })
+  }
+}
+
+// Fires on every successful invoice for a subscription — both the first one
+// (roughly simultaneous with checkout.session.completed, handled there) and
+// every monthly renewal after that (the only place renewals get applied,
+// since Stripe auto-charges the card with no further checkout session).
+async function handleInvoicePaid(
+  invoice: Stripe.Invoice,
+  db: ReturnType<typeof createServiceClient>
+) {
+  const invoiceId = invoice.id
+  const stripeCustomerId = stripeId(invoice.customer)
+  if (!stripeCustomerId) {
+    console.error('[stripe/webhook] invoice.paid missing customer', { invoiceId })
+    return
+  }
+
+  const subscriptionId = stripeId((invoice as unknown as { subscription?: unknown }).subscription)
+  if (!subscriptionId) return // one-off (non-subscription) invoice — nothing to renew
+
+  let periodEndIso: string | null = null
+  try {
+    const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
+    periodEndIso = stripeTimestampToIso((subscription as unknown as { current_period_end?: unknown }).current_period_end)
+  } catch (err) {
+    console.error('[stripe/webhook] could not retrieve subscription for renewal', {
+      subscriptionId,
+      invoiceId,
+      message: err instanceof Error ? err.message : 'unknown error',
+    })
+  }
+  if (!periodEndIso) return // can't safely extend access without a real period end
+
+  const now = new Date().toISOString()
+  const { data: entitlements, error } = await db
+    .from('user_entitlements')
+    .select('id, user_id, expires_at, metadata')
+    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('status', 'active')
+
+  if (error) throw new Error(`invoice paid entitlement lookup failed: ${error.message}`)
+
+  // If checkout.session.completed hasn't created the entitlement yet (event
+  // ordering isn't guaranteed), there's nothing to extend yet — it will be
+  // created with the correct period end there. Not an error, just a no-op.
+  for (const entitlement of entitlements ?? []) {
+    const metadata = (entitlement.metadata && typeof entitlement.metadata === 'object')
+      ? entitlement.metadata as Record<string, unknown>
+      : {}
+
+    const { error: updateError } = await db
+      .from('user_entitlements')
+      .update({
+        expires_at: periodEndIso,
+        updated_at: now,
+        metadata: {
+          ...metadata,
+          stripe_subscription_id: subscriptionId,
+          stripe_subscription_status: 'active',
+          stripe_payment_status: 'paid',
+          stripe_latest_invoice_id: invoiceId,
+          stripe_payment_failed_at: null,
+        },
+      })
+      .eq('id', entitlement.id)
+
+    if (updateError) throw new Error(`invoice paid entitlement update failed: ${updateError.message}`)
+
+    await db.from('billing_events').insert({
+      user_id: entitlement.user_id,
+      stripe_checkout_session_id: null,
+      event_type: 'subscription_renewed',
+      payload: {
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: subscriptionId,
+        stripe_invoice_id: invoiceId,
+        expires_at: periodEndIso,
       },
     })
   }

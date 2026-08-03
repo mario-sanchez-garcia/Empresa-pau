@@ -47,3 +47,6 @@ next-env.d.ts
 
 # temp dev endpoints
 app/api/cron/test-email/
+
+# graphify local code-graph output (generated, machine-specific)
+graphify-out/

@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 import { generateUnsubscribeToken } from './unsubscribeToken'
 
-const APP_URL = 'https://empresa-pau.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
 
 function getClient() {
   if (!process.env.RESEND_API_KEY) {

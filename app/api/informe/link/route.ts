@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
   const weekStart = getMadridWeekStart()
   const token = generateInformeToken(authContext.user.id, weekStart)
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://empresa-pau.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
   const url = `${appUrl}/informe/${token}`
 
   return NextResponse.json({ url })

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, createServiceClient } from '@/app/lib/billing/supabase'
 import { getStripe, isStripeConfigured, getAppUrl } from '@/app/lib/billing/stripe'
-import { getPlan, getLivePriceCents } from '@/app/lib/billing/plans'
+import { getPlan, getLivePriceCents, isRecurringPlan } from '@/app/lib/billing/plans'
 import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
 import { resolverPrecioConReserva } from '@/app/lib/billing/waitlistPrice'
 
@@ -80,14 +80,17 @@ export async function POST(request: NextRequest) {
   const appUrl = getAppUrl()
   const stripe = getStripe()
 
+  const recurring = isRecurringPlan(planId)
+
   const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
+    mode: recurring ? 'subscription' : 'payment',
     payment_method_types: ['card'],
     line_items: [
       {
         price_data: {
           currency: plan.currency,
           unit_amount: priceCents,
+          ...(recurring ? { recurring: { interval: 'month' } } : {}),
           product_data: {
             name: plan.label,
             description: plan.description,
@@ -96,6 +99,7 @@ export async function POST(request: NextRequest) {
         quantity: 1,
       },
     ],
+    ...(recurring ? { subscription_data: { metadata: { student_user_id: userId, plan_id: planId } } } : {}),
     metadata: {
       student_user_id: userId,
       plan_id: planId,

@@ -6410,7 +6410,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
 
                   <div className="history-card history-side-card">
                     <h2>Mejora reciente</h2>
-                    <p>¡Sigue así! Vas por buen camino.</p>
+                    <p>{recentImprovingSubjects.length ? '¡Sigue así! Vas por buen camino.' : 'Así evolucionan tus notas recientes.'}</p>
                     {recentImprovingSubjects.length ? recentImprovingSubjects.map(({ subject, config, delta }) => (
                       <div key={subject} className="history-side-row positive" style={{ '--subject-color': config.color } as CSSProperties}>
                         <span>{config.short}</span>

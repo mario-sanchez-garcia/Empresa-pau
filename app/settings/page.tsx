@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Camera, LogOut, Save, Trash2, X } from 'lucide-react'
+import { Camera, CreditCard, LogOut, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
@@ -75,6 +75,9 @@ export default function SettingsPage() {
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
   const usernameCheckId = useRef(0)
   const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [hasActivePack, setHasActivePack] = useState(false)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [portalError, setPortalError] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -99,6 +102,13 @@ export default function SettingsPage() {
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
             if (json.username) setUsername(json.username)
+          }
+        } catch { /* silent */ }
+        try {
+          const res = await fetch('/api/billing/me', { headers: { Authorization: `Bearer ${token}` } })
+          if (res.ok) {
+            const json = await res.json() as { hasActivePack?: boolean }
+            setHasActivePack(Boolean(json.hasActivePack))
           }
         } catch { /* silent */ }
         try {
@@ -324,6 +334,27 @@ export default function SettingsPage() {
     router.push('/login')
   }
 
+  async function openBillingPortal() {
+    setPortalLoading(true)
+    setPortalError('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) { setPortalError('No se ha podido verificar la sesión.'); return }
+      const res = await fetch('/api/billing/portal', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+      const json = await res.json().catch(() => null) as { url?: string; error?: string } | null
+      if (!res.ok || !json?.url) {
+        setPortalError(json?.error ?? 'No se ha podido abrir la gestión de facturación.')
+        return
+      }
+      window.location.href = json.url
+    } catch {
+      setPortalError('No se ha podido abrir la gestión de facturación. Revisa la conexión.')
+    } finally {
+      setPortalLoading(false)
+    }
+  }
+
   const displayName = username || preferences.displayName || email.split('@')[0] || '?'
   const initial = displayName[0]?.toUpperCase() ?? '?'
 
@@ -507,6 +538,24 @@ export default function SettingsPage() {
               <Hint>Solo orientativo: ahora mismo no cambia el algoritmo de Camino.</Hint>
             </Field>
           </div>
+
+          {/* Facturación — solo si hay un plan de pago activo */}
+          {hasActivePack && (
+            <>
+              <Section label="Facturación" />
+              <div style={{ marginBottom: 28, borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                <div>
+                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Gestionar mi suscripción</strong>
+                  <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: '#94a3b8' }}>Cambia tu método de pago, descarga facturas o cancela tu plan cuando quieras.</small>
+                  {portalError && <small style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>{portalError}</small>}
+                </div>
+                <button type="button" onClick={openBillingPortal} disabled={portalLoading}
+                  style={{ padding: '9px 18px', borderRadius: 999, background: '#0f172a', color: 'white', fontSize: 12, fontWeight: 900, border: 'none', cursor: portalLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0, opacity: portalLoading ? .7 : 1 }}>
+                  <CreditCard size={14} /> {portalLoading ? 'Abriendo…' : 'Gestionar facturación'}
+                </button>
+              </div>
+            </>
+          )}
 
           {/* Preferencias */}
           <Section label="Preferencias de estudio" />

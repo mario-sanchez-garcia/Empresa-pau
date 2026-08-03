@@ -4,6 +4,8 @@ import { verifyUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 
 export const dynamic = 'force-dynamic'
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
+
 function htmlPage(title: string, body: string): NextResponse {
   return new NextResponse(
     `<!DOCTYPE html>
@@ -58,13 +60,13 @@ export async function GET(request: NextRequest) {
     <p style="margin:0 0 28px;font-size:14px;color:#475569;line-height:1.6">
       Te has dado de baja de los recordatorios de Kairo.<br>Ya no recibirás más emails.
     </p>
-    <a href="https://empresa-pau.vercel.app/camino"
+    <a href="${APP_URL}/camino"
        style="display:inline-block;background:#2563eb;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:12px">
       Volver a Kairo →
     </a>
     <p style="margin:24px 0 0;font-size:12px;color:#94a3b8">
       Puedes reactivar los recordatorios desde
-      <a href="https://empresa-pau.vercel.app/settings" style="color:#2563eb">Ajustes</a>.
+      <a href="${APP_URL}/settings" style="color:#2563eb">Ajustes</a>.
     </p>`,
   )
 }

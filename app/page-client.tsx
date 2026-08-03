@@ -2078,6 +2078,10 @@ Si falta información, sustituye el hueco por una explicación real basada en el
     console.info(buildCorrectionBlockLog(requestId, validation, extra))
   }
 
+  function displayCorrectionText(text: string) {
+    return sanitizeCorrectionDisplayText(text)
+  }
+
   async function runChunkedCorrection(
     accessToken: string,
     chunks: ReturnType<typeof buildChunkedCorrectionPrompts>,
@@ -2089,7 +2093,7 @@ Si falta información, sustituye el hueco por una explicación real basada en el
 
     for (const chunk of chunks) {
       setCorrectionStage(chunk.label)
-      setStreamText(completed.join('\n\n'))
+      setStreamText(displayCorrectionText(completed.join('\n\n')))
       const chunkPrompt = chunk.includePreviousCorrection
         ? `${chunk.prompt}
 
@@ -2106,6 +2110,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         creditKey
       })
       let validation = validateCorrectionBlock(chunk.id, result.text, result.truncated)
+      let displayText = displayCorrectionText(result.text).trim()
+      if (!validation.valid && displayText && !containsVisibleTechnicalLiteral(displayText)) {
+        const repairedValidation = validateCorrectionBlock(chunk.id, displayText, result.truncated)
+        if (repairedValidation.valid) {
+          result = { ...result, text: displayText }
+          validation = repairedValidation
+        }
+      }
       logCorrectionBlockValidation(sessionId, validation)
 
       if (!validation.valid) {
@@ -2119,6 +2131,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           creditKey
         })
         validation = validateCorrectionBlock(chunk.id, result.text, result.truncated)
+        displayText = displayCorrectionText(result.text).trim()
+        if (!validation.valid && displayText && !containsVisibleTechnicalLiteral(displayText)) {
+          const repairedValidation = validateCorrectionBlock(chunk.id, displayText, result.truncated)
+          if (repairedValidation.valid) {
+            result = { ...result, text: displayText }
+            validation = repairedValidation
+          }
+        }
         logCorrectionBlockValidation(sessionId, validation, { retry: true })
         setContinuingCorrection(false)
       }
@@ -2136,7 +2156,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
         failedOptional.push(chunk.title)
         completed.push(fallback)
-        setStreamText(completed.join('\n\n'))
+        setStreamText(displayCorrectionText(completed.join('\n\n')))
         return {
           markdown: `# Corrección de Kairo\n\n${completed.join('\n\n')}`.trim(),
           truncated: result.truncated,
@@ -2146,8 +2166,8 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         }
       }
 
-      completed.push(result.text.trim())
-      setStreamText(completed.join('\n\n'))
+      completed.push(displayCorrectionText(result.text).trim())
+      setStreamText(displayCorrectionText(completed.join('\n\n')))
     }
 
     const optionalNote = failedOptional.length

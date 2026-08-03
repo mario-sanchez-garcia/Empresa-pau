@@ -104,3 +104,37 @@ test('removes visible technical literals from progressive display text', () => {
   assert.equal(visible.includes('El sistema queda:'), true)
   assert.equal(visible.includes('Continúa la explicación.'), true)
 })
+
+test('repairs system placeholder from previous equations', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    'Ecuación 1',
+    '$4x + 5y + 6z = 400$',
+    '',
+    'Ecuación 2',
+    '$3x - 5y + 3z = 0$',
+    '',
+    'Ecuación 3',
+    '$x + y - 2z = 5$',
+    '',
+    'Sistema resultante',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.equal(visible.includes('\\begin{cases}'), true)
+  assert.equal(visible.includes('4x + 5y + 6z = 400'), true)
+  assert.equal(visible.includes('x + y - 2z = 5'), true)
+})
+
+test('repairs why-section placeholder with a useful sentence', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    '## ¿Por qué es así?',
+    '',
+    '**Dónde se ve en la solución**',
+    '',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.match(visible, /ecuaciones y pasos anteriores/i)
+})

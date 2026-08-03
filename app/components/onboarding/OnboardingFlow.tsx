@@ -481,7 +481,7 @@ export default function OnboardingFlow() {
       // Ensure kairo_ccaa is in sync at completion (covers edge cases where
       // selectCommunity ran on a previous session)
       syncOnboardingCommunity(data)
-      router.push('/camino?first_session=1')
+      setStep('done')
     } catch {
       setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
     }
@@ -735,7 +735,7 @@ export default function OnboardingFlow() {
             <Check size={30} color="#111" strokeWidth={3} />
           </div>
           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, color: '#fff', letterSpacing: '.02em' }}>Tu Camino PAU está listo</div>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>Tu primer día empieza mañana.</p>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', textAlign: 'center', maxWidth: 360 }}>Revisa tu semana, mira tus misiones y empieza cuando te venga bien.</p>
           <button onClick={() => router.push('/camino')} style={{ marginTop: 8, padding: '12px 32px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
             Ver mi Camino PAU →
           </button>

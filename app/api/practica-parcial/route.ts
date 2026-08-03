@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { generatePracticeSession } from '@/components/simulacros/data'
 import type { SimulacroSubject } from '@/components/simulacros/types'
-import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { isInternalUser } from '@/app/lib/internalUsers'
@@ -34,6 +34,8 @@ export async function POST(request: NextRequest) {
   const { data: { user }, error } = await getUser(token)
   if (error || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const db = createServiceClient()
+
   if (!isInternalUser(user.email ?? '')) {
     const billing = await getUserBillingContext(user.id, user.created_at ?? new Date().toISOString(), user.email)
 
@@ -45,8 +47,20 @@ export async function POST(request: NextRequest) {
     }
 
     const planLimits = getCaminoPlanLimits(billing.planId)
-    const monthlyParciales = await getMonthlyActionCount(user.id, ['parcial_correction'])
-    if (monthlyParciales >= planLimits.partialsPerMonth) {
+    // Cuenta prácticas CREADAS este mes, no corregidas — contar
+    // 'parcial_correction' aquí siempre daba 0 (esa acción solo se registra
+    // al corregir en /api/simulacro, nunca al crear), así que este bloqueo
+    // nunca se disparaba de verdad: un alumno free podía crear tantas
+    // prácticas parciales como quisiera y solo se topaba con el límite al
+    // intentar corregir la segunda.
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+    const { count: monthlyParciales } = await db
+      .from('historial_simulacros')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', startOfMonth)
+      .contains('resultado_json', { __practice_session: true })
+    if ((monthlyParciales ?? 0) >= planLimits.partialsPerMonth) {
       return NextResponse.json(
         {
           error: 'parcial_limit_reached',
@@ -83,7 +97,6 @@ export async function POST(request: NextRequest) {
   const avgYear = session.questions.reduce((sum, q) => sum + q.year, 0) / Math.max(1, session.questions.length)
   const dificultadReal = avgYear >= 2023 ? 'Difícil' : avgYear >= 2019 ? 'Media' : 'Fácil'
 
-  const db = createServiceClient()
   const { data: inserted, error: insertError } = await db
     .from('historial_simulacros')
     .insert({

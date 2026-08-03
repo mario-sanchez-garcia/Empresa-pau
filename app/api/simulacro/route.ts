@@ -169,10 +169,18 @@ export async function POST(request: NextRequest) {
       const monthlyUsed = await getMonthlyActionCount(authContext.user.id, [correctionAction])
       if (monthlyUsed >= monthlyLimit) {
         const noun = isPracticeSession ? 'práctica' : 'simulacro'
+        // monthlyLimit=0 (p.ej. simulacros completos en el plan free) no es
+        // un "límite alcanzado" — es que el plan actual no incluye esto, y
+        // "el límite de 0 simulacros" se lee raro.
+        const message = monthlyLimit === 0
+          ? (isPracticeSession
+            ? 'Las prácticas parciales no están disponibles en tu plan actual.'
+            : 'Los simulacros completos no están disponibles en tu plan actual.')
+          : `Has alcanzado el límite de ${monthlyLimit} ${noun}${monthlyLimit !== 1 ? 's' : ''} este mes.`
         return NextResponse.json(
           {
             error: isPracticeSession ? 'parcial_limit_reached' : 'simulacro_limit_reached',
-            message: `Has alcanzado el límite de ${monthlyLimit} ${noun}${monthlyLimit !== 1 ? 's' : ''} este mes.`,
+            message,
             code: BILLING_BLOCK_CODE
           },
           { status: 429 }

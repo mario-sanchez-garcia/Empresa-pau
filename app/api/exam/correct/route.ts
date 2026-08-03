@@ -44,6 +44,27 @@ type ExamCorrectBody = {
 }
 
 export async function POST(request: NextRequest) {
+  try {
+    return await handlePost(request)
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorName = (error as any)?.name ?? (error as any)?.constructor?.name ?? 'Error'
+    console.error('EXAM_CORRECTION_ERROR', {
+      errorCode,
+      errorName,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      message: (error as any)?.message?.slice(0, 200)
+    })
+    return NextResponse.json(
+      { error: 'No hemos podido corregir este ejercicio ahora mismo. Inténtalo de nuevo en unos minutos.' },
+      { status: 500 }
+    )
+  }
+}
+
+async function handlePost(request: NextRequest) {
   const totalStart = Date.now()
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response

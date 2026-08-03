@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
-import { getCurrentRoundXpByUser, currentRoundRange, type Medal } from '@/app/lib/camino/leagueRounds'
+import { getXpByUserInRange, currentRoundRange, assignCompetitionRanks, medalForRank, type Medal } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,8 +28,26 @@ export async function GET(request: NextRequest) {
   // calcula en caliente sobre camino_xp_events. Si esto leyera de
   // ligas_rondas_resultados para el mes actual, se quedaría a 0 todo el mes
   // porque esa fila todavía no existe (solo la crea el cron al cerrar).
-  const currentRoundXpMap = await getCurrentRoundXpByUser(db, [user.id])
-  const currentRoundXp = currentRoundXpMap.get(user.id) ?? 0
+  //
+  // Se calcula sobre TODOS los usuarios (no solo el propio) para poder dar
+  // también el puesto y la medalla provisionales del global de este mes —
+  // antes esta ruta solo mostraba medallero de rondas YA cerradas, así que
+  // se veía vacía todo el mes hasta que el cron cerraba la ronda el día 1.
+  const range = currentRoundRange()
+  const allCurrentRoundXp = await getXpByUserInRange(db, range, null)
+  const rankedCurrent = assignCompetitionRanks(
+    Array.from(allCurrentRoundXp.entries())
+      .filter(([, xp]) => xp > 0)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([user_id, xp]) => ({ user_id, xp }))
+  )
+  const myCurrentEntry = rankedCurrent.find(r => r.user_id === user.id)
+  const currentRoundXp = myCurrentEntry?.xp ?? 0
+  const currentRank = myCurrentEntry?.rank ?? null
+  const currentMedal = currentRank != null ? medalForRank(currentRank, rankedCurrent.length) : null
+  const daysRemaining = Math.max(0, Math.ceil(
+    (new Date(range.end + 'T23:59:59Z').getTime() - Date.now()) / (24 * 60 * 60 * 1000)
+  ))
 
   // Medallero: se agrega en caliente sobre ligas_rondas_resultados — sigue
   // en 0/0/0 mientras no se haya cerrado ninguna ronda todavía (cron
@@ -85,7 +103,11 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     medals,
     currentRoundXp,
-    currentRoundRange: currentRoundRange(),
+    currentRoundRange: range,
+    currentRank,
+    currentTotalParticipants: rankedCurrent.length,
+    currentMedal,
+    daysRemaining,
     pastRounds,
   })
 }

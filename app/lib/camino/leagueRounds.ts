@@ -23,6 +23,25 @@ export const ETAPA_MEDAL_WEIGHTS: Record<Medal, number> = {
   bronce: 1,
 }
 
+// Rango "de competición": los empates comparten el mismo puesto (tres
+// alumnos empatados a 500 XP salen los tres como 3.º, no como 3.º/4.º/5.º) y
+// el siguiente puesto distinto salta al que le tocaría por COUNT de gente
+// por delante (6.º, no 4.º). Con XP gamificado los empates son constantes,
+// así que esta debe ser la ÚNICA función que asigna `rank` en un ranking
+// dado — usarla tanto para las filas visibles como para el puesto propio
+// evita que ambas cifras se contradigan entre sí.
+export function assignCompetitionRanks<T extends { xp: number }>(sortedDesc: T[]): (T & { rank: number })[] {
+  let rank = 0
+  let lastXp: number | null = null
+  return sortedDesc.map((row, i) => {
+    if (lastXp === null || row.xp !== lastXp) {
+      rank = i + 1
+      lastXp = row.xp
+    }
+    return { ...row, rank }
+  })
+}
+
 export function medalForRank(rank: number, totalParticipants: number): Medal | null {
   if (totalParticipants <= 0 || rank < 1) return null
   const percentile = rank / totalParticipants

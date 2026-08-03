@@ -3,10 +3,10 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { awardXp } from '@/app/lib/camino/awardXp'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
+import { normalizeScoreToTen } from '@/app/lib/camino/scoreNormalization'
+import { EXAM_CORRECTION_XP } from '@/app/lib/camino/xpMap'
 
 export const dynamic = 'force-dynamic'
-
-const EXAM_CORRECTION_XP = 20
 
 // La corrección de un ejercicio de examen (página Exámenes) se guarda en
 // historial_examenes directamente desde el cliente (ver page-client.tsx),
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const db = createServiceClient()
     const { data: examen, error: examenError } = await db
       .from('historial_examenes')
-      .select('id,user_id,asignatura,nota,created_at')
+      .select('id,user_id,asignatura,nota,nota_maxima,created_at')
       .eq('id', historialExamenId)
       .eq('user_id', user.id)
       .maybeSingle()
@@ -61,11 +61,13 @@ export async function POST(request: NextRequest) {
       sourceId: String(examen.id),
       subject: caminoSubjectFromSimulacro(String(examen.asignatura)),
       missionDate,
+      scoreOnTen: normalizeScoreToTen(examen.nota, examen.nota_maxima),
     })
 
     return NextResponse.json({
       success: true,
       xpAwarded: result.xpAwarded,
+      bonusXp: result.bonusXp,
       totalXp: result.totalXp,
       streakDays: result.streakDays,
       leagueUpgrade: result.leagueUpgrade,

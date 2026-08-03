@@ -9,12 +9,30 @@ type LigaMember = { user_id: string; name: string; weekly_xp: number; total_xp: 
 type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMember[] }
 
 type GlobalEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
-type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number }
+type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number; myRank: number }
 type GlobalPeriod = 'total' | 'month' | 'week'
+
+// Con menos alumnos que esto, un porcentaje ("top 18%") no significa nada
+// de fiar — mismo problema que el "Percentil P50" del historial con pocos
+// datos: el alumno se lo cree igual aunque la muestra sea minúscula.
+const MIN_PARTICIPANTS_FOR_PERCENTILE = 50
+// Por debajo de esto, una tabla de ranking con 2-4 filas no transmite "esto
+// es un ranking" — mejor explicar qué se verá cuando haya más gente que
+// enseñar una tabla que parece vacía o rota.
+const MIN_PARTICIPANTS_FOR_TABLE = 5
 
 type Medal = 'oro' | 'plata' | 'bronce'
 type PastRound = { periodStart: string; periodEnd: string; scopeType: string; label: string; roundXp: number; rank: number; medal: Medal | null }
-type EtapasData = { medals: Record<Medal, number>; currentRoundXp: number; currentRoundRange: { start: string; end: string }; pastRounds: PastRound[] }
+type TemporadasData = {
+  medals: Record<Medal, number>
+  currentRoundXp: number
+  currentRoundRange: { start: string; end: string }
+  currentRank: number | null
+  currentTotalParticipants: number
+  currentMedal: Medal | null
+  daysRemaining: number
+  pastRounds: PastRound[]
+}
 const MEDAL_EMOJI: Record<Medal, string> = { oro: '🥇', plata: '🥈', bronce: '🥉' }
 
 function formatMonthLabel(dateISO: string): string {
@@ -69,6 +87,27 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
         <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1.6 }}>
           Únete a una liga para ver tu clasificación.
         </p>
+      </div>
+    )
+  }
+
+  if (liga.miembros.length <= 1) {
+    return (
+      <div>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+          {liga.nombre}
+        </p>
+        <div style={{ textAlign: 'center', padding: '32px 0' }}>
+          <p style={{ fontSize: 28, marginBottom: 8 }}>👋</p>
+          <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Todavía estás solo aquí</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Invita a amigos con tu enlace y en cuanto se unan verás aquí quién va primero cada semana.</p>
+        </div>
+        <button
+          onClick={onCopyInvite}
+          style={{ marginTop: 8, width: '100%', padding: '12px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'color 200ms' }}
+        >
+          {copied ? '¡Enlace copiado! ✓' : '🔗 Invitar a amigos'}
+        </button>
       </div>
     )
   }
@@ -131,6 +170,18 @@ function GlobalTab({ token }: { token: string }) {
   const data = dataByPeriod[period]
 
   const PERIOD_LABELS: Record<GlobalPeriod, string> = { total: 'XP de siempre', month: 'XP de este mes', week: 'XP de esta semana' }
+  // El toggle cambia qué XP se suma para ordenar, no cambia qué es "tu
+  // posición": en Mes/Semana el ranking es por XP ganado en ese periodo, no
+  // por tu puesto histórico — vale la pena decirlo explícito, porque el
+  // toggle de al lado invita a leerlo como "tu posición esta semana".
+  const PERIOD_CLARIFICATION: Record<GlobalPeriod, string | null> = {
+    total: null,
+    month: 'Ordenado por XP ganado este mes, no por tu posición histórica.',
+    week: 'Ordenado por XP ganado esta semana, no por tu posición histórica.',
+  }
+  const percentile = data && data.activeCount >= MIN_PARTICIPANTS_FOR_PERCENTILE
+    ? Math.max(1, Math.round((data.myRank / data.activeCount) * 100))
+    : null
 
   return (
     <div>
@@ -139,12 +190,23 @@ function GlobalTab({ token }: { token: string }) {
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>
           <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Kairo acaba de empezar</p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Sé el primero en completar misiones.</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Sé el primero en completar misiones. En cuanto haya más alumnos, aquí verás el ranking completo.</p>
+        </div>
+      ) : data.activeCount < MIN_PARTICIPANTS_FOR_TABLE ? (
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <p style={{ fontSize: 28, marginBottom: 10 }}>🌱</p>
+          <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Todavía sois pocos</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>
+            Ahora mismo hay {data.activeCount} alumno{data.activeCount === 1 ? '' : 's'} con {PERIOD_LABELS[period].toLowerCase()}. Cuando se una más gente, aquí verás el ranking completo con tu puesto entre todos.
+          </p>
         </div>
       ) : (
         <>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
             {data.activeCount} alumnos · {PERIOD_LABELS[period]}
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 700, marginBottom: 10 }}>
+            Tu puesto: #{data.myRank}{percentile != null ? ` · Top ${percentile}%` : ''}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {data.entries.map((e, i) => (
@@ -152,19 +214,22 @@ function GlobalTab({ token }: { token: string }) {
             ))}
           </div>
           {data.nextTarget && <Hint xpNeeded={data.nextTarget.xpNeeded} name={data.nextTarget.name} />}
+          {PERIOD_CLARIFICATION[period] && (
+            <p style={{ marginTop: 10, fontSize: 10.5, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>{PERIOD_CLARIFICATION[period]}</p>
+          )}
         </>
       )}
     </div>
   )
 }
 
-function EtapasTab({ token }: { token: string }) {
-  const [data, setData] = useState<EtapasData | null | undefined>(undefined)
+function TemporadasTab({ token }: { token: string }) {
+  const [data, setData] = useState<TemporadasData | null | undefined>(undefined)
 
   useEffect(() => {
     fetch('/api/ligas/etapas', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => setData(d as EtapasData))
+      .then(d => setData(d as TemporadasData))
       .catch(() => setData(null))
   }, [token])
 
@@ -177,7 +242,8 @@ function EtapasTab({ token }: { token: string }) {
     )
   }
 
-  const { medals, currentRoundXp, currentRoundRange, pastRounds } = data
+  const { medals, currentRoundXp, currentRoundRange, currentRank, currentTotalParticipants, currentMedal, daysRemaining, pastRounds } = data
+  const hasCurrentStanding = currentRoundXp > 0 && currentRank != null
 
   return (
     <div>
@@ -195,18 +261,27 @@ function EtapasTab({ token }: { token: string }) {
       </div>
 
       <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
-        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Etapa actual · {formatMonthLabel(currentRoundRange.start)}</p>
+        <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Temporada actual · {formatMonthLabel(currentRoundRange.start)}</p>
         <p style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>{currentRoundXp.toLocaleString('es-ES')} <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>XP</span></p>
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Se cierra el día 1 del próximo mes — entonces se reparten medallas.</p>
+        {hasCurrentStanding ? (
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
+            Puesto provisional #{currentRank} de {currentTotalParticipants}{currentMedal ? ` · ${MEDAL_EMOJI[currentMedal]} ${currentMedal}` : ''}
+          </p>
+        ) : (
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Todavía no tienes XP esta temporada.</p>
+        )}
+        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+          {daysRemaining === 0 ? 'Se cierra hoy' : `Quedan ${daysRemaining} día${daysRemaining === 1 ? '' : 's'}`} — entonces se reparten medallas según el puesto final.
+        </p>
       </div>
 
       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-        Etapas anteriores
+        Temporadas anteriores
       </p>
       {pastRounds.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
           <p style={{ fontSize: 24, marginBottom: 8 }}>🏁</p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Aún no se ha cerrado ninguna etapa.<br />Vuelve el día 1 del próximo mes.</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Aún no se ha cerrado ninguna temporada.<br />Vuelve el día 1 del próximo mes.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -227,7 +302,7 @@ function EtapasTab({ token }: { token: string }) {
 }
 
 export default function FullRankingModal({ token, onClose }: { token: string; onClose: () => void }) {
-  const [tab, setTab] = useState<'liga' | 'global' | 'etapas'>('liga')
+  const [tab, setTab] = useState<'liga' | 'global' | 'temporadas'>('liga')
   const [liga, setLiga] = useState<LigaInfo | null | undefined>(undefined)
   const [copied, setCopied] = useState(false)
 
@@ -274,7 +349,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
 
         {/* Main tabs */}
         <div style={{ padding: '14px 20px 0', display: 'flex', gap: 6, flexShrink: 0 }}>
-          {(['liga', 'global', 'etapas'] as const).map(t => (
+          {(['liga', 'global', 'temporadas'] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -286,7 +361,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
                 transition: 'background 150ms, color 150ms',
               }}
             >
-              {t === 'liga' ? 'Mi liga' : t === 'global' ? 'Global' : 'Etapas'}
+              {t === 'liga' ? 'Mi liga' : t === 'global' ? 'Global' : 'Temporadas'}
             </button>
           ))}
         </div>
@@ -305,7 +380,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
                 ? <LigaTab liga={liga} onCopyInvite={copyInvite} copied={copied} />
                 : tab === 'global'
                   ? <GlobalTab token={token} />
-                  : <EtapasTab token={token} />
+                  : <TemporadasTab token={token} />
               }
             </motion.div>
           </AnimatePresence>

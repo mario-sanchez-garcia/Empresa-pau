@@ -11,8 +11,10 @@ export interface CaminoWeekData {
   duracion: string
 }
 
-// XP canónico por tipo de tarea — compartido entre cliente y servidor.
-// Mantener sincronizado con TASK_TYPE_XP_MAP en caminoProgressServer.ts.
+// XP *estimado* mostrado en una misión antes de completarla (vocabulario
+// fino por tipo de tarea). El XP *real* que se otorga al completar vive en
+// app/lib/camino/xpMap.ts, con un vocabulario más grueso (mission_type) —
+// son dos escalas distintas a propósito, no hace falta que coincidan.
 export const MISSION_TASK_XP: Record<CaminoTaskTypeId, number> = {
   flashcard: 15,
   ejercicio_corto: 20,

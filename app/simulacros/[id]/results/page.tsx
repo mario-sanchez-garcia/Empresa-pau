@@ -225,6 +225,11 @@ export default function SimulacroResultsPage() {
                 <div className="mt-2 text-lg font-black" style={{ color: '#94a3b8' }}>
                   {hasGrade ? '/ 10 puntos' : 'Corrección pendiente'}
                 </div>
+                {hasGrade && typeof result.xpAwarded === 'number' && result.xpAwarded > 0 && (
+                  <div className="mt-2 text-sm font-black" style={{ color: '#7c3aed' }}>
+                    +{result.xpAwarded} XP{typeof result.bonusXp === 'number' && result.bonusXp > 0 ? ` · +${result.bonusXp} bonus por la nota` : ''}
+                  </div>
+                )}
               </div>
 
               {/* Meta chips */}

@@ -1,36 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// XP por tipo de tarea — fuente de verdad del servidor.
-// Sincronizado con MISSION_TASK_XP en caminoCurriculum.ts.
-export const TASK_TYPE_XP_MAP: Record<string, number> = {
-  flashcard: 15,
-  ejercicio_corto: 20,
-  correccion_ia: 30,
-  repaso_error: 15,
-  mini_simulacro: 40,
-  simulacro_completo: 75,
-  simulacro_completo_escalonado: 75,
-  estrategia_examen: 10,
-  repaso_ligero: 10,
-  reading: 15,
-  writing: 20,
-  test: 10,
-}
-
-// Compatibilidad hacia atrás con los task IDs del MVP inicial (Fase 2C).
-const LEGACY_TASK_XP: Record<string, number> = {
-  'flashcards-integrales': 25,
-  'ejercicios-analisis': 30,
-  'correccion-corta': 30,
-  'repaso-areas': 20,
-}
-
-// Resuelve el XP para una tarea: legacy task ID primero, luego por tipo.
-export function resolveTaskXp(taskId: string, taskType: string): number | null {
-  return LEGACY_TASK_XP[taskId] ?? TASK_TYPE_XP_MAP[taskType] ?? null
-}
-
 // DAILY_TASK_IDS se mantiene para compatibilidad con misiones sin task_ids guardados.
 export const DAILY_TASK_IDS = ['flashcards-integrales', 'ejercicios-analisis', 'correccion-corta', 'repaso-areas']
 

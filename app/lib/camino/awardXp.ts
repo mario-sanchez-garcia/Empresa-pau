@@ -19,10 +19,26 @@ export type AwardXpResult = {
   // false = esta fuente ya había dado XP antes (mismo user+source_type+source_id+mission_date);
   // no-op idempotente, no un error.
   awarded: boolean
+  // XP total otorgado (base + bonus de calidad). Nombre mantenido por
+  // compatibilidad con el código existente que ya lee xpAwarded.
   xpAwarded: number
+  baseXp: number
+  bonusXp: number
   totalXp: number
   streakDays: number | null
   leagueUpgrade: { from: string; to: string } | null
+}
+
+// Bonus de calidad sobre el XP base garantizado: +50% si la nota (sobre 10)
+// es >= 7, +100% si es >= 9. La base nunca se reduce por una nota baja —
+// premiar acertar no debe castigar intentarlo, o el alumno racionalmente
+// evitaría sus puntos débiles, justo lo contrario de lo que busca
+// injectWeakReviewMissions.
+function applyQualityBonus(baseXp: number, scoreOnTen: number | null | undefined): { total: number; bonus: number } {
+  if (scoreOnTen == null || !Number.isFinite(scoreOnTen)) return { total: baseXp, bonus: 0 }
+  const multiplier = scoreOnTen >= 9 ? 1 : scoreOnTen >= 7 ? 0.5 : 0
+  const bonus = Math.round(baseXp * multiplier)
+  return { total: baseXp + bonus, bonus }
 }
 
 export async function awardXp(
@@ -39,11 +55,18 @@ export async function awardXp(
     // source_id,mission_date) dejaría de detectar el duplicado.
     missionDate: string
     missionsCompletedDelta?: number
+    // Nota normalizada sobre 10, si esta acción tiene una nota real (examen,
+    // simulacro, parcial, corrección de Camino con rúbrica). undefined/null
+    // = acción sin nota (p.ej. una flashcard) → solo se da el XP base, sin
+    // bonus.
+    scoreOnTen?: number | null
   },
 ): Promise<AwardXpResult> {
+  const { total: xpTotal, bonus: bonusXp } = applyQualityBonus(args.xp, args.scoreOnTen)
+
   const { error: xpError } = await db.from('camino_xp_events').insert({
     user_id: userId,
-    xp_amount: args.xp,
+    xp_amount: xpTotal,
     source_type: args.sourceType,
     source_id: args.sourceId,
     mission_date: args.missionDate,
@@ -58,7 +81,7 @@ export async function awardXp(
         .select('xp_total')
         .eq('user_id', userId)
         .maybeSingle()
-      return { awarded: false, xpAwarded: 0, totalXp: Number(progress?.xp_total) || 0, streakDays: null, leagueUpgrade: null }
+      return { awarded: false, xpAwarded: 0, baseXp: 0, bonusXp: 0, totalXp: Number(progress?.xp_total) || 0, streakDays: null, leagueUpgrade: null }
     }
     throw new Error(`awardXp: xp_event insert failed: ${xpError.message}`)
   }
@@ -74,7 +97,7 @@ export async function awardXp(
     const { error: subjectXpError } = await db.from('camino_subject_xp').upsert({
       user_id: userId,
       subject: args.subject,
-      xp_total: (Number(currentSubjectXp?.xp_total) || 0) + args.xp,
+      xp_total: (Number(currentSubjectXp?.xp_total) || 0) + xpTotal,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id,subject' })
     if (subjectXpError) {
@@ -90,7 +113,7 @@ export async function awardXp(
     .maybeSingle()
 
   const oldXpTotal = Number(currentProgress?.xp_total) || 0
-  const newXpTotal = oldXpTotal + args.xp
+  const newXpTotal = oldXpTotal + xpTotal
   const newMissionsCompleted = (Number(currentProgress?.missions_completed) || 0) + (args.missionsCompletedDelta ?? 0)
   const newStreakDays = await calcularRacha(userId, db).catch(() => null)
   const newLongestStreak = newStreakDays == null
@@ -105,7 +128,7 @@ export async function awardXp(
   if (!currentProgress) {
     await db.from('camino_user_progress').insert({
       user_id: userId,
-      xp_total: args.xp,
+      xp_total: xpTotal,
       streak_days: newStreakDays ?? 0,
       longest_streak: newLongestStreak,
       missions_completed: args.missionsCompletedDelta ?? 0,
@@ -127,5 +150,5 @@ export async function awardXp(
       .eq('user_id', userId)
   }
 
-  return { awarded: true, xpAwarded: args.xp, totalXp: newXpTotal, streakDays: newStreakDays, leagueUpgrade }
+  return { awarded: true, xpAwarded: xpTotal, baseXp: args.xp, bonusXp, totalXp: newXpTotal, streakDays: newStreakDays, leagueUpgrade }
 }

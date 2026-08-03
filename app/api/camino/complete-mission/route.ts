@@ -3,18 +3,9 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { awardXp } from '@/app/lib/camino/awardXp'
+import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 
 export const dynamic = 'force-dynamic'
-
-const XP_MAP: Record<string, number> = {
-  concept: 20,
-  review: 10,
-  pau_practice: 30,
-  comment_text: 30,
-  mock_exam: 50,
-  bonus: 10,
-  recovery: 10,
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +21,12 @@ export async function POST(request: NextRequest) {
     const calendarRowId = typeof body.calendarRowId === 'string' ? body.calendarRowId : null
     const missionType = typeof body.missionType === 'string' ? body.missionType : 'concept'
     const title = typeof body.title === 'string' ? body.title : null
+    // Nota normalizada sobre 10, si el cliente ya corrigió esta misión con
+    // rúbrica (ver /api/camino/correct) antes de marcarla completada — misma
+    // confianza en el cliente que ya existe hoy en el resto de la app para
+    // notas (p.ej. historial_examenes.nota se inserta directo desde cliente).
+    const rawScore = typeof body.score === 'number' ? body.score : null
+    const scoreOnTen = rawScore != null && Number.isFinite(rawScore) ? Math.min(10, Math.max(0, rawScore)) : null
 
     if (!subject || v2SortOrder == null) {
       return NextResponse.json(
@@ -38,8 +35,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // PASO 1 — XP siempre calculado en servidor
-    const xp = XP_MAP[missionType] ?? 20
+    // PASO 1 — XP base siempre calculado en servidor; el bonus de calidad lo
+    // añade awardXp() por encima según scoreOnTen.
+    const xp = resolveMissionTypeXp(missionType)
 
     const db = createServiceClient()
     const now = new Date().toISOString()
@@ -115,10 +113,11 @@ export async function POST(request: NextRequest) {
       subject,
       missionDate: now.slice(0, 10),
       missionsCompletedDelta: 1,
+      scoreOnTen,
     })
 
     // PASO 5 — Respuesta
-    return NextResponse.json({ success: true, xpAwarded: result.xpAwarded, totalXp: result.totalXp, streakDays: result.streakDays, leagueUpgrade: result.leagueUpgrade })
+    return NextResponse.json({ success: true, xpAwarded: result.xpAwarded, bonusXp: result.bonusXp, totalXp: result.totalXp, streakDays: result.streakDays, leagueUpgrade: result.leagueUpgrade })
   } catch (err) {
     console.error('[camino/complete-mission]', err)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

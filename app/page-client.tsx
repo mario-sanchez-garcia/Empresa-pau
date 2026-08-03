@@ -24,6 +24,7 @@ import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from './lib/contentQuality'
 import { getRandomEvauExerciseForMission, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
+import { normalizeScoreToTen } from './lib/camino/scoreNormalization'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
 import CatFisicaEjercicioCard from './components/CatFisicaEjercicioCard'
@@ -747,10 +748,7 @@ type HistorialItem = {
 }
 
 function normalizedHistoryScore(item: HistorialItem) {
-  const score = Number(item.nota)
-  const max = Number(item.nota_maxima)
-  if (!Number.isFinite(score) || !Number.isFinite(max) || max <= 0) return null
-  return Math.min(10, Math.max(0, (score / max) * 10))
+  return normalizeScoreToTen(item.nota, item.nota_maxima)
 }
 
 function calcMedia(items: HistorialItem[]) {
@@ -876,6 +874,7 @@ export default function Home() {
   const [imagenTipo, setImagenTipo] = useState('image/jpeg')
   const [imagenPreview, setImagenPreview] = useState<string | null>(null)
   const [correccion, setCorreccion] = useState('')
+  const [examXpResult, setExamXpResult] = useState<{ xpAwarded: number; bonusXp: number } | null>(null)
   const [streamText, setStreamText] = useState('')
   const [truncated, setTruncated] = useState(false)
   const [continuingCorrection, setContinuingCorrection] = useState(false)
@@ -2086,7 +2085,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
-    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false); setCorrectionStage('Leyendo tu respuesta...')
+    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false); setCorrectionStage('Leyendo tu respuesta...'); setExamXpResult(null)
     try {
       const accessToken = await getChatAccessToken()
       if (!accessToken) {
@@ -2196,6 +2195,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
                 body: JSON.stringify({ historialExamenId: insertedId })
+              }).then(async (res) => {
+                const json = await res.json().catch(() => null)
+                if (json?.success && typeof json.xpAwarded === 'number') {
+                  setExamXpResult({ xpAwarded: json.xpAwarded, bonusXp: json.bonusXp ?? 0 })
+                }
               }).catch(() => {})
             }
           }
@@ -5812,6 +5816,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
                         {!correccion && (
                           <p style={{ margin: '8px 0 0', fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>
                             {cargando ? 'Calculando con la rúbrica oficial…' : 'Resuelve el ejercicio y Kairo te dará feedback.'}
+                          </p>
+                        )}
+                        {correccion && examXpResult && (
+                          <p style={{ margin: '8px 0 0', fontSize: 12, fontWeight: 800, color: '#7c3aed' }}>
+                            +{examXpResult.xpAwarded} XP{examXpResult.bonusXp > 0 ? ` · +${examXpResult.bonusXp} bonus por la nota` : ''}
                           </p>
                         )}
                       </div>

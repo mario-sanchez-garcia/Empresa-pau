@@ -843,6 +843,8 @@ export default function CaminoCalendarClient() {
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
   const [globalTop, setGlobalTop] = useState<GlobalTopEntry[] | null>(null)
+  const [globalNextTarget, setGlobalNextTarget] = useState<{ name: string; xpNeeded: number } | null>(null)
+  const [globalMyRank, setGlobalMyRank] = useState<number | null>(null)
   const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
   const [supabaseCalLoaded, setSupabaseCalLoaded] = useState(false)
   const [streak, setStreak] = useState(0)
@@ -1158,8 +1160,10 @@ export default function CaminoCalendarClient() {
       if (!token || cancelled) return
       const res = await fetch('/api/ligas/global?period=total', { headers: { Authorization: `Bearer ${token}` } })
       if (!cancelled && res.ok) {
-        const d = await res.json() as { entries?: GlobalTopEntry[] }
+        const d = await res.json() as { entries?: GlobalTopEntry[]; nextTarget?: { name: string; xpNeeded: number } | null; myRank?: number }
         setGlobalTop((d.entries ?? []).slice(0, 5))
+        setGlobalNextTarget(d.nextTarget ?? null)
+        setGlobalMyRank(typeof d.myRank === 'number' ? d.myRank : null)
       }
     }).catch(() => undefined)
     return () => { cancelled = true }
@@ -2109,6 +2113,14 @@ export default function CaminoCalendarClient() {
                     <RankingRow key={entry.rank} rank={entry.rank} name={entry.name} xp={entry.xp} isMe={entry.isCurrentUser} theme="light" />
                   ))}
                 </div>
+                {globalMyRank != null && globalMyRank > 5 && (
+                  <p className="mt-2 text-center text-[11px] font-bold text-slate-400">Tu puesto: #{globalMyRank}</p>
+                )}
+                {globalNextTarget && (
+                  <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
+                    Te faltan <span className="font-black text-blue-600">{globalNextTarget.xpNeeded.toLocaleString('es-ES')} XP</span> para adelantar a {globalNextTarget.name}
+                  </p>
+                )}
               </div>
             )}
           </div>

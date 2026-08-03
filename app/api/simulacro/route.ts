@@ -9,6 +9,7 @@ import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { awardXp } from '@/app/lib/camino/awardXp'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
+import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -422,11 +423,12 @@ export async function POST(request: NextRequest) {
         ? simulacroRecord.created_at.slice(0, 10)
         : new Date().toISOString().slice(0, 10)
       xpResult = await awardXp(authContext.supabase, authContext.user.id, {
-        xp: isPracticeSession ? 30 : 50,
+        xp: isPracticeSession ? PARCIAL_COMPLETION_XP : SIMULACRO_COMPLETION_XP,
         sourceType: isPracticeSession ? 'parcial_completion' : 'simulacro_completion',
         sourceId: simulacro_id,
         subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
-        missionDate
+        missionDate,
+        scoreOnTen: result.nota_final
       })
     } catch (xpError) {
       console.error('[simulacro] xp_award_failed', { simulacroId: simulacro_id, message: (xpError as Error)?.message })
@@ -436,6 +438,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ...result,
       xpAwarded: xpResult?.xpAwarded ?? 0,
+      bonusXp: xpResult?.bonusXp ?? 0,
       totalXp: xpResult?.totalXp ?? null,
       streakDays: xpResult?.streakDays ?? null,
       leagueUpgrade: xpResult?.leagueUpgrade ?? null

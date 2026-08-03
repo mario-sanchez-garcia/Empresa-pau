@@ -757,6 +757,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 calendarRowId: pendingCalendarRowId ?? missionId ?? undefined,
                 missionType: pendingMissionType,
                 title: selectedMissionTitle,
+                score: rawScore,
               }),
             })
             const cmJson = await cmRes.json()
@@ -765,7 +766,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               setXpAwarded(cmJson.xpAwarded)
               setMissionXpStatus('already_completed')
               if (typeof cmJson.streakDays === 'number') setStreak(cmJson.streakDays)
-              toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10`
+              const bonusXp = typeof cmJson.bonusXp === 'number' ? cmJson.bonusXp : 0
+              toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10${bonusXp > 0 ? ` · +${bonusXp} bonus por la nota` : ''}`
               if (cmJson.leagueUpgrade) setLeagueUpgrade(cmJson.leagueUpgrade)
             } else if (cmJson.reason === 'already_completed') {
               setMissionXpStatus('already_completed')
@@ -1038,7 +1040,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
               <div>
                 <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
-                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>El XP se asigna sólo después de corregir con Kairo y depende de la nota obtenida.</p>
+                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>El XP se asigna sólo después de corregir con Kairo. Ganas la base saques la nota que saques; con un 7 o más sumas un 50% de bonus, con un 9 o más un 100%.</p>
               </div>
               <span style={{ borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
                 {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}

@@ -2,6 +2,9 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
+import { cleanStudentExams } from './camino/cleanStudentExams'
+import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
+import { injectAllPartialExamMissions } from './camino/injectPartialExamMissions'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, countWorkingDays, getMadridToday, getStudyDays } from './camino/studyDays'
 
@@ -18,14 +21,24 @@ const EXAM_DATE = '2027-06-07'
 // resto de la lógica de programación (que ya escala con esta constante).
 const CALENDAR_HORIZON = 30
 
-function subjectForDay(dateStr: string, subjects: string[]): string | null {
+function subjectForDay(dateStr: string, subjects: string[], examSubjectsToday?: string[]): string | null {
   if (subjects.length === 0) return null
-  if (subjects.length === 1) return subjects[0]
-  const ordered = (PRIVATE_BETA_SUBJECTS as readonly string[]).filter(subject => subjects.includes(subject))
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
   if (dow === 0 || dow === 6) return null
+  // A subject with an exam today takes priority over the plain weekday
+  // rotation — otherwise the round-robin can land on an unrelated subject
+  // (or even the subject that just had ITS OWN exam, per the day-of-week
+  // rotation math) while a different subject's exam that same day goes
+  // completely unaddressed.
+  if (examSubjectsToday && examSubjectsToday.length > 0) {
+    const examSubject = examSubjectsToday.find(s => subjects.includes(s))
+    if (examSubject) return examSubject
+  }
+  if (subjects.length === 1) return subjects[0]
+  const ordered = (PRIVATE_BETA_SUBJECTS as readonly string[]).filter(subject => subjects.includes(subject))
   return ordered[(dow - 1) % ordered.length] ?? subjects[0]
 }
+
 
 type QueueItem = {
   id: string
@@ -198,6 +211,35 @@ export async function ensureCaminoCalendar(
       .eq('queue_status', 'scheduled')
   }
 
+  // PASO 2.5 — Parciales: procesar TODOS los exámenes activos juntos (fechas +
+  // asignaturas), no uno a uno, para que dos exámenes próximos no se pisen
+  // los huecos de repaso y para que un examen que acaba de entrar en su
+  // ventana de preparación (≤10 días hábiles) reciba sus misiones sin que el
+  // alumno tenga que volver a tocarlo. Corre dentro del throttle diario de
+  // ensure-calendar, así que es como mucho una vez al día — y es idempotente
+  // para el mismo listado de exámenes, así que el plan no cambia si nada
+  // cambió de verdad.
+  const horizonEnd = addDays(today, CALENDAR_HORIZON)
+  const examSubjectsByDate = new Map<string, string[]>()
+  try {
+    const { data: profileForExams } = await supabase
+      .from('perfiles')
+      .select('student_exams, custom_instructions')
+      .eq('id', userId)
+      .maybeSingle()
+    const activeExams = cleanStudentExams(profileForExams?.student_exams)
+    for (const exam of activeExams) {
+      if (exam.date < today || exam.date > horizonEnd) continue
+      const slug = EXAM_SUBJECT_SLUG[exam.subject] ?? exam.subject
+      const existing = examSubjectsByDate.get(exam.date) ?? []
+      existing.push(slug)
+      examSubjectsByDate.set(exam.date, existing)
+    }
+    if (activeExams.length > 0) {
+      await injectAllPartialExamMissions(userId, supabase, activeExams, profileForExams?.custom_instructions ?? undefined)
+    }
+  } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
+
   // PASO 3 — Contar días futuros pendientes (distintos)
   const { data: futureDayRows } = await supabase
     .from('camino_calendar')
@@ -301,7 +343,7 @@ export async function ensureCaminoCalendar(
   const now = new Date().toISOString()
 
   for (const dateStr of emptyDays) {
-    const subject = subjectForDay(dateStr, subjects)
+    const subject = subjectForDay(dateStr, subjects, examSubjectsByDate.get(dateStr))
     if (!subject) continue
 
     const queue = subjectQueues[subject] ?? []

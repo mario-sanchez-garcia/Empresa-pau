@@ -14,7 +14,7 @@ import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2So
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
-import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
+import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import FullRankingModal from '@/components/shared/FullRankingModal'
@@ -49,7 +49,8 @@ type Mission = {
 }
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
-type StudentExam = { id: string; subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }
+type ExamConfidence = 'bajo' | 'medio' | 'alto'
+type StudentExam = { id: string; subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence?: ExamConfidence; content?: string; sessionOverride?: number }
 type CurriculumItem = { subject: string; subjectSlug: string; block: string; blockSlug: string; topic: string; topicSlug: string; title: string; sortOrder: number; contentStatus: string; source: 'supabase' | 'fallback' | 'seed'; planTopic?: CaminoCurriculumTopic }
 type RankingEntry = { id: string; name: string; community: string; xp: number; rank: number; isCurrentUser: boolean }
 type LeaderboardPayload = {
@@ -263,6 +264,21 @@ function loadJson<T>(key: string, fallback: T): T { try { const raw = window.loc
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
 function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') return 4; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
 function priorityLabel(priority: ExamPriority) { return priority === 'muy_alta' ? 'Muy alta' : priority.charAt(0).toUpperCase() + priority.slice(1) }
+// Extra rotation slots a subject earns for a given day based on how close/how prioritized its nearest exam is.
+// Capped so a subject never claims the whole rotation pool — every other active subject keeps at least its base slot.
+function subjectRotationWeight(subject: string, dateISO: string, relevantExams: StudentExam[]): number {
+  const subjSlug = subjectSlug(subject)
+  let extra = 0
+  for (const exam of relevantExams) {
+    if (normalizeSubjectSlug(exam.subject) !== subjSlug) continue
+    const distance = daysBetween(dateISO, exam.date)
+    if (distance < 0 || distance > 21) continue
+    const weight = priorityWeight(exam.priority)
+    if (distance <= 6) extra = Math.max(extra, weight - 1) // baja:+0, normal:+1, alta:+2, muy_alta:+3
+    else if (distance <= 14 && weight >= 3) extra = Math.max(extra, 1)
+  }
+  return 1 + extra
+}
 function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) }
 function hrefForMission(mission: Mission) {
   if (mission.missionType === 'partial_practice') {
@@ -426,6 +442,16 @@ function curriculumForSubject(subject: string, curriculum: CurriculumItem[]) {
   const rows = curriculum.filter(item => item.subject === subject)
   if (rows.length > 0) return rows
   return FALLBACK_CURRICULUM.filter(item => item.subject === subject)
+}
+
+function examBlockOptionsForSubject(subject: string, curriculum: CurriculumItem[]): string[] {
+  const rows = curriculumForSubject(subject, curriculum)
+  const seen = new Set<string>()
+  const blocks: string[] = []
+  for (const item of rows) {
+    if (item.block && !seen.has(item.block)) { seen.add(item.block); blocks.push(item.block) }
+  }
+  return blocks
 }
 
 function courseTopicsForSubjects(subjects: string[], curriculum: CurriculumItem[]) {
@@ -645,9 +671,13 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
 
     if (studyDay) {
       const weakArea = weakAreas.find(area => subjects.some(subject => subjectSlug(subject) === normalizeSubjectSlug(area.subject)) && area.score < 6)
-      const rawPrioritySubject = sameDay?.subject ?? (strongExamNearby || index <= 2 ? upcoming?.subject : null) ?? (index <= 2 ? weakArea?.subject : null)
+      // Exam day itself always wins the day's subject. Otherwise, priority only biases which
+      // subject is more *likely* to come up in the rotation — it never removes other active
+      // subjects from the pool, so a high-priority exam gets more days, not all of them.
+      const rawPrioritySubject = sameDay?.subject ?? (index <= 2 ? weakArea?.subject : null)
       const prioritySubject = rawPrioritySubject ? subjectLabelFromSlug(normalizeSubjectSlug(rawPrioritySubject)) : null
-      const subject = prioritySubject ?? subjects[subjectRotation % subjects.length]
+      const rotationPool = subjects.flatMap(subj => Array(subjectRotationWeight(subj, dateISO, relevantExams)).fill(subj) as string[])
+      const subject = prioritySubject ?? rotationPool[subjectRotation % rotationPool.length]
       const examContext = sameDay ?? (strongExamNearby ? upcoming : undefined)
       const weakItem = weakArea && normalizeSubjectSlug(weakArea.subject) === subjectSlug(subject) ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
       const rawCurriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? weakItem ?? nextCurriculumItem(subject)
@@ -784,7 +814,8 @@ export default function CaminoCalendarClient() {
   const [fullRankingToken, setFullRankingToken] = useState<string | null>(null)
   const [showExamForm, setShowExamForm] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
-  const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', name: '', priority: 'normal' as ExamPriority })
+  const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', name: '', priority: 'normal' as ExamPriority, confidence: 'medio' as ExamConfidence, content: '' })
+  const [savingExam, setSavingExam] = useState(false)
   const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
@@ -1440,37 +1471,65 @@ export default function CaminoCalendarClient() {
   function resetExamDraft() {
     setEditingExamId(null)
     setShowExamForm(false)
-    setExamDraft(current => ({ ...current, block: '', topic: '', name: '', date: toISO(addDays(new Date(), 3)), priority: 'normal' }))
+    setExamDraft(current => ({ ...current, block: '', topic: '', name: '', date: toISO(addDays(new Date(), 3)), priority: 'normal', confidence: 'medio', content: '' }))
   }
   function openNewExam() { setEditingExamId(null); setShowExamForm(true) }
-  function openEditExam(exam: StudentExam) { setEditingExamId(exam.id); setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, name: exam.name, priority: exam.priority }); setShowExamForm(true) }
-  function saveExam() {
-    if (!examDraft.subject || !examDraft.date) return
-    const normalizedBlock = normalizeBlockKey(examDraft.block ?? '')
-    const draft = { ...examDraft, block: normalizedBlock }
-    const currentEditingId = editingExamId
-    const nextExams = currentEditingId
-      ? exams.map(exam => exam.id === currentEditingId ? { ...exam, ...draft } : exam)
-      : [...exams, { id: `exam-${examDraft.date}-${exams.length + 1}`, ...draft }]
-    resetExamDraft()
-    regenerate(nextExams)
-    const savedExam = currentEditingId
-      ? nextExams.find(e => e.id === currentEditingId)
-      : nextExams[nextExams.length - 1]
-    if (savedExam) {
+  function openEditExam(exam: StudentExam) { setEditingExamId(exam.id); setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, name: exam.name, priority: exam.priority, confidence: exam.confidence ?? 'medio', content: exam.content ?? '' }); setShowExamForm(true) }
+  async function saveExam() {
+    if (!examDraft.subject || !examDraft.date || savingExam) return
+    setSavingExam(true)
+    try {
+      const normalizedBlock = normalizeBlockKey(examDraft.block ?? '')
+      // Ask the AI to size the plan to how the student says they're doing in
+      // this subject/block, and to whatever custom instructions they have
+      // active — before the plan gets generated, not after.
+      let sessionOverride: number | undefined
+      try {
+        const { data } = await supabase.auth.getSession()
+        const token = data.session?.access_token
+        if (token) {
+          const res = await fetch('/api/parciales/plan-intensity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              subject: examDraft.subject,
+              block: normalizedBlock,
+              topic: examDraft.topic,
+              content: examDraft.content,
+              confidence: examDraft.confidence,
+              priority: examDraft.priority,
+            }),
+          })
+          if (res.ok) {
+            const json = await res.json()
+            if (typeof json.sessionCount === 'number') sessionOverride = json.sessionCount
+          }
+        }
+      } catch { /* AI sizing is best-effort; deterministic fallback in injectPartialExamMissions still applies */ }
+
+      const draft = { ...examDraft, block: normalizedBlock, sessionOverride }
+      const currentEditingId = editingExamId
+      const nextExams = currentEditingId
+        ? exams.map(exam => exam.id === currentEditingId ? { ...exam, ...draft } : exam)
+        : [...exams, { id: `exam-${examDraft.date}-${exams.length + 1}`, ...draft }]
+      resetExamDraft()
+      regenerate(nextExams)
       supabase.auth.getSession().then(({ data }) => {
         const userId = data.session?.user.id
         if (!userId) return
-        injectPartialExamMissions(userId, supabase, savedExam)
+        injectAllPartialExamMissions(userId, supabase, nextExams)
       }, () => undefined)
+    } finally {
+      setSavingExam(false)
     }
   }
   function deleteExam(id: string) {
-    regenerate(exams.filter(exam => exam.id !== id))
+    const remaining = exams.filter(exam => exam.id !== id)
+    regenerate(remaining)
     supabase.auth.getSession().then(({ data }) => {
       const userId = data.session?.user.id
       if (!userId) return
-      deletePartialExamMissions(userId, supabase, id)
+      deletePartialExamMissions(userId, supabase, id).then(() => injectAllPartialExamMissions(userId, supabase, remaining))
     }, () => undefined)
   }
 
@@ -2063,7 +2122,7 @@ export default function CaminoCalendarClient() {
           </motion.div>
         )}
       </AnimatePresence>
-      <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} />}</AnimatePresence>
+      <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} saving={savingExam} />}</AnimatePresence>
       <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={w => calendar.filter(d => d.date >= w && d.date < addDays(new Date(w), 7).toISOString().slice(0, 10))} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onSave={updated => { setCalendar(updated); setShowCalendarEditor(false) }} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
@@ -3039,13 +3098,22 @@ function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
-function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { subjects: string[]; draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }; setDraft: (draft: { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority }) => void; onClose: () => void; onSave: () => void; editing: boolean }) {
+type ExamDraft = { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }
+
+function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curriculum, saving }: { subjects: string[]; draft: ExamDraft; setDraft: (draft: ExamDraft) => void; onClose: () => void; onSave: () => void; editing: boolean; curriculum: CurriculumItem[]; saving: boolean }) {
   const PRIORITIES: { value: ExamPriority; label: string; active: { bg: string; text: string; border: string } }[] = [
     { value: 'baja',     label: 'Baja',     active: { bg: '#f0fdf4', text: '#15803d', border: '#86efac' } },
     { value: 'normal',   label: 'Normal',   active: { bg: '#eff6ff', text: '#2563eb', border: '#93c5fd' } },
     { value: 'alta',     label: 'Alta',     active: { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' } },
     { value: 'muy_alta', label: 'Muy alta', active: { bg: '#fef2f2', text: '#dc2626', border: '#fca5a5' } },
   ]
+  const CONFIDENCE_OPTIONS: { value: ExamConfidence; label: string }[] = [
+    { value: 'bajo', label: 'Voy mal' },
+    { value: 'medio', label: 'Voy regular' },
+    { value: 'alto', label: 'Voy bien' },
+  ]
+  const blockOptions = examBlockOptionsForSubject(draft.subject, curriculum)
+  const isCustomBlock = draft.block !== '' && !blockOptions.includes(draft.block)
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -3083,14 +3151,41 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Bloque">
-                <input value={draft.block} onChange={e => setDraft({ ...draft, block: e.target.value })} placeholder="Álgebra, Análisis..." className="em-input" />
+                {blockOptions.length > 0 ? (
+                  <select
+                    value={isCustomBlock ? '__custom__' : draft.block}
+                    onChange={e => setDraft({ ...draft, block: e.target.value === '__custom__' ? '' : e.target.value })}
+                    className="em-input"
+                  >
+                    <option value="" disabled>Elige un bloque…</option>
+                    {blockOptions.map(b => <option key={b} value={b}>{b}</option>)}
+                    <option value="__custom__">Otro (especificar)</option>
+                  </select>
+                ) : (
+                  <input value={draft.block} onChange={e => setDraft({ ...draft, block: e.target.value })} placeholder="Álgebra, Análisis..." className="em-input" />
+                )}
               </Field>
               <Field label="Tema (opcional)">
                 <input value={draft.topic} onChange={e => setDraft({ ...draft, topic: e.target.value })} placeholder="Matrices, Gauss..." className="em-input" />
               </Field>
             </div>
+            {blockOptions.length > 0 && isCustomBlock && (
+              <Field label="Bloque (especifica)">
+                <input value={draft.block} onChange={e => setDraft({ ...draft, block: e.target.value })} placeholder="Álgebra, Análisis..." className="em-input" autoFocus />
+              </Field>
+            )}
             <Field label="Nombre (opcional)">
               <input value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} placeholder="Parcial 1, Examen tema 3..." className="em-input" />
+            </Field>
+            <Field label="¿Qué entra exactamente? (opcional)">
+              <textarea
+                value={draft.content}
+                onChange={e => setDraft({ ...draft, content: e.target.value.slice(0, 500) })}
+                placeholder="Ej: matrices y determinantes, sistemas por Gauss, no entra Cramer..."
+                className="em-input"
+                rows={2}
+                style={{ resize: 'vertical', fontFamily: 'inherit' }}
+              />
             </Field>
             <div>
               <p className="mb-2 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Prioridad</p>
@@ -3115,6 +3210,30 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
                 })}
               </div>
             </div>
+            <div>
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">¿Cómo vas en esta asignatura?</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {CONFIDENCE_OPTIONS.map(c => {
+                  const active = draft.confidence === c.value
+                  return (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => setDraft({ ...draft, confidence: c.value })}
+                      className="rounded-lg py-2 text-center text-[10px] font-black transition-all"
+                      style={{
+                        background: active ? '#eff6ff' : '#fafbfc',
+                        color: active ? '#2563eb' : '#94a3b8',
+                        border: `1.5px solid ${active ? '#93c5fd' : '#f1f5f9'}`,
+                      }}
+                    >
+                      {c.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="mt-1.5 text-[10px] font-semibold text-slate-400">Usamos esto para calcular cuántas horas de repaso necesitas.</p>
+            </div>
           </div>
         </div>
 
@@ -3125,8 +3244,8 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing }: { su
             <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">
               Cancelar
             </button>
-            <button onClick={onSave} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800">
-              {editing ? 'Guardar cambios' : 'Guardar parcial'}
+            <button onClick={onSave} disabled={saving} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-60">
+              {saving ? 'Calculando plan…' : editing ? 'Guardar cambios' : 'Guardar parcial'}
             </button>
           </div>
         </div>

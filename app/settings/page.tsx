@@ -66,6 +66,8 @@ export default function SettingsPage() {
   const [caminoDailyMinutes, setCaminoDailyMinutes] = useState(60)
   const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
   const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
+  const [customInstructions, setCustomInstructions] = useState('')
+  const [customInstructionsLoaded, setCustomInstructionsLoaded] = useState('')
   const [username, setUsername] = useState('')
   const [usernameEditMode, setUsernameEditMode] = useState(false)
   const [usernameInput, setUsernameInput] = useState('')
@@ -98,10 +100,12 @@ export default function SettingsPage() {
         try {
           const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           if (res.ok) {
-            const json = await res.json() as { email_notifications: boolean; username?: string }
+            const json = await res.json() as { email_notifications: boolean; username?: string; custom_instructions?: string }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
             if (json.username) setUsername(json.username)
+            setCustomInstructions(json.custom_instructions ?? '')
+            setCustomInstructionsLoaded(json.custom_instructions ?? '')
           }
         } catch { /* silent */ }
         try {
@@ -247,6 +251,15 @@ export default function SettingsPage() {
       window.setTimeout(() => setSaved(false), 2200)
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
+      const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
+      if (token && instructionsChanged) {
+        const res = await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ custom_instructions: customInstructions }),
+        })
+        if (res.ok) setCustomInstructionsLoaded(customInstructions.trim())
+      }
       if (token && onboarding?.completedAt) {
         const nextOnboarding: OnboardingData = {
           ...onboarding,
@@ -276,9 +289,10 @@ export default function SettingsPage() {
         })
         if (!setupRes.ok) throw new Error('onboarding_setup_failed')
 
-        // force: el usuario acaba de cambiar días/minutos y espera que sus
-        // próximas misiones se reajusten ahora, no mañana. Sin esto, el
-        // throttle diario de la ruta se lo saltaría en silencio.
+        // force: el usuario acaba de cambiar días/minutos (o sus instrucciones
+        // personalizadas) y espera que sus próximas misiones se reajusten
+        // ahora, no mañana. Sin esto, el throttle diario de la ruta se lo
+        // saltaría en silencio.
         const ensureRes = await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -286,6 +300,12 @@ export default function SettingsPage() {
         })
         if (!ensureRes.ok) throw new Error('camino_personalization_failed')
         setCaminoPrefsStatus('Tu Camino se ha ajustado para las próximas misiones.')
+      } else if (token && instructionsChanged) {
+        await fetch('/api/camino/ensure-calendar', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: true }),
+        }).catch(() => undefined)
       }
     } catch {
       setSaved(false)
@@ -621,6 +641,18 @@ export default function SettingsPage() {
           </div>
           <Toggle label="Mostrar consejos largos" description="Conservar explicaciones amplias al final de las correcciones." checked={preferences.longAdvice} onChange={v => setPreferences(cur => ({ ...cur, longAdvice: v }))} />
           <p style={{ marginTop: 10, fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>Estas preferencias se guardan localmente en este dispositivo.</p>
+          <div style={{ marginTop: 20 }}>
+            <Field label="Instrucciones personalizadas">
+              <textarea
+                value={customInstructions}
+                onChange={e => setCustomInstructions(e.target.value.slice(0, 600))}
+                placeholder="Ej: no puedo estudiar los findes, tengo entrenamientos por la tarde, prefiero sesiones cortas..."
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+              />
+            </Field>
+            <p style={{ marginTop: 6, fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>El plan de tus parciales las tiene en cuenta al generar misiones.</p>
+          </div>
         </div>
 
         {/* Save bar */}

@@ -3,6 +3,7 @@ import { getAuthContext, isValidRouteId } from '@/app/lib/camino/caminoProgressS
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
+import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +11,6 @@ const VALID_COMMUNITIES = ['Madrid', 'Cataluña', 'Andalucía', 'Otra'] as const
 const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
 const VALID_SCHOOL_SOURCES = ['dataset', 'manual'] as const
-const VALID_EXAM_PRIORITIES = ['baja', 'normal', 'alta', 'muy_alta'] as const
 
 function cleanString(value: unknown, fallback = '') {
   return typeof value === 'string' ? value.trim().slice(0, 160) : fallback
@@ -20,31 +20,6 @@ function cleanStringArray(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === 'string').map(item => item.trim()).filter(Boolean).slice(0, 12)
     : []
-}
-
-function cleanStudentExams(value: unknown) {
-  if (!Array.isArray(value)) return []
-  return value
-    .flatMap((raw, index) => {
-      if (!raw || typeof raw !== 'object') return []
-      const exam = raw as Record<string, unknown>
-      const subject = cleanString(exam.subject, '').slice(0, 80)
-      const date = cleanString(exam.date, '').slice(0, 10)
-      if (!subject || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return []
-      const priority = VALID_EXAM_PRIORITIES.includes(exam.priority as typeof VALID_EXAM_PRIORITIES[number])
-        ? (exam.priority as string)
-        : 'normal'
-      return [{
-        id: cleanString(exam.id, `onboarding-exam-${index + 1}`).slice(0, 80),
-        subject,
-        date,
-        block: cleanString(exam.block, 'Repaso general').slice(0, 80) || 'Repaso general',
-        topic: cleanString(exam.topic, '').slice(0, 120),
-        name: cleanString(exam.name, `Parcial de ${subject}`).slice(0, 120) || `Parcial de ${subject}`,
-        priority,
-      }]
-    })
-    .slice(0, 8)
 }
 
 export async function POST(request: NextRequest) {

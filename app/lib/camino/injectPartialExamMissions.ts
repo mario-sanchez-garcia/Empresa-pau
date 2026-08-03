@@ -1,35 +1,30 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
+import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
+import type { ExamConfidence, ExamPriority, StudentExam } from './cleanStudentExams'
+
 type PartialMissionType = 'conceptual_review' | 'evau_practice' | 'block_mock' | 'final_mini_mock'
-
-const SUBJECT_SLUG: Record<string, string> = {
-  'Matemáticas II': 'matematicas_ii',
-  'Matemáticas CCSS': 'matematicas_ccss',
-  'Historia de España': 'historia_espana',
-  'Lengua Castellana': 'lengua',
-  'Lengua Castellana y Literatura': 'lengua',
-  'Física': 'fisica',
-  'Química': 'quimica',
-  'Biología': 'biologia',
-  'Inglés': 'ingles',
-}
-
-const SIMULACRO_SUBJECT: Record<string, string> = {
-  matematicas_ii: 'mates',
-  matematicas_ccss: 'matematicas_ccss',
-  historia_espana: 'historia',
-  lengua: 'lengua',
-  fisica: 'fisica',
-  quimica: 'quimica',
-  biologia: 'biologia',
-  ingles: 'ingles',
-}
 
 const BLOCK_DISPLAY: Record<string, string> = {
   Algebra: 'Álgebra',
   Analisis: 'Análisis',
   Geometria: 'Geometría',
   Probabilidad: 'Probabilidad',
+}
+
+export type PartialExamInput = {
+  id: string
+  subject: string
+  date: string
+  block: string
+  topic?: string
+  priority?: ExamPriority
+  confidence?: ExamConfidence
+  content?: string
+  /** Overrides the computed session count (e.g. from an AI plan-intensity call). */
+  sessionOverride?: number
+  /** Free-text custom instructions from the student, passed through to mission metadata. */
+  customInstructions?: string
 }
 
 function madridToday(): string {
@@ -57,11 +52,48 @@ function weekdaysBefore(examDate: string, fromDate: string): string[] {
   return days
 }
 
+function priorityWeight(priority?: ExamPriority): number {
+  if (priority === 'muy_alta') return 4
+  if (priority === 'alta') return 3
+  if (priority === 'baja') return 1
+  return 2 // normal / unset
+}
+
+// Lower confidence ("voy mal") earns more prep sessions; high confidence needs fewer.
+function confidenceBonus(confidence?: ExamConfidence): number {
+  if (confidence === 'bajo') return 1
+  if (confidence === 'alto') return -1
+  return 0
+}
+
+function baseSessionCount(daysAvailable: number): number {
+  if (daysAvailable <= 2) return 1
+  if (daysAvailable <= 5) return 3
+  return 4
+}
+
+// Priority/confidence modulate how many prep sessions an exam earns, but the
+// count is always capped well below the available days so other active
+// subjects keep their rotation slots instead of being crowded out entirely.
+function sessionCountFor(daysAvailable: number, priority?: ExamPriority, confidence?: ExamConfidence, sessionOverride?: number): number {
+  if (daysAvailable <= 0) return 0
+  const weight = priorityWeight(priority)
+  const priorityBonus = weight >= 4 ? 2 : weight === 3 ? 1 : weight === 1 ? -1 : 0
+  const computed = baseSessionCount(daysAvailable) + priorityBonus + confidenceBonus(confidence)
+  const requested = sessionOverride && sessionOverride > 0 ? sessionOverride : computed
+  return Math.max(1, Math.min(requested, daysAvailable, 6))
+}
+
 function missionSequence(count: number): PartialMissionType[] {
-  if (count <= 0 || count > 10) return []
-  if (count <= 2) return ['final_mini_mock']
-  if (count <= 5) return ['evau_practice', 'block_mock', 'final_mini_mock']
-  return ['conceptual_review', 'evau_practice', 'block_mock', 'evau_practice', 'final_mini_mock']
+  if (count <= 0) return []
+  const seq: PartialMissionType[] = []
+  if (count >= 4) seq.push('conceptual_review')
+  const reserved = (count >= 2 ? 1 : 0) + 1 // block_mock (if any) + final_mini_mock
+  const fillerCount = Math.max(0, count - seq.length - reserved)
+  for (let i = 0; i < fillerCount; i++) seq.push('evau_practice')
+  if (count >= 2) seq.push('block_mock')
+  seq.push('final_mini_mock')
+  return seq
 }
 
 function missionTitle(type: PartialMissionType, blockDisplay: string, topic?: string): string {
@@ -80,13 +112,21 @@ function toSlug(text: string): string {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+/**
+ * Injects prep missions for a single exam. `reservedDates` are calendar dates
+ * already claimed by a *different* (nearer) exam this run — this exam skips
+ * them instead of double-booking the day, and returns the dates it claimed so
+ * a caller iterating multiple exams (see `injectAllPartialExamMissions`) can
+ * keep growing that reserved set.
+ */
 export async function injectPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
-  partialExam: { id: string; subject: string; date: string; block: string; topic?: string },
-): Promise<void> {
+  partialExam: PartialExamInput,
+  options: { reservedDates?: Set<string> } = {},
+): Promise<{ claimedDates: string[] }> {
   const today = madridToday()
-  if (partialExam.date <= today) return
+  if (partialExam.date <= today) return { claimedDates: [] }
 
   // Idempotent: wipe any pending partial missions for this exam before re-inserting
   await supabase
@@ -97,20 +137,30 @@ export async function injectPartialExamMissions(
     .eq('status', 'pending')
     .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
 
-  const slots = weekdaysBefore(partialExam.date, shiftDate(today, 1))
-  const daysUntilExam = slots.length
-  const sequence = missionSequence(daysUntilExam)
-  if (sequence.length === 0) return // > 10 days out: nothing to inject yet
+  // Include TODAY as a candidate slot (previously started from tomorrow),
+  // otherwise an exam added during onboarding never got a mission scheduled
+  // for the student's very first day in Camino.
+  const allSlots = weekdaysBefore(partialExam.date, today)
+  const daysUntilExam = allSlots.length
+  if (daysUntilExam === 0 || daysUntilExam > 10) return { claimedDates: [] } // > 10 weekdays out: nothing to inject yet
 
-  const subjectSlug = SUBJECT_SLUG[partialExam.subject] ?? partialExam.subject
+  const reserved = options.reservedDates
+  const availableSlots = reserved ? allSlots.filter(d => !reserved.has(d)) : allSlots
+
+  const count = sessionCountFor(daysUntilExam, partialExam.priority, partialExam.confidence, partialExam.sessionOverride)
+  const sequence = missionSequence(count)
+  if (sequence.length === 0 || availableSlots.length === 0) return { claimedDates: [] }
+
+  const subjectSlug = EXAM_SUBJECT_SLUG[partialExam.subject] ?? partialExam.subject
   const simSubject = SIMULACRO_SUBJECT[subjectSlug] ?? subjectSlug
   const blockDisplay = BLOCK_DISPLAY[partialExam.block] ?? partialExam.block
   const blockSlug = toSlug(partialExam.block)
   const topic = partialExam.topic || undefined
   const now = new Date().toISOString()
 
-  // Use the last N weekday slots (closest to the exam)
-  const targetSlots = slots.slice(-sequence.length)
+  // Use the last N available slots (closest to the exam)
+  const targetSlots = availableSlots.slice(-sequence.length)
+  const claimedDates: string[] = []
 
   for (let i = 0; i < sequence.length; i++) {
     const slot = targetSlots[i]
@@ -162,13 +212,20 @@ export async function injectPartialExamMissions(
         target_block_normalized: partialExam.block,
         target_block_display: blockDisplay,
         target_topic: topic ?? null,
+        target_content: partialExam.content ?? null,
         partial_mission_type: mType,
         days_until_exam: daysUntilExam,
+        priority: partialExam.priority ?? 'normal',
+        confidence: partialExam.confidence ?? null,
+        custom_instructions: partialExam.customInstructions ?? null,
         simulacro_block_filter: partialExam.block || null,
         simulacro_subject: simSubject,
       },
     })
+    claimedDates.push(slot)
   }
+
+  return { claimedDates }
 }
 
 export async function deletePartialExamMissions(
@@ -183,4 +240,31 @@ export async function deletePartialExamMissions(
     .eq('source', 'partial')
     .eq('status', 'pending')
     .filter('metadata->>partial_exam_id', 'eq', examId)
+}
+
+/**
+ * Processes ALL of a student's active exams together (nearest date first) so
+ * that two exams close in time don't silently overwrite each other's prep
+ * slots, and so a further-out exam never plants a mission on a day that is
+ * actually a different subject's exam date.
+ */
+export async function injectAllPartialExamMissions(
+  userId: string,
+  supabase: SupabaseClient,
+  exams: (StudentExam & { sessionOverride?: number })[],
+  customInstructions?: string,
+): Promise<void> {
+  const today = madridToday()
+  const upcoming = exams
+    .filter(exam => exam.date > today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+
+  const reservedDates = new Set<string>()
+  for (const exam of upcoming) {
+    const { claimedDates } = await injectPartialExamMissions(userId, supabase, { ...exam, customInstructions }, { reservedDates })
+    for (const d of claimedDates) reservedDates.add(d)
+    // Reserve the exam's own date too: a later exam's prep window shouldn't
+    // claim what is actually a different subject's exam day.
+    reservedDates.add(exam.date)
+  }
 }

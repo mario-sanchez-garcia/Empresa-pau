@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { validateUsername, normalizeUsername } from '@/app/lib/username'
+import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications, student_exams, username')
+    .select('email_notifications, student_exams, username, custom_instructions')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -38,6 +39,7 @@ export async function GET(request: NextRequest) {
     email_notifications: data?.email_notifications ?? true,
     student_exams: data?.student_exams ?? [],
     username: data?.username ?? '',
+    custom_instructions: data?.custom_instructions ?? '',
   })
 }
 
@@ -55,7 +57,8 @@ export async function PATCH(request: NextRequest) {
   const allowed: Record<string, unknown> = {}
 
   if (typeof body.email_notifications === 'boolean') allowed.email_notifications = body.email_notifications
-  if (Array.isArray(body.student_exams)) allowed.student_exams = body.student_exams
+  if (Array.isArray(body.student_exams)) allowed.student_exams = cleanStudentExams(body.student_exams)
+  if (typeof body.custom_instructions === 'string') allowed.custom_instructions = body.custom_instructions.trim().slice(0, 600)
 
   if (typeof body.username === 'string') {
     const u = body.username.trim()

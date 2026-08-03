@@ -4,6 +4,7 @@ import { createHash } from 'crypto'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { addDays, getMadridToday, isPreferredStudyDay } from './studyDays'
+import { getCaminoPlanLimits } from './caminoPlanLimits'
 
 const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
@@ -61,6 +62,26 @@ function metadataObject(value: Record<string, unknown> | null | undefined) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
 }
 
+// El plan gratuito anuncia "solo 2 días de estudio por semana" pero nada
+// comprobaba esto server-side: un alumno free podía elegir "7 días" en el
+// onboarding (una opción válida del formulario) y el generador se lo
+// respetaba igual que a un alumno de pago. Aquí es donde se aplica el tope
+// real de cada plan, el mismo maxStudyDaysPerWeek que ya usa el cliente en
+// CaminoCalendarClient.tsx — para que el límite exista de verdad, no solo
+// en la vista previa local.
+async function loadPlanMaxWeeklyDays(userId: string, supabase: SupabaseClient): Promise<number> {
+  const now = new Date().toISOString()
+  const { data } = await supabase
+    .from('user_entitlements')
+    .select('plan_id')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .limit(1)
+  const planId = data?.[0]?.plan_id ?? null
+  return getCaminoPlanLimits(planId).maxStudyDaysPerWeek
+}
+
 async function loadPreferences(userId: string, supabase: SupabaseClient): Promise<PersonalizationPrefs | null> {
   const { data, error } = await supabase
     .from('billing_events')
@@ -73,9 +94,12 @@ async function loadPreferences(userId: string, supabase: SupabaseClient): Promis
 
   if (error) throw new Error(`Onboarding preferences error: ${error.message}`)
   const payload = data?.payload as Record<string, unknown> | null | undefined
-  const weeklyStudyDaysValue = cleanWeeklyDays(payload?.weekly_study_days_value)
+  const requestedWeeklyDays = cleanWeeklyDays(payload?.weekly_study_days_value)
   const dailyMinutes = cleanDailyMinutes(payload?.daily_minutes)
-  if (!weeklyStudyDaysValue || !dailyMinutes) return null
+  if (!requestedWeeklyDays || !dailyMinutes) return null
+
+  const maxWeeklyDays = await loadPlanMaxWeeklyDays(userId, supabase)
+  const weeklyStudyDaysValue = Math.min(requestedWeeklyDays, maxWeeklyDays)
   return { weeklyStudyDaysValue, dailyMinutes }
 }
 

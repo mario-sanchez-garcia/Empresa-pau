@@ -43,7 +43,8 @@ export function countWorkingDays(from: string, to: string): number {
 }
 
 export function studyDayIndexesFor(count: number) {
-  if (count <= 3) return [0, 2, 4]
+  if (count <= 2) return [0, 3] // Lun, Jue — plan free (maxStudyDaysPerWeek: 2)
+  if (count === 3) return [0, 2, 4]
   if (count === 4) return [0, 1, 3, 5]
   if (count === 5) return [0, 1, 2, 4, 5]
   if (count === 6) return [0, 1, 2, 3, 4, 5]

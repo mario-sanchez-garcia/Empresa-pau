@@ -86,14 +86,6 @@ export function getWaitlistPriceCents(referralCount: number): number {
 // Los números de cada feature vienen de CAMINO_PLAN_LIMITS — un solo lugar
 // define cuántas correcciones/fotos/simulacros tiene cada plan.
 
-const RANKING_LABEL: Record<CaminoPlanId, string> = {
-  free: 'Preview de ranking',
-  premium: 'Ranking completo',
-  curso_pau: 'Ranking completo',
-  intensivo: 'Ranking completo',
-  superpremium: 'Ranking avanzado',
-}
-
 const CAMINO_MODE_LABEL: Record<CaminoPlanId, string> = {
   free: 'Camino PAU limitado',
   premium: 'Camino PAU completo',
@@ -114,7 +106,6 @@ function planFeatures(id: CaminoPlanId): string[] {
     `${l.photosPerMonth} fotos/mes`,
     mockOrPartial,
     CAMINO_MODE_LABEL[id],
-    RANKING_LABEL[id],
   ]
 
   if (id === 'superpremium') {

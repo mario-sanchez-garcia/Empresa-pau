@@ -57,7 +57,6 @@ export const PLANS: Record<string, BillingPlan> = {
       '80 fotos/mes',
       '12 parciales/mes · 5 simulacros/mes',
       'Camino PAU completo',
-      'Ranking completo',
     ],
   },
 }

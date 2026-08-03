@@ -1970,6 +1970,7 @@ Reglas comunes:
         prompt: `${sharedContext}
 
 Bloque 1/4. Evalúa la respuesta con la rúbrica.
+Sé preciso y breve: este bloque no debe superar 120 palabras.
 Devuelve exactamente estas secciones:
 
 ## Resumen y nota estimada
@@ -1991,7 +1992,7 @@ Nota: X/${formatPts(input.maxScore)}
 Bloque 2/4. Identifica máximo 3 aciertos y máximo 3 errores importantes.
 Este bloque NO debe resolver el ejercicio completo ni escribir sistemas largos: la resolución detallada va en el Bloque 3.
 No dejes placeholders ni escribas nunca "undefined", "null" o "NaN".
-Cada punto debe ser breve, concreto y accionable.
+Cada punto debe ser breve, concreto y accionable. No superes 160 palabras en total.
 Devuelve exactamente estas secciones:
 
 ## Puntos fuertes
@@ -2014,6 +2015,7 @@ Devuelve exactamente estas secciones:
 Bloque 3/4. Corrige paso a paso el ejercicio o sus apartados.
 Si hay apartados, usa subtítulos "### Apartado a)", "### Apartado b)", etc.
 Incluye solo los pasos necesarios para aprender y puntuar.
+No repitas aciertos/errores ya explicados en el Bloque 2.
 Devuelve exactamente esta sección:
 
 ## Corrección paso a paso`
@@ -2033,6 +2035,7 @@ Bloque 4/4. Explica la teoría aplicada al ejercicio concreto y cierra con una r
 No des teoría genérica. Relaciona cada idea con un paso real del ejercicio, la rúbrica, la solución orientativa o la corrección previa.
 Si no hay teoría curricular suficiente, usa la solución/criterios y escribe una explicación mínima segura sin inventar una clase larga.
 Mantén el idioma del ejercicio o de la corrección.
+Sé breve: máximo 220 palabras.
 Devuelve exactamente estas secciones:
 
 ## ¿Por qué es así?

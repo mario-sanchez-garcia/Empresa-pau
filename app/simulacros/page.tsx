@@ -253,11 +253,11 @@ function SimulacrosPage() {
         <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap', alignItems: 'center' }}>
           {stats.completedCount > 0 && <>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatScore(stats.bestScore)}</span>
+              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{stats.bestScore == null ? '—' : formatScore(stats.bestScore)}</span>
               <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Mejor nota</span>
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatScore(stats.averageScore)}</span>
+              <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{stats.averageScore == null ? '—' : formatScore(stats.averageScore)}</span>
               <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Media</span>
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '8px 14px' }}>
@@ -500,15 +500,21 @@ function SimulacrosPage() {
 
 
 function buildStats(history: SimulacroRecord[]) {
-  const completed = history.filter(item => item.estado === 'completado' && Number.isFinite(Number(item.nota_final)))
-  const scores = completed.map(item => Number(item.nota_final))
-  const times = completed.map(item => Number(item.tiempo_empleado)).filter(t => Number.isFinite(t) && t > 0)
+  const attempted = history.filter(item => item.estado === 'completado')
+  // nota_final null/undefined significa que la corrección nunca llegó a
+  // completarse (fallo de IA, reintento pendiente...), no una nota real de
+  // 0 — Number(null) es 0 y es "finito", así que sin este filtro explícito
+  // esas correcciones fallidas contaminaban la media y el tiempo medio hacia
+  // abajo aunque el alumno sí hubiera entregado el simulacro.
+  const scored = attempted.filter(item => typeof item.nota_final === 'number' && Number.isFinite(item.nota_final))
+  const scores = scored.map(item => Number(item.nota_final))
+  const times = scored.map(item => Number(item.tiempo_empleado)).filter(t => Number.isFinite(t) && t > 0)
   return {
-    completedCount: completed.length,
-    averageScore: average(scores),
-    bestScore: scores.length ? Math.max(...scores) : 0,
+    completedCount: attempted.length,
+    averageScore: scores.length ? average(scores) : null,
+    bestScore: scores.length ? Math.max(...scores) : null,
     averageTime: times.length ? Math.round(average(times)) : null,
-    lastCompleted: completed[0] ?? null
+    lastCompleted: attempted[0] ?? null
   }
 }
 

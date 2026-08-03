@@ -24,14 +24,14 @@ export const RECOMMENDED_FLASHCARDS: Flashcard[] = [
     ['Velocidad en caída libre', '$v=\\sqrt{2gh}$'],
     ['Segunda ley de Newton', '$\\sum \\vec F=m\\vec a$'],
     ['Ley de Ohm', '$V=IR$'],
-    ['Consejo PAU', 'Escribe siempre la ley aplicada, sustituye y añade unidades.'],
+    ['¿Qué no debes olvidar al resolver un problema?', 'Escribe siempre la ley aplicada, sustituye y añade unidades.'],
   ]),
   ...deck('quimica', 'Química PAU', [
     ['Ácido sulfúrico', '$\\mathrm{H_2SO_4}$'],
     ['Ácido acético', '$\\mathrm{CH_3COOH}$'],
     ['Constante de equilibrio', '$K_c=\\frac{[NH_3]^2}{[N_2][H_2]^3}$'],
     ['Síntesis del amoniaco', '$\\mathrm{N_2 + 3H_2 \\rightarrow 2NH_3}$'],
-    ['Consejo PAU', 'Ajusta la reacción antes de hacer cálculos estequiométricos.'],
+    ['¿Qué hacer antes de un cálculo estequiométrico?', 'Ajusta la reacción antes de hacer cálculos estequiométricos.'],
   ]),
   ...deck('lengua', 'Estructura de respuesta', [
     ['Tema de un texto', 'Una frase breve, precisa y sin ejemplos secundarios.'],
@@ -45,7 +45,7 @@ export const RECOMMENDED_FLASHCARDS: Flashcard[] = [
     ['Tema de desarrollo', 'Introducción, causas, desarrollo, consecuencias y conclusión.'],
     ['Error cronológico', 'Comprueba fechas clave antes de cerrar la respuesta.'],
     ['Concepto histórico', 'Define, sitúa cronológicamente y explica su relevancia.'],
-    ['Consejo PAU', 'Relaciona hechos; no presentes una mera lista de datos.'],
+    ['¿Cómo evitar una respuesta que parezca una lista?', 'Relaciona hechos; no presentes una mera lista de datos.'],
   ]),
   ...deck('ingles', 'English PAU', [
     ['True / False', 'Answer and quote the exact evidence from the text.'],
@@ -59,13 +59,13 @@ export const RECOMMENDED_FLASHCARDS: Flashcard[] = [
     ['Mitosis', 'División celular que produce dos células genéticamente iguales.'],
     ['Enzima', 'Catalizador biológico que reduce la energía de activación.'],
     ['Homeostasis', 'Mantenimiento de condiciones internas relativamente estables.'],
-    ['Consejo PAU', 'Relaciona estructura, mecanismo y función en cada respuesta.'],
+    ['¿Qué tres cosas debe cubrir tu respuesta?', 'Relaciona estructura, mecanismo y función en cada respuesta.'],
   ]),
   ...deck('historia_filosofia', 'Respuesta filosófica', [
     ['Comentario de texto', 'Identifica la tesis, explica las ideas y relaciona sus conceptos.'],
     ['Comparación filosófica', 'Define un criterio común y contrasta semejanzas y diferencias.'],
     ['Argumentación', 'Formula una tesis y justifícala con razones y objeciones.'],
     ['Precisión conceptual', 'Usa los términos del autor con significado filosófico exacto.'],
-    ['Consejo PAU', 'Evita biografías generales: responde al problema planteado.'],
+    ['¿Qué error se penaliza más en filosofía?', 'Evita biografías generales: responde al problema planteado.'],
   ]),
 ]

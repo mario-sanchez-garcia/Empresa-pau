@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Lock, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
@@ -263,6 +263,15 @@ function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
+// `exam-${date}-${exams.length + 1}` could collide with an existing exam's id
+// once one had been deleted (the counter resets to a value already used by a
+// surviving exam on the same date) — a React key collision that can hide the
+// newly-added exam from the "Exámenes parciales" list. IDs must stay unique
+// for the exam's whole lifetime, not just relative to the array's current length.
+function generateExamId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return `exam-${crypto.randomUUID()}`
+  return `exam-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
 function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') return 4; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
 function priorityLabel(priority: ExamPriority) { return priority === 'muy_alta' ? 'Muy alta' : priority.charAt(0).toUpperCase() + priority.slice(1) }
 // Extra rotation slots a subject earns for a given day based on how close/how prioritized its nearest exam is.
@@ -281,8 +290,13 @@ function subjectRotationWeight(subject: string, dateISO: string, relevantExams: 
   return 1 + extra
 }
 function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) }
-function hrefForMission(mission: Mission) {
+type MissionHrefResult = { href: string; fallback: string; locked?: boolean; blockLabel?: string }
+function hrefForMission(mission: Mission, curriculum: CurriculumItem[] = []): MissionHrefResult {
   if (mission.missionType === 'partial_practice') {
+    const gate = partialExamCourseGate(mission, curriculum)
+    if (gate.locked && gate.courseHref) {
+      return { href: gate.courseHref, fallback: '', locked: true, blockLabel: gate.blockLabel }
+    }
     const simSubject = String(mission.metadata?.simulacro_subject ?? '')
     const simBlock = String(mission.metadata?.simulacro_block_filter ?? mission.block ?? '')
     if (simSubject && simBlock) {
@@ -565,6 +579,37 @@ function blockIsCompleted(item: CurriculumItem | null | undefined, subject: stri
   if (!item) return false
   const rows = curriculumForSubject(subject, curriculum).filter(row => row.blockSlug === item.blockSlug || row.block === item.block)
   return rows.length > 0 && rows.every(row => topicIsCompleted(row, progress))
+}
+
+function curriculumItemsForBlock(subjectLabel: string, blockRaw: string, curriculum: CurriculumItem[]): CurriculumItem[] {
+  const blockNeedle = textSlug(blockRaw || '')
+  if (!blockNeedle) return []
+  return curriculumForSubject(subjectLabel, curriculum).filter(item =>
+    textSlug(item.block).includes(blockNeedle) || (item.blockSlug ? textSlug(item.blockSlug).includes(blockNeedle) : false)
+  )
+}
+
+// Antes de desbloquear el simulacro de un parcial, el alumno debe haber
+// pasado por el mini-curso del bloque del examen — el mismo curso/progreso
+// que ya usa Camino (Idea clave, Teoría rápida, ejemplo guiado...), no uno
+// paralelo. Si ya lo completó antes, no se repite (topicIsCompleted ya lo
+// registra). Exámenes "General"/sin bloque específico no se bloquean: no
+// hay un único bloque razonable que exigir, y forzar TODOS los bloques de
+// la asignatura sería una barrera desproporcionada para un parcial que
+// cubre todo el temario. Si no hay contenido de curso que enlazar, tampoco
+// se bloquea — nunca dejamos al alumno sin salida.
+function partialExamCourseGate(mission: Mission, curriculum: CurriculumItem[]): { locked: boolean; blockLabel?: string; courseHref?: string } {
+  const blockRaw = typeof mission.metadata?.target_block_normalized === 'string' ? mission.metadata.target_block_normalized : mission.block
+  if (!blockRaw || isGeneralExamBlock(blockRaw)) return { locked: false }
+  const items = curriculumItemsForBlock(mission.subject, blockRaw, curriculum)
+  if (items.length === 0) return { locked: false }
+  const progress = loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {})
+  const incomplete = items.find(item => !topicIsCompleted(item, progress))
+  if (!incomplete) return { locked: false }
+  const courseHref = courseHrefForItem(incomplete)
+  if (!courseHref) return { locked: false }
+  const blockLabel = typeof mission.metadata?.target_block_display === 'string' ? mission.metadata.target_block_display : blockRaw
+  return { locked: true, blockLabel, courseHref }
 }
 
 function missionPhaseForExam(distance: number | null) {
@@ -867,11 +912,11 @@ export default function CaminoCalendarClient() {
     const todayDay = calendar.find(d => d.date === realTodayStr)
     const firstMission = todayDay?.missions.find(m => m.role === 'main')
     if (!firstMission) return
-    const target = hrefForMission(firstMission)
+    const target = hrefForMission(firstMission, curriculumItems)
     if (!target.href) return
     const sep = target.href.includes('?') ? '&' : '?'
     router.replace(`${target.href}${sep}first_session=1`)
-  }, [isFirstSession, caminoReadyStatus, calendar, router])
+  }, [isFirstSession, caminoReadyStatus, calendar, router, curriculumItems])
 
   function recordCalendarSource(source: CalendarSource, context: CalendarSourceContext, details: { weekStart?: string; missionCount?: number; reason?: string } = {}) {
     const weekStart = details.weekStart ?? selectedWeekStart
@@ -1549,7 +1594,7 @@ export default function CaminoCalendarClient() {
       const currentEditingId = editingExamId
       const nextExams = currentEditingId
         ? exams.map(exam => exam.id === currentEditingId ? { ...exam, ...draft } : exam)
-        : [...exams, { id: `exam-${examDraft.date}-${exams.length + 1}`, ...draft }]
+        : [...exams, { id: generateExamId(), ...draft }]
       resetExamDraft()
       regenerate(nextExams)
       supabase.auth.getSession().then(({ data }) => {
@@ -1707,7 +1752,7 @@ export default function CaminoCalendarClient() {
   })()
 
   const mainMission = todayMain[0] ?? null
-  const mainTarget = mainMission ? hrefForMission(mainMission) : null
+  const mainTarget = mainMission ? hrefForMission(mainMission, curriculumItems) : null
   const mainReason = mainMission ? heroReason(mainMission, blockCompletedCount, nextMissionInCalendar?.title ?? null) : null
 
   return (
@@ -1836,7 +1881,9 @@ export default function CaminoCalendarClient() {
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mainMission.estimatedMinutes} min · {mainMission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
                 </div>
-                {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#64748b' }}>{mainReason}</div>}
+                {mainTarget?.locked ? (
+                  <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: '#b45309', display: 'flex', alignItems: 'center', gap: 6 }}><Lock size={12} /> Completa primero el curso de {mainTarget.blockLabel} para desbloquear el simulacro.</div>
+                ) : mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#64748b' }}>{mainReason}</div>}
                 {mainMission.status !== 'done' && (
                   <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
                     <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
@@ -1850,6 +1897,8 @@ export default function CaminoCalendarClient() {
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mainMission.baseXP} XP</span>
                 {mainMission.status === 'done' ? (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                ) : mainTarget?.locked ? (
+                  <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#fffbeb', border: '1px solid #fde68a', color: '#b45309', textDecoration: 'none' }}><Lock size={12} /> Ir al curso</a>
                 ) : mainTarget?.href ? (
                   <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.25)' }}>Empezar →</a>
                 ) : (
@@ -1889,7 +1938,7 @@ export default function CaminoCalendarClient() {
                 <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>Mañana</span>
               </div>
               {todayBonus.map((mission, idx) => {
-                const bonusTarget = hrefForMission(mission)
+                const bonusTarget = hrefForMission(mission, curriculumItems)
                 return (
                   <div key={mission.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', opacity: mission.status === 'done' ? 0.55 : 1 }}>
                     <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#dbeafe', flexShrink: 0, width: 48, paddingTop: 2 }}>0{idx + 2}</div>
@@ -1912,6 +1961,8 @@ export default function CaminoCalendarClient() {
                       <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mission.baseXP} XP</span>
                       {mission.status === 'done' ? (
                         <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                      ) : bonusTarget?.locked ? (
+                        <a href={bonusTarget.href} title={`Completa primero el curso de ${bonusTarget.blockLabel}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', textDecoration: 'none' }}><Lock size={11} /> Curso</a>
                       ) : bonusTarget?.href ? (
                         <a href={bonusTarget.href} style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', textDecoration: 'none' }}>Ir →</a>
                       ) : (
@@ -1991,7 +2042,7 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} curriculum={curriculumItems} />}
           </div>
 
           {/* ── EXAMS SECTION ── */}
@@ -3077,7 +3128,7 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
   )
 }
 
-function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[] }) {
+function CompactWeekView({ days, exams, curriculum }: { days: DayPlan[]; exams: StudentExam[]; curriculum: CurriculumItem[] }) {
   const [expandedDate, setExpandedDate] = useState<string | null>(null)
   return (
     <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
@@ -3111,7 +3162,7 @@ function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[
             </button>
             {isExpanded && (
               <div className="border-t border-slate-100 bg-slate-50/50 p-3">
-                <DayCard day={day} exams={exams.filter(e => e.date === day.date)} />
+                <DayCard day={day} exams={exams.filter(e => e.date === day.date)} curriculum={curriculum} />
               </div>
             )}
           </div>
@@ -3155,10 +3206,10 @@ function MissionRow({ mission, onPostpone, onComplete, compact = false }: { miss
   return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.missionType === 'review' && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-black text-indigo-700">Repaso</span>}{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
-function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
+function DayCard({ day, exams, curriculum }: { day: DayPlan; exams: StudentExam[]; curriculum: CurriculumItem[] }) {
   const main = day.missions.filter(mission => mission.role === 'main')
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission, curriculum); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className="mt-1 text-xs font-bold text-slate-700">{mission.title}</p><p className="mt-2 flex items-center gap-1 text-[11px] font-bold text-slate-400">{target.locked && <Lock size={10} />}{mission.status === 'done' ? 'Completada' : target.locked ? `Completa el curso de ${target.blockLabel}` : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 type ExamDraft = { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }

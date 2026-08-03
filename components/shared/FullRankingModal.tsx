@@ -10,7 +10,7 @@ type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMemb
 
 type GlobalEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
 type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number }
-type GlobalPeriod = 'total' | 'month' | 'week' | 'day'
+type GlobalPeriod = 'total' | 'month' | 'week'
 
 type Medal = 'oro' | 'plata' | 'bronce'
 type PastRound = { periodStart: string; periodEnd: string; scopeType: string; label: string; roundXp: number; rank: number; medal: Medal | null }
@@ -118,7 +118,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
 
 function GlobalTab({ token }: { token: string }) {
   const [period, setPeriod] = useState<GlobalPeriod>('total')
-  const [dataByPeriod, setDataByPeriod] = useState<Record<GlobalPeriod, GlobalData | null | undefined>>({ total: undefined, month: undefined, week: undefined, day: undefined })
+  const [dataByPeriod, setDataByPeriod] = useState<Record<GlobalPeriod, GlobalData | null | undefined>>({ total: undefined, month: undefined, week: undefined })
 
   useEffect(() => {
     if (dataByPeriod[period] !== undefined) return
@@ -130,11 +130,11 @@ function GlobalTab({ token }: { token: string }) {
 
   const data = dataByPeriod[period]
 
-  const PERIOD_LABELS: Record<GlobalPeriod, string> = { total: 'XP de siempre', month: 'XP de este mes', week: 'XP de esta semana', day: 'XP de hoy' }
+  const PERIOD_LABELS: Record<GlobalPeriod, string> = { total: 'XP de siempre', month: 'XP de este mes', week: 'XP de esta semana' }
 
   return (
     <div>
-      <PeriodToggle period={period} options={[{ value: 'total', label: 'Total' }, { value: 'month', label: 'Mes' }, { value: 'week', label: 'Semana' }, { value: 'day', label: 'Hoy' }]} onChange={setPeriod} />
+      <PeriodToggle period={period} options={[{ value: 'total', label: 'Total' }, { value: 'month', label: 'Mes' }, { value: 'week', label: 'Semana' }]} onChange={setPeriod} />
       {data === undefined ? <Loading /> : !data || data.activeCount === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>

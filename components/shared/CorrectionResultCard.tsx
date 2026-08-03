@@ -1,6 +1,7 @@
 'use client'
 
 import type { Components } from 'react-markdown'
+import { sanitizeCorrectionDisplayText } from '@/app/lib/correctionBlockValidation'
 import { correctionPayloadToMarkdown } from '@/app/lib/correctionParsing'
 import { splitWhyExplanationMarkdown } from '@/app/lib/whyExplanation'
 import MathMarkdown from './MathMarkdown'
@@ -19,7 +20,7 @@ export default function CorrectionResultCard({
   components?: Partial<Components>
   isStreaming?: boolean
 }) {
-  const markdown = correctionPayloadToMarkdown(correction, { officialMaxScore })
+  const markdown = sanitizeCorrectionDisplayText(correctionPayloadToMarkdown(correction, { officialMaxScore }))
   const { main, why } = splitWhyExplanationMarkdown(markdown)
 
   return (

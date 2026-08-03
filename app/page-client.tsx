@@ -1989,6 +1989,9 @@ Nota: X/${formatPts(input.maxScore)}
         prompt: `${sharedContext}
 
 Bloque 2/4. Identifica máximo 3 aciertos y máximo 3 errores importantes.
+Este bloque NO debe resolver el ejercicio completo ni escribir sistemas largos: la resolución detallada va en el Bloque 3.
+No dejes placeholders ni escribas nunca "undefined", "null" o "NaN".
+Cada punto debe ser breve, concreto y accionable.
 Devuelve exactamente estas secciones:
 
 ## Puntos fuertes
@@ -1997,8 +2000,7 @@ Devuelve exactamente estas secciones:
 
 ## Errores a corregir
 
-- Error: ...
-  Corrección: ...`
+- ...`
       },
       {
         id: 'paso-a-paso',

@@ -72,13 +72,15 @@ export function buildCorrectionBlockLog(
 }
 
 export function sanitizeCorrectionListItem(value: string) {
-  return value
+  const cleaned = value
     .trim()
     .replace(/^(?:[-•]\s*|\*\s+)/, '')
     .replace(/^\*\*(?:Error|Correcci[oó]n|Acierto|Punto fuerte|Mejora)\s*:?\*\*\s*/i, '')
     .replace(/^(?:Error|Correcci[oó]n|Acierto|Punto fuerte|Mejora)\s*:\s*/i, '')
     .replace(/\*\*/g, '')
     .trim()
+
+  return /^[\s\-–—.]+$/.test(cleaned) ? '' : cleaned
 }
 
 export function sanitizeCorrectionDisplayText(value: string) {
@@ -125,10 +127,20 @@ function repairTechnicalPlaceholderGaps(value: string) {
 
     const previousHeading = findPreviousHeading(lines, index)
     const normalizedHeading = normalizeHeading(previousHeading)
+    const previousContent = findPreviousContent(lines, index)
+    const normalizedPreviousContent = normalizeHeading(previousContent)
 
-    if (normalizedHeading.includes('sistema resultante') || normalizedHeading.includes('sistema queda')) {
+    if (
+      normalizedHeading.includes('sistema resultante') ||
+      normalizedHeading.includes('sistema queda') ||
+      normalizedPreviousContent.endsWith('el sistema es:') ||
+      normalizedPreviousContent.endsWith('el sistema queda:') ||
+      normalizedPreviousContent.endsWith('sistema a resolver:') ||
+      normalizedPreviousContent.includes('el sistema es:')
+    ) {
       const system = buildSystemFromPreviousEquations(lines, index)
       if (system) return system
+      return 'El sistema debe construirse con las ecuaciones que traducen las condiciones del enunciado antes de resolverlo.'
     }
 
     if (normalizedHeading.includes('donde se ve en la solucion')) {
@@ -147,6 +159,14 @@ function findPreviousHeading(lines: string[], index: number) {
       return clean
     }
     if (/^#{1,4}\s+/.test(clean) && index - i > 1) return clean
+  }
+  return ''
+}
+
+function findPreviousContent(lines: string[], index: number) {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const clean = stripMarkdownNoise(lines[i] ?? '')
+    if (clean) return clean
   }
   return ''
 }

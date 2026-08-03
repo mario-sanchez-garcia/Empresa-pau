@@ -75,6 +75,7 @@ test('preserves substantive Markdown text while cleaning side-panel labels', () 
     sanitizeCorrectionListItem('  **Corrección:** plantea $x+y=2$.'),
     'plantea $x+y=2$.'
   )
+  assert.equal(sanitizeCorrectionListItem('--'), '')
 })
 
 test('rejects incomplete JSON instead of accepting it as a complete correction', () => {
@@ -137,4 +138,15 @@ test('repairs why-section placeholder with a useful sentence', () => {
 
   assert.equal(visible.includes('undefined'), false)
   assert.match(visible, /ecuaciones y pasos anteriores/i)
+})
+
+test('repairs placeholder after prose ending with system introduction', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    'Corrección: Hay que definir variables, plantear el sistema y resolverlo. El sistema es:',
+    '',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.match(visible, /sistema debe construirse/i)
 })

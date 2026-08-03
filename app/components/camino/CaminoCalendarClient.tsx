@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Medal, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
@@ -18,6 +18,7 @@ import { deletePartialExamMissions, injectPartialExamMissions } from '@/app/lib/
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import FullRankingModal from '@/components/shared/FullRankingModal'
+import { RankingRow } from '@/components/shared/RankingRow'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
@@ -3189,13 +3190,7 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
           </button>
         </div>
         {ranked.map(m => (
-          <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8, background: m.name === 'Tú' ? '#eff6ff' : 'transparent', border: m.name === 'Tú' ? '1px solid #dbeafe' : '1px solid transparent' }}>
-            <span style={{ width: 20, fontWeight: 800, color: '#94a3b8', fontSize: 10, textAlign: 'center', flexShrink: 0 }}>
-              {m.rank <= 3 ? <Medal size={11} color={m.rank === 1 ? '#b45309' : m.rank === 2 ? '#64748b' : '#b87333'} /> : `#${m.rank}`}
-            </span>
-            <span style={{ flex: 1, fontSize: 11, fontWeight: m.name === 'Tú' ? 800 : 600, color: m.name === 'Tú' ? '#1d40af' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
-            <span style={{ fontWeight: 800, color: '#2563eb', fontSize: 10, flexShrink: 0 }}>{m.total_xp} XP</span>
-          </div>
+          <RankingRow key={m.user_id} rank={m.rank} name={m.name} xp={m.total_xp} isMe={m.name === 'Tú'} theme="light" />
         ))}
       </div>
     )

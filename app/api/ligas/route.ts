@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
 import { getXpByUserInRange, currentWeekRange } from '@/app/lib/camino/leagueRounds'
+import { resolveDisplayNames } from '@/app/lib/camino/rankingNames'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,16 +25,11 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
     totalXpByUser.set(row.user_id as string, Number(row.xp_total ?? 0))
   }
 
-  const { data: profiles } = await db.from('perfiles').select('id, username').in('id', memberIds)
-  const nameById = new Map<string, string>()
-  for (const p of profiles ?? []) {
-    const name = (p.username as string | null)?.trim() ?? ''
-    if (name) nameById.set(p.id as string, name)
-  }
+  const nameById = await resolveDisplayNames(db, memberIds, currentUserId)
 
   const miembros = memberIds.map(uid => ({
     user_id: uid,
-    name: uid === currentUserId ? 'Tú' : (nameById.get(uid) || 'Alumno Kairo'),
+    name: nameById.get(uid) ?? 'Alumno Kairo',
     weekly_xp: xpByUser.get(uid) ?? 0,
     total_xp: totalXpByUser.get(uid) ?? 0,
   }))

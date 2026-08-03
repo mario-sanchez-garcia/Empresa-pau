@@ -15,18 +15,10 @@ import { examenesIngles } from './data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from './data/matematicas_ccss_madrid'
 import { supabase } from './lib/supabase'
-import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
+import { correctionJsonToMarkdownWithOptions } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
-import {
-  buildCorrectionBlockLog,
-  containsVisibleTechnicalLiteral,
-  CORRECTION_BLOCK_FALLBACK,
-  sanitizeCorrectionDisplayText,
-  sanitizeCorrectionListItem,
-  validateCorrectionBlock,
-} from './lib/correctionBlockValidation'
+import { sanitizeCorrectionListItem } from './lib/correctionBlockValidation'
 import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
-import { getTheoryContextForExercise, theoryContextToPrompt } from './lib/whyItWorksTheory'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
@@ -169,14 +161,7 @@ const CORRECTION_PROGRESS_STEPS = [
   'Guardando en Historial'
 ]
 
-function hasUnsafeStreamingLatex(text: string) {
-  const mathDelimiters = (text.match(/\$/g) ?? []).length
-  const hasOpenEnvironment = /\\begin\{[^}]*$|\\begin\{[^}]+\}(?![\s\S]*\\end\{[^}]+\})/.test(text)
-  const hasLatexCommand = /\\(?:frac|tfrac|dfrac|cdot|implies|begin|end)\b|[_^]\{|\{[0-9A-Za-z.+\-]+\}\{[0-9A-Za-z.+\-]*$/.test(text)
-  return hasOpenEnvironment || (hasLatexCommand && mathDelimiters % 2 !== 0)
-}
-
-function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: string; isContinuing: boolean; stage?: string }) {
+function SafeProgressiveCorrectionStream() {
   const [autoStep, setAutoStep] = useState(0)
   const [visualProgress, setVisualProgress] = useState(8)
 
@@ -208,7 +193,6 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
   const completedSteps = CORRECTION_PROGRESS_STEPS.slice(0, autoStep)
   const currentStep = CORRECTION_PROGRESS_STEPS[autoStep] ?? CORRECTION_PROGRESS_STEPS.at(-1)!
   const pendingSteps = CORRECTION_PROGRESS_STEPS.slice(autoStep + 1)
-  const safePreviewAvailable = text.trim().length > 260 && !hasUnsafeStreamingLatex(text)
   const progressPct = Math.min(96, Math.round(visualProgress))
 
   return (
@@ -218,15 +202,10 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
           <KairoLoadingDot />
         </div>
         <div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>
-            {isContinuing ? 'Kairo está completando la corrección' : 'Kairo está corrigiendo tu ejercicio'}
-          </p>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#312e81' }}>Kairo está corrigiendo tu ejercicio</p>
           <p style={{ margin: '5px 0 0', fontSize: 13.5, color: '#64748b', lineHeight: 1.5 }}>
-            {isContinuing
-              ? 'La primera respuesta se quedó corta; estamos terminándola antes de mostrarla.'
-              : 'Mostramos el avance sin enseñar fórmulas incompletas ni texto técnico.'}
+            Mostramos el avance sin enseñar fórmulas incompletas ni texto técnico.
           </p>
-          {stage && <p style={{ margin: '8px 0 0', fontSize: 12.5, color: '#7c3aed', fontWeight: 800 }}>{stage}</p>}
         </div>
       </div>
       <div style={{ height: 8, borderRadius: 999, overflow: 'hidden', background: '#ede9fe' }}>
@@ -245,7 +224,7 @@ function SafeProgressiveCorrectionStream({ text, isContinuing, stage }: { text: 
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13, fontWeight: 700 }}>
           <KairoLoadingDot />
-          {progressPct >= 86 ? 'Últimos detalles...' : safePreviewAvailable ? 'Redactando explicación segura...' : 'Kairo está preparando esta parte...'}
+          {progressPct >= 86 ? 'Últimos detalles...' : 'Kairo está preparando esta parte...'}
         </div>
         {pendingSteps.map((step) => (
           <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 13.5, fontWeight: 700 }}>
@@ -742,13 +721,6 @@ function formatPts(value: unknown) {
   return Number.isFinite(number) ? number.toFixed(2).replace(/\.00$/, '') : '0'
 }
 
-function sanitizeCorrectionScaleText(text: string, maxScore: number) {
-  return text
-    .replace(/\s*\(\s*[0-9]+[.,]?[0-9]*\s*\/\s*14\s*\)/gi, '')
-    .replace(/([0-9]+[.,]?[0-9]*)\s*\/\s*14\b/g, (_, score) => `${score}/${formatPts(maxScore)} pts`)
-    .replace(/sobre\s+14\b/gi, `sobre ${formatPts(maxScore)} puntos`)
-}
-
 type HistorialItem = {
   id?: string
   asignatura: string
@@ -891,10 +863,7 @@ export default function Home() {
   const [imagenPreview, setImagenPreview] = useState<string | null>(null)
   const [correccion, setCorreccion] = useState('')
   const [examXpResult, setExamXpResult] = useState<{ xpAwarded: number; bonusXp: number } | null>(null)
-  const [streamText, setStreamText] = useState('')
   const [truncated, setTruncated] = useState(false)
-  const [continuingCorrection, setContinuingCorrection] = useState(false)
-  const [correctionStage, setCorrectionStage] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto'|'imagen'>('texto')
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
@@ -1577,8 +1546,18 @@ const preguntaActivaStorageId = [
 
 const enunciadoStorageKey = `principal:${preguntaActivaStorageId}:enunciado`
 const fuenteStorageKey = `principal:${preguntaActivaStorageId}:fuente`
+
+// La corrección se guarda como JSON (esquema normalizado, ver app/api/exam/correct)
+// desde este cambio; el regex sobre Markdown solo cubre historial antiguo guardado
+// como texto libre antes de la migración.
+const correccionParsedJson = correccion ? parseCorrectionPayload(correccion) : null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
+const correccionBloqueJson = (correccionParsedJson as any)?.desglose_bloques?.[0] ?? null
+
 const correctionScoreMatch = correccion.match(/(?:nota|puntuaci[oó]n|calificaci[oó]n)[^\n:]*[:\s]+([0-9]+(?:[.,][0-9]+)?)\s*(?:\/|de)\s*([0-9]+(?:[.,][0-9]+)?)/i)
-const correctionScoreLabel = correctionScoreMatch
+const correctionScoreLabel = correccionBloqueJson?.puntos_conseguidos != null && correccionBloqueJson?.puntos_maximos != null
+  ? `${formatPts(correccionBloqueJson.puntos_conseguidos)}/${formatPts(correccionBloqueJson.puntos_maximos)}`
+  : correctionScoreMatch
   ? `${correctionScoreMatch[1].replace(',', '.')}/${correctionScoreMatch[2].replace(',', '.')}`
   : '--'
 
@@ -1590,8 +1569,22 @@ function extractCorrectionBullets(text: string, section: string): string[] {
     .map(sanitizeCorrectionListItem)
     .filter(Boolean)
 }
-const correctionFuertes = correccion ? extractCorrectionBullets(correccion, 'Puntos fuertes') : []
-const correctionErrores = correccion ? extractCorrectionBullets(correccion, 'Errores a corregir') : []
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
+const correccionFuertesJson = Array.isArray((correccionParsedJson as any)?.fortalezas)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
+  ? ((correccionParsedJson as any).fortalezas as unknown[]).filter(Boolean).map(String)
+  : null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
+const correccionErroresJson = Array.isArray((correccionParsedJson as any)?.errores_principales)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
+  ? ((correccionParsedJson as any).errores_principales as unknown[]).filter(Boolean).map(String)
+  : null
+const correctionFuertes = correccionFuertesJson?.length
+  ? correccionFuertesJson
+  : correccion ? extractCorrectionBullets(correccion, 'Puntos fuertes') : []
+const correctionErrores = correccionErroresJson?.length
+  ? correccionErroresJson
+  : correccion ? extractCorrectionBullets(correccion, 'Errores a corregir') : []
 
 useEffect(() => {
   if (typeof window === 'undefined' || window.location.pathname !== '/') return
@@ -1792,7 +1785,7 @@ function formatChatTimestamp(ts: number) {
 }
 
 function reset() {
-  setCorreccion(''); setStreamText(''); setTruncated(false)
+  setCorreccion(''); setTruncated(false)
   setRespuesta('')
   setImagen(null)
   setImagenPreview(null)
@@ -1852,343 +1845,11 @@ function cambiarTipo(t: Tipo) {
     })
   }
 
-  async function streamCorrectionRequest(
-    accessToken: string,
-    prompt: string,
-    options: { includeImage: boolean; appendTo?: string; blockId?: string; sessionId?: string; creditKey?: string }
-  ) {
-    const requestId = `${options.sessionId ?? 'correction'}:${options.blockId ?? 'main'}`
-    const streamStart = performance.now()
-    const res = await fetch('/api/chat?stream=1', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}`, 'x-kairo-request-id': requestId },
-      body: JSON.stringify({
-        pregunta: prompt,
-        imagen: options.includeImage && modo === 'imagen' ? imagen : null,
-        imagenTipo: options.includeImage && modo === 'imagen' ? imagenTipo : null,
-        correctionMode: 'chunked_correction',
-        correctionBlock: options.blockId ?? null,
-        correctionSessionId: options.sessionId ?? null,
-        requestId,
-        creditKey: options.creditKey ?? null
-      })
-    })
-
-    if (!res.ok) {
-      const data = await res.json()
-      throw new Error(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
-    }
-
-    const reader = res.body!.getReader()
-    const decoder = new TextDecoder()
-    let accumulated = ''
-    let firstTokenLogged = false
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      if (!firstTokenLogged) {
-        firstTokenLogged = true
-        logCorrectionTiming(requestId, 'llm_first_token_ms', streamStart)
-      }
-      accumulated += decoder.decode(value, { stream: true })
-      const safeStream = readSafeStreamText(accumulated)
-      setStreamText(sanitizeCorrectionDisplayText(`${options.appendTo ?? ''}${safeStream.visibleText}`))
-    }
-    accumulated += decoder.decode()
-    const completedStream = readSafeStreamText(accumulated)
-    logCorrectionTiming(requestId, 'llm_total_ms', streamStart, {
-      truncated: completedStream.truncated,
-      responseChars: completedStream.visibleText.length
-    })
-    return {
-      text: completedStream.truncated ? completedStream.visibleText : accumulated,
-      truncated: completedStream.truncated
-    }
-  }
-
-  function buildChunkedCorrectionPrompts(input: {
-    subject: string
-    subjectId: string
-    community: string
-    examLabel: string
-    option: string
-    maxScore: number
-    year?: number | string | null
-    examCall?: string
-    exerciseId?: string
-    exerciseLabel?: string
-    officialPrompt: string
-    criteria?: string
-    sourceText?: string
-    concepts?: string[]
-    studentAnswer: string
-  }) {
-    const theoryContext = getTheoryContextForExercise({
-      subject: input.subjectId || input.subject,
-      community: input.community,
-      year: input.year,
-      examCall: input.examCall,
-      exerciseId: input.exerciseId,
-      exerciseLabel: input.exerciseLabel,
-      exerciseText: input.officialPrompt,
-      officialSolution: input.criteria,
-      rubric: input.criteria,
-      concepts: input.concepts
-    })
-    const theoryContextPrompt = theoryContextToPrompt(theoryContext)
-    const sharedContext = `Contexto de corrección PAU:
-- Asignatura: ${input.subject}
-- Comunidad: ${input.community}
-- Ejercicio: ${input.examLabel}
-- Opción: ${input.option}
-- Puntuación máxima oficial: ${formatPts(input.maxScore)}
-- Criterios oficiales disponibles: ${input.criteria || 'No especificados'}
-- Conceptos: ${input.concepts?.join(', ') || 'No especificados'}
-- Texto fuente, si existe: ${input.sourceText || 'No hay texto fuente adicional'}
-- Enunciado oficial: ${input.officialPrompt}
-- Respuesta del alumno: ${input.studentAnswer}
-
-Reglas comunes:
-- Devuelve solo Markdown, sin JSON y sin bloques de código.
-- No repitas el enunciado ni transcribas la respuesta completa del alumno.
-- Usa LaTeX solo dentro de $...$ o bloques $$...$$. No mezcles $ y $$ en la misma línea.
-- Matrices, determinantes y sistemas deben ir en bloque $$...$$: \\begin{pmatrix}...\\end{pmatrix}, \\begin{vmatrix}...\\end{vmatrix}, \\begin{cases}...\\end{cases}.
-- No dejes comandos sueltos como \\frac, \\tfrac, \\cdot, \\begin o \\end fuera de delimitadores matemáticos.
-- Nunca escribas placeholders visibles como undefined, null o NaN. Si no puedes deducir una parte, escribe una frase útil y honesta.
-- Antes de terminar, revisa que no queda ningún apartado con contenido vacío o técnico.
-- Si haces puntuación por apartados, usa lista Markdown en vez de tabla cuando haya fórmulas.
-- Sé claro y concreto. En Exámenes, la prioridad es que la corrección quede completa.`
-
-    return [
-      {
-        id: 'nota-resumen',
-        label: 'Leyendo tu respuesta y estimando la nota...',
-        essential: true,
-        title: 'Resumen y nota estimada',
-        theoryContext: null,
-        includePreviousCorrection: false,
-        prompt: `${sharedContext}
-
-Bloque 1/4. Evalúa la respuesta con la rúbrica.
-Devuelve exactamente estas secciones:
-
-## Resumen y nota estimada
-
-Nota: X/${formatPts(input.maxScore)}
-
-- Resumen breve de la corrección.
-- Justificación de la nota en 2-3 frases.`
-      },
-      {
-        id: 'aciertos-errores',
-        label: 'Detectando aciertos y errores principales...',
-        essential: true,
-        title: 'Aciertos y errores',
-        theoryContext: null,
-        includePreviousCorrection: false,
-        prompt: `${sharedContext}
-
-Bloque 2/4. Identifica máximo 3 aciertos y máximo 3 errores importantes.
-Este bloque NO debe resolver el ejercicio completo ni escribir sistemas largos: la resolución detallada va en el Bloque 3.
-No dejes placeholders ni escribas nunca "undefined", "null" o "NaN".
-Cada punto debe ser breve, concreto y accionable.
-Devuelve exactamente estas secciones:
-
-## Puntos fuertes
-
-- ...
-
-## Errores a corregir
-
-- ...`
-      },
-      {
-        id: 'paso-a-paso',
-        label: 'Corrigiendo paso a paso...',
-        essential: true,
-        title: 'Corrección paso a paso',
-        theoryContext: null,
-        includePreviousCorrection: false,
-        prompt: `${sharedContext}
-
-Bloque 3/4. Corrige paso a paso el ejercicio o sus apartados.
-Si hay apartados, usa subtítulos "### Apartado a)", "### Apartado b)", etc.
-Incluye solo los pasos necesarios para aprender y puntuar.
-Devuelve exactamente esta sección:
-
-## Corrección paso a paso`
-      },
-      {
-        id: 'teoria-final',
-        label: 'Preparando teoría aplicada y recomendación final...',
-        essential: false,
-        title: 'Teoría aplicada y recomendación final',
-        theoryContext,
-        includePreviousCorrection: true,
-        prompt: `${sharedContext}
-
-${theoryContextPrompt}
-
-Bloque 4/4. Explica la teoría aplicada al ejercicio concreto y cierra con una recomendación accionable.
-No des teoría genérica. Relaciona cada idea con un paso real del ejercicio, la rúbrica, la solución orientativa o la corrección previa.
-Si no hay teoría curricular suficiente, usa la solución/criterios y escribe una explicación mínima segura sin inventar una clase larga.
-Mantén el idioma del ejercicio o de la corrección.
-Devuelve exactamente estas secciones:
-
-## ¿Por qué es así?
-
-**Idea clave**
-
-**Por qué se aplica en este ejercicio**
-
-**Dónde se ve en la solución**
-
-**Error típico que debes evitar**
-
-**Qué recordar para el examen**
-
-## Recomendación final`
-      }
-    ]
-  }
-
-  function buildCorrectionRetryPrompt(prompt: string, validation: ReturnType<typeof validateCorrectionBlock>) {
-    const issues = [
-      validation.truncated ? 'la respuesta anterior se cortó por límite de tokens' : '',
-      validation.missingFields.length ? `faltaban secciones obligatorias: ${validation.missingFields.join(', ')}` : '',
-      validation.forbiddenLiterals.length ? 'aparecieron placeholders técnicos visibles como undefined/null/NaN' : '',
-      validation.parseError ? 'la respuesta tenía estructura incompleta o no renderizable' : '',
-    ].filter(Boolean).join('; ')
-
-    return `${prompt}
-
-Rehaz este bloque completo y cerrado. Problema detectado: ${issues || 'la respuesta anterior no cumplió el contrato de salida'}.
-Mantén Markdown limpio, LaTeX correcto y todas las secciones exigidas.
-No escribas valores visibles como undefined, null o NaN. No dejes líneas vacías como respuesta a un apartado.
-Si falta información, sustituye el hueco por una explicación real basada en el enunciado, la rúbrica o la corrección previa.`
-  }
-
-  function correctionBlockFallbackMarkdown(title: string) {
-    return `## ${title}\n\n${CORRECTION_BLOCK_FALLBACK}`
-  }
-
-  function logCorrectionBlockValidation(
-    requestId: string,
-    validation: ReturnType<typeof validateCorrectionBlock>,
-    extra: { retry?: boolean } = {}
-  ) {
-    console.info(buildCorrectionBlockLog(requestId, validation, extra))
-  }
-
-  function displayCorrectionText(text: string) {
-    return sanitizeCorrectionDisplayText(text)
-  }
-
-  async function runChunkedCorrection(
-    accessToken: string,
-    chunks: ReturnType<typeof buildChunkedCorrectionPrompts>,
-    sessionId: string,
-    creditKey: string
-  ) {
-    const completed: string[] = []
-    const failedOptional: string[] = []
-
-    for (const chunk of chunks) {
-      setCorrectionStage(chunk.label)
-      setStreamText(displayCorrectionText(completed.join('\n\n')))
-      const chunkPrompt = chunk.includePreviousCorrection
-        ? `${chunk.prompt}
-
-CORRECCIÓN YA GENERADA:
-${completed.join('\n\n')}
-
-Usa la corrección anterior solo como contexto para conectar la teoría con pasos, aciertos y errores concretos.`
-        : chunk.prompt
-      let result = await streamCorrectionRequest(accessToken, chunkPrompt, {
-        includeImage: true,
-        appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
-        blockId: chunk.id,
-        sessionId,
-        creditKey
-      })
-      let validation = validateCorrectionBlock(chunk.id, result.text, result.truncated)
-      let displayText = displayCorrectionText(result.text).trim()
-      if (!validation.valid && displayText && !containsVisibleTechnicalLiteral(displayText)) {
-        const repairedValidation = validateCorrectionBlock(chunk.id, displayText, result.truncated)
-        if (repairedValidation.valid) {
-          result = { ...result, text: displayText }
-          validation = repairedValidation
-        }
-      }
-      logCorrectionBlockValidation(sessionId, validation)
-
-      if (!validation.valid) {
-        setContinuingCorrection(true)
-        setCorrectionStage(`${chunk.label} Reintentando este bloque completo...`)
-        result = await streamCorrectionRequest(accessToken, buildCorrectionRetryPrompt(chunkPrompt, validation), {
-          includeImage: true,
-          appendTo: completed.length ? `${completed.join('\n\n')}\n\n` : '',
-          blockId: `${chunk.id}:retry`,
-          sessionId,
-          creditKey
-        })
-        validation = validateCorrectionBlock(chunk.id, result.text, result.truncated)
-        displayText = displayCorrectionText(result.text).trim()
-        if (!validation.valid && displayText && !containsVisibleTechnicalLiteral(displayText)) {
-          const repairedValidation = validateCorrectionBlock(chunk.id, displayText, result.truncated)
-          if (repairedValidation.valid) {
-            result = { ...result, text: displayText }
-            validation = repairedValidation
-          }
-        }
-        logCorrectionBlockValidation(sessionId, validation, { retry: true })
-        setContinuingCorrection(false)
-      }
-
-      if (!validation.valid) {
-        const fallback = correctionBlockFallbackMarkdown(chunk.title)
-        if (chunk.essential) {
-          return {
-            markdown: `# Corrección de Kairo\n\n${[...completed, fallback].join('\n\n')}`.trim(),
-            truncated: result.truncated,
-            invalid: true,
-            blocksCompleted: completed.length,
-            failedBlock: chunk.id
-          }
-        }
-        failedOptional.push(chunk.title)
-        completed.push(fallback)
-        setStreamText(displayCorrectionText(completed.join('\n\n')))
-        return {
-          markdown: `# Corrección de Kairo\n\n${completed.join('\n\n')}`.trim(),
-          truncated: result.truncated,
-          invalid: true,
-          blocksCompleted: completed.length,
-          failedBlock: chunk.id
-        }
-      }
-
-      completed.push(displayCorrectionText(result.text).trim())
-      setStreamText(displayCorrectionText(completed.join('\n\n')))
-    }
-
-    const optionalNote = failedOptional.length
-      ? `\n\n> Nota: No se pudo completar ${failedOptional.join(', ')}. La corrección principal sí está completa.`
-      : ''
-    return {
-      markdown: `# Corrección de Kairo\n\n${completed.join('\n\n')}${optionalNote}`.trim(),
-      truncated: false,
-      invalid: false,
-      blocksCompleted: completed.length,
-      failedBlock: ''
-    }
-  }
-
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
     const totalStart = performance.now()
-    setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false); setCorrectionStage('Leyendo tu respuesta...'); setExamXpResult(null)
+    setCargando(true); setCorreccion(''); setTruncated(false); setExamXpResult(null)
     try {
       const authStart = performance.now()
       const accessToken = await getChatAccessToken()
@@ -2209,74 +1870,59 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           preparedBeforeSubmit: true
         })
       }
-      const promptBuildStart = performance.now()
-      const chunks = buildChunkedCorrectionPrompts({
-        subject: nombreAsignatura(asignatura),
-        subjectId: asignatura,
-        community: ccaa,
-        examLabel: `Práctica ${nombreAsignatura(asignatura)} ${examenActivo?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
-        option: opcionMostrada,
-        maxScore: puntuacionMax,
-        year: examenActivo?.año ?? anioSeleccionado,
-        examCall: tipo,
-        exerciseId: p?.id ?? preguntaActivaStorageId,
-        exerciseLabel: bloqueActivoLabel || p?.label || p?.bloque || p?.tipo,
-        officialPrompt: enunciadoActivo,
-        criteria: p?.criterios,
-        sourceText: p?.texto_fuente,
-        concepts: p?.conceptos,
-        studentAnswer: modo === 'imagen'
-          ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
-          : respuesta
+      const llmStart = performance.now()
+      const res = await fetch('/api/exam/correct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          subject: nombreAsignatura(asignatura),
+          community: ccaa,
+          examLabel: `Práctica ${nombreAsignatura(asignatura)} ${examenActivo?.año ?? ''} ${tipo} ${bloqueActivoLabel || ''}`.trim(),
+          option: opcionMostrada,
+          maxScore: puntuacionMax,
+          year: examenActivo?.año ?? anioSeleccionado,
+          examCall: tipo,
+          exerciseId: p?.id ?? preguntaActivaStorageId,
+          exerciseLabel: bloqueActivoLabel || p?.label || p?.bloque || p?.tipo,
+          officialPrompt: enunciadoActivo,
+          criteria: p?.criterios,
+          sourceText: p?.texto_fuente,
+          concepts: p?.conceptos,
+          studentAnswer: modo === 'imagen'
+            ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+            : respuesta,
+          imagen: modo === 'imagen' ? imagen : null,
+          imagenTipo: modo === 'imagen' ? imagenTipo : null,
+          creditKey: correctionCreditKey
+        })
       })
-      logCorrectionTiming(correctionSessionId, 'prompt_build_ms', promptBuildStart, {
-        chunks: chunks.length,
-        promptChars: chunks.reduce((total, chunk) => total + chunk.prompt.length, 0)
-      })
-      const chunkedCorrection = await runChunkedCorrection(accessToken, chunks, correctionSessionId, correctionCreditKey)
-      const accumulated = chunkedCorrection.markdown
-      const isTruncated = chunkedCorrection.truncated
-      const isInvalidCorrection = chunkedCorrection.invalid || containsVisibleTechnicalLiteral(accumulated)
-      if (!accumulated) {
-        setStreamText('')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(getApiErrorMessage(errorData, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+      }
+      const data = await res.json()
+      const isTruncated = Boolean(data.truncated)
+      logCorrectionTiming(correctionSessionId, 'llm_total_ms', llmStart, { truncated: isTruncated })
+      const correccionJson = data.correction
+      if (!correccionJson) {
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
         return
       }
-      const parseStart = performance.now()
-      const parsedCorrection = parseCorrectionPayload(accumulated)
-      const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
-      const invalidCorrectionMarkdown = chunkedCorrection.invalid
-        ? accumulated
-        : `# Corrección de Kairo\n\n${correctionBlockFallbackMarkdown('Corrección incompleta')}`
-      const correccionVisible = isInvalidCorrection
-        ? invalidCorrectionMarkdown
-        : isTruncated
+      const correccionVisible = isTruncated
         ? 'La corrección se ha cortado antes de terminar. Puedes reintentar para obtener una versión completa.'
-        : correccionJson
-        ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
-        : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(accumulated, { officialMaxScore: puntuacionMax }), puntuacionMax)
-      const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
-      const markdownForWhy = correctionPayloadToMarkdown(correccionGuardada, { officialMaxScore: puntuacionMax })
-      const whyItWorks = splitWhyExplanationMarkdown(markdownForWhy).why
-      const whyContext = chunks.find(chunk => chunk.id === 'teoria-final')?.theoryContext
-      logCorrectionTiming(correctionSessionId, 'parse_ms', parseStart, {
-        parsedJson: Boolean(correccionJson),
-        correctionChars: correccionGuardada.length
-      })
-      // Batch all three updates — no empty-frame gap between streaming and final render.
+        : correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
+      const correccionGuardada = isTruncated ? correccionVisible : JSON.stringify(correccionJson)
+      const whyItWorks = isTruncated ? '' : splitWhyExplanationMarkdown(correccionVisible).why
+      const whyContext = data.whyContext ?? null
+      // Batch state updates — no empty-frame gap between loading and final render.
       // isTruncated is not persisted to historial_examenes (no column yet).
       setCorreccion(correccionGuardada)
-      setTruncated(isTruncated || isInvalidCorrection)
-      setStreamText('')
+      setTruncated(isTruncated)
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
-      const partes = !correccionJson ? accumulated.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
-      const rawNota = bloqueJson?.puntos_conseguidos != null
-        ? Number(bloqueJson.puntos_conseguidos)
-        : partes ? parseFloat(partes[1].replace(',', '.')) : null
+      const rawNota = bloqueJson?.puntos_conseguidos != null ? Number(bloqueJson.puntos_conseguidos) : null
       const nota = rawNota === null ? null : clampScore(rawNota, puntuacionMax)
       const notaMax = puntuacionMax
-      if (!isTruncated && !isInvalidCorrection) {
-        setCorrectionStage('Guardando en Historial...')
+      if (!isTruncated) {
         const saveStart = performance.now()
         const historyPayload = {
           user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
@@ -2339,20 +1985,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
         })
       }
-      logCorrectionTiming(correctionSessionId, 'total_ms', totalStart, {
-        blocksCompleted: chunkedCorrection.blocksCompleted,
-        truncated: isTruncated,
-        invalid: isInvalidCorrection
-      })
+      logCorrectionTiming(correctionSessionId, 'total_ms', totalStart, { truncated: isTruncated })
     } catch (error) {
-      setStreamText('')
       setTruncated(false)
-      setContinuingCorrection(false)
-      setCorrectionStage('')
       setCorreccion(error instanceof Error ? error.message : 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
-      setContinuingCorrection(false)
-      setCorrectionStage('')
       setCargando(false)
     }
   }
@@ -5893,15 +5530,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
               </div>
             </div>}
 
-            {!isCatalunaExam && (correccion || streamText || cargando) && (
+            {!isCatalunaExam && (correccion || cargando) && (
               <div style={{ borderRadius: '24px', border: '1.5px solid var(--pau-lilac-border)', overflow: 'hidden', background: 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,232,255,0.48))', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 4px 20px rgba(124,58,237,0.08), 0 1px 4px rgba(124,58,237,0.04)' }}>
                 <div style={{ padding: '14px 22px', background: 'linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><WandSparkles size={16} /></div>
                   <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  {!correccion && (streamText || cargando) ? (
-                    <SafeProgressiveCorrectionStream text={streamText} isContinuing={continuingCorrection} stage={correctionStage} />
+                  {!correccion && cargando ? (
+                    <SafeProgressiveCorrectionStream />
                   ) : (
                     <CorrectionResultCard
                       correction={correccion}

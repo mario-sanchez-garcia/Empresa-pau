@@ -633,7 +633,7 @@ function penaltiesToMarkdown(items: unknown) {
   if (!Array.isArray(items) || !items.length) return ''
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = items as Array<Record<string, any>> // JSON de corrección sin interfaz completa — any intencional
-  return `**Penalizaciones aplicadas:**\n${rows.map(item => `- ${item.motivo}: ${item.puntos_descontados}`).join('\n')}`
+  return `**Penalizaciones aplicadas:**\n${rows.map(item => `- ${item.motivo || 'Motivo no especificado'}: ${typeof item.puntos_descontados === 'number' ? item.puntos_descontados : 0}`).join('\n')}`
 }
 
 function whyBlockMarkdown(block: unknown) {

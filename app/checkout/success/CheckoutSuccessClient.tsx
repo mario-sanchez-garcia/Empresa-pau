@@ -1,9 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { CheckCircle2 } from 'lucide-react'
-import KairoBrand from '@/components/shared/KairoBrand'
 import { supabase } from '@/app/lib/supabase'
+import KairoLoader from '@/app/components/ui/KairoLoader'
+import CheckoutShell from '@/components/shared/CheckoutShell'
+
+const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
 type CheckStatus = 'checking' | 'success' | 'pending' | 'signed_out'
 
@@ -14,6 +19,9 @@ export default function CheckoutSuccessClient() {
   const [status, setStatus] = useState<CheckStatus>('checking')
   const attemptsRef = useRef(0)
   const cancelledRef = useRef(false)
+
+  const B = bebas.style.fontFamily
+  const M = dmMono.style.fontFamily
 
   useEffect(() => {
     cancelledRef.current = false
@@ -53,157 +61,131 @@ export default function CheckoutSuccessClient() {
     setStatus('checking')
   }
 
-  return (
-    <main style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.logoRow}>
-          <KairoBrand subtitle={null} size="md" />
-        </div>
-
-        {status === 'checking' && (
-          <>
-            <div style={styles.spinnerIcon}>
-              <style>{`@keyframes cs-spin{to{transform:rotate(360deg)}}`}</style>
-              <div style={styles.spinner} />
-            </div>
-            <h1 style={styles.title}>Confirmando tu pago…</h1>
-            <p style={styles.body}>
-              Hemos recibido tu pago y estamos activando tu acceso. Esto tarda unos segundos.
-            </p>
-          </>
-        )}
-
-        {status === 'success' && (
-          <>
-            <div style={styles.successIcon}>
-              <CheckCircle2 size={34} strokeWidth={2.4} />
-            </div>
-            <h1 style={styles.title}>¡Tu acceso está activado!</h1>
-            <p style={styles.body}>Tu pago se ha completado y tu plan ya está listo para usarse.</p>
-            <a href="/examenes" style={styles.cta}>Ir a Kairo →</a>
-          </>
-        )}
-
-        {status === 'pending' && (
-          <>
-            <div style={styles.successIcon}>
-              <CheckCircle2 size={34} strokeWidth={2.4} />
-            </div>
-            <h1 style={styles.title}>Tu pago se ha completado</h1>
-            <p style={styles.body}>
-              Está tardando más de lo normal en activarse. Puedes volver a comprobarlo o esperar un poco más — no hace falta pagar de nuevo.
-            </p>
-            <button onClick={retry} style={{ ...styles.cta, border: 'none', cursor: 'pointer' }}>Comprobar de nuevo</button>
-            <div style={styles.infoBox}>
-              <p style={styles.infoText}>
-                Si sigue sin aparecer en unos minutos, escríbenos a{' '}
-                <a href="mailto:hola@kairo.es" style={{ color: '#1e40af', fontWeight: 700 }}>hola@kairo.es</a>{' '}
-                con el número de pedido que Stripe te ha enviado por email.
-              </p>
-            </div>
-          </>
-        )}
-
-        {status === 'signed_out' && (
-          <>
-            <div style={styles.successIcon}>
-              <CheckCircle2 size={34} strokeWidth={2.4} />
-            </div>
-            <h1 style={styles.title}>Tu pago se ha completado</h1>
-            <p style={styles.body}>Inicia sesión con la misma cuenta para ver tu acceso activado.</p>
-            <a href="/login" style={styles.cta}>Iniciar sesión →</a>
-          </>
-        )}
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-          <a href="/legal/privacidad" style={styles.footLink}>Privacidad</a>
-          <span style={styles.dot}>·</span>
-          <a href="/legal/terminos" style={styles.footLink}>Términos</a>
-          <span style={styles.dot}>·</span>
-          <a href="/legal/reembolsos" style={styles.footLink}>Reembolsos</a>
+  if (status === 'checking') {
+    return (
+      <div style={{ position: 'relative' }}>
+        <KairoLoader />
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 48, gap: 8, pointerEvents: 'none' }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,.55)', margin: 0 }}>Estamos procesando tu pago</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,.28)', margin: 0 }}>No cierres esta ventana</p>
         </div>
       </div>
-    </main>
+    )
+  }
+
+  return (
+    <CheckoutShell>
+      <Logo />
+
+      {status === 'success' && (
+        <>
+          <div style={styles.iconRow}><div style={{ ...styles.iconBadge, borderColor: 'rgba(74,222,128,.3)', color: '#4ade80' }}><CheckCircle2 size={26} strokeWidth={2.2} /></div></div>
+          <h1 style={{ ...styles.title, fontFamily: B, textAlign: 'center' }}>¡Tu acceso está activado!</h1>
+          <p style={{ ...styles.body, textAlign: 'center' }}>Tu pago se ha completado y tu plan ya está listo para usarse.</p>
+          <a href="/examenes" style={styles.btnPrimary}>Ir a Kairo →</a>
+        </>
+      )}
+
+      {status === 'pending' && (
+        <>
+          <div style={styles.iconRow}><div style={{ ...styles.iconBadge, borderColor: 'rgba(74,222,128,.3)', color: '#4ade80' }}><CheckCircle2 size={26} strokeWidth={2.2} /></div></div>
+          <h1 style={{ ...styles.title, fontFamily: B, textAlign: 'center' }}>Tu pago se ha completado.</h1>
+          <p style={{ ...styles.body, textAlign: 'center' }}>
+            Está tardando más de lo normal en activarse. Puedes volver a comprobarlo o esperar un poco más — no hace falta pagar de nuevo.
+          </p>
+          <button onClick={retry} className="co-btn" style={styles.btnAsButton}>Comprobar de nuevo</button>
+          <div style={styles.infoBox}>
+            <p style={{ ...styles.infoText, fontFamily: M }}>
+              Si sigue sin aparecer en unos minutos, escríbenos a{' '}
+              <a href="mailto:hola@kairo.es" style={styles.link}>hola@kairo.es</a>{' '}
+              con el número de pedido que Stripe te ha enviado por email.
+            </p>
+          </div>
+        </>
+      )}
+
+      {status === 'signed_out' && (
+        <>
+          <div style={styles.iconRow}><div style={{ ...styles.iconBadge, borderColor: 'rgba(74,222,128,.3)', color: '#4ade80' }}><CheckCircle2 size={26} strokeWidth={2.2} /></div></div>
+          <h1 style={{ ...styles.title, fontFamily: B, textAlign: 'center' }}>Tu pago se ha completado.</h1>
+          <p style={{ ...styles.body, textAlign: 'center' }}>Inicia sesión con la misma cuenta para ver tu acceso activado.</p>
+          <a href="/login" style={styles.btnPrimary}>Iniciar sesión →</a>
+        </>
+      )}
+
+      <style>{`
+        .co-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 52px; background: #fff; color: #0d0d0d; font-size: 15px; font-weight: 700; letter-spacing: .01em; border: none; cursor: pointer; transition: transform 160ms cubic-bezier(0.22,1,0.36,1), opacity 160ms; font-family: var(--font-geist-sans, system-ui, sans-serif); }
+        .co-btn:hover { transform: translateY(-1px); opacity: .93; }
+        .co-btn:active { transform: scale(0.98); }
+      `}</style>
+
+      <div style={styles.footerLinks}>
+        <a href="/legal/privacidad" style={styles.footLink}>Privacidad</a>
+        <span style={styles.dot}>·</span>
+        <a href="/legal/terminos" style={styles.footLink}>Términos</a>
+        <span style={styles.dot}>·</span>
+        <a href="/legal/reembolsos" style={styles.footLink}>Reembolsos</a>
+      </div>
+    </CheckoutShell>
+  )
+}
+
+function Logo() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
+    </div>
   )
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: '100vh',
-    background: 'radial-gradient(circle at 20% 10%, rgba(219,234,254,0.9), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)',
+  title: {
+    fontSize: 'clamp(32px, 6vw, 44px)',
+    lineHeight: .92,
+    letterSpacing: '.01em',
+    color: '#fff',
+    margin: '0 0 14px',
+  },
+  body: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,.55)',
+    lineHeight: 1.7,
+    margin: '0 0 22px',
+  },
+  iconRow: { display: 'flex', justifyContent: 'center', marginBottom: 18 },
+  iconBadge: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    display: 'grid',
+    placeItems: 'center',
+    background: 'rgba(255,255,255,.04)',
+    border: '1px solid rgba(255,255,255,.12)',
+  },
+  btnPrimary: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '24px 16px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  },
-  card: {
-    background: 'rgba(255,255,255,0.78)',
-    border: '1px solid rgba(219,231,251,0.80)',
-    backdropFilter: 'blur(20px) saturate(1.16)',
-    WebkitBackdropFilter: 'blur(20px) saturate(1.16)',
-    borderRadius: 24,
-    boxShadow: '0 22px 60px rgba(37,99,235,0.11), 0 2px 8px rgba(37,99,235,0.05)',
-    padding: '40px 36px',
-    maxWidth: 440,
     width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 20,
-    alignItems: 'center',
-    textAlign: 'center',
-  },
-  logoRow: { display: 'flex', alignItems: 'center', gap: 10 },
-  successIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
-    display: 'grid',
-    placeItems: 'center',
-    color: '#16a34a',
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
-    boxShadow: '0 16px 34px rgba(22,163,74,0.12)',
-  },
-  spinnerIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
-    display: 'grid',
-    placeItems: 'center',
-    background: '#eff6ff',
-    border: '1px solid #bfdbfe',
-  },
-  spinner: {
-    width: 26,
-    height: 26,
-    borderRadius: '50%',
-    border: '3px solid rgba(37,99,235,0.18)',
-    borderTopColor: '#2563eb',
-    animation: 'cs-spin 0.7s linear infinite',
-  },
-  title: { fontSize: 24, fontWeight: 900, color: '#111827', margin: 0 },
-  body: { fontSize: 15, color: '#64748b', lineHeight: 1.7, margin: 0 },
-  infoBox: {
-    background: 'rgba(239,246,255,0.9)',
-    border: '1px solid #bfdbfe',
-    borderRadius: 16,
-    padding: '14px 18px',
-    width: '100%',
-  },
-  infoText: { fontSize: 13, color: '#1e40af', lineHeight: 1.5, margin: 0, textAlign: 'left' },
-  cta: {
-    display: 'block',
-    padding: '13px 32px',
-    background: '#2563eb',
-    color: 'white',
-    borderRadius: 14,
-    fontWeight: 900,
+    height: 52,
+    background: '#fff',
+    color: '#0d0d0d',
     fontSize: 15,
+    fontWeight: 700,
     textDecoration: 'none',
-    width: '100%',
-    textAlign: 'center',
+    fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)',
   },
-  footLink: { fontSize: 12, color: '#94a3b8', textDecoration: 'none' },
-  dot: { fontSize: 12, color: '#d1d5db' },
+  btnAsButton: { marginBottom: 16 },
+  infoBox: {
+    background: 'rgba(255,255,255,.05)',
+    border: '1px solid rgba(255,255,255,.1)',
+    padding: '14px 16px',
+    width: '100%',
+  },
+  infoText: { fontSize: 12, color: 'rgba(255,255,255,.5)', lineHeight: 1.6, margin: 0, textAlign: 'left' },
+  link: { color: 'rgba(255,255,255,.75)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 2 },
+  footerLinks: { display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 24 },
+  footLink: { fontSize: 12, color: 'rgba(255,255,255,.3)', textDecoration: 'none' },
+  dot: { fontSize: 12, color: 'rgba(255,255,255,.15)' },
 }

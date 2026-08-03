@@ -2,11 +2,15 @@
 
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { supabase } from '@/app/lib/supabase'
-import KairoBrand from '@/components/shared/KairoBrand'
 import KairoLoader from '@/app/components/ui/KairoLoader'
+import CheckoutShell from '@/components/shared/CheckoutShell'
 import { CheckCircle2, Lock } from 'lucide-react'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
+
+const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
 const PLAN_LABELS: Record<string, string> = {
   pack_curso_pau: 'Curso PAU',
@@ -26,6 +30,9 @@ function CheckoutFlow() {
   const [token, setToken] = useState<string | null>(null)
   const [withdrawalAccepted, setWithdrawalAccepted] = useState(false)
   const initiated = useRef(false)
+
+  const B = bebas.style.fontFamily
+  const M = dmMono.style.fontFamily
 
   useEffect(() => {
     if (initiated.current) return
@@ -83,70 +90,75 @@ function CheckoutFlow() {
 
   if (state === 'already_active') {
     return (
-      <main style={styles.page}>
-        <div style={styles.card}>
-          <KairoBrand subtitle={null} size="md" />
-          <div style={styles.successIcon}>
-            <CheckCircle2 size={30} strokeWidth={2.4} />
+      <CheckoutShell>
+        <Logo />
+        <div style={styles.iconRow}>
+          <div style={{ ...styles.iconBadge, borderColor: 'rgba(74,222,128,.3)', color: '#4ade80' }}>
+            <CheckCircle2 size={26} strokeWidth={2.2} />
           </div>
-          <h1 style={styles.title}>Ya tienes acceso</h1>
-          <p style={styles.body}>
-            Tu cuenta ya tiene un plan activo. No necesitas volver a pagar.
-          </p>
-          <a href="/examenes" style={styles.btn}>Ir a Kairo →</a>
         </div>
-      </main>
+        <h1 style={{ ...styles.title, fontFamily: B }}>Ya tienes acceso.</h1>
+        <p style={{ ...styles.body, textAlign: 'center' }}>
+          Tu cuenta ya tiene un plan activo. No necesitas volver a pagar.
+        </p>
+        <a href="/examenes" style={{ ...styles.btnPrimary, fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>Ir a Kairo →</a>
+      </CheckoutShell>
     )
   }
 
   if (state === 'error') {
     return (
-      <main style={styles.page}>
-        <div style={styles.card}>
-          <KairoBrand subtitle={null} size="md" />
-          <div style={styles.errorIcon}>✕</div>
-          <h1 style={styles.title}>Algo ha salido mal</h1>
-          <p style={styles.body}>{errorMsg}</p>
-          <a href="/pricing" style={styles.btn}>Ver planes →</a>
-          <a href="mailto:hola@kairo.es" style={styles.link}>hola@kairo.es</a>
+      <CheckoutShell>
+        <Logo />
+        <div style={styles.iconRow}>
+          <div style={{ ...styles.iconBadge, borderColor: 'rgba(248,113,113,.3)', color: '#f87171' }}>✕</div>
         </div>
-      </main>
+        <h1 style={{ ...styles.title, fontFamily: B }}>Algo ha salido mal.</h1>
+        <p style={{ ...styles.body, textAlign: 'center' }}>{errorMsg}</p>
+        <a href="/pricing" style={{ ...styles.btnPrimary, fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>Ver planes →</a>
+        <a href="mailto:hola@kairo.es" style={{ ...styles.link, textAlign: 'center', display: 'block', marginTop: 14 }}>hola@kairo.es</a>
+      </CheckoutShell>
     )
   }
 
   if (state === 'ready') {
     return (
-      <main style={styles.page}>
-        <div style={styles.card}>
-          <KairoBrand subtitle={null} size="md" />
-          <h1 style={styles.title}>Plan {planLabel}</h1>
-          <p style={styles.body}>Antes de ir al pago, confirma lo siguiente:</p>
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer', textAlign: 'left', padding: '14px 16px', borderRadius: 12, border: `2px solid ${withdrawalAccepted ? '#2563eb' : '#e2e8f0'}`, background: withdrawalAccepted ? '#eff6ff' : '#f8fafc', transition: 'all 140ms' }}>
-            <input
-              type="checkbox"
-              checked={withdrawalAccepted}
-              onChange={e => setWithdrawalAccepted(e.target.checked)}
-              style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16, accentColor: '#2563eb', cursor: 'pointer' }}
-            />
-            <span style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>
-              Solicito acceso inmediato a Kairo y entiendo que, al empezar a usarlo, pierdo el derecho de desistimiento de 14 días una vez el servicio se haya prestado por completo.{' '}
-              <a href="/legal/terminos#desistimiento" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>Saber más</a>
-            </span>
-          </label>
-          {errorMsg && (
-            <div role="alert" style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fff5f5', padding: '10px 14px', fontSize: 13, color: '#dc2626', fontWeight: 600, width: '100%', textAlign: 'left' }}>{errorMsg}</div>
-          )}
-          <button
-            type="button"
-            onClick={handlePay}
-            disabled={!withdrawalAccepted}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px 24px', borderRadius: 12, border: 'none', background: withdrawalAccepted ? '#2563eb' : '#e2e8f0', color: withdrawalAccepted ? 'white' : '#94a3b8', fontSize: 15, fontWeight: 800, cursor: withdrawalAccepted ? 'pointer' : 'not-allowed', transition: 'all 140ms' }}
-          >
-            <Lock size={16} /> Ir al pago
-          </button>
-          <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, textAlign: 'center' }}>Pago seguro procesado por Stripe</p>
-        </div>
-      </main>
+      <CheckoutShell>
+        <style>{`
+          .co-field { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); cursor: pointer; transition: border-color 160ms, background 160ms; }
+          .co-field.checked { border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.08); }
+          .co-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 54px; background: #fff; color: #0d0d0d; font-size: 15px; font-weight: 700; letter-spacing: .01em; border: none; cursor: pointer; transition: transform 160ms cubic-bezier(0.22,1,0.36,1), opacity 160ms; font-family: var(--font-geist-sans, system-ui, sans-serif); }
+          .co-btn:hover:not(:disabled) { transform: translateY(-1px); opacity: .93; }
+          .co-btn:active:not(:disabled) { transform: scale(0.98); }
+          .co-btn:disabled { opacity: .32; cursor: not-allowed; }
+        `}</style>
+        <Logo />
+        <p style={{ ...styles.eyebrow, fontFamily: M, textAlign: 'center' }}>Camino PAU · Checkout</p>
+        <h1 style={{ ...styles.title, fontFamily: B, textAlign: 'center' }}>Plan {planLabel}.</h1>
+        <p style={{ ...styles.body, textAlign: 'center', marginBottom: 4 }}>Antes de ir al pago, confirma lo siguiente:</p>
+
+        <label className={`co-field${withdrawalAccepted ? ' checked' : ''}`}>
+          <input
+            type="checkbox"
+            checked={withdrawalAccepted}
+            onChange={e => setWithdrawalAccepted(e.target.checked)}
+            style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16, accentColor: '#fff', cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', lineHeight: 1.6 }}>
+            Solicito acceso inmediato a Kairo y entiendo que, al empezar a usarlo, pierdo el derecho de desistimiento de 14 días una vez el servicio se haya prestado por completo.{' '}
+            <a href="/legal/terminos#desistimiento" target="_blank" rel="noopener noreferrer" style={styles.link}>Saber más</a>
+          </span>
+        </label>
+
+        {errorMsg && (
+          <div role="alert" style={styles.errorBanner}>{errorMsg}</div>
+        )}
+
+        <button type="button" onClick={handlePay} disabled={!withdrawalAccepted} className="co-btn" style={{ marginTop: 4 }}>
+          <Lock size={16} /> Ir al pago
+        </button>
+        <p style={{ ...styles.eyebrow, fontFamily: M, textAlign: 'center', marginTop: 4 }}>Pago seguro procesado por Stripe</p>
+      </CheckoutShell>
     )
   }
 
@@ -167,6 +179,15 @@ function CheckoutFlow() {
   return <KairoLoader />
 }
 
+function Logo() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
+    </div>
+  )
+}
+
 export default function CheckoutPage() {
   return (
     <Suspense fallback={<KairoLoader />}>
@@ -176,66 +197,70 @@ export default function CheckoutPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: '100vh',
-    background: 'radial-gradient(circle at 20% 10%, rgba(219,234,254,0.9), transparent 30%), linear-gradient(135deg, #fbfdff 0%, #eff6ff 100%)',
+  eyebrow: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,.35)',
+    letterSpacing: '.14em',
+    textTransform: 'uppercase',
+    margin: '0 0 6px',
+  },
+  title: {
+    fontSize: 'clamp(36px, 6vw, 48px)',
+    lineHeight: .92,
+    letterSpacing: '.01em',
+    color: '#fff',
+    margin: '0 0 16px',
+  },
+  body: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,.55)',
+    lineHeight: 1.7,
+    margin: '0 0 20px',
+  },
+  iconRow: {
     display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: '24px 16px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    marginBottom: 18,
   },
-  card: {
-    background: 'rgba(255,255,255,0.78)',
-    border: '1px solid rgba(219,231,251,0.80)',
-    backdropFilter: 'blur(20px) saturate(1.16)',
-    borderRadius: 24,
-    boxShadow: '0 22px 60px rgba(37,99,235,0.11), 0 2px 8px rgba(37,99,235,0.05)',
-    padding: '40px 36px',
-    maxWidth: 420,
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 20,
-    alignItems: 'center',
-    textAlign: 'center',
-  },
-  successIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
-    display: 'grid',
-    placeItems: 'center',
-    color: '#16a34a',
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
-    boxShadow: '0 16px 34px rgba(22,163,74,0.12)',
-  },
-  errorIcon: {
+  iconBadge: {
     width: 52,
     height: 52,
     borderRadius: 18,
     display: 'grid',
     placeItems: 'center',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 900,
-    color: '#dc2626',
-    background: '#fef2f2',
-    border: '1px solid #fecaca',
+    background: 'rgba(255,255,255,.04)',
+    border: '1px solid rgba(255,255,255,.12)',
   },
-  title: { fontSize: 22, fontWeight: 900, color: '#111827', margin: 0 },
-  body: { fontSize: 14, color: '#64748b', lineHeight: 1.7, margin: 0 },
-  btn: {
-    display: 'block',
-    padding: '12px 28px',
-    background: '#2563eb',
-    color: 'white',
-    borderRadius: 12,
-    fontWeight: 800,
-    fontSize: 14,
-    textDecoration: 'none',
+  errorBanner: {
+    padding: '10px 14px',
+    background: 'rgba(220,38,38,.12)',
+    border: '1px solid rgba(220,38,38,.3)',
+    fontSize: 13,
+    color: '#f87171',
+    fontWeight: 600,
     width: '100%',
-    textAlign: 'center',
+    textAlign: 'left',
+    marginTop: 14,
   },
-  link: { fontSize: 13, color: '#2563eb', textDecoration: 'none', fontWeight: 600 },
+  btnPrimary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: 52,
+    background: '#fff',
+    color: '#0d0d0d',
+    fontSize: 15,
+    fontWeight: 700,
+    textDecoration: 'none',
+    marginTop: 4,
+  },
+  link: {
+    color: 'rgba(255,255,255,.75)',
+    fontWeight: 600,
+    textDecoration: 'underline',
+    textUnderlineOffset: 2,
+  },
 }

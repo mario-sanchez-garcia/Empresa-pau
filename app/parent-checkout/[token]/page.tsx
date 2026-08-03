@@ -1,10 +1,14 @@
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { Bebas_Neue } from 'next/font/google'
 import { hashToken } from '@/app/lib/billing/tokens'
 import { getPlan } from '@/app/lib/billing/plans'
 import ParentCheckoutClient from './ParentCheckoutClient'
-import KairoBrand from '@/components/shared/KairoBrand'
+import CheckoutShell from '@/components/shared/CheckoutShell'
 import { CheckCircle2 } from 'lucide-react'
+
+const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const B = bebas.style.fontFamily
 
 // In Next.js App Router (v15+), params is a Promise — must be awaited.
 interface Props {
@@ -99,70 +103,58 @@ export default async function ParentCheckoutPage({ params }: Props) {
 
 function ErrorPage({ message }: { message: string }) {
   return (
-    <main className="pau-bg-atmosphere" style={styles.page}>
-      <div style={styles.card}>
-        <Logo />
-        <p style={styles.errorTitle}>Enlace no disponible</p>
-        <p style={styles.errorText}>{message}</p>
-      </div>
-    </main>
+    <CheckoutShell>
+      <Logo />
+      <div style={styles.iconRow}><div style={{ ...styles.iconBadge, borderColor: 'rgba(248,113,113,.3)', color: '#f87171' }}>✕</div></div>
+      <h1 style={{ ...styles.title, fontFamily: B }}>Enlace no disponible.</h1>
+      <p style={styles.bodyText}>{message}</p>
+    </CheckoutShell>
   )
 }
 
 function SuccessStaticPage({ name }: { name: string | null }) {
   return (
-    <main className="pau-bg-atmosphere" style={styles.page}>
-      <div style={styles.card}>
-        <Logo />
-        <div style={styles.successIcon}><CheckCircle2 size={30} strokeWidth={2.4} /></div>
-        <p style={styles.successTitle}>Pack ya activado</p>
-        <p style={styles.bodyText}>
-          {name ? `El Pack Curso PAU de ${name} ya está activado.` : 'Este Pack Curso PAU ya está activado.'}
-          {' '}Accede a Kairo para comenzar.
-        </p>
-      </div>
-    </main>
+    <CheckoutShell>
+      <Logo />
+      <div style={styles.iconRow}><div style={{ ...styles.iconBadge, borderColor: 'rgba(74,222,128,.3)', color: '#4ade80' }}><CheckCircle2 size={26} strokeWidth={2.2} /></div></div>
+      <h1 style={{ ...styles.title, fontFamily: B }}>Pack ya activado.</h1>
+      <p style={styles.bodyText}>
+        {name ? `El Pack Curso PAU de ${name} ya está activado.` : 'Este Pack Curso PAU ya está activado.'}
+        {' '}Accede a Kairo para comenzar.
+      </p>
+    </CheckoutShell>
   )
 }
 
 function Logo() {
   return (
-    <KairoBrand subtitle={null} size="md" style={{ marginBottom: 8 }} />
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
+    </div>
   )
 }
 
-const styles = {
-  page: {
-    minHeight: '100vh',
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    padding: '24px 16px',
-  },
-  card: {
-    background: 'white',
-    borderRadius: 28,
-    boxShadow: '0 24px 64px rgba(37,99,235,0.12)',
-    padding: '40px 36px',
-    maxWidth: 440,
-    width: '100%',
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 16,
-  },
-  errorTitle: { fontSize: 20, fontWeight: 800, color: '#111827', margin: 0 },
-  errorText: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0 },
-  successIcon: {
+const styles: Record<string, React.CSSProperties> = {
+  iconRow: { display: 'flex', justifyContent: 'center', marginBottom: 18 },
+  iconBadge: {
     width: 52,
     height: 52,
     borderRadius: 18,
-    display: 'grid' as const,
-    placeItems: 'center' as const,
-    alignSelf: 'center' as const,
-    color: '#16a34a',
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
+    display: 'grid',
+    placeItems: 'center',
+    fontSize: 20,
+    fontWeight: 900,
+    background: 'rgba(255,255,255,.04)',
+    border: '1px solid rgba(255,255,255,.12)',
   },
-  successTitle: { fontSize: 20, fontWeight: 800, color: '#111827', margin: 0, textAlign: 'center' as const },
-  bodyText: { fontSize: 15, color: '#64748b', lineHeight: 1.6, margin: 0, textAlign: 'center' as const },
+  title: {
+    fontSize: 'clamp(32px, 6vw, 44px)',
+    lineHeight: .92,
+    letterSpacing: '.01em',
+    color: '#fff',
+    margin: '0 0 16px',
+    textAlign: 'center',
+  },
+  bodyText: { fontSize: 14, color: 'rgba(255,255,255,.55)', lineHeight: 1.7, margin: 0, textAlign: 'center' },
 }

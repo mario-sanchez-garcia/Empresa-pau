@@ -111,7 +111,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   'upcoming-exams': { title: '¿Tienes algún examen pronto?', help: 'Opcional. Si tienes un parcial cerca, Kairo añadirá práctica específica antes de esa fecha.' },
   feeling: { title: '¿Cómo llevas la preparación?', help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.' },
   'daily-time': { title: '¿Cuánto tiempo podrías estudiar al día?', help: 'Lo ajustaremos mejor más adelante según tu ritmo.' },
-  'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'En el futuro, Kairo adaptará el plan a tu ritmo y preferencias.' },
+  'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'Kairo adapta el Camino a tu ritmo real de estudio.' },
   confirm: { title: 'Perfecto. Ya podemos construir tu Camino PAU.', help: 'Revisa el resumen y empieza cuando lo tengas claro.' },
   saving: { title: 'Construyendo tu Camino PAU', help: 'Estamos preparando tu experiencia inicial.' },
   done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
@@ -1059,11 +1059,19 @@ export default function OnboardingFlow() {
 
     if (step === 'weekly-days') {
       return (
-        <EditorialGrid cols={2}>
-          {WEEKLY_DAY_OPTS.map(opt => (
-            <EditorialChoice key={opt.label} title={opt.label} selected={data.weeklyStudyDays === opt.label} onClick={() => update({ weeklyStudyDays: opt.label, weeklyStudyDaysValue: opt.value })} />
-          ))}
-        </EditorialGrid>
+        <div>
+          <EditorialGrid cols={2}>
+            {WEEKLY_DAY_OPTS.map(opt => (
+              <EditorialChoice key={opt.label} title={opt.label} selected={data.weeklyStudyDays === opt.label} onClick={() => update({ weeklyStudyDays: opt.label, weeklyStudyDaysValue: opt.value })} />
+            ))}
+          </EditorialGrid>
+          <div style={{ marginTop: 14, border: '1px solid rgba(37,99,235,.18)', background: 'linear-gradient(135deg, rgba(239,246,255,.92), rgba(255,255,255,.96))', padding: '12px 14px', boxShadow: '0 12px 30px rgba(37,99,235,.08)' }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 6 }}>Cuenta gratis</div>
+            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, fontWeight: 700, color: '#334155' }}>
+              Recuerda: con la cuenta gratis tendrás 2 días de Camino activos. Con Premium desbloqueas la planificación completa según los días que elijas.
+            </p>
+          </div>
+        </div>
       )
     }
 

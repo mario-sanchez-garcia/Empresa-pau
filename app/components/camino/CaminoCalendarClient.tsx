@@ -533,6 +533,11 @@ function schoolAdjustedItem(subject: string, item: CurriculumItem | null, onboar
   return { item: null, adjustment, replacedTopic: examContext?.topic || item.topic }
 }
 
+const GENERAL_EXAM_BLOCK_LABELS = new Set(['', 'repaso general', 'general', 'todo el temario', 'todo'])
+function isGeneralExamBlock(block: string | undefined): boolean {
+  return GENERAL_EXAM_BLOCK_LABELS.has((block ?? '').trim().toLowerCase())
+}
+
 function findExamCurriculumItem(exam: StudentExam | undefined, subject: string, curriculum: CurriculumItem[]) {
   if (!exam) return null
   const blockNeedle = textSlug(exam.block || '')
@@ -666,6 +671,14 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     const examDistance = sameDay ? 0 : upcoming ? daysBetween(dateISO, upcoming.date) : null
     const examPhase = missionPhaseForExam(examDistance)
     const strongExamNearby = upcoming && priorityWeight(upcoming.priority) >= 3 && examDistance != null && examDistance <= 6
+    // Block correlation near an exam must not depend on priority: a normal/baja
+    // priority exam with a specific block (e.g. "Geometría") still needs its
+    // eve to review THAT block, not whatever the subject's overall topic
+    // rotation happens to land on (which could be an unrelated block like
+    // Álgebra/Gauss). Only widens which curriculum item gets picked — kind
+    // (concept vs practice) selection below is untouched.
+    const examHasSpecificBlock = Boolean(upcoming) && !isGeneralExamBlock(upcoming?.block)
+    const blockCorrelationNearby = examHasSpecificBlock && examDistance != null && examDistance <= 6
     const studyDay = indexes.includes(index) || Boolean(sameDay)
     const missions: Mission[] = []
 
@@ -678,7 +691,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       const prioritySubject = rawPrioritySubject ? subjectLabelFromSlug(normalizeSubjectSlug(rawPrioritySubject)) : null
       const rotationPool = subjects.flatMap(subj => Array(subjectRotationWeight(subj, dateISO, relevantExams)).fill(subj) as string[])
       const subject = prioritySubject ?? rotationPool[subjectRotation % rotationPool.length]
-      const examContext = sameDay ?? (strongExamNearby ? upcoming : undefined)
+      const examContext = sameDay ?? ((strongExamNearby || blockCorrelationNearby) ? upcoming : undefined)
       const weakItem = weakArea && normalizeSubjectSlug(weakArea.subject) === subjectSlug(subject) ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
       const rawCurriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? weakItem ?? nextCurriculumItem(subject)
       const schoolAdjusted = schoolAdjustedItem(subject, rawCurriculumItem, onboarding, curriculum, schoolAdjustments, examContext)

@@ -12,9 +12,9 @@ const NAV = [
   { label: 'Camino PAU', href: '/camino',                  icon: LayoutGrid },
   { label: 'Exámenes',   href: '/examenes',                icon: ClipboardList },
   { label: 'Simulacros', href: '/simulacros',              icon: GraduationCap },
-  { label: 'La Zona',    href: '/zona',                    icon: Zap },
   { label: 'Tutor IA',   href: '/examenes?view=chat',      icon: MessageCircle },
   { label: 'Historial',  href: '/examenes?view=historial', icon: Clock },
+  { label: 'La Zona',    href: '/zona',                    icon: Zap },
 ]
 
 // Same labels the Settings page uses for preferences.educationLevel

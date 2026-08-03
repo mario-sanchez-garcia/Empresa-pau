@@ -124,6 +124,7 @@ export async function POST(request: NextRequest) {
     const limitResponse = await enforceUsageLimits({
       userId: authContext.user.id,
       userCreatedAt: authContext.user.created_at,
+      email: authContext.user.email,
       action,
       creditKey,
       accessToken: authContext.accessToken,
@@ -310,17 +311,19 @@ async function loadCurriculumV2Row(subject: string, sortOrder: number, accessTok
 async function enforceUsageLimits({
   userId,
   userCreatedAt,
+  email,
   action,
   creditKey,
   accessToken,
 }: {
   userId: string
   userCreatedAt: string
+  email: string | undefined
   action: RateLimitAction
   creditKey: string
   accessToken: string
 }) {
-  const billing = await getUserBillingContext(userId, userCreatedAt)
+  const billing = await getUserBillingContext(userId, userCreatedAt, email)
   if (!billing.hasActivePack && billing.daysSince >= 7) {
     return NextResponse.json(
       { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },

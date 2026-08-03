@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     payload: { plan_id: planId, price_cents: priceCents }
   })
 
-  const appUrl = getAppUrl()
+  const appUrl = getAppUrl(request)
   const checkoutUrl = `${appUrl}/parent-checkout/${rawToken}`
 
   return NextResponse.json({

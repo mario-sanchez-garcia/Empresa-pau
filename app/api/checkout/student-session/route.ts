@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   const livePriceCents = getLivePriceCents(planId) ?? plan.priceCents
   const precio = await resolverPrecioConReserva(db, data.user.email, planId, livePriceCents)
   const priceCents = precio.priceCents
-  const appUrl = getAppUrl()
+  const appUrl = getAppUrl(request)
   const stripe = getStripe()
 
   const recurring = isRecurringPlan(planId)

@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
   const precio = await resolverPrecioConReserva(db, studentEmail, link.plan_id, livePriceCents)
   const priceCents = precio.priceCents
-  const appUrl = getAppUrl()
+  const appUrl = getAppUrl(request)
   const stripe = getStripe()
 
   if (link.status === 'checkout_started' && link.stripe_checkout_session_id && link.checkout_started_at) {

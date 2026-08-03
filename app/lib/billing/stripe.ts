@@ -2,6 +2,7 @@
 import 'server-only'
 
 import Stripe from 'stripe'
+import type { NextRequest } from 'next/server'
 
 let _stripe: Stripe | null = null
 
@@ -24,6 +25,19 @@ export function getWebhookSecret(): string {
   return secret
 }
 
-export function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+// Single source of truth for the public base URL used in Stripe redirects
+// (success_url, cancel_url, Billing Portal return_url, parent checkout
+// links). Never hardcode a domain here — order matters:
+//   1. NEXT_PUBLIC_APP_URL, explicitly configured (must be
+//      https://kairo-pau.com in production — see Vercel env vars).
+//   2. The incoming request's own origin, when available — safe because
+//      it comes from Next's parsed URL, not a raw spoofable header, and it
+//      naturally resolves to localhost in local dev too.
+//   3. https://kairo-pau.com as a last-resort safety net, so a missing env
+//      var can never silently fall back to an old/wrong deployment domain.
+export function getAppUrl(request?: NextRequest): string {
+  const configured = process.env.NEXT_PUBLIC_APP_URL
+  if (configured) return configured
+  if (request) return request.nextUrl.origin
+  return 'https://kairo-pau.com'
 }

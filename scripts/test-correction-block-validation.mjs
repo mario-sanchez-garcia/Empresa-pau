@@ -1,0 +1,88 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+
+import {
+  CORRECTION_BLOCK_FALLBACK,
+  sanitizeCorrectionListItem,
+  validateCorrectionBlock,
+} from '../app/lib/correctionBlockValidation.ts'
+
+test('accepts a valid Markdown correction block', () => {
+  const result = validateCorrectionBlock('aciertos-errores', [
+    '## Puntos fuertes',
+    '',
+    '- Plantea bien el sistema.',
+    '',
+    '## Errores a corregir',
+    '',
+    '- Falta justificar la última ecuación.',
+  ].join('\n'), false)
+
+  assert.equal(result.valid, true)
+  assert.deepEqual(result.missingFields, [])
+})
+
+test('rejects JSON inside fences because it does not satisfy the visible block contract', () => {
+  const result = validateCorrectionBlock('nota-resumen', '```json\n{"nota": 1}\n```', false)
+
+  assert.equal(result.valid, false)
+  assert.equal(result.parseError, false)
+  assert.ok(result.missingFields.includes('## Resumen y nota estimada'))
+})
+
+test('rejects missing mandatory fields', () => {
+  const result = validateCorrectionBlock('paso-a-paso', '## Otro título\n\nTexto breve.', false)
+
+  assert.equal(result.valid, false)
+  assert.deepEqual(result.missingFields, ['## Corrección paso a paso'])
+})
+
+test('rejects null and undefined as visible text', () => {
+  const result = validateCorrectionBlock('teoria-final', [
+    '## ¿Por qué es así?',
+    '',
+    '**Dónde se ve en la solución**',
+    '',
+    'undefined',
+    '',
+    '## Recomendación final',
+    '',
+    'Repasa el planteamiento.',
+  ].join('\n'), false)
+
+  assert.equal(result.valid, false)
+  assert.deepEqual(result.forbiddenLiterals, ['undefined'])
+})
+
+test('rejects truncated responses', () => {
+  const result = validateCorrectionBlock('nota-resumen', [
+    '## Resumen y nota estimada',
+    '',
+    'Nota: 1/2.5',
+  ].join('\n'), true)
+
+  assert.equal(result.valid, false)
+  assert.equal(result.truncated, true)
+})
+
+test('preserves substantive Markdown text while cleaning side-panel labels', () => {
+  assert.equal(
+    sanitizeCorrectionListItem('- **Error:** falta resolver el sistema.'),
+    'falta resolver el sistema.'
+  )
+  assert.equal(
+    sanitizeCorrectionListItem('  **Corrección:** plantea $x+y=2$.'),
+    'plantea $x+y=2$.'
+  )
+})
+
+test('rejects incomplete JSON instead of accepting it as a complete correction', () => {
+  const result = validateCorrectionBlock('nota-resumen', '{"nota": 1', false)
+
+  assert.equal(result.valid, false)
+  assert.equal(result.parseError, true)
+})
+
+test('fallback copy stays stable for invalid blocks', () => {
+  assert.equal(CORRECTION_BLOCK_FALLBACK, 'Esta parte de la corrección no pudo generarse. Reinténtalo.')
+})

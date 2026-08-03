@@ -36,15 +36,32 @@ const PREPARATION_TONE_GUIDANCE: Record<string, string> = {
   'Voy bastante bien': 'Tono personalizado del onboarding: el alumno va bastante bien. Mantén el mismo rigor, responde de forma directa y eficiente, sin sobreexplicar lo que probablemente ya domina.',
 }
 
+function makeRequestId(request: NextRequest) {
+  return request.headers.get('x-kairo-request-id') ?? `chat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function logCorrectionTiming(requestId: string, label: string, startedAt: number, extra: Record<string, unknown> = {}) {
+  console.info(`[correction-timing] ${label}`, {
+    requestId,
+    ms: Date.now() - startedAt,
+    ...extra
+  })
+}
+
 export async function POST(request: NextRequest) {
+  const requestId = makeRequestId(request)
+  const totalStart = Date.now()
+  const authStart = Date.now()
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
+  logCorrectionTiming(requestId, 'auth_ms', authStart)
 
   const { searchParams } = new URL(request.url)
   const wantsStream = searchParams.get('stream') === '1'
 
   const { pregunta, imagen, imagenTipo, imagenes, correctionMode, correctionBlock, correctionSessionId, creditKey } = await request.json()
 
+  const promptBuildStart = Date.now()
   const imagePayloadSize =
     (typeof imagen === 'string' ? imagen.length : 0) +
     (Array.isArray(imagenes)
@@ -107,7 +124,16 @@ export async function POST(request: NextRequest) {
   const internalUser = isInternalUser(authContext.user.email)
 
   contenido.push({ type: 'text', text: `${responseFormatRules}\n\n${pregunta}` })
+  logCorrectionTiming(requestId, 'prompt_build_ms', promptBuildStart, {
+    action,
+    imageCount,
+    promptChars: metadata.promptChars,
+    imagePayloadChars: imagePayloadSize,
+    maxTokens,
+    model
+  })
 
+  const dataFetchStart = Date.now()
   if (!internalUser) {
     const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at, authContext.user.email)
 
@@ -157,11 +183,16 @@ export async function POST(request: NextRequest) {
   }
 
   const preparationFeeling = await getPreparationFeeling(authContext.user.id)
+  logCorrectionTiming(requestId, 'data_fetch_ms', dataFetchStart, {
+    internalUser,
+    hasPreparationFeeling: Boolean(preparationFeeling)
+  })
   const toneGuidance = preparationFeeling ? PREPARATION_TONE_GUIDANCE[preparationFeeling] : ''
   const systemPrompt = `Eres Kairo, asistente experto en las pruebas de acceso a la universidad en España. Corriges exámenes de estudiantes de 2º de Bachillerato siguiendo los criterios oficiales de la comunidad indicada y ayudas a estudiar con precisión. Si recibes imágenes, son partes de la respuesta manuscrita del estudiante: léelas y corrígelas en conjunto. Responde siempre en español. Respeta estrictamente el formato que pida el usuario: si pide JSON estricto, devuelve solo JSON válido sin markdown ni texto adicional; si pide markdown, usa markdown claro. Cuando corrijas o expliques una duda académica y el formato lo permita, añade un bloque opcional titulado exactamente "¿Por qué es así?" con explicación específica del ejercicio, conexión con la respuesta del alumno, error típico PAU, mini ejemplo original y consejo para sacar puntos. No lo llames teoría, teoría desplegable ni más información. No copies materiales externos; redacta con palabras propias de Kairo. Usa $...$ para LaTeX inline y entornos \\begin{...}...\\end{...} sin $ externos para sistemas y matrices. NUNCA pongas \\begin{...} dentro de $...$. NUNCA mezcles delimitadores: si abres $ cierra con $, si abres $$ cierra con $$. Si el estudiante pregunta por correcciones anteriores, historial de errores o qué ha fallado antes, indica con claridad que no tienes acceso al historial de correcciones y recomiéndale consultar la sección Historial de la aplicación. No supongas ni inventes datos de sesiones anteriores. El nivel de exigencia y la nota deben ser los mismos para todos; solo puede cambiar el modo de explicar.${toneGuidance ? ` ${toneGuidance}` : ''}${action === 'image_correction' ? ' En correcciones con imagen, se especifico pero compacto: nota clara, maximo 3 aciertos, 3 errores, 3 mejoras y teoria en 2 lineas. No repitas enunciado ni respuesta del alumno.' : ''}`
   const systemContent = [{ type: 'text' as const, text: systemPrompt, cache_control: { type: 'ephemeral' as const } }]
 
   if (wantsStream) {
+    const llmStart = Date.now()
     const anthropicStream = client.messages.stream({
       model,
       max_tokens: maxTokens,
@@ -173,14 +204,25 @@ export async function POST(request: NextRequest) {
     const readable = new ReadableStream({
       async start(controller) {
         try {
+          let firstTokenLogged = false
           for await (const event of anthropicStream) {
             if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+              if (!firstTokenLogged) {
+                firstTokenLogged = true
+                logCorrectionTiming(requestId, 'llm_first_token_ms', llmStart)
+              }
               controller.enqueue(encoder.encode(event.delta.text))
             }
           }
           // All events consumed — finalMessage resolves immediately here
           const finalMsg = await anthropicStream.finalMessage()
           const usage = extractAnthropicTokenUsage(finalMsg)
+          logCorrectionTiming(requestId, 'llm_total_ms', llmStart, {
+            stopReason: finalMsg.stop_reason ?? 'unknown',
+            inputTokens: usage.inputTokens,
+            outputTokens: usage.outputTokens,
+            totalTokens: usage.totalTokens
+          })
           if (finalMsg.stop_reason === 'max_tokens') {
             console.warn('[chat] truncated: true (stream)', { action, maxTokens, outputTokens: usage.outputTokens })
             controller.enqueue(encoder.encode(STREAM_TRUNCATION_SENTINEL))
@@ -198,6 +240,7 @@ export async function POST(request: NextRequest) {
             accessToken: authContext.accessToken
           }).catch(() => {})
         } catch {
+          logCorrectionTiming(requestId, 'llm_total_ms', llmStart, { status: 'error' })
           logAiUsageEvent({
             userId: authContext.user.id,
             route: '/api/chat',
@@ -208,6 +251,7 @@ export async function POST(request: NextRequest) {
             accessToken: authContext.accessToken
           }).catch(() => {})
         } finally {
+          logCorrectionTiming(requestId, 'total_ms', totalStart, { stream: true })
           controller.close()
         }
       }
@@ -217,6 +261,7 @@ export async function POST(request: NextRequest) {
   }
 
   let message
+  const llmStart = Date.now()
   try {
     // Mismo cupo compartido de organización que las correcciones: 429/529 son
     // transitorios y se reintentan. Ver withAnthropicRetry.
@@ -230,6 +275,7 @@ export async function POST(request: NextRequest) {
       (intento, status) => console.warn('[chat] reintento por saturación', { intento, status }),
     )
   } catch (error) {
+    logCorrectionTiming(requestId, 'llm_total_ms', llmStart, { status: 'error' })
     await logAiUsageEvent({
       userId: authContext.user.id,
       route: '/api/chat',
@@ -253,6 +299,13 @@ export async function POST(request: NextRequest) {
   }
 
   const usage = extractAnthropicTokenUsage(message)
+  logCorrectionTiming(requestId, 'llm_first_token_ms', llmStart, { nonStream: true })
+  logCorrectionTiming(requestId, 'llm_total_ms', llmStart, {
+    stopReason: message.stop_reason ?? 'unknown',
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    totalTokens: usage.totalTokens
+  })
   await logAiUsageEvent({
     userId: authContext.user.id,
     route: '/api/chat',
@@ -270,6 +323,7 @@ export async function POST(request: NextRequest) {
     console.warn('[chat] truncated: true', { action, maxTokens, outputTokens: usage.outputTokens })
   }
   const respuesta = message.content[0].type === 'text' ? message.content[0].text : ''
+  logCorrectionTiming(requestId, 'total_ms', totalStart, { stream: false })
   return NextResponse.json({
     respuesta,
     truncated: message.stop_reason === 'max_tokens',

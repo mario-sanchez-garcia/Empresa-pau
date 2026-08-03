@@ -17,6 +17,13 @@ import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from './data/ma
 import { supabase } from './lib/supabase'
 import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
+import {
+  buildCorrectionBlockLog,
+  containsVisibleTechnicalLiteral,
+  CORRECTION_BLOCK_FALLBACK,
+  sanitizeCorrectionListItem,
+  validateCorrectionBlock,
+} from './lib/correctionBlockValidation'
 import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
 import { getTheoryContextForExercise, theoryContextToPrompt } from './lib/whyItWorksTheory'
 import { formatExamText } from './lib/mathFormatting'
@@ -141,6 +148,14 @@ function readSafeStreamText(rawText: string) {
   }
 
   return { visibleText: rawText, truncated: false }
+}
+
+function logCorrectionTiming(requestId: string, label: string, startedAt: number, extra: Record<string, unknown> = {}) {
+  console.info(`[correction-timing] ${label}`, {
+    requestId,
+    ms: Math.round(performance.now() - startedAt),
+    ...extra
+  })
 }
 
 const CORRECTION_PROGRESS_STEPS = [
@@ -906,6 +921,7 @@ export default function Home() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const lastImageTimingRef = useRef<{ requestId: string; ms: number; chars: number } | null>(null)
   const randomEvauResolutionKeyRef = useRef('')
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa, setCCAA } = useCCAA()
@@ -1569,7 +1585,9 @@ function extractCorrectionBullets(text: string, section: string): string[] {
   const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const match = text.match(new RegExp(`## ${escaped}[\\s\\S]*?\\n([\\s\\S]*?)(?=##|$)`, 'i'))
   if (!match) return []
-  return match[1].split('\n').map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean)
+  return match[1].split('\n')
+    .map(sanitizeCorrectionListItem)
+    .filter(Boolean)
 }
 const correctionFuertes = correccion ? extractCorrectionBullets(correccion, 'Puntos fuertes') : []
 const correctionErrores = correccion ? extractCorrectionBullets(correccion, 'Errores a corregir') : []
@@ -1818,9 +1836,19 @@ function cambiarTipo(t: Tipo) {
   async function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    const imageRequestId = `image-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const imageStart = performance.now()
     setImagenPreview(URL.createObjectURL(file))
     setImagenTipo('image/jpeg')
-    setImagen(await compressImageToBase64(file))
+    const compressed = await compressImageToBase64(file)
+    setImagen(compressed)
+    const imageMs = Math.round(performance.now() - imageStart)
+    lastImageTimingRef.current = { requestId: imageRequestId, ms: imageMs, chars: compressed.length }
+    console.info('[correction-timing] image_prepare_ms', {
+      requestId: imageRequestId,
+      ms: imageMs,
+      imagePayloadChars: compressed.length
+    })
   }
 
   async function streamCorrectionRequest(
@@ -1828,9 +1856,11 @@ function cambiarTipo(t: Tipo) {
     prompt: string,
     options: { includeImage: boolean; appendTo?: string; blockId?: string; sessionId?: string; creditKey?: string }
   ) {
+    const requestId = `${options.sessionId ?? 'correction'}:${options.blockId ?? 'main'}`
+    const streamStart = performance.now()
     const res = await fetch('/api/chat?stream=1', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}`, 'x-kairo-request-id': requestId },
       body: JSON.stringify({
         pregunta: prompt,
         imagen: options.includeImage && modo === 'imagen' ? imagen : null,
@@ -1838,6 +1868,7 @@ function cambiarTipo(t: Tipo) {
         correctionMode: 'chunked_correction',
         correctionBlock: options.blockId ?? null,
         correctionSessionId: options.sessionId ?? null,
+        requestId,
         creditKey: options.creditKey ?? null
       })
     })
@@ -1850,15 +1881,24 @@ function cambiarTipo(t: Tipo) {
     const reader = res.body!.getReader()
     const decoder = new TextDecoder()
     let accumulated = ''
+    let firstTokenLogged = false
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
+      if (!firstTokenLogged) {
+        firstTokenLogged = true
+        logCorrectionTiming(requestId, 'llm_first_token_ms', streamStart)
+      }
       accumulated += decoder.decode(value, { stream: true })
       const safeStream = readSafeStreamText(accumulated)
       setStreamText(`${options.appendTo ?? ''}${safeStream.visibleText}`)
     }
     accumulated += decoder.decode()
     const completedStream = readSafeStreamText(accumulated)
+    logCorrectionTiming(requestId, 'llm_total_ms', streamStart, {
+      truncated: completedStream.truncated,
+      responseChars: completedStream.visibleText.length
+    })
     return {
       text: completedStream.truncated ? completedStream.visibleText : accumulated,
       truncated: completedStream.truncated
@@ -2010,7 +2050,20 @@ Devuelve exactamente estas secciones:
   function buildCompactRetryPrompt(prompt: string) {
     return `${prompt}
 
-Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown limpio, LaTeX correcto y cierra la respuesta.`
+Rehaz este bloque de forma más breve para que no se corte. Mantén Markdown limpio, LaTeX correcto y cierra la respuesta.
+No escribas valores visibles como undefined, null o NaN. Si falta información, escribe "No disponible" solo si es necesario para entender el punto.`
+  }
+
+  function correctionBlockFallbackMarkdown(title: string) {
+    return `## ${title}\n\n${CORRECTION_BLOCK_FALLBACK}`
+  }
+
+  function logCorrectionBlockValidation(
+    requestId: string,
+    validation: ReturnType<typeof validateCorrectionBlock>,
+    extra: { retry?: boolean } = {}
+  ) {
+    console.info(buildCorrectionBlockLog(requestId, validation, extra))
   }
 
   async function runChunkedCorrection(
@@ -2040,8 +2093,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         sessionId,
         creditKey
       })
+      let validation = validateCorrectionBlock(chunk.id, result.text, result.truncated)
+      logCorrectionBlockValidation(sessionId, validation)
 
-      if (result.truncated || !result.text.trim()) {
+      if (!validation.valid) {
         setContinuingCorrection(true)
         setCorrectionStage(`${chunk.label} Reintentando este bloque en versión breve...`)
         result = await streamCorrectionRequest(accessToken, buildCompactRetryPrompt(chunkPrompt), {
@@ -2051,20 +2106,32 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           sessionId,
           creditKey
         })
+        validation = validateCorrectionBlock(chunk.id, result.text, result.truncated)
+        logCorrectionBlockValidation(sessionId, validation, { retry: true })
         setContinuingCorrection(false)
       }
 
-      if (result.truncated || !result.text.trim()) {
+      if (!validation.valid) {
+        const fallback = correctionBlockFallbackMarkdown(chunk.title)
         if (chunk.essential) {
           return {
-            markdown: completed.join('\n\n'),
-            truncated: true,
+            markdown: `# Corrección de Kairo\n\n${[...completed, fallback].join('\n\n')}`.trim(),
+            truncated: result.truncated,
+            invalid: true,
             blocksCompleted: completed.length,
             failedBlock: chunk.id
           }
         }
         failedOptional.push(chunk.title)
-        continue
+        completed.push(fallback)
+        setStreamText(completed.join('\n\n'))
+        return {
+          markdown: `# Corrección de Kairo\n\n${completed.join('\n\n')}`.trim(),
+          truncated: result.truncated,
+          invalid: true,
+          blocksCompleted: completed.length,
+          failedBlock: chunk.id
+        }
       }
 
       completed.push(result.text.trim())
@@ -2077,6 +2144,7 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
     return {
       markdown: `# Corrección de Kairo\n\n${completed.join('\n\n')}${optionalNote}`.trim(),
       truncated: false,
+      invalid: false,
       blocksCompleted: completed.length,
       failedBlock: ''
     }
@@ -2085,9 +2153,12 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
+    const totalStart = performance.now()
     setCargando(true); setCorreccion(''); setStreamText(''); setTruncated(false); setContinuingCorrection(false); setCorrectionStage('Leyendo tu respuesta...'); setExamXpResult(null)
     try {
+      const authStart = performance.now()
       const accessToken = await getChatAccessToken()
+      logCorrectionTiming('exam-correction:client', 'auth_ms', authStart)
       if (!accessToken) {
         setCorreccion('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
@@ -2096,6 +2167,15 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
       const correctionSessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       const correctionCreditKey = `exam:${ccaa}:${asignatura}:${examenActivo?.año ?? anioSeleccionado}:${tipo}:${opcionMostrada}:${p?.id ?? preguntaActivaStorageId ?? bloqueActivoLabel ?? 'sin-id'}`
+      if (modo === 'imagen' && lastImageTimingRef.current) {
+        console.info('[correction-timing] image_prepare_ms', {
+          requestId: correctionSessionId,
+          ms: lastImageTimingRef.current.ms,
+          imagePayloadChars: lastImageTimingRef.current.chars,
+          preparedBeforeSubmit: true
+        })
+      }
+      const promptBuildStart = performance.now()
       const chunks = buildChunkedCorrectionPrompts({
         subject: nombreAsignatura(asignatura),
         subjectId: asignatura,
@@ -2115,17 +2195,28 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
           : respuesta
       })
+      logCorrectionTiming(correctionSessionId, 'prompt_build_ms', promptBuildStart, {
+        chunks: chunks.length,
+        promptChars: chunks.reduce((total, chunk) => total + chunk.prompt.length, 0)
+      })
       const chunkedCorrection = await runChunkedCorrection(accessToken, chunks, correctionSessionId, correctionCreditKey)
       const accumulated = chunkedCorrection.markdown
       const isTruncated = chunkedCorrection.truncated
+      const isInvalidCorrection = chunkedCorrection.invalid || containsVisibleTechnicalLiteral(accumulated)
       if (!accumulated) {
         setStreamText('')
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
         return
       }
+      const parseStart = performance.now()
       const parsedCorrection = parseCorrectionPayload(accumulated)
       const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [puntuacionMax]) : null
-      const correccionVisible = isTruncated
+      const invalidCorrectionMarkdown = chunkedCorrection.invalid
+        ? accumulated
+        : `# Corrección de Kairo\n\n${correctionBlockFallbackMarkdown('Corrección incompleta')}`
+      const correccionVisible = isInvalidCorrection
+        ? invalidCorrectionMarkdown
+        : isTruncated
         ? 'La corrección se ha cortado antes de terminar. Puedes reintentar para obtener una versión completa.'
         : correccionJson
         ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: puntuacionMax })
@@ -2134,10 +2225,14 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
       const markdownForWhy = correctionPayloadToMarkdown(correccionGuardada, { officialMaxScore: puntuacionMax })
       const whyItWorks = splitWhyExplanationMarkdown(markdownForWhy).why
       const whyContext = chunks.find(chunk => chunk.id === 'teoria-final')?.theoryContext
+      logCorrectionTiming(correctionSessionId, 'parse_ms', parseStart, {
+        parsedJson: Boolean(correccionJson),
+        correctionChars: correccionGuardada.length
+      })
       // Batch all three updates — no empty-frame gap between streaming and final render.
       // isTruncated is not persisted to historial_examenes (no column yet).
       setCorreccion(correccionGuardada)
-      setTruncated(isTruncated)
+      setTruncated(isTruncated || isInvalidCorrection)
       setStreamText('')
       const bloqueJson = correccionJson?.desglose_bloques?.[0]
       const partes = !correccionJson ? accumulated.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
@@ -2146,8 +2241,9 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
         : partes ? parseFloat(partes[1].replace(',', '.')) : null
       const nota = rawNota === null ? null : clampScore(rawNota, puntuacionMax)
       const notaMax = puntuacionMax
-      if (!isTruncated) {
+      if (!isTruncated && !isInvalidCorrection) {
         setCorrectionStage('Guardando en Historial...')
+        const saveStart = performance.now()
         const historyPayload = {
           user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
           bloque: bloqueActivoLabel || '',
@@ -2186,6 +2282,10 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
             const legacyResult = await supabase.from('historial_examenes').insert(legacyPayload).select('id').single()
             insertedId = legacyResult.data?.id ?? null
           }
+          logCorrectionTiming(correctionSessionId, 'save_ms', saveStart, {
+            success: Boolean(insertedId),
+            usedLegacyPayload: Boolean(error)
+          })
           // XP solo si hay nota evaluable — el servidor también lo comprueba,
           // pero evitamos la llamada de red cuando ya sabemos que no aplica.
           if (insertedId && nota != null) {
@@ -2205,6 +2305,11 @@ Usa la corrección anterior solo como contexto para conectar la teoría con paso
           }
         })
       }
+      logCorrectionTiming(correctionSessionId, 'total_ms', totalStart, {
+        blocksCompleted: chunkedCorrection.blocksCompleted,
+        truncated: isTruncated,
+        invalid: isInvalidCorrection
+      })
     } catch (error) {
       setStreamText('')
       setTruncated(false)

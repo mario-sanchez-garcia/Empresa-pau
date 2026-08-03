@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
   contenido.push({ type: 'text', text: `${responseFormatRules}\n\n${pregunta}` })
 
   if (!internalUser) {
-    const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at)
+    const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at, authContext.user.email)
 
     if (!billing.hasActivePack && billing.daysSince >= 7) {
       return NextResponse.json(

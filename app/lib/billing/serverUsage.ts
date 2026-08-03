@@ -1,6 +1,7 @@
 // Server-only billing utilities — never import in client components.
 
 import { createServiceClient } from './supabase'
+import { grantCourtesyAccessIfEligible } from './betaCourtesyAccess'
 
 export interface UserBillingContext {
   hasActivePack: boolean
@@ -10,7 +11,8 @@ export interface UserBillingContext {
 
 export async function getUserBillingContext(
   userId: string,
-  userCreatedAt: string
+  userCreatedAt: string,
+  email?: string | null
 ): Promise<UserBillingContext> {
   try {
     const db = createServiceClient()
@@ -23,7 +25,10 @@ export async function getUserBillingContext(
       .or(`expires_at.is.null,expires_at.gt.${now}`)
       .limit(1)
 
-    const entitlement = data?.[0] ?? null
+    let entitlement = data?.[0] ?? null
+    if (!entitlement) {
+      entitlement = await grantCourtesyAccessIfEligible(db, userId, email)
+    }
     return {
       hasActivePack: entitlement !== null,
       planId: entitlement?.plan_id ?? null,

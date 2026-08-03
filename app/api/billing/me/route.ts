@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, createServiceClient } from '@/app/lib/billing/supabase'
+import { grantCourtesyAccessIfEligible } from '@/app/lib/billing/betaCourtesyAccess'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +31,11 @@ export async function GET(request: NextRequest) {
     .or(`expires_at.is.null,expires_at.gt.${now}`)
     .order('created_at', { ascending: false })
 
-  const active = entitlements ?? []
+  let active = entitlements ?? []
+  if (active.length === 0) {
+    const granted = await grantCourtesyAccessIfEligible(db, userId, data.user.email)
+    if (granted) active = [granted]
+  }
 
   // Pending parent checkout links (not paid, not expired, not cancelled)
   const { data: pendingLinks } = await db

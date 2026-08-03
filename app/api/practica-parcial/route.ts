@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   if (error || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   if (!isInternalUser(user.email ?? '')) {
-    const billing = await getUserBillingContext(user.id, user.created_at ?? new Date().toISOString())
+    const billing = await getUserBillingContext(user.id, user.created_at ?? new Date().toISOString(), user.email)
 
     if (!billing.hasActivePack && billing.daysSince >= 7) {
       return NextResponse.json(

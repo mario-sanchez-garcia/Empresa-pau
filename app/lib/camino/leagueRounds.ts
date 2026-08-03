@@ -112,3 +112,22 @@ export async function getCurrentRoundXpByUser(
 ): Promise<Map<string, number>> {
   return getXpByUserInRange(db, currentRoundRange(), memberIds, subject)
 }
+
+// Fuente única para "cuánto XP acumulado tiene cada alumno desde que existe
+// Kairo" — a diferencia de getXpByUserInRange (que suma eventos por rango de
+// fechas), esto lee el agregado que ya se mantiene en camino_user_progress
+// en cada misión completada (ver complete-mission/route.ts), así que es
+// barato incluso con historial largo.
+export async function getAllTimeXpByUser(
+  db: SupabaseClient,
+  memberIds: string[] | null,
+): Promise<Map<string, number>> {
+  let query = db.from('camino_user_progress').select('user_id, xp_total').limit(50_000)
+  if (memberIds) query = query.in('user_id', memberIds)
+  const { data } = await query
+  const byUser = new Map<string, number>()
+  for (const row of (data ?? []) as Array<{ user_id: string; xp_total: number | null }>) {
+    byUser.set(row.user_id, Number(row.xp_total ?? 0))
+  }
+  return byUser
+}

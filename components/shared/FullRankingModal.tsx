@@ -10,6 +10,7 @@ type LigaInfo = { id: string; codigo: string; nombre: string; miembros: LigaMemb
 
 type GlobalEntry = { name: string; xp: number; rank: number; isCurrentUser: boolean }
 type GlobalData = { entries: GlobalEntry[]; nextTarget: { name: string; xpNeeded: number } | null; activeCount: number }
+type GlobalPeriod = 'total' | 'month'
 
 function Loading() {
   return (
@@ -28,18 +29,18 @@ function Hint({ xpNeeded, name }: { xpNeeded: number; name: string }) {
   )
 }
 
-function PeriodToggle({ period, onChange }: { period: 'total' | 'week'; onChange: (p: 'total' | 'week') => void }) {
+function PeriodToggle<T extends string>({ period, options, onChange }: { period: T; options: { value: T; label: string }[]; onChange: (p: T) => void }) {
   return (
     <div style={{ display: 'inline-flex', gap: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 999, padding: 3, marginBottom: 16 }}>
-      {(['total', 'week'] as const).map(p => (
-        <button key={p} onClick={() => onChange(p)} style={{
+      {options.map(opt => (
+        <button key={opt.value} onClick={() => onChange(opt.value)} style={{
           padding: '5px 14px', borderRadius: 999, border: 'none', cursor: 'pointer',
           fontSize: 11, fontWeight: 700,
-          background: period === p ? 'rgba(255,255,255,0.14)' : 'transparent',
-          color: period === p ? 'white' : 'rgba(255,255,255,0.35)',
+          background: period === opt.value ? 'rgba(255,255,255,0.14)' : 'transparent',
+          color: period === opt.value ? 'white' : 'rgba(255,255,255,0.35)',
           transition: 'background 150ms, color 150ms',
         }}>
-          {p === 'total' ? 'XP total' : 'Esta semana'}
+          {opt.label}
         </button>
       ))}
     </div>
@@ -75,7 +76,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
 
   return (
     <div>
-      <PeriodToggle period={period} onChange={setPeriod} />
+      <PeriodToggle period={period} options={[{ value: 'total', label: 'XP total' }, { value: 'week', label: 'Esta semana' }]} onChange={setPeriod} />
       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
         {liga.nombre}
       </p>
@@ -104,30 +105,42 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
   )
 }
 
-function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
-  if (data === undefined) return <Loading />
+function GlobalTab({ token }: { token: string }) {
+  const [period, setPeriod] = useState<GlobalPeriod>('total')
+  const [dataByPeriod, setDataByPeriod] = useState<Record<GlobalPeriod, GlobalData | null | undefined>>({ total: undefined, month: undefined })
 
-  if (!data || data.activeCount === 0) {
-    return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>
-        <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Kairo acaba de empezar</p>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Sé el primero en completar misiones.</p>
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (dataByPeriod[period] !== undefined) return
+    fetch(`/api/ligas/global?period=${period}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setDataByPeriod(prev => ({ ...prev, [period]: d as GlobalData })))
+      .catch(() => setDataByPeriod(prev => ({ ...prev, [period]: null })))
+  }, [period, token, dataByPeriod])
+
+  const data = dataByPeriod[period]
 
   return (
     <div>
-      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-        {data.activeCount} alumnos · XP de la ronda actual
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {data.entries.map((e, i) => (
-          <RankingRow key={i} rank={e.rank} name={e.name} xp={e.xp} isMe={e.isCurrentUser} theme="dark" />
-        ))}
-      </div>
-      {data.nextTarget && <Hint xpNeeded={data.nextTarget.xpNeeded} name={data.nextTarget.name} />}
+      <PeriodToggle period={period} options={[{ value: 'total', label: 'Todo el tiempo' }, { value: 'month', label: 'Este mes' }]} onChange={setPeriod} />
+      {data === undefined ? <Loading /> : !data || data.activeCount === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p style={{ fontSize: 30, marginBottom: 10 }}>🌱</p>
+          <p style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Kairo acaba de empezar</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Sé el primero en completar misiones.</p>
+        </div>
+      ) : (
+        <>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+            {data.activeCount} alumnos · {period === 'total' ? 'XP de siempre' : 'XP de este mes'}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {data.entries.map((e, i) => (
+              <RankingRow key={i} rank={e.rank} name={e.name} xp={e.xp} isMe={e.isCurrentUser} theme="dark" />
+            ))}
+          </div>
+          {data.nextTarget && <Hint xpNeeded={data.nextTarget.xpNeeded} name={data.nextTarget.name} />}
+        </>
+      )}
     </div>
   )
 }
@@ -135,7 +148,6 @@ function GlobalTab({ data }: { data: GlobalData | null | undefined }) {
 export default function FullRankingModal({ token, onClose }: { token: string; onClose: () => void }) {
   const [tab, setTab] = useState<'liga' | 'global'>('liga')
   const [liga, setLiga] = useState<LigaInfo | null | undefined>(undefined)
-  const [globalData, setGlobalData] = useState<GlobalData | null | undefined>(undefined)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -144,14 +156,6 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
       .then(d => setLiga((d.liga as LigaInfo) ?? null))
       .catch(() => setLiga(null))
   }, [token])
-
-  useEffect(() => {
-    if (tab !== 'global' || globalData !== undefined) return
-    fetch('/api/ligas/global', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => setGlobalData(d as GlobalData))
-      .catch(() => setGlobalData(null))
-  }, [tab, token, globalData])
 
   async function copyInvite() {
     if (!liga) return
@@ -218,7 +222,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
             >
               {tab === 'liga'
                 ? <LigaTab liga={liga} onCopyInvite={copyInvite} copied={copied} />
-                : <GlobalTab data={globalData} />
+                : <GlobalTab token={token} />
               }
             </motion.div>
           </AnimatePresence>

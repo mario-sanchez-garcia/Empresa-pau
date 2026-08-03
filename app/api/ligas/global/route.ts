@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
 import { cached } from '@/app/lib/cache/memoCache'
-import { getXpByUserInRange, currentRoundRange } from '@/app/lib/camino/leagueRounds'
+import { getXpByUserInRange, getAllTimeXpByUser, currentRoundRange } from '@/app/lib/camino/leagueRounds'
 import { resolveDisplayNames, safeUsername } from '@/app/lib/camino/rankingNames'
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +12,14 @@ const NEIGHBORHOOD_SIZE = 3
 const RANKING_TTL_SECONDS = 60
 
 type RankedRow = { user_id: string; xp: number }
+type GlobalPeriod = 'total' | 'month'
+
+function sortRanked(xpByUser: Map<string, number>): RankedRow[] {
+  return Array.from(xpByUser.entries())
+    .filter(([, xp]) => xp > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([user_id, xp]): RankedRow => ({ user_id, xp }))
+}
 
 export async function GET(request: NextRequest) {
   const authContext = await getAuthContext(request)
@@ -21,18 +29,23 @@ export async function GET(request: NextRequest) {
   const db = createServiceSupabase()
   if (!db) return NextResponse.json({ error: 'Servicio no disponible' }, { status: 500 })
 
-  const { start, end } = currentRoundRange()
+  // Global es, por defecto, de siempre (todo el histórico de Kairo) — "mes"
+  // es una vista adicional dentro de la misma pestaña, no el comportamiento
+  // por defecto.
+  const period: GlobalPeriod = request.nextUrl.searchParams.get('period') === 'month' ? 'month' : 'total'
 
-  // El ranking de la ronda en curso es IDÉNTICO para todos los usuarios, así
-  // que se cachea 60 s por ronda (la clave incluye el mes, así que rueda
-  // sola al cerrar una ronda y abrir la siguiente).
-  const ranked = await cached(`ligas:global:round:${start}`, RANKING_TTL_SECONDS, async () => {
-    const xpByUser = await getXpByUserInRange(db, { start, end }, null)
-    return Array.from(xpByUser.entries())
-      .filter(([, xp]) => xp > 0)
-      .sort((a, b) => b[1] - a[1])
-      .map(([user_id, xp]): RankedRow => ({ user_id, xp }))
-  })
+  // El ranking (de cualquiera de los dos periodos) es IDÉNTICO para todos
+  // los usuarios, así que se cachea 60 s. La clave de "mes" incluye el mes,
+  // así que rueda sola al cerrar una ronda y abrir la siguiente.
+  const ranked = period === 'month'
+    ? await cached(`ligas:global:round:${currentRoundRange().start}`, RANKING_TTL_SECONDS, async () => {
+        const xpByUser = await getXpByUserInRange(db, currentRoundRange(), null)
+        return sortRanked(xpByUser)
+      })
+    : await cached('ligas:global:total', RANKING_TTL_SECONDS, async () => {
+        const xpByUser = await getAllTimeXpByUser(db, null)
+        return sortRanked(xpByUser)
+      })
 
   const activeCount = ranked.length
   const myIndex = ranked.findIndex(r => r.user_id === user.id)
@@ -86,5 +99,5 @@ export async function GET(request: NextRequest) {
   const { data: myProfile } = await db.from('perfiles').select('username').eq('id', user.id).maybeSingle()
   const currentUserNeedsUsername = !safeUsername(myProfile?.username)
 
-  return NextResponse.json({ entries, nextTarget, activeCount, myRank, currentUserNeedsUsername })
+  return NextResponse.json({ entries, nextTarget, activeCount, myRank, currentUserNeedsUsername, period })
 }

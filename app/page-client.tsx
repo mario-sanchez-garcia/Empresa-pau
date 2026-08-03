@@ -21,6 +21,7 @@ import {
   buildCorrectionBlockLog,
   containsVisibleTechnicalLiteral,
   CORRECTION_BLOCK_FALLBACK,
+  sanitizeCorrectionDisplayText,
   sanitizeCorrectionListItem,
   validateCorrectionBlock,
 } from './lib/correctionBlockValidation'
@@ -1891,7 +1892,7 @@ function cambiarTipo(t: Tipo) {
       }
       accumulated += decoder.decode(value, { stream: true })
       const safeStream = readSafeStreamText(accumulated)
-      setStreamText(`${options.appendTo ?? ''}${safeStream.visibleText}`)
+      setStreamText(sanitizeCorrectionDisplayText(`${options.appendTo ?? ''}${safeStream.visibleText}`))
     }
     accumulated += decoder.decode()
     const completedStream = readSafeStreamText(accumulated)

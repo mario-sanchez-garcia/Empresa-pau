@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   CORRECTION_BLOCK_FALLBACK,
+  sanitizeCorrectionDisplayText,
   sanitizeCorrectionListItem,
   validateCorrectionBlock,
 } from '../app/lib/correctionBlockValidation.ts'
@@ -85,4 +86,21 @@ test('rejects incomplete JSON instead of accepting it as a complete correction',
 
 test('fallback copy stays stable for invalid blocks', () => {
   assert.equal(CORRECTION_BLOCK_FALLBACK, 'Esta parte de la corrección no pudo generarse. Reinténtalo.')
+})
+
+test('removes visible technical literals from progressive display text', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    'El sistema queda:',
+    '',
+    'undefined',
+    '',
+    '**Dónde se ve en la solución**',
+    'Resultado: undefined',
+    '',
+    'Continúa la explicación.',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.equal(visible.includes('El sistema queda:'), true)
+  assert.equal(visible.includes('Continúa la explicación.'), true)
 })

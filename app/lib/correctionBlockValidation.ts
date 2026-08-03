@@ -81,6 +81,15 @@ export function sanitizeCorrectionListItem(value: string) {
     .trim()
 }
 
+export function sanitizeCorrectionDisplayText(value: string) {
+  return value
+    .split('\n')
+    .map(line => line.replace(/(:\s*)(?:undefined|null|NaN)\b/gi, '$1').trimEnd())
+    .filter(line => !/^\s*(?:undefined|null|NaN)\s*$/i.test(stripMarkdownNoise(line)))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+}
+
 export function containsVisibleTechnicalLiteral(text: string) {
   return /\b(?:undefined|null|NaN)\b/i.test(text)
 }
@@ -99,6 +108,13 @@ function stripCodeFence(value: string) {
     .trim()
     .replace(/^```(?:json|markdown)?\s*/i, '')
     .replace(/\s*```$/i, '')
+    .trim()
+}
+
+function stripMarkdownNoise(value: string) {
+  return value
+    .replace(/^[\s>*_`~-]+/, '')
+    .replace(/[\s*_`~-]+$/, '')
     .trim()
 }
 

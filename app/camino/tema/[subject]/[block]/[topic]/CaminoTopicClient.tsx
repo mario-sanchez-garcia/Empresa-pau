@@ -877,7 +877,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               )}
             </div>
             <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>
-              Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU/EVAU relacionado.
+              Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU relacionado.
             </p>
           </header>
 
@@ -1132,7 +1132,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           {/* Práctica PAU */}
           <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
             <div style={{ height: 2, background: '#0f172a', marginBottom: 10 }} />
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#0f172a', marginBottom: 8 }}>Práctica PAU/EVAU</p>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#0f172a', marginBottom: 8 }}>Práctica PAU</p>
             <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
             <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#0f172a', color: 'white', borderRadius: 4, padding: '10px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
               Hacer ejercicio PAU de este tema <ArrowRight size={12} />
@@ -1534,7 +1534,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function cleanLessonLine(value: string) {
   return value
-    .replace(/^(Qué es|Teoría rápida|Para qué sirve|Cuándo se usa en PAU\/EVAU|Error típico)\s*:\s*/i, '')
+    .replace(/^(Qué es|Teoría rápida|Para qué sirve|Cuándo se usa en PAU|Error típico)\s*:\s*/i, '')
     .trim()
 }
 
@@ -1566,7 +1566,7 @@ function StructuredLesson({ topic }: { topic: CaminoCurriculumTopic }) {
   const idea = pickLessonLine(topic, 'Qué es', topic.explanation)
   const theory = pickLessonLine(topic, 'Teoría rápida')
   const use = pickLessonLine(topic, 'Para qué sirve')
-  const pau = pickLessonLine(topic, 'Cuándo se usa en PAU/EVAU')
+  const pau = pickLessonLine(topic, 'Cuándo se usa en PAU')
   const alert = pickLessonLine(topic, 'Error típico', topic.commonMistakes?.[0] ?? '')
   const tags = topic.examTags?.slice(0, 4) ?? []
 

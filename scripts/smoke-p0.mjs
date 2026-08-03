@@ -453,7 +453,7 @@ assert(
   caminoCalendar.includes('buildMission({') &&
     caminoCalendar.includes("kind: 'evau_practice'") &&
     caminoCalendar.includes('item: secondItem') &&
-    caminoCalendar.includes('Después del curso, practica con un ejercicio PAU/EVAU del mismo tema.') &&
+    caminoCalendar.includes('Después del curso, practica con un ejercicio PAU del mismo tema.') &&
     caminoCalendar.includes("!\/flashcard|tarjeta|mazo|historial|corrige un error|revisa tus errores\/i.test") &&
     caminoMissionGenerator.includes("type === 'flashcard' ? 'ejercicio_corto' : type") &&
     caminoMissionGenerator.includes('title: `Refuerza ${weakBlocks[0]}`') &&

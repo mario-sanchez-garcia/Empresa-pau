@@ -100,7 +100,7 @@ function missionTitle(type: PartialMissionType, blockDisplay: string, topic?: st
   const ctx = topic ? `${blockDisplay} — ${topic}` : blockDisplay
   switch (type) {
     case 'conceptual_review': return `Repaso de conceptos: ${ctx}`
-    case 'evau_practice':     return `Práctica EVAU: ${ctx}`
+    case 'evau_practice':     return `Práctica PAU: ${ctx}`
     case 'block_mock':        return `Mini-simulacro: ${ctx}`
     case 'final_mini_mock':   return `Simulacro final antes del parcial: ${ctx}`
   }

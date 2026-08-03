@@ -44,7 +44,7 @@ export default function TerminosPage() {
         </S>
 
         <S n="02" title="Descripción del servicio" M={M}>
-          <P>Kairo es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado (Camino PAU), chat educativo con asistente IA e historial de correcciones y progreso.</P>
+          <P>Kairo es una plataforma educativa de preparación para la PAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado (Camino PAU), chat educativo con asistente IA e historial de correcciones y progreso.</P>
         </S>
 
         <S n="03" title="Edad mínima y consentimiento parental" M={M}>
@@ -66,7 +66,7 @@ export default function TerminosPage() {
         </S>
 
         <S n="06" title="Contenido educativo" M={M}>
-          <P>Los exámenes están basados en pruebas oficiales de la PAU/EVAU de acceso público. Las correcciones son generadas por inteligencia artificial y tienen carácter orientativo. Las correcciones de Kairo no garantizan ninguna nota en la PAU/EVAU real.</P>
+          <P>Los exámenes están basados en pruebas oficiales de la PAU de acceso público. Las correcciones son generadas por inteligencia artificial y tienen carácter orientativo. Las correcciones de Kairo no garantizan ninguna nota en la PAU real.</P>
         </S>
 
         <S n="07" title="Planes y precios" M={M}>

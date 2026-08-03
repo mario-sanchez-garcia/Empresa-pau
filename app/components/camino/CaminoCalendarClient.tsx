@@ -259,7 +259,7 @@ function missionMeta(kind: MissionKind, subject: string, topic?: string, block?:
   return { href: target, target, source: 'camino_pau' as const, xpPolicy: 'after_correction' as const }
 }
 function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count === 4) return [0, 1, 3, 5]; if (count === 5) return [0, 1, 2, 4, 5]; if (count === 6) return [0, 1, 2, 3, 4, 5]; return [0, 1, 2, 3, 4, 5, 6] }
-function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU/EVAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
+function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
 function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') return 4; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
@@ -717,8 +717,8 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
         : canUseSimulation ? `Parcial próximo${upcoming ? ` (${priorityLabel(upcoming.priority)})` : ''}: toca simulacro del mismo bloque sin superar tu límite mensual.`
           : simulationLimitReached ? 'Has alcanzado el límite de simulacros de tu plan este mes. Te proponemos ejercicios PAU del mismo tema.'
             : blockDone ? 'Bloque completado: pasamos a ejercicio PAU mixto y repaso inteligente, sin repetir teoría básica.'
-              : topicDone ? 'Tema completado: evitamos repetir teoría básica y pasamos a práctica PAU/EVAU.'
-                : sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU/EVAU del bloque.` : weakItem ? `Refuerzo concreto de ${curriculumItem?.topic ?? weakArea?.topic ?? subject} por una corrección baja anterior.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
+              : topicDone ? 'Tema completado: evitamos repetir teoría básica y pasamos a práctica PAU.'
+                : sameDay ? `Parcial hoy: ${sameDay.block || sameDay.topic || sameDay.name || sameDay.subject}. Prioridad a ejercicios PAU del bloque.` : weakItem ? `Refuerzo concreto de ${curriculumItem?.topic ?? weakArea?.topic ?? subject} por una corrección baja anterior.` : curriculumItem ? `${curriculumItem.block} · explicación, práctica guiada y ejercicio PAU.` : upcoming?.subject === subject ? `Parcial cercano (${priorityLabel(upcoming.priority)}): priorizamos ${subject}.` : onboarding.preparationFeeling === 'Me cuesta organizarme' ? 'Poco volumen, mucha claridad.' : 'Reparto equilibrado según tu onboarding.'
       if (missions.length < maxCorrectableMissions) {
         const missionItem = curriculumItem ?? rawCurriculumItem
         missions.push(buildMission({
@@ -730,7 +730,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
           item: missionItem,
           title: kind === 'mock_exam'
             ? `Simulacro corto: ${missionItem?.block ?? subject}`
-            : schoolAdjusted.adjustment ? curriculumItem ? `Base previa: ${curriculumItem.topic}` : `Base previa de ${rawCurriculumItem?.block ?? subject}` : weakItem ? `Refuerza ${curriculumItem?.topic ?? weakArea?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : topicDone || blockDone ? `Ejercicio PAU/EVAU de ${missionItem?.topic ?? subject}` : titleFor(kind, subject, missionItem ?? undefined),
+            : schoolAdjusted.adjustment ? curriculumItem ? `Base previa: ${curriculumItem.topic}` : `Base previa de ${rawCurriculumItem?.block ?? subject}` : weakItem ? `Refuerza ${curriculumItem?.topic ?? weakArea?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : topicDone || blockDone ? `Ejercicio PAU de ${missionItem?.topic ?? subject}` : titleFor(kind, subject, missionItem ?? undefined),
           reason,
           minutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60),
           xp: kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
@@ -747,8 +747,8 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
           kind: 'evau_practice',
           subject,
           item: secondItem,
-          title: blockDone ? `Ejercicio PAU mixto de ${secondItem?.block ?? subject}` : `Ejercicio PAU/EVAU de ${secondItem?.topic ?? subject}`,
-          reason: topicDone || blockDone ? 'Seguimos practicando con PAU/EVAU porque este contenido ya está trabajado.' : 'Después del curso, practica con un ejercicio PAU/EVAU del mismo tema.',
+          title: blockDone ? `Ejercicio PAU mixto de ${secondItem?.block ?? subject}` : `Ejercicio PAU de ${secondItem?.topic ?? subject}`,
+          reason: topicDone || blockDone ? 'Seguimos practicando con PAU porque este contenido ya está trabajado.' : 'Después del curso, practica con un ejercicio PAU del mismo tema.',
           minutes: Math.min(30, Math.max(15, Math.round(minutes / 3))),
           xp: 25,
         }))

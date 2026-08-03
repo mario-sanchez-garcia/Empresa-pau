@@ -58,7 +58,7 @@ export default function AvisoLegalPage() {
         </S>
 
         <S n="03" title="Objeto del sitio web" M={M}>
-          <P>Kairo es una plataforma educativa de preparación para la PAU/EVAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado e historial de progreso, dirigida a estudiantes de bachillerato en España.</P>
+          <P>Kairo es una plataforma educativa de preparación para la PAU que ofrece exámenes oficiales con corrección mediante inteligencia artificial, simulacros de examen, plan de estudio personalizado e historial de progreso, dirigida a estudiantes de bachillerato en España.</P>
           <P>El acceso y uso del sitio web atribuye la condición de usuario e implica la aceptación plena de los presentes términos, de los <A href="/legal/terminos">Términos y Condiciones</A> y de la <A href="/legal/privacidad">Política de Privacidad</A>.</P>
         </S>
 

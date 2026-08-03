@@ -133,14 +133,29 @@ function repairTechnicalPlaceholderGaps(value: string) {
     if (
       normalizedHeading.includes('sistema resultante') ||
       normalizedHeading.includes('sistema queda') ||
+      normalizedHeading.includes('sistema lineal') ||
+      normalizedHeading.includes('sistema a resolver') ||
+      normalizedHeading.includes('sistema de ecuaciones') ||
+      normalizedHeading.includes('vector') ||
+      normalizedHeading.includes('matriz') ||
+      normalizedHeading.includes('determinante') ||
       normalizedPreviousContent.endsWith('el sistema es:') ||
       normalizedPreviousContent.endsWith('el sistema queda:') ||
       normalizedPreviousContent.endsWith('sistema a resolver:') ||
-      normalizedPreviousContent.includes('el sistema es:')
+      normalizedPreviousContent.endsWith('las ecuaciones que se montan son:') ||
+      normalizedPreviousContent.endsWith('las tres ecuaciones que se montan son:') ||
+      normalizedPreviousContent.endsWith('el vector es:') ||
+      normalizedPreviousContent.endsWith('la matriz es:') ||
+      normalizedPreviousContent.endsWith('el determinante es:') ||
+      normalizedPreviousContent.includes('el sistema es:') ||
+      normalizedPreviousContent.includes('las ecuaciones que se montan son:') ||
+      normalizedPreviousContent.includes('el vector es:') ||
+      normalizedPreviousContent.includes('la matriz es:') ||
+      normalizedPreviousContent.includes('el determinante es:')
     ) {
       const system = buildSystemFromPreviousEquations(lines, index)
       if (system) return system
-      return 'El sistema debe construirse con las ecuaciones que traducen las condiciones del enunciado antes de resolverlo.'
+      return 'Este paso matemático no se generó correctamente. Reintenta la corrección para obtener el desarrollo completo.'
     }
 
     if (normalizedHeading.includes('donde se ve en la solucion')) {
@@ -155,7 +170,7 @@ function findPreviousHeading(lines: string[], index: number) {
   for (let i = index - 1; i >= 0; i -= 1) {
     const clean = stripMarkdownNoise(lines[i] ?? '')
     if (!clean) continue
-    if (/^(#{1,4}\s*)?(sistema resultante|el sistema queda|d[oó]nde se ve en la soluci[oó]n|sistema a resolver)\b/i.test(clean)) {
+    if (/^(#{1,4}\s*)?(sistema resultante|el sistema queda|sistema lineal|sistema de ecuaciones|vector|matriz|determinante|d[oó]nde se ve en la soluci[oó]n|sistema a resolver)\b/i.test(clean)) {
       return clean
     }
     if (/^#{1,4}\s+/.test(clean) && index - i > 1) return clean

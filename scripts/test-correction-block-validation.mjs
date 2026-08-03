@@ -148,5 +148,51 @@ test('repairs placeholder after prose ending with system introduction', () => {
   ].join('\n'))
 
   assert.equal(visible.includes('undefined'), false)
-  assert.match(visible, /sistema debe construirse/i)
+  assert.match(visible, /reintenta la corrección/i)
+})
+
+test('repairs placeholder after Sistema lineal heading', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    'Sistema lineal',
+    '',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.match(visible, /reintenta la corrección/i)
+})
+
+test('repairs placeholder after why text introducing mounted equations', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    '**Dónde se ve en la solución**',
+    '',
+    'Las tres ecuaciones que se montan son:',
+    '',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.match(visible, /reintenta la corrección/i)
+})
+
+test('does not expose placeholder in vector context', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    'Vector solución',
+    '',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.match(visible, /reintenta la corrección/i)
+})
+
+test('does not expose placeholder in matrix context', () => {
+  const visible = sanitizeCorrectionDisplayText([
+    'Matriz asociada',
+    '',
+    'undefined',
+  ].join('\n'))
+
+  assert.equal(visible.includes('undefined'), false)
+  assert.match(visible, /reintenta la corrección/i)
 })

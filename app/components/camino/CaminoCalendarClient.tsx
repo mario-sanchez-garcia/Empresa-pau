@@ -871,6 +871,23 @@ export default function CaminoCalendarClient() {
   const [monthlySimsUsed, setMonthlySimsUsed] = useState(0)
   const isSunday = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Madrid', weekday: 'short' }) === 'Sun'
 
+  // Auth guard: every other protected route in the app redirects to /login
+  // when there's no session (settings, planning, simulacros, zona...) but
+  // this page never did. Every session-dependent effect below just no-ops
+  // on a missing session, so an unauthenticated visit — e.g. the daily
+  // mission email opened in a browser/webview that doesn't share the
+  // logged-in session — rendered a permanently blank page (see the
+  // `!hasProfile` early return further down) instead of sending the user
+  // to log in.
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return
+      if (!data.session) router.push('/login?returnTo=%2Fcamino')
+    })
+    return () => { cancelled = true }
+  }, [router])
+
   // First-session redirect: when calendar is ready, send new users to their first mission
   useEffect(() => {
     if (!isFirstSession || caminoReadyStatus !== 'ready' || calendar.length === 0) return

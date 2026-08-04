@@ -66,6 +66,18 @@ export const formatExamText = normalizeExamStatement
 export function normalizeCorrectionText(input?: string | null) {
   if (!input) return ''
   let text = input
+  text = repairUnbalancedRowOperationDollar(text)
+  text = repairMissingLatexEnvironmentOpener(text)
+  // Strict alternating $$ pairing (1st opens, 2nd closes, 3rd opens, ...) BEFORE the
+  // lazy-regex $$...$$ matching below runs. That later matching just hunts for the
+  // NEXT "$$" with no notion of nesting, so two adjacent $$ blocks (e.g. consecutive
+  // Gauss-elimination matrices) with only inline $...$ math between them get merged
+  // into one giant "math" span, swallowing everything in between unrendered.
+  text = normalizeDisplayMathBlocks(text)
+  // Same idea for Markdown headings: "## Consejo final" only renders as a heading if
+  // it starts a new block. A model response that runs several sections together with
+  // single \n instead of blank lines leaves headings as literal "##" text mid-paragraph.
+  text = promoteInlineHeadingsToBlocks(text)
   text = unwrapLatexCodeFences(text)
   text = normalizeMathDelimiters(text)
   text = mapOutsideCodeFences(text, removeVisibleInvalidValues)
@@ -209,7 +221,10 @@ function unwrapLatexCodeFences(text: string) {
 }
 
 function formatOrphanCasesBlocks(text: string) {
-  return mapOutsideCodeFences(text, part => part.replace(
+  // mapOutsideMath (not just mapOutsideCodeFences): a "\end{cases}" line that's
+  // already inside a $$...$$ block from an earlier step must be left alone, or
+  // it gets wrapped in a second, nested $$...$$ block on top of the first.
+  return mapOutsideMath(text, part => part.replace(
     /(^|\n)(?!\s*\$\$)([^\n$]*?\\end\{cases\})/g,
     (match, prefix, body) => {
       const rows = body
@@ -372,6 +387,54 @@ function wrapDanglingLatexEnvironmentFragments(text: string) {
       return `${prefix}\n\n$$\n${formatLatexEnvironment(environment, cleanBody)}\n$$\n\n`
     }
   )
+}
+
+// Repairs a specific, recurring LLM slip: a Gauss row/column-operation reference
+// (e.g. "F_3 \leftarrow F_3 - 4F_1$") missing its OPENING "$" while still closing
+// with one. Left alone, this single missing delimiter throws off every subsequent
+// $...$ pairing for the rest of the document — the regex-based math tokenizer has
+// no way to distinguish an orphan "$" from a real opener, so everything downstream
+// silently stops being recognized as math/headings and renders as raw text. Must
+// run before any other $-pairing logic touches the text.
+function repairUnbalancedRowOperationDollar(text: string) {
+  return mapOutsideCodeFences(text, part => part.replace(
+    /(^|[^$])(\b[A-Z]_\d+\s*\\(?:leftarrow|to|rightarrow)\b[^$\n]*?)\$/g,
+    (match, before, body) => `${before}$${body}$`
+  ))
+}
+
+// Repairs a paragraph that closes a LaTeX environment ("...\end{cases}$$") without
+// ever opening it — another recurring LLM slip, distinct from the missing-$ one
+// above. Scoped to one paragraph (split on blank lines) so it can't reach across
+// unrelated content; if a model response runs everything together with single \n
+// instead of blank lines, the whole thing is treated as one paragraph and the
+// opener is inserted right before the first row-content line, which is still safe.
+function repairMissingLatexEnvironmentOpener(text: string) {
+  return text.split(/\n{2,}/).map(paragraph => {
+    const envMatch = paragraph.match(/\\end\{(cases|pmatrix|bmatrix|vmatrix|matrix|aligned)\}/)
+    if (!envMatch) return paragraph
+    const env = envMatch[1]
+    if (paragraph.includes(`\\begin{${env}}`)) return paragraph
+
+    const lines = paragraph.split('\n')
+    let insertAt = lines.findIndex(line => /&|\\\\/.test(line) && !line.includes(`\\end{${env}}`))
+    if (insertAt === -1) insertAt = lines.findIndex(line => line.includes(`\\end{${env}}`))
+    if (insertAt === -1) return paragraph
+
+    lines.splice(insertAt, 0, `$$\n\\begin{${env}}`)
+    return lines.join('\n')
+  }).join('\n\n')
+}
+
+// A "## Heading" only renders as an actual Markdown heading if it starts a new
+// block (blank line before it). A response that strings several sections together
+// with a single space/newline instead leaves "## Consejo final" etc. as literal
+// text in the middle of a paragraph. Force a paragraph break before it.
+function promoteInlineHeadingsToBlocks(text: string) {
+  // Group 1 excludes "#" too, otherwise the regex can match starting on the
+  // first "#" of "## Heading" itself, treating the second "#" as a new match
+  // and splitting "##" into a stray "#" followed by a demoted "# Heading".
+  return text.replace(/([^\n#])[ \t]*\n?[ \t]*(#{1,4}[ \t]+\S)/g, '$1\n\n$2')
 }
 
 function wrapOrphanLatexFragments(text: string) {

@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
   // existiera y no han vuelto a tocar sus asignaturas desde entonces.
   const { data: perfil } = await db
     .from('perfiles')
-    .select('subjects')
+    .select('subjects, username')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -98,6 +98,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     onboarding: {
       community: cleanCommunity(payload.community),
+      username: cleanString(perfil?.username) ?? cleanString(payload.username),
       schoolName: cleanString(payload.school_name),
       schoolSource: cleanSchoolSource(payload.school_source),
       subjects,

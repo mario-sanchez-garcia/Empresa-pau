@@ -432,19 +432,32 @@ export default function OnboardingFlow() {
     setSavingMsgIdx(0)
     setStep('saving')
     const completedAt = new Date().toISOString()
+    const usernameForSave = data.username?.trim() || loadOnboarding().username?.trim() || ''
+    const usernameErrorForSave = validateUsername(usernameForSave)
+    if (usernameErrorForSave) {
+      setSavingError(usernameErrorForSave)
+      setStep('confirm')
+      return
+    }
     const selectedEnabled = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
     const upcomingExams = sanitizeOnboardingExams(data.studentExams ?? [], selectedEnabled)
-    saveOnboarding({ ...data, subjects: selectedEnabled, studentExams: upcomingExams, completedAt })
+    saveOnboarding({ ...data, username: usernameForSave, subjects: selectedEnabled, studentExams: upcomingExams, completedAt })
     try {
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
+      if (!token) {
+        setSavingError('No hemos podido confirmar tu sesión. Inicia sesión otra vez para guardar tu perfil.')
+        setStep('confirm')
+        return
+      }
+
       if (token) {
         const setupRes = await fetch('/api/onboarding/setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             routeId: 'completa',
-            username: data.username?.trim() || null,
+            username: usernameForSave,
             community: data.community,
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,

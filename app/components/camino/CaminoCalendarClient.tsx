@@ -3265,6 +3265,9 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   if (subjects.length === 0) return null
 
   const examSlug = suggestion ? (CAMINO_TO_SIM_SUBJECT[subjectSlug(suggestion.subject)] ?? subjectSlug(suggestion.subject)) : null
+  const examSearchTerm = suggestion
+    ? (suggestion.focusNote || suggestion.subject).replace(/^repasa\s+/i, '').slice(0, 140)
+    : ''
 
   return (
     <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
@@ -3294,8 +3297,11 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
           <p className="text-[11px] font-black text-blue-900">{suggestion.subject}</p>
           {suggestion.focusNote && <p className="mt-0.5 text-[10px] font-semibold text-blue-700">{suggestion.focusNote}</p>}
           {examSlug && (
-            <a href={`/examenes?subject=${encodeURIComponent(examSlug)}`} className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black text-blue-600">
-              Ir a practicar →
+            <a
+              href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
+              className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black text-blue-600"
+            >
+              Buscar preguntas reales →
             </a>
           )}
         </div>

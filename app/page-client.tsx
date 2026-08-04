@@ -471,6 +471,11 @@ function readSubjectFromUrl(): Asignatura | null {
   return HOME_SUBJECTS.includes(subject as Asignatura) ? subject as Asignatura : null
 }
 
+function readExamSearchFromUrl(): string {
+  if (typeof window === 'undefined') return ''
+  return new URLSearchParams(window.location.search).get('search')?.trim().slice(0, 140) ?? ''
+}
+
 function readDefaultSubject(): Asignatura | null {
   if (typeof window === 'undefined') return null
   try {
@@ -928,6 +933,12 @@ export default function Home() {
     if (initialSubject) cambiarAsignatura(initialSubject)
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Inicialización desde URL en mount único — sin bucle posible
     if (urlSection) setSeccion(urlSection)
+    const initialExamSearch = readExamSearchFromUrl()
+    if (initialExamSearch) {
+      setSeccion('examenes')
+      setSearchQuery(initialExamSearch)
+      setSearchFocused(true)
+    }
     if (urlSection === 'chat' && params.get('from') === 'camino_course') {
       const subject = params.get('subject') ?? ''
       const block = params.get('block') ?? ''

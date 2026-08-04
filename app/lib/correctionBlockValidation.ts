@@ -10,11 +10,23 @@ export function sanitizeCorrectionListItem(value: string) {
   return /^[\s\-–—.]+$/.test(cleaned) ? '' : cleaned
 }
 
+const STANDALONE_TECHNICAL_LITERAL = /^\$*\s*(?:undefined|null|NaN)\s*\$*$/i
+const TECHNICAL_LITERAL_WORD = /\b(?:undefined|null|NaN)\b/gi
+const GENERIC_LITERAL_FALLBACK = 'Este paso no se generó correctamente. Reintenta la corrección para obtener el desarrollo completo.'
+
 export function sanitizeCorrectionDisplayText(value: string) {
   return repairTechnicalPlaceholderGaps(value)
     .split('\n')
-    .map(line => line.replace(/(:\s*)(?:undefined|null|NaN)\b/gi, '$1').trimEnd())
-    .filter(line => !/^\s*(?:undefined|null|NaN)\s*$/i.test(stripMarkdownNoise(line)))
+    .map(line => {
+      const stripped = stripMarkdownNoise(line)
+      // Catch-all safety net: the smart repair above only fires for phrasings it
+      // recognizes ("el sistema es:", "sistema resultante", ...). Any other bare
+      // occurrence of these English tokens — whatever precedes them, however they're
+      // wrapped ($$undefined$$, a lone word, etc.) — has no legitimate place in a
+      // Spanish PAU correction, so it's always safe to replace rather than pattern-match.
+      if (STANDALONE_TECHNICAL_LITERAL.test(stripped)) return GENERIC_LITERAL_FALLBACK
+      return line.replace(TECHNICAL_LITERAL_WORD, '(dato no generado)').trimEnd()
+    })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
 }
@@ -29,7 +41,7 @@ function stripMarkdownNoise(value: string) {
 function repairTechnicalPlaceholderGaps(value: string) {
   const lines = value.split('\n')
   return lines.map((line, index) => {
-    if (!/^\s*(?:undefined|null|NaN)\s*$/i.test(stripMarkdownNoise(line))) return line
+    if (!STANDALONE_TECHNICAL_LITERAL.test(stripMarkdownNoise(line))) return line
 
     const previousHeading = findPreviousHeading(lines, index)
     const normalizedHeading = normalizeHeading(previousHeading)
@@ -61,7 +73,7 @@ function repairTechnicalPlaceholderGaps(value: string) {
     ) {
       const system = buildSystemFromPreviousEquations(lines, index)
       if (system) return system
-      return 'Este paso matemático no se generó correctamente. Reintenta la corrección para obtener el desarrollo completo.'
+      return GENERIC_LITERAL_FALLBACK
     }
 
     if (normalizedHeading.includes('donde se ve en la solucion')) {

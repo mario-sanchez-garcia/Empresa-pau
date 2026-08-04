@@ -13,6 +13,7 @@ export const VALID_HINT_KEYS = [
   'hint_simulacros',  // First visit to Simulacros
   'hint_examenes',    // First visit to Exámenes
   'hint_zona',        // First visit to La Zona
+  'hint_zona_cursos', // First visit to La Zona → Mis Cursos
   'hint_tutor',       // First visit to Tutor/Chat
   'hint_historial',   // First visit to Historial
 ] as const

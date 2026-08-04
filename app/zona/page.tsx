@@ -3,7 +3,7 @@
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LayoutGrid, Zap } from 'lucide-react'
+import { BookOpen, LayoutGrid, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
@@ -119,6 +119,9 @@ export default function ZonaPage() {
               <LayoutGrid size={13} /> Mi Espacio
             </a>
           )}
+          <a href="/zona/cursos" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#64748b', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <BookOpen size={13} /> Mis Cursos
+          </a>
         </div>
 
         {/* Content */}

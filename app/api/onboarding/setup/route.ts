@@ -4,6 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
+import { normalizeUsername, validateUsername } from '@/app/lib/username'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,11 +48,20 @@ export async function POST(request: NextRequest) {
   const weeklyStudyDays = cleanString(body.weeklyStudyDays)
   const studentExams = cleanStudentExams(body.studentExams)
 
+  if (username) {
+    const validationError = validateUsername(username)
+    if (validationError) return NextResponse.json({ error: validationError }, { status: 400 })
+  }
+
   const entryDate = new Date().toISOString().slice(0, 10)
 
   const serviceDb = (() => {
     try { return createServiceClient() } catch { return null }
   })()
+
+  if (!serviceDb && username) {
+    return NextResponse.json({ error: 'No se pudo guardar el nombre de usuario' }, { status: 500 })
+  }
 
   if (serviceDb) {
     try {
@@ -79,13 +89,28 @@ export async function POST(request: NextRequest) {
     } catch { /* non-critical */ }
 
     if (username) {
-      try {
-        const { normalizeUsername } = await import('@/app/lib/username')
-        await serviceDb.from('perfiles').upsert(
-          { id: user.id, username, username_normalized: normalizeUsername(username) },
-          { onConflict: 'id' }
-        )
-      } catch { /* non-critical */ }
+      const normalized = normalizeUsername(username)
+      const { data: existing, error: existingError } = await serviceDb
+        .from('perfiles')
+        .select('id')
+        .eq('username_normalized', normalized)
+        .neq('id', user.id)
+        .maybeSingle()
+
+      if (existingError) {
+        return NextResponse.json({ error: 'No se pudo verificar el nombre de usuario' }, { status: 500 })
+      }
+      if (existing) {
+        return NextResponse.json({ error: 'Ese nombre de usuario ya está en uso' }, { status: 409 })
+      }
+
+      const { error: usernameError } = await serviceDb.from('perfiles').upsert(
+        { id: user.id, username, username_normalized: normalized },
+        { onConflict: 'id' }
+      )
+      if (usernameError) {
+        return NextResponse.json({ error: 'No se pudo guardar el nombre de usuario' }, { status: 500 })
+      }
     }
 
     if (Array.isArray(body.subjects)) {

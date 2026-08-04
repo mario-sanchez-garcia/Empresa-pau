@@ -439,7 +439,7 @@ export default function OnboardingFlow() {
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
       if (token) {
-        await fetch('/api/onboarding/setup', {
+        const setupRes = await fetch('/api/onboarding/setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
@@ -458,6 +458,11 @@ export default function OnboardingFlow() {
             onboardingCompleted: true,
           }),
         })
+        if (!setupRes.ok) {
+          const setupJson = await setupRes.json().catch(() => null) as { error?: string } | null
+          setSavingError(setupJson?.error ?? 'No hemos podido guardar tu perfil. Prueba otra vez en unos segundos.')
+          return
+        }
 
         const subjectSlugs = selectedEnabled
           .map(s => SUBJECT_TO_SLUG[s])

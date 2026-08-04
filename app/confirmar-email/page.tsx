@@ -37,8 +37,10 @@ function CheckIcon() {
 
 function ConfirmarEmailContent() {
   const searchParams = useSearchParams()
-  const email = searchParams.get('email') ?? ''
+  const initialEmail = searchParams.get('email') ?? ''
+  const expired = searchParams.get('expired') === '1'
 
+  const [email, setEmail] = useState(initialEmail)
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [cooldown, setCooldown] = useState(false)
@@ -54,13 +56,19 @@ function ConfirmarEmailContent() {
 
   async function handleResend() {
     if (cooldown || status === 'sending') return
+    const cleanEmail = email.trim().toLowerCase()
+    if (!cleanEmail) {
+      setErrorMsg('Escribe tu correo para reenviar el enlace.')
+      setStatus('error')
+      return
+    }
     setStatus('sending')
     setErrorMsg('')
     try {
       const res = await fetch('/api/auth/resend-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: cleanEmail }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -213,8 +221,22 @@ function ConfirmarEmailContent() {
             Revisa tu<br />correo.
           </h1>
 
+          {expired && (
+            <p className="ce-d3" style={{
+              fontFamily: M,
+              fontSize: 12,
+              lineHeight: 1.7,
+              color: 'rgba(255,255,255,0.52)',
+              textAlign: 'center',
+              maxWidth: 420,
+              margin: '-10px 0 24px',
+            }}>
+              Tu enlace anterior ha caducado o ya se ha usado. Te enviaremos uno nuevo para terminar la cuenta.
+            </p>
+          )}
+
           {/* Email pill */}
-          {email && (
+          {initialEmail ? (
             <div className="ce-d3" style={{ marginBottom: 32 }}>
               <div style={{
                 display: 'inline-flex',
@@ -232,9 +254,41 @@ function ConfirmarEmailContent() {
                   color: '#f97316',
                   letterSpacing: '0.02em',
                 }}>
-                  {email}
+                  {initialEmail}
                 </span>
               </div>
+            </div>
+          ) : (
+            <div className="ce-d3" style={{ width: '100%', marginBottom: 32 }}>
+              <label style={{
+                display: 'block',
+                fontFamily: M,
+                fontSize: 9,
+                letterSpacing: '.16em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.28)',
+                marginBottom: 8,
+              }}>
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '14px 16px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.06)',
+                  color: '#fff',
+                  fontFamily: M,
+                  fontSize: 13,
+                  outline: 'none',
+                }}
+              />
             </div>
           )}
 

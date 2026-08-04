@@ -15,15 +15,31 @@ function CallbackHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [errorMsg, setErrorMsg] = useState('')
+  const [expiredEmailLink, setExpiredEmailLink] = useState(false)
 
   useEffect(() => {
     const code = searchParams.get('code')
-    const errorParam = searchParams.get('error')
-    const errorDescription = searchParams.get('error_description')
+    const hashParams = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      : new URLSearchParams()
+    const errorParam = searchParams.get('error') ?? hashParams.get('error')
+    const errorCode = searchParams.get('error_code') ?? hashParams.get('error_code')
+    const errorDescription = searchParams.get('error_description') ?? hashParams.get('error_description')
     const next = searchParams.get('next') ?? '/camino'
 
     if (errorParam) {
-      setErrorMsg(errorDescription ?? errorParam)
+      const description = errorDescription ?? errorParam
+      const isExpiredEmailLink =
+        errorCode === 'otp_expired' ||
+        /email link is invalid|expired|otp/i.test(description)
+
+      if (isExpiredEmailLink) {
+        setExpiredEmailLink(true)
+        setErrorMsg('El enlace de confirmación ha caducado o ya se ha usado. Pide un correo nuevo para continuar.')
+      } else {
+        setExpiredEmailLink(false)
+        setErrorMsg(description)
+      }
       return
     }
 
@@ -137,15 +153,25 @@ function CallbackHandler() {
         padding: 24,
         gap: 16,
       }}>
-        <div style={{ color: '#f87171', fontSize: 14, maxWidth: 400, textAlign: 'center', lineHeight: 1.6 }}>
-          Error al iniciar sesión: {errorMsg}
+        <div style={{ color: '#f87171', fontSize: 14, maxWidth: 440, textAlign: 'center', lineHeight: 1.6 }}>
+          {expiredEmailLink ? errorMsg : `Error al iniciar sesión: ${errorMsg}`}
         </div>
-        <button
-          onClick={() => router.replace('/login')}
-          style={{ padding: '10px 24px', background: '#fff', color: '#0d0d0d', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
-        >
-          Volver al login
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {expiredEmailLink && (
+            <button
+              onClick={() => router.replace('/confirmar-email?expired=1')}
+              style={{ padding: '10px 24px', background: '#fff', color: '#0d0d0d', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+            >
+              Reenviar correo
+            </button>
+          )}
+          <button
+            onClick={() => router.replace('/login')}
+            style={{ padding: '10px 24px', background: expiredEmailLink ? 'transparent' : '#fff', color: expiredEmailLink ? '#fff' : '#0d0d0d', border: expiredEmailLink ? '1px solid rgba(255,255,255,0.24)' : 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+          >
+            Volver al login
+          </button>
+        </div>
       </div>
     )
   }

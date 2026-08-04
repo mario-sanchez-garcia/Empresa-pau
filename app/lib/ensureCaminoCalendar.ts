@@ -3,6 +3,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { cleanStudentExams } from './camino/cleanStudentExams'
+import { missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { injectAllPartialExamMissions } from './camino/injectPartialExamMissions'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
@@ -280,7 +281,23 @@ export async function ensureCaminoCalendar(
   const workingDaysUntilExam = countWorkingDays(today, EXAM_DATE)
   const ratio = workingDaysUntilExam > 0 ? (remainingQueue ?? 0) / workingDaysUntilExam : 0
   const rescueMode = ratio > 2
-  const itemsPerDay = rescueMode || ratio > 1.5 ? 2 : 1
+  // itemsPerDay used to come ONLY from the backlog-vs-exam ratio, completely
+  // ignoring how much daily time the student actually declared — a student
+  // with a light backlog who said "2-3 horas/día" still only ever got 1
+  // item/day. Take the larger of the two signals: rescue mode (heavy
+  // backlog) can still push extra items even for a modest daily time, but a
+  // student's declared time is always at least respected.
+  const { data: prefsRow } = await supabase
+    .from('billing_events')
+    .select('payload')
+    .eq('user_id', userId)
+    .eq('event_type', 'onboarding_completed')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const declaredDailyMinutes = (prefsRow?.payload as Record<string, unknown> | null | undefined)?.daily_minutes
+  const ratioItemsPerDay = rescueMode || ratio > 1.5 ? 2 : 1
+  const itemsPerDay = Math.max(ratioItemsPerDay, missionsPerDayForMinutes(typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null))
 
   // Obtener items pendientes de la cola ordenados por posición
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed

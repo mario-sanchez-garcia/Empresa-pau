@@ -8,12 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
 import MonthCalendarOverlay, { MonthCalendarButton } from '@/app/components/camino/MonthCalendarOverlay'
+import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
+import { estimatedMinutesForSlot, missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
@@ -745,26 +747,34 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
             ? `Simulacro corto: ${missionItem?.block ?? subject}`
             : schoolAdjusted.adjustment ? curriculumItem ? `Base previa: ${curriculumItem.topic}` : `Base previa de ${rawCurriculumItem?.block ?? subject}` : weakItem ? `Refuerza ${curriculumItem?.topic ?? weakArea?.topic ?? subject}` : sameDay ? `Foco parcial: ${sameDay.block || sameDay.topic || subject}` : topicDone || blockDone ? `Ejercicio PAU de ${missionItem?.topic ?? subject}` : titleFor(kind, subject, missionItem ?? undefined),
           reason,
-          minutes: Math.min(Math.max(25, Math.round(minutes / 2)), 60),
+          minutes: estimatedMinutesForSlot(minutes, 0),
           xp: kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
         }))
         if (kind === 'mock_exam') plannedSimulationsThisRun += 1
       }
 
-      if (planLimits.caminoMode !== 'limited' && minutes >= 60 && !sameDay && missions.length < maxCorrectableMissions) {
-        const secondItem = curriculumItem ?? rawCurriculumItem
-        missions.push(buildMission({
-          dateISO,
-          slot: 'main-2',
-          role: 'main',
-          kind: 'evau_practice',
-          subject,
-          item: secondItem,
-          title: blockDone ? `Ejercicio PAU mixto de ${secondItem?.block ?? subject}` : `Ejercicio PAU de ${secondItem?.topic ?? subject}`,
-          reason: topicDone || blockDone ? 'Seguimos practicando con PAU porque este contenido ya está trabajado.' : 'Después del curso, practica con un ejercicio PAU del mismo tema.',
-          minutes: Math.min(30, Math.max(15, Math.round(minutes / 3))),
-          xp: 25,
-        }))
+      // Extra main slots scale with the student's declared daily time
+      // (missionsPerDayForMinutes) instead of a hardcoded single second
+      // mission gated on `minutes >= 60` — a student who said 150-180
+      // min/day gets 3-4 main missions, not capped at 2 no matter how much
+      // time they declared.
+      if (planLimits.caminoMode !== 'limited' && !sameDay) {
+        const dailySlotCount = missionsPerDayForMinutes(minutes)
+        for (let slot = 1; slot < dailySlotCount && missions.length < maxCorrectableMissions; slot++) {
+          const secondItem = curriculumItem ?? rawCurriculumItem
+          missions.push(buildMission({
+            dateISO,
+            slot: `main-${slot + 1}`,
+            role: 'main',
+            kind: 'evau_practice',
+            subject,
+            item: secondItem,
+            title: blockDone ? `Ejercicio PAU mixto de ${secondItem?.block ?? subject}` : `Ejercicio PAU de ${secondItem?.topic ?? subject}`,
+            reason: topicDone || blockDone ? 'Seguimos practicando con PAU porque este contenido ya está trabajado.' : 'Después del curso, practica con un ejercicio PAU del mismo tema.',
+            minutes: estimatedMinutesForSlot(minutes, slot),
+            xp: 25,
+          }))
+        }
       }
 
       if (planLimits.includeBonusMissions) {
@@ -1786,6 +1796,7 @@ export default function CaminoCalendarClient() {
             </div>
           )}
           {isRescueMode && <div style={{ padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
+          <WeeklyCheckinBanner />
 
           {/* ── HERO ── */}
           <div className="camino-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>

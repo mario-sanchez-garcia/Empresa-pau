@@ -5,10 +5,10 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { addDays, getMadridToday, isPreferredStudyDay } from './studyDays'
 import { getCaminoPlanLimits } from './caminoPlanLimits'
+import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
 
-const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
-const PERSONALIZATION_VERSION = 'calendar_personalization_v1'
+const PERSONALIZATION_VERSION = 'calendar_personalization_v2'
 
 type PersonalizationPrefs = {
   weeklyStudyDaysValue: number
@@ -47,15 +47,6 @@ function cleanWeeklyDays(value: unknown): number | null {
   return VALID_WEEKLY_DAYS.includes(value as typeof VALID_WEEKLY_DAYS[number])
     ? value as number
     : null
-}
-
-function missionsPerDay(dailyMinutes: number) {
-  return dailyMinutes >= 60 ? 2 : 1
-}
-
-function estimatedMinutesForSlot(dailyMinutes: number, slot: number) {
-  if (slot === 0) return Math.min(Math.max(25, Math.round(dailyMinutes / 2)), 60)
-  return Math.min(30, Math.max(15, Math.round(dailyMinutes / 3)))
 }
 
 function metadataObject(value: Record<string, unknown> | null | undefined) {
@@ -123,7 +114,14 @@ export async function applyCalendarPersonalization(
     if (!prefs) return { applied: false, reason: 'missing_preferences', updatedRows: 0 }
 
     const today = getMadridToday()
-    const preferenceHash = stableHash(`${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}`)
+    // PERSONALIZATION_VERSION is folded into the hash (not just stored
+    // alongside it) so bumping it invalidates every previously-computed
+    // hash and forces re-application on the next run — needed the one time
+    // the formula itself changes (e.g. the missions-per-day/duration
+    // scaling fix), otherwise a student whose weeklyStudyDaysValue/
+    // dailyMinutes never changed would stay stuck on whatever the old
+    // formula produced forever.
+    const preferenceHash = stableHash(`${PERSONALIZATION_VERSION}:${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}`)
     const { data, error } = await supabase
       .from('camino_calendar')
       .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at')
@@ -148,7 +146,7 @@ export async function applyCalendarPersonalization(
       return { applied: false, reason: 'already_current', updatedRows: 0, preferenceHash }
     }
 
-    const capacity = missionsPerDay(prefs.dailyMinutes)
+    const capacity = missionsPerDayForMinutes(prefs.dailyMinutes)
     const appliedFrom = rows[0]?.scheduled_date ?? today
     const applicationHash = stableHash(`${preferenceHash}:${appliedFrom}`)
     const preferredDates = nextPreferredDates(appliedFrom, prefs.weeklyStudyDaysValue, rows.length, capacity)

@@ -15,7 +15,6 @@ const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlz
 type Preferences = {
   displayName: string // kept for local prefs compat; username is separate
   photo: string
-  dailyGoal: number
   educationLevel: string
   defaultSubject: string
   correctionStyle: 'breve' | 'normal' | 'detallado'
@@ -25,12 +24,40 @@ type Preferences = {
 const defaults: Preferences = {
   displayName: '',
   photo: '',
-  dailyGoal: 45,
   educationLevel: '2-bachillerato',
   defaultSubject: 'mates',
   correctionStyle: 'normal',
   longAdvice: true,
 }
+
+// onboarding.subjects son las etiquetas largas que usa el onboarding
+// (los 4 únicos temarios activos en la beta privada); Asignatura por
+// defecto / Historial usan los slugs cortos de /examenes (page-client.tsx).
+const ONBOARDING_LABEL_TO_EXAM_SLUG: Record<string, string> = {
+  'Matemáticas II': 'mates',
+  'Matemáticas CCSS': 'matematicas_ccss',
+  'Lengua Castellana': 'lengua',
+  'Historia de España': 'historia',
+}
+
+// Fallback for "Asignatura por defecto" only, for the brief window before
+// onboarding data has loaded — once it has, the selector is limited to the
+// student's actual active subjects (see activeSubjectOptions).
+const FULL_SUBJECT_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'mates', label: 'Matemáticas II' },
+  { value: 'matematicas_ccss', label: 'Matemáticas CCSS' },
+  { value: 'fisica', label: 'Física' },
+  { value: 'quimica', label: 'Química' },
+  { value: 'lengua', label: 'Lengua' },
+  { value: 'historia', label: 'Historia de España' },
+  { value: 'historia_filosofia', label: 'Historia de la Filosofía' },
+  { value: 'ingles', label: 'Inglés' },
+  { value: 'biologia', label: 'Biología' },
+]
+
+const SUBJECT_LEVEL_LABELS: Record<string, string> = { bajo: 'Voy mal', medio: 'Voy regular', alto: 'Voy bien' }
+const SUBJECT_LEVELS = ['bajo', 'medio', 'alto'] as const
+type SubjectLevel = typeof SUBJECT_LEVELS[number]
 
 const SUBJECT_LABELS: Record<string, string> = {
   mates: 'Mates II', matematicas_ccss: 'Mates CCSS', fisica: 'Física',
@@ -66,6 +93,9 @@ export default function SettingsPage() {
   const [caminoDailyMinutes, setCaminoDailyMinutes] = useState(60)
   const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
   const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
+  const [subjectLevels, setSubjectLevels] = useState<Record<string, SubjectLevel>>({})
+  const [recalculating, setRecalculating] = useState(false)
+  const [recalculateStatus, setRecalculateStatus] = useState('')
   const [customInstructions, setCustomInstructions] = useState('')
   const [customInstructionsLoaded, setCustomInstructionsLoaded] = useState('')
   const [username, setUsername] = useState('')
@@ -100,12 +130,19 @@ export default function SettingsPage() {
         try {
           const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           if (res.ok) {
-            const json = await res.json() as { email_notifications: boolean; username?: string; custom_instructions?: string }
+            const json = await res.json() as { email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string> }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
             if (json.username) setUsername(json.username)
             setCustomInstructions(json.custom_instructions ?? '')
             setCustomInstructionsLoaded(json.custom_instructions ?? '')
+            const levels = json.subject_levels ?? {}
+            setSubjectLevels(
+              Object.fromEntries(
+                Object.entries(levels).filter((entry): entry is [string, SubjectLevel] =>
+                  (SUBJECT_LEVELS as readonly string[]).includes(entry[1])),
+              ),
+            )
           }
         } catch { /* silent */ }
         try {
@@ -252,13 +289,16 @@ export default function SettingsPage() {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
       const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
-      if (token && instructionsChanged) {
+      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0)) {
         const res = await fetch('/api/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ custom_instructions: customInstructions }),
+          body: JSON.stringify({
+            ...(instructionsChanged ? { custom_instructions: customInstructions } : {}),
+            subject_levels: subjectLevels,
+          }),
         })
-        if (res.ok) setCustomInstructionsLoaded(customInstructions.trim())
+        if (res.ok && instructionsChanged) setCustomInstructionsLoaded(customInstructions.trim())
       }
       if (token && onboarding?.completedAt) {
         const nextOnboarding: OnboardingData = {
@@ -300,7 +340,7 @@ export default function SettingsPage() {
         })
         if (!ensureRes.ok) throw new Error('camino_personalization_failed')
         setCaminoPrefsStatus('Tu Camino se ha ajustado para las próximas misiones.')
-      } else if (token && instructionsChanged) {
+      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0)) {
         await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -310,6 +350,37 @@ export default function SettingsPage() {
     } catch {
       setSaved(false)
       setSaveError('No se han podido guardar todos los cambios. Revisa la conexión y vuelve a intentarlo.')
+    }
+  }
+
+  // Manual "recalcular mi plan" — always available, independent of whether
+  // any field actually changed (saving days/minutos/instrucciones already
+  // forces a recalculation as a side effect of changing them; this covers
+  // "nothing changed but I want a fresh look at my plan").
+  async function recalculateNow() {
+    setRecalculating(true)
+    setRecalculateStatus('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) throw new Error('no_session')
+      const res = await fetch('/api/camino/ensure-calendar', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: true }),
+      })
+      if (!res.ok) throw new Error('recalculate_failed')
+      await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ mark_weekly_checkin: true }),
+      }).catch(() => undefined)
+      setRecalculateStatus('Tu Camino se ha recalculado.')
+    } catch {
+      setRecalculateStatus('No se ha podido recalcular. Revisa la conexión e inténtalo de nuevo.')
+    } finally {
+      setRecalculating(false)
+      window.setTimeout(() => setRecalculateStatus(''), 4000)
     }
   }
 
@@ -377,6 +448,19 @@ export default function SettingsPage() {
 
   const displayName = username || preferences.displayName || email.split('@')[0] || '?'
   const initial = displayName[0]?.toUpperCase() ?? '?'
+
+  // Antes este selector tenía las 9 asignaturas de /examenes hardcodeadas
+  // siempre, sin relación con lo elegido en onboarding. Ahora se limita a
+  // las asignaturas activas del alumno; solo cae al listado completo si
+  // todavía no hay onboarding cargado (por ejemplo, justo tras iniciar
+  // sesión) para no dejar el selector vacío.
+  const activeSubjectOptions = (onboarding?.subjects ?? [])
+    .map(label => {
+      const value = ONBOARDING_LABEL_TO_EXAM_SLUG[label]
+      return value ? { value, label } : null
+    })
+    .filter((opt): opt is { value: string; label: string } => opt !== null)
+  const defaultSubjectOptions = activeSubjectOptions.length > 0 ? activeSubjectOptions : FULL_SUBJECT_OPTIONS
 
   return (
     <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
@@ -448,7 +532,7 @@ export default function SettingsPage() {
         {/* Stats band */}
         <div style={{ background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', flexShrink: 0 }}>
           {[
-            { label: 'Objetivo', value: `${preferences.dailyGoal}`, unit: 'min' },
+            { label: 'Tiempo diario', value: `${caminoDailyMinutes}`, unit: 'min' },
             { label: 'Asignatura', value: SUBJECT_LABELS[preferences.defaultSubject] ?? 'Mates II', unit: '' },
             { label: 'Corrección', value: preferences.correctionStyle.charAt(0).toUpperCase() + preferences.correctionStyle.slice(1), unit: '' },
             { label: 'Recordatorios', value: emailNotifications ? 'Activos' : 'Inactivos', unit: '', green: emailNotifications },
@@ -579,40 +663,27 @@ export default function SettingsPage() {
 
           {/* Preferencias */}
           <Section label="Preferencias de estudio" />
+          {/* Único sitio con el tiempo de estudio disponible — antes había un
+              "Objetivo diario" que no hacía nada ("solo orientativo") junto a
+              este, y no quedaba claro cuál mandaba de verdad. */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-            <Field label="Objetivo diario">
-              <select value={preferences.dailyGoal} onChange={e => setPreferences(cur => ({ ...cur, dailyGoal: Number(e.target.value) }))} style={inputStyle}>
-                <option value={20}>20 minutos</option>
-                <option value={45}>45 minutos</option>
-                <option value={60}>60 minutos</option>
-                <option value={90}>90 minutos</option>
-              </select>
-              <Hint>Solo orientativo: no ajusta todavía la carga de misiones.</Hint>
-            </Field>
             <Field label="Días de Camino">
               <select value={caminoWeeklyDays} onChange={e => setCaminoWeeklyDays(Number(e.target.value))} style={inputStyle}>
                 {WEEKLY_DAYS_OPTIONS.map(days => <option key={days} value={days}>{days} días por semana</option>)}
               </select>
               <Hint>Se aplica a tus próximas misiones. Lo completado no cambia.</Hint>
             </Field>
-            <Field label="Minutos por día">
+            <Field label="Tiempo disponible al día">
               <select value={caminoDailyMinutes} onChange={e => setCaminoDailyMinutes(Number(e.target.value))} style={inputStyle}>
                 {DAILY_MINUTES_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes} minutos</option>)}
               </select>
-              <Hint>Kairo concentrará el Camino en los días que puedes estudiar.</Hint>
+              <Hint>Kairo ajusta cuántas misiones y de qué duración te genera cada día a esto.</Hint>
             </Field>
             <Field label="Asignatura por defecto">
               <select value={preferences.defaultSubject} onChange={e => setPreferences(cur => ({ ...cur, defaultSubject: e.target.value }))} style={inputStyle}>
-                <option value="mates">Matemáticas II</option>
-                <option value="matematicas_ccss">Matemáticas CCSS</option>
-                <option value="fisica">Física</option>
-                <option value="quimica">Química</option>
-                <option value="lengua">Lengua</option>
-                <option value="historia">Historia de España</option>
-                <option value="historia_filosofia">Historia de la Filosofía</option>
-                <option value="ingles">Inglés</option>
-                <option value="biologia">Biología</option>
+                {defaultSubjectOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
               </select>
+              <Hint>Solo tus asignaturas activas de Camino PAU.</Hint>
             </Field>
           </div>
           {caminoPrefsStatus && (
@@ -620,6 +691,54 @@ export default function SettingsPage() {
               {caminoPrefsStatus}
             </div>
           )}
+
+          {activeSubjectOptions.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <span style={{ display: 'block', marginBottom: 8, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Cómo vas en cada asignatura</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {activeSubjectOptions.map(opt => (
+                  <div key={opt.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{opt.label}</span>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {SUBJECT_LEVELS.map(level => {
+                        const active = subjectLevels[opt.value] === level
+                        return (
+                          <button
+                            key={level}
+                            type="button"
+                            onClick={() => setSubjectLevels(cur => ({ ...cur, [opt.value]: level }))}
+                            style={{
+                              padding: '6px 10px', borderRadius: 8, fontSize: 10, fontWeight: 800,
+                              border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
+                              background: active ? '#eff6ff' : 'white',
+                              color: active ? '#1d4ed8' : '#94a3b8',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {SUBJECT_LEVEL_LABELS[level]}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Hint>Kairo lo tiene en cuenta al preparar tus misiones, junto con tus notas de Personalización IA.</Hint>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <button
+              type="button"
+              onClick={recalculateNow}
+              disabled={recalculating}
+              style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', fontSize: 12, fontWeight: 800, color: '#0f172a', cursor: recalculating ? 'default' : 'pointer', opacity: recalculating ? 0.6 : 1 }}
+            >
+              {recalculating ? 'Recalculando…' : 'Recalcular mi plan ahora'}
+            </button>
+            {recalculateStatus && <span style={{ fontSize: 11, fontWeight: 700, color: recalculateStatus.startsWith('No') ? '#dc2626' : '#16a34a' }}>{recalculateStatus}</span>}
+          </div>
+
           <Toggle
             label={`Recordatorios de estudio por email${emailNotifSaving ? ' · Guardando…' : ''}`}
             description="Kairo te avisará cuando tengas misiones pendientes en Camino PAU."

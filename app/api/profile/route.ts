@@ -6,6 +6,21 @@ import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 
 export const dynamic = 'force-dynamic'
 
+const VALID_SUBJECT_LEVELS = ['bajo', 'medio', 'alto'] as const
+
+// Same shape ExamModal already uses per-exam ("¿Cómo vas en esta
+// asignatura?" bajo/medio/alto), here keyed by subject slug for a
+// general, not-tied-to-one-exam self-assessment edited from Ajustes.
+function cleanSubjectLevels(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter((entry): entry is [string, string] =>
+      entry[0].length <= 40 &&
+      typeof entry[1] === 'string' && (VALID_SUBJECT_LEVELS as readonly string[]).includes(entry[1]))
+    .slice(0, 12)
+  return Object.fromEntries(entries)
+}
+
 function getBearerToken(request: NextRequest): string | null {
   const auth = request.headers.get('authorization') ?? ''
   const m = auth.match(/^Bearer\s+(.+)$/i)
@@ -29,7 +44,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications, student_exams, username, custom_instructions')
+    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -40,6 +55,8 @@ export async function GET(request: NextRequest) {
     student_exams: data?.student_exams ?? [],
     username: data?.username ?? '',
     custom_instructions: data?.custom_instructions ?? '',
+    subject_levels: data?.subject_levels ?? {},
+    last_weekly_checkin_at: data?.last_weekly_checkin_at ?? null,
   })
 }
 
@@ -59,6 +76,8 @@ export async function PATCH(request: NextRequest) {
   if (typeof body.email_notifications === 'boolean') allowed.email_notifications = body.email_notifications
   if (Array.isArray(body.student_exams)) allowed.student_exams = cleanStudentExams(body.student_exams)
   if (typeof body.custom_instructions === 'string') allowed.custom_instructions = body.custom_instructions.trim().slice(0, 600)
+  if (body.subject_levels !== undefined) allowed.subject_levels = cleanSubjectLevels(body.subject_levels)
+  if (body.mark_weekly_checkin === true) allowed.last_weekly_checkin_at = new Date().toISOString()
 
   if (typeof body.username === 'string') {
     const u = body.username.trim()

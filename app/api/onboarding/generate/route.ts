@@ -4,6 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
+import { missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
 
     const startMode: StartMode = VALID_START_MODES.includes(body.startMode as StartMode)
       ? (body.startMode as StartMode) : 'zero'
+    const dailyMinutes = typeof body.dailyMinutes === 'number' ? body.dailyMinutes : null
 
     const db = createServiceClient()
     const requestedStudentExams = cleanStudentExams(body.studentExams)
@@ -229,8 +231,14 @@ export async function POST(request: NextRequest) {
     }
     const cursors: Record<string, number> = Object.fromEntries(subjects.map(s => [s, 0]))
 
-    // 'review' startMode fills calendar more aggressively (2 missions/day)
-    const slotsPerDay = startMode === 'review' ? 2 : 1
+    // This used to be `startMode === 'review' ? 2 : 1` — since the real
+    // onboarding flow always sends startMode 'zero', every student got
+    // exactly one mission/day here regardless of how much daily time they
+    // declared, and applyCalendarPersonalization below can only redistribute
+    // whatever rows already exist, not create more — so a student who said
+    // "2-3 horas/día" ended up seeing a single ~25-60 min mission a day.
+    // Take the larger of the two signals, same as ensureCaminoCalendar.
+    const slotsPerDay = Math.max(startMode === 'review' ? 2 : 1, missionsPerDayForMinutes(dailyMinutes))
 
     const calRows: object[] = []
     const scheduledQueueIds: string[] = []

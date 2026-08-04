@@ -464,7 +464,7 @@ export default function OnboardingFlow() {
           const genRes = await fetch('/api/onboarding/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero', studentExams: upcomingExams }),
+            body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero', studentExams: upcomingExams, dailyMinutes: data.dailyMinutes }),
           })
           if (!genRes.ok) {
             setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')

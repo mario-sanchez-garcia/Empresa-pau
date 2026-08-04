@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
+import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
+import { validateUsername } from '@/app/lib/username'
 
 type Status = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
@@ -32,6 +34,23 @@ export default function UsernameGate() {
         const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
         if (!res.ok || cancelled) { if (!cancelled) setLoading(false); return }
         const d = await res.json() as { username?: string }
+        if (!d.username) {
+          const localUsername = loadOnboarding().username?.trim()
+          if (localUsername && !validateUsername(localUsername)) {
+            try {
+              const repairRes = await fetch('/api/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+                body: JSON.stringify({ username: localUsername }),
+              })
+              if (repairRes.ok && !cancelled) {
+                setNeedsUsername(false)
+                setLoading(false)
+                return
+              }
+            } catch { /* best-effort repair for legacy onboarding rows */ }
+          }
+        }
         if (!cancelled) {
           setNeedsUsername(!d.username)
           setLoading(false)

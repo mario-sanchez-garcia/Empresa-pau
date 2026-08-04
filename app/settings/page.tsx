@@ -134,7 +134,24 @@ export default function SettingsPage() {
             const json = await res.json() as { email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string> }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
-            if (json.username) setUsername(json.username)
+            if (json.username) {
+              setUsername(json.username)
+            } else {
+              const localUsername = loadOnboarding().username?.trim()
+              if (localUsername && !validateUsername(localUsername)) {
+                try {
+                  const repairRes = await fetch('/api/profile', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ username: localUsername }),
+                  })
+                  if (repairRes.ok) {
+                    serverDisplayName = localUsername
+                    setUsername(localUsername)
+                  }
+                } catch { /* best-effort repair for legacy onboarding rows */ }
+              }
+            }
             setCustomInstructions(json.custom_instructions ?? '')
             setCustomInstructionsLoaded(json.custom_instructions ?? '')
             const levels = json.subject_levels ?? {}

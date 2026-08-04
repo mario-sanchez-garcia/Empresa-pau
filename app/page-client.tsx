@@ -1082,7 +1082,12 @@ const LABELS_HISTORIA: Record<string, string> = {
 }
 
 const EXAMENES_BY_ASIGNATURA: Partial<Record<Asignatura, any[]>> = { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-  mates: examenes,
+  // `examenes` also carries Historia de España exams (randomEvauExercise.ts
+  // filters the same array the same way for that reason) — without this
+  // filter, selecting Matemáticas II here pulled in Historia questions
+  // whenever one matched the same tipo/comunidad, since nothing downstream
+  // (examenesFiltrados, the year picker, the exam search) re-checks asignatura.
+  mates: examenes.filter(e => e.asignatura === 'Matemáticas II'),
   matematicas_ccss: examenesMatematicasCCSSMadrid,
   fisica: examenesFisica,
   quimica: examenesQuimica,
@@ -1101,7 +1106,11 @@ const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas)
 const perteneceAComunidadSeleccionada = (examen: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   (examen.comunidad ?? examen.ccaa) === ccaa
 
-const examenesAsignatura = EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria
+// `?? []`, not `?? examenesHistoria`: a subject with no entry in the map
+// (e.g. 'general', deliberately kept out of HOME_SUBJECTS/the map since it
+// has no exams of its own — see the comment above CHAT_SUBJECTS) must show
+// no exams, not silently substitute Historia de España's.
+const examenesAsignatura = EXAMENES_BY_ASIGNATURA[asignatura] ?? []
 const requiresStructuredExams = SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatura)
 
 const examenesFiltrados = examenesAsignatura.filter(e =>
@@ -2422,7 +2431,9 @@ function cambiarTipo(t: Tipo) {
       const tipoFromCataluna = (convocatoria: string): Tipo =>
         convocatoria === 'extraordinaria' ? 'Extraordinaria' : 'Ordinaria'
 
-      const normalSource: any[] = (EXAMENES_BY_ASIGNATURA[asignatura] ?? examenesHistoria) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+      // Same reasoning as examenesAsignatura above: fall back to no results,
+      // never to a different subject's exams.
+      const normalSource: any[] = (EXAMENES_BY_ASIGNATURA[asignatura] ?? []) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         .filter(exam => !SUBJECTS_REQUIRING_STRUCTURED_EXAMS.has(asignatura) || hasStructuredQuestions(exam))
 
       const selectNormalResult = (exam: any, question: any, questionIndex: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión

@@ -3211,18 +3211,18 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/30 p-4 backdrop-blur-sm"
     >
       <motion.div
         initial={{ scale: 0.97, y: 14 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.97, y: 14 }}
         transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-        className="w-full max-w-md overflow-hidden rounded-2xl bg-white"
-        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white"
+        style={{ maxHeight: 'min(88dvh, 720px)', boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
       >
         {/* Header */}
-        <div className="bg-[#0f172a] px-6 py-5">
+        <div className="shrink-0 bg-[#0f172a] px-6 py-5">
           <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Calendario</p>
           <h2 className="mt-1 font-black text-slate-100" style={{ fontSize: 22, letterSpacing: '-0.025em', lineHeight: 1 }}>
             {editing ? 'Editar parcial' : 'Añadir parcial'}
@@ -3230,8 +3230,11 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
           <p className="mt-2 text-[12px] font-semibold text-slate-400">Camino ajustará tus misiones para preparar este bloque.</p>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-5">
+        {/* Body — the only part that scrolls, so the header and the
+            Guardar footer below stay pinned on screen no matter how long
+            the form gets or how much the mobile keyboard shrinks the
+            viewport. */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <div className="grid gap-3">
             <Field label="Asignatura">
               <select value={draft.subject} onChange={e => setDraft({ ...draft, subject: e.target.value })} className="em-input">
@@ -3330,7 +3333,7 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 border-t-2 border-[#0f172a] px-6 py-4">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t-2 border-[#0f172a] px-6 py-4">
           <p className="text-[10px] font-semibold text-slate-400">Tus misiones se adaptarán al parcial.</p>
           <div className="flex gap-2">
             <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">

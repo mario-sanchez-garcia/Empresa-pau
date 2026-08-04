@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
@@ -1114,6 +1114,47 @@ export default function CaminoCalendarClient() {
     return () => { cancelled = true }
   }, [onboarding?.community])
 
+  // displayedXP/ranking below prefer leaderboard.currentXp over the locally
+  // bumped xpTotal (see displayedXP), but leaderboard was only ever fetched
+  // once on mount — so after earning XP with a quality bonus (e.g. a good
+  // simulacro grade), the ranking kept showing the pre-bonus number until a
+  // full reload. Call this after anything that awards XP.
+  async function refreshLeaderboard() {
+    if (!onboarding?.community) return
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    if (!token) return
+    const next = await fetchLeaderboard(token, onboarding.community)
+    if (next) setLeaderboard(next)
+  }
+
+  // refreshLeaderboard is redefined every render and closes over that
+  // render's onboarding — the visibility/focus listener effect below is
+  // attached once on mount, so calling refreshLeaderboard directly from it
+  // would permanently use the first render's version (onboarding still null
+  // then). useEffectEvent gives a stable function that always runs with the
+  // latest render's values without needing a manual ref or re-subscribing
+  // the listener on every onboarding change.
+  const notifyLeaderboardRefresh = useEffectEvent(() => {
+    refreshLeaderboard()
+  })
+
+  // XP earned elsewhere (a simulacro, an exam correction — different
+  // pages/tabs) doesn't touch this component's state at all, so the
+  // leaderboard fetched once above could otherwise sit stale for the rest
+  // of the session. Refresh whenever the student comes back to this tab.
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === 'visible') notifyLeaderboardRefresh()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onVisible)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onVisible)
+    }
+  }, [])
+
   useEffect(() => {
     let cancelled = false
     supabase.auth.getSession().then(async ({ data }) => {
@@ -1441,6 +1482,7 @@ export default function CaminoCalendarClient() {
         .then(r => r.ok ? r.json() : null)
         .then(data => { if (data?.liga) setLiga(data.liga) })
         .catch(() => undefined)
+      refreshLeaderboard()
     } else if (json.reason === 'already_completed') {
       setToast('Misión ya completada')
     }

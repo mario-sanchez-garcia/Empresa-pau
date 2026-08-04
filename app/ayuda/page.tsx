@@ -32,7 +32,7 @@ const SECTIONS = [
 const FAQS = [
   {
     q: '¿Cómo funciona el XP?',
-    a: 'Ganas una base de XP garantizada cada vez que corriges un ejercicio con Kairo, en cualquier sección — la saques la nota que saques: entre 10 y 50 XP en una misión de Camino, 20 en un examen de Exámenes, 30 en una práctica parcial y 50 en un simulacro completo. Si además sacas un 7 o más, sumas un 50% extra de bonus; con un 9 o más, el bonus es del 100%. La base nunca se reduce por una nota baja — el bonus solo suma. El XP total sube siempre — nunca baja.',
+    a: 'Ganas una base de XP garantizada cada vez que corriges un ejercicio con Kairo, en cualquier sección — la saques la nota que saques: entre 10 y 50 XP en una misión de Camino, 20 en un examen de Exámenes, 30 en una práctica parcial y 50 en un simulacro completo. Si apruebas (5 o más), sumas un 25% extra de bonus; con un 7 o más, un 75%; con un 9 o más, el bonus es del 125%. La base nunca se reduce por una nota baja — el bonus solo suma, y cuanto mejor la nota, más pesa sobre el total. El XP total sube siempre — nunca baja.',
   },
   {
     q: '¿Qué es la racha?',

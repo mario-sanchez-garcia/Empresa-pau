@@ -14,6 +14,8 @@ export type XpSourceType =
   | 'exam_correction'
   | 'simulacro_completion'
   | 'parcial_completion'
+  | 'flashcard_deck_completion'
+  | 'flashcard_deck_author_bonus'
 
 export type AwardXpResult = {
   // false = esta fuente ya había dado XP antes (mismo user+source_type+source_id+mission_date);
@@ -29,14 +31,17 @@ export type AwardXpResult = {
   leagueUpgrade: { from: string; to: string } | null
 }
 
-// Bonus de calidad sobre el XP base garantizado: +50% si la nota (sobre 10)
-// es >= 7, +100% si es >= 9. La base nunca se reduce por una nota baja —
-// premiar acertar no debe castigar intentarlo, o el alumno racionalmente
-// evitaría sus puntos débiles, justo lo contrario de lo que busca
-// injectWeakReviewMissions.
+// Bonus de calidad sobre el XP base garantizado: +25% si aprueba (nota >= 5),
+// +75% si es >= 7, +125% si es >= 9. La base nunca se reduce por una nota
+// baja — premiar acertar no debe castigar intentarlo, o el alumno
+// racionalmente evitaría sus puntos débiles, justo lo contrario de lo que
+// busca injectWeakReviewMissions. Los tramos (antes +50%/+100%, sin nada
+// para un aprobado) se subieron para que la nota pese más que el simple
+// hecho de completar la acción — el hueco entre "lo he hecho" (1x) y
+// "lo he hecho muy bien" (2.25x) es ahora bastante mayor.
 function applyQualityBonus(baseXp: number, scoreOnTen: number | null | undefined): { total: number; bonus: number } {
   if (scoreOnTen == null || !Number.isFinite(scoreOnTen)) return { total: baseXp, bonus: 0 }
-  const multiplier = scoreOnTen >= 9 ? 1 : scoreOnTen >= 7 ? 0.5 : 0
+  const multiplier = scoreOnTen >= 9 ? 1.25 : scoreOnTen >= 7 ? 0.75 : scoreOnTen >= 5 ? 0.25 : 0
   const bonus = Math.round(baseXp * multiplier)
   return { total: baseXp + bonus, bonus }
 }

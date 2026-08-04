@@ -8,6 +8,7 @@ import { supabase } from '@/app/lib/supabase'
 import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profilePreferences'
+import { VALID_DAILY_MINUTES, dailyMinutesLabel, describeDailyPlan } from '@/app/lib/camino/dailyTimeCapacity'
 import SidebarNav from '@/app/components/SidebarNav'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
@@ -70,7 +71,7 @@ const EDUC_LABELS: Record<string, string> = {
   'preparacion-pau': 'Prep. PAU', 'otro': 'Otro',
 }
 
-const DAILY_MINUTES_OPTIONS = [30, 45, 60, 90, 150, 180]
+const DAILY_MINUTES_OPTIONS = VALID_DAILY_MINUTES
 const WEEKLY_DAYS_OPTIONS = [3, 4, 5, 6, 7]
 
 function weeklyDaysLabel(days: number | null) {
@@ -303,6 +304,12 @@ export default function SettingsPage() {
       if (token && onboarding?.completedAt) {
         const nextOnboarding: OnboardingData = {
           ...onboarding,
+          // dailyStudyTime es solo la etiqueta legible ("1-2 horas") del
+          // mismo dailyMinutes — antes se dejaba tal cual venía del
+          // onboarding original, así que quedaba desincronizada de
+          // dailyMinutes en cuanto el alumno cambiaba este selector aquí.
+          // Se deriva siempre del número, que es la única fuente de verdad.
+          dailyStudyTime: dailyMinutesLabel(caminoDailyMinutes),
           dailyMinutes: caminoDailyMinutes,
           weeklyStudyDays: weeklyDaysLabel(caminoWeeklyDays),
           weeklyStudyDaysValue: caminoWeeklyDays,
@@ -677,7 +684,7 @@ export default function SettingsPage() {
               <select value={caminoDailyMinutes} onChange={e => setCaminoDailyMinutes(Number(e.target.value))} style={inputStyle}>
                 {DAILY_MINUTES_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes} minutos</option>)}
               </select>
-              <Hint>Kairo ajusta cuántas misiones y de qué duración te genera cada día a esto.</Hint>
+              <Hint>{describeDailyPlan(caminoDailyMinutes)}</Hint>
             </Field>
             <Field label="Asignatura por defecto">
               <select value={preferences.defaultSubject} onChange={e => setPreferences(cur => ({ ...cur, defaultSubject: e.target.value }))} style={inputStyle}>

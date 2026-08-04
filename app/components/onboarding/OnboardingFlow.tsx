@@ -10,6 +10,7 @@ import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
+import { DAILY_MINUTES_LABELS } from '@/app/lib/camino/dailyTimeCapacity'
 import {
   clearOnboarding,
   loadOnboarding,
@@ -83,13 +84,16 @@ const FEELING_OPTS = [
   'Prefiero empezar desde lo básico',
 ]
 
+// Etiquetas tomadas de DAILY_MINUTES_LABELS (dailyTimeCapacity.ts) — misma
+// fuente que usa Ajustes al recalcular esta etiqueta tras un cambio
+// posterior, para que nunca queden desincronizadas.
 const TIME_OPTS = [
-  { label: '15-30 min', minutes: 30 },
-  { label: '30-45 min', minutes: 45 },
-  { label: '45-60 min', minutes: 60 },
-  { label: '1-2 horas', minutes: 90 },
-  { label: '2-3 horas', minutes: 150 },
-  { label: 'Más de 3 horas', minutes: 180 },
+  { label: DAILY_MINUTES_LABELS[30], minutes: 30 },
+  { label: DAILY_MINUTES_LABELS[45], minutes: 45 },
+  { label: DAILY_MINUTES_LABELS[60], minutes: 60 },
+  { label: DAILY_MINUTES_LABELS[90], minutes: 90 },
+  { label: DAILY_MINUTES_LABELS[150], minutes: 150 },
+  { label: DAILY_MINUTES_LABELS[180], minutes: 180 },
   { label: 'Depende del día', minutes: null },
 ]
 

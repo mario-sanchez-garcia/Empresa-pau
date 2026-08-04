@@ -46,3 +46,36 @@ export function estimatedMinutesForSlot(dailyMinutes: number | null | undefined,
   const plan = missionPlanForMinutes(dailyMinutes)
   return plan.slotMinutes[slot] ?? plan.slotMinutes[plan.slotMinutes.length - 1] ?? 25
 }
+
+// Etiqueta en rango de tiempo (la que usa el selector de Onboarding) para
+// cada valor válido de dailyMinutes — única fuente de verdad para ese texto,
+// así el picker de Onboarding y el guardado desde Ajustes (que antes dejaba
+// el campo de texto "daily_study_time" con el valor de cuando se hizo el
+// onboarding, desincronizado del número real tras cualquier cambio
+// posterior en Ajustes) siempre coinciden.
+export const DAILY_MINUTES_LABELS: Record<number, string> = {
+  30: '15-30 min',
+  45: '30-45 min',
+  60: '45-60 min',
+  90: '1-2 horas',
+  150: '2-3 horas',
+  180: 'Más de 3 horas',
+}
+
+export function dailyMinutesLabel(dailyMinutes: number | null | undefined): string {
+  if (dailyMinutes != null && DAILY_MINUTES_LABELS[dailyMinutes]) return DAILY_MINUTES_LABELS[dailyMinutes]
+  return `${dailyMinutes ?? 60} min`
+}
+
+// Explica en una frase qué implica en la práctica elegir ese tiempo diario —
+// calculado a partir del mismo PLAN_BY_MINUTES que de verdad genera las
+// misiones, para que el texto nunca pueda desincronizarse de lo que Camino
+// realmente hace con ese valor.
+export function describeDailyPlan(dailyMinutes: number | null | undefined): string {
+  const plan = missionPlanForMinutes(dailyMinutes)
+  if (plan.count === 1) {
+    return `Kairo te genera 1 misión de ~${plan.slotMinutes[0]} min al día — una sesión corta y directa al grano.`
+  }
+  const minutesList = plan.slotMinutes.join(' + ')
+  return `Kairo te genera ${plan.count} misiones al día (~${minutesList} min) — sesiones más largas y completas para cubrir más contenido de una sentada.`
+}

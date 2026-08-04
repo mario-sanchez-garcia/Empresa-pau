@@ -6,6 +6,7 @@ import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropi
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
+import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getTheoryContextForExercise, theoryContextToPrompt } from '@/app/lib/whyItWorksTheory'
@@ -27,6 +28,42 @@ const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
 
 function examSystemLabel(comunidad: string) {
   return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
+}
+
+// The general "¿Por qué es así?" explanation for a topic (idea clave, método,
+// error típico, mini ejemplo) doesn't depend on which student or exercise
+// triggered it — only the topic does. Caching it by (subject, blockSlug,
+// topicSlug) skips asking the model to regenerate the same content every time,
+// which was adding real output tokens/latency to every correction. Best-effort:
+// a cache failure must never break the actual correction.
+async function getCachedWhyExplanation(subject: string, blockSlug: string, topicSlug: string) {
+  try {
+    const db = createServiceClient()
+    const { data } = await db
+      .from('topic_why_cache')
+      .select('porque_es_asi')
+      .eq('subject', subject)
+      .eq('block_slug', blockSlug)
+      .eq('topic_slug', topicSlug)
+      .maybeSingle()
+    return data?.porque_es_asi ?? null
+  } catch {
+    return null
+  }
+}
+
+async function cacheWhyExplanation(subject: string, blockSlug: string, topicSlug: string, porqueEsAsi: unknown) {
+  try {
+    const db = createServiceClient()
+    await db
+      .from('topic_why_cache')
+      .upsert(
+        { subject, block_slug: blockSlug, topic_slug: topicSlug, porque_es_asi: porqueEsAsi },
+        { onConflict: 'subject,block_slug,topic_slug', ignoreDuplicates: true }
+      )
+  } catch (error) {
+    console.error('[exam/correct] why_cache_write_failed', { message: (error as Error)?.message?.slice(0, 150) })
+  }
 }
 
 type ExamCorrectBody = {
@@ -153,6 +190,13 @@ async function handlePost(request: NextRequest) {
   })
   const combinedCriteria = [criteria, theoryContextToPrompt(theoryContext)].filter(Boolean).join('\n\n')
 
+  // Only worth a cache lookup when a real topic was matched — fallbackReason
+  // means the generic "no theory found" path, which has no stable topic key.
+  const hasStableTopic = !theoryContext.fallbackReason && Boolean(theoryContext.blockSlug) && Boolean(theoryContext.topicSlug)
+  const cachedWhy = hasStableTopic
+    ? await getCachedWhyExplanation(subject, theoryContext.blockSlug, theoryContext.topicSlug)
+    : null
+
   const prompt = buildBlockPrompt({
     block: {
       numeroBloque: 'Ejercicio',
@@ -173,7 +217,8 @@ async function handlePost(request: NextRequest) {
     blockIndex: 0,
     totalBlocks: 1,
     subject,
-    community
+    community,
+    includeWhyExplanation: !cachedWhy
   }) + `
 
 Tienes espacio de sobra: prioriza una corrección completa y bien estructurada.
@@ -252,7 +297,22 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
   }
 
   const normalized = normalizeCorrectionForOfficialScores(parsed, [maxScore])
-  console.info('[exam/correct] done', { ms: Date.now() - totalStart })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
+  const block = (normalized as any)?.desglose_bloques?.[0]
+
+  if (hasStableTopic && block) {
+    if (cachedWhy) {
+      // Cache hit: the model was told not to bother generating porqueEsAsi —
+      // attach the cached explanation now.
+      block.porqueEsAsi = cachedWhy
+    } else if (block.porqueEsAsi && block.porqueEsAsi.status === 'generated') {
+      // Cache miss: this is the first time this topic was seen, or the model
+      // produced a usable explanation despite a prior miss — save it for next time.
+      await cacheWhyExplanation(subject, theoryContext.blockSlug, theoryContext.topicSlug, block.porqueEsAsi)
+    }
+  }
+
+  console.info('[exam/correct] done', { ms: Date.now() - totalStart, whyExplanationCacheHit: Boolean(cachedWhy) })
 
   return NextResponse.json({
     correction: normalized,

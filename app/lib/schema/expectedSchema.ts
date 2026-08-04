@@ -32,6 +32,7 @@ export const EXPECTED_TABLES: Array<{ name: string; rls: boolean; porque: string
   { name: 'user_entitlements',        rls: true, porque: 'Acceso de pago (Stripe)' },
   { name: 'email_events',             rls: true, porque: 'Deduplicación de envíos y reanudación de crons' },
   { name: 'ai_usage_events',          rls: true, porque: 'Control de cuota y coste de IA' },
+  { name: 'topic_why_cache',          rls: true, porque: 'Cache de "¿Por qué es así?" por tema — sin ella, cada corrección la regenera' },
 ]
 
 /** Columnas concretas que el código nombra de forma explícita. */

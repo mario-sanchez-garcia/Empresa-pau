@@ -320,13 +320,17 @@ export function buildBlockPrompt({
   blockIndex,
   totalBlocks,
   subject,
-  community
+  community,
+  includeWhyExplanation = true
 }: {
   block: CorrectionPromptBlock
   blockIndex: number
   totalBlocks: number
   subject: string
   community: string
+  // false when a cached "¿Por qué es así?" already exists for this topic — no
+  // point asking the model to regenerate it, it just adds output tokens/latency.
+  includeWhyExplanation?: boolean
 }): string {
   const criteria = BLOCK_SUBJECT_CRITERIA[subject] ?? ''
   const studentAnswer = block.studentAnswer?.trim() ? block.studentAnswer : '(sin respuesta)'
@@ -345,7 +349,7 @@ ${block.sourceText ? `\nTEXTO FUENTE:\n${block.sourceText.slice(0, 1500)}` : ''}
 RESPUESTA DEL ALUMNO:
 ${studentAnswer}
 ${criteria ? `\nCRITERIOS DE CORRECCIÓN:\n${criteria}` : ''}
-INSTRUCCIONES:
+${includeWhyExplanation ? '' : 'Ya existe una explicación teórica cacheada para este tema — NO generes porqueEsAsi, ni la sección "¿Por qué es así?", ni ningún campo relacionado.\n'}INSTRUCCIONES:
 REGLAS DE FORMATO LATEX — OBLIGATORIAS:
 
 1. Para fórmulas inline usa SIEMPRE $...$ con contenido en una sola línea.
@@ -386,7 +390,9 @@ REGLAS DE FORMATO LATEX — OBLIGATORIAS:
 3. Cada punto descontado en penalizaciones_aplicadas debe tener motivo concreto.
 4. Usa Markdown y LaTeX en los campos de texto: $...$ para inline; entornos \\begin{...} sin $ externos para sistemas y matrices.
 5. Feedback directo y específico a la respuesta real, no genérico.
-6. Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. Si falta contexto, usa status "not_available" sin inventar. No copies material externo.
+6. ${includeWhyExplanation
+    ? 'Añade porqueEsAsi si puedes hacerlo de forma específica y breve. Debe explicar por qué el concepto/método se aplica aquí, conectar con el error o acierto del alumno y dar un mini ejemplo original. Si falta contexto, usa status "not_available" sin inventar. No copies material externo.'
+    : 'No incluyas el campo porqueEsAsi — ya existe una explicación cacheada para este tema, no la regeneres.'}
 7. Formato obligatorio dentro de los campos de texto: Markdown limpio, listas separadas por saltos de linea, sin parrafos enormes, sin "undefined", "null" o "NaN" visibles, y sin titulos pegados a la frase siguiente.
 8. LaTeX obligatorio para matematicas/fisica/quimica: formulas inline en $...$; sistemas y matrices con \\begin{cases}...\\end{cases}, \\begin{pmatrix}...\\end{pmatrix} SIN $ externos (el renderizador envuelve). No dejes \\frac, \\implies, \\cdot, \\begin{cases} o \\end{matrix} como texto plano. NUNCA pongas \\begin{...} dentro de $...$.
 9. Manten el idioma del ejercicio o de la respuesta del alumno. Si el enunciado esta en catalan, corrige en catalan; si esta en castellano, corrige en castellano.
@@ -405,7 +411,7 @@ REGLAS DE FORMATO LATEX — OBLIGATORIAS:
   ],
   "correccion_detalle": "",
   "solucion_orientativa": "",
-  "consejo_para_mejorar": "",
+  "consejo_para_mejorar": ""${includeWhyExplanation ? `,
   "porqueEsAsi": {
     "title": "¿Por qué es así?",
     "keyIdea": "",
@@ -417,7 +423,7 @@ REGLAS DE FORMATO LATEX — OBLIGATORIAS:
     "examTip": "",
     "sourcesUsed": [],
     "status": "generated"
-  }
+  }` : ''}
 }`
 }
 

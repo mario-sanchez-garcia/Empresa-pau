@@ -10,18 +10,19 @@ import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getTheoryContextForExercise, theoryContextToPrompt } from '@/app/lib/whyItWorksTheory'
 
-// 50s SDK timeout leaves ~10s for the function to return a clean JSON error
-// before Vercel's 60s maxDuration kills the process and returns an HTML 504.
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000 })
+// 55s SDK timeout leaves ~5s for the function to return a clean JSON error
+// before Vercel's 60s maxDuration (Hobby plan ceiling) kills the process.
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 55_000 })
 
 export const maxDuration = 60
 
 const MODEL = 'claude-sonnet-4-6'
-// Same compact per-block prompt/budget /api/simulacro uses (proven to finish
-// well inside the 50s timeout). The earlier version used the full multi-subject
-// buildCorrectionPrompt with 4096 tokens, which could run past the SDK timeout
-// and get hard-killed by Vercel before any error handling could run.
-const MAX_TOKENS = 1800
+// Simulacro's per-block budget (1800) is tuned for shorter blocks corrected in
+// parallel; a single meaty exam exercise (e.g. a 3-variable Gauss system with
+// verification + model answer + advice + theory) needs more room. Too tight a
+// budget doesn't just truncate cleanly — it makes the model rush and blur field
+// boundaries near the end (headers/content bleeding across JSON string values).
+const MAX_TOKENS = 4000
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
 
 function examSystemLabel(comunidad: string) {
@@ -173,7 +174,13 @@ async function handlePost(request: NextRequest) {
     totalBlocks: 1,
     subject,
     community
-  })
+  }) + `
+
+Tienes espacio de sobra: prioriza una corrección completa y bien estructurada.
+Nunca mezcles el contenido de un campo con el de otro ni escribas encabezados
+Markdown (##, ###) dentro del valor de un campo — cada campo del JSON contiene
+únicamente su propio contenido. Si un bloque LaTeX ocupa varias líneas dentro de
+un valor de texto, escapa los saltos de línea correctamente para no romper el JSON.`
 
   const content: Anthropic.Messages.ContentBlockParam[] = []
   if (imagen) {
@@ -191,7 +198,7 @@ async function handlePost(request: NextRequest) {
       () => client.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: `Eres Kairo, corrector experto de ${examSystemLabel(community)}. Devuelve exclusivamente JSON válido. Sin texto fuera del JSON. Mantén la corrección compacta: nota, errores principales, feedback accionable y plan breve. No repitas el enunciado ni la respuesta del alumno. Máximo 3 aciertos, 3 errores y 3 mejoras.`,
+        system: `Eres Kairo, corrector experto de ${examSystemLabel(community)}. Devuelve exclusivamente JSON válido y completo. Sin texto fuera del JSON. No repitas el enunciado ni la respuesta del alumno, pero desarrolla el paso a paso con el detalle necesario para que el alumno aprenda: no lo recortes por brevedad. Cierra siempre el JSON correctamente con todas las claves, aunque eso signifique una respuesta larga.`,
         messages: [{ role: 'user', content }]
       }),
       (intento, status) => console.warn('[exam/correct] reintento por saturación', { intento, status })

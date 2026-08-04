@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import ParentLinkModule from '@/app/components/camino/ParentLinkModule'
+import MonthCalendarOverlay, { MonthCalendarButton } from '@/app/components/camino/MonthCalendarOverlay'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
@@ -845,6 +846,7 @@ export default function CaminoCalendarClient() {
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
   const [showCalendarEditor, setShowCalendarEditor] = useState(false)
+  const [showMonthCalendar, setShowMonthCalendar] = useState(false)
   const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
   const [addSubjectLoading, setAddSubjectLoading] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
@@ -1752,6 +1754,7 @@ export default function CaminoCalendarClient() {
             <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
               <CalendarDays size={13} /> Editar semana
             </button>
+            <MonthCalendarButton onClick={() => setShowMonthCalendar(true)} />
             <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
               <Plus size={13} /> Examen
             </button>
@@ -2209,6 +2212,7 @@ export default function CaminoCalendarClient() {
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} saving={savingExam} />}</AnimatePresence>
       <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={w => calendar.filter(d => d.date >= w && d.date < addDays(new Date(w), 7).toISOString().slice(0, 10))} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onSave={updated => { setCalendar(updated); setShowCalendarEditor(false) }} />}</AnimatePresence>
+      <AnimatePresence>{showMonthCalendar && <MonthCalendarOverlay exams={exams} onClose={() => setShowMonthCalendar(false)} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
           const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]

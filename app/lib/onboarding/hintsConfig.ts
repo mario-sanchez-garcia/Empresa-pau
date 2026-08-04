@@ -16,6 +16,7 @@ export const VALID_HINT_KEYS = [
   'hint_zona_cursos', // First visit to La Zona → Mis Cursos
   'hint_tutor',       // First visit to Tutor/Chat
   'hint_historial',   // First visit to Historial
+  'hint_calendario_mensual', // First visit to the monthly calendar view
 ] as const
 
 export type HintKey = typeof VALID_HINT_KEYS[number]

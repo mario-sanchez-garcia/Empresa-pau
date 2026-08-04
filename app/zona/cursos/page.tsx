@@ -3,11 +3,13 @@
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, CheckCircle2, LayoutGrid, Zap } from 'lucide-react'
+import { BookOpen, CheckCircle2, LayoutGrid, Lock, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
+import { useBillingStatus } from '@/app/hooks/useBillingStatus'
+import { useIsInternalUser } from '@/app/hooks/useIsInternalUser'
 import type { ZonaUser } from '@/components/zona/types'
 import {
   CAMINO_CURRICULUM_TOPICS,
@@ -154,6 +156,8 @@ export default function ZonaCursosPage() {
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const billing = useBillingStatus()
+  const internalUser = useIsInternalUser()
 
   useEffect(() => {
     async function load() {
@@ -195,7 +199,10 @@ export default function ZonaCursosPage() {
     return stats
   }, [groups])
 
-  if (loading || !user) return <KairoSpinner />
+  if (loading || !user || billing.loading || internalUser.loading) return <KairoSpinner />
+
+  // Mis Cursos is a paid-plan feature — internal/staff accounts always pass.
+  const canAccess = billing.hasActivePack || internalUser.isInternalUser
 
   return (
     <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
@@ -239,110 +246,125 @@ export default function ZonaCursosPage() {
         </div>
 
         <main className="kairo-page-scroll cursos-main" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
-          <SectionIntroCard
-            hintKey="hint_zona_cursos"
-            line1="Aquí están todos tus cursos de Camino PAU, organizados por asignatura y bloque."
-            line2="Ve qué has completado y qué tienes disponible para empezar ahora."
-          />
-
-          {groups.length === 0 ? (
-            <div style={{ borderRadius: 20, border: '1px dashed #cbd5e1', background: 'white', padding: '32px 20px', textAlign: 'center' }}>
-              <BookOpen size={28} color="#94a3b8" style={{ marginBottom: 10 }} />
-              <p style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Todavía no tienes cursos generados</p>
-              <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Completa tu Camino PAU para que aparezcan aquí, organizados por asignatura.</p>
-              <a href="/camino" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: '#2563eb', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'white', textDecoration: 'none' }}>Ir a Camino PAU</a>
+          {!canAccess ? (
+            <div style={{ borderRadius: 20, border: '1px solid #e2e8f0', background: 'white', padding: '40px 28px', textAlign: 'center', maxWidth: 440, margin: '32px auto 0' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 16, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <Lock size={22} color="#2563eb" />
+              </div>
+              <p style={{ fontSize: 15.5, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Mis Cursos es para alumnos con plan activo</p>
+              <p style={{ fontSize: 13.5, color: '#64748b', marginBottom: 20, lineHeight: 1.6 }}>
+                Desbloquea todo el temario de Camino PAU organizado por asignatura y bloque con cualquier plan de pago de Kairo.
+              </p>
+              <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: '#2563eb', padding: '11px 24px', fontSize: 13.5, fontWeight: 900, color: 'white', textDecoration: 'none' }}>Ver planes</a>
             </div>
           ) : (
             <>
-              {/* Global stats */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-                {(['completed', 'today'] as CourseStatus[]).map(status => {
-                  const meta = STATUS_META[status]
-                  return (
-                    <div key={status} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 12px', borderRadius: 12, background: meta.bg, border: `1px solid ${meta.border}` }}>
-                      <meta.Icon size={14} color={meta.color} />
-                      <span style={{ fontSize: 12, fontWeight: 900, color: meta.color }}>{overallStats[status]}</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, opacity: .85 }}>{meta.label}</span>
-                    </div>
-                  )
-                })}
-              </div>
+              <SectionIntroCard
+                hintKey="hint_zona_cursos"
+                line1="Aquí están todos tus cursos de Camino PAU, organizados por asignatura y bloque."
+                line2="Ve qué has completado y qué tienes disponible para empezar ahora."
+              />
 
-              {/* Subject chips */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-                {groups.map(group => {
-                  const accent = accentFor(group.subject)
-                  const isActive = group.subject === activeGroup?.subject
-                  return (
-                    <button
-                      key={group.subject}
-                      onClick={() => setSelectedSubject(group.subject)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
-                        border: `1px solid ${isActive ? accent.text : accent.border}`,
-                        background: isActive ? accent.bg : 'white',
-                        color: accent.text, fontSize: 12, fontWeight: 900,
-                      }}
-                    >
-                      {group.label}
-                      <span style={{ fontSize: 10, fontWeight: 800, opacity: .75 }}>{group.completed}/{group.total}</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              {activeGroup && (
-                <div>
-                  {/* Progress bar for the selected subject */}
-                  <div style={{ marginBottom: 18 }}>
-                    <div style={{ height: 8, borderRadius: 999, background: '#e2e8f0', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${activeGroup.total ? Math.round((activeGroup.completed / activeGroup.total) * 100) : 0}%`, background: '#34d399', borderRadius: 999 }} />
-                    </div>
-                    <p style={{ marginTop: 6, fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>
-                      {activeGroup.completed} de {activeGroup.total} temas completados en {activeGroup.label}
-                    </p>
-                  </div>
-
-                  {activeGroup.blocks.map(block => (
-                    <section key={block.blockTitle} style={{ marginBottom: 16, borderRadius: 20, border: '1px solid #e2e8f0', background: 'white', padding: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <h3 style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', margin: 0 }}>{block.blockTitle}</h3>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8' }}>
-                          {block.items.filter(i => i.status === 'completed').length}/{block.items.length}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {block.items.map(item => {
-                          const meta = STATUS_META[item.status]
-                          const rowStyle: CSSProperties = {
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                            padding: '10px 12px', borderRadius: 12, border: '1px solid #eef2f7',
-                            background: item.status === 'completed' ? '#f8fafc' : 'white',
-                            textDecoration: 'none', cursor: item.href ? 'pointer' : 'default',
-                            opacity: item.href ? 1 : .6,
-                          }
-                          const content = (
-                            <>
-                              <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-                                {item.title}
-                              </span>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0, padding: '4px 9px', borderRadius: 999, background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color, fontSize: 10.5, fontWeight: 900 }}>
-                                <meta.Icon size={11} />
-                                {meta.label}
-                              </span>
-                            </>
-                          )
-                          return item.href ? (
-                            <a key={item.key} href={item.href} style={rowStyle}>{content}</a>
-                          ) : (
-                            <div key={item.key} style={rowStyle}>{content}</div>
-                          )
-                        })}
-                      </div>
-                    </section>
-                  ))}
+              {groups.length === 0 ? (
+                <div style={{ borderRadius: 20, border: '1px dashed #cbd5e1', background: 'white', padding: '32px 20px', textAlign: 'center' }}>
+                  <BookOpen size={28} color="#94a3b8" style={{ marginBottom: 10 }} />
+                  <p style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Todavía no tienes cursos generados</p>
+                  <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Completa tu Camino PAU para que aparezcan aquí, organizados por asignatura.</p>
+                  <a href="/camino" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: '#2563eb', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'white', textDecoration: 'none' }}>Ir a Camino PAU</a>
                 </div>
+              ) : (
+                <>
+                {/* Global stats */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                  {(['completed', 'today'] as CourseStatus[]).map(status => {
+                    const meta = STATUS_META[status]
+                    return (
+                      <div key={status} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 12px', borderRadius: 12, background: meta.bg, border: `1px solid ${meta.border}` }}>
+                        <meta.Icon size={14} color={meta.color} />
+                        <span style={{ fontSize: 12, fontWeight: 900, color: meta.color }}>{overallStats[status]}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, opacity: .85 }}>{meta.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Subject chips */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                  {groups.map(group => {
+                    const accent = accentFor(group.subject)
+                    const isActive = group.subject === activeGroup?.subject
+                    return (
+                      <button
+                        key={group.subject}
+                        onClick={() => setSelectedSubject(group.subject)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 8,
+                          padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
+                          border: `1px solid ${isActive ? accent.text : accent.border}`,
+                          background: isActive ? accent.bg : 'white',
+                          color: accent.text, fontSize: 12, fontWeight: 900,
+                        }}
+                      >
+                        {group.label}
+                        <span style={{ fontSize: 10, fontWeight: 800, opacity: .75 }}>{group.completed}/{group.total}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {activeGroup && (
+                  <div>
+                    {/* Progress bar for the selected subject */}
+                    <div style={{ marginBottom: 18 }}>
+                      <div style={{ height: 8, borderRadius: 999, background: '#e2e8f0', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${activeGroup.total ? Math.round((activeGroup.completed / activeGroup.total) * 100) : 0}%`, background: '#34d399', borderRadius: 999 }} />
+                      </div>
+                      <p style={{ marginTop: 6, fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>
+                        {activeGroup.completed} de {activeGroup.total} temas completados en {activeGroup.label}
+                      </p>
+                    </div>
+
+                    {activeGroup.blocks.map(block => (
+                      <section key={block.blockTitle} style={{ marginBottom: 16, borderRadius: 20, border: '1px solid #e2e8f0', background: 'white', padding: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                          <h3 style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', margin: 0 }}>{block.blockTitle}</h3>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8' }}>
+                            {block.items.filter(i => i.status === 'completed').length}/{block.items.length}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {block.items.map(item => {
+                            const meta = STATUS_META[item.status]
+                            const rowStyle: CSSProperties = {
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                              padding: '10px 12px', borderRadius: 12, border: '1px solid #eef2f7',
+                              background: item.status === 'completed' ? '#f8fafc' : 'white',
+                              textDecoration: 'none', cursor: item.href ? 'pointer' : 'default',
+                              opacity: item.href ? 1 : .6,
+                            }
+                            const content = (
+                              <>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                                  {item.title}
+                                </span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0, padding: '4px 9px', borderRadius: 999, background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color, fontSize: 10.5, fontWeight: 900 }}>
+                                  <meta.Icon size={11} />
+                                  {meta.label}
+                                </span>
+                              </>
+                            )
+                            return item.href ? (
+                              <a key={item.key} href={item.href} style={rowStyle}>{content}</a>
+                            ) : (
+                              <div key={item.key} style={rowStyle}>{content}</div>
+                            )
+                          })}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                )}
+              </>
               )}
             </>
           )}

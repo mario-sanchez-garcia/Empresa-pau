@@ -461,7 +461,7 @@ export default function MonthCalendarOverlay({
 
 export function MonthCalendarButton({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-[#334155] transition hover:bg-slate-50">
+    <button onClick={onClick} className="inline-flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-[#334155] transition hover:bg-slate-50">
       <CalendarDays size={13} /> Ver mes
     </button>
   )

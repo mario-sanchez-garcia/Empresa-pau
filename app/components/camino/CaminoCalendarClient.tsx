@@ -1760,15 +1760,15 @@ export default function CaminoCalendarClient() {
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
             <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
+          <div className="camino-header-actions" style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <CalendarDays size={13} /> Editar semana
             </button>
             <MonthCalendarButton onClick={() => setShowMonthCalendar(true)} />
-            <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s' }}>
+            <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <Plus size={13} /> Examen
             </button>
-            <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: 'none', background: '#2563eb', color: 'white', transition: 'all .15s' }}>
+            <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: 'none', background: '#2563eb', color: 'white', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <BookPlus size={13} /> Asignatura
             </button>
           </div>
@@ -2263,8 +2263,10 @@ function Shell({ children }: { children: React.ReactNode }) {
           .camino-hero { height: 200px !important; }
           .camino-hero-days { font-size: 64px !important; }
           .camino-hero-overlay { padding: 16px 20px !important; }
-          .camino-header { padding: 10px 14px !important; }
+          .camino-header { padding: 10px 14px !important; flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
           .camino-header-title { font-size: 16px !important; }
+          .camino-header-actions { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+          .camino-header-actions::-webkit-scrollbar { display: none; }
           .camino-mission-card { padding: 14px 16px !important; }
           .camino-mission-number { font-size: 22px !important; width: 36px !important; }
         }

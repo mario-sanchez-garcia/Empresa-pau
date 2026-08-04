@@ -860,6 +860,7 @@ export default function CaminoCalendarClient() {
   const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
   const [addSubjectLoading, setAddSubjectLoading] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
+  const [expandedDayDate, setExpandedDayDate] = useState<string | null>(null)
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
@@ -2020,13 +2021,19 @@ export default function CaminoCalendarClient() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
               {weekCalendar.map((day, i) => {
                 const isPast = day.date < realToday
+                const isSelected = day.date === expandedDayDate
                 const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
                 const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
                 return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => { setExpandedDayDate(day.date); setCalendarExpanded(true) }}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  >
                     <span style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{dayLetter}</span>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: day.isToday || isPast ? 'none' : '1px solid #e2e8f0' }}>{dayNum}</div>
-                  </div>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: isSelected ? '2px solid #93c5fd' : day.isToday || isPast ? 'none' : '1px solid #e2e8f0', boxShadow: isSelected ? '0 0 0 2px #eff6ff' : 'none' }}>{dayNum}</div>
+                  </button>
                 )
               })}
             </div>
@@ -2034,7 +2041,8 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} />}
+            <FreeReviewPanel subjects={onboardingSubjects} />
           </div>
 
           {/* ── EXAMS SECTION ── */}
@@ -3144,8 +3152,123 @@ function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }
   )
 }
 
-function CompactWeekView({ days, exams }: { days: DayPlan[]; exams: StudentExam[] }) {
-  const [expandedDate, setExpandedDate] = useState<string | null>(null)
+// Personalization for "Repaso libre" days (the empty days the week widget
+// above already labels that way). Reuses perfiles.custom_instructions —
+// the exact same field Ajustes → Personalización IA and Parciales
+// (plan-intensity) already read — instead of a parallel notes store, so
+// writing here, in Ajustes, or in the monthly calendar's notes field all
+// edit the same thing. "Sugiéreme qué repasar" calls a small AI endpoint
+// (mirroring plan-intensity's pattern) that actually reads those
+// instructions to pick a subject and a focus note, with a deterministic
+// fallback if the AI call fails.
+function FreeReviewPanel({ subjects }: { subjects: string[] }) {
+  const [notes, setNotes] = useState('')
+  const [notesLoaded, setNotesLoaded] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [suggestion, setSuggestion] = useState<{ subject: string; focusNote: string } | null>(null)
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token
+      if (!token) return
+      try {
+        const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok || cancelled) return
+        const json = await res.json() as { custom_instructions?: string }
+        if (!cancelled) setNotes(json.custom_instructions ?? '')
+      } finally {
+        if (!cancelled) setNotesLoaded(true)
+      }
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  async function suggest() {
+    if (subjects.length === 0 || loadingSuggestion) return
+    setLoadingSuggestion(true)
+    setError('')
+    setSuggestion(null)
+    try {
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (!token) { setError('Inicia sesión para pedir una sugerencia.'); return }
+      // Save the notes first so this suggestion — and everywhere else that
+      // reads custom_instructions — sees the latest text, not stale state.
+      setSaving(true)
+      await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ custom_instructions: notes }),
+      }).catch(() => undefined)
+      setSaving(false)
+      const res = await fetch('/api/camino/free-review-suggestion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ subjects }),
+      })
+      if (!res.ok) { setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.'); return }
+      const json = await res.json() as { subject?: string; focusNote?: string }
+      if (json.subject) setSuggestion({ subject: json.subject, focusNote: json.focusNote ?? '' })
+      else setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.')
+    } catch {
+      setError('No se ha podido generar una sugerencia. Revisa la conexión.')
+    } finally {
+      setLoadingSuggestion(false)
+    }
+  }
+
+  if (subjects.length === 0) return null
+
+  const examSlug = suggestion ? (CAMINO_TO_SIM_SUBJECT[subjectSlug(suggestion.subject)] ?? subjectSlug(suggestion.subject)) : null
+
+  return (
+    <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[.12em] text-slate-400">Personaliza tu repaso libre</p>
+      <textarea
+        value={notes}
+        onChange={e => setNotes(e.target.value.slice(0, 600))}
+        placeholder={notesLoaded ? 'Ej: "en mis días libres quiero repasar más Historia", "prefiero ejercicios cortos"...' : 'Cargando…'}
+        disabled={!notesLoaded}
+        rows={2}
+        className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-blue-200 disabled:opacity-60"
+        style={{ resize: 'vertical' }}
+      />
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <p className="text-[9px] font-semibold text-slate-400">Mismo campo que Ajustes → Personalización IA.</p>
+        <button
+          onClick={suggest}
+          disabled={loadingSuggestion || saving || !notesLoaded}
+          className="shrink-0 rounded-lg bg-[#0f172a] px-3 py-1.5 text-[10px] font-black text-white disabled:opacity-40"
+        >
+          {loadingSuggestion || saving ? 'Pensando…' : 'Sugiéreme qué repasar'}
+        </button>
+      </div>
+      {error && <p className="mt-2 text-[10px] font-bold text-red-500">{error}</p>}
+      {suggestion && (
+        <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2">
+          <p className="text-[11px] font-black text-blue-900">{suggestion.subject}</p>
+          {suggestion.focusNote && <p className="mt-0.5 text-[10px] font-semibold text-blue-700">{suggestion.focusNote}</p>}
+          {examSlug && (
+            <a href={`/examenes?subject=${encodeURIComponent(examSlug)}`} className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black text-blue-600">
+              Ir a practicar →
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null }) {
+  // Only used as the useState initializer, not a live-controlled prop: this
+  // component remounts fresh every time the parent's "Ver semana completa"
+  // toggle opens it (conditional render, not display:none), so seeding from
+  // the day just clicked in the mini week strip above is enough to land
+  // straight on that day without lifting the whole accordion state up.
+  const [expandedDate, setExpandedDate] = useState<string | null>(initialExpandedDate)
   return (
     <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
       {days.map(day => {

@@ -2472,20 +2472,25 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     setDraft(current => current.map(day => ({ ...day, missions: day.missions.filter(mission => mission.id !== missionId) })))
   }
 
-  function addMission() {
-    if (!newMission.subject) return
-    const item = topics.find(topic => topic.topic === newMission.topic) ?? topics[0]
-    const subject = newMission.subject
-    const topic = item?.topic ?? newMission.topic
+  // Accepts overrides so a one-tap shortcut (e.g. "Tema sugerido") can add a
+  // mission for a specific day without first pushing that day/topic through
+  // the shared newMission panel state.
+  function addMission(overrides: Partial<typeof newMission> = {}) {
+    const effective = { ...newMission, ...overrides }
+    if (!effective.subject || !effective.day) return
+    const effectiveTopics = curriculumForSubject(effective.subject, curriculum)
+    const item = effectiveTopics.find(topic => topic.topic === effective.topic) ?? effectiveTopics[0]
+    const subject = effective.subject
+    const topic = item?.topic ?? effective.topic
     const cache: CalendarWeekCache = { [calendar[0]?.date ?? currentWeekStartISO()]: draft }
-    const requestedKind = newMission.kind
-    const kind = requestedKind === 'mock_exam' && !canScheduleSimulation(null, planId, newMission.day, cache)
+    const requestedKind = effective.kind
+    const kind = requestedKind === 'mock_exam' && !canScheduleSimulation(null, planId, effective.day, cache)
       ? 'evau_practice'
       : requestedKind
     if (requestedKind === 'mock_exam' && kind !== 'mock_exam') setEditorNotice('Has alcanzado el límite de simulacros de tu plan este mes. Te proponemos ejercicios PAU del mismo tema.')
     const mission: Mission = {
-      id: `${newMission.day}-${newMission.bonus ? 'bonus' : 'main'}-manual-${draft.reduce((total, day) => total + day.missions.length, 0) + 1}`,
-      role: newMission.bonus ? 'bonus' : 'main',
+      id: `${effective.day}-${effective.bonus ? 'bonus' : 'main'}-manual-${draft.reduce((total, day) => total + day.missions.length, 0) + 1}`,
+      role: effective.bonus ? 'bonus' : 'main',
       kind,
       subject,
       block: item?.block,
@@ -2493,11 +2498,11 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
       title: titleFor(kind, subject, item ?? undefined),
       reason: requestedKind === 'mock_exam' && kind !== 'mock_exam' ? 'Simulacro sustituido por límite mensual: práctica PAU del mismo tema.' : item ? `${item.block} · añadida por el alumno.` : 'Añadida manualmente por el alumno.',
       ...missionMeta(kind, subject, topic, item?.block, item?.planTopic),
-      estimatedMinutes: newMission.minutes,
-      baseXP: newMission.bonus ? 12 : kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
+      estimatedMinutes: effective.minutes,
+      baseXP: effective.bonus ? 12 : kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
       status: 'pending',
     }
-    setDraft(current => current.map(day => day.date === newMission.day ? { ...day, missions: [...day.missions, mission] } : day))
+    setDraft(current => current.map(day => day.date === effective.day ? { ...day, missions: [...day.missions, mission] } : day))
   }
 
   const kindOptions: Array<{ value: MissionKind; label: string }> = [
@@ -2613,12 +2618,18 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             </div>
             <div className="flex items-center gap-2">
               <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Añadir parcial</button>
-              <button onClick={() => setMissionPanelOpen(c => !c)} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> Añadir misión</button>
+              <button onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(c => !c) }} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> Añadir misión</button>
             </div>
           </div>
 
-          {/* Week grid */}
-          <div className="grid grid-cols-7 gap-1.5">
+          {/* Week grid — a plain grid-cols-7 never shrinks below each day's
+              intrinsic content width, so on narrow phones it silently
+              overflowed the header and got clipped by the section's
+              overflow-hidden: only the first 3-4 days were ever reachable,
+              with no scrollbar to reveal the rest. Below sm: it's a
+              horizontally scrollable row of fixed-width day chips instead;
+              from sm: up it's back to the original even 7-col grid. */}
+          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-7 sm:overflow-visible sm:px-0 sm:pb-0">
             {orderedDraft.map((day, idx) => {
               const isSelected = day.date === selectedDayDate
               const isToday = day.isToday
@@ -2633,7 +2644,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                   onClick={() => setSelectedDayDate(day.date)}
                   onDragOver={e => e.preventDefault()}
                   onDrop={e => { e.preventDefault(); if (draggedMissionId) { moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date) }; setDraggedMissionId(null) }}
-                  className="rounded-lg py-2.5 text-center transition-all"
+                  className="w-14 shrink-0 rounded-lg py-2.5 text-center transition-all sm:w-auto"
                   style={{
                     background: isSelected ? '#2563eb' : 'rgba(255,255,255,0.04)',
                     border: `1px solid ${isSelected ? '#2563eb' : isToday ? 'rgba(37,99,235,0.4)' : 'rgba(255,255,255,0.07)'}`,
@@ -2697,12 +2708,22 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                   {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
                 </p>
               </div>
-              <button
-                onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(c => !c) }}
-                className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50"
-              >
-                <Plus size={13} /> Añadir aquí
-              </button>
+              <div className="mt-1 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  onClick={() => selectedDay && addMission({ day: selectedDay.date, subject: newMission.subject || safeSubjects[0], topic: '', kind: 'concept_explanation', minutes: 15, bonus: false })}
+                  disabled={!selectedDay || !safeSubjects.length}
+                  title="Añade una misión de repaso con el tema que Camino sugiere para este día, sin rellenar nada más."
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Plus size={13} /> Tema sugerido
+                </button>
+                <button
+                  onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(c => !c) }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50"
+                >
+                  <Plus size={13} /> Añadir aquí
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2743,8 +2764,8 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
                     Opcional / bonus
                   </label>
-                  <button onClick={addMission} disabled={!safeSubjects.length} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
-                    <Plus size={12} /> Añadir
+                  <button onClick={() => addMission()} disabled={!safeSubjects.length} title="Añade esta misión al día y con los ajustes configurados arriba." className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
+                    <Plus size={12} /> Añadir misión
                   </button>
                 </div>
               </div>

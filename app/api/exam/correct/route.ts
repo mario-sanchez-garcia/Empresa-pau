@@ -7,7 +7,7 @@ import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
-import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getTheoryContextForExercise, theoryContextToPrompt } from '@/app/lib/whyItWorksTheory'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
@@ -17,11 +17,16 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 5
 export const maxDuration = 60
 
 const MODEL = 'claude-sonnet-4-6'
-// Prompt asks for a single-exercise schema (summary fields + one desglose_bloques
-// entry with porqueEsAsi) — heavier than simulacro's compact per-block prompt
-// (1800) but lighter than the old 4-chunk markdown flow (4 x 8192).
-const MAX_TOKENS = 4096
+// Same compact per-block prompt/budget /api/simulacro uses (proven to finish
+// well inside the 50s timeout). The earlier version used the full multi-subject
+// buildCorrectionPrompt with 4096 tokens, which could run past the SDK timeout
+// and get hard-killed by Vercel before any error handling could run.
+const MAX_TOKENS = 1800
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+
+function examSystemLabel(comunidad: string) {
+  return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
+}
 
 type ExamCorrectBody = {
   subject?: unknown
@@ -147,14 +152,8 @@ async function handlePost(request: NextRequest) {
   })
   const combinedCriteria = [criteria, theoryContextToPrompt(theoryContext)].filter(Boolean).join('\n\n')
 
-  const prompt = buildCorrectionPrompt({
-    subject,
-    community,
-    simulacroId: `Examen · ${subject} · ${examLabel}`,
-    option: option || 'Curso',
-    elapsedMinutes: 0,
-    difficulty: 'Media',
-    blocks: [{
+  const prompt = buildBlockPrompt({
+    block: {
       numeroBloque: 'Ejercicio',
       tema: examLabel,
       community,
@@ -169,7 +168,11 @@ async function handlePost(request: NextRequest) {
       studentAnswer: imagen
         ? `Respuesta manuscrita adjunta como imagen. Texto adicional: ${studentAnswer}`
         : studentAnswer
-    }]
+    },
+    blockIndex: 0,
+    totalBlocks: 1,
+    subject,
+    community
   })
 
   const content: Anthropic.Messages.ContentBlockParam[] = []
@@ -188,6 +191,7 @@ async function handlePost(request: NextRequest) {
       () => client.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,
+        system: `Eres Kairo, corrector experto de ${examSystemLabel(community)}. Devuelve exclusivamente JSON válido. Sin texto fuera del JSON. Mantén la corrección compacta: nota, errores principales, feedback accionable y plan breve. No repitas el enunciado ni la respuesta del alumno. Máximo 3 aciertos, 3 errores y 3 mejoras.`,
         messages: [{ role: 'user', content }]
       }),
       (intento, status) => console.warn('[exam/correct] reintento por saturación', { intento, status })

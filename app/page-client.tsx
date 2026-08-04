@@ -1569,15 +1569,22 @@ function extractCorrectionBullets(text: string, section: string): string[] {
     .map(sanitizeCorrectionListItem)
     .filter(Boolean)
 }
+// El esquema completo de Simulacros (varios bloques) trae fortalezas/errores_principales
+// a nivel superior; el prompt ligero de un solo bloque (buildBlockPrompt, usado por
+// /api/exam/correct) no los genera — en ese caso se derivan del propio bloque.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
 const correccionFuertesJson = Array.isArray((correccionParsedJson as any)?.fortalezas)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
   ? ((correccionParsedJson as any).fortalezas as unknown[]).filter(Boolean).map(String)
+  : typeof correccionBloqueJson?.que_hizo_bien === 'string' && correccionBloqueJson.que_hizo_bien.trim()
+  ? [correccionBloqueJson.que_hizo_bien.trim()]
   : null
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
 const correccionErroresJson = Array.isArray((correccionParsedJson as any)?.errores_principales)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
   ? ((correccionParsedJson as any).errores_principales as unknown[]).filter(Boolean).map(String)
+  : Array.isArray(correccionBloqueJson?.errores_detectados)
+  ? (correccionBloqueJson.errores_detectados as unknown[]).filter(Boolean).map(String)
   : null
 const correctionFuertes = correccionFuertesJson?.length
   ? correccionFuertesJson

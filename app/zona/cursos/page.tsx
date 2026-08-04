@@ -3,7 +3,7 @@
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, CalendarClock, CheckCircle2, Clock, LayoutGrid, Zap } from 'lucide-react'
+import { BookOpen, CheckCircle2, LayoutGrid, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
@@ -37,13 +37,6 @@ function accentFor(subject: string) {
   return SUBJECT_ACCENT[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
 }
 
-function madridToday() {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-}
-function formatShortDate(dateISO: string) {
-  return new Date(`${dateISO}T12:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
-}
-
 type QueueStatus = 'pending' | 'scheduled' | 'completed' | 'postponed' | 'inactive'
 type QueueRow = {
   subject: string
@@ -57,18 +50,16 @@ type QueueRow = {
 type CalendarRow = {
   subject: string
   v2_sort_order: number | null
-  scheduled_date: string
   status: 'pending' | 'completed' | 'missed' | 'postponed'
   completed_at: string | null
 }
 
-type CourseStatus = 'completed' | 'today' | 'scheduled' | 'unscheduled'
+type CourseStatus = 'completed' | 'today'
 type CourseEntry = {
   key: string
   title: string
   orderIndex: number
   status: CourseStatus
-  scheduledDate?: string
   completedAt?: string
   href: string | null
 }
@@ -93,21 +84,16 @@ function findTopic(subject: string, v2SortOrder: number | null): CaminoCurriculu
 }
 
 function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]): SubjectGroup[] {
-  const scheduledByKey = new Map<string, CalendarRow>()
+  // Every topic that already has curriculum content is open to everyone right
+  // away (no scheduling wait) — only completion is tracked from camino_calendar.
   const completedByKey = new Map<string, CalendarRow>()
   for (const row of calendarRows) {
-    if (row.v2_sort_order == null) continue
+    if (row.v2_sort_order == null || row.status !== 'completed') continue
     const key = `${row.subject}:${row.v2_sort_order}`
-    if (row.status === 'completed') {
-      const prev = completedByKey.get(key)
-      if (!prev || (row.completed_at ?? '') > (prev.completed_at ?? '')) completedByKey.set(key, row)
-    } else if (row.status === 'pending' || row.status === 'postponed') {
-      const prev = scheduledByKey.get(key)
-      if (!prev || row.scheduled_date < prev.scheduled_date) scheduledByKey.set(key, row)
-    }
+    const prev = completedByKey.get(key)
+    if (!prev || (row.completed_at ?? '') > (prev.completed_at ?? '')) completedByKey.set(key, row)
   }
 
-  const today = madridToday()
   const subjects = new Map<string, Map<string, BlockGroup>>()
   const totals = new Map<string, { total: number; completed: number }>()
 
@@ -115,17 +101,12 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
     const key = `${q.subject}:${q.v2_sort_order}`
     const topic = findTopic(q.subject, q.v2_sort_order)
     const completedRow = completedByKey.get(key)
-    const scheduledRow = scheduledByKey.get(key)
 
-    let status: CourseStatus = 'unscheduled'
-    let scheduledDate: string | undefined
+    let status: CourseStatus = 'today'
     let completedAt: string | undefined
     if (q.queue_status === 'completed' || completedRow) {
       status = 'completed'
       completedAt = completedRow?.completed_at ?? undefined
-    } else if (scheduledRow) {
-      scheduledDate = scheduledRow.scheduled_date
-      status = scheduledDate <= today ? 'today' : 'scheduled'
     }
 
     const blockTitle = sanitizeLessonTitle(topic?.blockTitle ?? q.block_key ?? 'General')
@@ -134,7 +115,6 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
       title: sanitizeLessonTitle(topic?.title ?? q.title),
       orderIndex: topic?.orderIndex ?? q.subject_position ?? 0,
       status,
-      scheduledDate,
       completedAt,
       href: topic ? buildTopicHref(topic) : null,
     }
@@ -165,15 +145,7 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
 
 const STATUS_META: Record<CourseStatus, { label: string; color: string; bg: string; border: string; Icon: typeof CheckCircle2 }> = {
   completed: { label: 'Completado', color: '#059669', bg: '#f0fdf4', border: '#bbf7d0', Icon: CheckCircle2 },
-  today: { label: 'Te toca hoy', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', Icon: Zap },
-  scheduled: { label: 'Programado', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', Icon: CalendarClock },
-  unscheduled: { label: 'Próximamente', color: '#64748b', bg: '#f8fafc', border: '#e2e8f0', Icon: Clock },
-}
-
-function badgeLabel(entry: CourseEntry) {
-  const meta = STATUS_META[entry.status]
-  if (entry.status === 'scheduled' && entry.scheduledDate) return `${meta.label} · ${formatShortDate(entry.scheduledDate)}`
-  return meta.label
+  today: { label: 'Disponible', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', Icon: Zap },
 }
 
 export default function ZonaCursosPage() {
@@ -199,9 +171,9 @@ export default function ZonaCursosPage() {
           .eq('user_id', data.user.id),
         supabase
           .from('camino_calendar')
-          .select('subject, v2_sort_order, scheduled_date, status, completed_at')
+          .select('subject, v2_sort_order, status, completed_at')
           .eq('user_id', data.user.id)
-          .in('status', ['pending', 'postponed', 'completed']),
+          .eq('status', 'completed'),
       ])
 
       const built = buildSubjectGroups((queueRows ?? []) as QueueRow[], (calendarRows ?? []) as CalendarRow[])
@@ -214,7 +186,7 @@ export default function ZonaCursosPage() {
 
   const activeGroup = useMemo(() => groups.find(g => g.subject === selectedSubject) ?? groups[0], [groups, selectedSubject])
   const overallStats = useMemo(() => {
-    const stats = { completed: 0, today: 0, scheduled: 0, unscheduled: 0 }
+    const stats = { completed: 0, today: 0 }
     for (const group of groups) {
       for (const block of group.blocks) {
         for (const item of block.items) stats[item.status] += 1
@@ -270,7 +242,7 @@ export default function ZonaCursosPage() {
           <SectionIntroCard
             hintKey="hint_zona_cursos"
             line1="Aquí están todos tus cursos de Camino PAU, organizados por asignatura y bloque."
-            line2="Ve qué has completado, qué te toca hoy y cuándo llegará el resto."
+            line2="Ve qué has completado y qué tienes disponible para empezar ahora."
           />
 
           {groups.length === 0 ? (
@@ -284,7 +256,7 @@ export default function ZonaCursosPage() {
             <>
               {/* Global stats */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-                {(['completed', 'today', 'scheduled', 'unscheduled'] as CourseStatus[]).map(status => {
+                {(['completed', 'today'] as CourseStatus[]).map(status => {
                   const meta = STATUS_META[status]
                   return (
                     <div key={status} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 12px', borderRadius: 12, background: meta.bg, border: `1px solid ${meta.border}` }}>
@@ -357,7 +329,7 @@ export default function ZonaCursosPage() {
                               </span>
                               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0, padding: '4px 9px', borderRadius: 999, background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color, fontSize: 10.5, fontWeight: 900 }}>
                                 <meta.Icon size={11} />
-                                {badgeLabel(item)}
+                                {meta.label}
                               </span>
                             </>
                           )

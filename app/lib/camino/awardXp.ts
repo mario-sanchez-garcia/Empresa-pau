@@ -110,50 +110,36 @@ export async function awardXp(
     }
   }
 
-  const now = new Date().toISOString()
-  const { data: currentProgress } = await db
-    .from('camino_user_progress')
-    .select('xp_total, missions_completed, longest_streak')
-    .eq('user_id', userId)
-    .maybeSingle()
-
-  const oldXpTotal = Number(currentProgress?.xp_total) || 0
-  const newXpTotal = oldXpTotal + xpTotal
-  const newMissionsCompleted = (Number(currentProgress?.missions_completed) || 0) + (args.missionsCompletedDelta ?? 0)
   const newStreakDays = await calcularRacha(userId, db).catch(() => null)
-  const newLongestStreak = newStreakDays == null
-    ? Number(currentProgress?.longest_streak ?? 0)
-    : Math.max(Number(currentProgress?.longest_streak ?? 0), newStreakDays)
+
+  // Incremento atómico en una sola sentencia SQL (ver migración
+  // 20260806120000) — antes esto era un read-modify-write en dos pasos
+  // desde aquí, vulnerable a perder XP si dos acciones del mismo alumno
+  // escribían casi a la vez (el evento en camino_xp_events quedaba bien,
+  // pero el agregado que lee el ranking podía quedarse corto).
+  const { data: progressRow, error: progressError } = await db
+    .rpc('increment_camino_progress', {
+      p_user_id: userId,
+      p_xp_delta: xpTotal,
+      p_missions_delta: args.missionsCompletedDelta ?? 0,
+      p_streak_days: newStreakDays ?? 0,
+      p_longest_streak: newStreakDays ?? 0,
+      p_has_streak: newStreakDays != null,
+    })
+    .single()
+
+  if (progressError || !progressRow) {
+    throw new Error(`awardXp: increment_camino_progress failed: ${progressError?.message}`)
+  }
+
+  const progress = progressRow as { old_xp_total: number; new_xp_total: number }
+  const oldXpTotal = Number(progress.old_xp_total) || 0
+  const newXpTotal = Number(progress.new_xp_total) || 0
   const oldDivision = divisionFor(oldXpTotal)
   const newDivision = divisionFor(newXpTotal)
   const leagueUpgrade = newDivision.name !== oldDivision.name
     ? { from: oldDivision.name, to: newDivision.name }
     : null
-
-  if (!currentProgress) {
-    await db.from('camino_user_progress').insert({
-      user_id: userId,
-      xp_total: xpTotal,
-      streak_days: newStreakDays ?? 0,
-      longest_streak: newLongestStreak,
-      missions_completed: args.missionsCompletedDelta ?? 0,
-      level_mates: 1,
-      level_historia: 1,
-      level_ingles: 1,
-      progress_towards_pau: 1,
-      updated_at: now,
-    })
-  } else {
-    await db
-      .from('camino_user_progress')
-      .update({
-        xp_total: newXpTotal,
-        missions_completed: newMissionsCompleted,
-        ...(newStreakDays == null ? {} : { streak_days: newStreakDays, longest_streak: newLongestStreak }),
-        updated_at: now,
-      })
-      .eq('user_id', userId)
-  }
 
   return { awarded: true, xpAwarded: xpTotal, baseXp: args.xp, bonusXp, totalXp: newXpTotal, streakDays: newStreakDays, leagueUpgrade }
 }

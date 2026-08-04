@@ -61,6 +61,8 @@ export const EXPECTED_FUNCTIONS: ExpectedFunction[] = [
     porque: 'Las políticas RLS de ligas la llaman; sin ella las ligas quedan abiertas' },
   { name: 'schema_snapshot',
     porque: 'Esta misma comprobación' },
+  { name: 'increment_camino_progress',
+    porque: 'awardXp() la usa para incrementar xp_total de forma atómica; sin ella el ranking puede perder XP por condición de carrera' },
 ]
 
 /**

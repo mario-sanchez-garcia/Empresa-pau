@@ -39,6 +39,8 @@ function accentFor(subject: string) {
   return SUBJECT_ACCENT[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
 }
 
+const HIDDEN_COURSE_SUBJECTS = new Set(['matematicas_ccss'])
+
 type QueueStatus = 'pending' | 'scheduled' | 'completed' | 'postponed' | 'inactive'
 type QueueRow = {
   subject: string
@@ -100,6 +102,8 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
   const totals = new Map<string, { total: number; completed: number }>()
 
   for (const q of queueRows) {
+    if (HIDDEN_COURSE_SUBJECTS.has(q.subject)) continue
+
     const key = `${q.subject}:${q.v2_sort_order}`
     const topic = findTopic(q.subject, q.v2_sort_order)
     const completedRow = completedByKey.get(key)

@@ -224,7 +224,7 @@ export async function ensureCaminoCalendar(
   try {
     const { data: profileForExams } = await supabase
       .from('perfiles')
-      .select('student_exams, custom_instructions')
+      .select('student_exams')
       .eq('id', userId)
       .maybeSingle()
     const activeExams = cleanStudentExams(profileForExams?.student_exams)
@@ -236,7 +236,7 @@ export async function ensureCaminoCalendar(
       examSubjectsByDate.set(exam.date, existing)
     }
     if (activeExams.length > 0) {
-      await injectAllPartialExamMissions(userId, supabase, activeExams, profileForExams?.custom_instructions ?? undefined)
+      await injectAllPartialExamMissions(userId, supabase, activeExams)
     }
   } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
 

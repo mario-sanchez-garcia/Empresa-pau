@@ -112,6 +112,51 @@ function toSlug(text: string): string {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+// The part of an exam a student would recognize as "I changed something" —
+// deliberately excludes anything derived from "today" (days-until-exam, and
+// therefore session count) so routine daily reruns never look like a change.
+type ExamSignature = {
+  date: string
+  block: string
+  topic: string | null
+  priority: ExamPriority
+  confidence: ExamConfidence | null
+  content: string | null
+  customInstructions: string | null
+}
+
+function examSignature(partialExam: PartialExamInput): ExamSignature {
+  return {
+    date: partialExam.date,
+    block: partialExam.block,
+    topic: partialExam.topic || null,
+    priority: partialExam.priority ?? 'normal',
+    confidence: partialExam.confidence ?? null,
+    content: partialExam.content ?? null,
+    customInstructions: partialExam.customInstructions ?? null,
+  }
+}
+
+function signatureFromMetadata(metadata: unknown): ExamSignature | null {
+  if (!metadata || typeof metadata !== 'object') return null
+  const m = metadata as Record<string, unknown>
+  return {
+    date: typeof m.partial_exam_date === 'string' ? m.partial_exam_date : '',
+    block: typeof m.target_block_normalized === 'string' ? m.target_block_normalized : '',
+    topic: typeof m.target_topic === 'string' ? m.target_topic : null,
+    priority: (m.priority as ExamPriority | undefined) ?? 'normal',
+    confidence: (m.confidence as ExamConfidence | null | undefined) ?? null,
+    content: typeof m.target_content === 'string' ? m.target_content : null,
+    customInstructions: typeof m.custom_instructions === 'string' ? m.custom_instructions : null,
+  }
+}
+
+function signaturesEqual(a: ExamSignature, b: ExamSignature): boolean {
+  return a.date === b.date && a.block === b.block && a.topic === b.topic &&
+    a.priority === b.priority && a.confidence === b.confidence &&
+    a.content === b.content && a.customInstructions === b.customInstructions
+}
+
 /**
  * Injects prep missions for a single exam. `reservedDates` are calendar dates
  * already claimed by a *different* (nearer) exam this run — this exam skips
@@ -127,6 +172,35 @@ export async function injectPartialExamMissions(
 ): Promise<{ claimedDates: string[] }> {
   const today = madridToday()
   if (partialExam.date <= today) return { claimedDates: [] }
+
+  // This runs at most once a day from ensureCaminoCalendar's throttle, so
+  // without this check every single run would wipe and recompute — and
+  // since the session count formula is driven by days-until-exam, which
+  // shrinks every day even though nothing about the exam changed, that
+  // reshuffled which calendar days already shown to the student carried a
+  // prep mission. Missions must only move for a real reason (exam edited,
+  // exam removed, instructions changed) — never as a side effect of "today"
+  // having advanced. So: look at what's already scheduled for this exam
+  // (any status, so a fully-completed prep plan isn't re-injected either)
+  // and skip the wipe/reinsert entirely if nothing that matters changed.
+  const { data: existingRows } = await supabase
+    .from('camino_calendar')
+    .select('scheduled_date, status, metadata')
+    .eq('user_id', userId)
+    .eq('source', 'partial')
+    .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
+    .order('scheduled_date', { ascending: true })
+
+  if (existingRows && existingRows.length > 0) {
+    const existingSignature = signatureFromMetadata(existingRows[0].metadata)
+    if (existingSignature && signaturesEqual(examSignature(partialExam), existingSignature)) {
+      return {
+        claimedDates: existingRows
+          .filter(r => r.status === 'pending')
+          .map(r => r.scheduled_date as string),
+      }
+    }
+  }
 
   // Idempotent: wipe any pending partial missions for this exam before re-inserting
   await supabase
@@ -158,13 +232,24 @@ export async function injectPartialExamMissions(
   const topic = partialExam.topic || undefined
   const now = new Date().toISOString()
 
-  // Use the last N available slots (closest to the exam)
-  const targetSlots = availableSlots.slice(-sequence.length)
+  // Use the last N available slots (closest to the exam). When a nearer
+  // exam has already reserved part of this window, availableSlots can be
+  // shorter than the full sequence — slice(-sequence.length) on a shorter
+  // array returns it unchanged from the start, silently pairing sequence[0..]
+  // (the lowest-priority, earliest session types) with the few available
+  // slots while dropping block_mock/final_mini_mock (the highest-priority
+  // ones, meant to land right before the exam) entirely. Trim the sequence
+  // from the front instead, so it's always the earliest/lowest-priority
+  // session types that get dropped when slots are scarce, never the ones
+  // closest to the exam.
+  const usableCount = Math.min(sequence.length, availableSlots.length)
+  const targetSequence = sequence.slice(-usableCount)
+  const targetSlots = availableSlots.slice(-usableCount)
   const claimedDates: string[] = []
 
-  for (let i = 0; i < sequence.length; i++) {
+  for (let i = 0; i < targetSequence.length; i++) {
     const slot = targetSlots[i]
-    const mType = sequence[i]
+    const mType = targetSequence[i]
     if (!slot) continue
 
     // Skip slot if there's already a locked mission
@@ -252,12 +337,26 @@ export async function injectAllPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
   exams: (StudentExam & { sessionOverride?: number })[],
-  customInstructions?: string,
 ): Promise<void> {
   const today = madridToday()
   const upcoming = exams
     .filter(exam => exam.date > today)
     .sort((a, b) => a.date.localeCompare(b.date))
+  if (upcoming.length === 0) return
+
+  // Fetched here (not passed in) so every caller — the client saving/
+  // deleting an exam, onboarding, and ensureCaminoCalendar's daily throttle
+  // — compares against the exact same live value. Two callers used to pass
+  // this inconsistently (some omitted it entirely), which, now that
+  // injectPartialExamMissions skips reinjection when nothing changed, would
+  // otherwise look like custom_instructions flip-flopping between "set" and
+  // "unset" on every other run and defeat that stability check.
+  const { data: profile } = await supabase
+    .from('perfiles')
+    .select('custom_instructions')
+    .eq('id', userId)
+    .maybeSingle()
+  const customInstructions = profile?.custom_instructions ?? undefined
 
   const reservedDates = new Set<string>()
   for (const exam of upcoming) {

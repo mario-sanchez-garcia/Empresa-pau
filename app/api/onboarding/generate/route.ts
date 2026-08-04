@@ -108,12 +108,7 @@ export async function POST(request: NextRequest) {
     async function injectOnboardingPartials() {
       const studentExams = await loadStudentExams()
       if (studentExams.length === 0) return
-      const { data: profile } = await db
-        .from('perfiles')
-        .select('custom_instructions')
-        .eq('id', user.id)
-        .maybeSingle()
-      await injectAllPartialExamMissions(user.id, db, studentExams, profile?.custom_instructions ?? undefined)
+      await injectAllPartialExamMissions(user.id, db, studentExams)
     }
 
     // ── Reset: wipe old plan so subjects chosen in onboarding take effect ───

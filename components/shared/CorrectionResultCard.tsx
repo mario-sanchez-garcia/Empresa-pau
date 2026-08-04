@@ -25,7 +25,10 @@ export default function CorrectionResultCard({
 
   return (
     <div className={className}>
-      <MathMarkdown text={main} format={false} components={components} isStreaming={isStreaming} />
+      {/* pau-stagger: each section (heading, paragraph, list...) eases in in
+          sequence instead of the whole correction appearing at once. Skipped
+          while isStreaming, where content is still arriving token by token. */}
+      <MathMarkdown text={main} format={false} components={components} isStreaming={isStreaming} className={isStreaming ? '' : 'pau-stagger'} />
       {!isStreaming && <WhyExplanation markdown={why} components={components} />}
     </div>
   )

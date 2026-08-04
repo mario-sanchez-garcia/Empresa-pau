@@ -53,6 +53,8 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'Fuente de verdad de asignaturas tras el onboarding' },
   { table: 'perfiles', column: 'custom_instructions',
     porque: 'Sin ella, Ajustes no puede guardar instrucciones personalizadas ni el generador de parciales leerlas' },
+  { table: 'perfiles', column: 'student_exams',
+    porque: 'GET /api/profile la selecciona junto a username; si falta, TODO el endpoint devuelve 500 y el username desaparece del perfil aunque esté guardado' },
 ]
 
 /** Funciones que alguna política RLS o ruta invoca. */

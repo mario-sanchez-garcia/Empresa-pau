@@ -1,0 +1,13 @@
+-- perfiles.student_exams: parciales/exámenes próximos capturados en
+-- onboarding ("¿Tienes un parcial pronto?") y editables desde Ajustes.
+--
+-- Esta columna nunca se creó vía migración pero /api/onboarding/setup,
+-- /api/profile, /api/onboarding/generate y ensureCaminoCalendar.ts la leen
+-- y escriben desde el commit b590737. Sin la columna, CUALQUIER select que
+-- la incluyera fallaba con "column perfiles.student_exams does not exist"
+-- — en particular GET /api/profile, que devuelve username en la misma
+-- respuesta: el error tumbaba la respuesta entera con un 500 aunque el
+-- username estuviera guardado correctamente en la fila, y el cliente lo
+-- interpretaba como "sin nombre de usuario". La inyección de misiones de
+-- parciales en ensureCaminoCalendar.ts estaba rota por el mismo motivo.
+alter table public.perfiles add column if not exists student_exams jsonb;

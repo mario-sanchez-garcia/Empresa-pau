@@ -41,7 +41,6 @@ const caminoTopic = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicC
 const simulacroActivePage = read('app/simulacros/[id]/page.tsx')
 const catEjercicioCard = read('app/components/CatEjercicioCard.tsx')
 const catFisicaEjercicioCard = read('app/components/CatFisicaEjercicioCard.tsx')
-const caminoSchoolFeedbackRoute = read('app/api/camino/school-topic-feedback/route.ts')
 const caminoCourseTopic = read('app/camino-pau/curso/[subject]/[block]/[topic]/page.tsx')
 const randomEvauExercise = read('app/lib/camino/randomEvauExercise.ts')
 const mathCcssSeed = read('supabase/migrations/20260622120000_seed_curriculum_flashcards_mates_ccss.sql')
@@ -803,17 +802,13 @@ assert(
 )
 
 assert(
-  'P0 not-seen feedback persists locally, syncs to Supabase and refreshes calendar',
+  'P0 not-seen feedback persists locally and refreshes calendar',
   caminoTopic.includes("SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'") &&
     caminoTopic.includes("CALENDAR_REFRESH_KEY = 'kairo_camino_calendar_needs_refresh_v1'") &&
     caminoTopic.includes('saveJson(CALENDAR_REFRESH_KEY, true)') &&
     caminoTopic.includes("window.dispatchEvent(new CustomEvent('kairo:school-topic-feedback'") &&
-    caminoTopic.includes("fetch('/api/camino/school-topic-feedback'") &&
-    caminoTopic.includes('No lo he dado en clase') &&
-    caminoSchoolFeedbackRoute.includes("reason: 'not_seen_in_class'") &&
-    caminoSchoolFeedbackRoute.includes("status = notSeenCount >= 2 ? 'delayed_for_school' : 'not_seen'") &&
-    caminoSchoolFeedbackRoute.includes("upsert({") &&
-    caminoSchoolFeedbackRoute.includes("onConflict: 'school_name,subject,block_slug,topic_slug'")
+    caminoTopic.includes("fetch('/api/camino/pace-signal'") &&
+    caminoTopic.includes('No lo he dado en clase')
 )
 
 assert(

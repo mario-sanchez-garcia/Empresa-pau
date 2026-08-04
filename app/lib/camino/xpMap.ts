@@ -29,3 +29,8 @@ export function resolveMissionTypeXp(missionType: string): number {
 export const EXAM_CORRECTION_XP = 20
 export const SIMULACRO_COMPLETION_XP = 50
 export const PARCIAL_COMPLETION_XP = 30
+export const FLASHCARD_DECK_COMPLETION_XP = 15
+// Otorgado al autor de un mazo público cuando otro alumno lo completa con
+// buena nota (ver umbral en el route handler) — recompensa publicar mazos
+// que de verdad ayudan, no solo publicar por publicar.
+export const FLASHCARD_DECK_AUTHOR_BONUS_XP = 10

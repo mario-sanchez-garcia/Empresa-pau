@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { CSSProperties, FormEvent, ReactNode } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -14,26 +14,17 @@ import {
   RotateCcw,
   Sparkles,
   Trash2,
+  Trophy,
   XCircle
 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import { RECOMMENDED_FLASHCARDS } from './recommendedFlashcards'
+import FlashcardDecks from './FlashcardDecks'
+import { SUBJECTS, subjectLabel, eyebrowStyle, labelStyle, inputStyle } from './zonaShared'
 import type { Flashcard, ZonaSubject } from './types'
 
-const SUBJECTS: { id: ZonaSubject; label: string; color: string; soft: string }[] = [
-  { id: 'mates', label: 'Mates', color: '#2563eb', soft: '#eff6ff' },
-  { id: 'matematicas_ccss', label: 'Matemáticas CCSS', color: '#7c3aed', soft: '#f5f3ff' },
-  { id: 'fisica', label: 'Física', color: '#CA8A04', soft: '#FEFCE8' },
-  { id: 'quimica', label: 'Química', color: '#ea580c', soft: '#fff7ed' },
-  { id: 'lengua', label: 'Lengua', color: '#0284C7', soft: '#E0F2FE' },
-  { id: 'historia', label: 'Historia', color: '#2f6f4e', soft: '#f0fdf4' },
-  { id: 'historia_filosofia', label: 'Filosofía', color: '#64748B', soft: '#F8FAFC' },
-  { id: 'ingles', label: 'Inglés', color: '#0891B2', soft: '#CFFAFE' },
-  { id: 'biologia', label: 'Biología', color: '#4d7c0f', soft: '#f7fee7' }
-]
-
-type ZonaMode = 'study' | 'create' | 'space'
+type ZonaMode = 'study' | 'create' | 'space' | 'decks'
 
 interface FlashcardsProps {
   userId: string
@@ -45,6 +36,7 @@ const MODES: { key: ZonaMode; icon: ReactNode; title: string; text: string }[] =
   { key: 'study', icon: <BookOpenCheck size={15} />, title: 'Repasar tarjetas', text: 'Practica conceptos rápidos por asignatura.' },
   { key: 'create', icon: <PencilLine size={15} />, title: 'Crear tarjetas', text: 'Guarda fórmulas o errores para repasar después.' },
   { key: 'space', icon: <Layers3 size={15} />, title: 'Mi espacio', text: 'Consulta tus tarjetas guardadas.' },
+  { key: 'decks', icon: <Trophy size={15} />, title: 'Mazos', text: 'Crea mazos, impórtalos, publícalos y compite en el ranking.' },
 ]
 
 export default function Flashcards({ userId, initialCards, externalSubject }: FlashcardsProps) {
@@ -209,7 +201,7 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
           <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid #e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+        <div className="grid grid-cols-2 lg:grid-cols-4" style={{ border: '1px solid #e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
           {MODES.map((m, i) => {
             const isActive = mode === m.key
             return (
@@ -221,7 +213,7 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
                   padding: '16px 18px',
                   background: isActive ? '#0f172a' : 'white',
                   borderWidth: 0,
-                  borderRightWidth: i < 2 ? 1 : 0,
+                  borderRightWidth: i < MODES.length - 1 ? 1 : 0,
                   borderRightStyle: 'solid',
                   borderRightColor: '#e2e8f0',
                   cursor: 'pointer', textAlign: 'left',
@@ -420,6 +412,13 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
           </div>
         </section>
       )}
+
+      {/* ── Decks mode ── */}
+      {mode === 'decks' && (
+        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24 }}>
+          <FlashcardDecks onExit={() => setMode(null)} />
+        </section>
+      )}
     </div>
   )
 }
@@ -498,38 +497,3 @@ function EmptyStudyState() {
   )
 }
 
-function subjectLabel(subject: ZonaSubject) {
-  return SUBJECTS.find(item => item.id === subject)?.label ?? subject
-}
-
-const eyebrowStyle: CSSProperties = {
-  fontSize: 9,
-  fontWeight: 900,
-  letterSpacing: '.18em',
-  textTransform: 'uppercase',
-  color: '#94a3b8',
-  margin: 0,
-}
-
-const labelStyle: CSSProperties = {
-  display: 'block',
-  color: '#64748b',
-  fontSize: 11,
-  fontWeight: 800,
-  letterSpacing: '.1em',
-  textTransform: 'uppercase',
-  marginBottom: 6,
-}
-
-const inputStyle: CSSProperties = {
-  width: '100%',
-  boxSizing: 'border-box',
-  border: '1px solid #e2e8f0',
-  background: 'white',
-  color: '#0f172a',
-  borderRadius: 4,
-  padding: '10px 12px',
-  font: 'inherit',
-  fontSize: 13,
-  outline: 'none',
-}

@@ -12,6 +12,7 @@ export type CaminoPlanLimits = {
   maxStudyDaysPerWeek: number
   includeBonusMissions: boolean
   variableMarginFloor: 0.2
+  maxFlashcardsPerDeck: number
 }
 
 export const CAMINO_VARIABLE_MARGIN_FLOOR = 0.2
@@ -29,6 +30,7 @@ export const CAMINO_PLAN_LIMITS: Record<CaminoPlanId, CaminoPlanLimits> = {
     maxStudyDaysPerWeek: 2,
     includeBonusMissions: false,
     variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
+    maxFlashcardsPerDeck: 15,
   },
   premium: {
     id: 'premium',
@@ -42,6 +44,7 @@ export const CAMINO_PLAN_LIMITS: Record<CaminoPlanId, CaminoPlanLimits> = {
     maxStudyDaysPerWeek: 6,
     includeBonusMissions: true,
     variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
+    maxFlashcardsPerDeck: 40,
   },
   curso_pau: {
     id: 'curso_pau',
@@ -55,6 +58,7 @@ export const CAMINO_PLAN_LIMITS: Record<CaminoPlanId, CaminoPlanLimits> = {
     maxStudyDaysPerWeek: 6,
     includeBonusMissions: true,
     variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
+    maxFlashcardsPerDeck: 40,
   },
   intensivo: {
     id: 'intensivo',
@@ -68,6 +72,7 @@ export const CAMINO_PLAN_LIMITS: Record<CaminoPlanId, CaminoPlanLimits> = {
     maxStudyDaysPerWeek: 6,
     includeBonusMissions: true,
     variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
+    maxFlashcardsPerDeck: 40,
   },
   superpremium: {
     id: 'superpremium',
@@ -81,6 +86,7 @@ export const CAMINO_PLAN_LIMITS: Record<CaminoPlanId, CaminoPlanLimits> = {
     maxStudyDaysPerWeek: 7,
     includeBonusMissions: true,
     variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
+    maxFlashcardsPerDeck: 60,
   },
 }
 

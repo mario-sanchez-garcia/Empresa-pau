@@ -13,7 +13,7 @@ function assert(name, condition) {
   console.log(`OK   ${name}`)
 }
 
-const page = read('app/page.tsx')
+const page = read('app/page-client.tsx')
 const chatRoute = read('app/api/chat/route.ts')
 const mathFormatting = read('app/lib/mathFormatting.ts')
 const mathMarkdown = read('components/shared/MathMarkdown.tsx')

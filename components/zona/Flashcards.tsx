@@ -35,7 +35,7 @@ interface FlashcardsProps {
 const MODES: { key: ZonaMode; icon: ReactNode; title: string; text: string }[] = [
   { key: 'study', icon: <BookOpenCheck size={15} />, title: 'Repasar tarjetas', text: 'Practica conceptos rápidos por asignatura.' },
   { key: 'create', icon: <PencilLine size={15} />, title: 'Crear tarjetas', text: 'Guarda fórmulas o errores para repasar después.' },
-  { key: 'space', icon: <Layers3 size={15} />, title: 'Mi espacio', text: 'Consulta tus tarjetas guardadas.' },
+  { key: 'space', icon: <Layers3 size={15} />, title: 'Tarjetas guardadas', text: 'Consulta tus tarjetas guardadas.' },
   { key: 'decks', icon: <Trophy size={15} />, title: 'Mazos', text: 'Crea mazos, impórtalos, publícalos y compite en el ranking.' },
 ]
 
@@ -368,7 +368,7 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
         <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>
             <div>
-              <p style={eyebrowStyle}>Mi espacio</p>
+              <p style={eyebrowStyle}>Tarjetas guardadas</p>
               <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', marginTop: 5 }}>Guarda aquí lo que quieras volver a repasar</h3>
             </div>
             <Link href="/zona/canvas" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0f172a', color: 'white', borderRadius: 4, padding: '9px 14px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>

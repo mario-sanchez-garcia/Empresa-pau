@@ -209,24 +209,40 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       const storedCorrection = normalized ? JSON.stringify(normalized) : visible
       setCorreccion(storedCorrection)
 
-      const { data: userData } = await supabase.auth.getUser()
-      if (userData.user) {
-        const bloque = normalized?.desglose_bloques?.[0]
-        await supabase.from('historial_examenes').insert({
-          user_id: userData.user.id,
-          asignatura: 'historia',
-          tipo: 'Cataluña',
-          año: Number(contexto.match(/\b20\d{2}\b/)?.[0]),
-          bloque: `Ejercicio ${ejercicio.numero}`,
-          opcion: 'Única',
-          nota: bloque?.puntos_conseguidos != null ? Math.min(puntuacion, Math.max(0, Number(bloque.puntos_conseguidos))) : null,
-          nota_maxima: puntuacion,
-          enunciado: enunciadoOficial.substring(0, 2000),
-          respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 4000),
-          // Do not truncate full correction: History modal needs complete feedback.
-          correccion: storedCorrection,
-        })
+      // Best-effort: la corrección ya se ha mostrado al alumno en la línea de
+      // arriba — un fallo guardando el historial no debe pisarla con un
+      // mensaje de error ni impedir que la vea.
+      try {
+        const { data: userData } = await supabase.auth.getUser()
+        if (userData.user) {
+          const bloque = normalized?.desglose_bloques?.[0]
+          await supabase.from('historial_examenes').insert({
+            user_id: userData.user.id,
+            asignatura: 'historia',
+            tipo: 'Cataluña',
+            año: Number(contexto.match(/\b20\d{2}\b/)?.[0]),
+            bloque: `Ejercicio ${ejercicio.numero}`,
+            opcion: 'Única',
+            nota: bloque?.puntos_conseguidos != null ? Math.min(puntuacion, Math.max(0, Number(bloque.puntos_conseguidos))) : null,
+            nota_maxima: puntuacion,
+            enunciado: enunciadoOficial.substring(0, 2000),
+            respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 4000),
+            // Do not truncate full correction: History modal needs complete feedback.
+            correccion: storedCorrection,
+          })
+        }
+      } catch (saveError) {
+        console.error('CAT_HISTORIA_SAVE_ERROR', (saveError as Error)?.message?.slice(0, 200))
       }
+    } catch (error) {
+      // Antes esta función no tenía catch (solo finally) — cualquier fallo de
+      // red, un cuerpo de respuesta no-JSON tras un error 500 sin formatear,
+      // o cualquier excepción inesperada se propagaba sin controlar y el
+      // alumno se quedaba sin corrección visible o veía el texto técnico
+      // crudo del error, en vez del mensaje en español que usa el resto de
+      // la app.
+      console.error('CAT_HISTORIA_CORRECTION_ERROR', (error as Error)?.message?.slice(0, 200))
+      setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
       setCargando(false)
     }

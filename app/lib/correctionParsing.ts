@@ -52,6 +52,18 @@ export function correctionPayloadToMarkdown(input: unknown, options: { officialM
       if (recovered) return recovered
       return 'No hemos podido formatear esta corrección automáticamente, pero tus datos están guardados. Vuelve a intentarlo para regenerar una corrección limpia.'
     }
+    // Última red de seguridad: si ninguno de los parseos anteriores reconoció
+    // el texto como una corrección real (ni JSON válido ni JSON degradado
+    // recuperable) y encima es corto y no contiene vocabulario propio de una
+    // corrección de Kairo, es más probable que sea un mensaje de error crudo
+    // filtrado desde algún punto no controlado (red, API, etc.) que una
+    // respuesta real de la IA — nunca se debe mostrar tal cual al alumno. El
+    // error real ya queda registrado por separado en el servidor/cliente que
+    // llama a esta función, así que esto no oculta nada, solo evita
+    // enseñarlo en crudo.
+    if (looksLikeRawTechnicalError(text)) {
+      return 'No hemos podido generar la corrección en el formato esperado. Vuelve a intentarlo — tu respuesta está guardada.'
+    }
     return text && !/^#{1,6}\s/m.test(text) ? `# Corrección de Kairo\n\n${text}` : text
   }
 
@@ -89,6 +101,24 @@ function stripCodeFence(value: string) {
 
 function looksLikeRawJsonCorrection(value: string) {
   return /^\s*\{/.test(value) || /"(?:feedback_general|errores_principales|plan_repaso|simulacro_id|nota_final)"\s*:/.test(value)
+}
+
+// Toda corrección real de Kairo (incluso una degradada/sin formatear) es
+// verbosa y usa vocabulario propio de corregir un examen. Un texto corto sin
+// ninguna de esas palabras es mucho más probable que sea un mensaje técnico
+// (de red, de una API, de una excepción) que se coló sin pasar por un catch
+// con mensaje amigable, que una respuesta real de la IA.
+// \b alrededor de "error" a propósito: sin límite de palabra, "TypeError",
+// "RangeError" o "SyntaxError" (nombres nativos de excepción de JS, todos
+// terminados en "Error") colarían como si tuvieran vocabulario de corrección
+// real solo por contener esas cuatro letras seguidas.
+const CORRECTION_VOCABULARY = /nota|correcci[oó]n|punt[oa]s?|\berror(?:es)?\b|aciert[oa]s?|mejora|criterio|respuesta|ejercicio|alumno|examen/i
+const RAW_TECHNICAL_ERROR_MAX_LENGTH = 220
+
+function looksLikeRawTechnicalError(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.length > RAW_TECHNICAL_ERROR_MAX_LENGTH) return false
+  return !CORRECTION_VOCABULARY.test(trimmed)
 }
 
 function recoverMalformedCorrectionMarkdown(value: string) {

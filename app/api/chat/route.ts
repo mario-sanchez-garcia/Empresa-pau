@@ -49,6 +49,36 @@ function logCorrectionTiming(requestId: string, label: string, startedAt: number
 }
 
 export async function POST(request: NextRequest) {
+  try {
+    return await handlePost(request)
+  } catch (error) {
+    // A diferencia de /api/exam/correct, esta ruta nunca tuvo un try/catch
+    // exterior — el único try/catch de abajo cubre la llamada a Claude y
+    // vuelve a lanzar (throw error) cualquier fallo que no sea de saturación
+    // (429/503/529, ver withAnthropicRetry), así que un error de validación
+    // real de la API de Anthropic (petición mal formada, etc.) escapaba sin
+    // controlar. Next.js entonces devolvía su propia respuesta de error por
+    // defecto, cuyo cuerpo no sigue el formato { error, message } que
+    // getApiErrorMessage() espera en el cliente — el alumno veía el texto
+    // técnico crudo del error en vez de "no hemos podido corregir".
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorName = (error as any)?.name ?? (error as any)?.constructor?.name ?? 'Error'
+    console.error('CHAT_CORRECTION_ERROR', {
+      errorCode,
+      errorName,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      message: (error as any)?.message?.slice(0, 200)
+    })
+    return NextResponse.json(
+      { error: 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.' },
+      { status: 500 }
+    )
+  }
+}
+
+async function handlePost(request: NextRequest) {
   const requestId = makeRequestId(request)
   const totalStart = Date.now()
   const authStart = Date.now()

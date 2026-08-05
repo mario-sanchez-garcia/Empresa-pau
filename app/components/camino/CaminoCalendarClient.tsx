@@ -297,6 +297,17 @@ function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateStri
 type MissionHrefResult = { href: string; fallback: string }
 function hrefForMission(mission: Mission): MissionHrefResult {
   if (mission.missionType === 'partial_practice') {
+    // Una práctica de parcial ya completada hoy no debe volver a abrir el
+    // flujo de "nueva" — eso es justo lo que dejaba reentregar sin avisar
+    // hasta corregir. Si ya sabemos a qué historial_simulacros quedó
+    // enlazada (practica_simulacro_id, escrito por /api/simulacro al
+    // completarla), el enlace lleva directo a esa corrección ya hecha.
+    if (mission.status === 'done') {
+      const resultId = typeof mission.metadata?.practica_simulacro_id === 'string' ? mission.metadata.practica_simulacro_id : ''
+      return resultId
+        ? { href: `/simulacros/${resultId}/results`, fallback: '' }
+        : { href: '', fallback: 'Práctica completada.' }
+    }
     const simSubject = String(mission.metadata?.simulacro_subject ?? '')
     const simBlock = String(mission.metadata?.simulacro_block_filter ?? mission.block ?? '')
     if (simSubject && simBlock) {
@@ -1928,7 +1939,19 @@ export default function CaminoCalendarClient() {
             )
           })()}
 
-          {upcomingPartial && <div style={{ padding: '8px 20px', borderBottom: '1px solid #f1f5f9' }}><PartialExamBanner exam={upcomingPartial} today={realToday} /></div>}
+          {upcomingPartial && (() => {
+            const todayPartialMission = today.missions.find(m => m.missionType === 'partial_practice')
+            return (
+              <div style={{ padding: '8px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                <PartialExamBanner
+                  exam={upcomingPartial}
+                  today={realToday}
+                  completedToday={todayPartialMission?.status === 'done'}
+                  missionId={todayPartialMission?.status === 'pending' ? todayPartialMission.id : undefined}
+                />
+              </div>
+            )
+          })()}
 
           {/* ── MISSIONS HEADER ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', background: 'white' }}>
@@ -1967,7 +1990,11 @@ export default function CaminoCalendarClient() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mainMission.baseXP} XP</span>
                 {mainMission.status === 'done' ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                  mainMission.missionType === 'partial_practice' && mainTarget?.href ? (
+                    <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669', textDecoration: 'none' }}>✓ Hecha · Ver resultado</a>
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                  )
                 ) : mainTarget?.href ? (
                   <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.25)' }}>Empezar →</a>
                 ) : (
@@ -2029,7 +2056,11 @@ export default function CaminoCalendarClient() {
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
                       <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mission.baseXP} XP</span>
                       {mission.status === 'done' ? (
-                        <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                        mission.missionType === 'partial_practice' && bonusTarget?.href ? (
+                          <a href={bonusTarget.href} style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669', textDecoration: 'none' }}>✓ Hecha · Ver</a>
+                        ) : (
+                          <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                        )
                       ) : bonusTarget?.href ? (
                         <a href={bonusTarget.href} style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', textDecoration: 'none' }}>Ir →</a>
                       ) : (
@@ -3183,22 +3214,45 @@ const PARTIAL_BLOCK_DISPLAY: Record<string, string> = {
   Algebra: 'Álgebra', Analisis: 'Análisis', Geometria: 'Geometría', Probabilidad: 'Probabilidad',
 }
 
-function PartialExamBanner({ exam, today }: { exam: StudentExam; today: string }) {
+function PartialExamBanner({ exam, today, completedToday = false, missionId }: { exam: StudentExam; today: string; completedToday?: boolean; missionId?: string }) {
   const daysDiff = Math.round(
     (new Date(exam.date + 'T12:00:00Z').getTime() - new Date(today + 'T12:00:00Z').getTime()) / 86400000
   )
   const subjectSlug = SUBJECT_SLUGS[exam.subject] ?? exam.subject
   const simSubject = PARTIAL_SIM_SUBJECT[subjectSlug] ?? subjectSlug
   const blockDisplay = exam.block ? (PARTIAL_BLOCK_DISPLAY[exam.block] ?? exam.block) : ''
+  // missionId (si esta práctica corresponde a la misión de "Prep. parcial"
+  // ya programada hoy en el calendario) se reenvía para que, al entregarla,
+  // /api/simulacro pueda marcar esa misma misión como completada — igual
+  // que si se hubiera empezado desde la tarjeta del calendario en vez de
+  // desde este banner.
+  const missionParam = missionId ? `&missionId=${encodeURIComponent(missionId)}` : ''
   const href = exam.block
-    ? `/simulacros/practica/nueva?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial`
-    : `/simulacros/practica/nueva?subject=${simSubject}&source=camino_partial`
+    ? `/simulacros/practica/nueva?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial${missionParam}`
+    : `/simulacros/practica/nueva?subject=${simSubject}&source=camino_partial${missionParam}`
 
   if (daysDiff === 0) {
     return (
       <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: '#0f172a', padding: '16px 20px' }}>
         <p style={{ fontSize: 15, fontWeight: 900, color: 'white', margin: 0 }}>¡Hoy es tu parcial de {exam.subject}!</p>
         <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0', fontWeight: 600 }}>Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
+      </div>
+    )
+  }
+
+  // La práctica de hoy para este parcial ya está entregada — insistir con
+  // "Empezar práctica" llevaba a crear una sesión nueva y descubrir al
+  // corregirla que ya se había entregado (ver hrefForMission/DayCard).
+  if (completedToday) {
+    return (
+      <div style={{ borderRadius: 14, border: '1px solid #bbf7d0', borderLeft: '3px solid #059669', background: '#ecfdf5', padding: '16px 20px' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#059669', margin: 0 }}>Próximo parcial</p>
+        <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
+          {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
+          {exam.subject ? ` · ${exam.subject}` : ''}
+          {blockDisplay ? ` · ${blockDisplay}` : ''}
+        </p>
+        <p style={{ fontSize: 12, color: '#059669', margin: 0, fontWeight: 700 }}>✓ Ya has practicado hoy para este parcial.</p>
       </div>
     )
   }

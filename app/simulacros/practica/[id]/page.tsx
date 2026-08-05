@@ -64,6 +64,7 @@ function PracticaPageInner() {
 
       const subject = searchParams.get('subject') ?? 'mates'
       const block = searchParams.get('block') ?? ''
+      const missionId = searchParams.get('missionId') ?? undefined
 
       supabase.auth.getSession().then(async ({ data }) => {
         const token = data.session?.access_token
@@ -73,11 +74,15 @@ function PracticaPageInner() {
           const res = await fetch('/api/practica-parcial', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ subject, block }),
+            body: JSON.stringify({ subject, block, missionId }),
           })
           if (res.ok) {
-            const json = await res.json() as { id: string }
-            router.replace(`/simulacros/practica/${json.id}`)
+            const json = await res.json() as { id: string; alreadyCompleted?: boolean }
+            // Esta misión del calendario ya tenía una práctica entregada hoy
+            // — en vez de abrir una sesión nueva (que se descubriría
+            // duplicada solo al corregirla), se va directo a la corrección
+            // ya hecha.
+            router.replace(json.alreadyCompleted ? `/simulacros/${json.id}/results` : `/simulacros/practica/${json.id}`)
           } else {
             const json = await res.json().catch(() => ({})) as Record<string, unknown>
             setCreateError(String(json.error ?? 'No hemos podido crear la sesión de práctica.'))

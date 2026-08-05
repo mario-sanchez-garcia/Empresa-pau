@@ -36,6 +36,35 @@ export async function POST(request: NextRequest) {
 
   const db = createServiceClient()
 
+  let body: Record<string, unknown> = {}
+  try { body = await request.json() } catch { /* ok */ }
+  const missionId = typeof body.missionId === 'string' && body.missionId.trim() ? body.missionId.trim() : null
+
+  // El alumno puede volver a pulsar la misión de "Prep. parcial" del
+  // calendario después de ya haberla entregado (el enlace del calendario a
+  // veces tarda en reflejar el estado, o simplemente reintenta). Antes esto
+  // generaba una sesión de práctica nueva — que se entregaba sin problema,
+  // pero al corregirla /api/simulacro respondía "ya se otorgó XP para este
+  // source_id" y el alumno se enteraba de que la sesión no contaba solo al
+  // final. Si esta missionId ya tiene una práctica completada, se devuelve
+  // esa directamente en vez de crear otra — el cliente redirige a sus
+  // resultados ya hechos sin pasar por el examen entero de nuevo. Se
+  // comprueba antes que nada, incluso antes de los límites de plan: no es
+  // una sesión nueva, así que no debe consumir cupo ni bloquearse por él.
+  if (missionId) {
+    const { data: existing } = await db
+      .from('historial_simulacros')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('estado', 'completado')
+      .eq('resultado_json->>mission_id', missionId)
+      .limit(1)
+      .maybeSingle()
+    if (existing) {
+      return NextResponse.json({ id: existing.id as string, alreadyCompleted: true })
+    }
+  }
+
   if (!isInternalUser(user.email ?? '')) {
     const billing = await getUserBillingContext(user.id, user.created_at ?? new Date().toISOString(), user.email)
 
@@ -72,9 +101,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  let body: Record<string, unknown> = {}
-  try { body = await request.json() } catch { /* ok */ }
-
   const subject = String(body.subject ?? 'mates')
   const block = String(body.block ?? '')
   const comunidad = String(body.comunidad ?? 'Madrid')
@@ -108,7 +134,11 @@ export async function POST(request: NextRequest) {
       dificultad_real: dificultadReal,
       bloques: session.questions,
       estado: 'en_progreso',
-      resultado_json: { __practice_session: true, block, subject, comunidad, ...(source ? { source } : {}), ...(weekStart ? { week_start: weekStart } : {}) },
+      // mission_id: enlaza esta sesión a la fila de camino_calendar que la
+      // originó (si vino del calendario) — /api/simulacro lo lee al
+      // completarla para marcar esa misión como hecha, y esta misma ruta lo
+      // usa arriba para detectar reintentos de una misión ya completada.
+      resultado_json: { __practice_session: true, block, subject, comunidad, ...(source ? { source } : {}), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}) },
       created_at: session.created_at,
       updated_at: session.created_at,
     })

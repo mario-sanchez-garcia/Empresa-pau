@@ -8,6 +8,7 @@ import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from
 import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { awardXp } from '@/app/lib/camino/awardXp'
+import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
 
@@ -111,6 +112,13 @@ export async function POST(request: NextRequest) {
     // distinguimos una práctica parcial de un simulacro completo para aplicar la
     // cuota mensual correcta (partialsPerMonth vs fullMocksPerMonth) por separado.
     const isPracticeSession = isPlainRecord(simulacroRecord.resultado_json) && simulacroRecord.resultado_json.__practice_session === true
+    // Guardado por /api/practica-parcial al crear la sesión, si vino de una
+    // misión del calendario de Camino — se lee AQUÍ, antes de que
+    // updateSimulacro() sustituya resultado_json entero por el resultado de
+    // la corrección, o se perdería.
+    const missionId = isPracticeSession && typeof simulacroRecord.resultado_json?.mission_id === 'string'
+      ? simulacroRecord.resultado_json.mission_id
+      : null
     const correctionAction: RateLimitAction = isPracticeSession ? 'parcial_correction' : 'simulacro_correction'
     const correctionCommunity = getCorrectionCommunity(comunidad, blocks)
     const storedCommunity = getCorrectionCommunity(null, blocks)
@@ -440,6 +448,14 @@ export async function POST(request: NextRequest) {
       })
     } catch (xpError) {
       console.error('[simulacro] xp_award_failed', { simulacroId: simulacro_id, message: (xpError as Error)?.message })
+    }
+
+    // Best-effort también: si esta práctica vino de una misión del
+    // calendario, márcala como completada ahora que la corrección ya se
+    // guardó — así deja de mostrarse como "Empezar" y el enlace pasa a
+    // apuntar a esta misma corrección.
+    if (missionId) {
+      await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, missionId, simulacro_id)
     }
 
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })

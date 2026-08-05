@@ -70,6 +70,16 @@ export default function ZonaPage() {
           letter-spacing: -.035em !important;
         }
 
+        /* iPad/tablet (768-1024px): el hero se quedaba en su altura de
+           escritorio (200px) porque el único breakpoint reducido era
+           max-width:767px (móvil) — en tablet ocupaba una porción
+           desproporcionada de la pantalla frente al contenido real. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .zona-hero { height: 160px !important; }
+          .zona-hero-title { font-size: 32px !important; }
+          .zona-hero-overlay { padding: 18px 24px !important; }
+        }
+
         @media (max-width: 767px) {
           .zona-hero { height: 130px !important; }
           .zona-hero-title { font-size: 28px !important; }

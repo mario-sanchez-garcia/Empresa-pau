@@ -214,6 +214,13 @@ export default function ZonaCursosPage() {
         .cursos-hero { height: 200px !important; }
         .cursos-hero-overlay { background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%) !important; padding: 20px 28px !important; }
         .cursos-hero-title { font-size: 40px !important; letter-spacing: -.035em !important; }
+        /* iPad/tablet: mismo ajuste que La Zona/Mi Espacio — sin esto el
+           hero se quedaba a altura de escritorio en tablet. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .cursos-hero { height: 160px !important; }
+          .cursos-hero-title { font-size: 32px !important; }
+          .cursos-hero-overlay { padding: 18px 24px !important; }
+        }
         @media (max-width: 767px) {
           .cursos-hero { height: 130px !important; }
           .cursos-hero-title { font-size: 28px !important; }

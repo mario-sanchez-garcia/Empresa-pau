@@ -2368,6 +2368,16 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
+        /* iPad/tablet: el hero (340px, pensado para escritorio) solo tenía
+           un recorte para móvil (max-width:767px) — en tablet se quedaba a
+           altura completa, dejando muy poco sitio para el contenido real
+           debajo. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .camino-hero { height: 260px !important; }
+          .camino-hero-days { font-size: 78px !important; }
+          .camino-hero-overlay { padding: 22px 26px !important; }
+        }
+
         @media (max-width: 767px) {
           .camino-hero { height: 200px !important; }
           .camino-hero-days { font-size: 64px !important; }

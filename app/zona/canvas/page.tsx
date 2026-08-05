@@ -84,6 +84,14 @@ export default function ZonaCanvasPage() {
           letter-spacing: -.035em !important;
         }
 
+        /* iPad/tablet: mismo ajuste que el resto de La Zona — sin esto el
+           hero se quedaba a altura de escritorio en tablet. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .canvas-hero { height: 160px !important; }
+          .canvas-hero-title { font-size: 32px !important; }
+          .canvas-hero-overlay { padding: 18px 24px !important; }
+        }
+
         @media (max-width: 767px) {
           .canvas-hero { height: 130px !important; }
           .canvas-hero-title { font-size: 28px !important; }

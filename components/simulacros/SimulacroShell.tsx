@@ -14,6 +14,16 @@ export default function SimulacroShell({ children, title, subtitle, actions }: S
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
+        /* iPad/tablet: el hero (340px, pensado para escritorio) solo tenía
+           un recorte para móvil (max-width:767px) — en tablet se quedaba a
+           altura completa, dejando muy poco sitio para el contenido real
+           debajo. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .sim-hero { height: 260px !important; }
+          .sim-hero-count { font-size: 78px !important; }
+          .sim-hero-overlay { padding: 22px 26px 28px !important; }
+        }
+
         @media (max-width: 767px) {
           .sim-hero { height: 200px !important; }
           .sim-hero-count { font-size: 64px !important; }

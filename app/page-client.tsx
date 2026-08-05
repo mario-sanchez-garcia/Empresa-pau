@@ -4283,6 +4283,17 @@ function cambiarTipo(t: Tipo) {
           }
         }
 
+        /* iPad/tablet: estos heroes (200px, pensados para escritorio) solo
+           tenían recorte para móvil (max-width:767px) — en tablet se
+           quedaban a altura completa, dejando muy poco sitio para el
+           contenido real debajo. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .exams-subject-hero { height: 160px !important; }
+          .exams-subject-hero-title { font-size: 32px !important; }
+          .history-hero { height: 160px !important; }
+          .history-hero-title { font-size: 32px !important; }
+        }
+
         @media (max-width: 767px) {
           /* Hide the stat badges in the hero on small screens */
           .exams-hero-stats { display: none !important; }
@@ -4931,6 +4942,17 @@ function cambiarTipo(t: Tipo) {
           .tutor-side {
             position: static;
             max-height: none;
+          }
+        }
+
+        /* iPad/tablet: mismo ajuste que el resto de heroes de la app — sin
+           esto se quedaba a altura de escritorio (200px) en tablet. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .tutor-hero {
+            height: 160px;
+          }
+          .tutor-hero-title {
+            font-size: 32px;
           }
         }
 

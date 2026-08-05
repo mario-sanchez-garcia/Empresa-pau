@@ -2539,6 +2539,25 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
   )
 }
 
+// El calendario que carga fetchCaminoCalendar en el padre solo trae
+// scheduled_date >= hoy (a propósito, para el dashboard principal, que no
+// necesita días ya pasados) — así que si hoy es, p.ej., miércoles, lunes y
+// martes de la semana actual nunca llegan a `calendar`, y por tanto tampoco
+// al draft de este editor: esos días ni siquiera existían como pestaña. No
+// era un problema de layout/overflow (el grid de abajo ya soporta 7
+// columnas) — el array de entrada tenía menos de 7 días. Se completan aquí
+// con entradas vacías (sin misiones) para que los 7 días de la semana
+// existan siempre como pestaña navegable, tanto si ya pasaron como si
+// todavía no se ha generado nada para ellos (fin de semana).
+function fillWeekGaps(weekStartISO: string, days: DayPlan[]): DayPlan[] {
+  const byDate = new Map(days.map(day => [day.date, day]))
+  const today = todayMadrid()
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = toISO(addDays(dateFromISO(weekStartISO), i))
+    return byDate.get(date) ?? { date, label: calendarDayLabel(date), isToday: date === today, missions: [] }
+  })
+}
+
 function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, planId, onNavigateWeek, onClose, onAddExam, onSave }: { calendar: DayPlan[]; weekStartISO: string; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onSave: (calendar: DayPlan[]) => void }) {
   const safeSubjects: string[] = subjects
   // `calendar` is the whole multi-week calendar loaded in the parent, not
@@ -2547,7 +2566,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   // loaded week stacked on open. Only a subsequent Ant/Hoy/Sig click (which
   // does filter) or a lucky reload where the parent happened to have just one
   // week loaded made it look "fixed".
-  const initialWeek = onNavigateWeek(weekStartISO)
+  const initialWeek = fillWeekGaps(weekStartISO, onNavigateWeek(weekStartISO))
   const [draft, setDraft] = useState<DayPlan[]>(() => initialWeek.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
   const [newMission, setNewMission] = useState({ day: initialWeek[0]?.date ?? weekStartISO, subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, bonus: false })
   const [draggedMissionId, setDraggedMissionId] = useState<string | null>(null)
@@ -2567,7 +2586,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
 
   function navigateEditorWeek(nextWeekStart: string) {
     const nextWeek = onNavigateWeek(nextWeekStart)
-    const nextDraft = cloneWeek(nextWeek)
+    const nextDraft = fillWeekGaps(nextWeekStart, cloneWeek(nextWeek))
     setEditorWeekStart(nextWeekStart)
     setDraft(nextDraft)
     setNewMission(current => ({ ...current, day: nextDraft[0]?.date ?? nextWeekStart }))

@@ -10,6 +10,14 @@
 -- que se aplicó la migración anterior. awardXp.ts nunca leyó ese campo del
 -- resultado (solo old_xp_total/new_xp_total), así que se elimina en vez de
 -- cualificarlo, quitando la colisión de raíz.
+--
+-- CREATE OR REPLACE no puede achicar el conjunto de columnas de un RETURNS
+-- TABLE (Postgres lo rechaza con "cannot change return type of existing
+-- function", SQLSTATE 42P13, porque el tipo de fila con OUT params cambia):
+-- hay que borrar la función vieja explícitamente antes de recrearla con la
+-- firma de salida nueva.
+drop function if exists public.increment_camino_progress(uuid, integer, integer, integer, integer, boolean);
+
 create or replace function public.increment_camino_progress(
   p_user_id uuid,
   p_xp_delta integer,

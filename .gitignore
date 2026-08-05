@@ -50,3 +50,6 @@ app/api/cron/test-email/
 
 # graphify local code-graph output (generated, machine-specific)
 graphify-out/
+
+# supabase CLI local link cache (machine-specific, contains pooler URL)
+supabase/.temp/

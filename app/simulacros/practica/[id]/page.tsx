@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Camera, CheckCircle2, Flag, Send, Trash2 } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Camera, CheckCircle2, Flag, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -14,6 +14,15 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
+import { PARCIAL_MINUTES } from '@/app/lib/camino/xpMap'
+
+// Misma duración de referencia que usa el XP de esta acción (PARCIAL_COMPLETION_XP
+// en xpMap.ts, ver comentario ahí: "una sesión de parcial cronometrada"). El
+// anillo/estilo del cronómetro es una réplica exacta del de app/simulacros/[id]/page.tsx
+// para que ambos flujos se sientan como el mismo componente.
+const TOTAL_SECONDS = PARCIAL_MINUTES * 60
+const RING_RADIUS = 48
+const RING_CIRC = 2 * Math.PI * RING_RADIUS
 
 function PracticaPageInner() {
   const params = useParams<{ id: string }>()
@@ -24,6 +33,9 @@ function PracticaPageInner() {
   const [answers, setAnswers] = useState<Record<string, SimulacroAnswer>>({})
   const [active, setActive] = useState(0)
   const [mode, setMode] = useState<Record<string, 'text' | 'image'>>({})
+  const [startedAtMs, setStartedAtMs] = useState<number | null>(null)
+  const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS)
+  const [timeUp, setTimeUp] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [reviewMarked, setReviewMarked] = useState<Record<string, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -97,8 +109,28 @@ function PracticaPageInner() {
       savedSnapshotRef.current = JSON.stringify(storedAnswers)
       setAnswers(storedAnswers)
       setRecord(next)
+
+      // La práctica parcial no tiene pantalla de "empezar": la sesión arranca
+      // en el momento en que /api/practica-parcial la crea, así que el
+      // cronómetro usa esa marca de tiempo como inicio real, sin paso intermedio.
+      const effectiveStart = new Date(next.created_at ?? Date.now()).getTime()
+      setStartedAtMs(effectiveStart)
+      setSecondsLeft(Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - effectiveStart) / 1000)))
     })
   }, [params.id, router, searchParams])
+
+  useEffect(() => {
+    if (!record || submitting || !startedAtMs) return
+    const timer = window.setInterval(() => {
+      const next = Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - startedAtMs) / 1000))
+      setSecondsLeft(next)
+      if (next === 0) {
+        window.clearInterval(timer)
+        setTimeUp(true)
+      }
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [record, submitting, startedAtMs])
 
   useEffect(() => {
     answersRef.current = answers
@@ -127,6 +159,12 @@ function PracticaPageInner() {
   const blockLabel = (record?.resultado_json as Record<string, unknown> | null)?.__practice_session
     ? String((record?.resultado_json as Record<string, unknown>).block ?? '')
     : ''
+  const elapsedMinutes = Math.max(0, Math.ceil((TOTAL_SECONDS - secondsLeft) / 60))
+  const percentLeft = Math.max(0, Math.min(1, secondsLeft / TOTAL_SECONDS))
+  const isUrgent = secondsLeft <= 15 * 60
+  const isWarning = secondsLeft <= 45 * 60 && secondsLeft > 15 * 60
+  const timerColor = isUrgent ? '#ef4444' : isWarning ? '#f59e0b' : '#2563eb'
+  const ringOffset = RING_CIRC * (1 - percentLeft)
 
   async function autosave(nextAnswers = answers) {
     if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
@@ -182,7 +220,6 @@ function PracticaPageInner() {
         return
       }
 
-      const elapsedMinutes = 0
       const res = await fetch('/api/simulacro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
@@ -319,6 +356,38 @@ function PracticaPageInner() {
             <div className="text-xs font-black" style={{ color: '#64748b' }}>
               {answeredCount}/{record.bloques.length} respondidas
             </div>
+
+            {/* Circular ring timer — mismo componente/estilo que app/simulacros/[id]/page.tsx */}
+            <div
+              className={`relative flex-shrink-0 ${isUrgent ? 'sim-ring-urgent' : ''}`}
+              aria-label={`Tiempo restante: ${formatTime(secondsLeft)}`}
+            >
+              <svg width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
+                <circle cx="56" cy="56" r={RING_RADIUS} fill="none" stroke="#e2e8f0" strokeWidth="7" />
+                <circle
+                  cx="56" cy="56" r={RING_RADIUS}
+                  fill="none"
+                  stroke={timerColor}
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  strokeDasharray={RING_CIRC}
+                  strokeDashoffset={ringOffset}
+                  style={{
+                    transform: 'rotate(-90deg)',
+                    transformOrigin: '50% 50%',
+                    transition: 'stroke-dashoffset 1s linear, stroke 600ms ease',
+                  }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-black leading-none" style={{ color: timerColor, letterSpacing: '-0.03em' }}>
+                  {formatTime(secondsLeft)}
+                </span>
+                <span className="mt-0.5 text-[10px] font-bold" style={{ color: '#94a3b8' }}>
+                  {isUrgent ? 'último tramo' : isWarning ? 'atención' : 'restantes'}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="mt-4 pau-progress-bar">
@@ -328,6 +397,18 @@ function PracticaPageInner() {
                 transform: `scaleX(${record.bloques.length > 0 ? answeredCount / record.bloques.length : 0})`,
                 background: `linear-gradient(90deg, ${cfg.color}, ${cfg.color}cc)`,
                 transition: 'transform 300ms ease',
+              }}
+            />
+          </div>
+
+          {/* Timer progress bar — mismo estilo que app/simulacros/[id]/page.tsx */}
+          <div className="mt-2 pau-progress-bar">
+            <div
+              className="pau-progress-fill"
+              style={{
+                transform: `scaleX(${percentLeft})`,
+                background: `linear-gradient(90deg, ${timerColor}, ${timerColor}cc)`,
+                transition: 'transform 1s linear, background 600ms ease',
               }}
             />
           </div>
@@ -528,8 +609,8 @@ function PracticaPageInner() {
         })}
       </div>
 
-      {/* Confirm modal */}
-      {confirmOpen && (
+      {/* Confirm / Time Up modal */}
+      {(confirmOpen || timeUp) && (
         <div
           className="fixed inset-0 flex items-center justify-center p-4"
           style={{ zIndex: 'var(--z-modal-bg)', background: 'rgba(15,23,42,0.52)', backdropFilter: 'blur(6px)' }}
@@ -539,8 +620,12 @@ function PracticaPageInner() {
             style={{ background: '#fff', borderRadius: 22, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-xl)', padding: 28 }}
           >
             <div className="mb-3 flex items-center gap-3">
-              <CheckCircle2 size={22} style={{ color: cfg.color }} />
-              <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>¿Entregar la práctica?</h2>
+              {timeUp
+                ? <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
+                : <CheckCircle2 size={22} style={{ color: cfg.color }} />}
+              <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
+                {timeUp ? 'Tiempo agotado' : '¿Entregar la práctica?'}
+              </h2>
             </div>
             <p className="text-sm font-semibold" style={{ color: '#475569' }}>
               La corrección se mostrará al entregar. Después podrás revisar tu nota y el desglose por pregunta.
@@ -565,7 +650,12 @@ function PracticaPageInner() {
             )}
             {submitError && <div className="pau-info mt-4" role="alert">{submitError}</div>}
             <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setConfirmOpen(false)} disabled={submitting} className="pau-button-secondary" style={{ padding: '10px 20px' }}>
+              <button
+                onClick={() => { setConfirmOpen(false); setTimeUp(false) }}
+                disabled={submitting}
+                className="pau-button-secondary"
+                style={{ padding: '10px 20px' }}
+              >
                 Seguir revisando
               </button>
               <button onClick={submitSession} disabled={submitting} className="campus-primary" style={{ padding: '10px 20px', borderRadius: 12 }}>
@@ -614,6 +704,12 @@ function IncompleteExerciseNotice({ color, light }: { color: string; light: stri
 
 async function safeJson(response: Response) {
   try { return await response.json() } catch { return null }
+}
+
+function formatTime(seconds: number) {
+  const min = Math.floor(seconds / 60).toString().padStart(2, '0')
+  const sec = Math.floor(seconds % 60).toString().padStart(2, '0')
+  return `${min}:${sec}`
 }
 
 export default function PracticaPage() {

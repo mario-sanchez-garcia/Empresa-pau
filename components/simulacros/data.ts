@@ -416,6 +416,26 @@ function normalizeLenguaCatalunaExam(exam: any, option: SimulacroOption): Simula
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
+// El enunciado crudo de algunos bancos de preguntas (p.ej. Lengua,
+// "Comunicacion") repite el texto fuente completo dentro del propio
+// enunciado (bajo una etiqueta suelta "TEXTO") además de guardarlo aparte en
+// texto_fuente — la UI ya renderiza texto_fuente en su propio panel ("Texto
+// fuente oficial"), así que dejarlo también dentro de enunciado lo mostraba
+// duplicado. Es un no-op si el enunciado no contiene el texto fuente tal
+// cual (la inmensa mayoría de asignaturas/preguntas), así que es seguro
+// aplicarlo de forma genérica en vez de solo para Lengua.
+function stripEmbeddedSourceText(enunciado: string, textoFuente?: string | null): string {
+  if (typeof enunciado !== 'string' || !textoFuente) return enunciado
+  const source = textoFuente.trim()
+  if (!source) return enunciado
+  const idx = enunciado.indexOf(source)
+  if (idx === -1) return enunciado
+  const before = enunciado.slice(0, idx).replace(/\bTEXTO\b\s*$/i, '').trimEnd()
+  const after = enunciado.slice(idx + source.length).replace(/^\s+/, '')
+  const result = [before, after].filter(Boolean).join('\n\n').trim()
+  return result || enunciado
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) {
   const option = (p.opcion ?? exam.opcion ?? 'A') as SimulacroOption
@@ -428,7 +448,7 @@ function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) 
     convocatoria: p.convocatoria ?? exam.tipo,
     option,
     puntuacion: Number(p.puntuacion ?? p.puntos ?? 2.5),
-    enunciado: p.enunciado,
+    enunciado: stripEmbeddedSourceText(p.enunciado, p.texto_fuente),
     criterios: p.criterios,
     textoFuente: p.texto_fuente,
     conceptos: p.conceptos,
@@ -518,13 +538,23 @@ export function generatePracticeSession(
   }
   if (pool.length === 0) return null
 
+  // "Comunicacion" (comentario de texto) aporta un único ejercicio por examen
+  // real, largo y con su propio texto fuente — no son varias preguntas
+  // cortas del mismo examen como en otros bloques. Pedir numQuestions=3 (el
+  // valor por defecto) juntaba en una misma sesión de práctica los
+  // comentarios de texto de hasta 3 exámenes reales distintos, cada uno con
+  // su propio texto, mostrados como pestañas "Pregunta 1/2/3" — lo que los
+  // alumnos veían como "dos (o tres) modelos de ejercicio a la vez" en vez
+  // de una única práctica. Aquí se fuerza a un solo ejercicio.
+  const effectiveNumQuestions = subject === 'lengua' && usedBlock === 'Comunicacion' ? 1 : numQuestions
+
   const shuffled = shuffle(pool)
   const usedYears = new Set<number>()
   const selected: SimulacroBlock[] = []
 
   // First pass: prefer distinct years
   for (const q of shuffled) {
-    if (selected.length >= numQuestions) break
+    if (selected.length >= effectiveNumQuestions) break
     if (!usedYears.has(q.year)) {
       usedYears.add(q.year)
       selected.push({ ...q.block, numero: selected.length + 1 })
@@ -532,9 +562,9 @@ export function generatePracticeSession(
   }
 
   // Second pass: fill remaining from any unused question
-  if (selected.length < numQuestions) {
+  if (selected.length < effectiveNumQuestions) {
     for (const q of shuffled) {
-      if (selected.length >= numQuestions) break
+      if (selected.length >= effectiveNumQuestions) break
       if (selected.some(b => b.id === q.block.id)) continue
       selected.push({ ...q.block, numero: selected.length + 1 })
     }

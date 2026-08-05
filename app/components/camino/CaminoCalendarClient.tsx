@@ -844,6 +844,7 @@ export default function CaminoCalendarClient() {
   const [xpTotal, setXpTotal] = useState(0)
   const [weeklyXP, setWeeklyXP] = useState(0)
   const [weeklySimsCompleted, setWeeklySimsCompleted] = useState(0)
+  const [weeklyExamsCompleted, setWeeklyExamsCompleted] = useState(0)
   const [rankingOpen, setRankingOpen] = useState(false)
 
   const [showFullRanking, setShowFullRanking] = useState(false)
@@ -1020,7 +1021,7 @@ export default function CaminoCalendarClient() {
       const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult] = await Promise.all([
+      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult, examsWeekResult] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
@@ -1032,6 +1033,10 @@ export default function CaminoCalendarClient() {
         supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
         supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
         supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', startOfMonth),
+        // historial_examenes no tiene columna 'estado' — nota != null es la
+        // misma condición que usa award-exam-xp/route.ts para considerar una
+        // corrección real (no evaluable = no cuenta).
+        supabase.from('historial_examenes').select('*', { count: 'exact', head: true }).eq('user_id', userId).not('nota', 'is', null).gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
       ])
       if (cancelled) return
       if (calDays && calDays.length > 0) {
@@ -1068,6 +1073,7 @@ export default function CaminoCalendarClient() {
       setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
       setWeeklySimsCompleted((simsWeekResult as { count: number | null }).count ?? 0)
       setMonthlySimsUsed((monthlySimsResult as { count: number | null }).count ?? 0)
+      setWeeklyExamsCompleted((examsWeekResult as { count: number | null }).count ?? 0)
     }).catch(() => {
       recordCalendarSource('server_error', 'initial_load', { weekStart: currentWeekStartISO(), reason: 'initial_load_failed' })
     })
@@ -1262,13 +1268,16 @@ export default function CaminoCalendarClient() {
   const allMissions = visibleCalendar.flatMap(day => day.missions)
   const totalMain = allMissions.filter(mission => mission.role === 'main').length
   const completedMain = allMissions.filter(mission => mission.role === 'main' && mission.status === 'done').length
-  const thisWeekStart = currentWeekStartISO()
-  const thisWeekEnd = toISO(addDays(dateFromISO(thisWeekStart), 6))
-  const weeklyMissionsCompleted = visibleCalendar
-    .filter(d => d.date >= thisWeekStart && d.date <= thisWeekEnd)
-    .flatMap(d => d.missions)
-    .filter(m => m.status === 'done')
-    .length
+  // Un simulacro/práctica parcial (historial_simulacros, weeklySimsCompleted)
+  // o una corrección de Exámenes (historial_examenes, weeklyExamsCompleted)
+  // no viven como filas de camino_calendar, así que nunca marcan como 'done'
+  // ninguna misión role='main' — aunque el calendario haya programado justo
+  // ese día una misión kind='mock_exam' o 'evau_practice'. Sin esto el
+  // contador se quedaba en 0 tras completar cualquiera de los dos, aunque XP
+  // y racha sí se actualizaran (esos sí leen camino_xp_events). Se suman como
+  // si fueran una misión normal más, sin superar el objetivo semanal ya
+  // mostrado (Math.min(totalMain, 5)) para no desbordar la UI.
+  const completedMainWithSims = Math.min(completedMain + weeklySimsCompleted + weeklyExamsCompleted, Math.min(totalMain, 5))
   const todayMain = today?.missions.filter(mission => mission.role === 'main') ?? []
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
@@ -1819,7 +1828,7 @@ export default function CaminoCalendarClient() {
         {/* Ticker */}
         <div style={{ background: '#eff6ff', borderBottom: '1px solid #dbeafe', padding: '6px 20px', display: 'flex', gap: 20, overflowX: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />🔥 {streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />{completedMain}/{Math.min(totalMain, 5)} misiones esta semana</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} misiones esta semana</div>
           {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP esta semana</div>}
           {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial próximo · {upcomingPartial.subject}</div>}
         </div>
@@ -1901,7 +1910,7 @@ export default function CaminoCalendarClient() {
           {/* ── MISSIONS HEADER ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', background: 'white' }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Misiones de hoy</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMain}/{Math.min(totalMain, 5)} completadas esta semana</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} completadas esta semana</span>
           </div>
 
           {/* ── MISSION 01 — PRINCIPAL ── */}
@@ -2148,7 +2157,7 @@ export default function CaminoCalendarClient() {
                 <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Racha</div>
               </div>
               <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 10, padding: '10px 12px' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{completedMain}/{Math.min(totalMain, 5)}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{completedMainWithSims}/{Math.min(totalMain, 5)}</div>
                 <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Esta semana</div>
               </div>
             </div>

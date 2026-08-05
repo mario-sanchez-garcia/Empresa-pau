@@ -1134,6 +1134,18 @@ export default function CaminoCalendarClient() {
     if (next) setLeaderboard(next)
   }
 
+  // Compartido por el botón "Clasificación →" del panel derecho (solo
+  // desktop, lg+) y por el chip equivalente del ticker (solo lg:hidden) —
+  // mismo modal (FullRankingModal), mismo estado, un único punto de entrada
+  // en dos sitios distintos según el tamaño de pantalla.
+  async function openFullRanking() {
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token ?? null
+    if (!token) { setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.'); return }
+    setFullRankingToken(token)
+    setShowFullRanking(true)
+  }
+
   // refreshLeaderboard is redefined every render and closes over that
   // render's onboarding — the visibility/focus listener effect below is
   // attached once on mount, so calling refreshLeaderboard directly from it
@@ -1831,6 +1843,17 @@ export default function CaminoCalendarClient() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} misiones esta semana</div>
           {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP esta semana</div>}
           {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial próximo · {upcomingPartial.subject}</div>}
+          {/* El botón "Clasificación →" de siempre vive en el panel derecho
+              (RIGHT PANEL, hidden lg:flex) — invisible por debajo de lg. Este
+              es el mismo punto de entrada (openFullRanking) para mobile/tablet;
+              en lg+ el de la derecha ya cubre el caso y este se oculta. */}
+          <button
+            onClick={openFullRanking}
+            className="lg:hidden"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+          >
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Clasificación →
+          </button>
         </div>
       </header>
 
@@ -2189,23 +2212,12 @@ export default function CaminoCalendarClient() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>Mi liga</div>
               <button
-                onClick={async () => {
-                  const { data } = await supabase.auth.getSession()
-                  const token = data.session?.access_token ?? null
-                  if (!token) { setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.'); return }
-                  setFullRankingToken(token)
-                  setShowFullRanking(true)
-                }}
+                onClick={openFullRanking}
                 style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
                 Clasificación →
               </button>
             </div>
-            <AnimatePresence>
-              {showFullRanking && fullRankingToken && (
-                <FullRankingModal token={fullRankingToken} onClose={() => setShowFullRanking(false)} />
-              )}
-            </AnimatePresence>
             <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
             {globalTop && globalTop.length > 0 && (
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
@@ -2310,6 +2322,13 @@ export default function CaminoCalendarClient() {
       </AnimatePresence>
       <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>
+      {/* Antes vivía dentro del panel derecho (className="hidden lg:flex" en
+          RIGHT PANEL más arriba) — un display:none en el ancestro oculta
+          también a sus descendientes aunque sean position:fixed, así que el
+          modal nunca podía pintarse en mobile/tablet ni disparándolo desde
+          otro sitio. Renderizado aquí, al nivel de los demás modales, queda
+          siempre disponible sin importar el ancho de pantalla. */}
+      <AnimatePresence>{showFullRanking && fullRankingToken && <FullRankingModal token={fullRankingToken} onClose={() => setShowFullRanking(false)} />}</AnimatePresence>
     </Shell>
   )
 }

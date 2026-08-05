@@ -30,13 +30,17 @@ const ACCOUNT_MENU = [
   { label: 'Ayuda', href: '/ayuda', icon: HelpCircle },
 ]
 
-// The 5 items shown in the mobile bottom bar (most-used first)
+// The items shown in the mobile bottom bar (most-used first). Historial was
+// missing here even though it's a real NAV entry on desktop (/examenes?view=
+// historial) — inserted in the same relative position it has in NAV, right
+// before La Zona, without touching the order of the other items.
 const MOBILE_NAV = [
-  { label: 'Camino',     href: '/camino',     icon: LayoutGrid },
-  { label: 'Exámenes',  href: '/examenes',   icon: ClipboardList },
-  { label: 'Simulacros', href: '/simulacros', icon: GraduationCap },
-  { label: 'Zona',       href: '/zona',       icon: Zap },
-  { label: 'Perfil',     href: '/settings',   icon: UserRound },
+  { label: 'Camino',     href: '/camino',                  icon: LayoutGrid },
+  { label: 'Exámenes',  href: '/examenes',                icon: ClipboardList },
+  { label: 'Simulacros', href: '/simulacros',              icon: GraduationCap },
+  { label: 'Historial',  href: '/examenes?view=historial', icon: Clock },
+  { label: 'Zona',       href: '/zona',                    icon: Zap },
+  { label: 'Perfil',     href: '/settings',                icon: UserRound },
 ]
 
 // currentView is read from window.location.search on mount (not next/navigation's

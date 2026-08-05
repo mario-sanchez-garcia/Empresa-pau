@@ -11,6 +11,7 @@ import { awardXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
+import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -61,7 +62,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { bloques, asignatura, comunidad, opcion, tiempo_empleado, simulacro_id } = body
-    const elapsed = Number(tiempo_empleado ?? 0)
+    // Valor inicial por si hace falta antes de poder leer el registro (p.ej.
+    // el simulacro_id ni siquiera existe) — se recalcula más abajo desde
+    // resultado_json.time_segments en cuanto se puede, que es la fuente de
+    // verdad real una vez existe "pausar y continuar" (ver
+    // app/lib/simulacros/timeSegments.ts): la suma de los tramos realmente
+    // trabajados, no lo que el cliente afirme en este envío.
+    let elapsed = Number(tiempo_empleado ?? 0)
 
     capturedSimulacroId = typeof simulacro_id === 'string' ? simulacro_id : undefined
     capturedSupabase = authContext.supabase
@@ -119,6 +126,22 @@ export async function POST(request: NextRequest) {
     const missionId = isPracticeSession && typeof simulacroRecord.resultado_json?.mission_id === 'string'
       ? simulacroRecord.resultado_json.mission_id
       : null
+    // "Pausar y continuar": si esta sesión tiene tramos de tiempo
+    // registrados (pausas/reanudaciones vía /api/simulacro/timer), el
+    // tiempo real trabajado es la suma de esos tramos — no lo que el
+    // cliente calculó y mandó en tiempo_empleado, que en una sesión con
+    // pausas de por medio podría no reflejar bien el reloj real si, p.ej.,
+    // el cliente se reanudó en otro dispositivo. Entregar = cerrar
+    // implícitamente el último tramo abierto, así que se computa "ahora"
+    // como su fin. Si la sesión no tiene tramos (sesiones creadas antes de
+    // esta función, o alguna sin pasar por pausar/reanudar), se mantiene el
+    // valor que mandó el cliente como venía haciendo hasta ahora.
+    const storedSegments = isPlainRecord(simulacroRecord.resultado_json) ? simulacroRecord.resultado_json.time_segments : undefined
+    if (isValidSegments(storedSegments) && storedSegments.length > 0) {
+      const closedAtSubmit = closeSegment(storedSegments)
+      elapsed = Math.round(totalElapsedSeconds(closedAtSubmit) / 60)
+      capturedElapsed = elapsed
+    }
     const correctionAction: RateLimitAction = isPracticeSession ? 'parcial_correction' : 'simulacro_correction'
     const correctionCommunity = getCorrectionCommunity(comunidad, blocks)
     const storedCommunity = getCorrectionCommunity(null, blocks)

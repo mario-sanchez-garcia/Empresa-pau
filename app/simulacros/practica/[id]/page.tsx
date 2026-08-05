@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { AlertTriangle, ArrowLeft, Camera, CheckCircle2, Flag, Send, Trash2 } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Camera, CheckCircle2, Flag, Pause, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -15,6 +15,7 @@ import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
 import { PARCIAL_MINUTES } from '@/app/lib/camino/xpMap'
+import { isValidSegments, totalElapsedSeconds, type TimeSegment } from '@/app/lib/simulacros/timeSegments'
 
 // Misma duración de referencia que usa el XP de esta acción (PARCIAL_COMPLETION_XP
 // en xpMap.ts, ver comentario ahí: "una sesión de parcial cronometrada"). El
@@ -39,6 +40,11 @@ function PracticaPageInner() {
   // siguen mostrándose apilados como siempre — esto solo cambia < md.
   const [mobileTab, setMobileTab] = useState<Record<string, 'leer' | 'responder'>>({})
   const [startedAtMs, setStartedAtMs] = useState<number | null>(null)
+  // Suma de los tramos ya cerrados (pausas anteriores) — igual que en
+  // app/simulacros/[id]/page.tsx, para que pausar y reanudar nunca reinicie
+  // el reloj a 0. secondsLeft siempre sale de TOTAL_SECONDS -
+  // closedElapsedSeconds - (tramo abierto, si lo hay).
+  const [closedElapsedSeconds, setClosedElapsedSeconds] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS)
   const [timeUp, setTimeUp] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -49,6 +55,9 @@ function PracticaPageInner() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'dirty'>('saved')
   const [creatingSession, setCreatingSession] = useState(false)
   const [createError, setCreateError] = useState('')
+  const [pausing, setPausing] = useState(false)
+  const [resuming, setResuming] = useState(false)
+  const [resumeError, setResumeError] = useState('')
 
   const answersRef = useRef<Record<string, SimulacroAnswer>>({})
   const answerTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
@@ -96,14 +105,16 @@ function PracticaPageInner() {
       return
     }
 
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) { router.push('/login'); return }
+    supabase.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user
+      const token = data.session?.access_token
+      if (!user || !token) { router.push('/login'); return }
 
       const { data: row } = await supabase
         .from('historial_simulacros')
         .select('*')
         .eq('id', params.id)
-        .eq('user_id', data.user.id)
+        .eq('user_id', user.id)
         .single()
 
       if (!row) { router.push('/camino'); return }
@@ -120,19 +131,66 @@ function PracticaPageInner() {
       setAnswers(storedAnswers)
       setRecord(next)
 
-      // La práctica parcial no tiene pantalla de "empezar": la sesión arranca
-      // en el momento en que /api/practica-parcial la crea, así que el
-      // cronómetro usa esa marca de tiempo como inicio real, sin paso intermedio.
-      const effectiveStart = new Date(next.created_at ?? Date.now()).getTime()
-      setStartedAtMs(effectiveStart)
-      setSecondsLeft(Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - effectiveStart) / 1000)))
+      // time_segments (pausar y continuar): mismo modelo que
+      // app/simulacros/[id]/page.tsx. La práctica parcial no tiene pantalla
+      // de "empezar" — si la sesión todavía no tiene ningún tramo (recién
+      // creada, o de antes de "pausar y continuar"), se abre el primero
+      // aquí mismo contra el servidor, en vez de fiarse solo del reloj local
+      // de created_at, que no sobrevive a una pausa.
+      const resultadoJson = (next.resultado_json && typeof next.resultado_json === 'object' && !Array.isArray(next.resultado_json))
+        ? next.resultado_json as Record<string, unknown>
+        : {}
+      const segments = isValidSegments(resultadoJson.time_segments) ? resultadoJson.time_segments : []
+      const openSeg = segments.find(s => s.endedAt === null) ?? null
+      const closedSeconds = totalElapsedSeconds(segments.filter(s => s.endedAt !== null))
+
+      if (openSeg) {
+        const openStart = Date.parse(openSeg.startedAt)
+        const start = Number.isFinite(openStart) ? openStart : Date.now()
+        setClosedElapsedSeconds(closedSeconds)
+        setStartedAtMs(start)
+        setSecondsLeft(Math.max(0, TOTAL_SECONDS - closedSeconds - Math.floor((Date.now() - start) / 1000)))
+        return
+      }
+      if (segments.length > 0) {
+        // Todos los tramos están cerrados: en pausa.
+        setClosedElapsedSeconds(closedSeconds)
+        setStartedAtMs(null)
+        setSecondsLeft(Math.max(0, TOTAL_SECONDS - closedSeconds))
+        return
+      }
+
+      // Sin tramos todavía: abre el primero ahora mismo.
+      try {
+        const res = await fetch('/api/simulacro/timer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ simulacroId: next.id, action: 'resume' }),
+        })
+        const json = await safeJson(res)
+        const openedSegments: TimeSegment[] = isValidSegments(json?.segments) ? json.segments : []
+        const opened = openedSegments.find(s => s.endedAt === null) ?? null
+        const openStart = opened ? Date.parse(opened.startedAt) : NaN
+        if (res.ok && Number.isFinite(openStart)) {
+          setClosedElapsedSeconds(0)
+          setStartedAtMs(openStart)
+          setSecondsLeft(Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - openStart) / 1000)))
+          return
+        }
+      } catch { /* fallback below */ }
+
+      // Fallback si el servidor falla: reloj local desde created_at, como
+      // antes de "pausar y continuar", para no bloquear la práctica.
+      const fallbackStart = new Date(next.created_at ?? Date.now()).getTime()
+      setStartedAtMs(fallbackStart)
+      setSecondsLeft(Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - fallbackStart) / 1000)))
     })
   }, [params.id, router, searchParams])
 
   useEffect(() => {
     if (!record || submitting || !startedAtMs) return
     const timer = window.setInterval(() => {
-      const next = Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - startedAtMs) / 1000))
+      const next = Math.max(0, TOTAL_SECONDS - closedElapsedSeconds - Math.floor((Date.now() - startedAtMs) / 1000))
       setSecondsLeft(next)
       if (next === 0) {
         window.clearInterval(timer)
@@ -140,7 +198,7 @@ function PracticaPageInner() {
       }
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [record, submitting, startedAtMs])
+  }, [record, submitting, startedAtMs, closedElapsedSeconds])
 
   useEffect(() => {
     answersRef.current = answers
@@ -175,6 +233,72 @@ function PracticaPageInner() {
   const isWarning = secondsLeft <= 45 * 60 && secondsLeft > 15 * 60
   const timerColor = isUrgent ? '#ef4444' : isWarning ? '#f59e0b' : '#2563eb'
   const ringOffset = RING_CIRC * (1 - percentLeft)
+  // En pausa: ya hay una sesión cargada pero no hay ningún tramo abierto
+  // ahora mismo (se cerró al pulsar "Pausar").
+  const isPaused = Boolean(record) && startedAtMs === null
+
+  async function getAccessToken() {
+    const { data } = await supabase.auth.getSession()
+    return data.session?.access_token ?? null
+  }
+
+  // Pausar cierra el tramo abierto en el servidor (el tiempo ya consumido
+  // se guarda en closedElapsedSeconds y deja de sumar) sin tocar las
+  // respuestas — se guardan aparte, como siempre, vía autosave.
+  async function pauseExam() {
+    if (!record || !startedAtMs || pausing) return
+    setPausing(true)
+    try {
+      await autosave(answersRef.current)
+      const token = await getAccessToken()
+      if (!token) return
+      const res = await fetch('/api/simulacro/timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ simulacroId: record.id, action: 'pause' }),
+      })
+      if (res.ok) {
+        const json = await safeJson(res)
+        const nextClosed = typeof json?.elapsedSeconds === 'number'
+          ? json.elapsedSeconds
+          : closedElapsedSeconds + Math.floor((Date.now() - startedAtMs) / 1000)
+        setClosedElapsedSeconds(nextClosed)
+        setStartedAtMs(null)
+      }
+    } finally {
+      setPausing(false)
+    }
+  }
+
+  // Reanudar abre un tramo nuevo en el servidor. Si ya no se puede
+  // continuar (ver MAX_RESUME_DAYS en app/lib/simulacros/timeSegments.ts),
+  // el servidor devuelve 410 con un mensaje claro en vez de dejar continuar
+  // silenciosamente.
+  async function resumePractice() {
+    if (!record || resuming) return
+    setResuming(true)
+    setResumeError('')
+    try {
+      const token = await getAccessToken()
+      if (!token) { setResumeError('Tu sesión ha caducado. Vuelve a iniciar sesión.'); return }
+      const res = await fetch('/api/simulacro/timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ simulacroId: record.id, action: 'resume' }),
+      })
+      const json = await safeJson(res)
+      if (!res.ok) {
+        setResumeError(json?.message ?? 'No hemos podido continuar la práctica ahora mismo. Inténtalo de nuevo.')
+        return
+      }
+      setStartedAtMs(Date.now())
+      setTimeUp(false)
+    } catch {
+      setResumeError('Error de conexión. Inténtalo de nuevo.')
+    } finally {
+      setResuming(false)
+    }
+  }
 
   async function autosave(nextAnswers = answers) {
     if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
@@ -262,11 +386,17 @@ function PracticaPageInner() {
         return
       }
 
+      // El servidor ya recalculó tiempo_empleado_minutos a partir de
+      // resultado_json.time_segments (suma real de los tramos trabajados,
+      // sin contar las pausas) — se prefiere ese valor sobre elapsedMinutes
+      // (reloj local) para que esta escritura redundante no lo pise.
+      const authoritativeElapsed = typeof result?.tiempo_empleado_minutos === 'number' ? result.tiempo_empleado_minutos : elapsedMinutes
+
       await supabase.from('historial_simulacros').update({
         resultado_json: { ...result, __practice_session: true },
         nota_final: result?.nota_final ?? null,
         estado: 'completado',
-        tiempo_empleado: elapsedMinutes,
+        tiempo_empleado: authoritativeElapsed,
         respuestas_parciales: answersSnapshot,
         updated_at: new Date().toISOString(),
       }).eq('id', record.id)
@@ -310,6 +440,50 @@ function PracticaPageInner() {
 
   if (!record) return <KairoSpinner />
 
+  // Pantalla distinta para "en pausa" — deja claro que no es una sesión
+  // nueva ni una ya completada, y que se puede retomar justo donde se dejó.
+  if (isPaused) {
+    const usedMinutes = Math.max(0, Math.round(closedElapsedSeconds / 60))
+    return (
+      <SimulacroShell
+        title={blockLabel ? `Práctica de ${blockLabel} · Parcial` : 'Práctica dirigida'}
+        subtitle="En pausa · continúa cuando quieras"
+      >
+        <div className="mx-auto max-w-xl py-16 text-center">
+          <div className="pau-card-section" style={{ padding: '40px 32px' }}>
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black"
+              style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }}
+            >
+              <Pause size={12} /> En pausa
+            </span>
+            <h2 className="mt-4 text-2xl font-black" style={{ color: '#0f172a' }}>
+              Tu práctica está en pausa
+            </h2>
+            <p className="mt-2 text-sm font-semibold" style={{ color: '#64748b' }}>
+              Ya llevas {usedMinutes} min trabajados y tus respuestas están guardadas. Continúa justo donde lo dejaste.
+            </p>
+            <div className="mt-5 text-4xl font-black" style={{ color: '#2563eb' }}>
+              {formatTime(secondsLeft)}
+            </div>
+            <div className="mt-1 text-xs font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+              tiempo restante
+            </div>
+            {resumeError && <div className="pau-info mt-4" role="alert">{resumeError}</div>}
+            <button
+              onClick={() => void resumePractice()}
+              disabled={resuming}
+              className="campus-primary mt-6"
+              style={{ padding: '12px 28px', borderRadius: 12, opacity: resuming ? 0.7 : 1 }}
+            >
+              {resuming ? 'Un momento...' : 'Continuar práctica →'}
+            </button>
+          </div>
+        </div>
+      </SimulacroShell>
+    )
+  }
+
   const subtitle = blockLabel
     ? `${cfg.label} · ${blockLabel} · ${record.bloques.length} preguntas`
     : `${cfg.label} · ${record.bloques.length} preguntas`
@@ -327,6 +501,15 @@ function PracticaPageInner() {
           >
             <ArrowLeft size={13} /> Volver a Camino PAU
           </a>
+          <button
+            onClick={() => void pauseExam()}
+            disabled={submitting || pausing}
+            className="pau-button-secondary"
+            style={{ padding: '9px 16px', fontSize: 13, gap: 8, borderRadius: 12 }}
+            title="Guarda tus respuestas y el tiempo consumido hasta ahora — puedes continuar más tarde donde lo dejaste."
+          >
+            <Pause size={14} />{pausing ? 'Pausando...' : 'Pausar'}
+          </button>
           <button
             onClick={() => { setSubmitError(''); setConfirmOpen(true) }}
             disabled={submitting}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { AlertTriangle, Camera, CheckCircle2, Flag, Send, Trash2 } from 'lucide-react'
+import { AlertTriangle, Camera, CheckCircle2, Flag, Pause, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
@@ -14,6 +14,7 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import MathEditor from '@/components/shared/MathEditor'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
+import { isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 
 const DEFAULT_DURATION_MINUTES = 90
 const TOTAL_SECONDS = DEFAULT_DURATION_MINUTES * 60
@@ -28,10 +29,19 @@ export default function SimulacroActivoPage() {
   const [active, setActive] = useState(0)
   const [mode, setMode] = useState<Record<string, 'text' | 'image'>>({})
   const [examStarted, setExamStarted] = useState(false)
+  // startedAtMs = inicio del tramo ABIERTO ahora mismo (null si nunca se ha
+  // empezado, o si está en pausa). closedElapsedSeconds = suma de los
+  // tramos ya cerrados (pausas anteriores) — lo que ya se trabajó y no debe
+  // reiniciarse a 0 al reanudar. secondsLeft siempre sale de
+  // duración - closedElapsedSeconds - (tramo abierto, si lo hay).
   const [startedAtMs, setStartedAtMs] = useState<number | null>(null)
+  const [closedElapsedSeconds, setClosedElapsedSeconds] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [timeUp, setTimeUp] = useState(false)
+  const [pausing, setPausing] = useState(false)
+  const [resuming, setResuming] = useState(false)
+  const [resumeError, setResumeError] = useState('')
   const [reviewMarked, setReviewMarked] = useState<Record<string, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -63,24 +73,56 @@ export default function SimulacroActivoPage() {
         }
         const storedAnswers = next.respuestas_parciales ?? {}
         const storedReview = readReviewState(next.id)
-        const storedStart = readStartedAt(next.id)
-        const hasAnswers = Object.values(storedAnswers).some(answer => Boolean(answer?.text?.trim() || answer?.image))
-        const fallbackStart = hasAnswers ? new Date(next.started_at ?? next.created_at ?? Date.now()).getTime() : null
-        const effectiveStart = storedStart ?? fallbackStart
         const durationSeconds = getDurationSeconds(next)
         answersRef.current = storedAnswers
         savedSnapshotRef.current = JSON.stringify(storedAnswers)
         setAnswers(storedAnswers)
         setReviewMarked(storedReview)
         setRecord(next)
-        if (effectiveStart) {
-          setStartedAtMs(effectiveStart)
+
+        // time_segments (pausar y continuar): un tramo con endedAt=null
+        // sigue abierto ahora mismo (sesión activa); si todos están cerrados
+        // es que está en pausa; si no hay ninguno, nunca se ha empezado.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const resultadoJson = (next.resultado_json && typeof next.resultado_json === 'object' && !Array.isArray(next.resultado_json))
+          ? next.resultado_json as Record<string, unknown>
+          : {}
+        const segments = isValidSegments(resultadoJson.time_segments) ? resultadoJson.time_segments : []
+        const openSegment = segments.find(s => s.endedAt === null) ?? null
+        const closedSeconds = totalElapsedSeconds(segments.filter(s => s.endedAt !== null))
+
+        if (openSegment) {
+          const openStart = Date.parse(openSegment.startedAt)
+          setClosedElapsedSeconds(closedSeconds)
+          setStartedAtMs(Number.isFinite(openStart) ? openStart : Date.now())
           setExamStarted(true)
-          setSecondsLeft(Math.max(0, durationSeconds - Math.floor((Date.now() - effectiveStart) / 1000)))
-        } else {
+          setSecondsLeft(Math.max(0, durationSeconds - closedSeconds - Math.floor((Date.now() - openStart) / 1000)))
+        } else if (segments.length > 0) {
+          // Todos los tramos están cerrados: en pausa.
+          setClosedElapsedSeconds(closedSeconds)
           setStartedAtMs(null)
-          setExamStarted(false)
-          setSecondsLeft(durationSeconds)
+          setExamStarted(true)
+          setSecondsLeft(Math.max(0, durationSeconds - closedSeconds))
+        } else {
+          // Sin tramos: o nunca se ha empezado, o es una sesión creada antes
+          // de "pausar y continuar" — para esas últimas (ya tienen
+          // respuestas guardadas) se preserva el comportamiento de antes
+          // (un único tramo continuo desde su inicio real) en vez de
+          // resetear su progreso a "no empezado".
+          const storedStart = readStartedAt(next.id)
+          const hasAnswers = Object.values(storedAnswers).some(answer => Boolean(answer?.text?.trim() || answer?.image))
+          const legacyFallbackStart = hasAnswers ? new Date(next.started_at ?? next.created_at ?? Date.now()).getTime() : null
+          const legacyStart = storedStart ?? legacyFallbackStart
+          setClosedElapsedSeconds(0)
+          if (legacyStart) {
+            setStartedAtMs(legacyStart)
+            setExamStarted(true)
+            setSecondsLeft(Math.max(0, durationSeconds - Math.floor((Date.now() - legacyStart) / 1000)))
+          } else {
+            setStartedAtMs(null)
+            setExamStarted(false)
+            setSecondsLeft(durationSeconds)
+          }
         }
       }
     })
@@ -90,7 +132,7 @@ export default function SimulacroActivoPage() {
     if (!record || submitting || !examStarted || !startedAtMs) return
     const durationSeconds = getDurationSeconds(record)
     const timer = window.setInterval(() => {
-      const next = Math.max(0, durationSeconds - Math.floor((Date.now() - startedAtMs) / 1000))
+      const next = Math.max(0, durationSeconds - closedElapsedSeconds - Math.floor((Date.now() - startedAtMs) / 1000))
       setSecondsLeft(next)
       if (next === 0) {
         window.clearInterval(timer)
@@ -98,7 +140,7 @@ export default function SimulacroActivoPage() {
       }
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [record, submitting, examStarted, startedAtMs])
+  }, [record, submitting, examStarted, startedAtMs, closedElapsedSeconds])
 
   useEffect(() => {
     answersRef.current = answers
@@ -130,6 +172,10 @@ export default function SimulacroActivoPage() {
   const isWarning = secondsLeft <= 45 * 60 && secondsLeft > 15 * 60
   const timerColor = isUrgent ? '#ef4444' : isWarning ? '#f59e0b' : '#2563eb'
   const ringOffset = RING_CIRC * (1 - percentLeft)
+  // En pausa: ya se empezó (hay progreso/tramos) pero no hay ningún tramo
+  // abierto ahora mismo — distinto de "nunca empezado" (examStarted=false)
+  // y de "activo" (examStarted=true && startedAtMs set).
+  const isPaused = examStarted && !startedAtMs
 
   async function autosave(nextAnswers = answers) {
     if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
@@ -150,14 +196,70 @@ export default function SimulacroActivoPage() {
     setActive(index)
   }
 
-  function startExam() {
-    if (!record) return
-    const nextStartedAt = Date.now()
-    writeStartedAt(record.id, nextStartedAt)
-    setStartedAtMs(nextStartedAt)
-    setSecondsLeft(getDurationSeconds(record))
-    setExamStarted(true)
-    setTimeUp(false)
+  async function getAccessToken() {
+    const { data } = await supabase.auth.getSession()
+    return data.session?.access_token ?? null
+  }
+
+  // Empezar por primera vez y reanudar desde pausa son la misma acción en
+  // el servidor (abrir un tramo nuevo en time_segments) — solo cambia qué
+  // pantalla la dispara. El servidor manda: si la sesión ya no se puede
+  // reanudar (ver MAX_RESUME_DAYS / fecha del parcial en
+  // app/lib/simulacros/timeSegments.ts), devuelve 410 con un mensaje claro
+  // en vez de dejar continuar silenciosamente.
+  async function startExam() {
+    if (!record || resuming) return
+    setResuming(true)
+    setResumeError('')
+    try {
+      const token = await getAccessToken()
+      if (!token) { setResumeError('Tu sesión ha caducado. Vuelve a iniciar sesión.'); return }
+      const res = await fetch('/api/simulacro/timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ simulacroId: record.id, action: 'resume' }),
+      })
+      const json = await safeJson(res)
+      if (!res.ok) {
+        setResumeError(json?.message ?? 'No hemos podido empezar el simulacro ahora mismo. Inténtalo de nuevo.')
+        return
+      }
+      setStartedAtMs(Date.now())
+      setExamStarted(true)
+      setTimeUp(false)
+    } catch {
+      setResumeError('Error de conexión. Inténtalo de nuevo.')
+    } finally {
+      setResuming(false)
+    }
+  }
+
+  // Pausar cierra el tramo abierto en el servidor (el tiempo ya consumido
+  // se guarda en closedElapsedSeconds y deja de sumar) sin tocar las
+  // respuestas — se guardan aparte, como siempre, vía autosave.
+  async function pauseExam() {
+    if (!record || !startedAtMs || pausing) return
+    setPausing(true)
+    try {
+      await autosave(answersRef.current)
+      const token = await getAccessToken()
+      if (!token) return
+      const res = await fetch('/api/simulacro/timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ simulacroId: record.id, action: 'pause' }),
+      })
+      if (res.ok) {
+        const json = await safeJson(res)
+        const nextClosed = typeof json?.elapsedSeconds === 'number'
+          ? json.elapsedSeconds
+          : closedElapsedSeconds + Math.floor((Date.now() - startedAtMs) / 1000)
+        setClosedElapsedSeconds(nextClosed)
+        setStartedAtMs(null)
+      }
+    } finally {
+      setPausing(false)
+    }
   }
 
   function toggleReview(blockId: string) {
@@ -235,11 +337,18 @@ export default function SimulacroActivoPage() {
         return
       }
 
+      // El servidor ya calculó y guardó tiempo_empleado desde
+      // resultado_json.time_segments (la suma real de los tramos
+      // trabajados, sin las pausas) al corregir — result.tiempo_empleado_minutos
+      // lo trae de vuelta. Se prefiere sobre elapsedMinutes (el del propio
+      // reloj del cliente) para no pisar ese valor más preciso con este
+      // update, redundante pero ya existente.
+      const authoritativeElapsed = typeof result?.tiempo_empleado_minutos === 'number' ? result.tiempo_empleado_minutos : elapsedMinutes
       await supabase.from('historial_simulacros').update({
         resultado_json: result,
         nota_final: result?.nota_final ?? null,
         estado: 'completado',
-        tiempo_empleado: elapsedMinutes,
+        tiempo_empleado: authoritativeElapsed,
         respuestas_parciales: answersSnapshot,
         updated_at: new Date().toISOString()
       }).eq('id', record.id)
@@ -263,7 +372,7 @@ export default function SimulacroActivoPage() {
 
   if (!record) return <KairoSpinner />
 
-  if (!examStarted) {
+  if (!examStarted || isPaused) {
     const community = record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'
     const totalPoints = record.bloques.reduce((sum, block) => sum + Number(block.puntuacion || 0), 0)
     const BLOCK_COLORS = ['#2563eb', '#7c3aed', '#0369a1', '#15803d', '#c2410c', '#b45309', '#831843']
@@ -274,6 +383,10 @@ export default function SimulacroActivoPage() {
       record.dificultad_real ?? record.dificultad,
       record.asignatura !== 'lengua' ? optionSummaryForRecord(record) : null,
     ].filter((t): t is string => Boolean(t))
+    // En pausa: se muestra el tiempo REAL restante (ya descontadas las
+    // pausas), no la duración completa fija — para dejar claro que esto es
+    // "continuar donde lo dejaste", no "empezar de cero" ni "ya completado".
+    const usedMinutes = Math.max(0, Math.round(closedElapsedSeconds / 60))
 
     return (
       <SimulacroShell>
@@ -290,24 +403,24 @@ export default function SimulacroActivoPage() {
           {/* Top nav */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px 44px', zIndex: 10 }}>
             <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.3em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.25)' }}>
-              Simulacro PAU · Antes de empezar
+              {isPaused ? 'Simulacro PAU · En pausa' : 'Simulacro PAU · Antes de empezar'}
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20, background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.3)', fontSize: 9, fontWeight: 900, color: '#60a5fa', letterSpacing: '.06em' }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', display: 'inline-block', flexShrink: 0 }} />
-              Kairo IA
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20, background: isPaused ? 'rgba(245,158,11,0.15)' : 'rgba(37,99,235,0.15)', border: `1px solid ${isPaused ? 'rgba(245,158,11,0.35)' : 'rgba(37,99,235,0.3)'}`, fontSize: 9, fontWeight: 900, color: isPaused ? '#fbbf24' : '#60a5fa', letterSpacing: '.06em' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: isPaused ? '#f59e0b' : '#2563eb', display: 'inline-block', flexShrink: 0 }} />
+              {isPaused ? 'En pausa' : 'Kairo IA'}
             </span>
           </div>
 
           {/* Center: giant countdown + subject */}
           <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 40px 40px' }}>
             <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.3em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>
-              Tu tiempo disponible
+              {isPaused ? 'Tiempo restante · ya llevas ' + usedMinutes + ' min' : 'Tu tiempo disponible'}
             </div>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(96px, 14vw, 192px)', lineHeight: 1, color: '#fff', letterSpacing: '0.04em', textShadow: '0 0 80px rgba(37,99,235,0.45)' }}>
-              {`${String(durationMinutes).padStart(2, '0')}:00`}
+              {isPaused ? formatTime(secondsLeft) : `${String(durationMinutes).padStart(2, '0')}:00`}
             </div>
             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginTop: 6, display: 'block' }}>
-              minutos · simulacro real
+              {isPaused ? 'minutos y segundos restantes' : 'minutos · simulacro real'}
             </span>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 4vw, 50px)', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em', marginTop: 20 }}>
               {cfg.label} · {community}
@@ -319,6 +432,11 @@ export default function SimulacroActivoPage() {
                 </span>
               ))}
             </div>
+            {resumeError && (
+              <div style={{ marginTop: 20, maxWidth: 420, padding: '10px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.35)', color: '#fca5a5', fontSize: 12, fontWeight: 700 }}>
+                {resumeError}
+              </div>
+            )}
           </div>
 
           {/* Bottom panel */}
@@ -339,14 +457,15 @@ export default function SimulacroActivoPage() {
             {/* CTA bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 44px' }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>
-                La corrección aparece al entregar · Kairo IA
+                {isPaused ? 'Tus respuestas siguen guardadas tal y como las dejaste' : 'La corrección aparece al entregar · Kairo IA'}
               </span>
               <button
-                onClick={startExam}
+                onClick={() => void startExam()}
+                disabled={resuming}
                 className="campus-primary"
-                style={{ padding: '15px 30px', borderRadius: 10, fontSize: 14, gap: 10, background: '#2563eb', boxShadow: '0 8px 24px rgba(37,99,235,0.4)' }}
+                style={{ padding: '15px 30px', borderRadius: 10, fontSize: 14, gap: 10, background: '#2563eb', boxShadow: '0 8px 24px rgba(37,99,235,0.4)', opacity: resuming ? 0.7 : 1 }}
               >
-                Empezar simulacro →
+                {resuming ? 'Un momento...' : isPaused ? 'Continuar simulacro →' : 'Empezar simulacro →'}
               </button>
             </div>
           </div>
@@ -360,14 +479,25 @@ export default function SimulacroActivoPage() {
       title="Simulacro PAU"
       subtitle={`${cfg.label} · ${record.dificultad_real ?? record.dificultad} · ${record.bloques.length} ejercicios`}
       actions={
-        <button
-          onClick={() => { setSubmitError(''); setConfirmOpen(true) }}
-          disabled={submitting}
-          className="campus-primary"
-          style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12 }}
-        >
-          <Send size={14} />Entregar simulacro
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => void pauseExam()}
+            disabled={submitting || pausing}
+            className="pau-button-secondary"
+            style={{ padding: '9px 16px', fontSize: 13, gap: 8, borderRadius: 12 }}
+            title="Guarda tus respuestas y el tiempo consumido hasta ahora — puedes continuar más tarde donde lo dejaste."
+          >
+            <Pause size={14} />{pausing ? 'Pausando...' : 'Pausar'}
+          </button>
+          <button
+            onClick={() => { setSubmitError(''); setConfirmOpen(true) }}
+            disabled={submitting}
+            className="campus-primary"
+            style={{ padding: '9px 18px', fontSize: 13, gap: 8, borderRadius: 12 }}
+          >
+            <Send size={14} />Entregar simulacro
+          </button>
+        </div>
       }
     >
       <div className="mx-auto grid max-w-6xl gap-5">
@@ -859,14 +989,6 @@ function readStartedAt(id: string) {
     return Number.isFinite(number) && number > 0 ? number : null
   } catch {
     return null
-  }
-}
-
-function writeStartedAt(id: string, value: number) {
-  try {
-    window.localStorage.setItem(startKey(id), String(value))
-  } catch {
-    // Local storage is best-effort only.
   }
 }
 

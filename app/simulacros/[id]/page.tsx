@@ -310,7 +310,7 @@ export default function SimulacroActivoPage() {
           simulacro_id: record.id
         })
       })
-      setSubmitStage('Corrigiendo con IA...')
+      setSubmitStage('Corrigiendo con Kairo...')
       const result = await safeJson(res)
 
       if (!res.ok || result?.correction_error) {

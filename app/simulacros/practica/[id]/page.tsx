@@ -344,7 +344,7 @@ function PracticaPageInner() {
     try {
       const saved = await autosave(answersSnapshot)
       if (!saved) throw new Error('No se pudieron guardar las respuestas.')
-      setSubmitStage('Corrigiendo con IA...')
+      setSubmitStage('Corrigiendo con Kairo...')
 
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token

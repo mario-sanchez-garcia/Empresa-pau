@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
   let capturedSimulacroId: string | undefined
   let capturedSupabase: SupabaseClient | undefined
   let capturedUserId: string | undefined
+  let capturedElapsed = 0
 
   try {
     const authContext = await getAuthContext(request)
@@ -64,6 +65,13 @@ export async function POST(request: NextRequest) {
     capturedSimulacroId = typeof simulacro_id === 'string' ? simulacro_id : undefined
     capturedSupabase = authContext.supabase
     capturedUserId = authContext.user.id
+    // Mismo tiempo real ya cronometrado por el cliente (elapsedMinutes en
+    // app/simulacros/[id]/page.tsx y en práctica parcial) — antes el catch de
+    // más abajo lo descartaba y mandaba 0 fijo si la corrección lanzaba una
+    // excepción no controlada (más probable en Lengua: enunciados y textos
+    // fuente mucho más largos que el resto de asignaturas), dejando
+    // tiempo_empleado sin guardar y el resultado mostrando "Tiempo: 0 min".
+    capturedElapsed = elapsed
 
     if (!simulacro_id) {
       return NextResponse.json(createCorrectionError({
@@ -460,7 +468,7 @@ export async function POST(request: NextRequest) {
       message: 'No hemos podido corregir este simulacro ahora mismo. Tus respuestas siguen guardadas.'
     })
     if (capturedSimulacroId && capturedSupabase && capturedUserId) {
-      await updateSimulacroError(capturedSupabase, capturedSimulacroId, capturedUserId, errorResult, 0)
+      await updateSimulacroError(capturedSupabase, capturedSimulacroId, capturedUserId, errorResult, capturedElapsed)
     }
     return NextResponse.json(errorResult, { status: 500 })
   }

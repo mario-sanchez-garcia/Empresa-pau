@@ -1969,7 +1969,11 @@ export default function CaminoCalendarClient() {
           {/* ── MISSIONS HEADER ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', background: 'white' }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Misiones de hoy</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} completadas esta semana</span>
+            {/* "principales" deja claro que este contador es solo del objetivo
+                semanal (role='main', tope de 5) — las bonus no cuentan aquí y
+                nunca bloquean nada, así que "sigue con las bonus" evita que
+                llegar a 5/5 se lea como un tope duro de toda la app. */}
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales · sigue con las bonus</span>
           </div>
 
           {/* ── MISSION 01 — PRINCIPAL ── */}

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
@@ -215,7 +215,6 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
       try {
         const { data: userData } = await supabase.auth.getUser()
         if (userData.user) {
-          const bloque = normalized?.desglose_bloques?.[0]
           await supabase.from('historial_examenes').insert({
             user_id: userData.user.id,
             asignatura: 'historia',
@@ -223,7 +222,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
             año: Number(contexto.match(/\b20\d{2}\b/)?.[0]),
             bloque: `Ejercicio ${ejercicio.numero}`,
             opcion: 'Única',
-            nota: bloque?.puntos_conseguidos != null ? Math.min(puntuacion, Math.max(0, Number(bloque.puntos_conseguidos))) : null,
+            nota: normalized ? scoreFromCorrection(normalized, puntuacion) : null,
             nota_maxima: puntuacion,
             enunciado: enunciadoOficial.substring(0, 2000),
             respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 4000),

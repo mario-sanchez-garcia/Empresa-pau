@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { Camera, Check, ChevronDown, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
@@ -27,12 +27,6 @@ const UI = {
 
 function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function scoreFromCorrection(data: any, maxScore: number) {
-  const raw = data?.desglose_bloques?.[0]?.puntos_conseguidos
-  return raw == null ? null : Math.min(maxScore, Math.max(0, Number(raw)))
 }
 
 export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {

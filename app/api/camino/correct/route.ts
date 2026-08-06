@@ -12,8 +12,9 @@ import {
   subjectLabelFromSlug,
 } from '@/app/lib/camino/caminoCurriculumPlan'
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
-import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
+import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { BILLING_BLOCK_CODE, createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
 
 export const dynamic = 'force-dynamic'
@@ -230,9 +231,31 @@ export async function POST(request: NextRequest) {
 
   const normalized = normalizeCorrectionForOfficialScores(parsed, [maxScore])
   const publicCorrection = stripPrivateCorrectionFields(normalized)
+  const score = scoreFromCorrection(publicCorrection, maxScore)
+  if (score == null) {
+    // scoreFromCorrection ya cae a nota_final cuando la IA deja
+    // desglose_bloques vacío (frecuente en preguntas de desarrollo de una
+    // sola pieza — Historia, Filosofía). Si TODAVÍA así no hay nota, algo
+    // más raro está pasando en la respuesta de la IA — que quede registrado
+    // en vez de fallar en silencio con un 0 sin contexto.
+    console.error('[camino/correct] score unparseable after fallback', {
+      userId: authContext.user.id,
+      subject: topic.subject,
+      sortOrder: sortOrder ?? topic.v2SortOrder ?? null,
+      truncated: message.stop_reason === 'max_tokens',
+    })
+    const db = createServiceSupabase() ?? createUserSupabase(authContext.accessToken)
+    await recordBetaMetric(db, authContext.user.id, 'correction_score_unparseable', {
+      subject: topic.subject,
+      blockSlug: topic.blockSlug,
+      topicSlug: topic.topicSlug,
+      sortOrder: sortOrder ?? topic.v2SortOrder ?? null,
+      truncated: message.stop_reason === 'max_tokens',
+    })
+  }
   return NextResponse.json({
     correction: publicCorrection,
-    score: scoreFromCorrection(publicCorrection),
+    score,
     truncated: message.stop_reason === 'max_tokens',
     finishReason: message.stop_reason ?? 'unknown',
   })
@@ -404,11 +427,6 @@ function stripPrivateCorrectionFields(value: unknown): unknown {
   )
 }
 
-function scoreFromCorrection(value: unknown) {
-  const data = value as { desglose_bloques?: Array<{ puntos_conseguidos?: number | string }> } | null
-  const numeric = Number(data?.desglose_bloques?.[0]?.puntos_conseguidos)
-  return Number.isFinite(numeric) ? Math.min(10, Math.max(0, numeric)) : null
-}
 
 function asString(value: unknown) {
   return typeof value === 'string' ? value : ''

@@ -15,6 +15,7 @@ export const BETA_METRIC_EVENTS = [
   'camino_calendar_source_selected',
   'weak_review_injected',
   'weak_review_mapping_missed',
+  'correction_score_unparseable',
 ] as const
 
 export type BetaMetricEvent = typeof BETA_METRIC_EVENTS[number]

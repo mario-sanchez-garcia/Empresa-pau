@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, MessageCircle, PenLi
 import SidebarNav from '@/app/components/SidebarNav'
 import { buildEvauHref, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
-import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
@@ -113,13 +113,6 @@ function daysSince(isoDate: string): number {
   const createdDay = new Date(isoDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
   const todayDay = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
   return Math.floor((new Date(todayDay + 'T00:00:00Z').getTime() - new Date(createdDay + 'T00:00:00Z').getTime()) / 86400000)
-}
-
-function scoreFromCorrection(data: unknown, maxScore: number) {
-  const raw = (data as { desglose_bloques?: Array<{ puntos_conseguidos?: number | string }> } | null)?.desglose_bloques?.[0]?.puntos_conseguidos
-  const numeric = Number(raw)
-  if (!Number.isFinite(numeric)) return null
-  return Math.min(maxScore, Math.max(0, numeric))
 }
 
 function normalizeLessonMathText(text: string): string {

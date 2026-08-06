@@ -2,7 +2,7 @@
 
 import { useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
@@ -202,7 +202,7 @@ export default function CatEjercicioCard({
           año: examen.anio,
           bloque: `${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
           opcion: ejercicio.opcion ?? 'Única',
-          nota: normalized?.desglose_bloques?.[0]?.puntos_conseguidos ?? null,
+          nota: normalized ? scoreFromCorrection(normalized, maxScore) : null,
           nota_maxima: maxScore,
           enunciado: enunciadoCompleto.substring(0, 2000),
           respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 4000),

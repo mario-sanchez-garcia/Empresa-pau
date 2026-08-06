@@ -533,11 +533,13 @@ export function correctionJsonToMarkdownWithOptions(rawData: unknown, options: {
   const firstBlock = bloques[0] ?? null
   const officialMax = normalizeScore(options.officialMaxScore)
   const firstMax = officialMax ?? normalizeScore(firstBlock?.puntos_maximos ?? firstBlock?.max_puntos)
-  const firstScore = firstMax != null
-    ? clampScore(normalizeScore(firstBlock?.puntos_conseguidos ?? firstBlock?.nota) ?? 0, firstMax)
-    : null
+  // scoreFromCorrection ya cae a nota_final cuando no hay bloque con
+  // puntos_conseguidos (ver su comentario) — sin esto, una corrección de
+  // desarrollo (Historia, Filosofía) con desglose_bloques vacío pero
+  // nota_final real mostraba "Nota: 0/10" pese a tener una nota válida.
+  const firstScore = firstMax != null ? scoreFromCorrection(data, firstMax) : null
   const heading = firstMax != null
-    ? `## Nota: ${formatNumber(firstScore)}/${formatNumber(firstMax)} pts`
+    ? `## Nota: ${formatNumber(firstScore ?? 0)}/${formatNumber(firstMax)} pts`
     : `## Nota: ${formatNumber(data?.nota_final)}/10`
 
   return [
@@ -633,6 +635,35 @@ export function normalizeCorrectionForOfficialScores(rawData: unknown, officialM
         aparece_en_plan_repaso: block.porcentaje_logrado < 80
       }))
   }
+}
+
+// Única fuente de verdad para extraer la nota numérica de una corrección ya
+// pasada por normalizeCorrectionForOfficialScores (o el JSON crudo de la IA,
+// que tiene la misma forma). Prioriza el desglose por bloque
+// (puntos_conseguidos, con "nota" como alias legacy) porque es la fuente más
+// precisa cuando existe.
+//
+// Antes cada pantalla de corrección (Camino, Filosofía, Cataluña...)
+// reimplementaba esta misma extracción leyendo solo
+// desglose_bloques[0].puntos_conseguidos, sin más. Para preguntas de
+// desarrollo de una sola pieza (Historia, Filosofía) la IA a veces deja
+// desglose_bloques vacío y solo rellena nota_final a nivel superior —
+// normalizeCorrectionForOfficialScores ya lo tiene en cuenta y calcula
+// nota_final correctamente en ese caso (ver arriba), pero como ninguna
+// pantalla leía ese campo como fallback, esas correcciones se mostraban con
+// "0/10" y sin XP pese a tener una nota real y feedback perfectamente
+// válido. Devuelve null solo cuando NINGUNA de las dos fuentes tiene un
+// número real — ese caso sí debe tratarse como "sin nota clara".
+export function scoreFromCorrection(data: unknown, maxScore: number): number | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const record = data as any // JSON de corrección sin interfaz completa — any intencional
+  const blockScore = normalizeScore(record?.desglose_bloques?.[0]?.puntos_conseguidos ?? record?.desglose_bloques?.[0]?.nota)
+  if (blockScore != null) return clampScore(blockScore, maxScore)
+
+  const topScore = normalizeScore(record?.nota_final)
+  if (topScore != null) return clampScore(topScore, maxScore)
+
+  return null
 }
 
 function penaltiesToMarkdown(items: unknown) {

@@ -897,6 +897,12 @@ export default function Home() {
   const fileRef = useRef<HTMLInputElement>(null)
   const lastImageTimingRef = useRef<{ requestId: string; ms: number; chars: number } | null>(null)
   const randomEvauResolutionKeyRef = useRef('')
+  // Un hilo persistente por asignatura (chat_threads/chat_messages en Supabase,
+  // ver migración 20260806150000). Cache en memoria por sesión de navegador
+  // para no re-pedir el hilo al alternar entre pills ya visitados; se llena
+  // al cargar y se guarda el hilo saliente justo antes de cambiar de pill en
+  // switchChatSubject().
+  const chatThreadCacheRef = useRef<Partial<Record<Asignatura, MensajeChat[]>>>({})
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa, setCCAA } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
@@ -948,6 +954,13 @@ export default function Home() {
       setContextoChat(`Camino PAU curso: ${label}. Ayuda al alumno con este tema sin inventar datos ni copiar apuntes.`)
       if (question) setInputChat(question)
       setMensajes(current => current.length ? current : [{ rol: 'kairo', texto: `Estoy contigo en este tema de Camino PAU${label ? `: ${label}` : ''}. Pregúntame la duda concreta y la trabajamos paso a paso.` }])
+    } else if (urlSection === 'chat') {
+      // Entrada normal al chat (sin contexto de Camino sembrado arriba):
+      // carga el hilo real guardado de la asignatura inicial, si existe.
+      // `asignatura` sigue en su valor por defecto ('mates') si no había
+      // subject en la URL ni preferencia guardada — mismo valor que ya usa
+      // el resto del efecto en ese caso.
+      loadChatThread(initialSubject ?? asignatura)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1833,6 +1846,49 @@ function cambiarAsignatura(a: Asignatura) {
   reset()
 }
 
+// Carga el hilo persistente de una asignatura (chat_threads/chat_messages) y
+// reemplaza `mensajes` con su historial real. Usa la cache en memoria de la
+// sesión si ya se visitó esa asignatura, así alternar entre pills no vuelve
+// a pedir red cada vez. Falla en silencio: si la carga no funciona, el chat
+// sigue usable, solo empieza vacío en vez de perder la conversación activa.
+async function loadChatThread(subject: Asignatura) {
+  const cached = chatThreadCacheRef.current[subject]
+  if (cached) {
+    setMensajes(cached)
+    return
+  }
+  try {
+    const accessToken = await getChatAccessToken()
+    if (!accessToken) return
+    const res = await fetch(`/api/chat/messages?subject=${subject}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    if (!res.ok) return
+    const data = await res.json()
+    const loaded: MensajeChat[] = Array.isArray(data.messages)
+      ? data.messages.map((m: { role: string; content: string; createdAt?: string }) => ({
+          rol: m.role === 'kairo' ? 'kairo' : 'usuario',
+          texto: m.content,
+          ts: m.createdAt ? new Date(m.createdAt).getTime() : undefined,
+        }))
+      : []
+    chatThreadCacheRef.current[subject] = loaded
+    setMensajes(loaded)
+  } catch {
+    /* silencioso — ver comentario de la función */
+  }
+}
+
+// Cambia de asignatura DENTRO del Chat con Kairo: guarda el hilo saliente en
+// cache (para no perderlo si se vuelve a esa asignatura en la misma sesión) y
+// carga el hilo real de la asignatura destino, en vez de seguir escribiendo
+// en el mismo array de mensajes (la mezcla entre asignaturas que se reportó).
+function switchChatSubject(subject: Asignatura) {
+  chatThreadCacheRef.current[asignatura] = mensajes
+  cambiarAsignatura(subject)
+  loadChatThread(subject)
+}
+
 function cambiarTipo(t: Tipo) {
   setTipo(t)
   setExamenIdx(0)
@@ -1851,6 +1907,20 @@ function cambiarTipo(t: Tipo) {
     const { data, error } = await supabase.auth.getSession()
     if (error || !data.session?.access_token) return null
     return data.session.access_token
+  }
+
+  // Guarda un mensaje en el hilo persistente de esa asignatura — best-effort,
+  // sin esperar ni bloquear la conversación: si falla, el chat sigue
+  // funcionando en memoria igual que hoy, solo no sobrevive a un recargo.
+  function persistChatMessage(subject: Asignatura, role: 'usuario' | 'kairo', content: string) {
+    getChatAccessToken().then(accessToken => {
+      if (!accessToken) return
+      return fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ subject, role, content }),
+      })
+    }).catch(() => {})
   }
 
   async function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
@@ -2022,9 +2092,15 @@ function cambiarTipo(t: Tipo) {
 
   async function enviarChat() {
     if (!inputChat.trim()) return
+    // Foto fija de la asignatura activa al enviar — si el alumno cambia de
+    // pill mientras esta respuesta sigue en curso, el mensaje se sigue
+    // guardando en el hilo correcto (el de cuando se envió), no en el que
+    // esté activo cuando termine de llegar la respuesta.
+    const chatSubject = asignatura
     const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: inputChat, ts: Date.now() }
     const hist = [...mensajes, nuevoMensaje]
     setMensajes(hist)
+    persistChatMessage(chatSubject, 'usuario', nuevoMensaje.texto)
     setInputChat('')
     setCargandoChat(true)
     const accessToken = await getChatAccessToken()
@@ -2045,7 +2121,11 @@ function cambiarTipo(t: Tipo) {
         body: JSON.stringify({
           pregunta: chatSystemIntro +
             (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
-            hist.map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Kairo') + ': ' + m.texto).join('\n') +
+            // Solo los últimos ~20 mensajes como contexto — un hilo persistente
+            // puede crecer durante semanas, y reenviar TODO el historial cada
+            // vez haría crecer el coste/tokens de cada respuesta sin tope. El
+            // historial completo se sigue guardando y mostrando igual.
+            hist.slice(-20).map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Kairo') + ': ' + m.texto).join('\n') +
             '\nResponde solo como Kairo.'
         })
       })
@@ -2072,6 +2152,7 @@ function cambiarTipo(t: Tipo) {
           setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: 'No he podido responder ahora mismo. Inténtalo de nuevo en unos minutos.', ts: prev[prev.length - 1]?.ts }])
         } else {
           setMensajes(prev => [...prev.slice(0, -1), { rol: 'kairo', texto: finalText, ts: prev[prev.length - 1]?.ts }])
+          persistChatMessage(chatSubject, 'kairo', finalText)
         }
       }
     } catch {
@@ -5744,7 +5825,7 @@ function cambiarTipo(t: Tipo) {
                         const card = SUBJECT_CARDS[key]
                         const isActive = asignatura === key
                         return (
-                          <button key={key} type="button" className={`tutor-hero-pill ${isActive ? 'is-active' : ''}`} onClick={() => cambiarAsignatura(key)}>
+                          <button key={key} type="button" className={`tutor-hero-pill ${isActive ? 'is-active' : ''}`} onClick={() => switchChatSubject(key)}>
                             {card.title}
                           </button>
                         )

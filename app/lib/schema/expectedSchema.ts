@@ -35,6 +35,8 @@ export const EXPECTED_TABLES: Array<{ name: string; rls: boolean; porque: string
   { name: 'topic_why_cache',          rls: true, porque: 'Cache de "¿Por qué es así?" por tema — sin ella, cada corrección la regenera' },
   { name: 'flashcard_decks',          rls: true, porque: 'Mazos de La Zona: tamaño, publicación pública' },
   { name: 'flashcard_deck_attempts',  rls: true, porque: 'Historial de intentos por mazo — estadísticas y ranking' },
+  { name: 'chat_threads',             rls: true, porque: 'Hilo fijo por asignatura del Chat con Kairo' },
+  { name: 'chat_messages',            rls: true, porque: 'Historial persistente de mensajes del Chat con Kairo' },
 ]
 
 /** Columnas concretas que el código nombra de forma explícita. */
@@ -79,4 +81,6 @@ export const NO_OPEN_SELECT: ForbiddenPolicy[] = [
   { table: 'perfiles',                porque: 'Expondría datos personales de menores' },
   { table: 'historial_examenes',      porque: 'Expondría respuestas y notas de otros alumnos' },
   { table: 'historial_simulacros',    porque: 'Expondría simulacros de otros alumnos' },
+  { table: 'chat_threads',            porque: 'Expondría qué asignaturas consulta cada alumno' },
+  { table: 'chat_messages',           porque: 'Expondría el contenido privado de las conversaciones de otros alumnos' },
 ]

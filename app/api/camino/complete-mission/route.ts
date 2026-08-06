@@ -116,6 +116,18 @@ export async function POST(request: NextRequest) {
       scoreOnTen,
     })
 
+    // PASO 4b — El PASO 2 ya guardó xp_awarded=xp (solo la base, antes de
+    // saber la nota) para poder marcar la fila como completada de forma
+    // atómica sin esperar a la corrección. Ahora que awardXp() ya calculó el
+    // bonus de calidad, se corrige ese valor al total real — si no, la
+    // tarjeta de esta misión en Camino se queda mostrando para siempre el XP
+    // base sin bonus aunque el alumno haya sacado buena nota. Best-effort:
+    // si falla, el XP real ya está bien escrito en camino_xp_events/
+    // camino_user_progress, solo se pierde la actualización de este badge.
+    if (result.awarded && result.xpAwarded !== xp) {
+      await db.from('camino_calendar').update({ xp_awarded: result.xpAwarded }).eq('id', updated[0].id)
+    }
+
     // PASO 5 — Respuesta
     return NextResponse.json({ success: true, xpAwarded: result.xpAwarded, bonusXp: result.bonusXp, totalXp: result.totalXp, streakDays: result.streakDays, leagueUpgrade: result.leagueUpgrade })
   } catch (err) {

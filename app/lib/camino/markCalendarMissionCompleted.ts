@@ -14,11 +14,17 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 // metadata.practica_simulacro_id para que la UI del calendario pueda
 // enlazar directamente a esa corrección en vez de dejar que el alumno
 // vuelva a abrir el flujo de "nueva práctica".
+//
+// xpAwarded (opcional): el total real ya otorgado por /api/simulacro (base +
+// bonus de calidad), para que la tarjeta de esta misión en el calendario de
+// Camino muestre el mismo número que ya vio el alumno en la pantalla de
+// resultados en vez de quedarse sin badge de XP.
 export async function markCalendarMissionCompleted(
   db: SupabaseClient,
   userId: string,
   calendarRowId: string,
   resultId: string,
+  xpAwarded?: number,
 ): Promise<void> {
   try {
     const { data: row } = await db
@@ -39,6 +45,7 @@ export async function markCalendarMissionCompleted(
         status: 'completed',
         completed_at: new Date().toISOString(),
         metadata: { ...existingMetadata, practica_simulacro_id: resultId },
+        ...(typeof xpAwarded === 'number' && xpAwarded > 0 ? { xp_awarded: xpAwarded } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', calendarRowId)

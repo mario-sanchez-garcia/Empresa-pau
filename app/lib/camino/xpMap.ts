@@ -11,20 +11,7 @@
 // ejercicio_corto...); este módulo gobierna el XP *real* que se otorga al
 // completar, con el vocabulario más grueso de mission_type/source_type.
 
-export const MISSION_TYPE_XP: Record<string, number> = {
-  concept: 20,
-  review: 10,
-  pau_practice: 30,
-  comment_text: 30,
-  mock_exam: 50,
-  bonus: 10,
-  recovery: 10,
-}
 export const MISSION_TYPE_XP_DEFAULT = 20
-
-export function resolveMissionTypeXp(missionType: string): number {
-  return MISSION_TYPE_XP[missionType] ?? MISSION_TYPE_XP_DEFAULT
-}
 
 // XP de exámenes/parciales/simulacros proporcional a su duración/esfuerzo
 // real frente a una misión normal — antes eran números sueltos sin relación
@@ -78,3 +65,28 @@ export const FLASHCARD_DECK_COMPLETION_XP = 15
 // buena nota (ver umbral en el route handler) — recompensa publicar mazos
 // que de verdad ayudan, no solo publicar por publicar.
 export const FLASHCARD_DECK_AUTHOR_BONUS_XP = 10
+
+// mission_type real de camino_calendar (constraint en la migración
+// 20260803120000_widen_camino_calendar_partial_constraints.sql) → XP base
+// otorgado al completar. 'partial_practice' nunca pasa por
+// resolveMissionTypeXp() en la ruta de otorgamiento real — esas misiones se
+// completan desde /api/simulacro con PARCIAL_COMPLETION_XP directamente y
+// marcan el calendario aparte (ver markCalendarMissionCompleted.ts, que
+// explícitamente NO llama a awardXp para no duplicar el XP de la misma
+// entrega) — pero SÍ se lee aquí para la tarjeta de estimación pre-completar
+// en Camino, así que tiene que coincidir con PARCIAL_COMPLETION_XP o esa
+// tarjeta prometería menos XP del que realmente da la práctica.
+export const MISSION_TYPE_XP: Record<string, number> = {
+  concept: 20,
+  review: 10,
+  pau_practice: 30,
+  comment_text: 30,
+  mock_exam: 50,
+  bonus: 10,
+  recovery: 10,
+  partial_practice: PARCIAL_COMPLETION_XP,
+}
+
+export function resolveMissionTypeXp(missionType: string): number {
+  return MISSION_TYPE_XP[missionType] ?? MISSION_TYPE_XP_DEFAULT
+}

@@ -19,6 +19,7 @@ import { estimatedMinutesForSlot, missionsPerDayForMinutes } from '@/app/lib/cam
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
+import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 import { RankingRow } from '@/components/shared/RankingRow'
@@ -360,6 +361,7 @@ type CaminoCalRow = {
   status: string
   v2_sort_order: number | null
   mission_type: string
+  xp_awarded: number | null
   metadata?: Record<string, unknown> | null
 }
 
@@ -391,7 +393,18 @@ function calRowToMission(row: CaminoCalRow): Mission {
     source: 'camino_pau',
     xpPolicy: 'after_correction',
     estimatedMinutes,
-    baseXP: row.mission_type === 'review' ? 10 : 20,
+    // Antes de completar: estimación real por tipo de misión (misma fuente
+    // que usa el servidor al otorgar XP — xpMap.ts), no un valor fijo de
+    // 10/20 que subestimaba pau_practice/comment_text (base real 30). Ya
+    // completada: el importe real otorgado (base + bonus de calidad),
+    // guardado en xp_awarded por complete-mission/markCalendarMissionCompleted
+    // — antes esta tarjeta se quedaba congelada en la estimación pre-completar
+    // incluso después de corregir con nota, mostrando p.ej. "+20 XP" a la vez
+    // que el toast de corrección ya había mostrado "+35 XP · +15 bonus" para
+    // esa misma misión.
+    baseXP: row.status === 'completed' && typeof row.xp_awarded === 'number' && row.xp_awarded > 0
+      ? row.xp_awarded
+      : resolveMissionTypeXp(row.mission_type),
     status: row.status === 'completed' ? 'done' : 'pending',
     metadata: row.metadata ?? undefined,
     subjectSlug: rowSubjectSlug,
@@ -405,7 +418,7 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
   const todayStr = todayMadrid()
   const { data, error } = await supabase
     .from('camino_calendar')
-    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, metadata')
+    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, metadata')
     .eq('user_id', userId)
     .gte('scheduled_date', todayStr)
     .order('scheduled_date', { ascending: true })

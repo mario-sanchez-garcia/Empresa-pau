@@ -478,7 +478,7 @@ export async function POST(request: NextRequest) {
     // guardó — así deja de mostrarse como "Empezar" y el enlace pasa a
     // apuntar a esta misma corrección.
     if (missionId) {
-      await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, missionId, simulacro_id)
+      await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, missionId, simulacro_id, xpResult?.xpAwarded)
     }
 
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })

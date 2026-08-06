@@ -42,7 +42,14 @@ export async function POST(request: NextRequest) {
     const db = createServiceClient()
     const now = new Date().toISOString()
 
-    // PASO 2 — Marcar calendario como completado y detectar si ya estaba
+    // PASO 2 — Marcar calendario como completado y detectar si ya estaba.
+    // Acepta tanto 'pending' como 'missed': el fix de cronología (las
+    // misiones ya no se mueven de su día real) hace que un alumno pueda ver
+    // y corregir un día pasado cuya misión ensureCaminoCalendar ya marcó
+    // 'missed' de madrugada por no haberse hecho a tiempo — antes esto solo
+    // aceptaba 'pending', así que corregirla tarde caía siempre en la rama
+    // "no_pending_mission" (sin XP, sin marcar como hecha) aunque el alumno
+    // sí hubiera hecho el trabajo real. Completar tarde sigue contando.
     let updateQuery = db
       .from('camino_calendar')
       .update({
@@ -52,7 +59,7 @@ export async function POST(request: NextRequest) {
         updated_at: now,
       })
       .eq('user_id', user.id)
-      .eq('status', 'pending')
+      .in('status', ['pending', 'missed'])
 
     updateQuery = calendarRowId
       ? updateQuery.eq('id', calendarRowId)
@@ -88,6 +95,23 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
+
+    // PASO 2c — Si esta misma pieza de contenido (mismo subject+v2_sort_order)
+    // tenía OTRAS filas todavía activas — una reprogramación tras un missed
+    // anterior, o un duplicado de repaso —, ya no tienen sentido: el
+    // contenido acaba de completarse de verdad. Dejarlas activas repetiría
+    // hacia delante algo ya hecho, el mismo problema que ya se corrigió para
+    // las misiones de repaso automáticas. Solo se tocan filas generadas por
+    // el algoritmo — nunca una misión que el alumno haya añadido a mano.
+    await db
+      .from('camino_calendar')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('subject', subject)
+      .eq('v2_sort_order', v2SortOrder)
+      .neq('id', updated[0].id)
+      .in('status', ['pending', 'missed', 'postponed'])
+      .in('source', ['algorithm', 'partial'])
 
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,

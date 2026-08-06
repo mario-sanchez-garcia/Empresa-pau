@@ -47,4 +47,7 @@ export interface SimulacroRecord {
   submitted_at?: string | null
   created_at?: string
   updated_at?: string
+  // Presente cuando este intento es "Repetir para mejorar" de otro anterior
+  // — ver app/lib/camino/repeatImprovement.ts para el cálculo de XP reducido.
+  repeated_from_id?: string | null
 }

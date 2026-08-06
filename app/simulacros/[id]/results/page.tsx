@@ -228,6 +228,12 @@ export default function SimulacroResultsPage() {
                 {hasGrade && typeof result.xpAwarded === 'number' && result.xpAwarded > 0 && (
                   <div className="mt-2 text-sm font-black" style={{ color: '#7c3aed' }}>
                     +{result.xpAwarded} XP{typeof result.bonusXp === 'number' && result.bonusXp > 0 ? ` · +${result.bonusXp} bonus por la nota` : ''}
+                    {record?.repeated_from_id ? ' · ¡nota mejorada!' : ''}
+                  </div>
+                )}
+                {hasGrade && result.repeatNoImprovement && (
+                  <div className="mt-2 text-xs font-bold" style={{ color: '#64748b' }}>
+                    No has mejorado tu intento anterior, así que no hay XP extra esta vez.
                   </div>
                 )}
               </div>

@@ -3,7 +3,7 @@
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, CheckCircle2, LayoutGrid, Lock, Zap } from 'lucide-react'
+import { BookOpen, CheckCircle2, LayoutGrid, Lock, RotateCcw, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
 import KairoSpinner from '@/app/components/ui/KairoSpinner'
@@ -18,6 +18,7 @@ import {
   subjectLabelFromSlug,
   type CaminoCurriculumTopic,
 } from '@/app/lib/camino/caminoCurriculumPlan'
+import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from '@/app/lib/camino/gradeThreshold'
 
 const LIBRARY_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_134153_21d8ecce-c198-4ae1-8fc9-22814072fdbc.png'
 
@@ -57,6 +58,14 @@ type CalendarRow = {
   status: 'pending' | 'completed' | 'missed' | 'postponed'
   completed_at: string | null
 }
+type HistorialGradeRow = {
+  id: string
+  asignatura: string
+  v2_sort_order: number | null
+  nota: number | null
+  nota_maxima: number | null
+  created_at: string
+}
 
 type CourseStatus = 'completed' | 'today'
 type CourseEntry = {
@@ -66,6 +75,9 @@ type CourseEntry = {
   status: CourseStatus
   completedAt?: string
   href: string | null
+  nota: number | null
+  notaMaxima: number | null
+  latestHistorialId: string | null
 }
 type BlockGroup = { blockTitle: string; orderIndex: number; items: CourseEntry[] }
 type SubjectGroup = {
@@ -87,7 +99,11 @@ function findTopic(subject: string, v2SortOrder: number | null): CaminoCurriculu
   return TOPIC_BY_V2.get(`${subject}:${v2SortOrder}`) ?? TOPIC_BY_ORDER.get(`${subject}:${v2SortOrder}`) ?? null
 }
 
-function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]): SubjectGroup[] {
+function formatGrade(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
+}
+
+function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[], gradeRows: HistorialGradeRow[]): SubjectGroup[] {
   // Every topic that already has curriculum content is open to everyone right
   // away (no scheduling wait) — only completion is tracked from camino_calendar.
   const completedByKey = new Map<string, CalendarRow>()
@@ -96,6 +112,17 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
     const key = `${row.subject}:${row.v2_sort_order}`
     const prev = completedByKey.get(key)
     if (!prev || (row.completed_at ?? '') > (prev.completed_at ?? '')) completedByKey.set(key, row)
+  }
+
+  // Nota más reciente por tema (subject+v2_sort_order) — gradeRows ya viene
+  // ordenado por created_at desc, así que la primera fila vista por key es
+  // la más reciente. Solo tipo='Camino PAU' con v2_sort_order relleno
+  // corresponde a una corrección de un tema de Cursos (ver CaminoTopicClient.tsx).
+  const latestGradeByKey = new Map<string, HistorialGradeRow>()
+  for (const row of gradeRows) {
+    if (row.v2_sort_order == null || row.nota == null) continue
+    const key = `${row.asignatura}:${row.v2_sort_order}`
+    if (!latestGradeByKey.has(key)) latestGradeByKey.set(key, row)
   }
 
   const subjects = new Map<string, Map<string, BlockGroup>>()
@@ -107,6 +134,7 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
     const key = `${q.subject}:${q.v2_sort_order}`
     const topic = findTopic(q.subject, q.v2_sort_order)
     const completedRow = completedByKey.get(key)
+    const gradeRow = latestGradeByKey.get(key)
 
     let status: CourseStatus = 'today'
     let completedAt: string | undefined
@@ -123,6 +151,9 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[]):
       status,
       completedAt,
       href: topic ? buildTopicHref(topic) : null,
+      nota: gradeRow?.nota ?? null,
+      notaMaxima: gradeRow?.nota_maxima ?? null,
+      latestHistorialId: gradeRow?.id ?? null,
     }
 
     if (!subjects.has(q.subject)) subjects.set(q.subject, new Map())
@@ -159,6 +190,7 @@ export default function ZonaCursosPage() {
   const [groups, setGroups] = useState<SubjectGroup[]>([])
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
   const router = useRouter()
   const billing = useBillingStatus()
   const internalUser = useIsInternalUser()
@@ -172,7 +204,7 @@ export default function ZonaCursosPage() {
       }
       setUser({ id: data.user.id, email: data.user.email })
 
-      const [{ data: queueRows }, { data: calendarRows }] = await Promise.all([
+      const [{ data: queueRows }, { data: calendarRows }, { data: gradeRows }] = await Promise.all([
         supabase
           .from('user_learning_queue')
           .select('subject, block_key, block_slug, v2_sort_order, title, subject_position, queue_status')
@@ -182,11 +214,35 @@ export default function ZonaCursosPage() {
           .select('subject, v2_sort_order, status, completed_at')
           .eq('user_id', data.user.id)
           .eq('status', 'completed'),
+        supabase
+          .from('historial_examenes')
+          .select('id, asignatura, v2_sort_order, nota, nota_maxima, created_at')
+          .eq('user_id', data.user.id)
+          .eq('tipo', 'Camino PAU')
+          .not('v2_sort_order', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(500),
       ])
 
-      const built = buildSubjectGroups((queueRows ?? []) as QueueRow[], (calendarRows ?? []) as CalendarRow[])
+      const built = buildSubjectGroups((queueRows ?? []) as QueueRow[], (calendarRows ?? []) as CalendarRow[], (gradeRows ?? []) as HistorialGradeRow[])
       setGroups(built)
       setSelectedSubject(prev => (prev && built.some(g => g.subject === prev)) ? prev : (built[0]?.subject ?? ''))
+
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      if (token) {
+        try {
+          const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+          if (res.ok) {
+            const json = await res.json() as { grade_threshold_mode?: string; grade_threshold?: number | null; subject_grade_thresholds?: Record<string, number> }
+            setGradeThresholdConfig({
+              mode: json.grade_threshold_mode === 'per_subject' ? 'per_subject' : 'general',
+              general: typeof json.grade_threshold === 'number' ? json.grade_threshold : null,
+              bySubject: json.subject_grade_thresholds ?? {},
+            })
+          }
+        } catch { /* usa el umbral por defecto si falla */ }
+      }
       setLoading(false)
     }
     load()
@@ -346,6 +402,9 @@ export default function ZonaCursosPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {block.items.map(item => {
                             const meta = STATUS_META[item.status]
+                            const notaOnTen = item.nota != null && item.notaMaxima ? (item.nota / item.notaMaxima) * 10 : null
+                            const threshold = resolveGradeThreshold(gradeThresholdConfig, item.key.split(':')[0])
+                            const suggestRepeat = item.status === 'completed' && item.latestHistorialId != null && item.href != null && shouldSuggestRepeat(notaOnTen, threshold)
                             const rowStyle: CSSProperties = {
                               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
                               padding: '10px 12px', borderRadius: 12, border: '1px solid #eef2f7',
@@ -353,22 +412,42 @@ export default function ZonaCursosPage() {
                               textDecoration: 'none', cursor: item.href ? 'pointer' : 'default',
                               opacity: item.href ? 1 : .6,
                             }
-                            const content = (
-                              <>
-                                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                            const titleBlock = (
+                              <span style={{ display: 'flex', flexDirection: 'column', gap: 3, overflow: 'hidden', minWidth: 0 }}>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                   {item.title}
                                 </span>
+                                {notaOnTen != null && (
+                                  <span style={{ fontSize: 10.5, fontWeight: 800, color: notaOnTen < threshold ? '#b45309' : '#059669' }}>
+                                    Nota: {formatGrade(item.nota ?? 0)}/{formatGrade(item.notaMaxima ?? 10)}
+                                  </span>
+                                )}
+                              </span>
+                            )
+                            const badges = (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0, padding: '4px 9px', borderRadius: 999, background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color, fontSize: 10.5, fontWeight: 900 }}>
                                   <meta.Icon size={11} />
                                   {meta.label}
                                 </span>
-                              </>
+                                {suggestRepeat && (
+                                  <a
+                                    href={`${item.href}?repeatOf=${item.latestHistorialId}`}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0, padding: '4px 9px', borderRadius: 999, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: 10.5, fontWeight: 900, textDecoration: 'none' }}
+                                  >
+                                    <RotateCcw size={11} />
+                                    Repetir para mejorar
+                                  </a>
+                                )}
+                              </span>
                             )
-                            return item.href ? (
-                              <a key={item.key} href={item.href} style={rowStyle}>{content}</a>
-                            ) : (
-                              <div key={item.key} style={rowStyle}>{content}</div>
-                            )
+                            if (!item.href) {
+                              return <div key={item.key} style={rowStyle}>{titleBlock}{badges}</div>
+                            }
+                            if (suggestRepeat) {
+                              return <div key={item.key} style={rowStyle}><a href={item.href} style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}>{titleBlock}</a>{badges}</div>
+                            }
+                            return <a key={item.key} href={item.href} style={rowStyle}>{titleBlock}{badges}</a>
                           })}
                         </div>
                       </section>

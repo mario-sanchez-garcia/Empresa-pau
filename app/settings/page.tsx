@@ -9,6 +9,8 @@ import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/o
 import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profilePreferences'
 import { VALID_DAILY_MINUTES, dailyMinutesLabel, describeDailyPlan } from '@/app/lib/camino/dailyTimeCapacity'
+import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { DEFAULT_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 import SidebarNav from '@/app/components/SidebarNav'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
@@ -60,6 +62,8 @@ const SUBJECT_LEVEL_LABELS: Record<string, string> = { bajo: 'Voy mal', medio: '
 const SUBJECT_LEVELS = ['bajo', 'medio', 'alto'] as const
 type SubjectLevel = typeof SUBJECT_LEVELS[number]
 
+const GRADE_THRESHOLD_OPTS = [4, 5, 6, 7, 8]
+
 const SUBJECT_LABELS: Record<string, string> = {
   mates: 'Mates II', matematicas_ccss: 'Mates CCSS', fisica: 'Física',
   quimica: 'Química', lengua: 'Lengua', historia: 'Historia',
@@ -95,6 +99,10 @@ export default function SettingsPage() {
   const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
   const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
   const [subjectLevels, setSubjectLevels] = useState<Record<string, SubjectLevel>>({})
+  const [gradeThresholdMode, setGradeThresholdMode] = useState<GradeThresholdMode>('general')
+  const [gradeThreshold, setGradeThreshold] = useState<number | null>(null)
+  const [subjectGradeThresholds, setSubjectGradeThresholds] = useState<Record<string, number>>({})
+  const [gradeThresholdLoaded, setGradeThresholdLoaded] = useState('')
   const [recalculating, setRecalculating] = useState(false)
   const [recalculateStatus, setRecalculateStatus] = useState('')
   const [customInstructions, setCustomInstructions] = useState('')
@@ -131,7 +139,10 @@ export default function SettingsPage() {
         try {
           const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           if (res.ok) {
-            const json = await res.json() as { email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string> }
+            const json = await res.json() as {
+              email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string>
+              grade_threshold_mode?: string; grade_threshold?: number | null; subject_grade_thresholds?: Record<string, number>
+            }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
             if (json.username) {
@@ -161,6 +172,13 @@ export default function SettingsPage() {
                   (SUBJECT_LEVELS as readonly string[]).includes(entry[1])),
               ),
             )
+            const loadedMode: GradeThresholdMode = json.grade_threshold_mode === 'per_subject' ? 'per_subject' : 'general'
+            const loadedGeneral = typeof json.grade_threshold === 'number' ? json.grade_threshold : null
+            const loadedBySubject = json.subject_grade_thresholds ?? {}
+            setGradeThresholdMode(loadedMode)
+            setGradeThreshold(loadedGeneral)
+            setSubjectGradeThresholds(loadedBySubject)
+            setGradeThresholdLoaded(JSON.stringify({ mode: loadedMode, general: loadedGeneral, bySubject: loadedBySubject }))
           }
         } catch { /* silent */ }
         try {
@@ -307,16 +325,25 @@ export default function SettingsPage() {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
       const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
-      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0)) {
+      const gradeThresholdChanged = JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }) !== gradeThresholdLoaded
+      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged)) {
         const res = await fetch('/api/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             ...(instructionsChanged ? { custom_instructions: customInstructions } : {}),
             subject_levels: subjectLevels,
+            ...(gradeThresholdChanged ? {
+              grade_threshold_mode: gradeThresholdMode,
+              grade_threshold: gradeThreshold,
+              subject_grade_thresholds: subjectGradeThresholds,
+            } : {}),
           }),
         })
         if (res.ok && instructionsChanged) setCustomInstructionsLoaded(customInstructions.trim())
+        if (res.ok && gradeThresholdChanged) {
+          setGradeThresholdLoaded(JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }))
+        }
       }
       if (token && onboarding?.completedAt) {
         const nextOnboarding: OnboardingData = {
@@ -364,7 +391,7 @@ export default function SettingsPage() {
         })
         if (!ensureRes.ok) throw new Error('camino_personalization_failed')
         setCaminoPrefsStatus('Tu Camino se ha ajustado para las próximas misiones.')
-      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0)) {
+      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged)) {
         await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -750,6 +777,98 @@ export default function SettingsPage() {
               <Hint>Kairo lo tiene en cuenta al preparar tus misiones, junto con tus notas de Personalización IA.</Hint>
             </div>
           )}
+
+          <div style={{ marginBottom: 20 }}>
+            <span style={{ display: 'block', marginBottom: 8, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>
+              Repetir para mejorar
+            </span>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              {([
+                { value: 'general' as const, label: 'Mismo umbral para todo' },
+                { value: 'per_subject' as const, label: 'Distinto por asignatura' },
+              ]).map(opt => {
+                const active = gradeThresholdMode === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setGradeThresholdMode(opt.value)}
+                    style={{
+                      padding: '7px 12px', borderRadius: 10, fontSize: 11, fontWeight: 800,
+                      border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
+                      background: active ? '#eff6ff' : 'white',
+                      color: active ? '#1d4ed8' : '#94a3b8',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {gradeThresholdMode === 'general' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Sugerir repetir si saco menos de</span>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {GRADE_THRESHOLD_OPTS.map(value => {
+                    const active = (gradeThreshold ?? DEFAULT_GRADE_THRESHOLD) === value
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setGradeThreshold(value)}
+                        style={{
+                          width: 30, height: 30, borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                          border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
+                          background: active ? '#eff6ff' : 'white',
+                          color: active ? '#1d4ed8' : '#94a3b8',
+                        }}
+                      >
+                        {value}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(onboarding?.subjects ?? []).length === 0 && (
+                  <p style={{ fontSize: 11.5, fontWeight: 700, color: '#94a3b8' }}>Añade asignaturas activas para ajustarlas una a una.</p>
+                )}
+                {(onboarding?.subjects ?? []).map(subjectLabel => {
+                  const slug = normalizeSubjectSlug(subjectLabel)
+                  const current = subjectGradeThresholds[slug] ?? DEFAULT_GRADE_THRESHOLD
+                  return (
+                    <div key={slug} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{subjectLabel}</span>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {GRADE_THRESHOLD_OPTS.map(value => {
+                          const active = current === value
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => setSubjectGradeThresholds(cur => ({ ...cur, [slug]: value }))}
+                              style={{
+                                width: 30, height: 30, borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                                border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
+                                background: active ? '#eff6ff' : 'white',
+                                color: active ? '#1d4ed8' : '#94a3b8',
+                              }}
+                            >
+                              {value}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            <Hint>Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.</Hint>
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <button

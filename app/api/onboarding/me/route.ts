@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
+import { DEFAULT_GRADE_THRESHOLD_CONFIG, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,6 +9,13 @@ const VALID_COMMUNITIES = ['Madrid', 'Cataluña', 'Andalucía', 'Otra'] as const
 const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
 const VALID_SCHOOL_SOURCES = ['dataset', 'manual'] as const
+const VALID_GRADE_THRESHOLD_MODES = ['general', 'per_subject'] as const
+
+function cleanGradeThresholdMode(value: unknown): GradeThresholdMode {
+  return (VALID_GRADE_THRESHOLD_MODES as readonly string[]).includes(value as string)
+    ? (value as GradeThresholdMode)
+    : DEFAULT_GRADE_THRESHOLD_CONFIG.mode
+}
 
 function cleanString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : null
@@ -81,7 +89,7 @@ export async function GET(request: NextRequest) {
   // existiera y no han vuelto a tocar sus asignaturas desde entonces.
   const { data: perfil } = await db
     .from('perfiles')
-    .select('subjects, username')
+    .select('subjects, username, grade_threshold_mode, grade_threshold, subject_grade_thresholds')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -110,6 +118,9 @@ export async function GET(request: NextRequest) {
       completedAt: data.created_at,
       lastStep: null,
       firstSessionSeen: Boolean(seenRow),
+      gradeThresholdMode: cleanGradeThresholdMode(perfil?.grade_threshold_mode),
+      gradeThreshold: typeof perfil?.grade_threshold === 'number' ? perfil.grade_threshold : null,
+      subjectGradeThresholds: (perfil?.subject_grade_thresholds as Record<string, number> | null) ?? {},
     },
   })
 }

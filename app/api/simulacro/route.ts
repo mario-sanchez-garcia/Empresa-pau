@@ -11,6 +11,7 @@ import { awardXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
+import { computeRepeatBaseXp } from '@/app/lib/camino/repeatImprovement'
 import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     const { data: simulacroRecord, error: simulacroError } = await authContext.supabase
       .from('historial_simulacros')
-      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at')
+      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at,repeated_from_id')
       .eq('id', simulacro_id)
       .eq('user_id', authContext.user.id)
       .maybeSingle()
@@ -457,18 +458,46 @@ export async function POST(request: NextRequest) {
     // reintento en otro día natural no rompa la deduplicación por unique
     // constraint en camino_xp_events.
     let xpResult: Awaited<ReturnType<typeof awardXp>> | null = null
+    let repeatNoImprovement = false
     try {
       const missionDate = typeof simulacroRecord.created_at === 'string'
         ? simulacroRecord.created_at.slice(0, 10)
         : new Date().toISOString().slice(0, 10)
-      xpResult = await awardXp(authContext.supabase, authContext.user.id, {
-        xp: isPracticeSession ? PARCIAL_COMPLETION_XP : SIMULACRO_COMPLETION_XP,
-        sourceType: isPracticeSession ? 'parcial_completion' : 'simulacro_completion',
-        sourceId: simulacro_id,
-        subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
-        missionDate,
-        scoreOnTen: result.nota_final
-      })
+      const normalXp = isPracticeSession ? PARCIAL_COMPLETION_XP : SIMULACRO_COMPLETION_XP
+
+      // "Repetir para mejorar" (ver app/simulacros/page.tsx repeatSimulacro):
+      // XP reducido y solo si la nota nueva supera la del intento de
+      // referencia — nunca se vuelve a dar el XP íntegro de la primera vez.
+      if (simulacroRecord.repeated_from_id) {
+        const { data: previous } = await authContext.supabase
+          .from('historial_simulacros')
+          .select('nota_final')
+          .eq('id', simulacroRecord.repeated_from_id)
+          .eq('user_id', authContext.user.id)
+          .maybeSingle()
+        const repeatBaseXp = computeRepeatBaseXp(normalXp, previous?.nota_final ?? null, result.nota_final)
+        if (repeatBaseXp > 0) {
+          xpResult = await awardXp(authContext.supabase, authContext.user.id, {
+            xp: repeatBaseXp,
+            sourceType: 'repeat_improvement',
+            sourceId: simulacro_id,
+            subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
+            missionDate,
+            scoreOnTen: result.nota_final
+          })
+        } else {
+          repeatNoImprovement = true
+        }
+      } else {
+        xpResult = await awardXp(authContext.supabase, authContext.user.id, {
+          xp: normalXp,
+          sourceType: isPracticeSession ? 'parcial_completion' : 'simulacro_completion',
+          sourceId: simulacro_id,
+          subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
+          missionDate,
+          scoreOnTen: result.nota_final
+        })
+      }
     } catch (xpError) {
       console.error('[simulacro] xp_award_failed', { simulacroId: simulacro_id, message: (xpError as Error)?.message })
     }
@@ -488,7 +517,8 @@ export async function POST(request: NextRequest) {
       bonusXp: xpResult?.bonusXp ?? 0,
       totalXp: xpResult?.totalXp ?? null,
       streakDays: xpResult?.streakDays ?? null,
-      leagueUpgrade: xpResult?.leagueUpgrade ?? null
+      leagueUpgrade: xpResult?.leagueUpgrade ?? null,
+      repeatNoImprovement
     })
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

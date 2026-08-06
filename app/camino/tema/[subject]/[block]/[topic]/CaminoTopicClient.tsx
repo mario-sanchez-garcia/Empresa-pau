@@ -255,6 +255,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const missionId = params.get('missionId')
   const shouldStartExercise = params.get('start') === 'exercise'
   const isFirstSession = params.get('first_session') === '1'
+  // Presente cuando el alumno llega aquí desde "Repetir para mejorar" (La
+  // Zona → Mis Cursos): id de la fila de historial_examenes que se está
+  // intentando superar. Activa la vía de XP reducido en vez de
+  // complete-mission — nunca toca camino_calendar, la misión ya completada
+  // (y su fecha, fijada por el fix de cronología) se queda exactamente igual.
+  const repeatOfId = params.get('repeatOf')
   const exerciseRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [toast, setToast] = useState('')
@@ -735,6 +741,55 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       setCorrection(storedCorrection)
       if (rawScore == null) {
         setToast('Corrección recibida sin nota clara. No se asigna XP hasta tener una nota.')
+      } else if (repeatOfId) {
+        // Repetir para mejorar (La Zona → Mis Cursos, ver DECISIONES en
+        // gradeThreshold.ts): la misión de camino_calendar ya está
+        // completada y fijada por el fix de cronología — esta vía nunca la
+        // toca. Solo se guarda un intento nuevo en historial_examenes y,
+        // si la nota mejora, se otorga XP reducido vía award-exam-xp.
+        setScore(rawScore)
+        recordCorrectionWeakArea(rawScore)
+        let toastText = `Intento guardado · nota ${rawScore}/10`
+        const { data: userData } = await supabase.auth.getUser()
+        if (userData.user) {
+          const { data: inserted } = await supabase.from('historial_examenes').insert({
+            user_id: userData.user.id,
+            asignatura: currentTopic.subject,
+            tipo: 'Camino PAU',
+            año: new Date().getFullYear(),
+            bloque: currentTopic.blockTitle,
+            opcion: 'Repetición',
+            nota: rawScore,
+            nota_maxima: maxScore,
+            enunciado: statement.substring(0, 2000),
+            respuesta: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : studentAnswer.substring(0, 4000),
+            correccion: storedCorrection,
+            repeated_from_id: repeatOfId,
+            v2_sort_order: selectedSortOrder,
+          }).select('id').single()
+          if (inserted?.id) {
+            try {
+              const repeatRes = await fetch('/api/camino/award-exam-xp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+                body: JSON.stringify({ historialExamenId: inserted.id, repeatedFromId: repeatOfId }),
+              })
+              const repeatJson = await repeatRes.json()
+              if (repeatJson.success && typeof repeatJson.xpAwarded === 'number' && repeatJson.xpAwarded > 0) {
+                setXpAwarded(repeatJson.xpAwarded)
+                if (typeof repeatJson.streakDays === 'number') setStreak(repeatJson.streakDays)
+                toastText = `¡Nota mejorada! +${repeatJson.xpAwarded} XP · nota ${rawScore}/10`
+                if (repeatJson.leagueUpgrade) setLeagueUpgrade(repeatJson.leagueUpgrade)
+              } else {
+                toastText = `Intento guardado · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que no suma XP extra.`
+              }
+            } catch { /* silent */ }
+          }
+          calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
+        }
+        setMissionXpStatus('free_practice')
+        setToast(toastText)
+        return
       } else {
         setScore(rawScore)
         recordCorrectionWeakArea(rawScore)

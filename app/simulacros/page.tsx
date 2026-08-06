@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle2, Eye, EyeOff, PlayCircle } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, PlayCircle, RotateCcw } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
@@ -10,6 +10,8 @@ import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRec
 import { useCCAA } from '@/app/hooks/useCCAA'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
+import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from '@/app/lib/camino/gradeThreshold'
 
 type SimulacroMode = 'normal' | 'errores' | 'personalizado'
 type YearChoice = 'all' | 'recent' | 'middle' | 'classic'
@@ -66,6 +68,8 @@ function SimulacrosPage() {
   const [examHistory, setExamHistory] = useState<ExamHistoryRow[]>([])
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
+  const [repeatingId, setRepeatingId] = useState<string | null>(null)
   const router = useRouter()
   const { ccaa } = useCCAA()
   const stats = useMemo(() => buildStats(history), [history])
@@ -95,6 +99,23 @@ function SimulacrosPage() {
       }
     })
   }, [router])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token
+      if (!token) return
+      try {
+        const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) return
+        const json = await res.json() as { grade_threshold_mode?: string; grade_threshold?: number | null; subject_grade_thresholds?: Record<string, number> }
+        setGradeThresholdConfig({
+          mode: json.grade_threshold_mode === 'per_subject' ? 'per_subject' : 'general',
+          general: typeof json.grade_threshold === 'number' ? json.grade_threshold : null,
+          bySubject: json.subject_grade_thresholds ?? {},
+        })
+      } catch { /* usa el umbral por defecto si falla */ }
+    })
+  }, [])
 
   useEffect(() => {
     if (!isCaminoPartial || !userId || autoTriggeredRef.current) return
@@ -207,6 +228,50 @@ function SimulacrosPage() {
     }
   }
 
+  // "Repetir para mejorar": mismo simulacro EXACTO que el intento de
+  // referencia (mismos bloques/preguntas, tal cual se guardaron en su
+  // momento) — no uno nuevo generado con otras preguntas. Al corregirlo,
+  // /api/simulacro compara la nota nueva contra la de este intento y solo
+  // otorga XP reducido si de verdad mejora (ver repeatImprovement.ts).
+  async function repeatSimulacro(recordId: string) {
+    if (repeatingId) return
+    setRepeatingId(recordId)
+    setErrorMessage('')
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const currentUserId = sessionData.session?.user?.id
+      if (!currentUserId) { router.push('/login'); return }
+
+      const original = history.find(item => item.id === recordId)
+      if (!original) { setErrorMessage('No hemos encontrado ese simulacro para repetirlo.'); return }
+
+      const newId = crypto.randomUUID()
+      const now = new Date().toISOString()
+      const { error } = await supabase.from('historial_simulacros').insert({
+        id: newId,
+        user_id: currentUserId,
+        asignatura: original.asignatura,
+        opcion: original.opcion,
+        dificultad: original.dificultad,
+        dificultad_real: original.dificultad_real,
+        bloques: original.bloques,
+        respuestas_parciales: {},
+        estado: 'en_progreso',
+        repeated_from_id: recordId,
+        created_at: now,
+        updated_at: now,
+      })
+      if (error) {
+        console.error('SIMULACRO_REPEAT_ERROR', error)
+        setErrorMessage('No se pudo preparar la repetición. Inténtalo de nuevo en unos segundos.')
+        return
+      }
+      router.push(`/simulacros/${newId}`)
+    } finally {
+      setRepeatingId(null)
+    }
+  }
+
   const cfg = SUBJECTS[subject]
   const autoInfo = autoModeInfo(mode, weakCandidateCount)
   const effectiveYearChoiceRender = mode === 'personalizado' ? yearChoice : 'all'
@@ -307,7 +372,10 @@ function SimulacrosPage() {
             <p style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>Todavía no tienes simulacros guardados.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
-              {history.map(item => (
+              {history.map(item => {
+                const threshold = resolveGradeThreshold(gradeThresholdConfig, normalizeSubjectSlug(item.asignatura))
+                const suggestRepeat = item.estado === 'completado' && shouldSuggestRepeat(item.nota_final ?? null, threshold)
+                return (
                 <a
                   key={item.id}
                   href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
@@ -324,9 +392,21 @@ function SimulacrosPage() {
                       ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
                       : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
                     <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                    {suggestRepeat && (
+                      <button
+                        type="button"
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); void repeatSimulacro(item.id) }}
+                        disabled={repeatingId === item.id}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', cursor: repeatingId === item.id ? 'default' : 'pointer', opacity: repeatingId === item.id ? .6 : 1 }}
+                      >
+                        <RotateCcw size={10} />
+                        {repeatingId === item.id ? 'Preparando…' : 'Repetir para mejorar'}
+                      </button>
+                    )}
                   </div>
                 </a>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

@@ -39,6 +39,9 @@ import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import KairoBrand from '@/components/shared/KairoBrand'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import RichTextArea from '@/components/shared/RichTextArea'
+import RepeatExamModal, { type RepeatExamSource } from '@/components/shared/RepeatExamModal'
+import { normalizeSubjectSlug } from './lib/camino/caminoCurriculumPlan'
+import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from './lib/camino/gradeThreshold'
 import {
   ArrowUpRight,
   Atom,
@@ -70,6 +73,7 @@ import {
   PenLine,
   Pin,
   Rocket,
+  RotateCcw,
   SendHorizontal,
   Sigma,
   SearchX,
@@ -886,6 +890,8 @@ export default function Home() {
   const [historialTab, setHistorialTab] = useState<'todas' | 'guardadas'>('todas')
   const [historialRowMenuOpenId, setHistorialRowMenuOpenId] = useState<string | null>(null)
   const [itemSeleccionado, setItemSeleccionado] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  const [repeatSource, setRepeatSource] = useState<RepeatExamSource | null>(null)
+  const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
   const [planIA, setPlanIA] = useState('')
   const [cargandoPlan, setCargandoPlan] = useState(false)
   const [contextoChat, setContextoChat] = useState('')
@@ -1030,6 +1036,17 @@ export default function Home() {
       fetch('/api/historial/percentile', { headers: { Authorization: `Bearer ${session.access_token}` } })
         .then(r => r.ok ? r.json() : null)
         .then(d => { if (d) setHistorialPercentil({ percentil: d.percentil, totalUsuarios: d.totalUsuarios }) })
+        .catch(() => {})
+      fetch('/api/profile', { headers: { Authorization: `Bearer ${session.access_token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(json => {
+          if (!json) return
+          setGradeThresholdConfig({
+            mode: json.grade_threshold_mode === 'per_subject' ? 'per_subject' : 'general',
+            general: typeof json.grade_threshold === 'number' ? json.grade_threshold : null,
+            bySubject: json.subject_grade_thresholds ?? {},
+          })
+        })
         .catch(() => {})
     })
   }, [seccion])
@@ -6419,6 +6436,22 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ fontSize: '24px', fontWeight: 800, color: '#cbd5e1' }}>—</span>
                     </div>
                   )}
+                  {itemSeleccionado.enunciado && itemSeleccionado.id && shouldSuggestRepeat(normalizedHistoryScore(itemSeleccionado), resolveGradeThreshold(gradeThresholdConfig, normalizeSubjectSlug(itemSeleccionado.asignatura))) && (
+                    <button
+                      className="campus-hover"
+                      onClick={() => setRepeatSource({
+                        id: itemSeleccionado.id,
+                        asignatura: itemSeleccionado.asignatura,
+                        tipo: itemSeleccionado.tipo,
+                        bloque: itemSeleccionado.bloque,
+                        opcion: itemSeleccionado.opcion,
+                        año: typeof itemSeleccionado.año === 'number' ? itemSeleccionado.año : null,
+                        enunciado: itemSeleccionado.enunciado,
+                        nota_maxima: itemSeleccionado.nota_maxima ?? null,
+                      })}
+                      style={{ padding: '9px 16px', borderRadius: '999px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}
+                    ><RotateCcw size={15} />Repetir para mejorar</button>
+                  )}
                   <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>
                   <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #dbe7fb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
                 </div>
@@ -6452,6 +6485,13 @@ function cambiarTipo(t: Tipo) {
               </div>
             </div>
           </div>
+        )}
+
+        {repeatSource && (
+          <RepeatExamModal
+            source={repeatSource}
+            onClose={() => setRepeatSource(null)}
+          />
         )}
 
       </div>

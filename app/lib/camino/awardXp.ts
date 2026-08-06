@@ -16,6 +16,10 @@ export type XpSourceType =
   | 'parcial_completion'
   | 'flashcard_deck_completion'
   | 'flashcard_deck_author_bonus'
+  // "Repetir para mejorar" — XP reducido al superar una nota anterior
+  // (ver app/lib/camino/repeatImprovement.ts). Nunca reutiliza el
+  // sourceType del intento original.
+  | 'repeat_improvement'
 
 export type AwardXpResult = {
   // false = esta fuente ya había dado XP antes (mismo user+source_type+source_id+mission_date);

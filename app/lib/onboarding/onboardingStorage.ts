@@ -17,6 +17,8 @@ export interface OnboardingStudentExam {
   priority: OnboardingExamPriority
 }
 
+export type OnboardingGradeThresholdMode = 'general' | 'per_subject'
+
 export interface OnboardingData {
   username: string | null
   community: OnboardingCommunity | null
@@ -32,6 +34,12 @@ export interface OnboardingData {
   completedAt: string | null
   lastStep: string | null
   firstSessionSeen: boolean
+  // A partir de qué nota (0-10) Kairo sugiere "Repetir para mejorar" en
+  // Simulacros/Exámenes/Cursos (ver app/lib/camino/gradeThreshold.ts).
+  // gradeThreshold null = usa el valor por defecto de la app.
+  gradeThresholdMode: OnboardingGradeThresholdMode
+  gradeThreshold: number | null
+  subjectGradeThresholds: Record<string, number>
 }
 
 const KEY = 'kairo_onboarding_v1'
@@ -120,5 +128,8 @@ function emptyOnboarding(): OnboardingData {
     completedAt: null,
     lastStep: null,
     firstSessionSeen: false,
+    gradeThresholdMode: 'general',
+    gradeThreshold: null,
+    subjectGradeThresholds: {},
   }
 }

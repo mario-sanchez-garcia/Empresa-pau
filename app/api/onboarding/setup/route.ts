@@ -5,6 +5,7 @@ import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { normalizeUsername, validateUsername } from '@/app/lib/username'
+import { MAX_GRADE_THRESHOLD, MIN_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,6 +13,25 @@ const VALID_COMMUNITIES = ['Madrid', 'Cataluña', 'Andalucía', 'Otra'] as const
 const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
 const VALID_SCHOOL_SOURCES = ['dataset', 'manual'] as const
+const VALID_GRADE_THRESHOLD_MODES = ['general', 'per_subject'] as const
+
+function cleanGradeThresholdMode(value: unknown): GradeThresholdMode | null {
+  return (VALID_GRADE_THRESHOLD_MODES as readonly string[]).includes(value as string) ? (value as GradeThresholdMode) : null
+}
+
+function cleanGradeThreshold(value: unknown): number | null {
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.min(MAX_GRADE_THRESHOLD, Math.max(MIN_GRADE_THRESHOLD, n)) : null
+}
+
+function cleanSubjectGradeThresholds(value: unknown): Record<string, number> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter((entry): entry is [string, number] => entry[0].length <= 40 && Number.isFinite(Number(entry[1])))
+    .slice(0, 12)
+    .map(([slug, raw]) => [slug, Math.min(MAX_GRADE_THRESHOLD, Math.max(MIN_GRADE_THRESHOLD, Number(raw)))] as [string, number])
+  return Object.fromEntries(entries)
+}
 
 function cleanString(value: unknown, fallback = '') {
   return typeof value === 'string' ? value.trim().slice(0, 160) : fallback
@@ -47,6 +67,9 @@ export async function POST(request: NextRequest) {
   const dailyStudyTime = cleanString(body.dailyStudyTime)
   const weeklyStudyDays = cleanString(body.weeklyStudyDays)
   const studentExams = cleanStudentExams(body.studentExams)
+  const gradeThresholdMode = cleanGradeThresholdMode(body.gradeThresholdMode)
+  const gradeThreshold = body.gradeThreshold !== undefined ? cleanGradeThreshold(body.gradeThreshold) : null
+  const subjectGradeThresholds = cleanSubjectGradeThresholds(body.subjectGradeThresholds)
 
   if (username) {
     const validationError = validateUsername(username)
@@ -87,6 +110,17 @@ export async function POST(request: NextRequest) {
     try {
       await serviceDb.from('perfiles').upsert({ id: user.id, comunidad: community }, { onConflict: 'id' })
     } catch { /* non-critical */ }
+
+    if (gradeThresholdMode || body.gradeThreshold !== undefined || body.subjectGradeThresholds !== undefined) {
+      try {
+        await serviceDb.from('perfiles').upsert({
+          id: user.id,
+          ...(gradeThresholdMode ? { grade_threshold_mode: gradeThresholdMode } : {}),
+          ...(body.gradeThreshold !== undefined ? { grade_threshold: gradeThreshold } : {}),
+          ...(body.subjectGradeThresholds !== undefined ? { subject_grade_thresholds: subjectGradeThresholds } : {}),
+        }, { onConflict: 'id' })
+      } catch { /* non-critical: el alumno puede ajustarlo luego en Ajustes */ }
+    }
 
     if (username) {
       const normalized = normalizeUsername(username)
@@ -139,6 +173,9 @@ export async function POST(request: NextRequest) {
         student_exams_count: studentExams.length,
         route_id: routeId,
         onboarding_completed: true,
+        grade_threshold_mode: gradeThresholdMode,
+        grade_threshold: gradeThreshold,
+        subject_grade_thresholds: subjectGradeThresholds,
       })
     } catch { /* non-critical */ }
   }

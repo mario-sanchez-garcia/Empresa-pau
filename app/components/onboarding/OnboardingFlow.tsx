@@ -11,6 +11,8 @@ import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { DAILY_MINUTES_LABELS } from '@/app/lib/camino/dailyTimeCapacity'
+import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { DEFAULT_GRADE_THRESHOLD } from '@/app/lib/camino/gradeThreshold'
 import {
   clearOnboarding,
   loadOnboarding,
@@ -23,9 +25,9 @@ import {
   type OnboardingStudentExam,
 } from '@/app/lib/onboarding/onboardingStorage'
 
-type Step = 'welcome' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'confirm' | 'saving' | 'done'
+type Step = 'welcome' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'saving' | 'done'
 
-const STEPS: Step[] = ['name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'confirm']
+const STEPS: Step[] = ['name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'grade-threshold', 'confirm']
 
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
@@ -40,6 +42,7 @@ const STEP_PHOTO: Partial<Record<Step, string>> = {
   feeling: HF_EQUATIONS,
   'daily-time': HF_LIBRARY,
   'weekly-days': HF_LIBRARY,
+  'grade-threshold': HF_LIBRARY,
   confirm: HF_FLATLAY,
 }
 
@@ -52,6 +55,7 @@ const STEP_HEADLINE: Partial<Record<Step, string[]>> = {
   feeling: ['¿Cómo', 'llevas la', 'prep?'],
   'daily-time': ['¿Cuánto', 'tiempo', 'al día?'],
   'weekly-days': ['¿Cuántos', 'días a la', 'semana?'],
+  'grade-threshold': ['¿Cuándo', 'repetir', 'para mejorar?'],
   confirm: ['Tu plan', 'está', 'listo.'],
 }
 
@@ -106,6 +110,8 @@ const WEEKLY_DAY_OPTS = [
   { label: 'Depende de la semana', value: null },
 ]
 
+const GRADE_THRESHOLD_OPTS = [4, 5, 6, 7, 8]
+
 const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   welcome: { title: 'Crea tu Camino PAU', help: 'Te haremos unas preguntas rápidas para adaptar Kairo a tu comunidad, centro y ritmo real.' },
   name: { title: '¿Cómo quieres que te llamemos?', help: 'Usaremos tu nombre para personalizar la experiencia dentro de la app.' },
@@ -116,12 +122,13 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   feeling: { title: '¿Cómo llevas la preparación?', help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.' },
   'daily-time': { title: '¿Cuánto tiempo podrías estudiar al día?', help: 'Lo ajustaremos mejor más adelante según tu ritmo.' },
   'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'Kairo adapta el Camino a tu ritmo real de estudio.' },
+  'grade-threshold': { title: '¿A partir de qué nota quieres repetir para mejorar?', help: 'Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.' },
   confirm: { title: 'Perfecto. Ya podemos construir tu Camino PAU.', help: 'Revisa el resumen y empieza cuando lo tengas claro.' },
   saving: { title: 'Construyendo tu Camino PAU', help: 'Estamos preparando tu experiencia inicial.' },
   done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
 }
 
-const SIDEBAR_STEPS = ['Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Confirmar']
+const SIDEBAR_STEPS = ['Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
 
@@ -468,6 +475,9 @@ export default function OnboardingFlow() {
             dailyMinutes: data.dailyMinutes,
             weeklyStudyDays: data.weeklyStudyDays,
             weeklyStudyDaysValue: data.weeklyStudyDaysValue,
+            gradeThresholdMode: data.gradeThresholdMode,
+            gradeThreshold: data.gradeThreshold,
+            subjectGradeThresholds: data.subjectGradeThresholds,
             onboardingCompleted: true,
           }),
         })
@@ -1097,6 +1107,75 @@ export default function OnboardingFlow() {
       )
     }
 
+    if (step === 'grade-threshold') {
+      const enabledSubjects = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+      return (
+        <div>
+          <EditorialGrid cols={2}>
+            <EditorialChoice
+              title="Mismo umbral para todo"
+              sub="Una nota para todas las asignaturas"
+              selected={data.gradeThresholdMode === 'general'}
+              onClick={() => update({ gradeThresholdMode: 'general' })}
+            />
+            <EditorialChoice
+              title="Distinto por asignatura"
+              sub="Ajusta cada asignatura por separado"
+              selected={data.gradeThresholdMode === 'per_subject'}
+              onClick={() => update({ gradeThresholdMode: 'per_subject' })}
+            />
+          </EditorialGrid>
+
+          {data.gradeThresholdMode === 'general' ? (
+            <div style={{ marginTop: 14 }}>
+              <EditorialGrid cols={5}>
+                {GRADE_THRESHOLD_OPTS.map(value => (
+                  <EditorialChoice
+                    key={value}
+                    title={`${value}`}
+                    selected={(data.gradeThreshold ?? DEFAULT_GRADE_THRESHOLD) === value}
+                    onClick={() => update({ gradeThreshold: value })}
+                  />
+                ))}
+              </EditorialGrid>
+            </div>
+          ) : (
+            <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
+              {enabledSubjects.length === 0 && (
+                <p style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>Elige primero tus asignaturas en el paso anterior.</p>
+              )}
+              {enabledSubjects.map(subjectLabel => {
+                const slug = normalizeSubjectSlug(subjectLabel)
+                const current = data.subjectGradeThresholds[slug] ?? DEFAULT_GRADE_THRESHOLD
+                return (
+                  <div key={slug} style={{ border: '1px solid #e0e0e0', background: '#fff', padding: '12px 14px' }}>
+                    <div style={{ fontSize: 12, fontWeight: 900, color: '#1c1c1c', marginBottom: 8 }}>{subjectLabel}</div>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {GRADE_THRESHOLD_OPTS.map(value => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => update({ subjectGradeThresholds: { ...data.subjectGradeThresholds, [slug]: value } })}
+                          style={{
+                            width: 34, height: 34, borderRadius: '50%', fontSize: 12, fontWeight: 900, cursor: 'pointer',
+                            border: current === value ? 'none' : '1.5px solid #e0e0e0',
+                            background: current === value ? '#1c1c1c' : '#fff',
+                            color: current === value ? '#fff' : '#1c1c1c',
+                          }}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )
+    }
+
     if (step === 'confirm') {
       return (
         <div>
@@ -1115,6 +1194,7 @@ export default function OnboardingFlow() {
               ['Preparación', data.preparationFeeling || '—'],
               ['Tiempo diario', data.dailyStudyTime || '—'],
               ['Días por semana', data.weeklyStudyDays || '—'],
+              ['Umbral para repetir', data.gradeThresholdMode === 'per_subject' ? 'Distinto por asignatura' : `Menos de ${data.gradeThreshold ?? DEFAULT_GRADE_THRESHOLD}/10`],
             ].map(([label, value]) => (
               <div key={label} style={{ background: '#fff', padding: '16px 18px' }}>
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>{label}</div>

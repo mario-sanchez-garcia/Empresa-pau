@@ -41,7 +41,7 @@ function weakBlockMatches(area: WeakArea, blockSlug: string, blockTitle: string)
   )
 }
 
-function findReviewTopic(area: WeakArea, futureTopicKeys: Set<string>, existingReviewKeys: Set<string>) {
+function findReviewTopic(area: WeakArea, futureTopicKeys: Set<string>, existingReviewKeys: Set<string>, completedTopicKeys: Set<string>) {
   const subject = normalizeSubjectSlug(area.subjectKey)
   const matchingTopics = CAMINO_CURRICULUM_TOPICS
     .filter(topic => topic.subject === subject)
@@ -54,7 +54,12 @@ function findReviewTopic(area: WeakArea, futureTopicKeys: Set<string>, existingR
     const sortOrder = candidate.v2SortOrder ?? candidate.orderIndex
     const topicKey = `${subject}:${sortOrder}`
     const key = reviewKey(subject, candidate.blockSlug, sortOrder)
-    return !futureTopicKeys.has(topicKey) && !existingReviewKeys.has(key)
+    // completedTopicKeys: este tema concreto ya se dio como misión normal
+    // (en cualquier día, pasado o de hoy) — repasarlo vía "review" duplicaría
+    // esa misión como si nunca se hubiera hecho. El único camino para
+    // repasar contenido ya completado es a través de los cursos en La Zona,
+    // no repitiendo la misión diaria.
+    return !futureTopicKeys.has(topicKey) && !existingReviewKeys.has(key) && !completedTopicKeys.has(topicKey)
   })
 
   return { topic: topic ?? null, mappingMissed: false }
@@ -106,6 +111,23 @@ export async function injectWeakReviewMissions(
         .filter(row => row.v2_sort_order != null)
         .map(row => `${normalizeSubjectSlug(row.subject)}:${row.v2_sort_order}`),
     )
+
+    // Un tema ya completado (cualquier fecha, pasada o de hoy) nunca debe
+    // volver a programarse como misión de repaso — solo se consulta para las
+    // asignaturas con áreas débiles, así el read se queda acotado.
+    const weakSubjects = [...new Set(weakAreas.map(area => normalizeSubjectSlug(area.subjectKey)))]
+    const { data: completedRows, error: completedError } = await supabase
+      .from('camino_calendar')
+      .select('subject, v2_sort_order')
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .in('subject', weakSubjects)
+      .not('v2_sort_order', 'is', null)
+      .limit(1000)
+    if (completedError) throw new Error(`Calendar weak review completed-read error: ${completedError.message}`)
+    const completedTopicKeys = new Set(
+      (completedRows ?? []).map(row => `${normalizeSubjectSlug(row.subject as string)}:${row.v2_sort_order}`),
+    )
     const existingReviewKeys = new Set(
       existingReviewRows
         .map(row => metadataObject(row.metadata).weak_review_key)
@@ -123,7 +145,7 @@ export async function injectWeakReviewMissions(
 
     for (const area of weakAreas) {
       if (rowsToInsert.length >= remainingSlots) break
-      const { topic, mappingMissed } = findReviewTopic(area, futureTopicKeys, existingReviewKeys)
+      const { topic, mappingMissed } = findReviewTopic(area, futureTopicKeys, existingReviewKeys, completedTopicKeys)
       if (mappingMissed) {
         mappingMisses += 1
         await recordBetaMetric(supabase, userId, 'weak_review_mapping_missed', {

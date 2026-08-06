@@ -415,20 +415,27 @@ function calRowToMission(row: CaminoCalRow): Mission {
 }
 
 async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
-  const todayStr = todayMadrid()
+  // Arranca en el lunes de la semana actual, no en "hoy": si el fetch
+  // empezaba en hoy, los días ya pasados de la semana en curso (p.ej. lunes
+  // y martes si hoy es miércoles) nunca llegaban a `calendar`, así que
+  // buildWeekDays/fillWeekGaps los rellenaba con `missions: []` — un lunes
+  // con misiones ya completadas se veía como "estudio libre" en el widget de
+  // semana. Estos días pasados son solo lectura aquí: se muestran tal cual
+  // quedaron registrados (completed/missed/pending), nunca se recalculan.
+  const weekStartStr = currentWeekStartISO()
   const { data, error } = await supabase
     .from('camino_calendar')
     .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, metadata')
     .eq('user_id', userId)
-    .gte('scheduled_date', todayStr)
+    .gte('scheduled_date', weekStartStr)
     .order('scheduled_date', { ascending: true })
     // Filas, no días — un día puede tener más de una misión (bonus,
     // comment_text, prácticas de parcial). ensureCaminoCalendar mantiene
-    // sembrados CALENDAR_HORIZON=30 días futuros; este límite tiene que
-    // ser generoso para no cortar antes de cubrirlos todos, o el cliente
-    // caería al generador local (ver generateCalendar) para días que en
-    // realidad ya están en Supabase.
-    .limit(90)
+    // sembrados CALENDAR_HORIZON=30 días futuros más hasta 6 días pasados de
+    // esta semana; este límite tiene que ser generoso para no cortar antes
+    // de cubrirlos todos, o el cliente caería al generador local (ver
+    // generateCalendar) para días que en realidad ya están en Supabase.
+    .limit(110)
   if (error || !data || data.length === 0) return null
   const byDate = new Map<string, CaminoCalRow[]>()
   for (const row of data as CaminoCalRow[]) {

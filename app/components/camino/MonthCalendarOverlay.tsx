@@ -2,20 +2,23 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Plus, Sparkles, Trash2, X } from 'lucide-react'
+import { CalendarClock, CalendarDays, Check, ChevronLeft, ChevronRight, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { addDays, getMadridToday, mondayBasedDayIndex } from '@/app/lib/camino/studyDays'
 import { CONTENT_TYPE_COLORS, CONTENT_TYPE_LABELS, type ContentType } from '@/app/lib/camino/contentTypeColors'
 import {
   CUSTOM_EVENT_CATEGORIES,
   CUSTOM_EVENT_CATEGORY_LABELS,
+  WEEKDAY_LABELS_FULL,
   createCustomEvent,
   deleteCustomEvent,
   fetchCustomEvents,
   type CustomEvent,
   type CustomEventCategory,
+  type CustomEventRecurrence,
 } from '@/app/lib/camino/customEvents'
 import { useHints } from '@/app/lib/onboarding/HintsContext'
+import WeekHourView, { type HourViewItem } from '@/app/components/camino/WeekHourView'
 
 type ExamSummary = { id: string; date: string; subject: string; topic?: string; name?: string; block?: string }
 
@@ -25,16 +28,11 @@ type MissionRow = {
   subject: string
   title: string
   status: string
+  start_time: string | null
+  end_time: string | null
 }
 
-type DayItem = {
-  key: string
-  type: ContentType
-  title: string
-  subtitle?: string
-  done?: boolean
-  onDelete?: () => void
-}
+type DayItem = HourViewItem
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
@@ -66,6 +64,14 @@ function buildMonthGrid(monthStartISOStr: string): string[] {
   return Array.from({ length: 42 }, (_, i) => addDays(gridStart, i))
 }
 
+function weekRangeLabel(weekStartISOStr: string): string {
+  const start = new Date(`${weekStartISOStr}T12:00:00`)
+  const end = new Date(`${addDays(weekStartISOStr, 6)}T12:00:00`)
+  const startText = start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  const endText = end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  return `Semana del ${startText} al ${endText}`
+}
+
 export default function MonthCalendarOverlay({
   onClose,
   exams,
@@ -75,12 +81,16 @@ export default function MonthCalendarOverlay({
 }) {
   const today = getMadridToday()
   const [monthCursor, setMonthCursor] = useState<string>(() => monthStartISO(today))
+  const [viewMode, setViewMode] = useState<'month' | 'week'>('month')
   const [missions, setMissions] = useState<MissionRow[]>([])
   const [customEvents, setCustomEvents] = useState<CustomEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState<string>(today)
   const [showEventForm, setShowEventForm] = useState(false)
-  const [eventDraft, setEventDraft] = useState({ title: '', description: '', category: 'otro' as CustomEventCategory, startTime: '', endTime: '' })
+  const [eventDraft, setEventDraft] = useState({
+    title: '', description: '', category: 'otro' as CustomEventCategory,
+    startTime: '', endTime: '', recurrence: 'none' as CustomEventRecurrence, recurrenceUntil: '',
+  })
   const [savingEvent, setSavingEvent] = useState(false)
   const [notes, setNotes] = useState('')
   const [notesLoaded, setNotesLoaded] = useState(false)
@@ -108,6 +118,27 @@ export default function MonthCalendarOverlay({
   const grid = useMemo(() => buildMonthGrid(monthCursor), [monthCursor])
   const gridEnd = grid[grid.length - 1]
 
+  const weekStartISO = useMemo(() => addDays(selectedDate, -mondayBasedDayIndex(selectedDate)), [selectedDate])
+
+  // Navegar de semana en semana puede cruzar a un mes cuyo grid de 42 días
+  // (buildMonthGrid) todavía no está cargado — resincroniza monthCursor con
+  // el mes de la nueva fecha seleccionada para que el efecto de carga de
+  // abajo traiga misiones/eventos de esa semana si hace falta. Un grid
+  // mensual de 6 semanas completas siempre contiene entera cualquier semana
+  // que toque ese mes, así que esto basta incluso cuando la semana cae a
+  // caballo entre dos meses.
+  function goToWeek(deltaDays: number) {
+    const next = addDays(selectedDate, deltaDays)
+    setSelectedDate(next)
+    const nextMonth = monthStartISO(next)
+    if (nextMonth !== monthCursor) setMonthCursor(nextMonth)
+  }
+  function goToTodayWeek() {
+    setSelectedDate(today)
+    const todayMonth = monthStartISO(today)
+    if (todayMonth !== monthCursor) setMonthCursor(todayMonth)
+  }
+
   useEffect(() => {
     let cancelled = false
     async function load() {
@@ -118,7 +149,7 @@ export default function MonthCalendarOverlay({
       const [missionRes, events] = await Promise.all([
         supabase
           .from('camino_calendar')
-          .select('id, scheduled_date, subject, title, status')
+          .select('id, scheduled_date, subject, title, status, start_time, end_time')
           .eq('user_id', userId)
           .gte('scheduled_date', grid[0])
           .lte('scheduled_date', gridEnd)
@@ -172,6 +203,8 @@ export default function MonthCalendarOverlay({
         title: m.title,
         subtitle: m.subject,
         done: m.status === 'completed',
+        start: m.start_time ? m.start_time.slice(0, 5) : null,
+        end: m.end_time ? m.end_time.slice(0, 5) : null,
       })
     }
     for (const e of examsByDate.get(dateISO) ?? []) {
@@ -180,14 +213,18 @@ export default function MonthCalendarOverlay({
         type: 'exam',
         title: e.name || `Parcial · ${e.subject}`,
         subtitle: e.topic || e.block || e.subject,
+        start: null,
+        end: null,
       })
     }
     for (const ev of customEventsByDate.get(dateISO) ?? []) {
       items.push({
-        key: `c-${ev.id}`,
+        key: `c-${ev.occurrenceKey}`,
         type: 'student_event',
         title: ev.title,
-        subtitle: [CUSTOM_EVENT_CATEGORY_LABELS[ev.category], ev.startTime].filter(Boolean).join(' · ') || undefined,
+        subtitle: [CUSTOM_EVENT_CATEGORY_LABELS[ev.category], ev.startTime?.slice(0, 5)].filter(Boolean).join(' · ') || undefined,
+        start: ev.startTime ? ev.startTime.slice(0, 5) : null,
+        end: ev.endTime ? ev.endTime.slice(0, 5) : null,
         onDelete: async () => {
           const { data: { session } } = await supabase.auth.getSession()
           const userId = session?.user?.id
@@ -209,8 +246,13 @@ export default function MonthCalendarOverlay({
       if (!userId) return
       const created = await createCustomEvent(supabase, userId, { ...eventDraft, date: selectedDate })
       if (created) {
-        setCustomEvents(current => [...current, created])
-        setEventDraft({ title: '', description: '', category: 'otro', startTime: '', endTime: '' })
+        // Recarga en vez de solo añadir `created` al estado: un evento
+        // semanal recién creado devuelve una única fila (su primera
+        // ocurrencia), pero el grid visible necesita TODAS sus ocurrencias
+        // proyectadas — fetchCustomEvents ya sabe expandirlas.
+        const refreshed = await fetchCustomEvents(supabase, userId, grid[0], gridEnd)
+        setCustomEvents(refreshed)
+        setEventDraft({ title: '', description: '', category: 'otro', startTime: '', endTime: '', recurrence: 'none', recurrenceUntil: '' })
         setShowEventForm(false)
       }
     } finally {
@@ -255,12 +297,40 @@ export default function MonthCalendarOverlay({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Tu agenda</p>
-              <h2 className="mt-1 text-[22px] font-black text-slate-100" style={{ letterSpacing: '-0.025em', lineHeight: 1 }}>{monthLabel(monthCursor)}</h2>
+              <h2 className="mt-1 text-[22px] font-black text-slate-100" style={{ letterSpacing: '-0.025em', lineHeight: 1 }}>
+                {viewMode === 'month' ? monthLabel(monthCursor) : weekRangeLabel(weekStartISO)}
+              </h2>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setMonthCursor(addMonths(monthCursor, -1))} className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Mes anterior"><ChevronLeft size={15} /></button>
-              <button onClick={() => setMonthCursor(monthStartISO(today))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Hoy</button>
-              <button onClick={() => setMonthCursor(addMonths(monthCursor, 1))} className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Mes siguiente"><ChevronRight size={15} /></button>
+              <div className="mr-1 flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.06] p-1">
+                <button
+                  onClick={() => setViewMode('month')}
+                  className="rounded-md px-2.5 py-1.5 text-[10px] font-black transition"
+                  style={{ background: viewMode === 'month' ? 'white' : 'transparent', color: viewMode === 'month' ? '#0f172a' : '#cbd5e1' }}
+                >
+                  Mes
+                </button>
+                <button
+                  onClick={() => setViewMode('week')}
+                  className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-black transition"
+                  style={{ background: viewMode === 'week' ? 'white' : 'transparent', color: viewMode === 'week' ? '#0f172a' : '#cbd5e1' }}
+                >
+                  <CalendarClock size={12} /> Por horas
+                </button>
+              </div>
+              {viewMode === 'month' ? (
+                <>
+                  <button onClick={() => setMonthCursor(addMonths(monthCursor, -1))} className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Mes anterior"><ChevronLeft size={15} /></button>
+                  <button onClick={() => setMonthCursor(monthStartISO(today))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Hoy</button>
+                  <button onClick={() => setMonthCursor(addMonths(monthCursor, 1))} className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Mes siguiente"><ChevronRight size={15} /></button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => goToWeek(-7)} className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Semana anterior"><ChevronLeft size={15} /></button>
+                  <button onClick={() => goToTodayWeek()} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Hoy</button>
+                  <button onClick={() => goToWeek(7)} className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Semana siguiente"><ChevronRight size={15} /></button>
+                </>
+              )}
               <button onClick={onClose} className="ml-1 inline-flex items-center justify-center rounded-lg bg-white/[0.06] p-2 text-slate-300 transition hover:bg-white/[0.11]" aria-label="Cerrar"><X size={15} /></button>
             </div>
           </div>
@@ -291,61 +361,77 @@ export default function MonthCalendarOverlay({
         {/* Body */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
 
-          {/* Month grid */}
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-5">
-            <div className="grid grid-cols-7 gap-1.5 text-center">
-              {WEEKDAY_LABELS.map(label => (
-                <div key={label} className="pb-1 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">{label}</div>
-              ))}
-            </div>
-            <div className="grid flex-1 grid-cols-7 gap-1.5" style={{ gridAutoRows: 'minmax(84px, 1fr)' }}>
-              {grid.map(dateISO => {
-                const inMonth = dateISO.slice(0, 7) === monthCursor.slice(0, 7)
-                const isToday = dateISO === today
-                const isSelected = dateISO === selectedDate
-                const items = itemsForDate(dateISO)
-                return (
-                  <button
-                    key={dateISO}
-                    type="button"
-                    onClick={() => setSelectedDate(dateISO)}
-                    className="flex flex-col items-stretch rounded-lg p-1.5 text-left transition-all"
-                    style={{
-                      background: isSelected ? '#eff6ff' : 'white',
-                      border: `1.5px solid ${isSelected ? '#2563eb' : isToday ? 'rgba(37,99,235,.35)' : '#f1f5f9'}`,
-                      opacity: inMonth ? 1 : 0.4,
-                    }}
-                  >
-                    <span
-                      className="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-black"
-                      style={{ background: isToday ? '#2563eb' : 'transparent', color: isToday ? 'white' : '#334155' }}
+          {viewMode === 'month' ? (
+            /* Month grid */
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-5">
+              <div className="grid grid-cols-7 gap-1.5 text-center">
+                {WEEKDAY_LABELS.map(label => (
+                  <div key={label} className="pb-1 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">{label}</div>
+                ))}
+              </div>
+              <div className="grid flex-1 grid-cols-7 gap-1.5" style={{ gridAutoRows: 'minmax(84px, 1fr)' }}>
+                {grid.map(dateISO => {
+                  const inMonth = dateISO.slice(0, 7) === monthCursor.slice(0, 7)
+                  const isToday = dateISO === today
+                  const isSelected = dateISO === selectedDate
+                  const items = itemsForDate(dateISO)
+                  return (
+                    <button
+                      key={dateISO}
+                      type="button"
+                      onClick={() => setSelectedDate(dateISO)}
+                      className="flex flex-col items-stretch rounded-lg p-1.5 text-left transition-all"
+                      style={{
+                        background: isSelected ? '#eff6ff' : 'white',
+                        border: `1.5px solid ${isSelected ? '#2563eb' : isToday ? 'rgba(37,99,235,.35)' : '#f1f5f9'}`,
+                        opacity: inMonth ? 1 : 0.4,
+                      }}
                     >
-                      {parseInt(dateISO.slice(-2), 10)}
-                    </span>
-                    <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
-                      {items.slice(0, 3).map(item => (
-                        <span
-                          key={item.key}
-                          className="truncate rounded px-1 py-0.5 text-[9px] font-bold"
-                          style={{
-                            background: CONTENT_TYPE_COLORS[item.type].bg,
-                            color: CONTENT_TYPE_COLORS[item.type].text,
-                            textDecoration: item.done ? 'line-through' : 'none',
-                          }}
-                        >
-                          {item.title}
-                        </span>
-                      ))}
-                      {items.length > 3 && (
-                        <span className="text-[9px] font-black text-slate-400">+{items.length - 3} más</span>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
+                      <span
+                        className="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-black"
+                        style={{ background: isToday ? '#2563eb' : 'transparent', color: isToday ? 'white' : '#334155' }}
+                      >
+                        {parseInt(dateISO.slice(-2), 10)}
+                      </span>
+                      <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+                        {items.slice(0, 3).map(item => (
+                          <span
+                            key={item.key}
+                            className="truncate rounded px-1 py-0.5 text-[9px] font-bold"
+                            style={{
+                              background: CONTENT_TYPE_COLORS[item.type].bg,
+                              color: CONTENT_TYPE_COLORS[item.type].text,
+                              textDecoration: item.done ? 'line-through' : 'none',
+                            }}
+                          >
+                            {item.title}
+                          </span>
+                        ))}
+                        {items.length > 3 && (
+                          <span className="text-[9px] font-black text-slate-400">+{items.length - 3} más</span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+              {loading && <p className="mt-3 text-center text-[11px] font-bold text-slate-400">Cargando…</p>}
             </div>
-            {loading && <p className="mt-3 text-center text-[11px] font-bold text-slate-400">Cargando…</p>}
-          </div>
+          ) : (
+            /* Vista por horas: agenda semanal tipo Google Calendar, misma
+               fuente de datos (missions/customEvents/exams) que el grid
+               mensual — ampliación, no un calendario paralelo. */
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-6 py-5">
+              <WeekHourView
+                weekStartISO={weekStartISO}
+                today={today}
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+                itemsForDate={itemsForDate}
+              />
+              {loading && <p className="mt-2 text-center text-[11px] font-bold text-slate-400">Cargando…</p>}
+            </div>
+          )}
 
           {/* Day detail + notes panel */}
           <div className="flex w-full shrink-0 flex-col overflow-y-auto border-t border-[#f1f5f9] bg-[#fafbfc] px-6 py-5 lg:w-[340px] lg:border-l lg:border-t-0">
@@ -370,21 +456,55 @@ export default function MonthCalendarOverlay({
                     placeholder="Ej: Entreno de fútbol, Deberes de física..."
                     className="mb-2 w-full rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2.5 py-2 text-[12px] font-bold text-slate-700 outline-none focus:border-blue-200 focus:bg-white"
                   />
-                  <div className="mb-2 grid grid-cols-2 gap-2">
+                  <div className="mb-2">
                     <select
                       value={eventDraft.category}
                       onChange={e => setEventDraft({ ...eventDraft, category: e.target.value as CustomEventCategory })}
-                      className="rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2 py-2 text-[11px] font-bold text-slate-700 outline-none"
+                      className="w-full rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2 py-2 text-[11px] font-bold text-slate-700 outline-none"
                     >
                       {CUSTOM_EVENT_CATEGORIES.map(cat => <option key={cat} value={cat}>{CUSTOM_EVENT_CATEGORY_LABELS[cat]}</option>)}
                     </select>
-                    <input
-                      type="time"
-                      value={eventDraft.startTime}
-                      onChange={e => setEventDraft({ ...eventDraft, startTime: e.target.value })}
-                      className="rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2 py-2 text-[11px] font-bold text-slate-700 outline-none"
-                    />
                   </div>
+                  <div className="mb-2 grid grid-cols-2 gap-2">
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[9px] font-black uppercase tracking-[.08em] text-slate-400">Empieza</span>
+                      <input
+                        type="time"
+                        value={eventDraft.startTime}
+                        onChange={e => setEventDraft({ ...eventDraft, startTime: e.target.value })}
+                        className="rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2 py-2 text-[11px] font-bold text-slate-700 outline-none"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[9px] font-black uppercase tracking-[.08em] text-slate-400">Termina</span>
+                      <input
+                        type="time"
+                        value={eventDraft.endTime}
+                        onChange={e => setEventDraft({ ...eventDraft, endTime: e.target.value })}
+                        className="rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2 py-2 text-[11px] font-bold text-slate-700 outline-none"
+                      />
+                    </label>
+                  </div>
+                  <label className="mb-2 flex items-center gap-2 text-[11px] font-bold text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={eventDraft.recurrence === 'weekly'}
+                      onChange={e => setEventDraft({ ...eventDraft, recurrence: e.target.checked ? 'weekly' : 'none' })}
+                      className="h-3.5 w-3.5 rounded border-slate-300"
+                    />
+                    Se repite cada {WEEKDAY_LABELS_FULL[mondayBasedDayIndex(selectedDate)].toLowerCase()}
+                  </label>
+                  {eventDraft.recurrence === 'weekly' && (
+                    <label className="mb-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+                      Hasta (opcional)
+                      <input
+                        type="date"
+                        value={eventDraft.recurrenceUntil}
+                        onChange={e => setEventDraft({ ...eventDraft, recurrenceUntil: e.target.value })}
+                        className="rounded-lg border border-[#f1f5f9] bg-[#fafbfc] px-2 py-1.5 text-[11px] font-bold text-slate-700 outline-none"
+                      />
+                    </label>
+                  )}
                   <textarea
                     value={eventDraft.description}
                     onChange={e => setEventDraft({ ...eventDraft, description: e.target.value.slice(0, 500) })}

@@ -3,9 +3,10 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { cleanStudentExams } from './camino/cleanStudentExams'
-import { missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
+import { estimatedMinutesForSlot, missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { injectAllPartialExamMissions } from './camino/injectPartialExamMissions'
+import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, countWorkingDays, getMadridToday, getStudyDays } from './camino/studyDays'
 
@@ -161,6 +162,9 @@ async function maybeInjectCommentText(
   }
   if (!candidate) return
 
+  const scheduler = await createDayScheduler(userId, supabase, candidate)
+  const timeSlot = scheduler.place(estimatedMinutesForMissionType('comment_text'))
+
   await supabase.from('camino_calendar').upsert({
     user_id: userId,
     scheduled_date: candidate,
@@ -173,6 +177,8 @@ async function maybeInjectCommentText(
     status: 'pending',
     source: 'algorithm',
     generated_by: 'algorithm_v1',
+    start_time: timeSlot?.start ?? null,
+    end_time: timeSlot?.end ?? null,
   }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order', ignoreDuplicates: true })
 }
 
@@ -359,12 +365,19 @@ export async function ensureCaminoCalendar(
   const scheduledQueueIds: string[] = []
   const now = new Date().toISOString()
 
+  const dailyMinutesForSlots = typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null
+
   for (const dateStr of emptyDays) {
     const subject = subjectForDay(dateStr, subjects, examSubjectsByDate.get(dateStr))
     if (!subject) continue
 
     const queue = subjectQueues[subject] ?? []
     let cursor = cursors[subject] ?? 0
+    // Un scheduler por día, sembrado con el horario propio del alumno
+    // (camino_custom_events, incluidas sus recurrencias semanales) — cada
+    // misión que coloca este bucle ocupa el hueco elegido antes de buscar el
+    // siguiente, así dos misiones del mismo día tampoco se pisan entre sí.
+    const scheduler = await createDayScheduler(userId, supabase, dateStr)
 
     for (let slot = 0; slot < itemsPerDay; slot++) {
       if (cursor >= queue.length) break
@@ -376,6 +389,7 @@ export async function ensureCaminoCalendar(
       calMetadata.topic_slug = topicMeta.topicSlug
       if (itemMeta.express) calMetadata.express = true
       if (rescueMode) calMetadata.plan_mode = 'rescue'
+      const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, slot))
       calendarRows.push({
         user_id: userId,
         scheduled_date: dateStr,
@@ -391,6 +405,8 @@ export async function ensureCaminoCalendar(
         source: 'algorithm',
         generated_by: 'algorithm_v1',
         queue_id: item.id,
+        start_time: timeSlot?.start ?? null,
+        end_time: timeSlot?.end ?? null,
         metadata: calMetadata,
       })
       scheduledQueueIds.push(item.id)

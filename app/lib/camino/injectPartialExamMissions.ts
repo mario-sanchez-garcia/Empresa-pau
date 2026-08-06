@@ -1,6 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
+import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import type { ExamConfidence, ExamPriority, StudentExam } from './cleanStudentExams'
 
 type PartialMissionType = 'conceptual_review' | 'evau_practice' | 'block_mock' | 'final_mini_mock'
@@ -278,6 +279,9 @@ export async function injectPartialExamMissions(
         .eq('id', existing[0].id as string)
     }
 
+    const scheduler = await createDayScheduler(userId, supabase, slot)
+    const timeSlot = scheduler.place(estimatedMinutesForMissionType('partial_practice'))
+
     await supabase.from('camino_calendar').insert({
       user_id: userId,
       scheduled_date: slot,
@@ -291,6 +295,8 @@ export async function injectPartialExamMissions(
       status: 'pending',
       source: 'partial',
       generated_by: 'partial_exam_v1',
+      start_time: timeSlot?.start ?? null,
+      end_time: timeSlot?.end ?? null,
       metadata: {
         partial_exam_id: partialExam.id,
         partial_exam_date: partialExam.date,

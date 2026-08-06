@@ -6,6 +6,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { addDays, getMadridToday, isPreferredStudyDay } from './studyDays'
 import { getCaminoPlanLimits } from './caminoPlanLimits'
 import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
+import { createDayScheduler } from './scheduleTimeSlot'
 
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
 const PERSONALIZATION_VERSION = 'calendar_personalization_v2'
@@ -152,18 +153,30 @@ export async function applyCalendarPersonalization(
     const preferredDates = nextPreferredDates(appliedFrom, prefs.weeklyStudyDaysValue, rows.length, capacity)
     if (preferredDates.length === 0) return { applied: false, reason: 'error', updatedRows: 0, preferenceHash }
 
+    // Todas las filas de `rows` se están reubicando en este mismo pase, así
+    // que su hora actual (si la tenían de una pasada anterior) nunca debe
+    // contar como "hueco ocupado" al buscar sitio en su nueva fecha —
+    // solo importa lo que el alumno tiene fuera de Camino (camino_custom_events)
+    // y lo que otras misiones YA reubicadas en este pase hayan ocupado.
+    const excludeCalendarRowIds = new Set(rows.map(row => row.id))
+
     let rowIndex = 0
     const updates: Array<PromiseLike<{ error: { message: string } | null }>> = []
     for (const date of preferredDates) {
+      if (rowIndex >= rows.length) break
+      const scheduler = await createDayScheduler(userId, supabase, date, { excludeCalendarRowIds })
       for (let slot = 0; slot < capacity && rowIndex < rows.length; slot += 1) {
         const row = rows[rowIndex]
         const meta = metadataObject(row.metadata)
+        const timeSlot = scheduler.place(estimatedMinutesForSlot(prefs.dailyMinutes, slot))
         updates.push(
           supabase
             .from('camino_calendar')
             .update({
               scheduled_date: date,
               updated_at: new Date().toISOString(),
+              start_time: timeSlot?.start ?? null,
+              end_time: timeSlot?.end ?? null,
               metadata: {
                 ...meta,
                 estimated_minutes: estimatedMinutesForSlot(prefs.dailyMinutes, slot),
@@ -182,7 +195,6 @@ export async function applyCalendarPersonalization(
         )
         rowIndex += 1
       }
-      if (rowIndex >= rows.length) break
     }
 
     const results = await Promise.all(updates)

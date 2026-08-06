@@ -5,6 +5,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, sanitizeLessonTitle } from './caminoCurriculumPlan'
 import { getWeakAreas, type WeakArea } from './caminoWeakAreasServer'
+import { createDayScheduler, estimatedMinutesForMissionType, DayScheduler } from './scheduleTimeSlot'
 import { addDays, getMadridToday, getStudyDays } from './studyDays'
 
 const WEAK_REVIEW_VERSION = 'weak_review_v1'
@@ -142,6 +143,17 @@ export async function injectWeakReviewMissions(
     const candidateDates = getStudyDays(today, HORIZON_DAYS * 2)
     const rowsToInsert: object[] = []
     let mappingMisses = 0
+    // Un scheduler por fecha candidata, creado bajo demanda y reutilizado si
+    // pickDateForReview elige el mismo día dos veces (hasta 2 repasos/día) —
+    // así la segunda misión de repaso del mismo día no se pisa con la primera.
+    const dayScheduler = new Map<string, DayScheduler>()
+    async function schedulerFor(dateStr: string): Promise<DayScheduler> {
+      const existing = dayScheduler.get(dateStr)
+      if (existing) return existing
+      const created = await createDayScheduler(userId, supabase, dateStr)
+      dayScheduler.set(dateStr, created)
+      return created
+    }
 
     for (const area of weakAreas) {
       if (rowsToInsert.length >= remainingSlots) break
@@ -168,6 +180,9 @@ export async function injectWeakReviewMissions(
       futureTopicKeys.add(`${subject}:${sortOrder}`)
       existingReviewKeys.add(key)
 
+      const scheduler = await schedulerFor(scheduledDate)
+      const timeSlot = scheduler.place(estimatedMinutesForMissionType('review'))
+
       rowsToInsert.push({
         user_id: userId,
         scheduled_date: scheduledDate,
@@ -182,6 +197,8 @@ export async function injectWeakReviewMissions(
         status: 'pending',
         source: 'algorithm',
         generated_by: WEAK_REVIEW_VERSION,
+        start_time: timeSlot?.start ?? null,
+        end_time: timeSlot?.end ?? null,
         queue_id: null,
         metadata: {
           topic_slug: topic.topicSlug,

@@ -12,6 +12,7 @@ export interface PreguntaBiologia {
   numero: string
   tema: string
   enunciado: string
+  textoDespuesImagen?: string
   puntuacion: number
   criterios: string
   imagenes?: string[]
@@ -147,8 +148,8 @@ d) Algunas sustancias tóxicas de origen vegetal implican la pérdida de la func
         label: "Pregunta 4",
         numero: "4.A",
         tema: "En relación con el metabolismo: Los camellos y dromedarios son animales",
-        enunciado: `En relación con el metabolismo: Los camellos y dromedarios son animales adaptados a la vida en climas áridos. Ambas especies pueden sobrevivir en los desiertos sin beber durante largos periodos de tiempo y su alimentación, frecuentemente se compone de vegetales salobres o con poca cantidad de agua. En un estudio sobre estos animales se han obtenido los siguientes datos sobre su metabolismo a partir de diferentes nutrientes: Tipo de nutriente consumido Producción metabólica de agua por gramo de nutriente Oxígeno consumido por gramo de nutriente Energía producida por gramo de nutriente Almidón 0,6 g 820 $cm^3$ 4 kcal Triglicéridos 1,07 g 2020 $cm^3$ 9 kcal Proteínas 0,41 g 970 $cm^3$ 4 kcal 
-a) Justifique por qué se produce mayor cantidad de agua a partir de los lípidos que de los glúcidos (0,5 puntos).
+        enunciado: `En relación con el metabolismo: Los camellos y dromedarios son animales adaptados a la vida en climas áridos. Ambas especies pueden sobrevivir en los desiertos sin beber durante largos periodos de tiempo y su alimentación, frecuentemente se compone de vegetales salobres o con poca cantidad de agua. En un estudio sobre estos animales se han obtenido los siguientes datos sobre su metabolismo a partir de diferentes nutrientes:`,
+        textoDespuesImagen: `a) Justifique por qué se produce mayor cantidad de agua a partir de los lípidos que de los glúcidos (0,5 puntos).
 b) Con los datos de la tabla, justifique por qué los camellos pueden estar sin beber durante largos periodos de tiempo (0,25 puntos).
 c) Explique en qué fase de la respiración celular se produce la mayor cantidad de $H_2O$ (0,5 puntos).
 d) Indique la vía metabólica específica del catabolismo de los ácidos grasos (0,25 puntos).
@@ -167,8 +168,8 @@ e) Explique la razón por qué el catabolismo de los ácidos grasos consume una 
         label: "Pregunta 4",
         numero: "4.B",
         tema: "En relación con el metabolismo: La siguiente gráfica muestra la actividad",
-        enunciado: `En relación con el metabolismo: La siguiente gráfica muestra la actividad enzimática de dos enzimas a diferentes temperaturas. 
-a) Razone cuál de las dos enzimas pertenece a un organismo termófilo (0,5 puntos).
+        enunciado: `En relación con el metabolismo: La siguiente gráfica muestra la actividad enzimática de dos enzimas a diferentes temperaturas.`,
+        textoDespuesImagen: `a) Razone cuál de las dos enzimas pertenece a un organismo termófilo (0,5 puntos).
 b) Explique la disminución de la actividad de la enzima B a la izquierda y a la derecha de su temperatura óptima (0,5 puntos).
 c) Indique otro factor físico-químico distinto a la temperatura que puede afectar a la actividad de la enzima. Explique cómo lo hace (0,5 puntos).
 d) Indique cómo se denomina el lugar específico de la enzima al que se une el sustrato (0,25 puntos).

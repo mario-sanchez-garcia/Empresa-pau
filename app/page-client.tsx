@@ -5591,10 +5591,24 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', display: 'grid', gap: '12px' }}>
+                    <div style={{ margin: '2px auto 20px', display: 'grid', justifyItems: 'center', gap: '12px' }}>
                       {(preguntaActiva as any).imagenes.map((src: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '18px', border: '1px solid #e5edf9', background: '#fff' }} />
+                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: 'min(100%, 760px)', maxHeight: '320px', objectFit: 'contain', borderRadius: '14px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 10px 26px rgba(15, 23, 42, 0.06)' }} />
                       ))}
+                    </div>
+                  )}
+                  {!preguntaActivaIncompleta && (preguntaActiva as any).textoDespuesImagen && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+                    <div style={{ marginBottom: '16px' }}>
+                      <ExamStatement
+                        key={`${preguntaActivaKey}-texto-despues-imagen`}
+                        text={formatEnunciado((preguntaActiva as any).textoDespuesImagen)} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+                        format="raw"
+                        components={mdComponents}
+                        storageKey={`${enunciadoStorageKey}:texto-despues-imagen`}
+                        accentColor={cfg.color}
+                        softColor={cfg.light}
+                        readingMode
+                      />
                     </div>
                   )}
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).conceptos && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión

@@ -1029,12 +1029,19 @@ export default function CaminoCalendarClient() {
       const userId = data.session?.user.id
       if (!userId || cancelled) return
       const token = data.session?.access_token
-      const storedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
-      if (storedExams.length === 0 && token) {
+      // El servidor es la fuente de verdad de los parciales del alumno —
+      // antes solo se reconciliaba si la copia local de ESTE navegador
+      // estaba vacía, así que en cuanto un dispositivo tenía algo en caché
+      // (aunque fuera antiguo) nunca más volvía a leer el servidor: un
+      // parcial añadido desde otro dispositivo no llegaba nunca, y al
+      // añadir uno aquí se sobrescribía la fila entera con la lista local
+      // desactualizada. Ahora se reconcilia en cada carga, igual que ya
+      // hace el onboarding más arriba.
+      if (token) {
         fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.json())
           .then((profile: { student_exams?: StudentExam[] }) => {
-            if (Array.isArray(profile.student_exams) && profile.student_exams.length > 0 && !cancelled) {
+            if (Array.isArray(profile.student_exams) && !cancelled) {
               setExams(profile.student_exams)
               saveJson(EXAMS_KEY, profile.student_exams)
             }

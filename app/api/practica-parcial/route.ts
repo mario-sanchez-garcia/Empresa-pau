@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
   let body: Record<string, unknown> = {}
   try { body = await request.json() } catch { /* ok */ }
   const missionId = typeof body.missionId === 'string' && body.missionId.trim() ? body.missionId.trim() : null
+  const subject = String(body.subject ?? 'mates')
+  const block = String(body.block ?? '')
+  const source = typeof body.source === 'string' ? body.source.slice(0, 64) : null
+  const weekStart = typeof body.weekStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.weekStart) ? body.weekStart : null
 
   // El alumno puede volver a pulsar la misión de "Prep. parcial" del
   // calendario después de ya haberla entregado (el enlace del calendario a
@@ -88,6 +92,50 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Red de seguridad para cuando el missionId no coincide con nada (o no
+  // llega ninguno): el calendario de Camino PAU puede regenerar y reemplazar
+  // la fila de camino_calendar de una misión "Prep. parcial" todavía
+  // pendiente (mismo contenido lógico, id nuevo), y algún enlace puede
+  // llegar sin missionId. Sin esto, cada entrada con un identificador
+  // distinto para la MISMA asignatura+bloque+origen creaba una sesión nueva
+  // e independiente en vez de continuar la que ya está en curso — el
+  // síntoma exacto reportado ("entra por un lado, es un ejercicio; entra
+  // por otro, es otro"). Se reutiliza la más reciente en_progreso que
+  // coincida en asignatura, bloque y origen (sunday_mock y camino_partial no
+  // se mezclan entre sí), y se le actualiza mission_id al recibido para que
+  // futuras reentradas por ese mismo id ya encuentren coincidencia directa.
+  if (block) {
+    const containsFilter: Record<string, unknown> = { __practice_session: true, block }
+    if (source) containsFilter.source = source
+    // sunday_mock reutiliza subject+block cada semana — sin esto, la sesión
+    // abandonada de la semana pasada se reutilizaría en vez de crear la de
+    // esta semana.
+    if (weekStart) containsFilter.week_start = weekStart
+    const { data: sameContentInProgress } = await db
+      .from('historial_simulacros')
+      .select('id, resultado_json')
+      .eq('user_id', user.id)
+      .eq('estado', 'en_progreso')
+      .eq('asignatura', subject)
+      .contains('resultado_json', containsFilter)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (sameContentInProgress) {
+      if (missionId) {
+        const currentResultado = (sameContentInProgress.resultado_json ?? {}) as Record<string, unknown>
+        if (currentResultado.mission_id !== missionId) {
+          await db
+            .from('historial_simulacros')
+            .update({ resultado_json: { ...currentResultado, mission_id: missionId } })
+            .eq('id', sameContentInProgress.id as string)
+            .eq('user_id', user.id)
+        }
+      }
+      return NextResponse.json({ id: sameContentInProgress.id as string })
+    }
+  }
+
   if (!isInternalUser(user.email ?? '')) {
     const billing = await getUserBillingContext(user.id, user.created_at ?? new Date().toISOString(), user.email)
 
@@ -124,12 +172,8 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const subject = String(body.subject ?? 'mates')
-  const block = String(body.block ?? '')
   const comunidad = String(body.comunidad ?? 'Madrid')
   const numQuestions = typeof body.numQuestions === 'number' ? body.numQuestions : 3
-  const source = typeof body.source === 'string' ? body.source.slice(0, 64) : null
-  const weekStart = typeof body.weekStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.weekStart) ? body.weekStart : null
 
   if (!VALID_SUBJECTS.has(subject)) {
     return NextResponse.json({ error: 'Asignatura no válida' }, { status: 400 })

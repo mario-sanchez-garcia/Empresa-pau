@@ -44,10 +44,6 @@ const OPTION_CHOICES: Array<{ id: OptionChoice; label: string; description: stri
   { id: 'B', label: 'Opción B', description: 'Solo ejercicios de opción B.' },
 ]
 
-const BLOCK_DISPLAY: Record<string, string> = {
-  Algebra: 'Álgebra', Analisis: 'Análisis', Geometria: 'Geometría', Probabilidad: 'Probabilidad'
-}
-
 function SimulacrosPage() {
   const searchParams = useSearchParams()
   const caminoBlock = searchParams.get('block')
@@ -118,10 +114,24 @@ function SimulacrosPage() {
   }, [])
 
   useEffect(() => {
-    if (!isCaminoPartial || !userId || autoTriggeredRef.current) return
+    // Antes esto llamaba a createSimulacro() directamente, que genera un
+    // simulacro COMPLETO de 90 min (SIMULACRO_MINUTES) con preguntas nuevas
+    // en cada visita y sin vincular a ningún mission_id. Cualquier enlace
+    // (actual o antiguo/cacheado) que aterrizara aquí con
+    // ?source=camino_partial&block=... — la misma "Prep. parcial" que Camino
+    // PAU abre correctamente vía /simulacros/practica/nueva — creaba una
+    // sesión totalmente distinta e independiente: otro enunciado, 90 min en
+    // vez de 45, y una fila nueva de historial_simulacros en cada reentrada.
+    // Redirige al flujo canónico único (/api/practica-parcial vía
+    // /simulacros/practica/nueva) para que, venga de donde venga la
+    // entrada, sea siempre la misma sesión de 45 min.
+    if (!isCaminoPartial || !caminoBlock || autoTriggeredRef.current) return
     autoTriggeredRef.current = true
-    void createSimulacro()
-  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
+    const params = new URLSearchParams({ subject, block: caminoBlock, source: 'camino_partial' })
+    const missionId = searchParams.get('missionId')
+    if (missionId) params.set('missionId', missionId)
+    router.replace(`/simulacros/practica/nueva?${params.toString()}`)
+  }, [isCaminoPartial, caminoBlock, subject, searchParams, router])
 
   async function loadHistory(uid = userId) {
     if (!uid) return
@@ -313,6 +323,16 @@ function SimulacrosPage() {
     return cfg.color
   }
 
+  if (isCaminoPartial) {
+    return (
+      <SimulacroShell>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: '#64748b', fontSize: 13, fontWeight: 700 }}>
+          <KairoLoadingDot /> Abriendo tu práctica…
+        </div>
+      </SimulacroShell>
+    )
+  }
+
   return (
     <SimulacroShell>
     {/* ── BLACKBOARD HERO ── */}
@@ -362,15 +382,6 @@ function SimulacrosPage() {
           line2="Elige asignatura y tiempo, responde todo y Kairo lo corrige al terminar. Úsalo para entrenar bajo presión."
         />
       </div>
-
-      {/* Camino parcial banner */}
-      {isCaminoPartial && caminoBlock && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', borderBottom: '1px solid #dbeafe', background: '#eff6ff', color: '#1e40af', fontSize: 13, fontWeight: 600 }}>
-          <PlayCircle size={15} style={{ flexShrink: 0 }} />
-          Simulacro enfocado en <strong style={{ marginLeft: 4 }}>{BLOCK_DISPLAY[caminoBlock] ?? caminoBlock}</strong>
-          <span style={{ marginLeft: 4, fontWeight: 400, color: '#3b82f6' }}>— generando para tu parcial...</span>
-        </div>
-      )}
 
       {/* History panel */}
       {historyOpen && (

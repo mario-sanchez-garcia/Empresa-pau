@@ -57,6 +57,14 @@ export default function SimulacroResultsPage() {
   const nota = safeNumber(result.nota_final ?? record?.nota_final, 0)
   const hasGrade = Boolean(record) && !correctionFailed && isFiniteNumber(result.nota_final) && (result.nota_final as number) > 0
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
+  // Esta página de resultados es compartida por el simulacro completo (90
+  // min) y la práctica parcial (45 min, __practice_session) — sin esto, una
+  // práctica parcial mostraba "de 90" en el chip de tiempo y, si la
+  // corrección fallaba, "Reintentar corrección" mandaba a /simulacros/[id]
+  // (el flujo de 90 min) en vez de /simulacros/practica/[id].
+  const isPracticeSession = Boolean(result.__practice_session)
+  const totalMinutes = isPracticeSession ? 45 : 90
+  const retryHref = isPracticeSession ? `/simulacros/practica/${params.id}` : `/simulacros/${params.id}`
 
   // Count-up animation when record loads
   useEffect(() => {
@@ -241,7 +249,7 @@ export default function SimulacroResultsPage() {
               {/* Meta chips */}
               <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
                 {[
-                  `Tiempo: ${record.tiempo_empleado ?? 0} min de 90`,
+                  `Tiempo: ${record.tiempo_empleado ?? 0} min de ${totalMinutes}`,
                   `Años: ${years || 'sin datos'}`,
                   ...(record.asignatura !== 'lengua' ? [optionSummaryForRecord(record)] : []),
                   record.id.slice(0, 8),
@@ -263,7 +271,7 @@ export default function SimulacroResultsPage() {
                 >
                   <p>{result.mensaje_usuario ?? result.feedback_general ?? 'No hemos podido corregir este simulacro. Tus respuestas están guardadas y puedes intentarlo de nuevo.'}</p>
                   <a
-                    href={`/simulacros/${params.id}`}
+                    href={retryHref}
                     className="mt-3 inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-black text-white no-underline transition hover:-translate-y-0.5"
                     style={{ background: '#2563eb', boxShadow: '0 8px 20px rgba(37,99,235,0.22)' }}
                   >
@@ -272,12 +280,12 @@ export default function SimulacroResultsPage() {
                 </div>
               )}
 
-              {(record.tiempo_empleado ?? 0) > 90 && (
+              {(record.tiempo_empleado ?? 0) > totalMinutes && (
                 <div
                   className="mx-auto mt-5 max-w-2xl rounded-2xl p-4 text-sm font-semibold"
                   style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#854d0e' }}
                 >
-                  En el examen real habrías entregado al llegar a 90 min.
+                  En el examen real habrías entregado al llegar a {totalMinutes} min.
                 </div>
               )}
             </div>

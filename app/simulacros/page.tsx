@@ -245,6 +245,14 @@ function SimulacrosPage() {
       const original = history.find(item => item.id === recordId)
       if (!original) { setErrorMessage('No hemos encontrado ese simulacro para repetirlo.'); return }
 
+      // Si el original era una práctica parcial (__practice_session, creada
+      // desde Camino PAU), la repetición debe seguir siéndolo: mismo flujo
+      // de 45 min y mismo bloque, no el simulacro completo de 90 min. Sin
+      // conservar el flag aquí, repetir una práctica parcial la convertía en
+      // un "simulacro" de 90 min con solo sus 3 preguntas originales.
+      const originalResultado = original.resultado_json && typeof original.resultado_json === 'object' ? original.resultado_json : {}
+      const isPracticeSession = Boolean(originalResultado.__practice_session)
+
       const newId = crypto.randomUUID()
       const now = new Date().toISOString()
       const { error } = await supabase.from('historial_simulacros').insert({
@@ -260,13 +268,16 @@ function SimulacrosPage() {
         repeated_from_id: recordId,
         created_at: now,
         updated_at: now,
+        ...(isPracticeSession
+          ? { resultado_json: { __practice_session: true, block: originalResultado.block, subject: originalResultado.subject, comunidad: originalResultado.comunidad } }
+          : {}),
       })
       if (error) {
         console.error('SIMULACRO_REPEAT_ERROR', error)
         setErrorMessage('No se pudo preparar la repetición. Inténtalo de nuevo en unos segundos.')
         return
       }
-      router.push(`/simulacros/${newId}`)
+      router.push(isPracticeSession ? `/simulacros/practica/${newId}` : `/simulacros/${newId}`)
     } finally {
       setRepeatingId(null)
     }
@@ -375,10 +386,20 @@ function SimulacrosPage() {
               {history.map(item => {
                 const threshold = resolveGradeThreshold(gradeThresholdConfig, normalizeSubjectSlug(item.asignatura))
                 const suggestRepeat = item.estado === 'completado' && shouldSuggestRepeat(item.nota_final ?? null, threshold)
+                // Las prácticas parciales (creadas desde Camino PAU vía
+                // /api/practica-parcial) viven en la misma tabla que los
+                // simulacros completos, marcadas con __practice_session. Sin
+                // distinguirlas aquí, continuar una práctica en pausa desde
+                // esta lista abría /simulacros/[id] (pensado para el
+                // simulacro de 90 min) en vez de /simulacros/practica/[id]
+                // (45 min) — mismo historial, contexto y duración distintos
+                // según por dónde se entrara a continuar la misma sesión.
+                const isPracticeSession = Boolean(item.resultado_json && typeof item.resultado_json === 'object' && item.resultado_json.__practice_session)
+                const continueHref = isPracticeSession ? `/simulacros/practica/${item.id}` : `/simulacros/${item.id}`
                 return (
                 <a
                   key={item.id}
-                  href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : `/simulacros/${item.id}`}
+                  href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : continueHref}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', textDecoration: 'none', color: 'inherit', transition: 'border-color .12s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLElement).style.background = '#eff6ff' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9'; (e.currentTarget as HTMLElement).style.background = 'white' }}

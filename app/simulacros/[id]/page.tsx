@@ -73,11 +73,13 @@ export default function SimulacroActivoPage() {
         }
         const storedAnswers = next.respuestas_parciales ?? {}
         const storedReview = readReviewState(next.id)
+        const storedActive = readActive(next.id)
         const durationSeconds = getDurationSeconds(next)
         answersRef.current = storedAnswers
         savedSnapshotRef.current = JSON.stringify(storedAnswers)
         setAnswers(storedAnswers)
         setReviewMarked(storedReview)
+        if (storedActive !== null && storedActive < next.bloques.length) setActive(storedActive)
         setRecord(next)
 
         // time_segments (pausar y continuar): un tramo con endedAt=null
@@ -194,6 +196,7 @@ export default function SimulacroActivoPage() {
   async function changeActive(index: number) {
     if (dirtyRef.current) await autosave(answersRef.current)
     setActive(index)
+    if (record) writeActive(record.id, index)
   }
 
   async function getAccessToken() {
@@ -982,6 +985,10 @@ function reviewKey(id: string) {
   return `kairo:simulacro:${id}:reviewMarked`
 }
 
+function activeKey(id: string) {
+  return `kairo:simulacro:${id}:active`
+}
+
 function readStartedAt(id: string) {
   try {
     const value = window.localStorage.getItem(startKey(id))
@@ -1006,6 +1013,24 @@ function readReviewState(id: string) {
 function writeReviewState(id: string, value: Record<string, boolean>) {
   try {
     window.localStorage.setItem(reviewKey(id), JSON.stringify(value))
+  } catch {
+    // Local storage is best-effort only.
+  }
+}
+
+function readActive(id: string) {
+  try {
+    const value = window.localStorage.getItem(activeKey(id))
+    const number = Number(value)
+    return Number.isFinite(number) && number >= 0 ? number : null
+  } catch {
+    return null
+  }
+}
+
+function writeActive(id: string, index: number) {
+  try {
+    window.localStorage.setItem(activeKey(id), String(index))
   } catch {
     // Local storage is best-effort only.
   }

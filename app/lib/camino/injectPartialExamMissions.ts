@@ -97,13 +97,20 @@ function missionSequence(count: number): PartialMissionType[] {
   return seq
 }
 
+// Las 4 usan mission_type: 'partial_practice' al insertarse más abajo (nunca
+// 'mock_exam'), así que SIEMPRE abren el flujo de 45 min de
+// /simulacros/practica/[id] (PARCIAL_MINUTES), no el simulacro completo de
+// 90 min. "block_mock"/"final_mini_mock" llevaban la palabra "simulacro" en
+// el título aunque su duración real fuera siempre 45 min — el alumno leía
+// "Simulacro final..." esperando 90 min y el cronómetro le daba 45,
+// exactamente la confusión Simulacro/Práctica parcial que se quería evitar.
 function missionTitle(type: PartialMissionType, blockDisplay: string, topic?: string): string {
   const ctx = topic ? `${blockDisplay} — ${topic}` : blockDisplay
   switch (type) {
     case 'conceptual_review': return `Repaso de conceptos: ${ctx}`
     case 'evau_practice':     return `Práctica PAU: ${ctx}`
-    case 'block_mock':        return `Mini-simulacro: ${ctx}`
-    case 'final_mini_mock':   return `Simulacro final antes del parcial: ${ctx}`
+    case 'block_mock':        return `Práctica corta: ${ctx}`
+    case 'final_mini_mock':   return `Práctica final antes del parcial: ${ctx}`
   }
 }
 

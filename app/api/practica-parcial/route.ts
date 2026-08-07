@@ -64,6 +64,28 @@ export async function POST(request: NextRequest) {
     if (existing) {
       return NextResponse.json({ id: existing.id as string, alreadyCompleted: true })
     }
+
+    // Mismo problema que arriba pero para una sesión en pausa, no entregada:
+    // el enlace de la misión de "Prep. parcial" (y el banner de parcial
+    // próximo) siempre apuntan a /simulacros/practica/nueva, sin distinguir
+    // "nunca empezada" de "ya empezada y pausada" — así que reabrir la misma
+    // misión creaba una fila historial_simulacros nueva (otros ejercicios al
+    // azar, cronómetro a 45:00 desde cero) y la sesión en pausa quedaba
+    // huérfana para siempre, aunque sus respuestas siguieran bien guardadas
+    // en su fila original. Se reutiliza la sesión en_progreso existente en
+    // vez de crear otra, igual que ya se hace arriba con las completadas.
+    const { data: inProgress } = await db
+      .from('historial_simulacros')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('estado', 'en_progreso')
+      .eq('resultado_json->>mission_id', missionId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (inProgress) {
+      return NextResponse.json({ id: inProgress.id as string })
+    }
   }
 
   if (!isInternalUser(user.email ?? '')) {

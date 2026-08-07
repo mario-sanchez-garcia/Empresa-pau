@@ -126,9 +126,11 @@ function PracticaPageInner() {
       }
 
       const storedAnswers = next.respuestas_parciales ?? {}
+      const storedActive = readActive(next.id)
       answersRef.current = storedAnswers
       savedSnapshotRef.current = JSON.stringify(storedAnswers)
       setAnswers(storedAnswers)
+      if (storedActive !== null && storedActive < next.bloques.length) setActive(storedActive)
       setRecord(next)
 
       // time_segments (pausar y continuar): mismo modelo que
@@ -317,6 +319,7 @@ function PracticaPageInner() {
   async function changeActive(index: number) {
     if (dirtyRef.current) await autosave(answersRef.current)
     setActive(index)
+    if (record) writeActive(record.id, index)
   }
 
   function toggleReview(blockId: string) {
@@ -923,6 +926,31 @@ function IncompleteExerciseNotice({ color, light }: { color: string; light: stri
 
 async function safeJson(response: Response) {
   try { return await response.json() } catch { return null }
+}
+
+// Misma convención de clave que app/simulacros/[id]/page.tsx (kairo:simulacro:<id>:...)
+// — sin esto, pausar y reanudar guardaba bien respuestas y tiempo, pero
+// siempre reabría la pregunta 1 en vez de la que se estaba respondiendo.
+function activeKey(id: string) {
+  return `kairo:simulacro:${id}:active`
+}
+
+function readActive(id: string) {
+  try {
+    const value = window.localStorage.getItem(activeKey(id))
+    const number = Number(value)
+    return Number.isFinite(number) && number >= 0 ? number : null
+  } catch {
+    return null
+  }
+}
+
+function writeActive(id: string, index: number) {
+  try {
+    window.localStorage.setItem(activeKey(id), String(index))
+  } catch {
+    // Local storage is best-effort only.
+  }
 }
 
 function formatTime(seconds: number) {

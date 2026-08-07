@@ -5142,8 +5142,8 @@ function cambiarTipo(t: Tipo) {
 
             <SectionIntroCard
               hintKey="hint_examenes"
-              line1="Práctica ejercicio a ejercicio, sin tiempo ni reloj."
-              line2="Elige asignatura y tema, responde y lo corriges al momento. Para trabajar una parte del temario en profundidad."
+              line1="Ejercicios reales de PAU, sin límite de tiempo."
+              line2="Elige asignatura, año y tema, responde y Kairo lo corrige al momento. A diferencia de Simulacros, aquí no hay cronómetro: repasa un ejercicio concreto con calma."
             />
 
             {/* ── Search bar ──────────────────────────────── */}

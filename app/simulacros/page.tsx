@@ -396,31 +396,45 @@ function SimulacrosPage() {
                 // según por dónde se entrara a continuar la misma sesión.
                 const isPracticeSession = Boolean(item.resultado_json && typeof item.resultado_json === 'object' && item.resultado_json.__practice_session)
                 const continueHref = isPracticeSession ? `/simulacros/practica/${item.id}` : `/simulacros/${item.id}`
+                const rowHref = item.estado === 'completado' ? `/simulacros/${item.id}/results` : continueHref
                 return (
-                <a
+                // Antes esto era un único <a> con el botón "Repetir para
+                // mejorar" anidado dentro (<button> dentro de <a>, contenido
+                // interactivo anidado inválido en HTML) — el navegador podía
+                // reescribir esa estructura al parsear el HTML servido, así
+                // que el click a veces no llegaba al handler del botón ni se
+                // podía distinguir de un click en la fila entera. Ahora la
+                // fila es un <div> y son dos <a display:contents> separados
+                // (mismo layout, cero cambio visual) los que cubren el resto
+                // de la fila, dejando "Repetir" como único elemento
+                // interactivo real, sin anidar.
+                <div
                   key={item.id}
-                  href={item.estado === 'completado' ? `/simulacros/${item.id}/results` : continueHref}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', textDecoration: 'none', color: 'inherit', transition: 'border-color .12s' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', transition: 'border-color .12s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLElement).style.background = '#eff6ff' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9'; (e.currentTarget as HTMLElement).style.background = 'white' }}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 12, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      color: item.estado === 'completado' ? '#94a3b8' : '#0f172a',
-                      textDecoration: item.estado === 'completado' ? 'line-through' : 'none',
-                    }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
-                    <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{item.id.slice(0, 8)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
-                  </div>
+                  <a href={rowHref} style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 12, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        color: item.estado === 'completado' ? '#94a3b8' : '#0f172a',
+                        textDecoration: item.estado === 'completado' ? 'line-through' : 'none',
+                      }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
+                      <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{item.id.slice(0, 8)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
+                    </div>
+                  </a>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    {item.estado === 'completado'
-                      ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
-                      : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                    <a href={rowHref} style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}>
+                      {item.estado === 'completado'
+                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
+                        : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                    </a>
                     {suggestRepeat && (
                       <button
                         type="button"
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); void repeatSimulacro(item.id) }}
+                        onClick={() => void repeatSimulacro(item.id)}
                         disabled={repeatingId === item.id}
                         style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 900, padding: '5px 11px', borderRadius: 999, background: 'linear-gradient(135deg, #f59e0b, #fb923c)', color: 'white', border: 'none', boxShadow: '0 2px 6px rgba(217,119,6,.4)', cursor: repeatingId === item.id ? 'default' : 'pointer', opacity: repeatingId === item.id ? .6 : 1 }}
                       >
@@ -429,7 +443,7 @@ function SimulacrosPage() {
                       </button>
                     )}
                   </div>
-                </a>
+                </div>
                 )
               })}
             </div>

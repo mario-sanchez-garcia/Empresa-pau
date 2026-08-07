@@ -397,9 +397,9 @@ function SimulacrosPage() {
                         type="button"
                         onClick={e => { e.preventDefault(); e.stopPropagation(); void repeatSimulacro(item.id) }}
                         disabled={repeatingId === item.id}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', cursor: repeatingId === item.id ? 'default' : 'pointer', opacity: repeatingId === item.id ? .6 : 1 }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 900, padding: '5px 11px', borderRadius: 999, background: 'linear-gradient(135deg, #f59e0b, #fb923c)', color: 'white', border: 'none', boxShadow: '0 2px 6px rgba(217,119,6,.4)', cursor: repeatingId === item.id ? 'default' : 'pointer', opacity: repeatingId === item.id ? .6 : 1 }}
                       >
-                        <RotateCcw size={10} />
+                        <RotateCcw size={11} />
                         {repeatingId === item.id ? 'Preparando…' : 'Repetir para mejorar'}
                       </button>
                     )}

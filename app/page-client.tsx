@@ -6438,7 +6438,7 @@ function cambiarTipo(t: Tipo) {
                   )}
                   {itemSeleccionado.enunciado && itemSeleccionado.id && shouldSuggestRepeat(normalizedHistoryScore(itemSeleccionado), resolveGradeThreshold(gradeThresholdConfig, normalizeSubjectSlug(itemSeleccionado.asignatura))) && (
                     <button
-                      className="campus-hover"
+                      className="campus-primary"
                       onClick={() => setRepeatSource({
                         id: itemSeleccionado.id,
                         asignatura: itemSeleccionado.asignatura,
@@ -6449,7 +6449,7 @@ function cambiarTipo(t: Tipo) {
                         enunciado: itemSeleccionado.enunciado,
                         nota_maxima: itemSeleccionado.nota_maxima ?? null,
                       })}
-                      style={{ padding: '9px 16px', borderRadius: '999px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}
+                      style={{ padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #f59e0b, #fb923c)', color: 'white', border: 'none', boxShadow: '0 3px 10px rgba(217,119,6,.4)', cursor: 'pointer', fontSize: '13px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}
                     ><RotateCcw size={15} />Repetir para mejorar</button>
                   )}
                   <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>

@@ -433,7 +433,7 @@ export default function ZonaCursosPage() {
                                 {suggestRepeat && (
                                   <a
                                     href={`${item.href}?repeatOf=${item.latestHistorialId}`}
-                                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0, padding: '4px 9px', borderRadius: 999, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: 10.5, fontWeight: 900, textDecoration: 'none' }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0, padding: '5px 11px', borderRadius: 999, background: 'linear-gradient(135deg, #f59e0b, #fb923c)', border: 'none', boxShadow: '0 2px 6px rgba(217,119,6,.4)', color: 'white', fontSize: 10.5, fontWeight: 900, textDecoration: 'none' }}
                                   >
                                     <RotateCcw size={11} />
                                     Repetir para mejorar

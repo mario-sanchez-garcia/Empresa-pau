@@ -4,7 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { awardXp } from '@/app/lib/camino/awardXp'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { normalizeScoreToTen } from '@/app/lib/camino/scoreNormalization'
-import { computeRepeatBaseXp } from '@/app/lib/camino/repeatImprovement'
+import { computeRepeatBaseXp, countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { EXAM_CORRECTION_XP } from '@/app/lib/camino/xpMap'
 
 export const dynamic = 'force-dynamic'
@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
         .maybeSingle()
 
       const previousScoreOnTen = previous ? normalizeScoreToTen(previous.nota, previous.nota_maxima) : null
-      const repeatBaseXp = computeRepeatBaseXp(EXAM_CORRECTION_XP, previousScoreOnTen, newScoreOnTen)
+      const repeatGeneration = (await countRepeatDepth(db, 'historial_examenes', examen.repeated_from_id, user.id)) + 1
+      const repeatBaseXp = computeRepeatBaseXp(EXAM_CORRECTION_XP, previousScoreOnTen, newScoreOnTen, repeatGeneration)
 
       if (repeatBaseXp <= 0) {
         return NextResponse.json({ success: true, xpAwarded: 0, reason: 'no_improvement' })

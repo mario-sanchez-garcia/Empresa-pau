@@ -11,7 +11,7 @@ import { awardXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
-import { computeRepeatBaseXp } from '@/app/lib/camino/repeatImprovement'
+import { computeRepeatBaseXp, countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
@@ -475,7 +475,8 @@ export async function POST(request: NextRequest) {
           .eq('id', simulacroRecord.repeated_from_id)
           .eq('user_id', authContext.user.id)
           .maybeSingle()
-        const repeatBaseXp = computeRepeatBaseXp(normalXp, previous?.nota_final ?? null, result.nota_final)
+        const repeatGeneration = (await countRepeatDepth(authContext.supabase, 'historial_simulacros', simulacroRecord.repeated_from_id, authContext.user.id)) + 1
+        const repeatBaseXp = computeRepeatBaseXp(normalXp, previous?.nota_final ?? null, result.nota_final, repeatGeneration)
         if (repeatBaseXp > 0) {
           xpResult = await awardXp(authContext.supabase, authContext.user.id, {
             xp: repeatBaseXp,

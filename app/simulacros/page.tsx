@@ -421,7 +421,7 @@ function SimulacrosPage() {
                         color: item.estado === 'completado' ? '#94a3b8' : '#0f172a',
                         textDecoration: item.estado === 'completado' ? 'line-through' : 'none',
                       }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
-                      <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{item.id.slice(0, 8)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
+                      <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>Última entrada: {formatDate(item.updated_at ?? item.created_at)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
                     </div>
                   </a>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
@@ -649,7 +649,7 @@ function formatScore(value: unknown) {
 
 function formatDate(value?: string) {
   if (!value) return '-'
-  return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(new Date(value))
+  return new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(new Date(value))
 }
 
 function yearChoiceToSelection(choice: YearChoice): 'all' | SimulacroDifficulty {

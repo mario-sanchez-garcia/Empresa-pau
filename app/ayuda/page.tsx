@@ -1,6 +1,7 @@
 'use client'
 
 import SidebarNav from '@/app/components/SidebarNav'
+import XpExplainerDrawer from '@/components/ayuda/XpExplainerDrawer'
 
 const SECTIONS = [
   {
@@ -32,11 +33,11 @@ const SECTIONS = [
 const FAQS = [
   {
     q: '¿Cómo funciona el XP?',
-    a: 'Ganas una base de XP garantizada cada vez que corriges un ejercicio con Kairo, en cualquier sección — la saques la nota que saques: entre 10 y 50 XP en una misión de Camino, 28 en un examen de Exámenes, 41 en una práctica parcial y 90 en un simulacro completo (la base de Exámenes, parciales y simulacros está pensada para ser proporcional a su duración real frente a una misión corta, no un número suelto — por eso queda siempre por encima de una misión normal de Camino y por debajo de un simulacro completo). Si apruebas (5 o más), sumas un 25% extra de bonus; con un 7 o más, un 75%; con un 9 o más, el bonus es del 125%. La base nunca se reduce por una nota baja — el bonus solo suma, y cuanto mejor la nota, más pesa sobre el total. El XP total sube siempre — nunca baja.',
+    a: 'Ganas XP cada vez que corriges un ejercicio con Kairo, en cualquier sección — la saques la nota que saques. La base depende de cuánto dura de verdad la actividad (una misión de Camino da menos que una práctica parcial, y esa menos que un simulacro completo de 90 minutos) y de la dificultad del bloque. Sobre esa base se aplican dos bonus que se multiplican entre sí: la nota que sacas (+25% aprobando, +75% con un 7 o más, +125% con un 9 o más) y tu racha de días seguidos estudiando (hasta +50% a partir de dos meses seguidos sin cortar). Si repites algo que ya habías hecho, la base se reduce a la mitad en cada repetición sucesiva — pero si mejoras tu nota respecto a tu último intento, te llevas un bonus extra encima, tanto mayor cuanto más grande sea la mejora y cuanto más cerca del 10 termines. El XP total nunca baja. Puedes ver el desglose visual completo en "¿Cómo funciona el XP?" (arriba a la derecha).',
   },
   {
     q: '¿Qué es la racha?',
-    a: 'La racha cuenta los días consecutivos en los que has completado al menos una misión. Si un día no estudias, la racha vuelve a cero. No afecta al XP ni a tu progreso real — es solo una forma de ver tu constancia.',
+    a: 'La racha cuenta los días consecutivos en los que has completado al menos una misión. Si un día no estudias, la racha vuelve a cero. Además de ser una forma de ver tu constancia, una racha larga también da más XP en cada corrección: hasta un +50% extra a partir de dos meses seguidos estudiando (la subida es rápida los primeros días y se suaviza después, nunca se dispara).',
   },
   {
     q: '¿Qué pasa si un día no estudio?',
@@ -66,12 +67,17 @@ export default function AyudaPage() {
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
         <div style={{ padding: '36px 36px 0', maxWidth: 780 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>
-            Ayuda
-          </p>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 8 }}>
-            Cómo funciona Kairo
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>
+                Ayuda
+              </p>
+              <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 8 }}>
+                Cómo funciona Kairo
+              </h1>
+            </div>
+            <XpExplainerDrawer />
+          </div>
           <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
             Todo lo que necesitas saber para sacarle partido a la app.
           </p>

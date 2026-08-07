@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     // PASO 3 — Registrar XP y actualizar camino_user_progress (un mismo
     // helper compartido con exam_correction/simulacro_completion/parcial_completion)
     const result = await awardXp(db, user.id, {
-      xp,
+      effortXp: xp,
       sourceType: 'mission_completion',
       sourceId: String(updated[0].id),
       subject,

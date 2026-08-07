@@ -5758,7 +5758,7 @@ function cambiarTipo(t: Tipo) {
                         )}
                         {correccion && examXpResult && (
                           <p style={{ margin: '8px 0 0', fontSize: 12, fontWeight: 800, color: '#7c3aed' }}>
-                            +{examXpResult.xpAwarded} XP{examXpResult.bonusXp > 0 ? ` · +${examXpResult.bonusXp} bonus por la nota` : ''}
+                            +{examXpResult.xpAwarded} XP{examXpResult.bonusXp > 0 ? ` · +${examXpResult.bonusXp} bonus extra` : ''}
                           </p>
                         )}
                       </div>

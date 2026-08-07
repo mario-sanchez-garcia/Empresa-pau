@@ -8,11 +8,11 @@ import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from
 import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
-import { awardXp } from '@/app/lib/camino/awardXp'
+import { awardXp, awardRepeatImprovementXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
-import { computeRepeatBaseXp, countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
+import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     const { data: simulacroRecord, error: simulacroError } = await authContext.supabase
       .from('historial_simulacros')
-      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at,repeated_from_id')
+      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at,repeated_from_id,dificultad')
       .eq('id', simulacro_id)
       .eq('user_id', authContext.user.id)
       .maybeSingle()
@@ -458,17 +458,29 @@ export async function POST(request: NextRequest) {
     // mission_date viene de la creación del simulacro (no "hoy") para que un
     // reintento en otro día natural no rompa la deduplicación por unique
     // constraint en camino_xp_events.
-    let xpResult: Awaited<ReturnType<typeof awardXp>> | null = null
-    let repeatNoImprovement = false
+    let xpResult: Awaited<ReturnType<typeof awardXp>> | Awaited<ReturnType<typeof awardRepeatImprovementXp>> | null = null
+    // null = no es una repetición; true/false = si el intento repetido
+    // mejoró la nota del anterior. Con el nuevo sistema de XP, repetir SIN
+    // mejorar ya no da 0 XP (se queda con el XP reducido de repetición de
+    // siempre) — este flag ahora solo distingue si hubo bonus de mejora
+    // encima, no si hubo XP en absoluto.
+    let repeatImproved: boolean | null = null
     try {
       const missionDate = typeof simulacroRecord.created_at === 'string'
         ? simulacroRecord.created_at.slice(0, 10)
         : new Date().toISOString().slice(0, 10)
-      const normalXp = isPracticeSession ? PARCIAL_COMPLETION_XP : SIMULACRO_COMPLETION_XP
+      const effortXp = isPracticeSession ? PARCIAL_COMPLETION_XP : SIMULACRO_COMPLETION_XP
+      // "Dificultad del bloque" (nuevo ingrediente del XP) — reutiliza la
+      // columna dificultad ya existente en historial_simulacros ('Fácil'/
+      // 'Media'/'Difícil'), no dificultad_real (esa guarda a veces una
+      // etiqueta de modo tipo "Todos los años · A/B", no una dificultad real
+      // — ver comentario en app/simulacros/page.tsx createSimulacro).
+      const difficultyLabel = typeof simulacroRecord.dificultad === 'string' ? simulacroRecord.dificultad : null
 
       // "Repetir para mejorar" (ver app/simulacros/page.tsx repeatSimulacro):
-      // XP reducido y solo si la nota nueva supera la del intento de
-      // referencia — nunca se vuelve a dar el XP íntegro de la primera vez.
+      // XP reducido siempre, más un bonus de mejora si la nota nueva supera
+      // la del intento INMEDIATAMENTE ANTERIOR (repeated_from_id, nunca el
+      // primer intento histórico).
       if (simulacroRecord.repeated_from_id) {
         const { data: previous } = await authContext.supabase
           .from('historial_simulacros')
@@ -477,22 +489,22 @@ export async function POST(request: NextRequest) {
           .eq('user_id', authContext.user.id)
           .maybeSingle()
         const repeatGeneration = (await countRepeatDepth(authContext.supabase, 'historial_simulacros', simulacroRecord.repeated_from_id, authContext.user.id)) + 1
-        const repeatBaseXp = computeRepeatBaseXp(normalXp, previous?.nota_final ?? null, result.nota_final, repeatGeneration)
-        if (repeatBaseXp > 0) {
-          xpResult = await awardXp(authContext.supabase, authContext.user.id, {
-            xp: repeatBaseXp,
-            sourceType: 'repeat_improvement',
-            sourceId: simulacro_id,
-            subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
-            missionDate,
-            scoreOnTen: result.nota_final
-          })
-        } else {
-          repeatNoImprovement = true
-        }
+        const repeatResult = await awardRepeatImprovementXp(authContext.supabase, authContext.user.id, {
+          effortXp,
+          difficultyLabel,
+          previousScoreOnTen: previous?.nota_final ?? null,
+          newScoreOnTen: result.nota_final,
+          repeatGeneration,
+          sourceId: simulacro_id,
+          subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
+          missionDate,
+        })
+        xpResult = repeatResult
+        repeatImproved = previous?.nota_final != null ? repeatResult.improved : null
       } else {
         xpResult = await awardXp(authContext.supabase, authContext.user.id, {
-          xp: normalXp,
+          effortXp,
+          difficultyLabel,
           sourceType: isPracticeSession ? 'parcial_completion' : 'simulacro_completion',
           sourceId: simulacro_id,
           subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
@@ -520,7 +532,12 @@ export async function POST(request: NextRequest) {
       totalXp: xpResult?.totalXp ?? null,
       streakDays: xpResult?.streakDays ?? null,
       leagueUpgrade: xpResult?.leagueUpgrade ?? null,
-      repeatNoImprovement
+      repeatImproved,
+      // Compatibilidad con clientes/registros ya guardados que leían este
+      // campo con la semántica vieja (0 XP si no mejoraba) — ahora repetir
+      // sin mejorar sigue dando el XP reducido, así que ya no implica "sin
+      // XP", solo "sin bonus de mejora".
+      repeatNoImprovement: repeatImproved === false
     })
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

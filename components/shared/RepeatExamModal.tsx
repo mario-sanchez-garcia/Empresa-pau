@@ -97,9 +97,15 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
             body: JSON.stringify({ historialExamenId: inserted.id }),
           })
           const xpJson = await xpRes.json()
+          // Con el nuevo sistema de XP, repetir sin mejorar ya no da 0 XP
+          // (se queda con el XP reducido de repetición de siempre) — xpJson
+          // .improved (no xpAwarded > 0, casi siempre true ahora) es lo que
+          // distingue si hubo bonus de mejora de verdad.
           if (xpJson.success && typeof xpJson.xpAwarded === 'number' && xpJson.xpAwarded > 0) {
-            setXpMessage(`+${xpJson.xpAwarded} XP${xpJson.bonusXp > 0 ? ` · +${xpJson.bonusXp} bonus por la nota` : ''} — ¡nota mejorada!`)
-            onDone?.({ xpAwarded: xpJson.xpAwarded, bonusXp: xpJson.bonusXp ?? 0, nota: rawScore, noImprovement: false })
+            setXpMessage(xpJson.improved
+              ? `+${xpJson.xpAwarded} XP${xpJson.bonusXp > 0 ? ` · +${xpJson.bonusXp} bonus por mejora` : ''} — ¡nota mejorada!`
+              : `+${xpJson.xpAwarded} XP. No has mejorado tu mejor nota anterior, así que sin bonus extra esta vez.`)
+            onDone?.({ xpAwarded: xpJson.xpAwarded, bonusXp: xpJson.bonusXp ?? 0, nota: rawScore, noImprovement: !xpJson.improved })
           } else {
             setXpMessage('No has mejorado tu mejor nota anterior, así que no hay XP extra esta vez.')
             onDone?.({ xpAwarded: 0, bonusXp: 0, nota: rawScore, noImprovement: true })

@@ -512,7 +512,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
               {correctCount} a la primera · {failedCount} con algún fallo
             </p>
             <p style={{ fontSize: 13, fontWeight: 900, color: '#059669', marginBottom: 18 }}>
-              +{attemptResult.xpAwarded} XP{attemptResult.bonusXp > 0 ? ` (incluye +${attemptResult.bonusXp} de bonus por la nota)` : ''}
+              +{attemptResult.xpAwarded} XP{attemptResult.bonusXp > 0 ? ` (incluye +${attemptResult.bonusXp} de bonus extra)` : ''}
               {attemptResult.authorBonusAwarded ? ' · el autor del mazo también ha ganado XP' : ''}
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10 }}>

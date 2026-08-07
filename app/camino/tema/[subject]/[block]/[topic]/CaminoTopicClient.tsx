@@ -795,10 +795,16 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 body: JSON.stringify({ historialExamenId: inserted.id, repeatedFromId: repeatOfId }),
               })
               const repeatJson = await repeatRes.json()
+              // Con el nuevo sistema de XP, repetir sin mejorar ya no da 0
+              // XP (se queda con el XP reducido de repetición de siempre) —
+              // repeatJson.improved (no xpAwarded > 0, que ahora es casi
+              // siempre true) es lo que distingue si hubo bonus de mejora.
               if (repeatJson.success && typeof repeatJson.xpAwarded === 'number' && repeatJson.xpAwarded > 0) {
                 setXpAwarded(repeatJson.xpAwarded)
                 if (typeof repeatJson.streakDays === 'number') setStreak(repeatJson.streakDays)
-                toastText = `¡Nota mejorada! +${repeatJson.xpAwarded} XP · nota ${rawScore}/10`
+                toastText = repeatJson.improved
+                  ? `¡Nota mejorada! +${repeatJson.xpAwarded} XP · nota ${rawScore}/10`
+                  : `+${repeatJson.xpAwarded} XP · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que sin bonus extra esta vez.`
                 if (repeatJson.leagueUpgrade) setLeagueUpgrade(repeatJson.leagueUpgrade)
               } else {
                 toastText = `Intento guardado · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que no suma XP extra.`
@@ -835,7 +841,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               setMissionXpStatus('already_completed')
               if (typeof cmJson.streakDays === 'number') setStreak(cmJson.streakDays)
               const bonusXp = typeof cmJson.bonusXp === 'number' ? cmJson.bonusXp : 0
-              toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10${bonusXp > 0 ? ` · +${bonusXp} bonus por la nota` : ''}`
+              toastText = `+${cmJson.xpAwarded} XP por corrección · nota ${rawScore}/10${bonusXp > 0 ? ` · +${bonusXp} bonus extra` : ''}`
               if (cmJson.leagueUpgrade) setLeagueUpgrade(cmJson.leagueUpgrade)
             } else if (cmJson.reason === 'already_completed') {
               setMissionXpStatus('already_completed')

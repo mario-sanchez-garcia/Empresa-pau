@@ -68,7 +68,7 @@ export async function POST(
 
   const serviceDb = createServiceClient()
   const studentResult = await awardXp(serviceDb, user.id, {
-    xp: FLASHCARD_DECK_COMPLETION_XP,
+    effortXp: FLASHCARD_DECK_COMPLETION_XP,
     sourceType: 'flashcard_deck_completion',
     sourceId: deckId,
     subject: deck.subject,
@@ -79,7 +79,7 @@ export async function POST(
   let authorBonusAwarded = false
   if (deck.is_public && deck.user_id !== user.id && scoreOnTen >= AUTHOR_BONUS_MIN_SCORE) {
     const authorResult = await awardXp(serviceDb, deck.user_id, {
-      xp: FLASHCARD_DECK_AUTHOR_BONUS_XP,
+      effortXp: FLASHCARD_DECK_AUTHOR_BONUS_XP,
       sourceType: 'flashcard_deck_author_bonus',
       sourceId: `${deckId}:${user.id}`,
       subject: deck.subject,

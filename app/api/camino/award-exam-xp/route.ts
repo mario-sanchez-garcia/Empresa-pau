@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
-import { awardXp } from '@/app/lib/camino/awardXp'
+import { awardXp, awardRepeatImprovementXp } from '@/app/lib/camino/awardXp'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { normalizeScoreToTen } from '@/app/lib/camino/scoreNormalization'
-import { computeRepeatBaseXp, countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
+import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { EXAM_CORRECTION_XP } from '@/app/lib/camino/xpMap'
 
 export const dynamic = 'force-dynamic'
@@ -20,9 +20,12 @@ export const dynamic = 'force-dynamic'
 // "Repetir para mejorar": si la fila ya insertada tiene repeated_from_id
 // (lo pone el cliente al crearla, ver CaminoTopicClient.tsx), este endpoint
 // NUNCA se fía de un valor del body — relee siempre la columna real desde la
-// propia fila para decidir si aplica XP reducido, comparando contra la nota
-// de la fila referenciada. Sin mejora real sobre esa nota, no se llama a
-// awardXp (xp_amount > 0 es constraint de camino_xp_events).
+// propia fila para decidir el bonus de mejora, comparando contra la nota de
+// la fila referenciada (el intento INMEDIATAMENTE anterior). Repetir sin
+// mejorar sigue dando el XP reducido de repetición de siempre, solo sin el
+// bonus de mejora encima — nunca 0 (ver awardRepeatImprovementXp).
+// historial_examenes no tiene columna de dificultad — se usa 'Media' (×1,00)
+// por defecto, como pide el documento de diseño para contenido sin etiqueta.
 export async function POST(request: NextRequest) {
   try {
     const authContext = await getAuthContext(request)
@@ -75,19 +78,15 @@ export async function POST(request: NextRequest) {
 
       const previousScoreOnTen = previous ? normalizeScoreToTen(previous.nota, previous.nota_maxima) : null
       const repeatGeneration = (await countRepeatDepth(db, 'historial_examenes', examen.repeated_from_id, user.id)) + 1
-      const repeatBaseXp = computeRepeatBaseXp(EXAM_CORRECTION_XP, previousScoreOnTen, newScoreOnTen, repeatGeneration)
 
-      if (repeatBaseXp <= 0) {
-        return NextResponse.json({ success: true, xpAwarded: 0, reason: 'no_improvement' })
-      }
-
-      const result = await awardXp(db, user.id, {
-        xp: repeatBaseXp,
-        sourceType: 'repeat_improvement',
+      const result = await awardRepeatImprovementXp(db, user.id, {
+        effortXp: EXAM_CORRECTION_XP,
+        previousScoreOnTen,
+        newScoreOnTen,
+        repeatGeneration,
         sourceId: String(examen.id),
         subject,
         missionDate,
-        scoreOnTen: newScoreOnTen,
       })
 
       return NextResponse.json({
@@ -97,11 +96,12 @@ export async function POST(request: NextRequest) {
         totalXp: result.totalXp,
         streakDays: result.streakDays,
         leagueUpgrade: result.leagueUpgrade,
+        improved: previousScoreOnTen != null ? result.improved : null,
       })
     }
 
     const result = await awardXp(db, user.id, {
-      xp: EXAM_CORRECTION_XP,
+      effortXp: EXAM_CORRECTION_XP,
       sourceType: 'exam_correction',
       sourceId: String(examen.id),
       subject,

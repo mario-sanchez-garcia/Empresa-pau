@@ -191,6 +191,7 @@ export default function ZonaCursosPage() {
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
+  const [confirmItem, setConfirmItem] = useState<CourseEntry | null>(null)
   const router = useRouter()
   const billing = useBillingStatus()
   const internalUser = useIsInternalUser()
@@ -414,7 +415,11 @@ export default function ZonaCursosPage() {
                             }
                             const titleBlock = (
                               <span style={{ display: 'flex', flexDirection: 'column', gap: 3, overflow: 'hidden', minWidth: 0 }}>
-                                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <span style={{
+                                  fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                  color: item.status === 'completed' ? '#94a3b8' : '#0f172a',
+                                  textDecoration: item.status === 'completed' ? 'line-through' : 'none',
+                                }}>
                                   {item.title}
                                 </span>
                                 {notaOnTen != null && (
@@ -444,8 +449,23 @@ export default function ZonaCursosPage() {
                             if (!item.href) {
                               return <div key={item.key} style={rowStyle}>{titleBlock}{badges}</div>
                             }
-                            if (suggestRepeat) {
-                              return <div key={item.key} style={rowStyle}><a href={item.href} style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}>{titleBlock}</a>{badges}</div>
+                            // Un tema completado no debe reabrirse directo como si
+                            // fuera nuevo — se pregunta primero si quiere repetirlo
+                            // (CaminoTopicClient también protege esto por si acceso
+                            // llega desde otro sitio, p. ej. la tarjeta del calendario).
+                            if (item.status === 'completed') {
+                              return (
+                                <div key={item.key} style={rowStyle}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfirmItem(item)}
+                                    style={{ display: 'contents', textDecoration: 'none', color: 'inherit', background: 'none', border: 'none', padding: 0, margin: 0, font: 'inherit', textAlign: 'left', cursor: 'pointer' }}
+                                  >
+                                    {titleBlock}
+                                  </button>
+                                  {badges}
+                                </div>
+                              )
                             }
                             return <a key={item.key} href={item.href} style={rowStyle}>{titleBlock}{badges}</a>
                           })}
@@ -460,6 +480,47 @@ export default function ZonaCursosPage() {
           )}
         </main>
       </div>
+
+      {confirmItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-modal-bg, 1000)', background: 'rgba(15,23,42,0.52)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={() => setConfirmItem(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 400, background: 'white', borderRadius: 22, border: '1px solid #e2e8f0', boxShadow: '0 24px 60px rgba(15,23,42,0.22)', padding: 26 }}
+          >
+            <p style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Ya completaste este tema</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#64748b', lineHeight: 1.6, marginBottom: 20 }}>
+              &ldquo;{confirmItem.title}&rdquo; ya está marcado como completado{confirmItem.nota != null ? ` con nota ${formatGrade(confirmItem.nota)}/${formatGrade(confirmItem.notaMaxima ?? 10)}` : ''}. ¿Quieres repetirlo para intentar mejorar tu nota?
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setConfirmItem(null)}
+                style={{ padding: '10px 18px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#475569', fontSize: 13, fontWeight: 900, cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = confirmItem.href
+                    ? (confirmItem.latestHistorialId ? `${confirmItem.href}?repeatOf=${confirmItem.latestHistorialId}` : `${confirmItem.href}?confirmed=1`)
+                    : null
+                  setConfirmItem(null)
+                  if (target) router.push(target)
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 12, background: 'linear-gradient(135deg, #f59e0b, #fb923c)', border: 'none', color: 'white', fontSize: 13, fontWeight: 900, cursor: 'pointer' }}
+              >
+                <RotateCcw size={13} /> Sí, quiero repetirlo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

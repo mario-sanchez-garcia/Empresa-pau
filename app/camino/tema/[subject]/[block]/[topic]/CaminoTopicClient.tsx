@@ -261,6 +261,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   // complete-mission — nunca toca camino_calendar, la misión ya completada
   // (y su fecha, fijada por el fix de cronología) se queda exactamente igual.
   const repeatOfId = params.get('repeatOf')
+  // Presente cuando el aviso "ya completaste esto, ¿repetir?" ya se mostró y
+  // confirmó en el propio listado de Mis Cursos (temas sin una fila de
+  // historial_examenes que enlazar vía repeatOf, p. ej. lecciones sin
+  // calificar) — evita preguntar dos veces lo mismo al aterrizar aquí.
+  const entryConfirmed = params.get('confirmed') === '1'
   const exerciseRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [toast, setToast] = useState('')
@@ -292,6 +297,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [missionXpStatus, setMissionXpStatus] = useState<MissionXpStatus>('checking')
   const [pendingCalendarRowId, setPendingCalendarRowId] = useState<string | null>(null)
   const [pendingMissionType, setPendingMissionType] = useState<string>('concept')
+  // Sin este gate, cualquier enlace directo a un tema ya completado (tarjeta
+  // del calendario, vista semanal, Mis Cursos sin pasar por "Repetir para
+  // mejorar") aterrizaba en el formulario de entrega ya abierto y enviable,
+  // sin avisar de que ya se había hecho. `repeatOfId` en la URL (el flujo de
+  // "Repetir para mejorar" ya existente) salta este aviso porque ya expresa
+  // la intención explícita de repetir.
+  const [repeatConfirmed, setRepeatConfirmed] = useState(false)
   const billing = useBillingStatus()
 
   useEffect(() => {
@@ -503,6 +515,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     })
     return () => { cancelled = true }
   }, [topic, v2Cards, activeV2Index, missionId])
+
+  // Un tema puede tener varias mini-lecciones (v2Cards); al cambiar de una
+  // ya confirmada a otra sin confirmar, el aviso debe volver a aparecer en
+  // vez de quedarse "abierto" para todas las siguientes.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRepeatConfirmed(false)
+  }, [topic, activeV2Index])
 
   if (!topic) {
     return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[28px] border border-blue-100 bg-white p-8 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
@@ -1094,60 +1114,87 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}
               </span>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-              <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'texto' ? '#0f172a' : '#f1f5f9', color: answerMode === 'texto' ? 'white' : '#64748b' }}>
-                <PenLine size={13} /> Escribir respuesta
-              </button>
-              <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'imagen' ? '#0f172a' : '#f1f5f9', color: answerMode === 'imagen' ? 'white' : '#64748b' }}>
-                <Camera size={13} /> Subir foto
-              </button>
-            </div>
-            {answerMode === 'texto' ? (
-              <MathEditor subject={currentTopic.subject} value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" />
-            ) : (
-              <div style={{ borderRadius: 4, border: '1px dashed #cbd5e1', background: '#f8fafc', padding: 14 }}>
-                <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} style={{ display: 'none' }} />
-                {image ? (
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    <img src={image.preview} alt="Respuesta subida" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
-                    <button type="button" onClick={clearImage} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '6px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
-                      <X size={13} /> Quitar foto
-                    </button>
-                  </div>
-                ) : (
-                  <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, background: 'white', border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
-                    <UploadCloud size={15} /> Hacer foto o elegir imagen
+            {missionXpStatus === 'already_completed' && !repeatOfId && !repeatConfirmed && !entryConfirmed ? (
+              <div style={{ borderRadius: 12, border: '1px solid #bbf7d0', background: '#f0fdf4', padding: '20px 18px', textAlign: 'center' }}>
+                <p style={{ fontSize: 14, fontWeight: 900, color: '#065f46', marginBottom: 6 }}>Ya has completado este ejercicio</p>
+                <p style={{ fontSize: 12.5, fontWeight: 600, color: '#166534', marginBottom: 16, lineHeight: 1.6 }}>
+                  Puedes repetirlo para intentar mejorar tu nota, o volver a Mis Cursos.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setRepeatConfirmed(true)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: '#059669', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: 'pointer' }}
+                  >
+                    <RotateCcw size={14} /> Sí, quiero repetirlo
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/zona/cursos')}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: 'white', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: '#065f46', border: '1px solid #bbf7d0', cursor: 'pointer' }}
+                  >
+                    Volver a Mis Cursos
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                  <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'texto' ? '#0f172a' : '#f1f5f9', color: answerMode === 'texto' ? 'white' : '#64748b' }}>
+                    <PenLine size={13} /> Escribir respuesta
+                  </button>
+                  <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'imagen' ? '#0f172a' : '#f1f5f9', color: answerMode === 'imagen' ? 'white' : '#64748b' }}>
+                    <Camera size={13} /> Subir foto
+                  </button>
+                </div>
+                {answerMode === 'texto' ? (
+                  <MathEditor subject={currentTopic.subject} value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" />
+                ) : (
+                  <div style={{ borderRadius: 4, border: '1px dashed #cbd5e1', background: '#f8fafc', padding: 14 }}>
+                    <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} style={{ display: 'none' }} />
+                    {image ? (
+                      <div style={{ display: 'grid', gap: 10 }}>
+                        <img src={image.preview} alt="Respuesta subida" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
+                        <button type="button" onClick={clearImage} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '6px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
+                          <X size={13} /> Quitar foto
+                        </button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, background: 'white', border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
+                        <UploadCloud size={15} /> Hacer foto o elegir imagen
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-            <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)) ? .5 : 1 }}>
-              {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
-            </button>
-            {score != null && (
-              <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
-                Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
-              </p>
-            )}
-            {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
-            {isFirstSession && score !== null && correction && (
-              <div style={{ marginTop: 20, borderRadius: 12, background: '#0f172a', padding: '20px 22px', color: 'white' }}>
-                <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
-                  {score < 5
-                    ? 'Este es tu punto de partida. Kairo ya sabe en qué tienes que trabajar y va a empezar por ahí.'
-                    : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
-                </p>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
-                  Cada día Kairo te prepara una misión adaptada a tu nivel. Por cada ejercicio que corriges ganas XP y subes en el ranking de tu liga. Y si estudias varios días seguidos, construyes una racha.
-                </p>
-                <KairoMapCard embedded />
-                <a
-                  href="/camino"
-                  style={{ display: 'inline-block', marginTop: 18, padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
-                >
-                  Ver mi Camino →
-                </a>
-              </div>
+                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)) ? .5 : 1 }}>
+                  {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
+                </button>
+                {score != null && (
+                  <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
+                    Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
+                  </p>
+                )}
+                {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
+                {isFirstSession && score !== null && correction && (
+                  <div style={{ marginTop: 20, borderRadius: 12, background: '#0f172a', padding: '20px 22px', color: 'white' }}>
+                    <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
+                      {score < 5
+                        ? 'Este es tu punto de partida. Kairo ya sabe en qué tienes que trabajar y va a empezar por ahí.'
+                        : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
+                    </p>
+                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
+                      Cada día Kairo te prepara una misión adaptada a tu nivel. Por cada ejercicio que corriges ganas XP y subes en el ranking de tu liga. Y si estudias varios días seguidos, construyes una racha.
+                    </p>
+                    <KairoMapCard embedded />
+                    <a
+                      href="/camino"
+                      style={{ display: 'inline-block', marginTop: 18, padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
+                    >
+                      Ver mi Camino →
+                    </a>
+                  </div>
+                )}
+              </>
             )}
           </article>
         </main>

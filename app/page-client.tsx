@@ -6436,22 +6436,34 @@ function cambiarTipo(t: Tipo) {
                       <span style={{ fontSize: '24px', fontWeight: 800, color: '#cbd5e1' }}>—</span>
                     </div>
                   )}
-                  {itemSeleccionado.enunciado && itemSeleccionado.id && shouldSuggestRepeat(normalizedHistoryScore(itemSeleccionado), resolveGradeThreshold(gradeThresholdConfig, normalizeSubjectSlug(itemSeleccionado.asignatura))) && (
-                    <button
-                      className="campus-primary"
-                      onClick={() => setRepeatSource({
-                        id: itemSeleccionado.id,
-                        asignatura: itemSeleccionado.asignatura,
-                        tipo: itemSeleccionado.tipo,
-                        bloque: itemSeleccionado.bloque,
-                        opcion: itemSeleccionado.opcion,
-                        año: typeof itemSeleccionado.año === 'number' ? itemSeleccionado.año : null,
-                        enunciado: itemSeleccionado.enunciado,
-                        nota_maxima: itemSeleccionado.nota_maxima ?? null,
-                      })}
-                      style={{ padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #f59e0b, #fb923c)', color: 'white', border: 'none', boxShadow: '0 3px 10px rgba(217,119,6,.4)', cursor: 'pointer', fontSize: '13px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}
-                    ><RotateCcw size={15} />Repetir para mejorar</button>
-                  )}
+                  {itemSeleccionado.enunciado && itemSeleccionado.id && (() => {
+                    // Antes solo se ofrecía repetir cuando la nota estaba por
+                    // debajo del umbral (shouldSuggestRepeat) — así que un
+                    // ejercicio ya hecho con buena nota no tenía ningún aviso
+                    // ni camino de vuelta explícito si el alumno quería
+                    // repetirlo de todas formas. Ahora el botón (y por tanto
+                    // el aviso de RepeatExamModal antes de reenviar) está
+                    // siempre disponible para cualquier ejercicio ya
+                    // corregido; solo cambia la etiqueta según si conviene
+                    // "mejorar" o simplemente "repetir".
+                    const wantsImprovement = shouldSuggestRepeat(normalizedHistoryScore(itemSeleccionado), resolveGradeThreshold(gradeThresholdConfig, normalizeSubjectSlug(itemSeleccionado.asignatura)))
+                    return (
+                      <button
+                        className="campus-primary"
+                        onClick={() => setRepeatSource({
+                          id: itemSeleccionado.id,
+                          asignatura: itemSeleccionado.asignatura,
+                          tipo: itemSeleccionado.tipo,
+                          bloque: itemSeleccionado.bloque,
+                          opcion: itemSeleccionado.opcion,
+                          año: typeof itemSeleccionado.año === 'number' ? itemSeleccionado.año : null,
+                          enunciado: itemSeleccionado.enunciado,
+                          nota_maxima: itemSeleccionado.nota_maxima ?? null,
+                        })}
+                        style={{ padding: '9px 16px', borderRadius: '999px', background: wantsImprovement ? 'linear-gradient(135deg, #f59e0b, #fb923c)' : WARM.wash, color: wantsImprovement ? 'white' : WARM.blue, border: wantsImprovement ? 'none' : '1px solid #dbe7fb', boxShadow: wantsImprovement ? '0 3px 10px rgba(217,119,6,.4)' : 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}
+                      ><RotateCcw size={15} />{wantsImprovement ? 'Repetir para mejorar' : 'Ya lo hiciste · repetir'}</button>
+                    )
+                  })()}
                   <button className="campus-primary" onClick={() => abrirChatConContexto(itemSeleccionado)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), padding: '9px 16px', borderRadius: '999px', background: 'linear-gradient(135deg, #1d4ed8, #60a5fa)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}><MessageCircle size={15} />Preguntar a Kairo</button>
                   <button className="campus-hover" onClick={() => setItemSeleccionado(null)} style={{ ...hoverVars(WARM.blue, WARM.wash, '#60a5fa'), width: '34px', height: '34px', borderRadius: '50%', background: WARM.wash, border: '1px solid #dbe7fb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARM.muted }}><X size={17} /></button>
                 </div>

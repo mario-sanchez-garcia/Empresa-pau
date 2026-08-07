@@ -82,6 +82,28 @@ export default function ExamStatement({
     return () => document.removeEventListener('pointerdown', closeHighlightMenu)
   }, [])
 
+  // En móvil, seleccionar texto es un gesto táctil (mantener pulsado +
+  // arrastrar los tiradores de selección nativos) que nunca dispara
+  // mouseup — por eso "Subrayar" no hacía nada en el móvil, aunque la
+  // selección de texto en sí funcionara. selectionchange sí se dispara con
+  // cualquier modalidad de entrada (ratón, teclado o touch), así que sirve
+  // de red de seguridad universal; se debounce porque dispara en cada paso
+  // intermedio mientras se arrastra, no solo al soltar.
+  useEffect(() => {
+    if (!highlighterActive || typeof document === 'undefined') return
+    let timer: number | undefined
+    function onSelectionChange() {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => { addHighlightFromSelection() }, 400)
+    }
+    document.addEventListener('selectionchange', onSelectionChange)
+    return () => {
+      document.removeEventListener('selectionchange', onSelectionChange)
+      window.clearTimeout(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlighterActive])
+
   function persist(next: HighlightRange[]) {
     if (!safeStorageKey || typeof window === 'undefined') return
     try {
@@ -200,6 +222,7 @@ export default function ExamStatement({
         onClick={selectHighlight}
         onKeyUp={addHighlightFromSelection}
         onMouseUp={addHighlightFromSelection}
+        onTouchEnd={addHighlightFromSelection}
       >
         <MathMarkdown text={text} format={format} components={components} />
       </div>

@@ -34,11 +34,6 @@ function PracticaPageInner() {
   const [answers, setAnswers] = useState<Record<string, SimulacroAnswer>>({})
   const [active, setActive] = useState(0)
   const [mode, setMode] = useState<Record<string, 'text' | 'image'>>({})
-  // En móvil el enunciado (con texto fuente incluido, a veces largo) y la
-  // respuesta competían por la misma pantalla estrecha, dejando muy poco
-  // alto real para leer o escribir a la vez. En desktop (md+) ambos paneles
-  // siguen mostrándose apilados como siempre — esto solo cambia < md.
-  const [mobileTab, setMobileTab] = useState<Record<string, 'leer' | 'responder'>>({})
   const [startedAtMs, setStartedAtMs] = useState<number | null>(null)
   // Suma de los tramos ya cerrados (pausas anteriores) — igual que en
   // app/simulacros/[id]/page.tsx, para que pausar y reanudar nunca reinicie
@@ -645,36 +640,10 @@ function PracticaPageInner() {
         {/* Question panels */}
         {record.bloques.map((block, index) => {
           const bloqueIncompleto = isIncompleteOfficialExercise(block)
-          const activeMobileTab = mobileTab[block.id] ?? 'leer'
           return (
             <section key={block.id} className={active === index ? 'grid gap-4 pau-reveal' : 'hidden'}>
 
-              {/* Selector Leer/Responder — solo en móvil (md:hidden), desktop sigue mostrando ambos paneles apilados */}
-              {!bloqueIncompleto && (
-                <div className="flex gap-2 md:hidden">
-                  {([
-                    { key: 'leer' as const, label: 'Leer enunciado' },
-                    { key: 'responder' as const, label: 'Responder' },
-                  ]).map(tab => (
-                    <button
-                      key={tab.key}
-                      onClick={() => setMobileTab(prev => ({ ...prev, [block.id]: tab.key }))}
-                      className="flex-1 rounded-xl px-4 py-2.5 text-sm font-black transition"
-                      style={{
-                        background: activeMobileTab === tab.key ? cfg.color : '#f1f5f9',
-                        color: activeMobileTab === tab.key ? '#fff' : '#475569',
-                        boxShadow: activeMobileTab === tab.key ? `0 8px 20px ${cfg.color}30` : 'none',
-                        border: 'none',
-                        transition: 'all 180ms var(--ease-out)',
-                      }}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div className={`pau-card-section ${!bloqueIncompleto && activeMobileTab === 'responder' ? 'hidden md:block' : ''}`}>
+              <div className="pau-card-section">
                 <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="mb-2 flex items-center gap-2.5">
@@ -732,7 +701,7 @@ function PracticaPageInner() {
               </div>
 
               {!bloqueIncompleto && (
-                <div className={`pau-card-section ${activeMobileTab === 'leer' ? 'hidden md:block' : ''}`}>
+                <div className="pau-card-section">
                   <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex gap-2">
                       {(['text', 'image'] as const).map(m => (

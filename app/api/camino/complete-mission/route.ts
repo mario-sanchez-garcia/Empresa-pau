@@ -41,16 +41,62 @@ export async function POST(request: NextRequest) {
 
     const db = createServiceClient()
     const now = new Date().toISOString()
+    const today = now.slice(0, 10)
 
-    // PASO 2 — Marcar calendario como completado y detectar si ya estaba.
-    // Acepta tanto 'pending' como 'missed': el fix de cronología (las
-    // misiones ya no se mueven de su día real) hace que un alumno pueda ver
-    // y corregir un día pasado cuya misión ensureCaminoCalendar ya marcó
-    // 'missed' de madrugada por no haberse hecho a tiempo — antes esto solo
-    // aceptaba 'pending', así que corregirla tarde caía siempre en la rama
-    // "no_pending_mission" (sin XP, sin marcar como hecha) aunque el alumno
-    // sí hubiera hecho el trabajo real. Completar tarde sigue contando.
-    let updateQuery = db
+    // PASO 1.5 — Resolver la fila EXACTA a completar antes de escribir nada.
+    // calendarRowId es lo normal (el alumno abrió esta misión desde una
+    // tarjeta concreta del calendario, ver missionId en CaminoCalendarClient/
+    // CaminoTopicClient). Cuando no llega (p.ej. abierto desde La Zona → Mis
+    // Cursos, sin contexto de día), antes se hacía un UPDATE directo
+    // filtrando solo por subject+v2_sort_order+status — sin fecha ni límite
+    // de filas. Si el motor de generación había dejado más de una fila
+    // pendiente/missed para el mismo tema en fechas distintas (algo que sí
+    // pasa — ver ensureCaminoCalendar), ese UPDATE las marcaba TODAS
+    // completadas a la vez, incluidas fechas futuras que el alumno ni había
+    // visto todavía. Ahora se resuelve primero a una única fila candidata
+    // (pendiente/missed, con fecha <= hoy, la más reciente) y solo esa se
+    // toca — nunca una fecha futura.
+    let targetId = calendarRowId
+    if (!targetId) {
+      const { data: candidates } = await db
+        .from('camino_calendar')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('subject', subject)
+        .eq('v2_sort_order', v2SortOrder)
+        .in('status', ['pending', 'missed'])
+        .lte('scheduled_date', today)
+        .order('scheduled_date', { ascending: false })
+        .limit(1)
+      targetId = candidates?.[0]?.id ?? null
+    }
+
+    if (!targetId) {
+      const { data: existing } = await db
+        .from('camino_calendar')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('subject', subject)
+        .eq('v2_sort_order', v2SortOrder)
+        .lte('scheduled_date', today)
+        .limit(10)
+
+      const reason = existing?.some(row => row.status === 'completed')
+        ? 'already_completed'
+        : 'no_pending_mission'
+
+      return NextResponse.json({ success: false, reason })
+    }
+
+    // PASO 2 — Marcar calendario como completado. Acepta tanto 'pending' como
+    // 'missed': el fix de cronología (las misiones ya no se mueven de su día
+    // real) hace que un alumno pueda ver y corregir un día pasado cuya misión
+    // ensureCaminoCalendar ya marcó 'missed' de madrugada por no haberse
+    // hecho a tiempo — antes esto solo aceptaba 'pending', así que corregirla
+    // tarde caía siempre en la rama "no_pending_mission" (sin XP, sin marcar
+    // como hecha) aunque el alumno sí hubiera hecho el trabajo real.
+    // Completar tarde sigue contando — pero solo la fila ya resuelta arriba.
+    const { data: updated } = await db
       .from('camino_calendar')
       .update({
         status: 'completed',
@@ -58,34 +104,14 @@ export async function POST(request: NextRequest) {
         xp_awarded: xp,
         updated_at: now,
       })
+      .eq('id', targetId)
       .eq('user_id', user.id)
       .in('status', ['pending', 'missed'])
-
-    updateQuery = calendarRowId
-      ? updateQuery.eq('id', calendarRowId)
-      : updateQuery.eq('subject', subject).eq('v2_sort_order', v2SortOrder)
-
-    const { data: updated } = await updateQuery
       .select('id')
 
-    // PASO 4 — Idempotencia: 0 filas afectadas = ya completada o no existe
+    // PASO 4 — Idempotencia: 0 filas afectadas = ya completada entre medias
     if (!updated || updated.length === 0) {
-      let existingQuery = db
-        .from('camino_calendar')
-        .select('id, status')
-        .eq('user_id', user.id)
-
-      existingQuery = calendarRowId
-        ? existingQuery.eq('id', calendarRowId)
-        : existingQuery.eq('subject', subject).eq('v2_sort_order', v2SortOrder)
-
-      const { data: existing } = await existingQuery.limit(10)
-
-      const reason = existing?.some(row => row.status === 'completed')
-        ? 'already_completed'
-        : 'no_pending_mission'
-
-      return NextResponse.json({ success: false, reason })
+      return NextResponse.json({ success: false, reason: 'already_completed' })
     }
 
     // PASO 2b — Marcar cola como completada (best-effort)
@@ -116,14 +142,14 @@ export async function POST(request: NextRequest) {
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,
       v2_sort_order: v2SortOrder,
-      calendar_row_id: calendarRowId,
+      calendar_row_id: targetId,
       mission_type: missionType,
       title,
     })
     await recordBetaMetric(db, user.id, 'xp_awarded', {
       subject,
       v2_sort_order: v2SortOrder,
-      calendar_row_id: calendarRowId,
+      calendar_row_id: targetId,
       mission_type: missionType,
       xp,
     })

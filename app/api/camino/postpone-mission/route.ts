@@ -47,14 +47,31 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', queueItem.id)
 
-    // PASO 3: Marcar la misión del calendario como postponed (si está pending)
-    await db
+    // PASO 3: Marcar la misión del calendario como postponed (si está
+    // pending). Mismo tema+asignatura puede tener más de una fila pendiente
+    // en fechas distintas (ver ensureCaminoCalendar) — sin fecha ni límite,
+    // este UPDATE marcaría TODAS como postponed de golpe, no solo la de hoy
+    // (mismo bug de fondo que /api/camino/complete-mission). Se resuelve a
+    // la fila de hoy o pasada más reciente antes de escribir.
+    const { data: postponeCandidates } = await db
       .from('camino_calendar')
-      .update({ status: 'postponed', updated_at: new Date().toISOString() })
+      .select('id')
       .eq('user_id', user.id)
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
       .eq('status', 'pending')
+      .lte('scheduled_date', new Date().toISOString().slice(0, 10))
+      .order('scheduled_date', { ascending: false })
+      .limit(1)
+
+    if (postponeCandidates?.[0]?.id) {
+      await db
+        .from('camino_calendar')
+        .update({ status: 'postponed', updated_at: new Date().toISOString() })
+        .eq('id', postponeCandidates[0].id)
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+    }
 
     // PASO 4: Calcular ratio de postponed en el bloque
     const blockKey = queueItem.block_key

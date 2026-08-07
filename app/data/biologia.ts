@@ -234,14 +234,15 @@ c) Razone qué ocurriría en el caso de que la fermentación se realizase a 10-1
         numero: "A.1",
         tema: "Con respecto al sistema inmune: El esquema adjunto representa la administración",
         enunciado: `Con respecto al sistema inmune: El esquema adjunto representa la administración de un antígeno (A) y una respuesta inmunitaria que produce (B).
+
+![Esquema de inmunización y obtención de suero](/biologia-imgs/madrid/2024/ordinaria/pregunta-A1-inmunizacion.png)
+
 a) ¿Qué tipo de inmunización se lleva a cabo en A? ¿Qué tipo de respuesta inmune está representada en B? (0,5 puntos).
 b) Mencione otro tipo de respuesta inmune e indique si también se produciría en este caso (0,5 puntos).
 c) El vial representado en C se ha obtenido a partir de la sangre del animal inmunizado. Explique qué utilidad puede tener la administración de su contenido a otro animal infectado con el mismo antígeno (0.5 puntos).
 d) ¿Qué tipo de inmunidad proporciona la administración mencionada en el apartado c? ¿Cómo se denomina este tipo de tratamiento? (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2024-A-2",
@@ -368,7 +369,11 @@ d) Explique qué diferencia hay entre la eucromatina y la heterocromatina en una
         enunciado: `Respecto a las enzimas:
 a) Defina los términos enzima y centro activo (1 punto).
 b) En una reacción química en la que un sustrato “A” se transforma en un producto “B” se liberan 5 kJ/mol por molécula de sustrato. Razone cuánta energía se liberaría si la reacción estuviese catalizada por una enzima (0,5 puntos).
-c) El estudio del efecto de la temperatura sobre la actividad de una enzima, medida en velocidad de la reacción V ($\\mu mol/min$), dio lugar a los valores mostrados en la tabla. Razone a qué se deben estos resultados (0,5 puntos). Tª (°C) 10º 15º 20º 25º 30º 35º 40º 45º 50º 55º 60º V($\\mu mol/min$) 0,4 0,8 1,4 2 2,8 3,4 3,8 3,4 2,4 0,8 0`,
+c) El estudio del efecto de la temperatura sobre la actividad de una enzima, medida en velocidad de la reacción V ($\\mu mol/min$), dio lugar a los valores mostrados en la tabla.
+
+![Tabla de actividad enzimática según temperatura](/biologia-imgs/madrid/2024/ordinaria/pregunta-B4-tabla-temperatura-enzima.png)
+
+Razone a qué se deben estos resultados (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
       },
@@ -424,13 +429,14 @@ d) Razone si mediante selección sería posible criar exclusivamente gallinas az
         numero: "A.2",
         tema: "Con relación a la respuesta inmune",
         enunciado: `Con relación a la respuesta inmune:
+
+![Estructura básica de un anticuerpo](/biologia-imgs/madrid/2023/ordinaria/pregunta-A2-anticuerpo.png)
+
 a) El esquema adjunto representa la estructura básica de un anticuerpo. Identifique todas las partes señaladas con letras (0,75 puntos).
 b) Indique tres características de la unión antígeno-anticuerpo (0,75 puntos).
 c) Indique cuál es la inmunoglobulina implicada en los procesos alérgicos y cite una sustancia liberada por los mastocitos en la respuesta a un alergeno (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2023-A-3",
@@ -572,14 +578,15 @@ b) Nombre dos enlaces o interacciones que estabilizan la estructura terciaria de
         label: "Pregunta 1",
         numero: "A.1",
         tema: "En relación con el transporte y movimiento celular",
-        enunciado: `En relación con el transporte y movimiento celular: 
+        enunciado: `En relación con el transporte y movimiento celular:
+
+![Esquema de transporte y movimiento celular](/biologia-imgs/madrid/2022/ordinaria/pregunta-A1-transporte-celular.png)
+
 a) Indique el mecanismo de transporte que aparece representado en el esquema adjunto. Nombre las estructuras y orgánulos señalados del 1 al 4 (0,75 puntos).
 b) Indique dos diferencias entre transporte activo y pasivo a través de la membrana. Ponga un ejemplo de transporte activo (0,75 puntos).
 c) Cite dos ejemplos concretos en los que el citoesqueleto pueda contribuir a los movimientos celulares (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2022-A-2",
@@ -678,15 +685,16 @@ b) Describa brevemente la diferencia entre mutación cromosómica y mutación ge
         label: "Pregunta 2",
         numero: "B.2",
         tema: "En relación con la respuesta inmune: La gráfica adjunta representa la respuesta",
-        enunciado: `En relación con la respuesta inmune: La gráfica adjunta representa la respuesta inmune primaria (A) y secundaria (B) de un individuo que recibe dos dosis de la misma vacuna frente a un microorganismo patógeno: 
+        enunciado: `En relación con la respuesta inmune: La gráfica adjunta representa la respuesta inmune primaria (A) y secundaria (B) de un individuo que recibe dos dosis de la misma vacuna frente a un microorganismo patógeno:
+
+![Gráfica de respuesta inmune primaria y secundaria](/biologia-imgs/madrid/2022/ordinaria/pregunta-B2-respuesta-inmune.png)
+
 a) A la vista de la gráfica, explique la necesidad de revacunación frente a este microorganismo (0,5 puntos).
 b) Explique a qué se debe que la segunda dosis de vacuna desencadene una respuesta inmune más rápida y mayor (0,5 puntos).
 c) Indique el tipo de anticuerpo mayoritario de la respuesta inmune primaria (A) y el de la respuesta inmune secundaria (B) (0,5 puntos).
 d) Indique el nombre que recibe la inmunidad conseguida mediante vacunas (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2022-B-3",
@@ -775,13 +783,14 @@ d) Explique qué le sucedería a una planta si se riega con agua salada (0,5 pun
         label: "Pregunta 2",
         numero: "A.2",
         tema: "En relación con los intercambios energéticos de los procesos metabólicos",
-        enunciado: `En relación con los intercambios energéticos de los procesos metabólicos: 
+        enunciado: `En relación con los intercambios energéticos de los procesos metabólicos:
+
+![Gráfica de energía libre de una reacción metabólica](/biologia-imgs/madrid/2021/ordinaria/pregunta-A2-energia-reaccion.png)
+
 a) La siguiente gráfica representa la energía de una reacción metabólica. Identifique los compuestos A y C y la variable B . Justifique si se trata de una reacción endergónica o exergónica (1 punto).
 b) Defina catabolismo y anabolismo. Indique un ejemplo de una ruta metabólica de cada uno de estos procesos (1 punto).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2021-A-3",
@@ -792,13 +801,14 @@ b) Defina catabolismo y anabolismo. Indique un ejemplo de una ruta metabólica d
         label: "Pregunta 3",
         numero: "A.3",
         tema: "En relación con el flujo de información genética: El esquema representa el",
-        enunciado: `En relación con el flujo de información genética: El esquema representa el dogma central de la biología molecular. 
+        enunciado: `En relación con el flujo de información genética: El esquema representa el dogma central de la biología molecular.
+
+![Esquema del dogma central de la biología molecular](/biologia-imgs/madrid/2021/ordinaria/pregunta-A3-dogma-central.png)
+
 a) Indique qué moléculas se corresponden con los números 1, 2 y 3 y qué procesos se corresponden con las letras A, B, C y D (1,25 puntos).
 b) Indique la enzima clave en cada uno de los procesos A, B y C (0,75 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2021-A-4",
@@ -831,7 +841,7 @@ c) Cite la principal diferencia entre cilios y flagelos. Indique si los cilios s
         tema: "En relación con las características de microorganismos y otras formas acelulares",
         enunciado: `En relación con las características de microorganismos y otras formas acelulares:
 a) Defina capsómero, profago, virión, nucleoide (1 punto).
-b) Indique dos semejanzas y dos diferencias entre Arqueobacterias y Eubacterias (1 punto). Tiempo ESTADO INTERMEDIO B C A`,
+b) Indique dos semejanzas y dos diferencias entre Arqueobacterias y Eubacterias (1 punto).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
       },
@@ -876,7 +886,10 @@ b) Defina estructura terciaria de una proteína e indique tres tipos de enlaces 
         numero: "B.3",
         tema: "En relación con los microorganismos",
         enunciado: `En relación con los microorganismos:
-a) Copie la siguiente tabla y complete los datos para cada uno de los microorganismos indicados (1,25 puntos): Reino Tipo de nutrición Cianobacterias Bacterias nitrificantes Diatomeas Plasmodium Saccharomyces cerevisiae 
+a) Copie la siguiente tabla y complete los datos para cada uno de los microorganismos indicados (1,25 puntos):
+
+![Tabla de microorganismos, reino y tipo de nutrición](/biologia-imgs/madrid/2021/ordinaria/pregunta-B3-tabla-microorganismos.png)
+
 b) Indique cuáles de los microorganismos de la tabla anterior presentan pared celular y cuál es su principal componente en cada caso (0,75 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
@@ -907,7 +920,10 @@ d) Durante la telofase mitótica se produce la descondensación progresiva de 23
         label: "Pregunta 5",
         numero: "B.5",
         tema: "Con relación a las aportaciones de Mendel al estudio de la herencia: En una",
-        enunciado: `Con relación a las aportaciones de Mendel al estudio de la herencia: En una raza de conejos, el pelo corto “A” es dominante sobre el pelo largo “a”. Se llevan a cabo cuatro cruzamientos que dan lugar a los siguientes porcentajes de fenotipos en sus progenies: Parentales Progenie 1 pelo corto x pelo largo 50% pelo corto y 50% pelo largo 2 pelo largo x pelo largo 100% pelo largo 3 pelo corto x pelo largo 100% pelo corto 4 pelo corto x pelo corto 100% pelo corto 
+        enunciado: `Con relación a las aportaciones de Mendel al estudio de la herencia: En una raza de conejos, el pelo corto “A” es dominante sobre el pelo largo “a”. Se llevan a cabo cuatro cruzamientos que dan lugar a los siguientes porcentajes de fenotipos en sus progenies:
+
+![Tabla de cruzamientos y progenie en conejos](/biologia-imgs/madrid/2021/ordinaria/pregunta-B5-cruzamientos.png)
+
 a) Indique los genotipos posibles de los parentales y de la progenie de cada uno de los cruzamientos (1 punto).
 b) Defina locus y fenotipo (0,5 puntos).
 c) Razone si en el caso de dos genes ligados se cumple la tercera ley de Mendel en ausencia de recombinación (0,5 puntos).`,

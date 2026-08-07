@@ -21,6 +21,18 @@ const defaultComponents: Partial<Components> = {
   th: ({ children }: { children?: ReactNode }) => <th className="border border-slate-200 bg-blue-50 px-3 py-2 text-left font-black text-blue-900">{children}</th>,
   td: ({ children }: { children?: ReactNode }) => <td className="border border-slate-200 px-3 py-2 align-top text-slate-700">{children}</td>,
   code: ({ children }: { children?: ReactNode }) => <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.9em] text-slate-800">{children}</code>,
+  img: ({ src, alt }) => {
+    const safeSrc = typeof src === 'string' ? src : undefined
+    return (
+      <span className="my-4 flex justify-center">
+        <img
+          src={safeSrc}
+          alt={alt ?? 'Imagen oficial'}
+          className="max-h-[240px] w-auto max-w-[min(100%,600px)] rounded-xl border border-slate-200 bg-white object-contain shadow-sm"
+        />
+      </span>
+    )
+  },
 }
 
 export default function MathMarkdown({

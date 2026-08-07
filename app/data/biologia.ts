@@ -79,6 +79,8 @@ b) Indique la secuencia y polaridad del $ARNm$ que corresponde al ADN de doble h
 c) Describa brevemente los principales eventos que suceden en cada una de las tres fases de la traducción del mensaje genético (0,75 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+        requiereImagen: true,
+        imagenes: ["/biologia-imgs/madrid/2025/ordinaria/pregunta-2A-codigo-genetico.png"],
       },
       {
         id: "bio-2025-B-2",
@@ -153,6 +155,8 @@ d) Indique la vía metabólica específica del catabolismo de los ácidos grasos
 e) Explique la razón por qué el catabolismo de los ácidos grasos consume una mayor cantidad de oxígeno que la de otros nutrientes (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+        requiereImagen: true,
+        imagenes: ["/biologia-imgs/madrid/2025/ordinaria/pregunta-4A-tabla-nutrientes.png"],
       },
       {
         id: "bio-2025-B-4",
@@ -172,7 +176,7 @@ e) Defina coenzima (0,25 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
         requiereImagen: true,
-        imagenes: [],
+        imagenes: ["/biologia-imgs/madrid/2025/ordinaria/pregunta-4B-enzimas.png"],
       },
       {
         id: "bio-2025-A-5",

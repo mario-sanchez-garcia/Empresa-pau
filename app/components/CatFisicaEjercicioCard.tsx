@@ -45,6 +45,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
   const [respuesta, setRespuesta] = useState('')
   const [imagenes, setImagenes] = useState<UploadedImage[]>([])
   const [correccion, setCorreccion] = useState('')
+  const [imagenError, setImagenError] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const [apartadoIdx, setApartadoIdx] = useState(0)
@@ -59,13 +60,23 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
-    const next = await Promise.all(files.map(async file => ({
+    // allSettled: un archivo en formato no compatible (p. ej. HEIC) no debe
+    // tirar las demás fotos del mismo lote sin ningún aviso.
+    const results = await Promise.allSettled(files.map(async file => ({
       name: file.name,
       type: 'image/jpeg',
       data: await compressImageToBase64(file),
       preview: URL.createObjectURL(file),
     })))
-    setImagenes(current => [...current, ...next])
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<UploadedImage> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) setImagenes(current => [...current, ...succeeded])
+    if (failedCount > 0) {
+      console.error('[cat-fisica] image_compression_failed', { failedCount })
+      setImagenError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte a JPG/PNG.`)
+    } else {
+      setImagenError('')
+    }
     event.target.value = ''
   }
 
@@ -271,6 +282,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
                 <UploadCloud size={20} /> Añadir fotos
                 <input type="file" multiple accept="image/png,image/jpeg,image/webp" capture="environment" onChange={handleImagenes} className="hidden" />
               </label>
+              {imagenError && <p className="mt-2 text-xs font-bold" style={{ color: '#dc2626' }}>{imagenError}</p>}
               {imagenes.length > 0 && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {imagenes.map((imagen, index) => (

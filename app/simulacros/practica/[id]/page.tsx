@@ -53,6 +53,7 @@ function PracticaPageInner() {
   const [pausing, setPausing] = useState(false)
   const [resuming, setResuming] = useState(false)
   const [resumeError, setResumeError] = useState('')
+  const [imageErrors, setImageErrors] = useState<Record<string, string>>({})
 
   const answersRef = useRef<Record<string, SimulacroAnswer>>({})
   const answerTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
@@ -328,8 +329,18 @@ function PracticaPageInner() {
 
   async function handleImage(blockId: string, file?: File) {
     if (!file) return
-    const base64 = await compressImageToBase64(file)
-    setAnswers(prev => ({ ...prev, [blockId]: { ...(prev[blockId] ?? { text: '' }), image: base64, imageType: 'image/jpeg' } }))
+    setImageErrors(prev => ({ ...prev, [blockId]: '' }))
+    try {
+      const base64 = await compressImageToBase64(file)
+      setAnswers(prev => ({ ...prev, [blockId]: { ...(prev[blockId] ?? { text: '' }), image: base64, imageType: 'image/jpeg' } }))
+    } catch (error) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone). Sin este catch la promesa
+      // rechazada quedaba sin manejar: el bloque se quedaba sin respuesta y
+      // sin ningún aviso — "las fotos no se leen" sin explicación.
+      console.error('[simulacro-practica] image_compression_failed', { blockId, message: (error as Error)?.message })
+      setImageErrors(prev => ({ ...prev, [blockId]: 'No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.' }))
+    }
   }
 
   async function submitSession() {
@@ -757,6 +768,9 @@ function PracticaPageInner() {
                         <span className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>JPG, PNG, HEIC hasta 10 MB</span>
                         <input type="file" accept="image/*" capture="environment" className="hidden" onChange={event => void handleImage(block.id, event.target.files?.[0])} />
                       </label>
+                      {imageErrors[block.id] && (
+                        <p className="text-xs font-bold" style={{ color: '#dc2626' }}>{imageErrors[block.id]}</p>
+                      )}
                       {answers[block.id]?.image && (
                         <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: '#dbe7fb' }}>
                           <img src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`} alt="Respuesta" className="max-h-96 w-full object-contain" style={{ background: '#f8fbff' }} />

@@ -574,6 +574,28 @@ export function correctionJsonToMarkdownWithOptions(rawData: unknown, options: {
   ].filter(Boolean).join('\n\n')
 }
 
+// Un bloque de corrección "tiene contenido genuino" si aporta una nota
+// parseable o feedback real (texto/lista no vacíos). Un bloque que pasa
+// parseCorrectionJson pero no cumple ninguna de estas condiciones es
+// indistinguible de "la IA no corrigió nada" — normalizeScore(...) ?? 0 lo
+// convertía en un 0/10 silencioso e indistinguible de una nota real de 0,
+// con "Sin observaciones adicionales" en ambos apartados. Ver notEvaluable
+// más abajo, que usa esto para marcar esos casos como error técnico en vez
+// de nota real.
+export function blockHasGenuineContent(block: unknown): boolean {
+  if (!block || typeof block !== 'object') return false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const b = block as any
+  const hasScore = normalizeScore(b.puntos_conseguidos ?? b.nota) != null
+  const hasFeedback = Boolean(
+    (typeof b.que_hizo_bien === 'string' && b.que_hizo_bien.trim()) ||
+    (Array.isArray(b.errores_detectados) && b.errores_detectados.filter(Boolean).length) ||
+    (typeof b.correccion_detalle === 'string' && b.correccion_detalle.trim()) ||
+    (typeof b.que_faltaba === 'string' && b.que_faltaba.trim())
+  )
+  return hasScore || hasFeedback
+}
+
 export function normalizeCorrectionForOfficialScores(rawData: unknown, officialMaxScores: number[]) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = rawData as any // JSON de corrección sin interfaz completa — any intencional
@@ -591,6 +613,15 @@ export function normalizeCorrectionForOfficialScores(rawData: unknown, officialM
     : hasBlockShape
       ? [data]
       : []
+  // notEvaluable: la IA devolvió JSON válido pero sin ningún bloque con
+  // contenido genuino (ni nota parseable ni feedback) y sin nota_final ni
+  // feedback_general a nivel superior. No es una nota real de 0 — es un
+  // fallo técnico (respuesta vacía, imagen no legible, JSON con forma
+  // inesperada) que el llamante debe mostrar como "no evaluable", no como
+  // 0/10.
+  const notEvaluable = blocks.length > 0
+    ? !blocks.some(blockHasGenuineContent)
+    : normalizeScore(data?.nota_final) == null && !(typeof data?.feedback_general === 'string' && data.feedback_general.trim())
   const normalizedBlocks = blocks.map((block, index: number) => {
     const officialMax = normalizeScore(officialMaxScores[index]) ?? normalizeScore(block?.puntos_maximos ?? block?.max_puntos) ?? 0
     const score = clampScore(normalizeScore(block?.puntos_conseguidos ?? block?.nota) ?? 0, officialMax)
@@ -612,6 +643,7 @@ export function normalizeCorrectionForOfficialScores(rawData: unknown, officialM
     ...data,
     nota_final: notaFinal,
     nota_sobre_14: undefined,
+    notEvaluable,
     desglose_bloques: normalizedBlocks,
     resumen_por_bloque_tematico: Array.isArray(data?.resumen_por_bloque_tematico) && data.resumen_por_bloque_tematico.length
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

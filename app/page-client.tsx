@@ -869,7 +869,9 @@ export default function Home() {
   const [imagen, setImagen] = useState<string | null>(null)
   const [imagenTipo, setImagenTipo] = useState('image/jpeg')
   const [imagenPreview, setImagenPreview] = useState<string | null>(null)
+  const [imagenError, setImagenError] = useState('')
   const [correccion, setCorreccion] = useState('')
+  const [correccionNoEvaluable, setCorreccionNoEvaluable] = useState(false)
   const [examXpResult, setExamXpResult] = useState<{ xpAwarded: number; bonusXp: number } | null>(null)
   const [truncated, setTruncated] = useState(false)
   const [cargando, setCargando] = useState(false)
@@ -1943,26 +1945,40 @@ function cambiarTipo(t: Tipo) {
   async function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    setImagenError('')
     const imageRequestId = `image-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const imageStart = performance.now()
     setImagenPreview(URL.createObjectURL(file))
     setImagenTipo('image/jpeg')
-    const compressed = await compressImageToBase64(file)
-    setImagen(compressed)
-    const imageMs = Math.round(performance.now() - imageStart)
-    lastImageTimingRef.current = { requestId: imageRequestId, ms: imageMs, chars: compressed.length }
-    console.info('[correction-timing] image_prepare_ms', {
-      requestId: imageRequestId,
-      ms: imageMs,
-      imagePayloadChars: compressed.length
-    })
+    try {
+      const compressed = await compressImageToBase64(file)
+      setImagen(compressed)
+      const imageMs = Math.round(performance.now() - imageStart)
+      lastImageTimingRef.current = { requestId: imageRequestId, ms: imageMs, chars: compressed.length }
+      console.info('[correction-timing] image_prepare_ms', {
+        requestId: imageRequestId,
+        ms: imageMs,
+        imagePayloadChars: compressed.length
+      })
+    } catch (error) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone). Sin este catch, la promesa
+      // rechazada quedaba sin manejar: `imagen` nunca se rellenaba pero
+      // imagenPreview ya se había puesto, así que el alumno veía "su foto
+      // subida" y al pulsar Corregir el guard `!imagen` no dejaba enviar
+      // nada — "las fotos no se leen" sin ningún aviso de por qué.
+      console.error('[exam] image_compression_failed', { message: (error as Error)?.message })
+      setImagenPreview(null)
+      setImagen(null)
+      setImagenError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba a hacer la foto con la cámara del navegador o convertirla a JPG/PNG.')
+    }
   }
 
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && !imagen) return
     const totalStart = performance.now()
-    setCargando(true); setCorreccion(''); setTruncated(false); setExamXpResult(null)
+    setCargando(true); setCorreccion(''); setTruncated(false); setExamXpResult(null); setCorreccionNoEvaluable(false)
     try {
       const authStart = performance.now()
       const accessToken = await getChatAccessToken()
@@ -2019,6 +2035,15 @@ function cambiarTipo(t: Tipo) {
       const correccionJson = data.correction
       if (!correccionJson) {
         setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
+        return
+      }
+      // Fallo técnico (imagen no legible, respuesta vacía, JSON sin
+      // contenido genuino) — nunca lo guardamos como un 0/10 real ni lo
+      // contamos como intento: no se inserta en historial_examenes y no se
+      // pide XP. El alumno ve un aviso claro con reintentar/reportar en vez
+      // de una nota engañosa.
+      if (!isTruncated && data.notEvaluable) {
+        setCorreccionNoEvaluable(true)
         return
       }
       const correccionVisible = isTruncated
@@ -2180,11 +2205,24 @@ function cambiarTipo(t: Tipo) {
   }
 
   function abrirChatConContexto(item: HistorialItem) {
+    // item.respuesta faltaba aquí antes: el chat de "reevaluar" solo veía
+    // enunciado + corrección, nunca lo que el alumno escribió de verdad. Por
+    // eso, ante "¿por qué saqué 0?", el chat a veces respondía "no hay
+    // ninguna respuesta tuya registrada" sin haber comprobado nada — solo
+    // reflejaba que ÉL no tenía esa respuesta en su contexto, no que la BD
+    // estuviera vacía. Para fotos (historial_examenes no guarda la imagen,
+    // solo el texto de la respuesta) lo dejamos explícito para que el chat
+    // no confunda "no tengo el texto" con "no había nada".
+    const respuestaTexto = (item.respuesta || '').trim()
+    const respuestaLinea = respuestaTexto
+      ? 'Respuesta del estudiante: ' + respuestaTexto
+      : 'Respuesta del estudiante: (el texto no está disponible aquí — puede que fuera una foto, que no guardamos, o que la corrección original tuviera un fallo técnico; no asumas que no escribió nada sin preguntarle primero)'
     const ctx = 'El estudiante acaba de revisar esta corrección:\n' +
       'Asignatura: ' + nombreAsignatura(item.asignatura) + '\n' +
       'Ejercicio: ' + item.bloque + ' - ' + item.tipo + ' ' + item.año + '\n' +
       'Nota obtenida: ' + item.nota + '/' + item.nota_maxima + '\n' +
       'Enunciado: ' + (item.enunciado || '') + '\n' +
+      respuestaLinea + '\n' +
       'Corrección: ' + correctionPayloadToMarkdown(item.correccion || '') + '\n\n' +
       'El estudiante quiere entender mejor su nota. Ayúdale de forma clara y motivadora.'
     setContextoChat(ctx)
@@ -5672,7 +5710,7 @@ function cambiarTipo(t: Tipo) {
                     {imagenPreview ? (
                       <div style={{ position: 'relative' }}>
                         <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
-                        <button onClick={() => { setImagen(null); setImagenPreview(null) }} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
+                        <button onClick={() => { setImagen(null); setImagenPreview(null); setImagenError('') }} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
                       </div>
                     ) : (
                       <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: 160, borderRadius: 10, border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
@@ -5680,6 +5718,9 @@ function cambiarTipo(t: Tipo) {
                         <p style={{ fontSize: 13, fontWeight: 600, color: cfg.color, margin: '8px 0 3px' }}>Haz una foto o sube una imagen</p>
                         <p style={{ fontSize: 11, color: cfg.accent, margin: 0 }}>Fotografía tu respuesta manuscrita</p>
                       </div>
+                    )}
+                    {imagenError && (
+                      <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>
                     )}
                   </div>
                 )}
@@ -5692,14 +5733,43 @@ function cambiarTipo(t: Tipo) {
               </div>
             </div>}
 
-            {!isCatalunaExam && (correccion || cargando) && (
+            {!isCatalunaExam && (correccion || cargando || correccionNoEvaluable) && (
               <div className="pau-reveal" style={{ borderRadius: 'var(--r-2xl)', overflow: 'hidden', background: '#ffffff', boxShadow: 'var(--shadow-sm)' }}>
                 <div style={{ padding: '15px 22px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '9px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}><WandSparkles size={15} /></div>
                   <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  {!correccion && cargando ? (
+                  {correccionNoEvaluable ? (
+                    <div style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+                      <div>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#991b1b' }}>No se pudo leer tu respuesta — no evaluable</p>
+                        <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b91c1c', lineHeight: 1.4 }}>
+                          Ha sido un error técnico, no un problema con tu trabajo. No se ha guardado como intento en tu historial ni afecta a tu itinerario.
+                        </p>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <button
+                            onClick={corregir}
+                            style={{ fontSize: 12.5, fontWeight: 700, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
+                          >
+                            Reintentar corrección
+                          </button>
+                          <button
+                            onClick={() => {
+                              setContextoChat(`El alumno acaba de recibir un error técnico al corregir un ejercicio: Kairo no pudo leer o evaluar su respuesta (asignatura: ${nombreAsignatura(asignatura)}, ejercicio: ${bloqueActivoLabel || ''}). No se guardó como intento. El alumno quiere reportarlo o que le ayudes a resolverlo.`)
+                              setMensajes([{ rol: 'kairo', texto: 'Vaya, siento el fallo técnico — ya sé que tu última corrección no se pudo evaluar y no cuenta como intento. Cuéntame qué ha pasado (¿respuesta escrita o foto?) y lo reviso contigo.', ts: Date.now() }])
+                              setItemSeleccionado(null)
+                              navegarASeccion('chat')
+                            }}
+                            style={{ fontSize: 12.5, fontWeight: 700, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
+                          >
+                            Reportar error
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : !correccion && cargando ? (
                     <SafeProgressiveCorrectionStream />
                   ) : (
                     <CorrectionResultCard

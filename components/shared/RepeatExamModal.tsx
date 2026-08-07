@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
-import { normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
-import { parseCorrectionPayload } from '@/app/lib/correctionParsing'
+import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import CorrectionResultCard from './CorrectionResultCard'
 import RichTextArea from './RichTextArea'
@@ -66,10 +65,20 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
         setError(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsed = parseCorrectionPayload(data.respuesta ?? data)
-      const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
-      const rawScore = normalized ? scoreFromCorrection(normalized, maxScore) : null
-      setCorrection(normalized ?? data.respuesta ?? data)
+      // Antes esto pasaba data.respuesta (inexistente en la respuesta de
+      // /api/exam/correct, que solo devuelve `correction`) a
+      // normalizeCorrectionForOfficialScores, que caía en `data` entero
+      // (el sobre {correction, notEvaluable, ...}, no la corrección real) y
+      // sin desglose_bloques reconocible devolvía siempre nota_final: 0 —
+      // "Repetir para mejorar" mostraba 0/10 pase lo que pase. El servidor
+      // ya normaliza y marca notEvaluable, así que basta con leerlo.
+      if (data.notEvaluable) {
+        setError('No se pudo leer tu respuesta — error técnico, no un problema con tu trabajo. No se ha guardado como intento. Vuelve a intentarlo.')
+        return
+      }
+      const correctionJson = data.correction ?? null
+      const rawScore = correctionJson ? scoreFromCorrection(correctionJson, maxScore) : null
+      setCorrection(correctionJson)
       setNota(rawScore)
 
       const { data: userData } = await supabase.auth.getUser()
@@ -85,7 +94,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
         nota_maxima: maxScore,
         enunciado: source.enunciado.slice(0, 2000),
         respuesta: answer.slice(0, 4000),
-        correccion: normalized ? JSON.stringify(normalized) : JSON.stringify(data),
+        correccion: JSON.stringify(correctionJson),
         repeated_from_id: source.id,
       }).select('id').single()
 

@@ -45,6 +45,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
   const [correction, setCorrection] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [imageError, setImageError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const exams = useMemo(() => (
@@ -142,16 +143,29 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
   async function chooseImage(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
+    setImageError('')
     if (imagePreview) URL.revokeObjectURL(imagePreview)
     setImagePreview(URL.createObjectURL(file))
     setImageType('image/jpeg')
-    setImage(await compressImageToBase64(file))
+    try {
+      setImage(await compressImageToBase64(file))
+    } catch (err) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone) — sin este catch quedaba
+      // una promesa rechazada sin manejar y una preview engañosa con
+      // `image` sin rellenar.
+      console.error('[philosophy] image_compression_failed', { message: (err as Error)?.message })
+      setImagePreview(null)
+      setImage(null)
+      setImageError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+    }
   }
 
   function clearImage() {
     if (imagePreview) URL.revokeObjectURL(imagePreview)
     setImage(null)
     setImagePreview(null)
+    setImageError('')
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -394,6 +408,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
                 }
               </div>
             )}
+            {imageError && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{imageError}</div>}
             {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
             <button type="button" onClick={correct} disabled={loading || (mode === 'text' ? !answer.trim() : !image)} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:opacity-50" style={{ '--hover-shadow': `${UI.accent}33`, background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})`, boxShadow: `0 16px 34px ${UI.accent}33` } as CSSProperties}>{loading ? <KairoLoadingDot /> : <WandSparkles size={17} />}{loading ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}</button>
           </section>

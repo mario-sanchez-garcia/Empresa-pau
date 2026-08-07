@@ -315,8 +315,13 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
 
   console.info('[exam/correct] done', { ms: Date.now() - totalStart, whyExplanationCacheHit: Boolean(cachedWhy) })
 
+  if ((normalized as { notEvaluable?: boolean })?.notEvaluable) {
+    console.warn('[exam/correct] not_evaluable', { ms: Date.now() - totalStart, hasImage: Boolean(imagen) })
+  }
+
   return NextResponse.json({
     correction: normalized,
+    notEvaluable: Boolean((normalized as { notEvaluable?: boolean })?.notEvaluable),
     whyContext: theoryContext,
     truncated: message.stop_reason === 'max_tokens',
     finishReason: message.stop_reason ?? 'unknown'

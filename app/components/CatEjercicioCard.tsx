@@ -79,6 +79,7 @@ export default function CatEjercicioCard({
   const [respuesta, setRespuesta] = useState('')
   const [imagenes, setImagenes] = useState<UploadedImage[]>([])
   const [correccion, setCorreccion] = useState('')
+  const [imagenError, setImagenError] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const [apartadoIdx, setApartadoIdx] = useState(0)
@@ -115,17 +116,24 @@ export default function CatEjercicioCard({
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
-    const next = await Promise.all(files.map(async file => {
+    // allSettled en vez de Promise.all: un solo archivo en formato no
+    // compatible (típicamente HEIC de iPhone) no debe tirar las demás fotos
+    // ya comprimidas al mismo tiempo — antes rechazaba todo el lote sin
+    // ningún aviso ("las fotos no se leen" sin explicación).
+    const results = await Promise.allSettled(files.map(async file => {
       const preview = URL.createObjectURL(file)
       const data = await compressImageToBase64(file)
-      return {
-        name: file.name,
-        type: 'image/jpeg',
-        data,
-        preview,
-      }
+      return { name: file.name, type: 'image/jpeg', data, preview }
     }))
-    setImagenes(current => [...current, ...next])
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<UploadedImage> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) setImagenes(current => [...current, ...succeeded])
+    if (failedCount > 0) {
+      console.error('[cat-ejercicio] image_compression_failed', { failedCount })
+      setImagenError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte a JPG/PNG.`)
+    } else {
+      setImagenError('')
+    }
     event.target.value = ''
   }
 
@@ -316,6 +324,7 @@ export default function CatEjercicioCard({
                 <UploadCloud size={20} /> Añadir fotos
                 <input type="file" multiple accept="image/png,image/jpeg,image/webp" capture="environment" onChange={handleImagenes} className="hidden" />
               </label>
+              {imagenError && <p className="mt-2 text-xs font-bold" style={{ color: '#dc2626' }}>{imagenError}</p>}
               {imagenes.length > 0 && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {imagenes.map((imagen, index) => (

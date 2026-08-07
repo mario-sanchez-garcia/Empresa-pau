@@ -257,6 +257,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     correction: publicCorrection,
     score,
+    notEvaluable: Boolean((normalized as { notEvaluable?: boolean })?.notEvaluable),
     truncated: message.stop_reason === 'max_tokens',
     finishReason: message.stop_reason ?? 'unknown',
   })

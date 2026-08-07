@@ -274,6 +274,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [studentAnswer, setStudentAnswer] = useState('')
   const [image, setImage] = useState<UploadedImage | null>(null)
   const [correction, setCorrection] = useState('')
+  const [notEvaluable, setNotEvaluable] = useState(false)
+  const [imageError, setImageError] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [xpAwarded, setXpAwarded] = useState<number | null>(null)
   const [firstSessionMarked, setFirstSessionMarked] = useState(false)
@@ -662,13 +664,25 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   async function handleImage(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    if (image?.preview) URL.revokeObjectURL(image.preview)
-    setImage({ data: await compressImageToBase64(file), preview: URL.createObjectURL(file), type: 'image/jpeg' })
+    setImageError('')
+    try {
+      const data = await compressImageToBase64(file)
+      if (image?.preview) URL.revokeObjectURL(image.preview)
+      setImage({ data, preview: URL.createObjectURL(file), type: 'image/jpeg' })
+    } catch (error) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone). Sin este catch la promesa
+      // rechazada quedaba sin manejar: no se fijaba imagen ni preview y no
+      // había ningún aviso — "las fotos no se leen" sin explicación.
+      console.error('[camino] image_compression_failed', { message: (error as Error)?.message })
+      setImageError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+    }
   }
 
   function clearImage() {
     if (image?.preview) URL.revokeObjectURL(image.preview)
     setImage(null)
+    setImageError('')
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -718,6 +732,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     const maxScore = 10
     setCorrecting(true)
     setCorrection('')
+    setNotEvaluable(false)
     setScore(null)
     setXpAwarded(null)
     try {
@@ -749,6 +764,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           return
         }
         setCorrection(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+        return
+      }
+      // Fallo técnico (imagen no legible, respuesta vacía, JSON sin
+      // contenido genuino) — nunca se guarda como nota real ni cuenta como
+      // intento: no se inserta en historial_examenes, no se pide XP y no se
+      // marca la misión como completada.
+      if (data.notEvaluable) {
+        setNotEvaluable(true)
         return
       }
       const parsed = data.correction ?? parseCorrectionPayload(data.respuesta)
@@ -1170,11 +1193,33 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                         <UploadCloud size={15} /> Hacer foto o elegir imagen
                       </button>
                     )}
+                    {imageError && (
+                      <p style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imageError}</p>
+                    )}
                   </div>
                 )}
                 <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)) ? .5 : 1 }}>
                   {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
                 </button>
+                {notEvaluable && (
+                  <div style={{ marginTop: 12, borderRadius: 4, background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px' }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: '#991b1b' }}>No se pudo leer tu respuesta — no evaluable</p>
+                    <p style={{ margin: '4px 0 8px', fontSize: 12, color: '#b91c1c', lineHeight: 1.4 }}>
+                      Ha sido un error técnico, no un problema con tu trabajo. No cuenta como intento ni afecta a tu Camino.
+                    </p>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button type="button" onClick={correctCourseExercise} style={{ fontSize: 12, fontWeight: 900, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 4, padding: '5px 12px', cursor: 'pointer' }}>
+                        Reintentar corrección
+                      </button>
+                      <a
+                        href="mailto:hola@kairo.es?subject=Error%20t%C3%A9cnico%20al%20corregir&body=Se%20produjo%20un%20error%20t%C3%A9cnico%20al%20corregir%20un%20ejercicio%20de%20Camino%20PAU."
+                        style={{ fontSize: 12, fontWeight: 900, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 4, padding: '5px 12px', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                      >
+                        Reportar error
+                      </a>
+                    </div>
+                  </div>
+                )}
                 {score != null && (
                   <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
                     Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}

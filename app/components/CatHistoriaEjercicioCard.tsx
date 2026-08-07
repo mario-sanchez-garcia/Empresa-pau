@@ -130,6 +130,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
   const [imagenTipo, setImagenTipo] = useState('image/jpeg')
   const [imagenPreview, setImagenPreview] = useState<string | null>(null)
   const [correccion, setCorreccion] = useState('')
+  const [imagenError, setImagenError] = useState('')
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -141,15 +142,28 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
   async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
+    setImagenError('')
     setImagenPreview(URL.createObjectURL(file))
     setImagenTipo('image/jpeg')
-    setImagen(await compressImageToBase64(file))
+    try {
+      setImagen(await compressImageToBase64(file))
+    } catch (error) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone) — sin este catch quedaba
+      // una promesa rechazada sin manejar y una preview engañosa con
+      // `imagen` sin rellenar.
+      console.error('[cat-historia] image_compression_failed', { message: (error as Error)?.message })
+      setImagenPreview(null)
+      setImagen(null)
+      setImagenError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+    }
   }
 
   function eliminarImagen() {
     if (imagenPreview) URL.revokeObjectURL(imagenPreview)
     setImagen(null)
     setImagenPreview(null)
+    setImagenError('')
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -309,6 +323,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
                   <span className="mt-1 text-xs font-semibold" style={{ color: UI.accent }}>Fotografía tu respuesta manuscrita</span>
                 </button>
               )}
+              {imagenError && <p className="mt-2 text-xs font-bold" style={{ color: '#dc2626' }}>{imagenError}</p>}
             </div>
           )}
           <button type="button" onClick={corregir} disabled={cargando || sinRespuesta} className="campus-primary mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50" style={{ background: `linear-gradient(135deg, ${UI.color}, ${UI.accent})` }}>

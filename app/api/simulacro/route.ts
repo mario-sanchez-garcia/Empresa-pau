@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
-import { buildBlockPrompt, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildBlockPrompt, parseCorrectionJson, blockHasGenuineContent } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
@@ -367,8 +367,16 @@ export async function POST(request: NextRequest) {
       })
     )
 
+    // Un bloque puede parsear como JSON válido pero venir hueco (sin nota
+    // parseable ni feedback real) — la IA devolvió "algo" pero no corrigió
+    // nada. Sin esto, ese bloque se trataba como "éxito" y bajaba en
+    // silencio a un 0 con texto de relleno inventado por textOrFallback,
+    // indistinguible de una nota real de 0. Se trata igual que un bloque
+    // que falló del todo (mismo placeholder "no disponible" ya existente).
+    const blockGenuine = blockResults.map(br => br !== null && blockHasGenuineContent(br))
+
     // All blocks failed — hard error, nothing to show
-    if (blockResults.every(r => r === null)) {
+    if (blockGenuine.every(genuine => !genuine)) {
       console.error('[simulacro] failed', { phase: 'all_blocks_failed', ms: Date.now() - t0 })
       const errorResult = createCorrectionError({
         simulacroId: simulacro_id,
@@ -380,9 +388,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Build desglose_bloques: successful blocks get parsed result; failed ones get error placeholder
-    const failedCount = blockResults.filter(r => r === null).length
+    const failedCount = blockGenuine.filter(genuine => !genuine).length
     const desglose_bloques = blockResults.map((br, i) => {
-      if (!br) {
+      if (!blockGenuine[i]) {
         return {
           numero_bloque: `Bloque ${i + 1}`,
           tema: blocks[i]?.tema ?? `Bloque ${i + 1}`,

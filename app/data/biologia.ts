@@ -74,8 +74,8 @@ d) Explique la importancia que tiene una ingesta apropiada de ácidos grasos ome
         label: "Pregunta 2",
         numero: "2.A",
         tema: "En relación con la información genética de los seres vivos",
-        enunciado: `En relación con la información genética de los seres vivos:
-a) Siendo 3’-GCTTTACCATACCCCAGAATGTGGAATCTTC-5’ la secuencia de la cadena molde de un fragmento de $ADN$, indique la secuencia, polaridad y porcentajes de purinas y pirimidinas de la hebra codificante (0,5 puntos).
+        enunciado: `En relación con la información genética de los seres vivos:`,
+        textoDespuesImagen: `a) Siendo 3’-GCTTTACCATACCCCAGAATGTGGAATCTTC-5’ la secuencia de la cadena molde de un fragmento de $ADN$, indique la secuencia, polaridad y porcentajes de purinas y pirimidinas de la hebra codificante (0,5 puntos).
 b) Indique la secuencia y polaridad del $ARNm$ que corresponde al ADN de doble hebra del apartado a). Indique la secuencia y sentido de la proteína codificada por este $ARNm$ desde el codón de inicio, Cite el nombre del enlace característico que une los aminoácidos entre sí (0,75 puntos).
 c) Describa brevemente los principales eventos que suceden en cada una de las tres fases de la traducción del mensaje genético (0,75 puntos).`,
         puntuacion: 2,

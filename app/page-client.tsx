@@ -5593,7 +5593,7 @@ function cambiarTipo(t: Tipo) {
                   {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ margin: '2px auto 20px', display: 'grid', justifyItems: 'center', gap: '12px' }}>
                       {(preguntaActiva as any).imagenes.map((src: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: 'min(100%, 760px)', maxHeight: '320px', objectFit: 'contain', borderRadius: '14px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 10px 26px rgba(15, 23, 42, 0.06)' }} />
+                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: 'min(100%, 640px)', maxHeight: '260px', objectFit: 'contain', borderRadius: '12px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.055)' }} />
                       ))}
                     </div>
                   )}

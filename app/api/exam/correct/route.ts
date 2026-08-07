@@ -8,6 +8,7 @@ import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from
 import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
 import { getTheoryContextForExercise, theoryContextToPrompt } from '@/app/lib/whyItWorksTheory'
 
@@ -380,7 +381,7 @@ async function enforceUsageLimits({
     )
   }
 
-  const planLimits = getCaminoPlanLimits(billing.planId)
+  const planLimits = await getEffectivePlanLimits(createServiceClient(), userId, getCaminoPlanLimits(billing.planId))
   if (action === 'image_correction') {
     const monthlyPhotos = creditKey
       ? await getMonthlyUniqueActionCount(userId, ['image_correction'])

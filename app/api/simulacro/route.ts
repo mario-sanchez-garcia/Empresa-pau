@@ -7,6 +7,7 @@ import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { awardXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
@@ -207,7 +208,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const planLimits = getCaminoPlanLimits(billing.planId)
+      const planLimits = await getEffectivePlanLimits(authContext.supabase, authContext.user.id, getCaminoPlanLimits(billing.planId))
       const monthlyLimit = isPracticeSession ? planLimits.partialsPerMonth : planLimits.fullMocksPerMonth
       const monthlyUsed = await getMonthlyActionCount(authContext.user.id, [correctionAction])
       if (monthlyUsed >= monthlyLimit) {

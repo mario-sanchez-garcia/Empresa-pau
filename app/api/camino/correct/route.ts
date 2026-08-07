@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { getMonthlyActionCount, getMonthlyUniqueActionCount, getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { createServiceSupabase, createUserSupabase, getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import {
   getTopic,
@@ -354,7 +355,11 @@ async function enforceUsageLimits({
     )
   }
 
-  const planLimits = getCaminoPlanLimits(billing.planId)
+  const planLimits = await getEffectivePlanLimits(
+    createServiceSupabase() ?? createUserSupabase(accessToken),
+    userId,
+    getCaminoPlanLimits(billing.planId)
+  )
   if (action === 'image_correction') {
     const monthlyPhotos = creditKey
       ? await getMonthlyUniqueActionCount(userId, ['image_correction'])

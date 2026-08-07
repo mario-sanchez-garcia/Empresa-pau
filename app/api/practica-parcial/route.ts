@@ -5,6 +5,7 @@ import { generatePracticeSession } from '@/components/simulacros/data'
 import type { SimulacroSubject } from '@/components/simulacros/types'
 import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { isInternalUser } from '@/app/lib/internalUsers'
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const planLimits = getCaminoPlanLimits(billing.planId)
+    const planLimits = await getEffectivePlanLimits(db, user.id, getCaminoPlanLimits(billing.planId))
     // Cuenta prácticas CREADAS este mes, no corregidas — contar
     // 'parcial_correction' aquí siempre daba 0 (esa acción solo se registra
     // al corregir en /api/simulacro, nunca al crear), así que este bloqueo

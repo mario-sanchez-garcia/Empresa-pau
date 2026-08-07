@@ -2160,6 +2160,14 @@ export default function CaminoCalendarClient() {
                 const isSelected = day.date === expandedDayDate
                 const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
                 const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
+                // Mismo criterio de "completado" que ya usa el calendario por
+                // horas (WeekHourView/MonthCalendarOverlay: status de la
+                // misión) y que CompactWeekView/DayCard más abajo — antes esta
+                // tira solo distinguía "día pasado" de "día futuro", así que
+                // un día pasado sin nada hecho se veía igual que uno con la
+                // misión completada.
+                const dayMain = day.missions.filter(m => m.role === 'main')
+                const dayDone = dayMain.length > 0 && dayMain.every(m => m.status === 'done')
                 return (
                   <button
                     key={i}
@@ -2168,7 +2176,14 @@ export default function CaminoCalendarClient() {
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     <span style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{dayLetter}</span>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: isSelected ? '2px solid #93c5fd' : day.isToday || isPast ? 'none' : '1px solid #e2e8f0', boxShadow: isSelected ? '0 0 0 2px #eff6ff' : 'none' }}>{dayNum}</div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: isSelected ? '2px solid #93c5fd' : day.isToday || isPast ? 'none' : '1px solid #e2e8f0', boxShadow: isSelected ? '0 0 0 2px #eff6ff' : 'none' }}>{dayNum}</div>
+                      {dayDone && (
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 14, height: 14, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid white' }}>
+                          <Check size={9} color="white" strokeWidth={3} />
+                        </span>
+                      )}
+                    </div>
                   </button>
                 )
               })}
@@ -2259,10 +2274,19 @@ export default function CaminoCalendarClient() {
                 const isPast = day.date < realToday
                 const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : i + 1
                 const dayLetter = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] ?? day.label.slice(0, 1).toUpperCase()
+                const dayMain = day.missions.filter(m => m.role === 'main')
+                const dayDone = dayMain.length > 0 && dayMain.every(m => m.status === 'done')
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                     <span style={{ fontSize: 8, fontWeight: 700, color: '#94a3b8' }}>{dayLetter}</span>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b' }}>{dayNum}</div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b' }}>{dayNum}</div>
+                      {dayDone && (
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 13, height: 13, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid white' }}>
+                          <Check size={8} color="white" strokeWidth={3} />
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )
               })}

@@ -6534,16 +6534,27 @@ function cambiarTipo(t: Tipo) {
                     return (
                       <button
                         className="campus-primary"
-                        onClick={() => setRepeatSource({
-                          id: itemSeleccionado.id,
-                          asignatura: itemSeleccionado.asignatura,
-                          tipo: itemSeleccionado.tipo,
-                          bloque: itemSeleccionado.bloque,
-                          opcion: itemSeleccionado.opcion,
-                          año: typeof itemSeleccionado.año === 'number' ? itemSeleccionado.año : null,
-                          enunciado: itemSeleccionado.enunciado,
-                          nota_maxima: itemSeleccionado.nota_maxima ?? null,
-                        })}
+                        onClick={() => {
+                          // itemSeleccionado (zIndex 100) se quedaba abierto
+                          // por encima de RepeatExamModal (zIndex 60) — el
+                          // modal de "Repetir para mejorar" SÍ se abría, pero
+                          // quedaba tapado detrás del detalle de Historial,
+                          // capturando todos los clics: el alumno veía "la
+                          // pantalla se queda igual" porque literalmente no
+                          // podía interactuar con nada de lo que se acababa
+                          // de abrir.
+                          setItemSeleccionado(null)
+                          setRepeatSource({
+                            id: itemSeleccionado.id,
+                            asignatura: itemSeleccionado.asignatura,
+                            tipo: itemSeleccionado.tipo,
+                            bloque: itemSeleccionado.bloque,
+                            opcion: itemSeleccionado.opcion,
+                            año: typeof itemSeleccionado.año === 'number' ? itemSeleccionado.año : null,
+                            enunciado: itemSeleccionado.enunciado,
+                            nota_maxima: itemSeleccionado.nota_maxima ?? null,
+                          })
+                        }}
                         style={{ padding: '9px 16px', borderRadius: '999px', background: wantsImprovement ? 'linear-gradient(135deg, #f59e0b, #fb923c)' : WARM.wash, color: wantsImprovement ? 'white' : WARM.blue, border: wantsImprovement ? 'none' : '1px solid #dbe7fb', boxShadow: wantsImprovement ? '0 3px 10px rgba(217,119,6,.4)' : 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}
                       ><RotateCcw size={15} />{wantsImprovement ? 'Repetir para mejorar' : 'Ya lo hiciste · repetir'}</button>
                     )

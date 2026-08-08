@@ -494,7 +494,7 @@ export default function ZonaCursosPage() {
           >
             <p style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Ya completaste este tema</p>
             <p style={{ fontSize: 13, fontWeight: 600, color: '#64748b', lineHeight: 1.6, marginBottom: 20 }}>
-              &ldquo;{confirmItem.title}&rdquo; ya está marcado como completado{confirmItem.nota != null ? ` con nota ${formatGrade(confirmItem.nota)}/${formatGrade(confirmItem.notaMaxima ?? 10)}` : ''}. ¿Quieres repetirlo para intentar mejorar tu nota?
+              &ldquo;{confirmItem.title}&rdquo; ya está marcado como completado{confirmItem.nota != null ? ` con nota ${formatGrade(confirmItem.nota)}/${formatGrade(confirmItem.notaMaxima ?? 10)}` : ''}. ¿Quieres repetirlo?
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button

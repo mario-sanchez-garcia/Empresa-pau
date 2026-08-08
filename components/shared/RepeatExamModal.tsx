@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { Camera, PenLine, UploadCloud, X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
+import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import CorrectionResultCard from './CorrectionResultCard'
 import RichTextArea from './RichTextArea'
 import KairoLoadingDot from './KairoLoadingDot'
+import MathMarkdown from './MathMarkdown'
 
 export type RepeatExamSource = {
   id: string
@@ -32,16 +34,48 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
   onClose: () => void
   onDone?: (result: { xpAwarded: number; bonusXp: number; nota: number | null; noImprovement: boolean }) => void
 }) {
+  const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const [answer, setAnswer] = useState('')
+  const [imagen, setImagen] = useState<string | null>(null)
+  const [imagenTipo, setImagenTipo] = useState('image/jpeg')
+  const [imagenPreview, setImagenPreview] = useState<string | null>(null)
+  const [imagenError, setImagenError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [correction, setCorrection] = useState<unknown>(null)
   const [nota, setNota] = useState<number | null>(null)
   const [xpMessage, setXpMessage] = useState('')
   const maxScore = source.nota_maxima ?? 10
+  const canSubmit = modo === 'texto' ? Boolean(answer.trim()) : Boolean(imagen)
+
+  async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setImagenError('')
+    setImagenPreview(URL.createObjectURL(file))
+    setImagenTipo('image/jpeg')
+    try {
+      setImagen(await compressImageToBase64(file))
+    } catch (err) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone) — sin este catch quedaba
+      // una promesa rechazada sin manejar y una preview engañosa con
+      // `imagen` sin rellenar.
+      console.error('[repeat-exam] image_compression_failed', { message: (err as Error)?.message })
+      setImagenPreview(null)
+      setImagen(null)
+      setImagenError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+    }
+  }
+
+  function clearImagen() {
+    setImagen(null)
+    setImagenPreview(null)
+    setImagenError('')
+  }
 
   async function submit() {
-    if (!answer.trim() || submitting) return
+    if (!canSubmit || submitting) return
     setSubmitting(true)
     setError('')
     try {
@@ -57,7 +91,11 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
           examLabel: source.bloque || source.asignatura,
           maxScore,
           officialPrompt: source.enunciado,
-          studentAnswer: answer,
+          studentAnswer: modo === 'imagen'
+            ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+            : answer,
+          imagen: modo === 'imagen' ? imagen : null,
+          imagenTipo: modo === 'imagen' ? imagenTipo : null,
         }),
       })
       const data = await res.json()
@@ -93,7 +131,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
         nota: rawScore,
         nota_maxima: maxScore,
         enunciado: source.enunciado.slice(0, 2000),
-        respuesta: answer.slice(0, 4000),
+        respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : answer.slice(0, 4000),
         correccion: JSON.stringify(correctionJson),
         repeated_from_id: source.id,
       }).select('id').single()
@@ -137,22 +175,58 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
           <button onClick={onClose} aria-label="Cerrar" style={{ border: 'none', background: '#f1f5f9', borderRadius: 8, padding: 6, cursor: 'pointer' }}><X size={15} /></button>
         </div>
 
-        <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#f8fafc', padding: '12px 14px', fontSize: 13, color: '#334155', marginBottom: 14, whiteSpace: 'pre-wrap' }}>
-          {source.enunciado}
+        <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#f8fafc', padding: '12px 14px', marginBottom: 14 }}>
+          <MathMarkdown text={source.enunciado} className="text-[13px] text-slate-700" />
         </div>
 
         {!correction ? (
           <>
-            <RichTextArea
-              value={answer}
-              onChange={setAnswer}
-              placeholder="Escribe tu nueva respuesta..."
-              minHeight={200}
-            />
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <button
+                type="button"
+                onClick={() => setModo('texto')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: modo === 'texto' ? '#0f172a' : '#f1f5f9', color: modo === 'texto' ? 'white' : '#64748b' }}
+              >
+                <PenLine size={13} /> Escribir
+              </button>
+              <button
+                type="button"
+                onClick={() => setModo('imagen')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: modo === 'imagen' ? '#0f172a' : '#f1f5f9', color: modo === 'imagen' ? 'white' : '#64748b' }}
+              >
+                <Camera size={13} /> Subir foto
+              </button>
+            </div>
+
+            {modo === 'texto' ? (
+              <RichTextArea
+                value={answer}
+                onChange={setAnswer}
+                placeholder="Escribe tu nueva respuesta..."
+                minHeight={200}
+              />
+            ) : (
+              <div>
+                <input type="file" accept="image/*" capture="environment" onChange={handleImagen} style={{ display: 'none' }} id="repeat-exam-image-input" />
+                {imagenPreview ? (
+                  <div style={{ position: 'relative' }}>
+                    <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
+                    <button onClick={clearImagen} type="button" style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
+                  </div>
+                ) : (
+                  <label htmlFor="repeat-exam-image-input" style={{ height: 160, borderRadius: 10, border: '2px dashed #93c5fd', background: '#eff6ff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <UploadCloud size={30} color="#2563eb" />
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#2563eb', margin: '8px 0 3px' }}>Haz una foto o sube una imagen</p>
+                    <p style={{ fontSize: 11, color: '#60a5fa', margin: 0 }}>Fotografía tu respuesta manuscrita</p>
+                  </label>
+                )}
+                {imagenError && <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>}
+              </div>
+            )}
             {error && <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{error}</p>}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
               <button onClick={onClose} style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', fontSize: 13, fontWeight: 800, color: '#475569', cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={submit} disabled={!answer.trim() || submitting} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, border: 'none', background: '#2563eb', fontSize: 13, fontWeight: 800, color: 'white', cursor: submitting ? 'default' : 'pointer', opacity: !answer.trim() || submitting ? .6 : 1 }}>
+              <button onClick={submit} disabled={!canSubmit || submitting} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, border: 'none', background: '#2563eb', fontSize: 13, fontWeight: 800, color: 'white', cursor: submitting ? 'default' : 'pointer', opacity: !canSubmit || submitting ? .6 : 1 }}>
                 {submitting ? (<><KairoLoadingDot /> Corrigiendo…</>) : 'Corregir'}
               </button>
             </div>

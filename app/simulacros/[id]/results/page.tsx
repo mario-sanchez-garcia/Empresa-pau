@@ -270,13 +270,22 @@ export default function SimulacroResultsPage() {
                   style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af' }}
                 >
                   <p>{result.mensaje_usuario ?? result.feedback_general ?? 'No hemos podido corregir este simulacro. Tus respuestas están guardadas y puedes intentarlo de nuevo.'}</p>
-                  <a
-                    href={retryHref}
-                    className="mt-3 inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-black text-white no-underline transition hover:-translate-y-0.5"
-                    style={{ background: '#2563eb', boxShadow: '0 8px 20px rgba(37,99,235,0.22)' }}
-                  >
-                    Reintentar corrección
-                  </a>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <a
+                      href={retryHref}
+                      className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-black text-white no-underline transition hover:-translate-y-0.5"
+                      style={{ background: '#2563eb', boxShadow: '0 8px 20px rgba(37,99,235,0.22)' }}
+                    >
+                      Reintentar corrección
+                    </a>
+                    <a
+                      href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo"
+                      className="inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-black no-underline transition hover:-translate-y-0.5"
+                      style={{ background: 'white', color: '#1e40af', borderColor: '#bfdbfe' }}
+                    >
+                      Reportar error
+                    </a>
+                  </div>
                 </div>
               )}
 

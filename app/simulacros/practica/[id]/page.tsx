@@ -856,7 +856,12 @@ function PracticaPageInner() {
                 {submitStage || 'Preparando entrega...'}
               </div>
             )}
-            {submitError && <div className="pau-info mt-4" role="alert">{submitError}</div>}
+            {submitError && (
+              <div className="pau-info mt-4" role="alert">
+                {submitError}{' '}
+                <a href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo" className="font-black underline">Reportar error</a>
+              </div>
+            )}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => { setConfirmOpen(false); setTimeUp(false) }}

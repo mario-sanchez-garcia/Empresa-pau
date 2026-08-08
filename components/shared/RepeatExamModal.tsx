@@ -223,7 +223,17 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
                 {imagenError && <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>}
               </div>
             )}
-            {error && <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{error}</p>}
+            {error && (
+              <div style={{ marginTop: 10 }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{error}</p>
+                <a
+                  href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo"
+                  style={{ display: 'inline-block', marginTop: 6, fontSize: 11.5, fontWeight: 700, color: '#475569' }}
+                >
+                  Reportar error →
+                </a>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
               <button onClick={onClose} style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', fontSize: 13, fontWeight: 800, color: '#475569', cursor: 'pointer' }}>Cancelar</button>
               <button onClick={submit} disabled={!canSubmit || submitting} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, border: 'none', background: '#2563eb', fontSize: 13, fontWeight: 800, color: 'white', cursor: submitting ? 'default' : 'pointer', opacity: !canSubmit || submitting ? .6 : 1 }}>

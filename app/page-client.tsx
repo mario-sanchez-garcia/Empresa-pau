@@ -67,6 +67,7 @@ import {
   Globe,
   Landmark,
   LibraryBig,
+  LifeBuoy,
   Lightbulb,
   MessageCircle,
   MoreVertical,
@@ -956,6 +957,10 @@ export default function Home() {
   // al cargar y se guarda el hilo saliente justo antes de cambiar de pill en
   // switchChatSubject().
   const chatThreadCacheRef = useRef<Partial<Record<Asignatura, MensajeChat[]>>>({})
+  // Resumen de historial (solo lectura) por asignatura, para que el chat
+  // pueda responder con precisión a "¿cómo voy en X?" / "¿por qué esta
+  // nota?" sin volver a consultar Supabase en cada mensaje del mismo hilo.
+  const historialResumenCacheRef = useRef<Partial<Record<Asignatura, string>>>({})
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa, setCCAA } = useCCAA()
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
@@ -1979,6 +1984,81 @@ async function loadChatThread(subject: Asignatura) {
   }
 }
 
+// Resumen de solo lectura del historial real del alumno para esa asignatura
+// (Exámenes + Simulacros/Prep. parcial), para que el chat pueda responder
+// con precisión a "¿cómo voy?" / "¿por qué esta nota?" en vez de negar que
+// tiene acceso. Se pide una sola vez por asignatura por sesión de navegador
+// (cache en historialResumenCacheRef) para no repetir la consulta en cada
+// mensaje del mismo hilo. Nunca se usa para escribir — la corrección y el
+// XP solo los toca el motor de corrección real.
+async function getHistorialResumen(subject: Asignatura): Promise<string> {
+  const cached = historialResumenCacheRef.current[subject]
+  if (cached !== undefined) return cached
+  if (!usuario?.id || subject === 'general') {
+    historialResumenCacheRef.current[subject] = ''
+    return ''
+  }
+  try {
+    const [examenesResult, simulacrosResult] = await Promise.all([
+      // select('*') a propósito: un select con columnas explícitas que
+      // incluya "año" junto a varias más rompe el parser de tipos de
+      // Supabase (TS2345, "Unexpected input: ño" — límite conocido del
+      // parser de tipos con acentos en selects largos, no un problema en
+      // runtime). Son como mucho 12 filas ligeras, así que traer todas las
+      // columnas no tiene coste real.
+      supabase.from('historial_examenes')
+        .select('*')
+        .eq('user_id', usuario.id)
+        .eq('asignatura', subject)
+        .order('created_at', { ascending: false })
+        .limit(12),
+      supabase.from('historial_simulacros')
+        .select('nota_final, resultado_json, created_at, estado')
+        .eq('user_id', usuario.id)
+        .eq('asignatura', subject)
+        .eq('estado', 'completado')
+        .order('created_at', { ascending: false })
+        .limit(6),
+    ])
+    const resumen = buildHistorialResumenText(subject, examenesResult.data ?? [], simulacrosResult.data ?? [])
+    historialResumenCacheRef.current[subject] = resumen
+    return resumen
+  } catch {
+    historialResumenCacheRef.current[subject] = ''
+    return ''
+  }
+}
+
+function buildHistorialResumenText(
+  subject: Asignatura,
+  examenes: Array<{ nota: number | null; nota_maxima: number | null; bloque: string | null; tipo: string | null; año: number | string | null; created_at: string }>,
+  simulacros: Array<{ nota_final: number | null; resultado_json: any; created_at: string }> // eslint-disable-line @typescript-eslint/no-explicit-any -- resultado_json sin tipado estricto
+) {
+  const nombre = nombreAsignatura(subject)
+  if (!examenes.length && !simulacros.length) {
+    return `El alumno todavía no tiene correcciones guardadas en ${nombre}.`
+  }
+  const notasValidas = examenes
+    .map(e => e.nota != null && e.nota_maxima ? (Number(e.nota) / Number(e.nota_maxima)) * 10 : null)
+    .filter((n): n is number => n != null)
+  const media = notasValidas.length ? (notasValidas.reduce((a, b) => a + b, 0) / notasValidas.length).toFixed(1) : null
+  const ultimosExamenes = examenes.slice(0, 8).map(e => {
+    const notaTxt = e.nota != null ? `${e.nota}/${e.nota_maxima ?? 10}` : 'sin nota clara'
+    const fecha = new Date(e.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+    return `${e.bloque || e.tipo || 'Ejercicio'} (${e.año ?? '—'}, ${fecha}): ${notaTxt}`
+  }).join('; ')
+  const ultimosSimulacros = simulacros.slice(0, 4).map(s => {
+    const fecha = new Date(s.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+    return `Simulacro ${fecha}: ${s.nota_final != null ? `${s.nota_final}/10` : 'sin nota'}`
+  }).join('; ')
+  const partes = [
+    `Historial de ${nombre} (${examenes.length} corrección${examenes.length === 1 ? '' : 'es'} de Exámenes${media ? `, media ${media}/10` : ''}${simulacros.length ? `, ${simulacros.length} simulacro${simulacros.length === 1 ? '' : 's'} completado${simulacros.length === 1 ? '' : 's'}` : ''}).`,
+    ultimosExamenes ? `Últimas correcciones: ${ultimosExamenes}.` : '',
+    ultimosSimulacros ? `Últimos simulacros: ${ultimosSimulacros}.` : '',
+  ]
+  return partes.filter(Boolean).join(' ')
+}
+
 // Cambia de asignatura DENTRO del Chat con Kairo: guarda el hilo saliente en
 // cache (para no perderlo si se vuelve a esa asignatura en la misma sesión) y
 // carga el hilo real de la asignatura destino, en vez de seguir escribiendo
@@ -2233,6 +2313,7 @@ function cambiarTipo(t: Tipo) {
       return
     }
     setMensajes(prev => [...prev, { rol: 'kairo', texto: '', ts: Date.now() }])
+    const historialResumen = await getHistorialResumen(chatSubject)
     const chatSystemIntro = asignatura === 'general'
       ? `Eres Kairo, el asistente de estudio de ${examSystemLabel(ccaa)}. El estudiante está en el modo General del chat: pregúntale con naturalidad sobre lo que necesite, incluidas dudas de organización, técnicas de estudio, motivación, cómo funciona la app, o cualquier cuestión que no encaje en una asignatura concreta. No fuerces la respuesta hacia matemáticas, lengua, historia u otra asignatura salvo que el estudiante lo pida explícitamente.\n` +
         'Responde de forma directa, clara y cercana. Preserva cualquier LaTeX que uses con $...$ o $$...$$.\n'
@@ -2243,6 +2324,7 @@ function cambiarTipo(t: Tipo) {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           pregunta: chatSystemIntro +
+            (historialResumen ? 'HISTORIAL DEL ALUMNO (solo lectura — úsalo para responder con precisión, nunca inventes datos fuera de él): ' + historialResumen + '\n' : '') +
             (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
             // Solo los últimos ~20 mensajes como contexto — un hilo persistente
             // puede crecer durante semanas, y reenviar TODO el historial cada
@@ -5853,6 +5935,12 @@ function cambiarTipo(t: Tipo) {
                           >
                             Reportar error
                           </button>
+                          <a
+                            href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo"
+                            style={{ fontSize: 12.5, fontWeight: 700, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '5px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            Escribir a soporte
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -6205,6 +6293,21 @@ function cambiarTipo(t: Tipo) {
                         </>
                       )
                     })()}
+                  </div>
+
+                  <div className="history-card tutor-side-card">
+                    <h2><LifeBuoy size={14} /> ¿No es lo que esperabas?</h2>
+                    <p style={{ margin: '2px 0 10px', fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                      Kairo no puede cambiar notas ni corregir manualmente desde el chat — si crees que hay un error, escríbenos directamente.
+                    </p>
+                    <a
+                      href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo"
+                      className="tutor-shortcut"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      Contactar con soporte
+                      <ChevronRight size={14} />
+                    </a>
                   </div>
                 </aside>
               </div>

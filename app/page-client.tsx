@@ -23,7 +23,7 @@ import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from './lib/contentQuality'
-import { getRandomEvauExerciseForMission, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
+import { getRandomEvauExerciseForMission, getRandomUnseenEvauExercise, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
 import { normalizeScoreToTen } from './lib/camino/scoreNormalization'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
@@ -543,14 +543,52 @@ function stringifyForSearch(value: unknown): string {
 
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
   const [open, setOpen] = useState(false)
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const hasValue = options.some(o => o.active)
+
+  // Antes el menú era position:absolute + left:0 dentro de .exams-filter-bar
+  // (overflow-x:auto, lo que además clipa overflow-y por la regla implícita
+  // del spec CSS) — en móvil, para un filtro cerca del borde derecho de esa
+  // barra con scroll horizontal, el menú se salía de la pantalla o quedaba
+  // recortado por el propio contenedor con scroll. position:fixed calculado
+  // desde getBoundingClientRect() escapa de ese overflow y se ajusta al
+  // ancho real de la pantalla.
+  function openMenu() {
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (rect) {
+      const menuWidth = Math.min(240, window.innerWidth - 24)
+      const left = Math.min(rect.left, window.innerWidth - menuWidth - 12)
+      setMenuStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: Math.max(12, left),
+        width: menuWidth,
+        zIndex: 200
+      })
+    }
+    setOpen(true)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    window.addEventListener('scroll', close, { passive: true, capture: true })
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
+  }, [open])
+
   return (
     <div className={`exam-filter-dropdown${open ? ' is-open' : ''}`}>
       <button
+        ref={triggerRef}
         type="button"
         className={`exam-filter-trigger${hasValue ? ' has-value' : ''}${open ? ' is-open' : ''}`}
         aria-expanded={open}
-        onClick={() => setOpen(c => !c)}
+        onClick={() => (open ? setOpen(false) : openMenu())}
       >
         <span className="exam-filter-label">{label}</span>
         <span className="exam-filter-sep">·</span>
@@ -558,19 +596,22 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
         <ChevronDown size={11} style={{ flexShrink: 0, color: open ? '#2563eb' : '#94a3b8', transition: 'transform 180ms cubic-bezier(0.23,1,0.32,1), color 140ms', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
       </button>
       {open && (
-        <div className="exam-filter-menu">
-          {options.map(option => (
-            <button
-              type="button"
-              key={option.label}
-              className={`exam-filter-option${option.active ? ' is-active' : ''}`}
-              onClick={() => { option.onSelect(); setOpen(false) }}
-            >
-              <span>{option.label}</span>
-              {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="exam-filter-menu-backdrop" onClick={() => setOpen(false)} />
+          <div className="exam-filter-menu" style={menuStyle}>
+            {options.map(option => (
+              <button
+                type="button"
+                key={option.label}
+                className={`exam-filter-option${option.active ? ' is-active' : ''}`}
+                onClick={() => { option.onSelect(); setOpen(false) }}
+              >
+                <span>{option.label}</span>
+                {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
@@ -905,6 +946,10 @@ export default function Home() {
   const fileRef = useRef<HTMLInputElement>(null)
   const lastImageTimingRef = useRef<{ requestId: string; ms: number; chars: number } | null>(null)
   const randomEvauResolutionKeyRef = useRef('')
+  // Última asignatura para la que ya se hizo la selección aleatoria por
+  // defecto al entrar en Exámenes — evita repetir el sorteo en cada render,
+  // pero permite un sorteo nuevo cada vez que el alumno cambia de asignatura.
+  const autoExerciseSubjectRef = useRef<string | null>(null)
   // Un hilo persistente por asignatura (chat_threads/chat_messages en Supabase,
   // ver migración 20260806150000). Cache en memoria por sesión de navegador
   // para no re-pedir el hilo al alternar entre pills ya visitados; se llena
@@ -1713,6 +1758,42 @@ useEffect(() => {
 
   window.history.replaceState(null, '', resolved.targetUrl)
 }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+// Selección por defecto al entrar en Exámenes: en vez de dejar la pantalla
+// vacía esperando que el alumno elija año/convocatoria/pregunta a mano, se
+// sortea un ejercicio del banco PAU que todavía no aparece en su historial
+// (comprobado siempre contra historial_examenes, no solo contra un
+// "recientes" local). El alumno sigue pudiendo cambiarlo a mano con los
+// desplegables en cualquier momento — esto solo fija el punto de partida.
+// Cataluña y Filosofía quedan fuera (isCatalunaExam las incluye a ambas):
+// usan fuentes de datos y flujos de selección propios, no
+// selectMadridExerciseById.
+useEffect(() => {
+  if (seccion !== 'examenes' || isCatalunaExam || !usuario?.id) return
+  if (autoExerciseSubjectRef.current === asignatura) return
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search)
+    // La otra selección aleatoria (deep-link desde Camino PAU, mode=random /
+    // mode=selected) ya se encarga de elegir el ejercicio para esta visita —
+    // no pisarla con un segundo sorteo independiente.
+    if ((params.get('source') ?? '').startsWith('camino')) return
+  }
+  autoExerciseSubjectRef.current = asignatura
+
+  let cancelled = false
+  supabase
+    .from('historial_examenes')
+    .select('tipo, año')
+    .eq('user_id', usuario.id)
+    .eq('asignatura', asignatura)
+    .then(({ data }) => {
+      if (cancelled) return
+      const doneKeys = new Set((data ?? []).map((row: any) => `${row.tipo}-${row.año}`)) // eslint-disable-line @typescript-eslint/no-explicit-any -- fila de historial_examenes sin tipado estricto
+      const resolved = getRandomUnseenEvauExercise(asignatura, ccaa, doneKeys)
+      if (resolved) selectMadridExerciseById(resolved.subject, resolved.exerciseId)
+    })
+  return () => { cancelled = true }
+}, [seccion, asignatura, ccaa, isCatalunaExam, usuario?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
 function puntosBloqueFisica(tipoBloque: string) {
   return (
@@ -3172,9 +3253,12 @@ function cambiarTipo(t: Tipo) {
         }
 
         .exam-filter-menu {
-          position: absolute;
-          left: 0;
-          top: calc(100% + 6px);
+          /* position/top/left/width vienen por prop style (getBoundingClientRect
+             en FilterDropdown) para no salirse de la pantalla en móvil —
+             antes position:absolute + left:0 aquí ganaba (misma
+             especificidad que globals.css, pero definido después en el DOM)
+             y el menú podía quedar cortado o fuera de la pantalla para un
+             filtro cerca del borde derecho. */
           z-index: 120;
           min-width: 190px;
           max-height: 300px;
@@ -5256,6 +5340,9 @@ function cambiarTipo(t: Tipo) {
                   {caminoExerciseNotice}
                 </div>
               )}
+              <p style={{ margin: '0 20px 10px', fontSize: 12, fontWeight: 600, color: '#64748b' }}>
+                Selecciona un ejercicio de nuestro banco de PAU (por defecto elegimos uno nuevo para ti).
+              </p>
               <div className="exams-filter-bar">
                 <FilterDropdown
                   label="Año"

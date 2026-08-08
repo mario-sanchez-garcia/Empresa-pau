@@ -345,3 +345,32 @@ export function getRandomEvauExerciseForMission(query: RandomEvauExerciseQuery):
 export function rememberRecentEvauExerciseIds(current: string[], exerciseId: string) {
   return [...current.filter(id => id !== exerciseId), exerciseId].slice(-RECENT_LIMIT)
 }
+
+export interface RandomUnseenExerciseResult {
+  subject: CaminoExamSubject
+  exerciseId: string
+  year: number
+  convocatoria: string
+}
+
+// Selección por defecto al entrar en Exámenes (no ligada a una misión de
+// Camino PAU): un ejercicio al azar del banco completo de la asignatura,
+// evitando los año+convocatoria que ya aparecen en el historial del alumno
+// (historial_examenes no guarda el exerciseId exacto, solo tipo/año/bloque,
+// así que la comprobación de "ya hecho" es a nivel de examen completo, no
+// de pregunta suelta dentro de él). Si ya ha hecho todos los exámenes
+// disponibles, no se bloquea: cae de vuelta a elegir entre todos.
+export function getRandomUnseenEvauExercise(
+  subjectInput: string | null | undefined,
+  community: string | null | undefined,
+  doneYearConvocatoriaKeys: Set<string>
+): RandomUnseenExerciseResult | null {
+  const subject = normalizeCaminoExamSubject(subjectInput)
+  if (!subject) return null
+  const allCandidates = flattenCandidates(subject, community ?? 'Madrid')
+  if (!allCandidates.length) return null
+  const unseen = allCandidates.filter(c => !doneYearConvocatoriaKeys.has(`${c.convocatoria}-${c.year}`))
+  const pool = unseen.length ? unseen : allCandidates
+  const selected = pickRandom(pool)
+  return { subject, exerciseId: selected.exerciseId, year: selected.year, convocatoria: selected.convocatoria }
+}

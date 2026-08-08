@@ -423,14 +423,51 @@ type PhiloFilterOption = { label: string; active: boolean; onSelect: () => void 
 
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: PhiloFilterOption[] }) {
   const [open, setOpen] = useState(false)
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const hasValue = options.some(o => o.active)
+
+  // Antes el menú era position:absolute + left:0 (CSS compartida en
+  // globals.css) dentro de .exams-filter-bar (overflow-x:auto, que por el
+  // spec CSS también clipa overflow-y) — en móvil, un filtro cerca del
+  // borde derecho de esa barra con scroll horizontal se salía de la
+  // pantalla o quedaba recortado. position:fixed calculado desde
+  // getBoundingClientRect() escapa de ese overflow.
+  function openMenu() {
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (rect) {
+      const menuWidth = Math.min(240, window.innerWidth - 24)
+      const left = Math.min(rect.left, window.innerWidth - menuWidth - 12)
+      setMenuStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: Math.max(12, left),
+        width: menuWidth,
+        zIndex: 200
+      })
+    }
+    setOpen(true)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    window.addEventListener('scroll', close, { passive: true, capture: true })
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
+  }, [open])
+
   return (
     <div className={`exam-filter-dropdown${open ? ' is-open' : ''}`}>
       <button
+        ref={triggerRef}
         type="button"
         className={`exam-filter-trigger${hasValue ? ' has-value' : ''}${open ? ' is-open' : ''}`}
         aria-expanded={open}
-        onClick={() => setOpen(c => !c)}
+        onClick={() => (open ? setOpen(false) : openMenu())}
       >
         <span className="exam-filter-label">{label}</span>
         <span className="exam-filter-sep">·</span>
@@ -446,19 +483,22 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
         />
       </button>
       {open && (
-        <div className="exam-filter-menu">
-          {options.map(option => (
-            <button
-              type="button"
-              key={option.label}
-              className={`exam-filter-option${option.active ? ' is-active' : ''}`}
-              onClick={() => { option.onSelect(); setOpen(false) }}
-            >
-              <span>{option.label}</span>
-              {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="exam-filter-menu-backdrop" onClick={() => setOpen(false)} />
+          <div className="exam-filter-menu" style={menuStyle}>
+            {options.map(option => (
+              <button
+                type="button"
+                key={option.label}
+                className={`exam-filter-option${option.active ? ' is-active' : ''}`}
+                onClick={() => { option.onSelect(); setOpen(false) }}
+              >
+                <span>{option.label}</span>
+                {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

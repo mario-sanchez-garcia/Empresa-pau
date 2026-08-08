@@ -929,16 +929,25 @@ button:active:not(:disabled),
   white-space: nowrap;
 }
 
+.exam-filter-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+}
+
 .exam-filter-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 50;
+  /* position/top/left/width se calculan en JS (getBoundingClientRect) y
+     llegan por prop style — .exams-filter-bar tiene overflow-x:auto, que
+     por el spec CSS también clipa overflow-y, así que un menú
+     position:absolute anclado dentro de esa barra podía salirse de la
+     pantalla o quedar recortado en móvil. position:fixed escapa de ese
+     contenedor. */
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(15,23,42,0.12);
   min-width: 160px;
+  max-width: calc(100vw - 24px);
   max-height: 260px;
   overflow-y: auto;
   padding: 4px;

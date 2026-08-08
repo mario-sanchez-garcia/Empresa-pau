@@ -16,7 +16,7 @@ import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropi
 import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
-import { BILLING_BLOCK_CODE, createRateLimitPayload, type RateLimitAction } from '@/app/lib/rateLimitMessages'
+import { BILLING_BLOCK_CODE, createRateLimitPayload, monthlyLimitResetNotice, type RateLimitAction } from '@/app/lib/rateLimitMessages'
 
 export const dynamic = 'force-dynamic'
 
@@ -367,7 +367,7 @@ async function enforceUsageLimits({
       : await getMonthlyActionCount(userId, ['image_correction'])
     if (monthlyPhotos >= planLimits.photosPerMonth) {
       return NextResponse.json(
-        { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes.`, code: BILLING_BLOCK_CODE },
+        { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
         { status: 429 }
       )
     }
@@ -377,7 +377,7 @@ async function enforceUsageLimits({
       : await getMonthlyActionCount(userId, ['chat'])
     if (monthlyCorrections >= planLimits.correctionsPerMonth) {
       return NextResponse.json(
-        { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes.`, code: BILLING_BLOCK_CODE },
+        { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
         { status: 429 }
       )
     }

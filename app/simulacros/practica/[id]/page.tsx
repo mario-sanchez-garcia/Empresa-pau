@@ -90,7 +90,10 @@ function PracticaPageInner() {
             router.replace(json.alreadyCompleted ? `/simulacros/${json.id}/results` : `/simulacros/practica/${json.id}`)
           } else {
             const json = await res.json().catch(() => ({})) as Record<string, unknown>
-            setCreateError(String(json.error ?? 'No hemos podido crear la sesión de práctica.'))
+            // json.error puede ser un código crudo tipo "parcial_limit_reached"
+            // (el mensaje humano real vive en json.message) — mostrarlo tal
+            // cual dejaba ese texto sin traducir en pantalla.
+            setCreateError(getApiErrorMessage(json, 'No hemos podido crear la sesión de práctica.'))
             setCreatingSession(false)
           }
         } catch {

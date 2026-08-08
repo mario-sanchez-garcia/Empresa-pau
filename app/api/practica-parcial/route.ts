@@ -6,7 +6,7 @@ import type { SimulacroSubject } from '@/components/simulacros/types'
 import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
-import { BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { isInternalUser } from '@/app/lib/internalUsers'
 
 export const dynamic = 'force-dynamic'
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'parcial_limit_reached',
-          message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} práctica${planLimits.partialsPerMonth !== 1 ? 's' : ''} parcial${planLimits.partialsPerMonth !== 1 ? 'es' : ''} este mes.`,
+          message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} práctica${planLimits.partialsPerMonth !== 1 ? 's' : ''} parcial${planLimits.partialsPerMonth !== 1 ? 'es' : ''} este mes. ${monthlyLimitResetNotice()}`,
           code: BILLING_BLOCK_CODE
         },
         { status: 429 }

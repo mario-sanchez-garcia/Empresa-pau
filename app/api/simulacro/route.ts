@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { buildBlockPrompt, parseCorrectionJson, blockHasGenuineContent } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
-import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
@@ -185,18 +185,30 @@ export async function POST(request: NextRequest) {
     }
 
     const internalUser = isInternalUser(authContext.user.email)
+    // "Repetir para mejorar" es una acción deliberada del itinerario
+    // formativo, no una entrega nueva — el límite diario de 1 corrección
+    // (pensado para espaciar cuánto contenido nuevo se genera por día) no
+    // debe bloquearla: antes, si el alumno ya había gastado su corrección
+    // diaria en una práctica nueva, repetir ese mismo día para mejorar la
+    // nota chocaba con "ya has completado tu práctica de hoy", justo la
+    // función que se supone que debe estar siempre disponible. La cuota
+    // MENSUAL del plan sigue aplicando a las repeticiones (no es gratis sin
+    // límite, solo no está sujeta al ritmo de 1/día).
+    const isRepeat = Boolean(simulacroRecord.repeated_from_id)
     if (!internalUser) {
-      const rateLimit = await checkAiRateLimit({
-        userId: authContext.user.id,
-        route: '/api/simulacro',
-        action: correctionAction,
-        limit: 1,
-        windowSeconds: 24 * 60 * 60,
-        accessToken: authContext.accessToken
-      })
+      if (!isRepeat) {
+        const rateLimit = await checkAiRateLimit({
+          userId: authContext.user.id,
+          route: '/api/simulacro',
+          action: correctionAction,
+          limit: 1,
+          windowSeconds: 24 * 60 * 60,
+          accessToken: authContext.accessToken
+        })
 
-      if (!rateLimit.allowed) {
-        return rateLimitResponse(correctionAction, rateLimit)
+        if (!rateLimit.allowed) {
+          return rateLimitResponse(correctionAction, rateLimit)
+        }
       }
 
       const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at, authContext.user.email)
@@ -220,7 +232,7 @@ export async function POST(request: NextRequest) {
           ? (isPracticeSession
             ? 'Las prácticas parciales no están disponibles en tu plan actual.'
             : 'Los simulacros completos no están disponibles en tu plan actual.')
-          : `Has alcanzado el límite de ${monthlyLimit} ${noun}${monthlyLimit !== 1 ? 's' : ''} este mes.`
+          : `Has alcanzado el límite de ${monthlyLimit} ${noun}${monthlyLimit !== 1 ? 's' : ''} este mes. ${monthlyLimitResetNotice()}`
         return NextResponse.json(
           {
             error: isPracticeSession ? 'parcial_limit_reached' : 'simulacro_limit_reached',

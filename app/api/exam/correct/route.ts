@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { isInternalUser } from '@/app/lib/internalUsers'
-import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
@@ -393,7 +393,7 @@ async function enforceUsageLimits({
       : await getMonthlyActionCount(userId, ['image_correction'])
     if (monthlyPhotos >= planLimits.photosPerMonth) {
       return NextResponse.json(
-        { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes.`, code: BILLING_BLOCK_CODE },
+        { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
         { status: 429 }
       )
     }
@@ -403,7 +403,7 @@ async function enforceUsageLimits({
       : await getMonthlyActionCount(userId, ['chat'])
     if (monthlyCorrections >= planLimits.correctionsPerMonth) {
       return NextResponse.json(
-        { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes.`, code: BILLING_BLOCK_CODE },
+        { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
         { status: 429 }
       )
     }

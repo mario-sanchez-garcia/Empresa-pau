@@ -21,6 +21,7 @@ import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/l
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
+import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 import { RankingRow } from '@/components/shared/RankingRow'
 import UsernameGate from '@/app/components/camino/UsernameGate'
@@ -1952,7 +1953,7 @@ export default function CaminoCalendarClient() {
                   <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#f8fafc', padding: '16px 20px' }}>
                     <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
                     <p style={{ fontSize: 15, fontWeight: 900, color: '#64748b', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
-                    <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes.</p>
+                    <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes. {monthlyLimitResetNotice()}</p>
                   </div>
                 ) : (
                   <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: 'white', padding: '16px 20px' }}>

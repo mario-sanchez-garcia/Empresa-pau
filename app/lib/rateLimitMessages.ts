@@ -32,6 +32,22 @@ export function createRateLimitPayload(action: RateLimitAction, result: { limit:
   }
 }
 
+const MESES_ES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+]
+
+// Los límites mensuales de plan (fotos, correcciones, parciales, simulacros)
+// se reinician el día 1 de cada mes — sin decir cuándo, "has alcanzado el
+// límite" es un callejón sin salida: el alumno no sabe si es para siempre o
+// vuelve mañana. Se usa en el mensaje de cada límite mensual para que
+// siempre quede claro cuándo puede volver a intentarlo.
+export function monthlyLimitResetNotice(): string {
+  const now = new Date()
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  return `Se renueva el 1 de ${MESES_ES[next.getMonth()]}.`
+}
+
 export function getApiErrorMessage(body: unknown, fallback = 'No hemos podido completar la acción. Inténtalo de nuevo.') {
   const b = body as Record<string, string | null | undefined>
   if (b?.code === RATE_LIMIT_CODE) {

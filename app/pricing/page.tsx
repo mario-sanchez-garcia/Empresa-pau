@@ -15,7 +15,7 @@ const PLANS = [
     description: PLAN_COPY.free.description,
     features: PLAN_COPY.free.features.map((text) => ({ text, included: true })),
     cta: 'Empezar gratis →',
-    href: '/login',
+    href: '/onboarding',
     dark: false,
     badge: null,
   },

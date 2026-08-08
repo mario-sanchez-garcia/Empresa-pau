@@ -199,6 +199,7 @@ const BASE_CSS = `
 *{box-sizing:border-box}
 .onb-input{width:100%;border:none;background:transparent;padding:0;font-size:13px;font-weight:700;color:#1c1c1c;font-family:'Inter',system-ui,sans-serif;outline:none}
 .onb-input::placeholder{color:#94a3b8;font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes onb-top-slam{0%{transform:translateY(-50%);opacity:0}45%{opacity:1}72%{transform:translateY(3.5%)}86%{transform:translateY(-1%)}100%{transform:translateY(0)}}
 @keyframes onb-bot-slam{0%{transform:translateY(50%);opacity:0}45%{opacity:1}72%{transform:translateY(-3.5%)}86%{transform:translateY(1%)}100%{transform:translateY(0)}}
 @keyframes onb-seam{0%{opacity:0;transform:scaleX(0.3)}40%{opacity:1;transform:scaleX(1)}75%{opacity:0.5}100%{opacity:0}}
@@ -235,6 +236,7 @@ export default function OnboardingFlow() {
   // paso "saving" en este componente: la generación real ocurre server-side
   // en /api/onboarding/finalize, orquestada desde /onboarding/finalizando.
   const [authError, setAuthError] = useState('')
+  const [signupOptionsReady, setSignupOptionsReady] = useState(false)
   const [signupEmail, setSignupEmail] = useState('')
   const [signupPassword, setSignupPassword] = useState('')
   const [signupTerms, setSignupTerms] = useState(false)
@@ -724,16 +726,24 @@ export default function OnboardingFlow() {
   // Si el alumno YA tiene sesión al llegar a 'signup' (usuario existente que
   // reanuda onboarding, o volvió atrás tras autenticarse) no se le pide
   // autenticarse otra vez — se prepara el draft y se pasa directo a
-  // finalizar.
+  // finalizar. signupOptionsReady empieza en false para no enseñar
+  // "Continuar con Google/email" ni una fracción de segundo mientras se
+  // comprueba la sesión — solo se revela si de verdad hace falta autenticarse.
   useEffect(() => {
     if (step !== 'signup') return
     let cancelled = false
+    setSignupOptionsReady(false)
     supabase.auth.getSession().then(async ({ data: sessionData }) => {
-      if (cancelled || !sessionData.session) return
+      if (cancelled) return
+      if (!sessionData.session) {
+        setSignupOptionsReady(true)
+        return
+      }
       const draftId = await ensureServerDraft()
       if (cancelled) return
       if (!draftId) {
         setAuthError('No se pudo preparar tu cuenta. Inténtalo de nuevo.')
+        setSignupOptionsReady(true)
         return
       }
       goToFinalizing(draftId)
@@ -1050,48 +1060,59 @@ export default function OnboardingFlow() {
             )}
           </div>
         )}
-        <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <button
-            onClick={handleGoogleSignup}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', height: 48, background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
-          >
-            Continuar con Google
-          </button>
+        {signupOptionsReady ? (
+          <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button
+              onClick={handleGoogleSignup}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', height: 48, background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
+            >
+              Continuar con Google
+            </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
-            o
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+              o
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+            </div>
+
+            <input
+              type="email"
+              value={email}
+              onChange={e => setSignupEmail(e.target.value)}
+              placeholder="tu@email.com"
+              className="onb-input"
+              style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={e => setSignupPassword(e.target.value)}
+              placeholder="Contraseña"
+              className="onb-input"
+              style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+            />
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11, color: 'rgba(255,255,255,.4)', textAlign: 'left', cursor: 'pointer' }}>
+              <input type="checkbox" checked={terms} onChange={e => setSignupTerms(e.target.checked)} style={{ marginTop: 2 }} />
+              <span>Acepto los <a href="/legal/terminos" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Términos</a> y la <a href="/legal/privacidad" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Política de Privacidad</a>.</span>
+            </label>
+            <button
+              onClick={() => { if (email && password && terms) void handleEmailSignup(email, password) }}
+              disabled={!email || !password || !terms}
+              style={{ width: '100%', height: 48, background: (!email || !password || !terms) ? '#333' : '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: (!email || !password || !terms) ? 'not-allowed' : 'pointer' }}
+            >
+              Continuar con email
+            </button>
           </div>
-
-          <input
-            type="email"
-            value={email}
-            onChange={e => setSignupEmail(e.target.value)}
-            placeholder="tu@email.com"
-            className="onb-input"
-            style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={e => setSignupPassword(e.target.value)}
-            placeholder="Contraseña"
-            className="onb-input"
-            style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
-          />
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11, color: 'rgba(255,255,255,.4)', textAlign: 'left', cursor: 'pointer' }}>
-            <input type="checkbox" checked={terms} onChange={e => setSignupTerms(e.target.checked)} style={{ marginTop: 2 }} />
-            <span>Acepto los <a href="/legal/terminos" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Términos</a> y la <a href="/legal/privacidad" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Política de Privacidad</a>.</span>
-          </label>
-          <button
-            onClick={() => { if (email && password && terms) void handleEmailSignup(email, password) }}
-            disabled={!email || !password || !terms}
-            style={{ width: '100%', height: 48, background: (!email || !password || !terms) ? '#333' : '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: (!email || !password || !terms) ? 'not-allowed' : 'pointer' }}
-          >
-            Continuar con email
-          </button>
-        </div>
+        ) : (
+          // Comprobando si ya hay sesión (usuario existente reanudando onboarding)
+          // — nunca se enseñan los botones de Google/email hasta saber que hacen
+          // falta de verdad, para no dar el parpadeo de "signup" que luego se
+          // redirige solo a /camino.
+          <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '24px 0' }}>
+            <div style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid rgba(255,255,255,.15)', borderTopColor: '#fff', animation: 'spin .7s linear infinite' }} />
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', margin: 0 }}>Comprobando tu sesión…</p>
+          </div>
+        )}
         <button onClick={() => setStep('preview')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
           ← Volver
         </button>

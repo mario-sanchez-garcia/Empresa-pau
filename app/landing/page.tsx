@@ -330,7 +330,7 @@ export default function LandingPage() {
             Prepara<span style={{ display: 'block', letterSpacing: '-.01em' }}>la PAU.</span>
           </h1>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <Link href="/login" className="v4c-cta-circle" style={{ width: 140, height: 140, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', flexDirection: 'column', gap: 4 }}>
+            <Link href="/onboarding" className="v4c-cta-circle" style={{ width: 140, height: 140, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', flexDirection: 'column', gap: 4 }}>
               <span style={{ fontFamily: B, fontSize: 17, letterSpacing: '.06em', color: '#111', textAlign: 'center', lineHeight: 1.1 }}>Empieza<br />gratis</span>
               <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(0,0,0,.45)', letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
             </Link>
@@ -578,7 +578,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/login" style={{ fontFamily: M, fontSize: 10, color: '#fff', letterSpacing: '.1em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.3)', paddingBottom: 1, display: 'inline-block' }}>
+                <Link href={plan.name === PLAN_COPY.free.label ? '/onboarding' : '/login'} style={{ fontFamily: M, fontSize: 10, color: '#fff', letterSpacing: '.1em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.3)', paddingBottom: 1, display: 'inline-block' }}>
                   {plan.cta}
                 </Link>
               </div>
@@ -604,7 +604,7 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="v4c-cta-right">
-          <Link href="/login" className="v4c-cta-circle-inv">
+          <Link href="/onboarding" className="v4c-cta-circle-inv">
             <span style={{ fontFamily: B, fontSize: 16, letterSpacing: '.06em', color: '#fff', textAlign: 'center', lineHeight: 1.1 }}>Empieza<br />gratis</span>
             <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
           </Link>

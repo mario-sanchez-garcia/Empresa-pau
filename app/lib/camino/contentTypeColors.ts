@@ -4,7 +4,7 @@
 // monthly calendar view so a student can tell at a glance what's a Kairo
 // mission vs. an exam vs. something they added themselves, regardless of
 // subject. Kept in one place so it stays consistent everywhere it's used.
-export type ContentType = 'kairo_mission' | 'exam' | 'student_event'
+export type ContentType = 'kairo_mission' | 'exam' | 'student_event' | 'suggestion'
 
 export const CONTENT_TYPE_COLORS: Record<ContentType, { bg: string; text: string; border: string; dot: string }> = {
   // Blue — the app's primary brand color, already used for every Kairo CTA
@@ -16,10 +16,16 @@ export const CONTENT_TYPE_COLORS: Record<ContentType, { bg: string; text: string
   // Rose — new, distinct from every subject color and from amber/blue, so
   // student-added events never get mistaken for Kairo- or exam-generated ones.
   student_event: { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8', dot: '#db2777' },
+  // Violeta y notablemente más transparente que el resto (alpha bajo en
+  // bg/border) a propósito — "Sugiéreme qué repasar" propone, no asigna: el
+  // hueco sigue siendo "Repaso libre" tal cual, esto es solo un añadido
+  // opcional al lado, nunca debe leerse como una misión más.
+  suggestion: { bg: 'rgba(139,92,246,0.10)', text: '#7c3aed', border: 'rgba(139,92,246,0.35)', dot: '#8b5cf6' },
 }
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   kairo_mission: 'Misión Kairo',
   exam: 'Examen / parcial',
   student_event: 'Añadido por ti',
+  suggestion: 'Sugerencia de repaso (opcional)',
 }

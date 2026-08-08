@@ -149,21 +149,32 @@ async function maybeInjectCommentText(
     .lte('scheduled_date', horizon)
   const takenDates = new Set((existingDates ?? []).map(r => r.scheduled_date as string))
 
-  // Find next available Friday; fall back to Thursday if Friday is taken
-  let candidate: string | null = null
+  // Candidatos: cada viernes libre del horizonte y, si está ocupado por otra
+  // misión de Camino, su jueves. Se prueban en orden hasta encontrar uno con
+  // hueco real en la agenda propia del alumno (cole/extraescolares) — un
+  // viernes/jueves sin otra misión de Camino pero completo de eventos
+  // propios no debe forzar esta misión ahí; se prueba el siguiente.
+  const candidates: string[] = []
   for (let i = 0; i < 42; i++) {
     const d = addDays(today, i)
     const dow = new Date(d + 'T12:00:00Z').getUTCDay()
     if (dow !== 5 || SPAIN_HOLIDAYS.has(d)) continue // only Fridays, non-holiday
-    if (!takenDates.has(d)) { candidate = d; break }
-    // Friday taken — try Thursday (day before)
-    const thu = addDays(d, -1)
-    if (thu >= today && !SPAIN_HOLIDAYS.has(thu) && !takenDates.has(thu)) { candidate = thu; break }
+    if (!takenDates.has(d)) candidates.push(d)
+    else {
+      const thu = addDays(d, -1)
+      if (thu >= today && !SPAIN_HOLIDAYS.has(thu) && !takenDates.has(thu)) candidates.push(thu)
+    }
   }
-  if (!candidate) return
+  if (candidates.length === 0) return
 
-  const scheduler = await createDayScheduler(userId, supabase, candidate)
-  const timeSlot = scheduler.place(estimatedMinutesForMissionType('comment_text'))
+  let candidate: string | null = null
+  let timeSlot: { start: string; end: string } | null = null
+  for (const d of candidates) {
+    const scheduler = await createDayScheduler(userId, supabase, d)
+    const slot = scheduler.place(estimatedMinutesForMissionType('comment_text'))
+    if (slot) { candidate = d; timeSlot = slot; break }
+  }
+  if (!candidate || !timeSlot) return
 
   await supabase.from('camino_calendar').upsert({
     user_id: userId,
@@ -177,8 +188,8 @@ async function maybeInjectCommentText(
     status: 'pending',
     source: 'algorithm',
     generated_by: 'algorithm_v1',
-    start_time: timeSlot?.start ?? null,
-    end_time: timeSlot?.end ?? null,
+    start_time: timeSlot.start,
+    end_time: timeSlot.end,
   }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order', ignoreDuplicates: true })
 }
 
@@ -390,6 +401,12 @@ export async function ensureCaminoCalendar(
       if (itemMeta.express) calMetadata.express = true
       if (rescueMode) calMetadata.plan_mode = 'rescue'
       const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, slot))
+      // Sin hueco libre en la ventana de estudio de este día (agenda propia
+      // — cole/extraescolares — ya lo llena) -> no se fuerza la misión aquí.
+      // Se deja en la cola sin avanzar el cursor, así un día futuro con
+      // menos ocupación la recoge en vez de aterrizar sin hora en un día ya
+      // completo.
+      if (!timeSlot) break
       calendarRows.push({
         user_id: userId,
         scheduled_date: dateStr,
@@ -405,8 +422,8 @@ export async function ensureCaminoCalendar(
         source: 'algorithm',
         generated_by: 'algorithm_v1',
         queue_id: item.id,
-        start_time: timeSlot?.start ?? null,
-        end_time: timeSlot?.end ?? null,
+        start_time: timeSlot.start,
+        end_time: timeSlot.end,
         metadata: calMetadata,
       })
       scheduledQueueIds.push(item.id)

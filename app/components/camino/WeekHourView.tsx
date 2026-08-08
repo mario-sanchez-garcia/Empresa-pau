@@ -165,7 +165,7 @@ export default function WeekHourView({
         })}
       </div>
 
-      <div className="flex flex-1 overflow-y-auto overflow-x-auto">
+      <div className="flex flex-1 overflow-y-auto overflow-x-auto overscroll-contain">
         <div className="w-12 shrink-0">
           {Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i).map(hour => (
             <div key={hour} style={{ height: HOUR_PX }} className="relative">

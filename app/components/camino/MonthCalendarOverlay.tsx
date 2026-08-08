@@ -98,6 +98,20 @@ export default function MonthCalendarOverlay({
   const [notesSaved, setNotesSaved] = useState(true)
   const { seenKeys, markSeen, isLoaded: hintsLoaded } = useHints()
 
+  // Este overlay cubre toda la pantalla (fixed inset-0) pero el body de
+  // detrás seguía siendo scrolleable — al llegar al límite de scroll del
+  // grid mensual (o del panel lateral), la rueda del ratón encadenaba el
+  // scroll restante al fondo de la página en vez de quedarse contenido en
+  // el calendario. overscroll-contain en los paneles internos evita el
+  // encadenado; bloquear el scroll del body mientras el overlay está
+  // montado es la red de seguridad estándar para cualquier modal a
+  // pantalla completa.
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [])
+
   useEffect(() => {
     let cancelled = false
     supabase.auth.getSession().then(async ({ data }) => {
@@ -335,7 +349,10 @@ export default function MonthCalendarOverlay({
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            {(Object.keys(CONTENT_TYPE_COLORS) as ContentType[]).map(type => (
+            {/* 'suggestion' no aparece en esta vista mensual (viene de datos
+                efímeros en localStorage, no de camino_calendar) — se omite
+                de la leyenda para no listar un tipo que nunca se ve aquí. */}
+            {(Object.keys(CONTENT_TYPE_COLORS) as ContentType[]).filter(type => type !== 'suggestion').map(type => (
               <span key={type} className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[.08em] text-slate-400">
                 <span style={{ width: 8, height: 8, borderRadius: 999, background: CONTENT_TYPE_COLORS[type].dot, display: 'inline-block' }} />
                 {CONTENT_TYPE_LABELS[type]}
@@ -363,7 +380,7 @@ export default function MonthCalendarOverlay({
 
           {viewMode === 'month' ? (
             /* Month grid */
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-5">
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-6 py-5">
               <div className="grid grid-cols-7 gap-1.5 text-center">
                 {WEEKDAY_LABELS.map(label => (
                   <div key={label} className="pb-1 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">{label}</div>
@@ -434,7 +451,7 @@ export default function MonthCalendarOverlay({
           )}
 
           {/* Day detail + notes panel */}
-          <div className="flex w-full shrink-0 flex-col overflow-y-auto border-t border-[#f1f5f9] bg-[#fafbfc] px-6 py-5 lg:w-[340px] lg:border-l lg:border-t-0">
+          <div className="flex w-full shrink-0 flex-col overflow-y-auto overscroll-contain border-t border-[#f1f5f9] bg-[#fafbfc] px-6 py-5 lg:w-[340px] lg:border-l lg:border-t-0">
             <div className="mb-5">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[13px] font-black text-slate-900">

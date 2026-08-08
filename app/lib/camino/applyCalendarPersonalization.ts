@@ -169,14 +169,18 @@ export async function applyCalendarPersonalization(
         const row = rows[rowIndex]
         const meta = metadataObject(row.metadata)
         const timeSlot = scheduler.place(estimatedMinutesForSlot(prefs.dailyMinutes, slot))
+        // Sin hueco libre este día (agenda propia ya lo llena) -> no se
+        // reubica esta misión aquí; se prueba en el siguiente día preferido
+        // en vez de forzarla sin hora en un día completo.
+        if (!timeSlot) break
         updates.push(
           supabase
             .from('camino_calendar')
             .update({
               scheduled_date: date,
               updated_at: new Date().toISOString(),
-              start_time: timeSlot?.start ?? null,
-              end_time: timeSlot?.end ?? null,
+              start_time: timeSlot.start,
+              end_time: timeSlot.end,
               metadata: {
                 ...meta,
                 estimated_minutes: estimatedMinutesForSlot(prefs.dailyMinutes, slot),

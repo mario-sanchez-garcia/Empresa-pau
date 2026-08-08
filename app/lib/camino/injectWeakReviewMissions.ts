@@ -172,16 +172,27 @@ export async function injectWeakReviewMissions(
       if (!topic) continue
 
       const sortOrder = topic.v2SortOrder ?? topic.orderIndex
-      const scheduledDate = pickDateForReview(candidateDates, countByDate)
-      if (!scheduledDate) break
+
+      // Un día candidato sin hueco real en la agenda propia del alumno
+      // (cole/extraescolares) no debe forzar el repaso ahí — se prueba el
+      // siguiente candidato en vez de quedarse sin hora en un día completo.
+      let scheduledDate: string | null = null
+      let timeSlot: { start: string; end: string } | null = null
+      const attemptedDates = new Set<string>()
+      for (let attempt = 0; attempt < candidateDates.length; attempt += 1) {
+        const candidate = pickDateForReview(candidateDates, countByDate)
+        if (!candidate || attemptedDates.has(candidate)) break
+        attemptedDates.add(candidate)
+        const scheduler = await schedulerFor(candidate)
+        const slot = scheduler.place(estimatedMinutesForMissionType('review'))
+        if (slot) { scheduledDate = candidate; timeSlot = slot; break }
+      }
+      if (!scheduledDate || !timeSlot) continue
 
       const subject = normalizeSubjectSlug(topic.subject)
       const key = reviewKey(subject, topic.blockSlug, sortOrder)
       futureTopicKeys.add(`${subject}:${sortOrder}`)
       existingReviewKeys.add(key)
-
-      const scheduler = await schedulerFor(scheduledDate)
-      const timeSlot = scheduler.place(estimatedMinutesForMissionType('review'))
 
       rowsToInsert.push({
         user_id: userId,
@@ -197,8 +208,8 @@ export async function injectWeakReviewMissions(
         status: 'pending',
         source: 'algorithm',
         generated_by: WEAK_REVIEW_VERSION,
-        start_time: timeSlot?.start ?? null,
-        end_time: timeSlot?.end ?? null,
+        start_time: timeSlot.start,
+        end_time: timeSlot.end,
         queue_id: null,
         metadata: {
           topic_slug: topic.topicSlug,

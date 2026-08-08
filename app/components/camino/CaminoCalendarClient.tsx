@@ -22,6 +22,7 @@ import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
+import { CONTENT_TYPE_COLORS } from '@/app/lib/camino/contentTypeColors'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 import { RankingRow } from '@/components/shared/RankingRow'
 import UsernameGate from '@/app/components/camino/UsernameGate'
@@ -269,6 +270,13 @@ function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
+// "Sugiéreme qué repasar" (FreeReviewPanel) no persiste en camino_calendar
+// — es una propuesta, no una misión asignada — así que se guarda aquí solo
+// para que CompactWeekView pueda mostrarla junto a "Repaso libre" del día de
+// hoy sin levantar el estado hasta el padre. Se descarta sola al día
+// siguiente (comparación de fecha al leer), sin necesidad de limpiarla.
+const FREE_REVIEW_SUGGESTION_KEY = 'kairo_free_review_suggestion_v1'
+type FreeReviewSuggestion = { date: string; subject: string; focusNote: string }
 // `exam-${date}-${exams.length + 1}` could collide with an existing exam's id
 // once one had been deleted (the counter resets to a value already used by a
 // surviving exam on the same date) — a React key collision that can hide the
@@ -3395,6 +3403,15 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
     return () => { cancelled = true }
   }, [])
 
+  // Recupera la sugerencia de hoy si el alumno ya la pidió antes y volvió a
+  // esta pantalla (p. ej. tras navegar a Exámenes y volver) — sin esto, un
+  // simple remount de FreeReviewPanel la perdía aunque siguiera siendo el
+  // mismo día.
+  useEffect(() => {
+    const saved = loadJson<FreeReviewSuggestion | null>(FREE_REVIEW_SUGGESTION_KEY, null)
+    if (saved && saved.date === todayMadrid()) setSuggestion({ subject: saved.subject, focusNote: saved.focusNote })
+  }, [])
+
   async function suggest() {
     if (subjects.length === 0 || loadingSuggestion) return
     setLoadingSuggestion(true)
@@ -3420,8 +3437,11 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
       })
       if (!res.ok) { setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.'); return }
       const json = await res.json() as { subject?: string; focusNote?: string }
-      if (json.subject) setSuggestion({ subject: json.subject, focusNote: json.focusNote ?? '' })
-      else setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.')
+      if (json.subject) {
+        const focusNote = json.focusNote ?? ''
+        setSuggestion({ subject: json.subject, focusNote })
+        saveJson(FREE_REVIEW_SUGGESTION_KEY, { date: todayMadrid(), subject: json.subject, focusNote } satisfies FreeReviewSuggestion)
+      } else setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.')
     } catch {
       setError('No se ha podido generar una sugerencia. Revisa la conexión.')
     } finally {
@@ -3460,13 +3480,18 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
       </div>
       {error && <p className="mt-2 text-[10px] font-bold text-red-500">{error}</p>}
       {suggestion && (
-        <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2">
-          <p className="text-[11px] font-black text-blue-900">{suggestion.subject}</p>
-          {suggestion.focusNote && <p className="mt-0.5 text-[10px] font-semibold text-blue-700">{suggestion.focusNote}</p>}
+        <div
+          className="mt-2 rounded-xl px-3 py-2"
+          style={{ background: CONTENT_TYPE_COLORS.suggestion.bg, border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}` }}
+        >
+          <p className="text-[9px] font-black uppercase tracking-[.1em]" style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}>💡 Sugerencia opcional</p>
+          <p className="mt-0.5 text-[11px] font-black" style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}>{suggestion.subject}</p>
+          {suggestion.focusNote && <p className="mt-0.5 text-[10px] font-semibold" style={{ color: CONTENT_TYPE_COLORS.suggestion.text, opacity: 0.85 }}>{suggestion.focusNote}</p>}
           {examSlug && (
             <a
               href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
-              className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black text-blue-600"
+              className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black"
+              style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}
             >
               Buscar preguntas reales →
             </a>
@@ -3484,6 +3509,13 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
   // the day just clicked in the mini week strip above is enough to land
   // straight on that day without lifting the whole accordion state up.
   const [expandedDate, setExpandedDate] = useState<string | null>(initialExpandedDate)
+  // Solo lectura: la sugerencia la genera/guarda FreeReviewPanel. Se lee una
+  // vez al montar — este widget no necesita reaccionar en vivo a que el
+  // alumno pida una sugerencia nueva mientras está abierto.
+  const [freeReviewSuggestion] = useState<FreeReviewSuggestion | null>(() => {
+    const saved = loadJson<FreeReviewSuggestion | null>(FREE_REVIEW_SUGGESTION_KEY, null)
+    return saved && saved.date === todayMadrid() ? saved : null
+  })
   return (
     <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
       {days.map(day => {
@@ -3494,6 +3526,10 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
         const missionCount = main.length
         const isExpanded = expandedDate === day.date
         const isToday = day.isToday
+        // La sugerencia es un añadido opcional al lado de "Repaso libre", no
+        // lo sustituye — solo se muestra si el día sigue sin misiones
+        // asignadas (si mientras tanto se le asignó una, ya no aplica).
+        const showSuggestion = isToday && missionCount === 0 && Boolean(freeReviewSuggestion)
         return (
           <div key={day.date}>
             <button
@@ -3512,6 +3548,20 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
               <span className={`shrink-0 text-xs font-bold ${done ? 'text-emerald-600' : missionCount === 0 ? 'text-slate-300' : 'text-slate-400'}`}>
                 {done ? '✅ Hecho' : missionCount === 0 ? 'Repaso libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
               </span>
+              {showSuggestion && (
+                <span
+                  className="shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-black"
+                  style={{
+                    maxWidth: 130,
+                    background: CONTENT_TYPE_COLORS.suggestion.bg,
+                    color: CONTENT_TYPE_COLORS.suggestion.text,
+                    border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}`,
+                  }}
+                  title={`Sugerencia opcional: ${freeReviewSuggestion?.subject}${freeReviewSuggestion?.focusNote ? ` — ${freeReviewSuggestion.focusNote}` : ''}`}
+                >
+                  💡 {shortSubjectLabel(freeReviewSuggestion?.subject ?? '')}
+                </span>
+              )}
               <ChevronDown size={13} className={`shrink-0 text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>
             {isExpanded && (

@@ -34,8 +34,10 @@ function isAlreadyRegisteredError(error: { message?: string } | null) {
   )
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function POST(req: NextRequest) {
-  let body: { email?: unknown; password?: unknown; terms_version?: unknown; privacy_version?: unknown }
+  let body: { email?: unknown; password?: unknown; terms_version?: unknown; privacy_version?: unknown; next?: unknown; draft_id?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -45,6 +47,12 @@ export async function POST(req: NextRequest) {
   const { email, password } = body
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
   const normalizedPassword = typeof password === 'string' ? password : ''
+  // Fase 2 (signup al final): si el signup viene del onboarding anónimo, el
+  // enlace de confirmación debe volver a /onboarding/finalizando con el
+  // draft_id — no al /onboarding genérico. Con next/draft_id ausentes se
+  // conserva el comportamiento anterior exacto (login clásico).
+  const nextPath = typeof body.next === 'string' && body.next.startsWith('/') ? body.next : '/onboarding'
+  const draftId = typeof body.draft_id === 'string' && UUID_RE.test(body.draft_id) ? body.draft_id : null
 
   if (!normalizedEmail || !normalizedPassword) {
     return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
@@ -101,11 +109,16 @@ export async function POST(req: NextRequest) {
       // /auth/callback already parses the hash tokens Supabase appends and then
       // forwards to `next`, so confirmation lands in the product, not the landing.
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
+      const redirectQuery = new URLSearchParams({ next: nextPath })
+      if (draftId) {
+        redirectQuery.set('draft', draftId)
+        redirectQuery.set('method', 'email')
+      }
       const { data, error: signUpError } = await anonSupabase.auth.signUp({
         email: normalizedEmail,
         password: normalizedPassword,
         options: {
-          emailRedirectTo: `${appUrl}/auth/callback?next=%2Fonboarding`,
+          emailRedirectTo: `${appUrl}/auth/callback?${redirectQuery.toString()}`,
         },
       })
 
@@ -123,6 +136,15 @@ export async function POST(req: NextRequest) {
 
       // Confirmation email sent — record consent proof non-blocking
       const userId = data.user?.id
+      if (userId && draftId) {
+        void adminSupabase.from('billing_events').insert({
+          user_id: userId,
+          event_type: 'email_confirmation_sent',
+          payload: { draft_id: draftId, beta_private: true },
+        }).then(({ error: eErr }) => {
+          if (eErr) console.error('[auth/signup] email_confirmation_sent record failed:', eErr.message)
+        })
+      }
       if (userId && termsVersion && privacyVersion) {
         void adminSupabase.from('billing_events').insert({
           user_id: userId,

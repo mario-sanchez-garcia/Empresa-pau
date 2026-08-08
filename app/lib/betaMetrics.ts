@@ -25,6 +25,20 @@ export const BETA_METRIC_EVENTS = [
   'onboarding_flow_completed',
   // Fase 1 (rediseño emocional): dolor principal elegido en la portada.
   'onboarding_pain_selected',
+  // Fase 2 (signup al final, ver app/api/onboarding/draft, /claim y
+  // /finalize). La mayoría de los "onboarding_*" de aquí abajo llegan desde
+  // el cliente vía flush de la cola pre-auth (ver onboardingEventQueue.ts);
+  // draft_created/claimed/finalize_* se escriben directamente server-side.
+  'onboarding_preview_viewed',
+  'onboarding_signup_method_selected',
+  'onboarding_signup_started',
+  'onboarding_signup_completed',
+  'email_confirmation_sent',
+  'email_confirmation_completed',
+  'onboarding_draft_created',
+  'onboarding_draft_claimed',
+  'onboarding_finalize_started',
+  'onboarding_finalize_resumed',
   'camino_opened',
   'mission_opened',
   'course_opened',

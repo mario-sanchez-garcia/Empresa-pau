@@ -9,6 +9,7 @@
 // ver la lista blanca de campos en app/api/onboarding/event/route.ts.
 import { supabase } from '@/app/lib/supabase'
 import type { PainType } from '@/app/lib/onboarding/onboardingStorage'
+import { enqueueOnboardingEvent, readQueuedEvents, removeQueuedEvents } from '@/app/lib/onboarding/onboardingEventQueue'
 
 export const ONBOARDING_FLOW_VERSION = 'current_v1'
 
@@ -33,6 +34,19 @@ export type OnboardingEventType =
   | 'onboarding_flow_completed'
   // Fase 1 (rediseño emocional): dolor principal elegido en la portada.
   | 'onboarding_pain_selected'
+  // Fase 2 (signup al final): estos ocurren ANTES de que exista sesión, así
+  // que sendOnboardingEvent() los encola en local (ver
+  // onboardingEventQueue.ts) hasta que haya token para enviarlos de verdad.
+  | 'onboarding_preview_viewed'
+  | 'onboarding_signup_method_selected'
+  | 'onboarding_signup_started'
+  | 'onboarding_signup_completed'
+  | 'email_confirmation_sent'
+  | 'email_confirmation_completed'
+  | 'onboarding_draft_created'
+  | 'onboarding_draft_claimed'
+  | 'onboarding_finalize_started'
+  | 'onboarding_finalize_resumed'
 
 export type OnboardingStepId =
   | 'welcome'
@@ -48,8 +62,9 @@ export type OnboardingStepId =
   | 'study_days'
   | 'grade_threshold'
   | 'confirmation'
-  | 'saving'
-  | 'done'
+  | 'preview'
+  | 'signup'
+  | 'finalizing'
 
 export interface OnboardingEventPayload {
   step_id?: OnboardingStepId
@@ -65,6 +80,7 @@ export interface OnboardingEventPayload {
   study_days_count?: number | null
   error_code?: string
   pain_type?: PainType
+  method?: 'google' | 'email'
 }
 
 function viewportType(): 'mobile' | 'desktop' {
@@ -72,7 +88,11 @@ function viewportType(): 'mobile' | 'desktop' {
   return window.innerWidth < 768 ? 'mobile' : 'desktop'
 }
 
-// Best-effort: la telemetría nunca debe bloquear ni romper el onboarding real.
+// Best-effort: la telemetría nunca debe bloquear ni romper el onboarding
+// real. Fase 2: el onboarding ahora ocurre antes de autenticarse, así que
+// sin token no se descarta el evento — se encola en local (ver
+// onboardingEventQueue.ts) y se manda de verdad en el flush posterior al
+// login/claim (ver flushQueuedOnboardingEvents).
 export async function sendOnboardingEvent(
   traceId: string | null,
   eventType: OnboardingEventType,
@@ -82,7 +102,19 @@ export async function sendOnboardingEvent(
   try {
     const { data: sessionData } = await supabase.auth.getSession()
     const token = sessionData.session?.access_token
-    if (!token) return
+    const eventId = crypto.randomUUID()
+    if (!token) {
+      enqueueOnboardingEvent({
+        event_id: eventId,
+        trace_id: traceId,
+        event_type: eventType,
+        occurred_at: new Date().toISOString(),
+        flow_version: ONBOARDING_FLOW_VERSION,
+        viewport_type: viewportType(),
+        payload: { ...payload },
+      })
+      return
+    }
     await fetch('/api/onboarding/event', {
       method: 'POST',
       headers: {
@@ -91,7 +123,7 @@ export async function sendOnboardingEvent(
         'X-Kairo-Trace-Id': traceId,
       },
       body: JSON.stringify({
-        event_id: crypto.randomUUID(),
+        event_id: eventId,
         event_type: eventType,
         trace_id: traceId,
         flow_version: ONBOARDING_FLOW_VERSION,
@@ -103,4 +135,63 @@ export async function sendOnboardingEvent(
   } catch {
     // Telemetry must never block the onboarding flow.
   }
+}
+
+// Guarda si ya hay un flush en curso en esta misma pestaña/instancia del
+// módulo. Sin esto, dos llamadas casi simultáneas (p.ej. React Strict Mode
+// invocando el efecto de montaje dos veces en dev — encontrado en el E2E de
+// Fase 2) leen la cola ANTES de que la primera termine de vaciarla, y cada
+// evento se reenvía duplicado. No cubre dos pestañas distintas (procesos JS
+// separados) — ahí la duplicación de analytics sigue siendo posible, pero
+// es solo telemetría, nunca datos de negocio (perfil/Camino/XP), que están
+// protegidos por el lock atómico de /api/onboarding/finalize.
+let flushInFlight = false
+
+// Se llama tras autenticarse (claim del draft) con el token ya disponible.
+// Envía cada evento encolado y solo lo quita de la cola local si el server
+// lo aceptó — un fallo de red deja el evento para el próximo flush en vez de
+// perderlo.
+export async function flushQueuedOnboardingEvents(accessToken: string) {
+  if (typeof window === 'undefined' || flushInFlight) return
+  const queued = readQueuedEvents()
+  if (queued.length === 0) return
+  flushInFlight = true
+  try {
+    await flushEvents(accessToken, queued)
+  } finally {
+    flushInFlight = false
+  }
+}
+
+async function flushEvents(accessToken: string, queued: ReturnType<typeof readQueuedEvents>) {
+  const sentIds: string[] = []
+  for (const event of queued) {
+    try {
+      const res = await fetch('/api/onboarding/event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+          'X-Kairo-Trace-Id': event.trace_id,
+        },
+        body: JSON.stringify({
+          event_id: event.event_id,
+          event_type: event.event_type,
+          trace_id: event.trace_id,
+          flow_version: event.flow_version,
+          viewport_type: event.viewport_type,
+          occurred_at: event.occurred_at,
+          ...event.payload,
+        }),
+      })
+      if (res.ok || res.status === 400) {
+        // 400 (p.ej. event_type ya no reconocido) no es recuperable
+        // reintentando — se descarta para no atascar el flush para siempre.
+        sentIds.push(event.event_id)
+      }
+    } catch {
+      // Sin red: se deja en la cola para el próximo flush.
+    }
+  }
+  removeQueuedEvents(sentIds)
 }

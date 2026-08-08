@@ -10,6 +10,8 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
+import { loadLocalDraft, setLocalDraftId } from '@/app/lib/onboarding/onboardingDraftStorage'
+import { sendOnboardingEvent, flushQueuedOnboardingEvents } from '@/app/lib/onboarding/onboardingEvents'
 
 function CallbackHandler() {
   const router = useRouter()
@@ -26,6 +28,11 @@ function CallbackHandler() {
     const errorCode = searchParams.get('error_code') ?? hashParams.get('error_code')
     const errorDescription = searchParams.get('error_description') ?? hashParams.get('error_description')
     const next = searchParams.get('next') ?? '/camino'
+    // Fase 2 (signup al final): presencia de `draft` = este login viene del
+    // onboarding anónimo (Google o email) y debe reclamar el server draft
+    // antes de seguir — ver POST /api/onboarding/draft/claim.
+    const draftId = searchParams.get('draft')
+    const signupMethod = searchParams.get('method') === 'google' ? 'google' as const : searchParams.get('method') === 'email' ? 'email' as const : null
 
     if (errorParam) {
       const description = errorDescription ?? errorParam
@@ -72,6 +79,42 @@ function CallbackHandler() {
     // y solo es legible por el service role, de ahí que haya que ir por la
     // API y no por supabase-js directamente).
     async function redirectNext() {
+      // Fase 2: si venimos del onboarding anónimo, reclamar el draft es lo
+      // primero — el destino real es siempre /onboarding/finalizando?draft=…
+      // (nunca la comprobación de "onboarding completo" de más abajo, que es
+      // para el login clásico). No genera Camino aquí: eso lo hace
+      // /api/onboarding/finalize, llamado desde esa página.
+      if (draftId) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          const token = session?.access_token
+          if (token) {
+            const claimRes = await fetch('/api/onboarding/draft/claim', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ draft_id: draftId }),
+            })
+            if (claimRes.ok) {
+              setLocalDraftId(draftId)
+              const traceId = loadLocalDraft()?.traceId ?? null
+              if (signupMethod === 'email') {
+                void sendOnboardingEvent(traceId, 'email_confirmation_completed', {})
+              }
+              void sendOnboardingEvent(traceId, 'onboarding_signup_completed', signupMethod ? { method: signupMethod } : {})
+              void flushQueuedOnboardingEvents(token)
+              go(`${next}?draft=${encodeURIComponent(draftId)}`)
+              return
+            }
+          }
+        } catch {
+          // Cae al onboarding normal de abajo — el local draft sigue intacto
+          // y el propio paso 'signup' vuelve a intentar el draft server-side
+          // en cuanto detecte que ya hay sesión.
+        }
+        go('/onboarding')
+        return
+      }
+
       try {
         const { data: { session } } = await supabase.auth.getSession()
         const token = session?.access_token

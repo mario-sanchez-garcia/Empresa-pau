@@ -26,10 +26,12 @@ import {
   type OnboardingStudentExam,
   type PainType,
 } from '@/app/lib/onboarding/onboardingStorage'
-import { sendOnboardingEvent, type OnboardingStepId } from '@/app/lib/onboarding/onboardingEvents'
+import { sendOnboardingEvent, ONBOARDING_FLOW_VERSION, type OnboardingStepId } from '@/app/lib/onboarding/onboardingEvents'
 import { createActiveDurationTracker } from '@/app/lib/onboarding/activeDuration'
+import { loadLocalDraft, saveLocalDraft } from '@/app/lib/onboarding/onboardingDraftStorage'
+import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
-type Step = 'welcome' | 'pain' | 'pain-result' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'saving' | 'done'
+type Step = 'welcome' | 'pain' | 'pain-result' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'preview' | 'signup'
 
 // 'pain' cuenta como pregunta real dentro del wizard (progreso, chrome
 // estándar). 'pain-result' es una pantalla de resultado sin formulario (como
@@ -52,8 +54,8 @@ const STEP_ID_MAP: Record<Step, OnboardingStepId> = {
   'weekly-days': 'study_days',
   'grade-threshold': 'grade_threshold',
   confirm: 'confirmation',
-  saving: 'saving',
-  done: 'done',
+  preview: 'preview',
+  signup: 'signup',
 }
 
 const PAIN_OPTS: Array<{ id: PainType; label: string }> = [
@@ -185,8 +187,8 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'Kairo adapta el Camino a tu ritmo real de estudio.' },
   'grade-threshold': { title: '¿A partir de qué nota quieres repetir para mejorar?', help: 'Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.' },
   confirm: { title: 'Así vamos a preparar tu Camino', help: 'Revisa cada bloque y edítalo si algo no encaja.' },
-  saving: { title: 'Construyendo tu Camino PAU', help: 'Estamos preparando tu experiencia inicial.' },
-  done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
+  preview: { title: 'Así se organizará tu preparación', help: 'Una vista previa de cómo Kairo organiza tu Camino.' },
+  signup: { title: 'Tu Camino está listo para construirse', help: 'Crea tu cuenta para guardar tu preparación.' },
 }
 
 const SIDEBAR_STEPS = ['Dolor', 'Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
@@ -228,18 +230,18 @@ export default function OnboardingFlow() {
   const isPreview = searchParams.get('preview') === '1'
   const [step, setStep] = useState<Step>('welcome')
   const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
-  const [savingError, setSavingError] = useState('')
-  const [savingMsgIdx, setSavingMsgIdx] = useState(0)
+  // Fase 2 (signup al final): error de la pantalla de preview/signup —
+  // draft server-side, Google OAuth o signup por email. Ya no existe un
+  // paso "saving" en este componente: la generación real ocurre server-side
+  // en /api/onboarding/finalize, orquestada desde /onboarding/finalizando.
+  const [authError, setAuthError] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+  const [signupTerms, setSignupTerms] = useState(false)
   const [schoolQuery, setSchoolQuery] = useState('')
   const [schoolOpen, setSchoolOpen] = useState(false)
   const [dbInstitutes, setDbInstitutes] = useState<string[]>([])
   const [examDraft, setExamDraft] = useState({ subject: '', date: inputDate(addDays(new Date(), 10)), block: '', topic: '', name: '', priority: 'normal' as const })
-  const generateRetriesRef = useRef(0)
-  // Efecto espejo (Fase 1): mission_type NO determina si una misión admite
-  // corrección paso a paso (auditado — ver app/api/onboarding/generate/route.ts).
-  // supportsStepCorrection es la señal real, calculada en servidor con la
-  // misma resolución de tema que usa /api/camino/correct.
-  const firstMissionSupportsCorrectionRef = useRef<boolean>(false)
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
   const [usernameError, setUsernameError] = useState('')
@@ -350,7 +352,11 @@ export default function OnboardingFlow() {
       traceIdRef.current = saved.traceId ?? null
       if (traceIdRef.current) onboardingStartedRef.current = true
       const savedStep = saved.lastStep as Step | null
-      if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
+      // Fase 2: 'preview'/'signup' viven fuera de STEPS (no cuentan para el
+      // progreso de 11 pasos, igual que 'pain-result'), pero SÍ son destinos
+      // válidos para reanudar — si no, volver de /onboarding/revisa-tu-email
+      // o recargar en 'signup' rebotaría siempre a 'welcome'.
+      if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome' || savedStep === 'preview' || savedStep === 'signup')) {
         setStep(savedStep)
         if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
         // Username NUNCA se deriva del email (ver AGENTS.md / plan de
@@ -368,19 +374,18 @@ export default function OnboardingFlow() {
 
   // Persist current step so interrupted sessions can resume
   useEffect(() => {
-    if (step !== 'saving' && step !== 'done') saveOnboarding({ lastStep: step })
+    saveOnboarding({ lastStep: step })
   }, [step])
 
   // Fase 0 de observabilidad: registra onboarding_step_viewed cuando el paso
   // está efectivamente renderizado, y arranca/reinicia el medidor de tiempo
   // activo del paso. No se dispara para 'welcome' (cubierto por
-  // onboarding_started) ni para 'saving'/'done' (cubiertos por los eventos
-  // de generación/finalización).
+  // onboarding_started).
   useEffect(() => {
     stepTimerRef.current?.destroy()
     stepTimerRef.current = createActiveDurationTracker()
 
-    if (step === 'welcome' || step === 'saving' || step === 'done') return
+    if (step === 'welcome') return
     if (!traceIdRef.current) return
 
     const visitCount = (stepVisitCountsRef.current[step] ?? 0) + 1
@@ -438,49 +443,9 @@ export default function OnboardingFlow() {
     return [...dbInstitutes.filter(s => normalizeSearch(s).includes(q)), ...staticExtra].slice(0, 10)
   }, [dbInstitutes, centers, schoolQuery])
 
-  const savingMessages = useMemo(() => {
-    // Fase 1: cada mensaje debe reflejar algo que realmente está ocurriendo
-    // (no fingir pasos ni mostrar porcentajes falsos) — ver AGENTS.md.
-    const contextMsgs: string[] = []
-    if (data.community && data.community !== 'Otra') {
-      contextMsgs.push(`Preparando tu Camino para la PAU de ${data.community}…`)
-    }
-    const nextExam = [...(data.studentExams ?? [])].sort((a, b) => a.date.localeCompare(b.date))[0]
-    if (nextExam) {
-      contextMsgs.push(`Priorizando ${nextExam.subject} por tu próximo parcial…`)
-    }
-    if (data.weeklyStudyDaysValue) {
-      contextMsgs.push(`Distribuyendo tus sesiones entre ${data.weeklyStudyDaysValue} días…`)
-    }
-    if (data.dailyMinutes) {
-      contextMsgs.push(`Adaptando las sesiones a tus ${data.dailyMinutes} minutos disponibles…`)
-    }
-
-    const subjectMsgs: string[] = []
-    const enabledSelected = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
-    if (enabledSelected.includes('Matemáticas II')) subjectMsgs.push('Ordenando tus 60 temas de Matemáticas II…')
-    if (enabledSelected.includes('Matemáticas CCSS')) subjectMsgs.push('Ordenando tus temas de Matemáticas CCSS…')
-    if (enabledSelected.includes('Lengua Castellana')) subjectMsgs.push('Preparando comentario, gramática y literatura…')
-    if (enabledSelected.includes('Historia de España')) subjectMsgs.push('Construyendo tu cronología de Historia de España…')
-    if (subjectMsgs.length === 0) {
-      subjectMsgs.push('Calculando tu ritmo de estudio…')
-      subjectMsgs.push('Construyendo tu Camino PAU…')
-    }
-
-    return [...contextMsgs, ...subjectMsgs, 'Listo — tu primer día empieza mañana.']
-  }, [data.subjects, data.community, data.studentExams, data.weeklyStudyDaysValue, data.dailyMinutes])
-
-  useEffect(() => {
-    if (step !== 'saving' || savingError) return
-    const interval = setInterval(() => {
-      setSavingMsgIdx(i => Math.min(i + 1, savingMessages.length - 1))
-    }, 2200)
-    return () => clearInterval(interval)
-  }, [step, savingError, savingMessages.length])
-
   const stepIndex = STEPS.indexOf(step)
   const currentStep = stepIndex >= 0 ? stepIndex + 1 : 0
-  const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
+  const progressPct = (step === 'preview' || step === 'signup') ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
 
   const canContinue = (() => {
     if (step === 'pain') return Boolean(data.painType)
@@ -612,127 +577,174 @@ export default function OnboardingFlow() {
     update({ studentExams: (data.studentExams ?? []).filter(exam => exam.id !== id) })
   }
 
-  const SUBJECT_TO_SLUG: Record<string, string> = {
-    'Matemáticas II': 'matematicas_ii',
-    'Matemáticas CCSS': 'matematicas_ccss',
-    'Lengua Castellana': 'lengua',
-    'Historia de España': 'historia_espana',
+  // Fase 2 (signup al final): 'confirm' ya no llama directamente a
+  // setup+generate — pasa a 'preview' (organizativa, sin generar nada) y el
+  // signup ocurre DESPUÉS, al final del todo. La generación real ocurre
+  // server-side en /api/onboarding/finalize, orquestada desde
+  // /onboarding/finalizando (ver esa página).
+  function goToPreview() {
+    const durations = stepTimerRef.current?.getDurations()
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_step_completed', {
+      step_id: STEP_ID_MAP[step],
+      step_index: stepIndex,
+      elapsed_duration_ms: durations?.elapsedMs,
+      active_duration_ms: durations?.activeMs,
+      validation_attempts: stepValidationAttemptsRef.current[step] ?? 0,
+    })
+    setAuthError('')
+    setStep('preview')
   }
 
-  async function finish() {
-    setSavingError('')
-    setSavingMsgIdx(0)
-    setStep('saving')
-    const completedAt = new Date().toISOString()
-    const usernameForSave = data.username?.trim() || loadOnboarding().username?.trim() || ''
-    const usernameErrorForSave = validateUsername(usernameForSave)
-    if (usernameErrorForSave) {
-      setSavingError(usernameErrorForSave)
-      setStep('confirm')
-      return
-    }
+  // Crea o actualiza el draft server-side ANÓNIMO (tabla onboarding_drafts)
+  // justo antes de iniciar cualquier auth — nunca antes. Devuelve el
+  // draft_id opaco o null si falló. Reutiliza el draft local existente
+  // (mismo id) si el usuario vuelve atrás y cambia respuestas, en vez de
+  // acumular drafts nuevos en cada intento.
+  async function ensureServerDraft(): Promise<string | null> {
+    // traceIdRef.current (no data.traceId) es la fuente fiable: Fase 0 fija
+    // el traceId escribiendo directo a localStorage vía
+    // ensureOnboardingTraceId() sin pasar por setData, así que el siguiente
+    // update() (que persiste el `data` de React tal cual) lo sobreescribe a
+    // null en localStorage — encontrado en el E2E de Fase 2. El ref en
+    // memoria, en cambio, es correcto durante toda la sesión.
+    const traceId = traceIdRef.current ?? data.traceId ?? ensureOnboardingTraceId()
     const selectedEnabled = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
     const upcomingExams = sanitizeOnboardingExams(data.studentExams ?? [], selectedEnabled)
-    saveOnboarding({ ...data, username: usernameForSave, subjects: selectedEnabled, studentExams: upcomingExams, completedAt })
+    const existingDraftId = loadLocalDraft()?.draftId ?? undefined
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-      if (!token) {
-        setSavingError('No hemos podido confirmar tu sesión. Inicia sesión otra vez para guardar tu perfil.')
-        setStep('confirm')
-        return
-      }
-
-      if (token) {
-        const setupRes = await fetch('/api/onboarding/setup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            'X-Kairo-Trace-Id': traceIdRef.current ?? '',
-            'X-Kairo-Request-Id': crypto.randomUUID(),
-          },
-          body: JSON.stringify({
-            routeId: 'completa',
-            username: usernameForSave,
+      const res = await fetch('/api/onboarding/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          draft_id: existingDraftId,
+          trace_id: traceId,
+          flow_version: ONBOARDING_FLOW_VERSION,
+          payload: {
+            painType: data.painType,
+            username: data.username?.trim() || null,
             community: data.community,
             schoolName: data.schoolName,
             schoolSource: data.schoolSource,
             subjects: selectedEnabled,
-            studentExams: upcomingExams,
-            preparationFeeling: data.preparationFeeling,
+            upcomingExams,
+            preparationLevel: data.preparationFeeling,
+            minutesPerSession: data.dailyMinutes,
+            studyDays: data.weeklyStudyDaysValue,
             dailyStudyTime: data.dailyStudyTime,
-            dailyMinutes: data.dailyMinutes,
             weeklyStudyDays: data.weeklyStudyDays,
-            weeklyStudyDaysValue: data.weeklyStudyDaysValue,
             gradeThresholdMode: data.gradeThresholdMode,
             gradeThreshold: data.gradeThreshold,
             subjectGradeThresholds: data.subjectGradeThresholds,
-            onboardingCompleted: true,
-          }),
-        })
-        if (!setupRes.ok) {
-          const setupJson = await setupRes.json().catch(() => null) as { error?: string } | null
-          setSavingError(setupJson?.error ?? 'No hemos podido guardar tu perfil. Prueba otra vez en unos segundos.')
-          return
-        }
-
-        const subjectSlugs = selectedEnabled
-          .map(s => SUBJECT_TO_SLUG[s])
-          .filter((s): s is string => Boolean(s))
-
-        if (subjectSlugs.length > 0) {
-          generateRetriesRef.current += 1
-          // onboarding_generation_started/succeeded/failed se emiten desde
-          // /api/onboarding/generate (servidor), no desde aquí — ver Fase 0:
-          // el servidor es la única fuente de verdad para esos 3 eventos,
-          // así un cierre de pestaña a mitad de fetch no puede hacer parecer
-          // que una generación exitosa falló.
-          const generateRequestId = crypto.randomUUID()
-          const genRes = await fetch('/api/onboarding/generate', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-              'X-Kairo-Trace-Id': traceIdRef.current ?? '',
-              'X-Kairo-Request-Id': generateRequestId,
-            },
-            body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero', studentExams: upcomingExams, dailyMinutes: data.dailyMinutes }),
-          })
-          if (!genRes.ok) {
-            setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')
-            return
-          }
-          const genJson = await genRes.json()
-          if (!genJson.success) {
-            setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')
-            return
-          }
-          firstMissionSupportsCorrectionRef.current = Boolean(genJson.firstMission?.supportsStepCorrection)
-        }
-      }
-      markOnboardingComplete()
-      // Ensure kairo_ccaa is in sync at completion (covers edge cases where
-      // selectCommunity ran on a previous session)
-      syncOnboardingCommunity(data)
-      void sendOnboardingEvent(traceIdRef.current, 'onboarding_flow_completed', {
-        step_id: 'done',
-        subjects_count: selectedEnabled.length,
-        has_upcoming_exam: upcomingExams.length > 0,
-        study_time_bucket: data.dailyMinutes ? String(data.dailyMinutes) : (data.dailyStudyTime ?? undefined),
-        study_days_count: data.weeklyStudyDaysValue,
+          },
+        }),
       })
-      setStep('done')
+      if (!res.ok) return null
+      const json = await res.json() as { draft_id: string }
+      saveLocalDraft({ ...data, subjects: selectedEnabled, studentExams: upcomingExams }, json.draft_id)
+      return json.draft_id
     } catch {
-      setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')
+      return null
     }
   }
 
-  const isSaving = step === 'saving'
-  const isDone = step === 'done'
-  const showBack = !isDone && !isSaving && (step === 'pain' || stepIndex > 0)
-  const showContinue = !isDone && !isSaving && stepIndex >= 0 && step !== 'confirm'
-  const showConfirm = !isDone && !isSaving && step === 'confirm'
+  function goToFinalizing(draftId: string) {
+    markOnboardingComplete()
+    syncOnboardingCommunity(data)
+    router.push(`/onboarding/finalizando?draft=${encodeURIComponent(draftId)}`)
+  }
+
+  async function handleGoogleSignup() {
+    setAuthError('')
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_method_selected', { method: 'google' })
+    const draftId = await ensureServerDraft()
+    if (!draftId) {
+      setAuthError('No se pudo preparar tu cuenta. Inténtalo de nuevo.')
+      return
+    }
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_started', { method: 'google' })
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+    const callbackUrl = `${base}/auth/callback?next=${encodeURIComponent('/onboarding/finalizando')}&draft=${encodeURIComponent(draftId)}&method=google`
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: callbackUrl },
+    })
+    if (error) setAuthError('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
+  }
+
+  async function handleEmailSignup(email: string, password: string) {
+    setAuthError('')
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_method_selected', { method: 'email' })
+    const draftId = await ensureServerDraft()
+    if (!draftId) {
+      setAuthError('No se pudo preparar tu cuenta. Inténtalo de nuevo.')
+      return
+    }
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_started', { method: 'email' })
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          terms_version: LEGAL_VERSIONS.terminos.version,
+          privacy_version: LEGAL_VERSIONS.privacidad.version,
+          next: '/onboarding/finalizando',
+          draft_id: draftId,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setAuthError(mensajeAuthLegible(result.error))
+        return
+      }
+      if (result.needsConfirmation) {
+        void sendOnboardingEvent(traceIdRef.current, 'email_confirmation_sent', {})
+        router.push(`/onboarding/revisa-tu-email?email=${encodeURIComponent(email)}&draft=${encodeURIComponent(draftId)}`)
+        return
+      }
+      await supabase.auth.setSession(result.session)
+      goToFinalizing(draftId)
+    } catch {
+      setAuthError('Error de conexión. Inténtalo de nuevo.')
+    }
+  }
+
+  function mensajeAuthLegible(error?: string) {
+    const text = error?.toLowerCase() ?? ''
+    if (text.includes('already been registered') || text.includes('already registered')) {
+      return 'Ya existe una cuenta con este email. Inicia sesión o usa otra contraseña.'
+    }
+    if (text.includes('invalid login credentials')) {
+      return 'Email o contraseña incorrectos.'
+    }
+    return error ?? 'No se pudo completar la operación. Inténtalo de nuevo.'
+  }
+
+  // Si el alumno YA tiene sesión al llegar a 'signup' (usuario existente que
+  // reanuda onboarding, o volvió atrás tras autenticarse) no se le pide
+  // autenticarse otra vez — se prepara el draft y se pasa directo a
+  // finalizar.
+  useEffect(() => {
+    if (step !== 'signup') return
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data: sessionData }) => {
+      if (cancelled || !sessionData.session) return
+      const draftId = await ensureServerDraft()
+      if (cancelled) return
+      if (!draftId) {
+        setAuthError('No se pudo preparar tu cuenta. Inténtalo de nuevo.')
+        return
+      }
+      goToFinalizing(draftId)
+    })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+
+  const showBack = step === 'pain' || stepIndex > 0
+  const showContinue = stepIndex >= 0 && step !== 'confirm'
+  const showConfirm = step === 'confirm'
 
   return (
     <div style={{ minHeight: '100dvh', fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -741,9 +753,11 @@ export default function OnboardingFlow() {
         ? renderWelcome()
         : step === 'pain-result'
           ? renderPainResult()
-          : (isSaving || isDone)
-            ? renderSavingDone()
-            : renderShell()}
+          : step === 'preview'
+            ? renderPreview()
+            : step === 'signup'
+              ? renderSignup()
+              : renderShell()}
     </div>
   )
 
@@ -953,13 +967,8 @@ export default function OnboardingFlow() {
                 </button>
               )}
               {showConfirm && (
-                <button onClick={finish} style={{ padding: '11px 28px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: 'pointer' }}>
-                  Crear mi Camino PAU →
-                </button>
-              )}
-              {isDone && (
-                <button onClick={() => router.push('/camino')} style={{ padding: '11px 28px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
-                  Ver mi Camino PAU →
+                <button onClick={goToPreview} style={{ padding: '11px 28px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: 'pointer' }}>
+                  Ver cómo se organiza mi preparación →
                 </button>
               )}
             </div>
@@ -969,88 +978,129 @@ export default function OnboardingFlow() {
     )
   }
 
-  // ─── Saving / Done full-screen ────────────────────────────────────────────────
-  function renderSavingDone() {
-    if (isDone) {
-      // Efecto espejo (Fase 1): el dolor elegido no cambia qué misión eligió
-      // el generador, solo cómo se presenta la recompensa. El badge de
-      // corrección solo aparece si el backend confirmó que ESA misión en
-      // concreto resuelve a un tema real y corregible (ver
-      // supportsStepCorrection en /api/onboarding/generate) — nunca se finge.
-      const painType = data.painType
-      const mirrorMessage = painType === 'daily_plan' ? 'Tu primera tarea ya está decidida. Solo tienes que empezar.'
-        : painType === 'procrastination' ? 'Hoy solo necesitas 25 minutos.'
-        : null
-      const mirrorBadge = painType === 'correction_confidence' && firstMissionSupportsCorrectionRef.current ? 'Incluye corrección paso a paso'
-        : painType === 'improve_grade' ? 'Enfocada en asegurar puntos'
-        : null
-      return (
-        <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 16 }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Check size={30} color="#111" strokeWidth={3} />
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, color: '#fff', letterSpacing: '.02em' }}>Tu Camino PAU está listo</div>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', textAlign: 'center', maxWidth: 360 }}>Revisa tu semana, mira tus misiones y empieza cuando te venga bien.</p>
-          {mirrorMessage && (
-            <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,.75)', textAlign: 'center', maxWidth: 340, margin: 0 }}>{mirrorMessage}</p>
-          )}
-          {mirrorBadge && (
-            <span style={{ padding: '5px 12px', border: '1px solid rgba(37,99,235,.35)', background: 'rgba(37,99,235,.12)', borderRadius: 999, fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#60a5fa' }}>{mirrorBadge}</span>
-          )}
-          <button onClick={() => router.push('/camino')} style={{ marginTop: 8, padding: '12px 32px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
-            Ver mi Camino PAU →
-          </button>
-        </div>
-      )
-    }
+  // ─── Preview organizativa + Signup (Fase 2: signup al final) ─────────────────
+  function renderPreview() {
+    const community = data.community
+    const selectedEnabled = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+    const nextExam = [...(data.studentExams ?? [])].sort((a, b) => a.date.localeCompare(b.date))[0]
 
-    if (savingError) {
-      return (
-        <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 16, padding: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#f87171', textAlign: 'center', maxWidth: 400 }}>{savingError}</p>
-          {generateRetriesRef.current < 2 && (
-            <button onClick={finish} style={{ padding: '11px 24px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
-              Reintentar
-            </button>
-          )}
-        </div>
-      )
-    }
+    // Solo inferencias directas de respuestas reales — nunca temas, fechas
+    // de misión, XP, número/orden de misiones ni correcciones concretas
+    // (eso lo genera de verdad el finalizer, después de crear la cuenta).
+    const bullets: string[] = []
+    if (data.weeklyStudyDaysValue) bullets.push(`${data.weeklyStudyDaysValue} días de estudio por semana`)
+    if (data.dailyMinutes) bullets.push(`Sesiones de ${DAILY_MINUTES_LABELS[data.dailyMinutes] ?? `${data.dailyMinutes} min`}`)
+    if (nextExam) bullets.push(`${nextExam.subject} tendrá prioridad por tu próximo parcial`)
+    if (community) bullets.push(`Preparación adaptada a la PAU de ${community}`)
+    if (selectedEnabled.length > 0) bullets.push(`Asignaturas: ${selectedEnabled.join(', ')}`)
 
     return (
-      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40 }}>
-          {['K', 'A', 'I', 'R', 'O'].map((ch, i) => (
-            <div key={i} className="onb-lw">
-              <span className="onb-ghost">{ch}</span>
-              <span className="onb-glyph onb-top" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
-              <span className="onb-glyph onb-bot" style={{ animationDelay: `${i * 110}ms` }}>{ch}</span>
-              <div className="onb-seam" style={{ animationDelay: `${i * 110}ms` }} />
+      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 20, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6' }}>Así se organizará tu preparación</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 48px)', color: '#fff', letterSpacing: '.01em', maxWidth: 560, lineHeight: 1.05 }}>
+          Un vistazo a cómo Kairo organiza tu Camino
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 460, marginTop: 8 }}>
+          {bullets.map((bullet, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', textAlign: 'left' }}>
+              <Check size={14} color="#3b82f6" strokeWidth={3} style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.85)' }}>{bullet}</span>
             </div>
           ))}
         </div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 10 }}>
-          Generando tu Camino PAU
-        </div>
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={savingMsgIdx}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.3 }}
-            style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: '0 0 28px', fontFamily: "'Inter', system-ui, sans-serif" }}
-          >
-            {savingMessages[savingMsgIdx]}
-          </motion.p>
-        </AnimatePresence>
-        <div style={{ width: 200, height: 2, background: 'rgba(255,255,255,.06)', overflow: 'hidden' }}>
-          <div style={{ height: '100%', background: '#2563eb', animation: 'onb-bar-save 6s ease-out forwards' }} />
-        </div>
+        <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.04em', color: 'rgba(255,255,255,.3)', maxWidth: 380, lineHeight: 1.7, marginTop: 4 }}>
+          Esta es una vista de cómo se organizará. Tus misiones reales se generarán al crear la cuenta.
+        </p>
+        <button
+          onClick={() => {
+            void sendOnboardingEvent(traceIdRef.current, 'onboarding_preview_viewed', { step_id: 'preview' })
+            setStep('signup')
+          }}
+          style={{ marginTop: 8, padding: '13px 32px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
+        >
+          Crear mi cuenta y construir mi Camino →
+        </button>
+        <button onClick={() => setStep('confirm')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
+          ← Volver y revisar respuestas
+        </button>
       </div>
     )
   }
 
+  function renderSignup() {
+    const email = signupEmail
+    const password = signupPassword
+    const terms = signupTerms
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 18, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Tu Camino está listo para construirse.</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
+          Solo falta crear tu cuenta para guardar tu preparación y generar tus primeras misiones.
+        </p>
+        {authError && (
+          <div style={{ maxWidth: 380 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#f87171', margin: 0 }}>{authError}</p>
+            {/ya (tienes|existe) una cuenta/i.test(authError) && (
+              <a
+                href={`/login?returnTo=${encodeURIComponent(`/onboarding/finalizando?draft=${loadLocalDraft()?.draftId ?? ''}`)}`}
+                style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 700, color: '#60a5fa', textDecoration: 'underline' }}
+              >
+                Iniciar sesión con esta cuenta →
+              </a>
+            )}
+          </div>
+        )}
+        <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <button
+            onClick={handleGoogleSignup}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', height: 48, background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
+          >
+            Continuar con Google
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+            o
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+          </div>
+
+          <input
+            type="email"
+            value={email}
+            onChange={e => setSignupEmail(e.target.value)}
+            placeholder="tu@email.com"
+            className="onb-input"
+            style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={e => setSignupPassword(e.target.value)}
+            placeholder="Contraseña"
+            className="onb-input"
+            style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+          />
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11, color: 'rgba(255,255,255,.4)', textAlign: 'left', cursor: 'pointer' }}>
+            <input type="checkbox" checked={terms} onChange={e => setSignupTerms(e.target.checked)} style={{ marginTop: 2 }} />
+            <span>Acepto los <a href="/legal/terminos" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Términos</a> y la <a href="/legal/privacidad" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Política de Privacidad</a>.</span>
+          </label>
+          <button
+            onClick={() => { if (email && password && terms) void handleEmailSignup(email, password) }}
+            disabled={!email || !password || !terms}
+            style={{ width: '100%', height: 48, background: (!email || !password || !terms) ? '#333' : '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: (!email || !password || !terms) ? 'not-allowed' : 'pointer' }}
+          >
+            Continuar con email
+          </button>
+        </div>
+        <button onClick={() => setStep('preview')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
+          ← Volver
+        </button>
+      </div>
+    )
+  }
+
+  // (bloque legacy eliminado — la generación real ahora ocurre en
+  // /api/onboarding/finalize, ver /onboarding/finalizando)
   // ─── Pantalla de resultado personalizado (sin formulario) ─────────────────────
   function renderPainResult() {
     const copy = data.painType ? PAIN_RESULT_COPY[data.painType] : null
@@ -1510,11 +1560,6 @@ export default function OnboardingFlow() {
       ]
       return (
         <div>
-          {savingError && (
-            <div style={{ border: '1px solid #fecaca', background: '#fef2f2', padding: '10px 14px', fontSize: 11, fontWeight: 700, color: '#991b1b', marginBottom: 14 }}>
-              {savingError}
-            </div>
-          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
             {summaryBlocks.map(block => (
               <div key={block.label} style={{ background: '#fff', padding: '16px 18px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>

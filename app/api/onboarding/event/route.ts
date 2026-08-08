@@ -29,6 +29,19 @@ const ONBOARDING_EVENT_TYPES = new Set<string>([
   // (telemetría) en su lugar — ver comentario en onboardingEvents.ts.
   'onboarding_flow_completed',
   'onboarding_pain_selected',
+  // Fase 2 (signup al final) — la mayoría ocurren antes de que exista
+  // sesión y llegan aquí vía flush de la cola local (ver
+  // onboardingEventQueue.ts), no en tiempo real.
+  'onboarding_preview_viewed',
+  'onboarding_signup_method_selected',
+  'onboarding_signup_started',
+  'onboarding_signup_completed',
+  'email_confirmation_sent',
+  'email_confirmation_completed',
+  'onboarding_draft_created',
+  'onboarding_draft_claimed',
+  'onboarding_finalize_started',
+  'onboarding_finalize_resumed',
 ])
 
 // Límite generoso: un onboarding real (con vueltas atrás y validaciones
@@ -64,6 +77,11 @@ const ALLOWED_PAYLOAD_KEYS = [
   'generation_duration_ms',
   'error_code',
   'pain_type',
+  // Fase 2: qué método de signup eligió (google|email) — no es PII.
+  'method',
+  // Fase 2: cuándo ocurrió el evento en el cliente (encolado pre-auth y
+  // enviado más tarde en el flush) — distinto de created_at en servidor.
+  'occurred_at',
 ] as const
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

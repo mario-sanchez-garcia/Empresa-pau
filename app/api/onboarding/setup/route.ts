@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, isValidRouteId } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
-import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { normalizeUsername, validateUsername } from '@/app/lib/username'
@@ -176,8 +175,17 @@ export async function POST(request: NextRequest) {
   }
 
   if (serviceDb) {
-    try {
-      await recordBetaMetric(serviceDb, user.id, 'onboarding_completed', {
+    // A diferencia del resto de métricas beta (ver recordBetaMetric), esta
+    // fila SÍ es crítica: /api/onboarding/me y CaminoCalendarClient.hasProfile
+    // dependen de que exista para no rebotar al alumno de vuelta a
+    // /onboarding justo después de haber terminado. Tratarla como
+    // "no crítica" (best-effort, error silenciado) permitía que setup
+    // respondiera 200 sin haber persistido la finalización real — bug
+    // encontrado en la primera prueba end-to-end de Fase 0.
+    const { error: completedError } = await serviceDb.from('billing_events').insert({
+      user_id: user.id,
+      event_type: 'onboarding_completed',
+      payload: {
         community,
         school_name: schoolName,
         school_source: schoolSource,
@@ -193,8 +201,12 @@ export async function POST(request: NextRequest) {
         grade_threshold_mode: gradeThresholdMode,
         grade_threshold: gradeThreshold,
         subject_grade_thresholds: subjectGradeThresholds,
-      })
-    } catch { /* non-critical */ }
+        beta_private: true,
+      },
+    })
+    if (completedError) {
+      return respond({ error: 'No se pudo guardar tu onboarding. Prueba otra vez en unos segundos.' }, 500, 'onboarding_completed_write_failed')
+    }
   }
 
   return respond({ ok: true, routeId, entryDate })

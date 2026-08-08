@@ -15,6 +15,7 @@ import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD } from '@/app/lib/camino/gradeThreshold'
 import {
   clearOnboarding,
+  ensureOnboardingTraceId,
   loadOnboarding,
   markOnboardingComplete,
   restoreOnboardingFromServer,
@@ -24,10 +25,31 @@ import {
   type OnboardingData,
   type OnboardingStudentExam,
 } from '@/app/lib/onboarding/onboardingStorage'
+import { sendOnboardingEvent, type OnboardingStepId } from '@/app/lib/onboarding/onboardingEvents'
+import { createActiveDurationTracker } from '@/app/lib/onboarding/activeDuration'
 
 type Step = 'welcome' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'saving' | 'done'
 
 const STEPS: Step[] = ['name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'grade-threshold', 'confirm']
+
+// Fase 0 de observabilidad: mapea los steps internos del wizard a step_id
+// semánticos y estables para no depender del índice numérico (que se
+// desplazaría si en el futuro se añade el paso de "dolor principal").
+const STEP_ID_MAP: Record<Step, OnboardingStepId> = {
+  welcome: 'welcome',
+  name: 'username',
+  community: 'community',
+  school: 'school',
+  subjects: 'subjects',
+  'upcoming-exams': 'upcoming_exam',
+  feeling: 'preparation',
+  'daily-time': 'study_time',
+  'weekly-days': 'study_days',
+  'grade-threshold': 'grade_threshold',
+  confirm: 'confirmation',
+  saving: 'saving',
+  done: 'done',
+}
 
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
@@ -179,6 +201,19 @@ export default function OnboardingFlow() {
   const usernameCheckId = useRef(0)
   const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Fase 0 de observabilidad del onboarding (medición pura, ver AGENTS.md).
+  const traceIdRef = useRef<string | null>(null)
+  const onboardingStartedRef = useRef(false)
+  const stepTimerRef = useRef<ReturnType<typeof createActiveDurationTracker> | null>(null)
+  const stepVisitCountsRef = useRef<Record<string, number>>({})
+  const stepValidationAttemptsRef = useRef<Record<string, number>>({})
+
+  function incrementValidationAttempt(stepKey: Step) {
+    const next = (stepValidationAttemptsRef.current[stepKey] ?? 0) + 1
+    stepValidationAttemptsRef.current[stepKey] = next
+    return next
+  }
+
   // On mount: redirect already-completed users; restore last step for interrupted sessions.
   // El servidor es la única fuente de verdad de si ESTA cuenta completó
   // onboarding — `kairo_onboarding_v1` no está vinculado al usuario, así que
@@ -210,6 +245,8 @@ export default function OnboardingFlow() {
         }
       } catch { /* local resume still works */ }
       if (cancelled) return
+      traceIdRef.current = saved.traceId ?? null
+      if (traceIdRef.current) onboardingStartedRef.current = true
       const savedStep = saved.lastStep as Step | null
       if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
         setStep(savedStep)
@@ -224,6 +261,31 @@ export default function OnboardingFlow() {
   useEffect(() => {
     if (step !== 'saving' && step !== 'done') saveOnboarding({ lastStep: step })
   }, [step])
+
+  // Fase 0 de observabilidad: registra onboarding_step_viewed cuando el paso
+  // está efectivamente renderizado, y arranca/reinicia el medidor de tiempo
+  // activo del paso. No se dispara para 'welcome' (cubierto por
+  // onboarding_started) ni para 'saving'/'done' (cubiertos por los eventos
+  // de generación/finalización).
+  useEffect(() => {
+    stepTimerRef.current?.destroy()
+    stepTimerRef.current = createActiveDurationTracker()
+
+    if (step === 'welcome' || step === 'saving' || step === 'done') return
+    if (!traceIdRef.current) return
+
+    const visitCount = (stepVisitCountsRef.current[step] ?? 0) + 1
+    stepVisitCountsRef.current[step] = visitCount
+
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_step_viewed', {
+      step_id: STEP_ID_MAP[step],
+      step_index: STEPS.indexOf(step),
+      is_revisit: visitCount > 1,
+      visit_number: visitCount,
+    })
+
+    return () => { stepTimerRef.current?.destroy() }
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch user email once for username pre-fill
   useEffect(() => {
@@ -254,6 +316,12 @@ export default function OnboardingFlow() {
       setUsernameStatus('invalid')
       setUsernameError(err)
       setUsernameSuggestions([])
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_validation_failed', {
+        step_id: 'username',
+        step_index: STEPS.indexOf('name'),
+        error_code: 'invalid_format',
+        validation_attempts: incrementValidationAttempt('name'),
+      })
       return false
     }
     const id = ++usernameCheckId.current
@@ -270,6 +338,12 @@ export default function OnboardingFlow() {
         setUsernameStatus('invalid')
         setUsernameError(json.error)
         setUsernameSuggestions([])
+        void sendOnboardingEvent(traceIdRef.current, 'onboarding_validation_failed', {
+          step_id: 'username',
+          step_index: STEPS.indexOf('name'),
+          error_code: 'invalid_format',
+          validation_attempts: incrementValidationAttempt('name'),
+        })
         return false
       }
       if (json.available) {
@@ -279,6 +353,12 @@ export default function OnboardingFlow() {
       }
       setUsernameStatus('taken')
       setUsernameSuggestions(json.suggestions ?? [])
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_validation_failed', {
+        step_id: 'username',
+        step_index: STEPS.indexOf('name'),
+        error_code: 'username_taken',
+        validation_attempts: incrementValidationAttempt('name'),
+      })
       return false
     } catch {
       if (usernameCheckId.current !== id) return false
@@ -376,13 +456,37 @@ export default function OnboardingFlow() {
   }
 
   function goNext() {
-    if (step === 'welcome') { setStep('name'); return }
-    if (stepIndex >= 0 && stepIndex < STEPS.length - 1 && canContinue) setStep(STEPS[stepIndex + 1])
+    if (step === 'welcome') {
+      const traceId = ensureOnboardingTraceId()
+      traceIdRef.current = traceId
+      if (!onboardingStartedRef.current) {
+        onboardingStartedRef.current = true
+        void sendOnboardingEvent(traceId, 'onboarding_started', { step_id: 'username', step_index: 0 })
+      }
+      setStep('name')
+      return
+    }
+    if (stepIndex >= 0 && stepIndex < STEPS.length - 1 && canContinue) {
+      const durations = stepTimerRef.current?.getDurations()
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_step_completed', {
+        step_id: STEP_ID_MAP[step],
+        step_index: stepIndex,
+        elapsed_duration_ms: durations?.elapsedMs,
+        active_duration_ms: durations?.activeMs,
+        validation_attempts: stepValidationAttemptsRef.current[step] ?? 0,
+      })
+      setStep(STEPS[stepIndex + 1])
+    }
   }
 
   function goBack() {
-    if (stepIndex > 0) setStep(STEPS[stepIndex - 1])
-    else if (step === 'name') setStep('welcome')
+    if (stepIndex > 0) {
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_back_clicked', { step_id: STEP_ID_MAP[step], step_index: stepIndex })
+      setStep(STEPS[stepIndex - 1])
+    } else if (step === 'name') {
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_back_clicked', { step_id: STEP_ID_MAP[step], step_index: 0 })
+      setStep('welcome')
+    }
   }
 
   function selectCommunity(community: OnboardingCommunity) {
@@ -461,7 +565,12 @@ export default function OnboardingFlow() {
       if (token) {
         const setupRes = await fetch('/api/onboarding/setup', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'X-Kairo-Trace-Id': traceIdRef.current ?? '',
+            'X-Kairo-Request-Id': crypto.randomUUID(),
+          },
           body: JSON.stringify({
             routeId: 'completa',
             username: usernameForSave,
@@ -493,9 +602,20 @@ export default function OnboardingFlow() {
 
         if (subjectSlugs.length > 0) {
           generateRetriesRef.current += 1
+          // onboarding_generation_started/succeeded/failed se emiten desde
+          // /api/onboarding/generate (servidor), no desde aquí — ver Fase 0:
+          // el servidor es la única fuente de verdad para esos 3 eventos,
+          // así un cierre de pestaña a mitad de fetch no puede hacer parecer
+          // que una generación exitosa falló.
+          const generateRequestId = crypto.randomUUID()
           const genRes = await fetch('/api/onboarding/generate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+              'X-Kairo-Trace-Id': traceIdRef.current ?? '',
+              'X-Kairo-Request-Id': generateRequestId,
+            },
             body: JSON.stringify({ subjects: subjectSlugs, startMode: 'zero', studentExams: upcomingExams, dailyMinutes: data.dailyMinutes }),
           })
           if (!genRes.ok) {
@@ -513,6 +633,13 @@ export default function OnboardingFlow() {
       // Ensure kairo_ccaa is in sync at completion (covers edge cases where
       // selectCommunity ran on a previous session)
       syncOnboardingCommunity(data)
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_completed', {
+        step_id: 'done',
+        subjects_count: selectedEnabled.length,
+        has_upcoming_exam: upcomingExams.length > 0,
+        study_time_bucket: data.dailyMinutes ? String(data.dailyMinutes) : (data.dailyStudyTime ?? undefined),
+        study_days_count: data.weeklyStudyDaysValue,
+      })
       setStep('done')
     } catch {
       setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No hemos podido guardar el onboarding. Prueba otra vez en unos segundos.')

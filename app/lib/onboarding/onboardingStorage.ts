@@ -40,6 +40,10 @@ export interface OnboardingData {
   gradeThresholdMode: OnboardingGradeThresholdMode
   gradeThreshold: number | null
   subjectGradeThresholds: Record<string, number>
+  // Fase 0 de observabilidad (ver AGENTS.md / plan de onboarding): identifica
+  // un intento de onboarding de punta a punta para poder cruzar eventos en
+  // billing_events. No es PII, se regenera solo al empezar un intento nuevo.
+  traceId: string | null
 }
 
 const KEY = 'kairo_onboarding_v1'
@@ -108,6 +112,17 @@ export function markOnboardingComplete() {
   saveOnboarding({ completedAt: new Date().toISOString() })
 }
 
+// Devuelve el trace_id del intento de onboarding en curso, creando uno nuevo
+// (crypto.randomUUID()) solo si todavía no existe. Se persiste junto al resto
+// del borrador para sobrevivir a recargas y navegación atrás.
+export function ensureOnboardingTraceId(): string {
+  const current = loadOnboarding()
+  if (current.traceId) return current.traceId
+  const traceId = crypto.randomUUID()
+  saveOnboarding({ traceId })
+  return traceId
+}
+
 export function isOnboardingComplete(): boolean {
   return Boolean(loadOnboarding().completedAt)
 }
@@ -131,5 +146,6 @@ function emptyOnboarding(): OnboardingData {
     gradeThresholdMode: 'general',
     gradeThreshold: null,
     subjectGradeThresholds: {},
+    traceId: null,
   }
 }

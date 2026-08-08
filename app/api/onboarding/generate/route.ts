@@ -10,8 +10,13 @@ import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
+import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
+import { recordBetaMetric } from '@/app/lib/betaMetrics'
 
 export const dynamic = 'force-dynamic'
+
+// Debe coincidir con ONBOARDING_FLOW_VERSION en app/lib/onboarding/onboardingEvents.ts.
+const FLOW_VERSION = 'current_v1'
 
 const VALID_START_MODES = ['zero', 'first_block', 'mid', 'review', 'unknown'] as const
 type StartMode = typeof VALID_START_MODES[number]
@@ -71,10 +76,37 @@ function betaSequenceItems(subject: string): QueueSourceItem[] {
 }
 
 export async function POST(request: NextRequest) {
+  const { traceId, requestId } = extractTraceHeaders(request)
+  const startedAt = Date.now()
+  logOnboardingStage({ traceId, requestId, endpoint: 'generate', stage: 'start' })
+
+  function respond(json: Record<string, unknown>, status?: number, errorCode?: string) {
+    logOnboardingStage({
+      traceId,
+      requestId,
+      endpoint: 'generate',
+      result: errorCode ? 'failed' : 'success',
+      errorCode,
+      durationMs: Date.now() - startedAt,
+    })
+    return NextResponse.json({ ...json, request_id: requestId }, status ? { status } : undefined)
+  }
+
+  // Fase 0 de observabilidad: el servidor es la única fuente de verdad para
+  // onboarding_generation_started/succeeded/failed — un fetch del cliente que
+  // no llega a completarse (pestaña cerrada, red cortada) no debe poder
+  // hacer parecer que la generación falló cuando en realidad tuvo éxito. Se
+  // declaran fuera del try para que el catch pueda emitir el evento de fallo.
+  let generationHasStarted = false
+  let generationStartedAt = 0
+  let eventUserId: string | null = null
+  let eventDb: ReturnType<typeof createServiceClient> | null = null
+
   try {
     const authContext = await getAuthContext(request)
     if ('response' in authContext) return authContext.response
     const { user } = authContext
+    eventUserId = user.id
 
     let body: Record<string, unknown> = {}
     try { body = await request.json() } catch { /* ok */ }
@@ -87,7 +119,9 @@ export async function POST(request: NextRequest) {
         .filter(subject => ALLOWED_SUBJECTS.has(subject)))]
       : []
     if (subjects.length === 0) {
-      return NextResponse.json({ error: 'Se requiere al menos una asignatura válida' }, { status: 400 })
+      // Validación previa al inicio real de la generación — no debe emitir
+      // generation_started/failed (ver auditoría Fase 0).
+      return respond({ error: 'Se requiere al menos una asignatura válida' }, 400, 'invalid_subjects')
     }
 
     const startMode: StartMode = VALID_START_MODES.includes(body.startMode as StartMode)
@@ -95,6 +129,18 @@ export async function POST(request: NextRequest) {
     const dailyMinutes = typeof body.dailyMinutes === 'number' ? body.dailyMinutes : null
 
     const db = createServiceClient()
+    eventDb = db
+
+    generationHasStarted = true
+    generationStartedAt = Date.now()
+    await recordBetaMetric(db, user.id, 'onboarding_generation_started', {
+      event_id: crypto.randomUUID(),
+      trace_id: traceId,
+      flow_version: FLOW_VERSION,
+      request_id: requestId,
+      subjects_count: subjects.length,
+    })
+
     const requestedStudentExams = cleanStudentExams(body.studentExams)
 
     async function loadStudentExams() {
@@ -327,7 +373,16 @@ export async function POST(request: NextRequest) {
       console.error('[onboarding] welcome email failed silently:', err)
     }
 
-    return NextResponse.json({
+    const generationDurationMs = Date.now() - generationStartedAt
+    await recordBetaMetric(db, user.id, 'onboarding_generation_succeeded', {
+      event_id: crypto.randomUUID(),
+      trace_id: traceId,
+      flow_version: FLOW_VERSION,
+      request_id: requestId,
+      generation_duration_ms: generationDurationMs,
+    })
+
+    return respond({
       success: true,
       daysGenerated: calRows.length,
       firstMission: first ? {
@@ -338,6 +393,24 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('[onboarding/generate]', err)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    const message = err instanceof Error ? err.message : ''
+    const errorCode = message.startsWith('Queue insert error') ? 'queue_insert_failed'
+      : message.startsWith('Calendar insert error') ? 'calendar_insert_failed'
+      : message.startsWith('Queue update error') ? 'queue_update_failed'
+      : 'internal_error'
+    if (generationHasStarted && eventUserId) {
+      try {
+        const db = eventDb ?? createServiceClient()
+        await recordBetaMetric(db, eventUserId, 'onboarding_generation_failed', {
+          event_id: crypto.randomUUID(),
+          trace_id: traceId,
+          flow_version: FLOW_VERSION,
+          request_id: requestId,
+          generation_duration_ms: Date.now() - generationStartedAt,
+          error_code: errorCode,
+        })
+      } catch { /* metrics must never mask the real error */ }
+    }
+    return respond({ error: 'Error interno del servidor' }, 500, errorCode)
   }
 }

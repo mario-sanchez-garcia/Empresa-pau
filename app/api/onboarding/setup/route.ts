@@ -6,6 +6,7 @@ import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { normalizeUsername, validateUsername } from '@/app/lib/username'
 import { MAX_GRADE_THRESHOLD, MIN_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
+import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,6 +45,22 @@ function cleanStringArray(value: unknown) {
 }
 
 export async function POST(request: NextRequest) {
+  const { traceId, requestId } = extractTraceHeaders(request)
+  const startedAt = Date.now()
+  logOnboardingStage({ traceId, requestId, endpoint: 'setup', stage: 'start' })
+
+  function respond(json: Record<string, unknown>, status?: number, errorCode?: string) {
+    logOnboardingStage({
+      traceId,
+      requestId,
+      endpoint: 'setup',
+      result: errorCode ? 'failed' : 'success',
+      errorCode,
+      durationMs: Date.now() - startedAt,
+    })
+    return NextResponse.json({ ...json, request_id: requestId }, status ? { status } : undefined)
+  }
+
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
   const { user } = authContext
@@ -73,7 +90,7 @@ export async function POST(request: NextRequest) {
 
   if (username) {
     const validationError = validateUsername(username)
-    if (validationError) return NextResponse.json({ error: validationError }, { status: 400 })
+    if (validationError) return respond({ error: validationError }, 400, 'invalid_username')
   }
 
   const entryDate = new Date().toISOString().slice(0, 10)
@@ -83,7 +100,7 @@ export async function POST(request: NextRequest) {
   })()
 
   if (!serviceDb && username) {
-    return NextResponse.json({ error: 'No se pudo guardar el nombre de usuario' }, { status: 500 })
+    return respond({ error: 'No se pudo guardar el nombre de usuario' }, 500, 'no_service_db')
   }
 
   if (serviceDb) {
@@ -132,10 +149,10 @@ export async function POST(request: NextRequest) {
         .maybeSingle()
 
       if (existingError) {
-        return NextResponse.json({ error: 'No se pudo verificar el nombre de usuario' }, { status: 500 })
+        return respond({ error: 'No se pudo verificar el nombre de usuario' }, 500, 'username_check_failed')
       }
       if (existing) {
-        return NextResponse.json({ error: 'Ese nombre de usuario ya está en uso' }, { status: 409 })
+        return respond({ error: 'Ese nombre de usuario ya está en uso' }, 409, 'username_taken')
       }
 
       const { error: usernameError } = await serviceDb.from('perfiles').upsert(
@@ -143,7 +160,7 @@ export async function POST(request: NextRequest) {
         { onConflict: 'id' }
       )
       if (usernameError) {
-        return NextResponse.json({ error: 'No se pudo guardar el nombre de usuario' }, { status: 500 })
+        return respond({ error: 'No se pudo guardar el nombre de usuario' }, 500, 'username_save_failed')
       }
     }
 
@@ -180,5 +197,5 @@ export async function POST(request: NextRequest) {
     } catch { /* non-critical */ }
   }
 
-  return NextResponse.json({ ok: true, routeId, entryDate })
+  return respond({ ok: true, routeId, entryDate })
 }

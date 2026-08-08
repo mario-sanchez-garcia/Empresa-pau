@@ -1,5 +1,17 @@
 export const BETA_METRIC_EVENTS = [
   'onboarding_completed',
+  // Fase 0 de observabilidad del onboarding actual (medición pura, ver
+  // AGENTS.md / plan de onboarding). Reutilizan billing_events porque
+  // recordBetaMetric() ya es el patrón existente — no crear otra tabla
+  // solo para esto todavía.
+  'onboarding_started',
+  'onboarding_step_viewed',
+  'onboarding_step_completed',
+  'onboarding_validation_failed',
+  'onboarding_back_clicked',
+  'onboarding_generation_started',
+  'onboarding_generation_succeeded',
+  'onboarding_generation_failed',
   'camino_opened',
   'mission_opened',
   'course_opened',

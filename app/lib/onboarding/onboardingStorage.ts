@@ -7,6 +7,12 @@ export type OnboardingCommunity = 'Madrid' | 'Cataluña' | 'Andalucía' | 'Otra'
 export type OnboardingSchoolSource = 'dataset' | 'manual' | null
 export type OnboardingExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 
+// Fase 1 (rediseño emocional del onboarding): dolor principal declarado por
+// el alumno en la portada. No sustituye ningún dato existente — es
+// puramente adicional, usada para la pantalla de resultado personalizado y
+// para el "efecto espejo" de la recompensa final.
+export type PainType = 'daily_plan' | 'correction_confidence' | 'procrastination' | 'improve_grade'
+
 export interface OnboardingStudentExam {
   id: string
   subject: string
@@ -44,6 +50,7 @@ export interface OnboardingData {
   // un intento de onboarding de punta a punta para poder cruzar eventos en
   // billing_events. No es PII, se regenera solo al empezar un intento nuevo.
   traceId: string | null
+  painType: PainType | null
 }
 
 const KEY = 'kairo_onboarding_v1'
@@ -147,5 +154,6 @@ function emptyOnboarding(): OnboardingData {
     gradeThreshold: null,
     subjectGradeThresholds: {},
     traceId: null,
+    painType: null,
   }
 }

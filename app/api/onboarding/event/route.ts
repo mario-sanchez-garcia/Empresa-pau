@@ -22,7 +22,13 @@ const ONBOARDING_EVENT_TYPES = new Set<string>([
   'onboarding_step_completed',
   'onboarding_validation_failed',
   'onboarding_back_clicked',
-  'onboarding_completed',
+  // 'onboarding_completed' NO está aquí a propósito: es el event_type del
+  // evento de negocio que escribe /api/onboarding/setup (con
+  // payload.onboarding_completed === true), del que depende
+  // /api/onboarding/me. Este endpoint acepta 'onboarding_flow_completed'
+  // (telemetría) en su lugar — ver comentario en onboardingEvents.ts.
+  'onboarding_flow_completed',
+  'onboarding_pain_selected',
 ])
 
 // Límite generoso: un onboarding real (con vueltas atrás y validaciones
@@ -57,6 +63,7 @@ const ALLOWED_PAYLOAD_KEYS = [
   'request_id',
   'generation_duration_ms',
   'error_code',
+  'pain_type',
 ] as const
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

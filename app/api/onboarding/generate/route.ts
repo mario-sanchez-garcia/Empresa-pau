@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
-import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { CAMINO_CURRICULUM_TOPICS, getTopic, getTopicByV2SortOrder, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
@@ -354,7 +354,28 @@ export async function POST(request: NextRequest) {
     await applyCalendarPersonalization(user.id, db)
 
     // ── PASO 4: Response ────────────────────────────────────────────────────
-    const first = calRows[0] as { title: string; subject: string; scheduled_date: string } | undefined
+    const first = calRows[0] as {
+      title: string
+      subject: string
+      scheduled_date: string
+      mission_type: string
+      v2_sort_order: number | null
+      block_slug: string | null
+      metadata: { topic_slug?: string | null }
+    } | undefined
+
+    // Auditoría Fase 1: mission_type ('concept'/'review'/...) NO determina si
+    // una misión admite corrección paso a paso — lo hace únicamente si su
+    // tema resuelve en CAMINO_CURRICULUM_TOPICS, exactamente la misma
+    // comprobación que hace /api/camino/correct (getTopicByV2SortOrder /
+    // getTopic). Reutilizamos esas funciones en vez de inferir nada del
+    // mission_type para no prometerle al alumno una corrección que la
+    // misión real no podría dar.
+    const firstTopic = first
+      ? getTopicByV2SortOrder(first.subject, first.v2_sort_order)
+        ?? (first.block_slug && first.metadata.topic_slug ? getTopic(first.subject, first.block_slug, first.metadata.topic_slug) : null)
+      : null
+    const firstMissionSupportsCorrection = Boolean(firstTopic)
 
     // Email de bienvenida — fail-safe, nunca bloquea el onboarding
     try {
@@ -389,6 +410,11 @@ export async function POST(request: NextRequest) {
         title: first.title,
         subject: first.subject,
         scheduled_date: first.scheduled_date,
+        missionType: first.mission_type,
+        // Señal real (no inferida de mission_type) de si esta misión concreta
+        // admite corrección paso a paso — ver comentario sobre firstTopic más
+        // arriba. El cliente la usa para decidir el badge del efecto espejo.
+        supportsStepCorrection: firstMissionSupportsCorrection,
       } : null,
     })
   } catch (err) {

@@ -24,19 +24,24 @@ import {
   type OnboardingCommunity,
   type OnboardingData,
   type OnboardingStudentExam,
+  type PainType,
 } from '@/app/lib/onboarding/onboardingStorage'
 import { sendOnboardingEvent, type OnboardingStepId } from '@/app/lib/onboarding/onboardingEvents'
 import { createActiveDurationTracker } from '@/app/lib/onboarding/activeDuration'
 
-type Step = 'welcome' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'saving' | 'done'
+type Step = 'welcome' | 'pain' | 'pain-result' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'saving' | 'done'
 
-const STEPS: Step[] = ['name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'grade-threshold', 'confirm']
+// 'pain' cuenta como pregunta real dentro del wizard (progreso, chrome
+// estándar). 'pain-result' es una pantalla de resultado sin formulario (como
+// 'welcome'/'saving'/'done') y por eso vive fuera de este array.
+const STEPS: Step[] = ['pain', 'name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'grade-threshold', 'confirm']
 
 // Fase 0 de observabilidad: mapea los steps internos del wizard a step_id
-// semánticos y estables para no depender del índice numérico (que se
-// desplazaría si en el futuro se añade el paso de "dolor principal").
+// semánticos y estables para no depender del índice numérico.
 const STEP_ID_MAP: Record<Step, OnboardingStepId> = {
   welcome: 'welcome',
+  pain: 'pain',
+  'pain-result': 'pain_result',
   name: 'username',
   community: 'community',
   school: 'school',
@@ -51,11 +56,38 @@ const STEP_ID_MAP: Record<Step, OnboardingStepId> = {
   done: 'done',
 }
 
+const PAIN_OPTS: Array<{ id: PainType; label: string }> = [
+  { id: 'daily_plan', label: 'Nunca sé qué estudiar cada día.' },
+  { id: 'correction_confidence', label: 'Hago ejercicios, pero no sé si están bien.' },
+  { id: 'procrastination', label: 'Sé que acabaré dejándolo para el final.' },
+  { id: 'improve_grade', label: 'Necesito subir mi nota en la PAU.' },
+]
+
+const PAIN_RESULT_COPY: Record<PainType, { title: string; body: string }> = {
+  daily_plan: {
+    title: 'Deja de decidir cada tarde qué toca.',
+    body: 'Kairo organizará tus asignaturas y tu tiempo para que cada día tengas una tarea clara.',
+  },
+  correction_confidence: {
+    title: 'Sabrás exactamente dónde pierdes puntos.',
+    body: 'Practicarás y corregirás tus errores antes de repetirlos en el examen.',
+  },
+  procrastination: {
+    title: 'Llega al final de curso sin tenerlo todo pendiente.',
+    body: 'Kairo distribuirá el trabajo según el tiempo que puedas mantener de verdad.',
+  },
+  improve_grade: {
+    title: 'Entrena para mejorar, no solo para terminar.',
+    body: 'Kairo priorizará aquello que más puede ayudarte a avanzar.',
+  },
+}
+
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
 const HF_EQUATIONS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125527_d366f113-8e29-4f93-b91c-7a6c40bfe1d1.png'
 
 const STEP_PHOTO: Partial<Record<Step, string>> = {
+  pain: HF_EQUATIONS,
   name: HF_FLATLAY,
   community: HF_FLATLAY,
   school: HF_EQUATIONS,
@@ -69,6 +101,7 @@ const STEP_PHOTO: Partial<Record<Step, string>> = {
 }
 
 const STEP_HEADLINE: Partial<Record<Step, string[]>> = {
+  pain: ['¿Qué te', 'preocupa', 'más?'],
   name: ['¿Cómo', 'te', 'llamas?'],
   community: ['¿Dónde', 'haces la', 'PAU?'],
   school: ['¿Cuál es', 'tu', 'centro?'],
@@ -81,11 +114,15 @@ const STEP_HEADLINE: Partial<Record<Step, string[]>> = {
   confirm: ['Tu plan', 'está', 'listo.'],
 }
 
-const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: string }> = [
-  { id: 'Madrid', label: 'Madrid', desc: 'EBAU Madrid' },
-  { id: 'Cataluña', label: 'Cataluña', desc: 'PAU Cataluña' },
-  { id: 'Otra', label: 'Otra comunidad', desc: 'Ruta troncal común' },
+const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: string; available: boolean }> = [
+  { id: 'Madrid', label: 'Madrid', desc: 'EBAU Madrid', available: true },
+  // Cataluña no se puede seleccionar para un Camino nuevo todavía — Camino
+  // no está operativo ahí. No se elimina de OnboardingCommunity (drafts o
+  // perfiles antiguos con 'Cataluña' guardada deben poder seguir cargando).
+  { id: 'Cataluña', label: 'Cataluña', desc: 'Próximamente', available: false },
+  { id: 'Otra', label: 'Otra comunidad', desc: 'Ruta troncal común', available: true },
 ]
+const COMMUNITY_AVAILABLE_IDS = new Set(COMMUNITY_OPTS.filter(opt => opt.available).map(opt => opt.id))
 
 const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; betaStatus: 'enabled' | 'locked'; badge?: string }> = [
   { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', betaStatus: 'enabled' },
@@ -136,6 +173,8 @@ const GRADE_THRESHOLD_OPTS = [4, 5, 6, 7, 8]
 
 const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   welcome: { title: 'Crea tu Camino PAU', help: 'Te haremos unas preguntas rápidas para adaptar Kairo a tu comunidad, centro y ritmo real.' },
+  pain: { title: '¿Qué es lo que más te preocupa de segundo?', help: 'No hay una respuesta correcta — nos ayuda a priorizar tu Camino.' },
+  'pain-result': { title: '', help: '' },
   name: { title: '¿Cómo quieres que te llamemos?', help: 'Usaremos tu nombre para personalizar la experiencia dentro de la app.' },
   community: { title: '¿Dónde haces la PAU?', help: 'Así ajustamos la experiencia a tu comunidad autónoma.' },
   school: { title: '¿Cuál es tu centro educativo?', help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.' },
@@ -145,12 +184,12 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   'daily-time': { title: '¿Cuánto tiempo podrías estudiar al día?', help: 'Lo ajustaremos mejor más adelante según tu ritmo.' },
   'weekly-days': { title: '¿Cuántos días a la semana estudiarías?', help: 'Kairo adapta el Camino a tu ritmo real de estudio.' },
   'grade-threshold': { title: '¿A partir de qué nota quieres repetir para mejorar?', help: 'Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.' },
-  confirm: { title: 'Perfecto. Ya podemos construir tu Camino PAU.', help: 'Revisa el resumen y empieza cuando lo tengas claro.' },
+  confirm: { title: 'Así vamos a preparar tu Camino', help: 'Revisa cada bloque y edítalo si algo no encaja.' },
   saving: { title: 'Construyendo tu Camino PAU', help: 'Estamos preparando tu experiencia inicial.' },
   done: { title: 'Tu Camino PAU está listo', help: 'Kairo ya tiene lo necesario para empezar a ayudarte.' },
 }
 
-const SIDEBAR_STEPS = ['Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
+const SIDEBAR_STEPS = ['Dolor', 'Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
 
@@ -178,6 +217,8 @@ const BASE_CSS = `
   .onb-footer-pad{padding:14px 24px!important}
   .onb-steps-header{padding:14px 20px!important}
   .onb-scroll-form{padding:20px 24px!important}
+  .onb-steps-tabs{display:none!important}
+  .onb-steps-compact{display:flex!important}
 }
 `
 
@@ -194,7 +235,11 @@ export default function OnboardingFlow() {
   const [dbInstitutes, setDbInstitutes] = useState<string[]>([])
   const [examDraft, setExamDraft] = useState({ subject: '', date: inputDate(addDays(new Date(), 10)), block: '', topic: '', name: '', priority: 'normal' as const })
   const generateRetriesRef = useRef(0)
-  const [userEmail, setUserEmail] = useState('')
+  // Efecto espejo (Fase 1): mission_type NO determina si una misión admite
+  // corrección paso a paso (auditado — ver app/api/onboarding/generate/route.ts).
+  // supportsStepCorrection es la señal real, calculada en servidor con la
+  // misma resolución de tema que usa /api/camino/correct.
+  const firstMissionSupportsCorrectionRef = useRef<boolean>(false)
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
   const [usernameError, setUsernameError] = useState('')
@@ -213,102 +258,6 @@ export default function OnboardingFlow() {
     stepValidationAttemptsRef.current[stepKey] = next
     return next
   }
-
-  // On mount: redirect already-completed users; restore last step for interrupted sessions.
-  // El servidor es la única fuente de verdad de si ESTA cuenta completó
-  // onboarding — `kairo_onboarding_v1` no está vinculado al usuario, así que
-  // en un navegador compartido entre cuentas puede traer un `completedAt` de
-  // otra cuenta. Por eso se consulta el servidor primero y solo se usa la
-  // copia local como fallback si la consulta falla (offline).
-  useEffect(() => {
-    let cancelled = false
-    async function restore() {
-      let saved = loadOnboarding()
-      try {
-        const { data: sessionData } = await supabase.auth.getSession()
-        const token = sessionData.session?.access_token
-        if (token) {
-          const result = await restoreOnboardingFromServer(token)
-          if (result.status === 'found') {
-            if (!isPreview) { router.replace('/camino'); return }
-            saved = result.data
-          } else if (result.status === 'empty' && saved.completedAt) {
-            // Copia local "completada" que no pertenece a esta cuenta.
-            clearOnboarding()
-            saved = loadOnboarding()
-          } else if (result.status === 'error' && saved.completedAt && !isPreview) {
-            // No se pudo consultar el servidor; si ya había onboarding local
-            // (offline / fallo puntual) se respeta como antes.
-            router.replace('/camino')
-            return
-          }
-        }
-      } catch { /* local resume still works */ }
-      if (cancelled) return
-      traceIdRef.current = saved.traceId ?? null
-      if (traceIdRef.current) onboardingStartedRef.current = true
-      const savedStep = saved.lastStep as Step | null
-      if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
-        setStep(savedStep)
-        if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
-      }
-    }
-    restore()
-    return () => { cancelled = true }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Persist current step so interrupted sessions can resume
-  useEffect(() => {
-    if (step !== 'saving' && step !== 'done') saveOnboarding({ lastStep: step })
-  }, [step])
-
-  // Fase 0 de observabilidad: registra onboarding_step_viewed cuando el paso
-  // está efectivamente renderizado, y arranca/reinicia el medidor de tiempo
-  // activo del paso. No se dispara para 'welcome' (cubierto por
-  // onboarding_started) ni para 'saving'/'done' (cubiertos por los eventos
-  // de generación/finalización).
-  useEffect(() => {
-    stepTimerRef.current?.destroy()
-    stepTimerRef.current = createActiveDurationTracker()
-
-    if (step === 'welcome' || step === 'saving' || step === 'done') return
-    if (!traceIdRef.current) return
-
-    const visitCount = (stepVisitCountsRef.current[step] ?? 0) + 1
-    stepVisitCountsRef.current[step] = visitCount
-
-    void sendOnboardingEvent(traceIdRef.current, 'onboarding_step_viewed', {
-      step_id: STEP_ID_MAP[step],
-      step_index: STEPS.indexOf(step),
-      is_revisit: visitCount > 1,
-      visit_number: visitCount,
-    })
-
-    return () => { stepTimerRef.current?.destroy() }
-  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fetch user email once for username pre-fill
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: d }) => {
-      if (d?.user?.email) setUserEmail(d.user.email)
-    }).catch(() => undefined)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Pre-fill username when entering the name step
-  useEffect(() => {
-    if (step !== 'name') return
-    const current = data.username
-    if (current && current.length >= 3) {
-      void checkUsername(current)
-      return
-    }
-    if (!userEmail) return
-    const base = userEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').slice(0, 17)
-    if (!base || base.length < 3) return
-    void checkUsername(base).then(ok => {
-      if (ok) update({ username: base })
-    })
-  }, [step, userEmail]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function checkUsername(u: string): Promise<boolean> {
     const err = validateUsername(u)
@@ -367,6 +316,86 @@ export default function OnboardingFlow() {
     }
   }
 
+  // On mount: redirect already-completed users; restore last step for interrupted sessions.
+  // El servidor es la única fuente de verdad de si ESTA cuenta completó
+  // onboarding — `kairo_onboarding_v1` no está vinculado al usuario, así que
+  // en un navegador compartido entre cuentas puede traer un `completedAt` de
+  // otra cuenta. Por eso se consulta el servidor primero y solo se usa la
+  // copia local como fallback si la consulta falla (offline).
+  useEffect(() => {
+    let cancelled = false
+    async function restore() {
+      let saved = loadOnboarding()
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData.session?.access_token
+        if (token) {
+          const result = await restoreOnboardingFromServer(token)
+          if (result.status === 'found') {
+            if (!isPreview) { router.replace('/camino'); return }
+            saved = result.data
+          } else if (result.status === 'empty' && saved.completedAt) {
+            // Copia local "completada" que no pertenece a esta cuenta.
+            clearOnboarding()
+            saved = loadOnboarding()
+          } else if (result.status === 'error' && saved.completedAt && !isPreview) {
+            // No se pudo consultar el servidor; si ya había onboarding local
+            // (offline / fallo puntual) se respeta como antes.
+            router.replace('/camino')
+            return
+          }
+        }
+      } catch { /* local resume still works */ }
+      if (cancelled) return
+      traceIdRef.current = saved.traceId ?? null
+      if (traceIdRef.current) onboardingStartedRef.current = true
+      const savedStep = saved.lastStep as Step | null
+      if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome')) {
+        setStep(savedStep)
+        if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
+        // Username NUNCA se deriva del email (ver AGENTS.md / plan de
+        // onboarding). Si el draft restaurado ya trae uno guardado, se
+        // revalida su disponibilidad aquí mismo (tras los awaits de arriba,
+        // no de forma síncrona en el cuerpo del efecto).
+        if (savedStep === 'name' && saved.username && saved.username.length >= 3) {
+          void checkUsername(saved.username)
+        }
+      }
+    }
+    restore()
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist current step so interrupted sessions can resume
+  useEffect(() => {
+    if (step !== 'saving' && step !== 'done') saveOnboarding({ lastStep: step })
+  }, [step])
+
+  // Fase 0 de observabilidad: registra onboarding_step_viewed cuando el paso
+  // está efectivamente renderizado, y arranca/reinicia el medidor de tiempo
+  // activo del paso. No se dispara para 'welcome' (cubierto por
+  // onboarding_started) ni para 'saving'/'done' (cubiertos por los eventos
+  // de generación/finalización).
+  useEffect(() => {
+    stepTimerRef.current?.destroy()
+    stepTimerRef.current = createActiveDurationTracker()
+
+    if (step === 'welcome' || step === 'saving' || step === 'done') return
+    if (!traceIdRef.current) return
+
+    const visitCount = (stepVisitCountsRef.current[step] ?? 0) + 1
+    stepVisitCountsRef.current[step] = visitCount
+
+    void sendOnboardingEvent(traceIdRef.current, 'onboarding_step_viewed', {
+      step_id: STEP_ID_MAP[step],
+      step_index: STEPS.indexOf(step),
+      is_revisit: visitCount > 1,
+      visit_number: visitCount,
+    })
+
+    return () => { stepTimerRef.current?.destroy() }
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+
   function onUsernameChange(raw: string) {
     const val = raw.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 20)
     update({ username: val })
@@ -410,19 +439,36 @@ export default function OnboardingFlow() {
   }, [dbInstitutes, centers, schoolQuery])
 
   const savingMessages = useMemo(() => {
-    const msgs: string[] = []
-    const enabledSelected = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
-    if (enabledSelected.includes('Matemáticas II')) msgs.push('Ordenando tus 60 temas de Matemáticas II…')
-    if (enabledSelected.includes('Matemáticas CCSS')) msgs.push('Ordenando tus temas de Matemáticas CCSS…')
-    if (enabledSelected.includes('Lengua Castellana')) msgs.push('Preparando comentario, gramática y literatura…')
-    if (enabledSelected.includes('Historia de España')) msgs.push('Construyendo tu cronología de Historia de España…')
-    if (msgs.length === 0) {
-      msgs.push('Calculando tu ritmo de estudio…')
-      msgs.push('Construyendo tu Camino PAU…')
+    // Fase 1: cada mensaje debe reflejar algo que realmente está ocurriendo
+    // (no fingir pasos ni mostrar porcentajes falsos) — ver AGENTS.md.
+    const contextMsgs: string[] = []
+    if (data.community && data.community !== 'Otra') {
+      contextMsgs.push(`Preparando tu Camino para la PAU de ${data.community}…`)
     }
-    msgs.push('Listo — tu primer día empieza mañana.')
-    return msgs
-  }, [data.subjects])
+    const nextExam = [...(data.studentExams ?? [])].sort((a, b) => a.date.localeCompare(b.date))[0]
+    if (nextExam) {
+      contextMsgs.push(`Priorizando ${nextExam.subject} por tu próximo parcial…`)
+    }
+    if (data.weeklyStudyDaysValue) {
+      contextMsgs.push(`Distribuyendo tus sesiones entre ${data.weeklyStudyDaysValue} días…`)
+    }
+    if (data.dailyMinutes) {
+      contextMsgs.push(`Adaptando las sesiones a tus ${data.dailyMinutes} minutos disponibles…`)
+    }
+
+    const subjectMsgs: string[] = []
+    const enabledSelected = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+    if (enabledSelected.includes('Matemáticas II')) subjectMsgs.push('Ordenando tus 60 temas de Matemáticas II…')
+    if (enabledSelected.includes('Matemáticas CCSS')) subjectMsgs.push('Ordenando tus temas de Matemáticas CCSS…')
+    if (enabledSelected.includes('Lengua Castellana')) subjectMsgs.push('Preparando comentario, gramática y literatura…')
+    if (enabledSelected.includes('Historia de España')) subjectMsgs.push('Construyendo tu cronología de Historia de España…')
+    if (subjectMsgs.length === 0) {
+      subjectMsgs.push('Calculando tu ritmo de estudio…')
+      subjectMsgs.push('Construyendo tu Camino PAU…')
+    }
+
+    return [...contextMsgs, ...subjectMsgs, 'Listo — tu primer día empieza mañana.']
+  }, [data.subjects, data.community, data.studentExams, data.weeklyStudyDaysValue, data.dailyMinutes])
 
   useEffect(() => {
     if (step !== 'saving' || savingError) return
@@ -437,8 +483,9 @@ export default function OnboardingFlow() {
   const progressPct = step === 'done' ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
 
   const canContinue = (() => {
+    if (step === 'pain') return Boolean(data.painType)
     if (step === 'name') return usernameStatus === 'available' && Boolean(data.username?.trim())
-    if (step === 'community') return Boolean(data.community)
+    if (step === 'community') return Boolean(data.community) && COMMUNITY_AVAILABLE_IDS.has(data.community as OnboardingCommunity)
     if (step === 'school') return Boolean(data.schoolName?.trim())
     if (step === 'subjects') return data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
     if (step === 'feeling') return Boolean(data.preparationFeeling)
@@ -461,9 +508,32 @@ export default function OnboardingFlow() {
       traceIdRef.current = traceId
       if (!onboardingStartedRef.current) {
         onboardingStartedRef.current = true
-        void sendOnboardingEvent(traceId, 'onboarding_started', { step_id: 'username', step_index: 0 })
+        void sendOnboardingEvent(traceId, 'onboarding_started', { step_id: 'pain', step_index: 0 })
       }
+      setStep('pain')
+      return
+    }
+    if (step === 'pain') {
+      // No avanza al siguiente STEPS[] — primero pasa por la pantalla de
+      // resultado personalizado (sin formulario, fuera del contador de pasos).
+      const durations = stepTimerRef.current?.getDurations()
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_step_completed', {
+        step_id: 'pain',
+        step_index: 0,
+        elapsed_duration_ms: durations?.elapsedMs,
+        active_duration_ms: durations?.activeMs,
+        validation_attempts: stepValidationAttemptsRef.current[step] ?? 0,
+      })
+      setStep('pain-result')
+      return
+    }
+    if (step === 'pain-result') {
       setStep('name')
+      // Username NUNCA se deriva del email (ver AGENTS.md / plan de
+      // onboarding). Si ya hay uno guardado (vuelta atrás previa, draft
+      // restaurado), se revalida aquí, en la propia interacción de avanzar.
+      const currentUsername = data.username
+      if (currentUsername && currentUsername.length >= 3) void checkUsername(currentUsername)
       return
     }
     if (stepIndex >= 0 && stepIndex < STEPS.length - 1 && canContinue) {
@@ -480,10 +550,21 @@ export default function OnboardingFlow() {
   }
 
   function goBack() {
+    if (step === 'pain-result') {
+      setStep('pain')
+      return
+    }
     if (stepIndex > 0) {
       void sendOnboardingEvent(traceIdRef.current, 'onboarding_back_clicked', { step_id: STEP_ID_MAP[step], step_index: stepIndex })
-      setStep(STEPS[stepIndex - 1])
-    } else if (step === 'name') {
+      const previousStep = STEPS[stepIndex - 1]
+      setStep(previousStep)
+      // Username NUNCA se deriva del email (ver AGENTS.md / plan de
+      // onboarding). Revalida al volver a 'name', en la propia interacción.
+      if (previousStep === 'name') {
+        const currentUsername = data.username
+        if (currentUsername && currentUsername.length >= 3) void checkUsername(currentUsername)
+      }
+    } else if (step === 'pain') {
       void sendOnboardingEvent(traceIdRef.current, 'onboarding_back_clicked', { step_id: STEP_ID_MAP[step], step_index: 0 })
       setStep('welcome')
     }
@@ -627,13 +708,14 @@ export default function OnboardingFlow() {
             setSavingError(generateRetriesRef.current >= 2 ? 'Algo fue mal. Contacta con soporte en hola@kairo.es' : 'No pudimos generar tu plan. Inténtalo de nuevo.')
             return
           }
+          firstMissionSupportsCorrectionRef.current = Boolean(genJson.firstMission?.supportsStepCorrection)
         }
       }
       markOnboardingComplete()
       // Ensure kairo_ccaa is in sync at completion (covers edge cases where
       // selectCommunity ran on a previous session)
       syncOnboardingCommunity(data)
-      void sendOnboardingEvent(traceIdRef.current, 'onboarding_completed', {
+      void sendOnboardingEvent(traceIdRef.current, 'onboarding_flow_completed', {
         step_id: 'done',
         subjects_count: selectedEnabled.length,
         has_upcoming_exam: upcomingExams.length > 0,
@@ -648,7 +730,7 @@ export default function OnboardingFlow() {
 
   const isSaving = step === 'saving'
   const isDone = step === 'done'
-  const showBack = !isDone && !isSaving && (step === 'name' || stepIndex > 0)
+  const showBack = !isDone && !isSaving && (step === 'pain' || stepIndex > 0)
   const showContinue = !isDone && !isSaving && stepIndex >= 0 && step !== 'confirm'
   const showConfirm = !isDone && !isSaving && step === 'confirm'
 
@@ -657,9 +739,11 @@ export default function OnboardingFlow() {
       <style>{FONTS + BASE_CSS}</style>
       {step === 'welcome'
         ? renderWelcome()
-        : (isSaving || isDone)
-          ? renderSavingDone()
-          : renderShell()}
+        : step === 'pain-result'
+          ? renderPainResult()
+          : (isSaving || isDone)
+            ? renderSavingDone()
+            : renderShell()}
     </div>
   )
 
@@ -680,23 +764,13 @@ export default function OnboardingFlow() {
 
           {/* Main */}
           <div className="onb-main-pad" style={{ flex: 1, padding: '0 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6', marginBottom: 20 }}>Tu plan de selectividad · 2025–2026</div>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6', marginBottom: 20 }}>La PAU empieza hoy</div>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(52px, 6.5vw, 88px)', lineHeight: .91, color: '#fff', letterSpacing: '.01em', marginBottom: 22 }}>
               La PAU<br />empieza<br /><span style={{ color: 'rgba(255,255,255,.2)' }}>hoy.</span>
             </div>
-            <p style={{ fontSize: 13, lineHeight: 1.75, color: 'rgba(255,255,255,.4)', maxWidth: 380, marginBottom: 36 }}>
-              8 pasos. 3 minutos. Kairo construye un Camino PAU adaptado a tu comunidad, asignaturas y ritmo real.
+            <p style={{ fontSize: 13, lineHeight: 1.75, color: 'rgba(255,255,255,.4)', maxWidth: 380, marginBottom: 40 }}>
+              En unos minutos tendrás una preparación adaptada a tus asignaturas, tu tiempo y tus próximos exámenes.
             </p>
-
-            {/* Stats grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0, border: '1px solid rgba(255,255,255,.08)', marginBottom: 40 }}>
-              {[['4.200+', 'Alumnos'], ['8.4', 'Nota media'], ['2 min', 'Configurar']].map(([val, label], i) => (
-                <div key={i} style={{ padding: '14px 18px', borderRight: i < 2 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, color: '#fff', lineHeight: 1 }}>{val}</div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: 3 }}>{label}</div>
-                </div>
-              ))}
-            </div>
 
             {/* Circle CTA */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
@@ -706,11 +780,11 @@ export default function OnboardingFlow() {
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.07)'; (e.currentTarget as HTMLElement).style.borderColor = '#fff' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,.2)' }}
               >
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: '.08em', color: '#fff', lineHeight: 1.2, textAlign: 'center' }}>Empezar</span>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 12, letterSpacing: '.04em', color: '#fff', lineHeight: 1.2, textAlign: 'center', padding: '0 8px' }}>Preparar<br />mi Camino</span>
                 <span style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', marginTop: 4 }}>↗</span>
               </button>
               <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.2)', lineHeight: 1.7 }}>
-                Personaliza tu plan<br />de preparación PAU<br />Gratis en beta privada
+                Adaptado a tus asignaturas<br />tu tiempo y tus exámenes<br />Gratis en beta privada
               </div>
             </div>
           </div>
@@ -731,7 +805,7 @@ export default function OnboardingFlow() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.9) 0%, rgba(17,17,17,.15) 45%, transparent 70%)' }} />
           <div style={{ position: 'absolute', bottom: 32, right: 32, textAlign: 'right' }}>
             <div style={{ display: 'inline-block', padding: '4px 10px', border: '1px solid rgba(255,255,255,.15)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: 8 }}>Editorial · Higgsfield</div>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,.25)', maxWidth: 160, lineHeight: 1.6 }}>Miles de alumnos ya han aprobado su PAU con Kairo</p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,.25)', maxWidth: 160, lineHeight: 1.6 }}>Cada Camino se adapta a tu comunidad, tus asignaturas y tu ritmo real</p>
           </div>
         </div>
       </div>
@@ -813,7 +887,7 @@ export default function OnboardingFlow() {
           {/* Header */}
           <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
-            <div style={{ display: 'flex', gap: 0 }}>
+            <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0 }}>
               {SIDEBAR_STEPS.map((label, i) => {
                 const done = currentStep > i + 1
                 const active = currentStep === i + 1
@@ -823,6 +897,16 @@ export default function OnboardingFlow() {
                   </div>
                 )
               })}
+            </div>
+            {/* Mobile: sustituye la tira completa de pestañas (se corta fuera
+                de pantalla con 11 pasos) por un indicador compacto */}
+            <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
+                {currentStep} de {STEPS.length}
+              </span>
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                {SIDEBAR_STEPS[stepIndex] ?? ''}
+              </span>
             </div>
           </div>
 
@@ -888,6 +972,18 @@ export default function OnboardingFlow() {
   // ─── Saving / Done full-screen ────────────────────────────────────────────────
   function renderSavingDone() {
     if (isDone) {
+      // Efecto espejo (Fase 1): el dolor elegido no cambia qué misión eligió
+      // el generador, solo cómo se presenta la recompensa. El badge de
+      // corrección solo aparece si el backend confirmó que ESA misión en
+      // concreto resuelve a un tema real y corregible (ver
+      // supportsStepCorrection en /api/onboarding/generate) — nunca se finge.
+      const painType = data.painType
+      const mirrorMessage = painType === 'daily_plan' ? 'Tu primera tarea ya está decidida. Solo tienes que empezar.'
+        : painType === 'procrastination' ? 'Hoy solo necesitas 25 minutos.'
+        : null
+      const mirrorBadge = painType === 'correction_confidence' && firstMissionSupportsCorrectionRef.current ? 'Incluye corrección paso a paso'
+        : painType === 'improve_grade' ? 'Enfocada en asegurar puntos'
+        : null
       return (
         <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 16 }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -895,6 +991,12 @@ export default function OnboardingFlow() {
           </div>
           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, color: '#fff', letterSpacing: '.02em' }}>Tu Camino PAU está listo</div>
           <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', textAlign: 'center', maxWidth: 360 }}>Revisa tu semana, mira tus misiones y empieza cuando te venga bien.</p>
+          {mirrorMessage && (
+            <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,.75)', textAlign: 'center', maxWidth: 340, margin: 0 }}>{mirrorMessage}</p>
+          )}
+          {mirrorBadge && (
+            <span style={{ padding: '5px 12px', border: '1px solid rgba(37,99,235,.35)', background: 'rgba(37,99,235,.12)', borderRadius: 999, fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#60a5fa' }}>{mirrorBadge}</span>
+          )}
           <button onClick={() => router.push('/camino')} style={{ marginTop: 8, padding: '12px 32px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
             Ver mi Camino PAU →
           </button>
@@ -949,8 +1051,48 @@ export default function OnboardingFlow() {
     )
   }
 
+  // ─── Pantalla de resultado personalizado (sin formulario) ─────────────────────
+  function renderPainResult() {
+    const copy = data.painType ? PAIN_RESULT_COPY[data.painType] : null
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 16, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6', marginBottom: 4 }}>Tu Camino, a tu medida</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.05, color: '#fff', maxWidth: 520 }}>
+          {copy?.title ?? 'Kairo se adapta a lo que más te cuesta.'}
+        </div>
+        <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,.55)', maxWidth: 440 }}>
+          {copy?.body ?? 'Organizará tus asignaturas, tu tiempo y tus próximos exámenes.'}
+        </p>
+        <button onClick={goNext} style={{ marginTop: 16, padding: '13px 32px', background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
+          Construir mi Camino →
+        </button>
+        <button onClick={goBack} style={{ marginTop: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,.3)', fontSize: 11, fontFamily: "'DM Mono', monospace", letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer' }}>
+          ← Cambiar respuesta
+        </button>
+      </div>
+    )
+  }
+
   // ─── Step content ─────────────────────────────────────────────────────────────
   function renderStep() {
+    if (step === 'pain') {
+      return (
+        <EditorialGrid cols={1}>
+          {PAIN_OPTS.map(opt => (
+            <EditorialChoice
+              key={opt.id}
+              title={opt.label}
+              selected={data.painType === opt.id}
+              onClick={() => {
+                update({ painType: opt.id })
+                void sendOnboardingEvent(traceIdRef.current, 'onboarding_pain_selected', { step_id: 'pain', pain_type: opt.id })
+              }}
+            />
+          ))}
+        </EditorialGrid>
+      )
+    }
+
     if (step === 'name') {
       const borderColor = usernameStatus === 'available' ? '#16a34a'
         : (usernameStatus === 'taken' || usernameStatus === 'invalid') ? '#dc2626'
@@ -1017,11 +1159,40 @@ export default function OnboardingFlow() {
 
     if (step === 'community') {
       return (
-        <EditorialGrid cols={3}>
-          {COMMUNITY_OPTS.map(opt => (
-            <EditorialChoice key={opt.id} title={opt.label} sub={opt.desc} selected={data.community === opt.id} onClick={() => selectCommunity(opt.id)} />
-          ))}
-        </EditorialGrid>
+        <div>
+          <EditorialGrid cols={3}>
+            {COMMUNITY_OPTS.map(opt => {
+              const selected = data.community === opt.id
+              if (!opt.available) {
+                return (
+                  <div
+                    key={opt.id}
+                    style={{
+                      padding: '16px 18px',
+                      background: selected ? '#fef2f2' : '#fff',
+                      border: selected ? '1px solid #fecaca' : 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', lineHeight: 1.3 }}>{opt.label}</div>
+                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.06em', color: '#dc2626', marginTop: 3, textTransform: 'uppercase' }}>Próximamente</div>
+                    </div>
+                    <Lock size={13} style={{ color: '#cbd5e1', flexShrink: 0 }} strokeWidth={2.5} />
+                  </div>
+                )
+              }
+              return (
+                <EditorialChoice key={opt.id} title={opt.label} sub={opt.desc} selected={selected} onClick={() => selectCommunity(opt.id)} />
+              )
+            })}
+          </EditorialGrid>
+          {data.community && !COMMUNITY_AVAILABLE_IDS.has(data.community) && (
+            <div style={{ marginTop: 14, border: '1px solid #fecaca', background: '#fef2f2', padding: '10px 14px', fontSize: 11, fontWeight: 600, color: '#991b1b' }}>
+              Camino todavía no está disponible en {data.community}. Elige Madrid u Otra comunidad para poder continuar — el resto de tus respuestas se conservan.
+            </div>
+          )}
+        </div>
       )
     }
 
@@ -1122,8 +1293,24 @@ export default function OnboardingFlow() {
         <div>
           <div style={{ border: '1px solid #dbeafe', background: '#eff6ff', padding: '10px 14px', marginBottom: 14 }}>
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Paso opcional</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>Si tienes un parcial cerca, añadiremos repasos específicos en los días previos. Si no, continúa sin añadir nada.</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>Si tienes un parcial cerca, añadiremos repasos específicos en los días previos.</div>
           </div>
+          <button
+            type="button"
+            onClick={() => update({ studentExams: [] })}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', textAlign: 'left',
+              border: exams.length === 0 ? 'none' : '1px solid #e0e0e0', cursor: 'pointer', padding: '13px 16px', marginBottom: 14,
+              background: exams.length === 0 ? '#1c1c1c' : '#fff',
+            }}
+          >
+            <span style={{ fontSize: 12, fontWeight: 700, color: exams.length === 0 ? '#fff' : '#1c1c1c' }}>
+              Ahora mismo no tengo ningún parcial próximo
+            </span>
+            <div style={{ width: 16, height: 16, borderRadius: '50%', background: exams.length === 0 ? '#fff' : 'transparent', border: exams.length === 0 ? 'none' : '1.5px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {exams.length === 0 && <Check size={9} color="#1c1c1c" strokeWidth={3} />}
+            </div>
+          </button>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
             <label style={{ background: '#fff', padding: '12px 14px' }}>
               <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Asignatura</div>
@@ -1304,6 +1491,23 @@ export default function OnboardingFlow() {
     }
 
     if (step === 'confirm') {
+      const communityValue = data.community
+        ? COMMUNITY_AVAILABLE_IDS.has(data.community) ? data.community : `${data.community} (no disponible todavía)`
+        : '—'
+      const examValue = data.studentExams?.length
+        ? `${data.studentExams.length} parcial${data.studentExams.length === 1 ? '' : 'es'} añadido${data.studentExams.length === 1 ? '' : 's'}`
+        : 'Ningún parcial próximo'
+      const summaryBlocks: Array<{ label: string; value: string; step: Step }> = [
+        { label: 'Usuario', value: data.username ? `@${data.username}` : '—', step: 'name' },
+        { label: 'Comunidad', value: communityValue, step: 'community' },
+        { label: 'Centro educativo', value: data.schoolName || '—', step: 'school' },
+        { label: 'Asignaturas', value: data.subjects.join(', ') || '—', step: 'subjects' },
+        { label: 'Próximo examen', value: examValue, step: 'upcoming-exams' },
+        { label: 'Preparación', value: data.preparationFeeling || '—', step: 'feeling' },
+        { label: 'Duración de sesión', value: data.dailyStudyTime || '—', step: 'daily-time' },
+        { label: 'Días por semana', value: data.weeklyStudyDays || '—', step: 'weekly-days' },
+        { label: 'Umbral para repetir', value: data.gradeThresholdMode === 'per_subject' ? 'Distinto por asignatura' : `Menos de ${data.gradeThreshold ?? DEFAULT_GRADE_THRESHOLD}/10`, step: 'grade-threshold' },
+      ]
       return (
         <div>
           {savingError && (
@@ -1312,20 +1516,19 @@ export default function OnboardingFlow() {
             </div>
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
-            {[
-              ['Usuario', data.username ? `@${data.username}` : '—'],
-              ['Comunidad', data.community || '—'],
-              ['Centro educativo', data.schoolName || '—'],
-              ['Asignaturas', data.subjects.join(', ') || '—'],
-              ['Parciales próximos', data.studentExams?.length ? `${data.studentExams.length} añadido${data.studentExams.length === 1 ? '' : 's'}` : 'Ninguno'],
-              ['Preparación', data.preparationFeeling || '—'],
-              ['Tiempo diario', data.dailyStudyTime || '—'],
-              ['Días por semana', data.weeklyStudyDays || '—'],
-              ['Umbral para repetir', data.gradeThresholdMode === 'per_subject' ? 'Distinto por asignatura' : `Menos de ${data.gradeThreshold ?? DEFAULT_GRADE_THRESHOLD}/10`],
-            ].map(([label, value]) => (
-              <div key={label} style={{ background: '#fff', padding: '16px 18px' }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>{label}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#1c1c1c', lineHeight: 1.4 }}>{value}</div>
+            {summaryBlocks.map(block => (
+              <div key={block.label} style={{ background: '#fff', padding: '16px 18px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>{block.label}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#1c1c1c', lineHeight: 1.4 }}>{block.value}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep(block.step)}
+                  style={{ flexShrink: 0, border: 'none', background: 'none', padding: 0, fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Editar
+                </button>
               </div>
             ))}
           </div>

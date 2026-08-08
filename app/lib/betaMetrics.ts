@@ -1,4 +1,9 @@
 export const BETA_METRIC_EVENTS = [
+  // 'onboarding_completed' es EL evento de negocio (lo escribe únicamente
+  // /api/onboarding/setup con payload.onboarding_completed === true — es lo
+  // único que /api/onboarding/me acepta como "onboarding realmente
+  // terminado"). NUNCA reutilizar este event_type para telemetría — ver
+  // 'onboarding_flow_completed' más abajo y el bug que causó reutilizarlo.
   'onboarding_completed',
   // Fase 0 de observabilidad del onboarding actual (medición pura, ver
   // AGENTS.md / plan de onboarding). Reutilizan billing_events porque
@@ -12,6 +17,14 @@ export const BETA_METRIC_EVENTS = [
   'onboarding_generation_started',
   'onboarding_generation_succeeded',
   'onboarding_generation_failed',
+  // Evento de telemetría del cierre del wizard (distinto del evento de
+  // negocio 'onboarding_completed' de arriba — antes colisionaban con el
+  // mismo nombre, y /api/onboarding/me acababa leyendo esta fila de
+  // telemetría en vez de la de negocio, rompiendo la detección de
+  // "onboarding completado" para cualquier cuenta que terminara el wizard).
+  'onboarding_flow_completed',
+  // Fase 1 (rediseño emocional): dolor principal elegido en la portada.
+  'onboarding_pain_selected',
   'camino_opened',
   'mission_opened',
   'course_opened',

@@ -63,11 +63,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Supabase service role not configured' }, { status: 500 })
   }
 
+  // Filtra explícitamente por el flag de negocio en vez de fiarse de
+  // "la fila onboarding_completed más reciente" — billing_events puede
+  // (y llegó a) contener más de una fila con event_type='onboarding_completed'
+  // si algún otro punto del código reutiliza ese nombre para telemetría; sin
+  // este filtro, una fila de telemetría más reciente sin el flag ganaba la
+  // query y hacía parecer que el usuario nunca completó el onboarding.
   const { data, error } = await db
     .from('billing_events')
     .select('payload, created_at')
     .eq('user_id', user.id)
     .eq('event_type', 'onboarding_completed')
+    .eq('payload->>onboarding_completed', 'true')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()

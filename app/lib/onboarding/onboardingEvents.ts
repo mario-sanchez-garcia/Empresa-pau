@@ -8,6 +8,7 @@
 // Nunca incluir aquí PII (email, username, instituto, texto libre, etc.) —
 // ver la lista blanca de campos en app/api/onboarding/event/route.ts.
 import { supabase } from '@/app/lib/supabase'
+import type { PainType } from '@/app/lib/onboarding/onboardingStorage'
 
 export const ONBOARDING_FLOW_VERSION = 'current_v1'
 
@@ -22,10 +23,21 @@ export type OnboardingEventType =
   | 'onboarding_step_completed'
   | 'onboarding_validation_failed'
   | 'onboarding_back_clicked'
-  | 'onboarding_completed'
+  // NUNCA 'onboarding_completed' aquí — ese event_type es el evento de
+  // negocio que escribe /api/onboarding/setup (payload.onboarding_completed
+  // === true) y que /api/onboarding/me usa para decidir si el usuario
+  // terminó el onboarding. Reutilizarlo para telemetría del cliente rompió
+  // esa detección para todo el mundo (la fila de telemetría, al ser más
+  // reciente, ganaba la query de "última fila onboarding_completed" sin
+  // llevar el flag de negocio). Este es el evento equivalente pero seguro.
+  | 'onboarding_flow_completed'
+  // Fase 1 (rediseño emocional): dolor principal elegido en la portada.
+  | 'onboarding_pain_selected'
 
 export type OnboardingStepId =
   | 'welcome'
+  | 'pain'
+  | 'pain_result'
   | 'username'
   | 'community'
   | 'school'
@@ -52,6 +64,7 @@ export interface OnboardingEventPayload {
   study_time_bucket?: string
   study_days_count?: number | null
   error_code?: string
+  pain_type?: PainType
 }
 
 function viewportType(): 'mobile' | 'desktop' {

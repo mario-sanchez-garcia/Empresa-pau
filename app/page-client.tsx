@@ -40,6 +40,7 @@ import KairoBrand from '@/components/shared/KairoBrand'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import RichTextArea from '@/components/shared/RichTextArea'
 import RepeatExamModal, { type RepeatExamSource } from '@/components/shared/RepeatExamModal'
+import PhotoAttachButton, { type PhotoAttachment } from '@/components/shared/PhotoAttachButton'
 import { normalizeSubjectSlug } from './lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from './lib/camino/gradeThreshold'
 import {
@@ -452,7 +453,11 @@ function formatEnunciado(enunciado?: string | null) {
 type Asignatura = 'general' | 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
-interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string; ts?: number }
+// imagenPreview: solo para mostrar la miniatura en la burbuja del propio
+// alumno en esta sesión — no se persiste en chat_messages (evita guardar
+// blobs de imagen en el historial de chat) ni se reenvía en mensajes
+// posteriores.
+interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string; ts?: number; imagenPreview?: string }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'matematicas_ccss', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
@@ -921,6 +926,7 @@ export default function Home() {
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
   const [inputChat, setInputChat] = useState('')
   const [cargandoChat, setCargandoChat] = useState(false)
+  const [chatAdjunto, setChatAdjunto] = useState<PhotoAttachment | null>(null)
   const [historial, setHistorial] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [cargandoHistorial, setCargandoHistorial] = useState(false)
   const [historialTotalCount, setHistorialTotalCount] = useState<number | null>(null)
@@ -2067,6 +2073,7 @@ function switchChatSubject(subject: Asignatura) {
   chatThreadCacheRef.current[asignatura] = mensajes
   cambiarAsignatura(subject)
   loadChatThread(subject)
+  setChatAdjunto(null)
 }
 
 function cambiarTipo(t: Tipo) {
@@ -2294,17 +2301,23 @@ function cambiarTipo(t: Tipo) {
   }
 
   async function enviarChat() {
-    if (!inputChat.trim()) return
+    if (!inputChat.trim() && !chatAdjunto) return
     // Foto fija de la asignatura activa al enviar — si el alumno cambia de
     // pill mientras esta respuesta sigue en curso, el mensaje se sigue
     // guardando en el hilo correcto (el de cuando se envió), no en el que
     // esté activo cuando termine de llegar la respuesta.
     const chatSubject = asignatura
-    const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: inputChat, ts: Date.now() }
+    const adjunto = chatAdjunto
+    const textoMensaje = inputChat.trim() || '¿Está bien esto que he hecho?'
+    const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: textoMensaje, ts: Date.now(), imagenPreview: adjunto?.preview }
     const hist = [...mensajes, nuevoMensaje]
     setMensajes(hist)
-    persistChatMessage(chatSubject, 'usuario', nuevoMensaje.texto)
+    // La imagen no se persiste en chat_messages (evitar guardar blobs de
+    // foto en el historial de chat) — solo queda constancia en texto de que
+    // había una adjunta.
+    persistChatMessage(chatSubject, 'usuario', adjunto ? `${textoMensaje} [foto adjunta]` : textoMensaje)
     setInputChat('')
+    setChatAdjunto(null)
     setCargandoChat(true)
     const accessToken = await getChatAccessToken()
     if (!accessToken) {
@@ -2331,7 +2344,9 @@ function cambiarTipo(t: Tipo) {
             // vez haría crecer el coste/tokens de cada respuesta sin tope. El
             // historial completo se sigue guardando y mostrando igual.
             hist.slice(-20).map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Kairo') + ': ' + m.texto).join('\n') +
-            '\nResponde solo como Kairo.'
+            '\nResponde solo como Kairo.',
+          imagen: adjunto?.data ?? null,
+          imagenTipo: adjunto?.mediaType ?? null,
         })
       })
       if (!res.ok) {
@@ -6203,7 +6218,12 @@ function cambiarTipo(t: Tipo) {
                             return (
                               <div key={i} className="tutor-msg-user-row">
                                 <div>
-                                  <div className="tutor-msg-user-bubble">{msg.texto}</div>
+                                  <div className="tutor-msg-user-bubble">
+                                    {msg.imagenPreview && (
+                                      <img src={msg.imagenPreview} alt="Foto enviada" style={{ display: 'block', maxWidth: 200, maxHeight: 200, borderRadius: 10, marginBottom: msg.texto ? 8 : 0, objectFit: 'contain' }} />
+                                    )}
+                                    {msg.texto}
+                                  </div>
                                   <div className="tutor-msg-user-meta">
                                     {msg.ts && <small>{new Date(msg.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</small>}
                                     <Check size={11} />
@@ -6233,13 +6253,14 @@ function cambiarTipo(t: Tipo) {
 
                     <div className="tutor-input-zone">
                       <div className="chat-input-wrap">
-                        <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder="Pregunta lo que quieras a Kairo..." rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
-                        <button className="chat-send-btn" onClick={enviarChat} disabled={!inputChat.trim() || cargandoChat}>
+                        <PhotoAttachButton value={chatAdjunto} onChange={setChatAdjunto} disabled={cargandoChat} compact />
+                        <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder={chatAdjunto ? 'Pregúntale a Kairo sobre esta foto (opcional)...' : 'Pregunta lo que quieras a Kairo...'} rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
+                        <button className="chat-send-btn" onClick={enviarChat} disabled={(!inputChat.trim() && !chatAdjunto) || cargandoChat}>
                           {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
                           {cargandoChat ? 'Pensando...' : 'Enviar'}
                         </button>
                       </div>
-                      <p className="tutor-input-hint">Enter para enviar · Shift + Enter para nueva línea</p>
+                      <p className="tutor-input-hint">Enter para enviar · Shift + Enter para nueva línea · <Camera size={10} style={{ display: 'inline', verticalAlign: -1 }} /> adjunta una foto para preguntar sobre ella</p>
                     </div>
                   </div>
                 </section>

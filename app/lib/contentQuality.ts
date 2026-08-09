@@ -7,17 +7,10 @@ const EDITORIAL_PHRASES = [
   'imagen pendiente',
 ]
 
-const EDITORIAL_CONTEXT_WORDS = [
-  'adaptar',
-  'anadir',
-  'contenido',
-  'imagen',
-  'ocr',
-  'pdf',
-  'proximamente',
-  'revision',
-  'validar',
-  'visual',
+const EDITORIAL_PENDING_PATTERNS = [
+  /\b(?:contenido|figura|fuente|grafica|grafico|imagen|ocr|tabla)\s+pendiente\b/,
+  /\bpendiente\s+(?:de\s+)?(?:adaptar|anadir|cargar|imagen|insertar|revision|revisar|subir|validar)\b/,
+  /\bpendent\s+(?:de\s+)?(?:adaptar|afegir|contingut|figura|font|grafic|imatge|ocr|revisio|taula|validar)\b/,
 ]
 
 const REVISION_FLAGS = [
@@ -39,8 +32,7 @@ function normalizeText(value: string) {
 }
 
 function hasPendingWithEditorialContext(value: string) {
-  const hasPendingWord = /\b(pendiente|pendent)\b/.test(value)
-  return hasPendingWord && EDITORIAL_CONTEXT_WORDS.some(word => value.includes(word))
+  return EDITORIAL_PENDING_PATTERNS.some(pattern => pattern.test(value))
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -86,4 +78,3 @@ export function isIncompleteOfficialExercise(exercise: unknown): boolean {
   if (!isPlainObject(exercise)) return hasEditorialPlaceholderText(exercise)
   return hasInternalIncompleteFlag(exercise) || hasEditorialPlaceholderText(exercise)
 }
-

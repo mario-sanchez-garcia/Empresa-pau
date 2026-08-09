@@ -23,6 +23,7 @@ import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { CONTENT_TYPE_COLORS } from '@/app/lib/camino/contentTypeColors'
+import DivisionIcon from '@/components/shared/DivisionIcon'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 import { RankingRow } from '@/components/shared/RankingRow'
 import UsernameGate from '@/app/components/camino/UsernameGate'
@@ -2260,7 +2261,8 @@ export default function CaminoCalendarClient() {
               <span style={{ fontSize: 36, fontWeight: 900, color: '#2563eb', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXP.toLocaleString('es-ES')}</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>XP</span>
             </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: division.bg, color: division.text }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: division.bg, color: division.text }}>
+              <DivisionIcon tierIndex={DIVISIONS.indexOf(division)} size={12} color={division.text} strokeWidth={1.1} />
               {division.name}{nextDivision ? ` · ${nextDivision.name} en ${Math.max(0, nextDivision.min - displayedXP)} XP` : ''}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>

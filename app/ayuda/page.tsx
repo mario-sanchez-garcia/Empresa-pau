@@ -33,7 +33,7 @@ const SECTIONS = [
 const FAQS = [
   {
     q: '¿Cómo funciona el XP?',
-    a: 'Ganas XP cada vez que corriges un ejercicio con Kairo, en cualquier sección — la saques la nota que saques. La base depende de cuánto dura de verdad la actividad (una misión de Camino da menos que una práctica parcial, y esa menos que un simulacro completo de 90 minutos) y de la dificultad del bloque. Sobre esa base se aplican dos bonus que se multiplican entre sí: la nota que sacas (+25% aprobando, +75% con un 7 o más, +125% con un 9 o más) y tu racha de días seguidos estudiando (hasta +50% a partir de dos meses seguidos sin cortar). Si repites algo que ya habías hecho, la base se reduce a la mitad en cada repetición sucesiva — pero si mejoras tu nota respecto a tu último intento, te llevas un bonus extra encima, tanto mayor cuanto más grande sea la mejora y cuanto más cerca del 10 termines. El XP total nunca baja. Puedes ver el desglose visual completo en "¿Cómo funciona el XP?" (arriba a la derecha).',
+    a: 'Ganas XP cada vez que corriges un ejercicio con Kairo, en cualquier sección — la saques la nota que saques. La base depende de cuánto dura de verdad la actividad (una misión de Camino da menos que una práctica parcial, y esa menos que un simulacro completo de 90 minutos) y de la dificultad del bloque. Sobre esa base se aplican dos bonus que se multiplican entre sí: la nota que sacas (+25% aprobando, +75% con un 7 o más, +125% con un 9 o más) y tu racha de días seguidos estudiando (hasta +50% a partir de dos meses seguidos sin cortar). Si repites algo que ya habías hecho, la base se reduce a la mitad en cada repetición sucesiva — pero si mejoras tu nota respecto a tu último intento, te llevas un bonus extra encima, tanto mayor cuanto más grande sea la mejora y cuanto más cerca del 10 termines. El XP total nunca baja. Puedes ver el desglose visual completo en "XP y divisiones" (arriba a la derecha).',
   },
   {
     q: '¿Qué es la racha?',
@@ -45,7 +45,7 @@ const FAQS = [
   },
   {
     q: '¿Qué son las divisiones?',
-    a: 'Las divisiones (Bronce, Plata, Oro, etc.) son niveles globales basados en tu XP total. Subes de división acumulando XP. No se puede bajar de división una vez alcanzada.',
+    a: 'Las divisiones (Bronce, Plata, Oro, Platino, Diamante y Élite PAU) son seis tramos por XP total acumulado, cada uno con más XP que el anterior. Subes de división acumulando XP; no se puede bajar de división una vez alcanzada. Puedes ver los rangos exactos y en cuál estás ahora mismo en "XP y divisiones" (arriba a la derecha).',
   },
   {
     q: '¿Cómo funcionan las ligas?',

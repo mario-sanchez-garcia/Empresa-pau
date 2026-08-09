@@ -8,6 +8,9 @@ import {
   previewImprovementBonusXp,
 } from '@/app/lib/camino/xpFormula'
 import { SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
+import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
+import { supabase } from '@/app/lib/supabase'
+import DivisionIcon from '@/components/shared/DivisionIcon'
 
 // Mismos tokens de color/sombra/easing que ya usa el resto de la app
 // (SimulacroShell, modales de confirmación de Simulacros/Camino) — ver
@@ -43,8 +46,15 @@ const BIG_JUMP = { from: 4, to: 8 }
 const NEAR_CEILING_A = { from: 6, to: 7 }
 const NEAR_CEILING_B = { from: 8, to: 9 }
 
+// Ilustrativo (no son intentos reales del alumno): una secuencia de notas en
+// el mismo ejercicio para el diagrama "solo cuenta el último intento" — el
+// bonus de mejora real siempre compara contra el intento inmediatamente
+// anterior (repeatImprovement.ts), nunca contra el primero.
+const ATTEMPT_TIMELINE = [4, 5, 4, 6, 8]
+
 export default function XpExplainerDrawer() {
   const [open, setOpen] = useState(false)
+  const [xpTotal, setXpTotal] = useState<number | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -60,9 +70,29 @@ export default function XpExplainerDrawer() {
     }
   }, [open])
 
+  // Se pide solo al abrir (no en cada render) para marcar la división real
+  // del alumno en el diagrama — un simple SELECT de una fila, no algo que
+  // valga la pena precargar antes de que el panel se abra.
+  useEffect(() => {
+    if (!open || xpTotal !== null) return
+    let cancelled = false
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user || cancelled) return
+      const { data: progress } = await supabase
+        .from('camino_user_progress')
+        .select('xp_total')
+        .eq('user_id', data.user.id)
+        .maybeSingle()
+      if (!cancelled) setXpTotal(progress?.xp_total ?? 0)
+    })
+    return () => { cancelled = true }
+  }, [open, xpTotal])
+
   const bigJumpBonus = previewImprovementBonusXp(SIMULACRO_COMPLETION_XP, 'Media', BIG_JUMP.from, BIG_JUMP.to)
   const nearCeilingBonusA = previewImprovementBonusXp(SIMULACRO_COMPLETION_XP, 'Media', NEAR_CEILING_A.from, NEAR_CEILING_A.to)
   const nearCeilingBonusB = previewImprovementBonusXp(SIMULACRO_COMPLETION_XP, 'Media', NEAR_CEILING_B.from, NEAR_CEILING_B.to)
+  const currentDivision = xpTotal != null ? divisionFor(xpTotal) : null
+  const currentDivisionIndex = currentDivision ? DIVISIONS.indexOf(currentDivision) : -1
 
   return (
     <>
@@ -78,7 +108,7 @@ export default function XpExplainerDrawer() {
         }}
       >
         <Zap size={14} />
-        ¿Cómo funciona el XP?
+        XP y divisiones
       </button>
 
       {open && (
@@ -111,7 +141,7 @@ export default function XpExplainerDrawer() {
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '22px 24px 18px', borderBottom: `1px solid ${BORDER}`, flexShrink: 0 }}>
               <div>
                 <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase', color: FAINT, marginBottom: 6 }}>Cómo funciona</p>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: '-0.02em', margin: 0 }}>El XP, por capas</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: INK, letterSpacing: '-0.02em', margin: 0 }}>El XP y las divisiones</h2>
               </div>
               <button
                 type="button"
@@ -184,6 +214,8 @@ export default function XpExplainerDrawer() {
                   Al repetir algo ya hecho, comparamos con tu intento anterior (no con el primero). Cuanto más subas, mayor el bonus — y subir cerca del 10 vale más que subir cerca del 5.
                 </p>
 
+                <AttemptTimeline attempts={ATTEMPT_TIMELINE} />
+
                 <ImprovementArrow from={BIG_JUMP.from} to={BIG_JUMP.to} bonus={bigJumpBonus} size="large" />
 
                 <p style={{ fontSize: 10.5, fontWeight: 800, color: FAINT, textTransform: 'uppercase', letterSpacing: '.08em', margin: '20px 0 10px' }}>
@@ -196,6 +228,27 @@ export default function XpExplainerDrawer() {
                 <p style={{ fontSize: 10.5, color: FAINT, lineHeight: 1.5, marginTop: 10 }}>
                   {NEAR_CEILING_B.from}→{NEAR_CEILING_B.to} da más que {NEAR_CEILING_A.from}→{NEAR_CEILING_A.to} — ese último punto cerca del techo es más difícil de conseguir, y el XP lo refleja.
                 </p>
+              </section>
+
+              {/* ── Divisiones ── */}
+              <section style={{ marginTop: 34, paddingTop: 26, borderTop: `1px solid ${BORDER}` }}>
+                <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase', color: FAINT, marginBottom: 8 }}>Divisiones</p>
+                <p style={{ fontSize: 13, fontWeight: 900, color: INK, marginBottom: 4 }}>Seis tramos por XP total acumulado</p>
+                <p style={{ fontSize: 12, color: MUTED, lineHeight: 1.55, marginBottom: 16 }}>
+                  Solo suben, nunca bajan — tu división refleja lo que ya has ganado, no depende de una semana floja.
+                </p>
+
+                <DivisionLadder currentIndex={currentDivisionIndex} />
+
+                {currentDivision && xpTotal != null && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, padding: '10px 12px', borderRadius: 10, background: currentDivision.bg, border: `1px solid ${BORDER}` }}>
+                    <DivisionIcon tierIndex={currentDivisionIndex} size={18} color={currentDivision.text} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 11, fontWeight: 900, color: currentDivision.text }}>Estás en {currentDivision.name}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: FAINT, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{xpTotal.toLocaleString('es-ES')} XP</div>
+                    </div>
+                  </div>
+                )}
               </section>
 
             </div>
@@ -253,6 +306,47 @@ function StreakCurveChart() {
   )
 }
 
+// Diagrama 4: secuencia de intentos sobre el mismo ejercicio, con el último
+// resaltado — refuerzo visual de que el bonus de mejora compara contra el
+// intento inmediatamente anterior, no contra el primero ni la media.
+function AttemptTimeline({ attempts }: { attempts: number[] }) {
+  const width = 260
+  const height = 76
+  const padX = 16
+  const padTop = 16
+  const padBottom = 20
+  const plotH = height - padTop - padBottom
+  const stepX = (width - padX * 2) / (attempts.length - 1)
+  const y = (v: number) => padTop + (1 - v / 10) * plotH
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', maxWidth: 260, height: 'auto', display: 'block' }} role="img" aria-label="Solo el último intento cuenta para el bonus de mejora">
+      <line x1={padX} y1={height - padBottom} x2={width - padX} y2={height - padBottom} stroke={BORDER} strokeWidth={1} />
+      {attempts.map((v, i) => {
+        const x = padX + stepX * i
+        const isLast = i === attempts.length - 1
+        const prevX = i > 0 ? padX + stepX * (i - 1) : x
+        const prevY = i > 0 ? y(attempts[i - 1]) : y(v)
+        return (
+          <g key={i}>
+            {i > 0 && (
+              <line
+                x1={prevX} y1={prevY} x2={x} y2={y(v)}
+                stroke={isLast ? PURPLE : FAINT} strokeWidth={isLast ? 2 : 1} opacity={isLast ? 1 : 0.45}
+              />
+            )}
+            <circle cx={x} cy={y(v)} r={isLast ? 6 : 3} fill={isLast ? PURPLE : 'white'} stroke={isLast ? 'none' : FAINT} strokeWidth={1.3} />
+            <text x={x} y={height - padBottom + 13} textAnchor="middle" fontSize={8} fontWeight={700} fill={FAINT} fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{v}</text>
+            {isLast && (
+              <text x={x} y={y(v) - 12} textAnchor="middle" fontSize={9} fontWeight={900} fill={PURPLE}>cuenta este</text>
+            )}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 function ImprovementArrow({ from, to, bonus, size }: { from: number; to: number; bonus: number; size: 'large' | 'small' }) {
   const isLarge = size === 'large'
   const pillSize = isLarge ? 52 : 38
@@ -294,6 +388,43 @@ function Grade({ value, size, fontSize, tone }: { value: number; size: number; f
       }}
     >
       {value}
+    </div>
+  )
+}
+
+// Diagrama 5+6: escalera de las seis divisiones (icono técnico + rango de
+// XP como único texto) con la división actual del alumno marcada aparte —
+// currentIndex === -1 mientras xpTotal todavía no ha cargado, así que nada
+// se marca como "actual" hasta tener el dato real.
+function DivisionLadder({ currentIndex }: { currentIndex: number }) {
+  return (
+    <div style={{ display: 'flex', gap: 3 }}>
+      {DIVISIONS.map((d, i) => {
+        const isCurrent = i === currentIndex
+        const range = d.max === Infinity ? `${d.min.toLocaleString('es-ES')}+` : `${d.min.toLocaleString('es-ES')}–${d.max.toLocaleString('es-ES')}`
+        return (
+          <div key={d.name} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ height: 14, display: 'flex', alignItems: 'flex-end', marginBottom: 3 }}>
+              {isCurrent && (
+                <svg width={10} height={10} viewBox="0 0 10 10" aria-hidden="true">
+                  <path d="M5 10 L0 2 L10 2 Z" fill={d.bar} />
+                </svg>
+              )}
+            </div>
+            <div
+              style={{
+                width: '100%', borderRadius: 8, padding: '8px 2px 7px',
+                background: d.bg, border: `${isCurrent ? 2 : 1}px solid ${isCurrent ? d.bar : BORDER}`,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+              }}
+            >
+              <DivisionIcon tierIndex={i} size={16} color={d.text} />
+              <span style={{ fontSize: 8.5, fontWeight: 900, color: d.text, textAlign: 'center', lineHeight: 1.2 }}>{d.name}</span>
+              <span style={{ fontSize: 7, fontWeight: 700, color: FAINT, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', whiteSpace: 'nowrap' }}>{range}</span>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

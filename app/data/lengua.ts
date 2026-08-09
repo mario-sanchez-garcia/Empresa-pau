@@ -1418,6 +1418,586 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
         ]
       }
     ]
+  },
+  {
+    "id": 11,
+    "año": 2026,
+    "tipo": "Modelo",
+    "convocatoria": "Modelo",
+    "opcion": "Única",
+    "dia": "Única",
+    "asignatura": "Lengua Castellana y Literatura II",
+    "comunidad": "Madrid",
+    "bloques": [
+      {
+        "id": "lengua-2026-Unica-1",
+        "año": 2026,
+        "convocatoria": "Modelo",
+        "opcion": "Única",
+        "bloque": "Comunicacion",
+        "tipo": "Comunicacion",
+        "label": "Comunicación",
+        "numero": 1,
+        "tema": "Comunicación. Escoja uno de los dos textos",
+        "puntuacion": 4,
+        "enunciado": "Escoja uno de los dos textos y responda las tres preguntas siguientes:\n1.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos).\n1.2. (0,6 puntos) Redacte un resumen de entre 40 y 50 palabras del contenido del texto.\n1.3. (1,4 puntos) Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto,\nmanifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+        "texto_fuente": "TEXTO 1\nEn el fragor de la batalla, surgió un término que, en la última década, muchos enarbolan como si fuera\nsinónimo de innovación, vanguardia y, sobre todo, de ser muy cool, pero que tiene un significado\ncompletamente distinto en el diccionario. “Disruptivo”. Según la RAE, “que produce rotura o interrupción\nbrusca”. ¿Una rotura o una interrupción brusca es algo deseable? No lo sabemos, pero sí que el adjetivo\nsuele acompañar a la palabra “tecnología”. Quizá para suavizar la cosa, la Fundación del Español Urgente\n(Fundéu) ha tenido que añadir que es “un proceso o modo de hacer las cosas que se impone y desbanca a\nlos que venían empleándose”.\n(…) Un buen ejemplo de lo que, en la práctica, significa “tecnología disruptiva” es el lema del chico\nque nunca creció, Mark Zuckerberg: “Muévete rápido y rompe cosas”. Como ha demostrado su compañía\nFacebook Meta a lo largo de sus veinte años de fulgurante carrera, eso se traduce en sacar productos no\nseguros al mercado, exponer a millones de personas de carne y hueso a ellos y preocuparse por sus\nconsecuencias después, poniendo sus beneficios por encima de la salud mental y de la vida de la gente. No\nes el único. Su modus operandi es el habitual en el campo de las innovaciones en inteligencia artificial (IA):\ntendemos a adoptarlas a toda prisa antes de entender o de prevenir sus efectos secundarios sociales,\nmorales o humanos. (…) Un estudio de Cisco señalaba en 2024 que el 91 por ciento de los equipos de\nseguridad de las grandes empresas estadounidenses emplean IA generativa, aunque el 70 por ciento de los\nprofesionales no entiendan completamente sus implicaciones. Lo mismo nos pasa a la gente de a pie. Nos\nhemos metido de cabeza sin tener siquiera tiempo para pensar si era realmente lo que queríamos. (Laura G.\nde Rivera, Esclavos del algoritmo, 2025)\n\nTEXTO 2\nHoy he renunciado a una comida con los amigos. Así lo he pensado: tenía muchas ganas de verlos, pero he\nrenunciado, porque no quería que mi mujer se quedara en casa con los dos críos ella sola. Al final comimos\nlos cuatro juntos. Por la noche, renuncié también a terminar este artículo en hora, y, como en Peter Pan,\njugamos a tirarnos tartas de mentirijilla durante la cena.\nLa bebé se ríe cada vez más. El mayor, cuando ella se ríe mirándonos, no lo soporta. Se pone a dar\nsaltos, nos agarra de la cara para que lo miremos a él, ¡no ha cumplido los cuatro años! Repartiendo el juego\nentre los niños, el cansancio entre nosotros, me quedé pensando: ¿he renunciado hoy a algo? ¿Me haría\nesta pregunta si hubiera salido a comer con los amigos, si me hubiera saltado la cena para escribir?\nUn tipo de entrevista se hace cada vez más común en los periódicos: es gente rica o famosa que ha\ncumplido años y piensa que su vida está incompleta. Suelen ser mujeres mayores, a veces hombres, que\nhan buscado toda la vida realizarse y lo han conseguido. Perseguían un prestigio que convertía cada logro\nen un impulso hacia el siguiente. No renunciaron a nada: renunciaron a mucho.\nLa ideología es lo que no se ve, lo que está debajo de las piedras. Soporta encima las ideas como un\nsuelo de marisma y debido a sus ondulaciones salen inclinados los principios morales. La ideología dominante\ndel presente consiste en perseguir tus sueños, en cumplir tus metas, en alcanzar la autodeterminación, en\nser dueño de uno mismo sin que nadie te ponga freno. (…)\nTambién dice, la ideología, que se puede tener todo sin renunciar a nada: pero el todo al que se refiere\nla ideología es un todo sin los otros, un todo independiente, autodeterminado, es decir: relativo como mínimo,\nsi partimos de la base de que a todos nos han construido otros. (Juan Soto Ivars, “¿Renuncias a tener pareja\ne hijos para tener trabajo y Netflix?”, El Confidencial, 21/09/2024)",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nI. INFORMACIÓN GENERAL\nEstructura de la prueba\nLa prueba consta de dos textos de carácter no especializado y una serie de preguntas. El estudiante debe\nescoger uno de los textos y contestar a las preguntas según se le indica en las instrucciones.\nLas preguntas se estructuran de acuerdo con el modelo siguiente:\nBloque 1 (4 puntos)\nComprensión y comentario del texto propuesto:\n1.1. Comentario de texto: a) tema del texto (0,5 puntos); b) características lingüísticas y\nestilísticas más sobresalientes (1,3 puntos); c) tipo de texto (0,2 puntos). (Calificación total: 2\npuntos)\n1.2. Resumen del texto de entre 40 y 50 palabras. (0,6 puntos)\n1.3. Elaboración de un texto argumentativo de entre 100 y 150 palabras sobre el tema que se\npropone. (1,4 puntos)\nBloque 2 (3 puntos)\nCuestiones sobre los contenidos de Lengua Castellana del currículo de 2.º de Bachillerato:\n2.1. o 2.2. Una de las preguntas consistirá en un análisis sintáctico de una oración compleja\no compuesta mientras que la otra pregunta, que puede contar con apartados, consistirá\nen tareas de reflexión lingüística. (1,4 puntos)\nDe 2.3. a 2.5. El alumno deberá elegir dos de las tres preguntas que consistirán en cuestiones\nde carácter morfológico, léxico-semántico y en torno al español y sus hablantes. (1,6 puntos)\nBloque 3 (3 puntos)\nCuestiones sobre contenidos de Literatura en castellano del currículo de 2º de Bachillerato:\n3.1. o 3.2. Una de las preguntas propondrá relacionar un texto con alguno de los contenidos\ndel temario de literatura española mientras que la otra consistirá en el desarrollo de un tema\nde literatura española. (2 puntos)\n3.3. o 3.4. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición\nliteraria. (1 punto)\nTiempo. La duración del examen es de 90 minutos.\nPuntuación. La prueba se califica sobre 10. En cada pregunta, figura entre paréntesis la puntuación máxima\nasignada.\nII. CRITERIOS DE CALIFICACIÓN DE LA PRUEBA\na) Debe enunciar su tema de manera concisa en una o dos líneas de extensión como máximo (0,5\npuntos).\nb) Explicará las características lingüísticas y estilísticas más sobresalientes del texto: secuencias\ntextuales, género discursivo, estructuras oracionales, léxico, tiempos verbales, recursos estilísticos\n(repeticiones, contraposiciones, ironía, metáfora, etc.), variedades culta y estándar del español. No se\nvalorará un mero listado de elementos; es imprescindible señalar la función que las propiedades\nlingüísticas y estilísticas poseen en el texto (1,3 puntos).\nc) Indicará el tipo de texto y el género discursivo al que corresponde el fragmento propuesto (0,2\npuntos).\nEn la pregunta 1.2. el resumen tendrá entre 40 y 50 palabras, contendrá las ideas principales con\ncoherencia interna, se redactará con las palabras del estudiante, no será una paráfrasis y será objetivo. Se\ncalificará con un máximo de 0,6 puntos.\nEn la pregunta 1.3. el texto argumentativo (100-150 palabras) debe mostrar madurez intelectual,\ncapacidad de reflexión y destreza en la argumentación, con una posición clara y argumentos que la\njustifiquen. Se calificará con un máximo de 1,4 puntos.\nLas preguntas del bloque 2 siguen un esquema fijo: la 2.1. es un análisis sintáctico funcional\ninteroracional e intraoracional hasta el nivel de las palabras (máximo 1,4 puntos). La 2.2. contiene tareas de\nreflexión lingüística sobre categorías y funciones (pares mínimos y análisis inverso), calificándose con un\nmáximo de 0,6 y 0,8 puntos respectivamente. Las preguntas 2.3. a 2.5. ofrecen elegir entre cuestiones de\nmorfología, léxico-semánticas y sobre el español y sus hablantes (bilingüismo, diglosia, variación lingüística,\nnormas, lengua estándar), con una puntuación máxima de 1,6 puntos (0,8 por pregunta).\nEl bloque 3 comprende preguntas de literatura (3.1. y 3.2., máximo 2 puntos) y de las obras leídas\n(3.3. y 3.4., máximo 1 punto), valorando conocimientos derivados del estudio de la historia de la literatura y\nde la lectura de las obras.\nSe reitera la importancia de la corrección de la expresión escrita: la máxima deducción global en el\nejercicio será de dos puntos (0,25 puntos por cada falta de ortografía repetida a partir de la segunda, hasta\ndos puntos; hasta 1 punto por errores de redacción, coherencia, cohesión, léxico o gramática).",
+        "preguntas_opcionales": [
+          {
+            "id": "1.1",
+            "puntos": 2,
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos)."
+          },
+          {
+            "id": "1.2",
+            "puntos": 0.6,
+            "enunciado": "Redacte un resumen de entre 40 y 50 palabras del contenido del texto."
+          },
+          {
+            "id": "1.3",
+            "puntos": 1.4,
+            "enunciado": "Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto,\nmanifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+          }
+        ]
+      },
+      {
+        "id": "lengua-2026-Unica-2",
+        "año": 2026,
+        "convocatoria": "Modelo",
+        "opcion": "Única",
+        "bloque": "ReflexionLengua",
+        "tipo": "ReflexionLengua",
+        "label": "Reflexión sobre la lengua",
+        "numero": 2,
+        "tema": "Reflexión sobre la lengua. La lengua y sus hablantes",
+        "puntuacion": 3,
+        "enunciado": "Responda una pregunta de 1,4 puntos a elegir entre las preguntas 2.1 o 2.2.\n2.1. (1,4 puntos) Analice sintácticamente: Perseguían un prestigio que convertía cada logro en un impulso.\n2.2. (1,4 puntos) Realice los siguientes ejercicios de reflexión lingüística:\na) (0,6 puntos) Observe el siguiente par mínimo y explique a qué se debe la diferencia de gramaticalidad:\na. Pone sus beneficios por encima de la salud mental.\nb. *Pone sus beneficios por encima de la mental salud.\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes\nelementos en el orden que considere oportuno: determinante interrogativo; verbo intransitivo; nombre\ncontable; complemento de régimen. A continuación, complete una tabla con los elementos que haya usado\nen la secuencia.\nResponda dos preguntas de 0,8 puntos a elegir entre las preguntas 2.3, 2.4 o 2.5.\n2.3. (0,8 puntos) Indique a qué categoría gramatical, o clase de palabras, pertenece predominante, analice\nsu estructura morfológica y señale a qué proceso de formación de palabras responde.\n2.4. (0,8 puntos) Defina el concepto de polisemia y ejemplifíquelo con la palabra artículo.\n2.5. (0,8 puntos) Enumere las lenguas de España que tienen la consideración de oficiales.",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nLas preguntas del bloque 2, relativas a cuestiones de lengua y sobre la lengua y sus hablantes, siguen un\nesquema fijo. La pregunta 2.1. consistirá en un análisis sintáctico funcional interoracional e intraoracional\nde la oración propuesta, extendido hasta el nivel de las palabras (máximo 1,4 puntos). La pregunta 2.2.\ncontiene tareas de reflexión lingüística sobre categorías y funciones de la oración simple y compuesta: en\nel ejercicio de pares mínimos, el estudiante debe emplear los términos gramaticales relevantes para explicar\nel contraste observado (máximo 0,6 puntos); en el ejercicio de análisis inverso, debe escribir la secuencia\ngramatical que contenga todos los elementos exigidos y rellenar la tabla correspondiente, teniendo en\ncuenta que un mismo elemento puede aparecer en dos casillas (máximo 0,8 puntos).\nLas preguntas 2.3., 2.4. y 2.5. ofrecen la posibilidad de elegir entre cuestiones de morfología (estructura\nmorfológica de palabras complejas, categoría o clase de palabras, procesos de creación léxica como\nderivación, composición o parasíntesis), cuestiones léxico-semánticas (sinonimia, antonimia, polisemia,\nhomonimia, hiperonimia e hiponimia) y cuestiones referidas al español y sus hablantes (bilingüismo,\nplurilingüismo, diglosia, glotofobia, variación y variedad lingüística, normas —culta, popular, vulgar— y\nlengua estándar). Su puntuación máxima será de 1,6 puntos (0,8 puntos por pregunta).\n\nSolución orientativa:\n2.1. Análisis sintáctico de \"Perseguían un prestigio que convertía cada logro en un impulso\": sujeto elíptico\n(Ø), predicado con núcleo \"Perseguían\", CD \"un prestigio que convertía cada logro en un impulso\"; dentro de\nél, \"que\" (nexo/pronombre relativo) introduce la oración subordinada adjetiva con función de complemento\ndel nombre \"prestigio\", cuyo sujeto es \"que\" y predicado \"convertía cada logro en un impulso\" (CD: \"cada\nlogro\"; C. Régimen: \"en un impulso\", con \"en\" como enlace/preposición y \"un impulso\" como término).\n2.2.a) La agramaticalidad de (b) se debe a la anteposición del adjetivo relacional \"mental\" al sustantivo\n\"salud\": los adjetivos relacionales (a diferencia de los calificativos) deben aparecer obligatoriamente\npospuestos al nombre.\n2.2.b) Respuesta abierta, p. ej.: \"¿De cuántos capítulos consta el manual?\" (determinante interrogativo:\ncuántos; verbo intransitivo: consta; nombre contable: capítulos/manual; complemento de régimen: de\ncuántos capítulos).\n2.3. \"predominante\": palabra formada por derivación (adjetivo); pre- (prefijo) + domin- (raíz/lexema) + a\n(vocal temática) + -nte (sufijo), o bien pre- (prefijo) + domina- (raíz/lexema) + -nte (sufijo).\n2.4. La polisemia es la propiedad de una palabra de tener varios significados relacionados entre sí. Ejemplo\ncon \"artículo\": cada una de las partes en que suele dividirse un escrito; mercancía; cada una de las\ndisposiciones numeradas de una ley; clase de palabra que limita la extensión del nombre.\n2.5. Por orden alfabético: aranés, castellano o español, catalán (también denominado valenciano en la\nComunidad Valenciana), euskera o vasco, gallego.",
+        "preguntas_opcionales": [
+          {
+            "id": "2.1",
+            "puntos": 1.4,
+            "enunciado": "Analice sintácticamente: Perseguían un prestigio que convertía cada logro en un impulso.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "2.2",
+            "puntos": 1.4,
+            "enunciado": "Realice los siguientes ejercicios de reflexión lingüística:\na) (0,6 puntos) Observe el siguiente par mínimo y explique a qué se debe la diferencia de gramaticalidad:\na. Pone sus beneficios por encima de la salud mental.\nb. *Pone sus beneficios por encima de la mental salud.\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes\nelementos en el orden que considere oportuno: determinante interrogativo; verbo intransitivo; nombre\ncontable; complemento de régimen. A continuación, complete una tabla con los elementos que haya usado\nen la secuencia.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "2.3",
+            "puntos": 0.8,
+            "enunciado": "Indique a qué categoría gramatical, o clase de palabras, pertenece predominante, analice su\nestructura morfológica y señale a qué proceso de formación de palabras responde.",
+            "grupo": "morfologia"
+          },
+          {
+            "id": "2.4",
+            "puntos": 0.8,
+            "enunciado": "Defina el concepto de polisemia y ejemplifíquelo con la palabra artículo.",
+            "grupo": "morfologia"
+          },
+          {
+            "id": "2.5",
+            "puntos": 0.8,
+            "enunciado": "Enumere las lenguas de España que tienen la consideración de oficiales.",
+            "grupo": "morfologia"
+          }
+        ]
+      },
+      {
+        "id": "lengua-2026-Unica-3",
+        "año": 2026,
+        "convocatoria": "Modelo",
+        "opcion": "Única",
+        "bloque": "EducacionLiteraria",
+        "tipo": "EducacionLiteraria",
+        "label": "Educación literaria",
+        "numero": 3,
+        "tema": "Educación literaria",
+        "puntuacion": 3,
+        "enunciado": "Responda una pregunta de 2 puntos a elegir entre las preguntas 3.1 o 3.2.\n3.1. (2 puntos) Lea el siguiente texto y realice la actividad que se propone a continuación:\n\"De mi niñez no son precisamente buenos recuerdos los que guardo. Mi padre se llamaba Esteban Duarte\nDiniz, y era portugués, cuarentón cuando yo niño, y alto y gordo como un monte. […] Cuando se enfurecía,\ncosa que le ocurría con mayor frecuencia de lo que se necesitaba, nos pegaba a mi madre y a mí las grandes\npalizas por cualquier cosa, palizas que mi madre procuraba devolverle por ver de corregirlo, pero ante las\ncuales a mí no me quedaba sino resignación dados mis pocos años. ¡Se tienen las carnes muy tiernas a tan\ncorta edad!\"\nEl fragmento pertenece a la novela La familia de Pascual Duarte (1942), escrita por Camilo José Cela.\nEscriba cuatro rasgos de la novela tremendista y ejemplifique, con citas, su presencia en el texto.\n3.2. (2 puntos) La generación del 27: características y trayectoria poética de los poetas del 27. El teatro\nlorquiano.\nResponda una pregunta de 1 punto a elegir entre las preguntas 3.3 o 3.4.\n3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.\n3.4. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937\ny 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nEl bloque 3 comprende preguntas relativas a contenidos de literatura (preguntas 3.1. y 3.2.) y a las obras\nque el estudiante habrá leído en 2.º de Bachillerato (preguntas 3.3. y 3.4.). En las preguntas 3.1. y 3.2. el\nestudiante podrá elegir entre relacionar un texto propuesto con las características del movimiento al que\npertenece o el desarrollo de un tema, demostrando conocimientos acerca de las tendencias literarias del\nmovimiento o época, con referencia a los autores y obras más relevantes, más allá de un mero catálogo.\nLa puntuación máxima de esta pregunta es de 2 puntos. En las preguntas 3.3. y 3.4., el estudiante debe\nmostrar su conocimiento de la obra leída, relacionarla con el movimiento o tendencia literarios a los que\npertenece y destacar su importancia en relación con su contexto sociohistórico y la tradición literaria.\nSu puntuación máxima será de 1 punto.\n\nSolución orientativa 3.1. (rasgos del tremendismo en el fragmento de La familia de Pascual Duarte):\nviolencia extrema (campo semántico agresivo: \"enfurecía\", \"pegaba\", \"palizas\"); trato inhumano entre los\nmiembros de la propia familia (agresores: \"mi padre\", \"mi madre\"; víctima: el narrador, \"nos pegaba\"); visión\nagria y pesimista de la realidad (\"palizas que mi madre procuraba devolverle\"); influencia del\nrealismo-naturalismo, con el protagonista determinado por su medio y su temprana edad (\"yo niño\", \"mis\npocos años\", \"tan corta edad\"); diálogo con la novela picaresca (narrador protagonista en 1ª persona, de\norigen humilde, que relata su pasado —analepsis— desde el presente: \"recuerdos que guardo\"); fuerza\nexpresiva mediante figuras retóricas como el hipérbaton inicial, el símil cosificador (\"alto y gordo como un\nmonte\"), el quiasmo (\"las grandes palizas, palizas que...\") y la exclamación retórica final.",
+        "preguntas_opcionales": [
+          {
+            "id": "3.1",
+            "puntos": 2,
+            "enunciado": "Lea el siguiente texto y realice la actividad que se propone a continuación:\n\"De mi niñez no son precisamente buenos recuerdos los que guardo. Mi padre se llamaba Esteban Duarte\nDiniz, y era portugués, cuarentón cuando yo niño, y alto y gordo como un monte. […] Cuando se enfurecía,\ncosa que le ocurría con mayor frecuencia de lo que se necesitaba, nos pegaba a mi madre y a mí las grandes\npalizas por cualquier cosa, palizas que mi madre procuraba devolverle por ver de corregirlo, pero ante las\ncuales a mí no me quedaba sino resignación dados mis pocos años. ¡Se tienen las carnes muy tiernas a tan\ncorta edad!\"\nEl fragmento pertenece a la novela La familia de Pascual Duarte (1942), escrita por Camilo José Cela.\nEscriba cuatro rasgos de la novela tremendista y ejemplifique, con citas, su presencia en el texto.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "3.2",
+            "puntos": 2,
+            "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "3.3",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          },
+          {
+            "id": "3.4",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937\ny 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "año": 2025,
+    "tipo": "Modelo",
+    "convocatoria": "Modelo",
+    "opcion": "Única",
+    "dia": "Única",
+    "asignatura": "Lengua Castellana y Literatura II",
+    "comunidad": "Madrid",
+    "bloques": [
+      {
+        "id": "lengua-2025-Unica-1",
+        "año": 2025,
+        "convocatoria": "Modelo",
+        "opcion": "Única",
+        "bloque": "Comunicacion",
+        "tipo": "Comunicacion",
+        "label": "Comunicación",
+        "numero": 1,
+        "tema": "Comunicación. La lengua y sus hablantes",
+        "puntuacion": 5,
+        "enunciado": "TEXTO\nQuien no perciba lo más sencillo, tampoco sentirá lo más hondo. Paralelamente, una cultura alejada de la\nsencillez es también una cultura alejada de la profundidad. Esto es lo que, de manera creciente, le ocurre a\nla nuestra. ¿Estará la civilización del progreso y del éxito científico desorientada como cultura de la vida?\n¿Serán el consumismo exasperado, el malestar contenido y la violencia, por lo menos en parte, síntomas de\ntamaña desorientación? Hay un avance de lo abstracto que vacía y enajena la vida. Quizá se acerque el día\nen que, debido a tal enajenación, el malestar será ya insoportable y se necesitarán toneladas de droga y de\ndistracción para mantenernos constantemente aturdidos.\nLa cultura que todo lo reduce a hechos y a datos es una cultura miope y, por eso mismo, decadente.\nPorque conviene saber que la decadencia de una cultura no se debe tanto a la poca destreza para\nenfrentarse a la dificultad y los asuntos más abstrusos, como a su desconexión de lo sencillo. Cúmulos de\ncomplejidades artificiosas, pero alejamiento de lo simple y de lo profundo. Encontramos sencillez poética en\nel trabajo bien hecho, en el gesto antiguo de cada uno de los oficios. Encontramos sencillez poética en el\nuso de las palabras en el habla coloquial. Encontramos sencillez poética en la comprensión normal y sensata\nde las cosas, y en las definiciones de siempre. A los actuales alumnos universitarios les sorprende, por\nejemplo, lo que se encuentran cuando se les invita a buscar en el diccionario el adjetivo verde. La primera\nacepción dice así: 'De color semejante al de la hierba fresca'. Y no es ninguna metáfora. Casi nadie se la\nesperaba, cuando, sin embargo, es la definición más sencilla, la más evidente, y la más esencial. Del color\nde la hierba fresca: la simplicidad de una de tantas definiciones de diccionario se convierte inesperadamente\nen dulzura para los oídos y en música para el alma. Tal vez alguien, ya extraviado, crea que se trata de una\ndefinición poco científica; sin darse cuenta, engrosa las filas del desconcierto actual. Cualquier definición\n«científica» será secundaria respecto a la primera aproximación experiencial al mundo de la vida, consistente\nen señalar lo que se ve o en expresar lo que se vive. A menudo da la impresión de que algunos autores de\nlibros de bachillerato o de manuales universitarios relacionados con las nuevas disciplinas presuntamente\ncientíficas (ciencias empresariales y económicas, ciencias sociales y políticas, ciencias de la educación y del\naprendizaje, ciencias de la comunicación…) no es ya que hayan perdido la inspiración, sino la cabeza,\nporque el conocimiento mal digerido les ha ofuscado el acceso primordial al sentido de las cosas. No dejan\nde proponer definiciones con aire de cientificidad en lugar de mantener la comprensión elemental. Han\ndesconectado de la base y pululan dentro del limbo de la confusión, cuyas dimensiones contribuyen a\nagrandar incorporando a los jóvenes recién llegados. Desolador.\nLa desconexión de lo sencillo es desconexión de la génesis… (Josep Maria Esquirol, La penúltima\nbondad, 2018)\n\nResponda las tres preguntas siguientes:\n1.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).\n1.2. (1 punto) Redacte un resumen del contenido del texto.\n1.3. (1,5 puntos) Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o\ndesacuerdo con alguna de las ideas que refleja.",
+        "texto_fuente": "Quien no perciba lo más sencillo, tampoco sentirá lo más hondo. Paralelamente, una cultura alejada de la\nsencillez es también una cultura alejada de la profundidad. Esto es lo que, de manera creciente, le ocurre a\nla nuestra. ¿Estará la civilización del progreso y del éxito científico desorientada como cultura de la vida?\n¿Serán el consumismo exasperado, el malestar contenido y la violencia, por lo menos en parte, síntomas de\ntamaña desorientación? Hay un avance de lo abstracto que vacía y enajena la vida. Quizá se acerque el día\nen que, debido a tal enajenación, el malestar será ya insoportable y se necesitarán toneladas de droga y de\ndistracción para mantenernos constantemente aturdidos.\nLa cultura que todo lo reduce a hechos y a datos es una cultura miope y, por eso mismo, decadente.\nPorque conviene saber que la decadencia de una cultura no se debe tanto a la poca destreza para\nenfrentarse a la dificultad y los asuntos más abstrusos, como a su desconexión de lo sencillo. Cúmulos de\ncomplejidades artificiosas, pero alejamiento de lo simple y de lo profundo. Encontramos sencillez poética en\nel trabajo bien hecho, en el gesto antiguo de cada uno de los oficios. Encontramos sencillez poética en el\nuso de las palabras en el habla coloquial. Encontramos sencillez poética en la comprensión normal y sensata\nde las cosas, y en las definiciones de siempre. A los actuales alumnos universitarios les sorprende, por\nejemplo, lo que se encuentran cuando se les invita a buscar en el diccionario el adjetivo verde. La primera\nacepción dice así: 'De color semejante al de la hierba fresca'. Y no es ninguna metáfora. Casi nadie se la\nesperaba, cuando, sin embargo, es la definición más sencilla, la más evidente, y la más esencial. Del color\nde la hierba fresca: la simplicidad de una de tantas definiciones de diccionario se convierte inesperadamente\nen dulzura para los oídos y en música para el alma. Tal vez alguien, ya extraviado, crea que se trata de una\ndefinición poco científica; sin darse cuenta, engrosa las filas del desconcierto actual. Cualquier definición\n«científica» será secundaria respecto a la primera aproximación experiencial al mundo de la vida, consistente\nen señalar lo que se ve o en expresar lo que se vive. A menudo da la impresión de que algunos autores de\nlibros de bachillerato o de manuales universitarios relacionados con las nuevas disciplinas presuntamente\ncientíficas (ciencias empresariales y económicas, ciencias sociales y políticas, ciencias de la educación y del\naprendizaje, ciencias de la comunicación…) no es ya que hayan perdido la inspiración, sino la cabeza,\nporque el conocimiento mal digerido les ha ofuscado el acceso primordial al sentido de las cosas. No dejan\nde proponer definiciones con aire de cientificidad en lugar de mantener la comprensión elemental. Han\ndesconectado de la base y pululan dentro del limbo de la confusión, cuyas dimensiones contribuyen a\nagrandar incorporando a los jóvenes recién llegados. Desolador.\nLa desconexión de lo sencillo es desconexión de la génesis… (Josep Maria Esquirol, La penúltima\nbondad, 2018)",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nI. INFORMACIÓN GENERAL\nEstructura de la prueba\nLa prueba consta de un texto de carácter no especializado y una serie de preguntas. El estudiante debe\ncontestar a las preguntas según se le indica en las instrucciones. Las preguntas se estructuran de\nacuerdo con el modelo siguiente:\nBloque 1\nComprensión y comentario del texto propuesto:\n1.1. Comentario de texto: a) tema del texto (0,5 puntos); b) características lingüísticas y\nestilísticas más sobresalientes (1,5 puntos); c) tipo de texto (0,5 puntos). (Calificación total:\n2,5 puntos)\n1.2. Resumen del texto. (1 punto)\n1.3. Elaboración de un texto argumentativo sobre el tema que se propone. (1,5 puntos)\nBloque 2\nCuestiones sobre los contenidos de Lengua Castellana del currículo de 2.º de Bachillerato:\n2.1.o 2.2. Análisis sintáctico de una oración compleja o compuesta. (1,5\npuntos)\n2.3. o 2.4. Cuestiones de carácter morfológico o léxico-semántico. (1 punto)\nBloque 3\nCuestiones sobre contenidos de Literatura en castellano del currículo de 2º de Bachillerato:\n3.1. o 3.2. Tema de literatura española para desarrollar. (1,5 puntos)\n3.3. o 3.4. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición\nliteraria. (1 punto)\nTiempo. La duración del examen es de 90 minutos.\nPuntuación. La prueba se califica sobre 10. En cada pregunta, figura entre paréntesis la puntuación\nmáxima asignada.\nII. CRITERIOS DE CALIFICACIÓN DE LA PRUEBA\nLas preguntas del bloque 1 se corresponden con cuestiones relativas a la comprensión y análisis de los\ntextos propuestos. Con la pregunta 1.1. se pretende que el estudiante sepa hacer un comentario de\ntexto, para lo cual ha de comprender su naturaleza y su significado. Para facilitar y sistematizar las\nrespuestas, se han previsto tres cuestiones dentro de esta primera pregunta, que el estudiante debe\ncontestar siguiendo las indicaciones siguientes:\na) Debe enunciar su tema de manera concisa en una o dos líneas de extensión como máximo\n(0,5 puntos).\nb) Explicará las características lingüísticas y estilísticas más sobresalientes del texto. En caso de\nque resulte pertinente (por ejemplo, en el caso de las noticias periodísticas), también deberán\nincluirse aspectos de la estructura textual. Se analizarán los elementos lingüísticos que permitan\nidentificar tanto las secuencias textuales (narración, descripción, exposición, argumentación,\netc.) como el género discursivo (noticia periodística, ensayo humanístico, etc.): predominio de\ndeterminadas estructuras oracionales, tipo de léxico empleado, preferencia por determinados\ntiempos verbales, etc. Asimismo, se valorarán recursos de especial interés estilístico (o incluso\nde carácter literario) en el texto en cuestión: repeticiones, contraposiciones, ironía, metáfora,\nentre otros posibles, así como el dominio de las características del español actual y el\nconocimiento del contraste entre las variedades culta y estándar del español. En ningún caso se\nvalorará que el estudiante elabore un mero listado de elementos (sustantivos, adjetivos, verbos\nen presente, etc.); es imprescindible que señale la función que las propiedades lingüísticas y\nestilísticas señaladas poseen / reflejan en el texto (1,5 puntos).\nc) Indicará el tipo de texto y el género discursivo al que corresponde el fragmento propuesto (0,5\npuntos).\nEn la pregunta 1.2. el estudiante debe mostrar su capacidad de síntesis. Para ello, debe elaborar un\nresumen del texto que se adecue a las siguientes pautas: a) no debe exceder de seis o siete líneas; b)\ndebe contener las ideas principales exponiéndolas con coherencia interna; c) se redactará con las\npalabras del estudiante; d) no debe ser una paráfrasis del texto; e) debe ser objetivo; por tanto, no se\nexpresarán opiniones o valoraciones personales. Se calificará con una puntuación máxima de 1 punto.\nEn la pregunta 1.3. el estudiante debe mostrar su madurez intelectual, su capacidad de reflexión,\nsu facultad para exponer clara y ordenadamente sus ideas, así como su destreza en la argumentación.\nEs imprescindible que el estudiante se exprese de forma personal y no conteste con fórmulas\nestereotipadas, que exponga sus ideas con coherencia, con rigor y con una expresión correcta. Es\nimportante que construya un texto de naturaleza argumentativa, donde se observe claramente cuál es\nsu posición y los argumentos que la justifican. Se admitirán distintos tipos de estructuras\nargumentativas, siempre que sean coherentes. Esta pregunta recibirá una calificación máxima de 1,5\npuntos.\nLas preguntas del bloque 2, relativas a cuestiones de lengua, seguirán un esquema fijo que\ndescribimos a continuación. Las preguntas 2.1. y 2.2. consistirán en un análisis sintáctico. El estudiante\ndebe realizar el análisis funcional interoracional e intraoracional de la oración propuesta. Este análisis\ndebe extenderse hasta el nivel de las palabras. Se calificará con un máximo de 1,5 puntos. Las\npreguntas 2.3. y 2.4. ofrecen la posibilidad de elegir entre cuestiones de morfología (estructura\nmorfológica de palabras complejas, categoría o clase de palabras, procesos de creación léxica como\nderivación, composición o parasíntesis) y cuestiones léxico-semánticas, tales como sinonimia,\nantonimia, polisemia, homonimia, hiperonimia e hiponimia, relacionadas con la comprensión del\nsignificado de ciertos elementos del texto. Su puntuación máxima será de 1 punto.\nEl bloque 3 comprende preguntas relativas a contenidos de literatura (preguntas 3.1. y 3.2.) y a\nlas obras que el estudiante habrá leído en 2.º de Bachillerato (preguntas 3.3. y 3.4.). En su respuesta se\nvalorarán los conocimientos del estudiante, tanto los derivados del estudio de la historia de la literatura\ncomo los que pueda haber adquirido mediante la lectura de las obras literarias. En las preguntas 3.1. y\n3.2., el estudiante habrá de demostrar sus conocimientos acerca de las tendencias literarias del\nmovimiento o época por los que se pregunta y deberá, asimismo, hacer referencia a los autores y obras\nmás relevantes. Es preciso que haga una exposición de conjunto donde demuestre un conocimiento\nglobal del movimiento literario en cuestión y de la significación de los autores y de sus obras, más allá\nde un mero catálogo de estos. La puntuación máxima de esta pregunta es de 1,5 puntos. En cuanto a\nlas preguntas 3.3. y 3.4., el estudiante debe mostrar su conocimiento de la obra leída, relacionarla con el\nmovimiento o tendencia literarios a los que pertenece y destacar su importancia en relación con su\ncontexto sociohistórico y la tradición literaria. Su puntuación máxima será de 1 punto.\nEn el marco de los criterios establecidos con carácter general por la Comisión Organizadora del\nDistrito Único de Madrid para todas las materias, se reitera la importancia de la corrección de la\nexpresión escrita en esta materia. Así, además de calificar la prueba de acuerdo con el contenido, se\nvalorará la capacidad de redacción, manifestada en la exposición ordenada de las ideas, el correcto\nengarce sintáctico, la riqueza léxica y la matización expresiva. La ortografía será juzgada en su totalidad\n—letras, tildes y signos de puntuación— y valorada dentro de la capacidad de expresión del estudiante.\nHechas estas consideraciones generales, la máxima deducción global en el ejercicio será de dos puntos\nde la forma siguiente:\n— La primera incorrección ortográfica no se penalizará.\n— Cuando se repita la misma falta de ortografía se contará como una sola.\n— A partir de la segunda, por cada falta se deducirán 0,25 puntos hasta un máximo de dos\npuntos.\n— Por errores en la redacción, en la presentación, falta de coherencia, falta de cohesión,\nincorrección léxica e incorrección gramatical se podrá deducir un máximo de 1 punto.\nObsérvese que, aunque la suma de las deducciones anteriores sea superior a 2 puntos, la máxima\ndeducción permitida será de 2 puntos.",
+        "preguntas_opcionales": [
+          {
+            "id": "1.1",
+            "puntos": 2.5,
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+          },
+          {
+            "id": "1.2",
+            "puntos": 1,
+            "enunciado": "Redacte un resumen del contenido del texto."
+          },
+          {
+            "id": "1.3",
+            "puntos": 1.5,
+            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o\ndesacuerdo con alguna de las ideas que refleja."
+          }
+        ]
+      },
+      {
+        "id": "lengua-2025-Unica-2",
+        "año": 2025,
+        "convocatoria": "Modelo",
+        "opcion": "Única",
+        "bloque": "ReflexionLengua",
+        "tipo": "ReflexionLengua",
+        "label": "Reflexión sobre la lengua",
+        "numero": 2,
+        "tema": "Reflexión sobre la lengua",
+        "puntuacion": 2.5,
+        "enunciado": "Responda una de estas dos preguntas:\n2.1. (1,5 puntos) Analice sintácticamente: La cultura que reduce todo a hechos es una cultura miope.\n2.2. (1,5 puntos) Analice sintácticamente: Tal vez alguien crea que se trata de una definición poco\ncientífica.\nResponda una de estas dos preguntas:\n2.3. (1 punto) Indique a qué categoría gramatical, o clase de palabras, pertenece complejidades, analice su\nestructura morfológica y señale a qué proceso de formación de palabras responde.\n2.4. (1 punto) Defina el concepto de sinonimia y ejemplifíquelo aportando, al menos, dos sinónimos de la\npalabra sencillez.",
+        "texto_fuente": "Quien no perciba lo más sencillo, tampoco sentirá lo más hondo. La cultura que todo lo reduce a hechos y a\ndatos es una cultura miope y, por eso mismo, decadente. Cúmulos de complejidades artificiosas, pero\nalejamiento de lo simple y de lo profundo. Tal vez alguien, ya extraviado, crea que se trata de una definición\npoco científica; sin darse cuenta, engrosa las filas del desconcierto actual. (Josep Maria Esquirol, La\npenúltima bondad, 2018)",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nLas preguntas del bloque 2, relativas a cuestiones de lengua, seguirán un esquema fijo. Las preguntas 2.1.\ny 2.2. consistirán en un análisis sintáctico funcional interoracional e intraoracional de la oración propuesta,\nextendido hasta el nivel de las palabras, calificándose con un máximo de 1 punto el análisis intraoracional y\n0,5 puntos el análisis interoracional (total 1,5 puntos). Las preguntas 2.3. y 2.4. ofrecen la posibilidad de\nelegir entre cuestiones de morfología (estructura morfológica de palabras complejas, categoría o clase de\npalabras, procesos de creación léxica como derivación, composición o parasíntesis) y cuestiones\nléxico-semánticas, tales como sinonimia, antonimia, polisemia, homonimia, hiperonimia e hiponimia. Su\npuntuación máxima será de 1 punto.\n\nSolución orientativa:\n2.1. Análisis sintáctico de \"La cultura que reduce todo a hechos es una cultura miope\": sujeto \"La cultura que\nreduce todo a hechos\" (núcleo \"cultura\", con complemento del nombre \"que reduce todo a hechos\": sujeto\n\"que\", CD \"todo\", C. de régimen \"a hechos\"), predicado \"es una cultura miope\" (atributo \"una cultura miope\").\n2.2. Análisis sintáctico de \"Tal vez alguien crea que se trata de una definición poco científica\": modificador\noracional \"Tal vez\", sujeto \"alguien\", predicado \"crea que se trata de una definición poco científica\", con CD\n\"que se trata de una definición poco científica\" (oración subordinada sustantiva; dentro de ella, sujeto \"esta\",\npredicado \"es una definición poco científica\", atributo \"una definición poco científica\").\n2.3. \"complejidades\": palabra formada por derivación (sustantivo); complej- (raíz/lexema) + -idad (sufijo) +\n-es (morfema flexivo de número).\n2.4. La sinonimia es la relación de igualdad o semejanza de significado entre dos o más palabras. Algunos\nsinónimos de \"sencillez\" son: simplicidad, naturalidad, llaneza."
+        ,
+        "preguntas_opcionales": [
+          {
+            "id": "2.1",
+            "puntos": 1.5,
+            "enunciado": "Analice sintácticamente: La cultura que reduce todo a hechos es una cultura miope.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "2.2",
+            "puntos": 1.5,
+            "enunciado": "Analice sintácticamente: Tal vez alguien crea que se trata de una definición poco científica.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "2.3",
+            "puntos": 1,
+            "enunciado": "Indique a qué categoría gramatical, o clase de palabras, pertenece complejidades, analice su\nestructura morfológica y señale a qué proceso de formación de palabras responde.",
+            "grupo": "morfologia"
+          },
+          {
+            "id": "2.4",
+            "puntos": 1,
+            "enunciado": "Defina el concepto de sinonimia y ejemplifíquelo aportando, al menos, dos sinónimos de la\npalabra sencillez.",
+            "grupo": "morfologia"
+          }
+        ]
+      },
+      {
+        "id": "lengua-2025-Unica-3",
+        "año": 2025,
+        "convocatoria": "Modelo",
+        "opcion": "Única",
+        "bloque": "EducacionLiteraria",
+        "tipo": "EducacionLiteraria",
+        "label": "Educación literaria",
+        "numero": 3,
+        "tema": "Educación literaria",
+        "puntuacion": 2.5,
+        "enunciado": "Responda una de estas dos preguntas:\n3.1. (1,5 puntos) La novela española de 1939 a 1975.\n3.2. (1,5 puntos) La generación del 27: características y trayectoria poética de los poetas del 27. El teatro\nlorquiano.\nResponda una de estas dos preguntas:\n3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.\n3.4. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937\ny 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nEl bloque 3 comprende preguntas relativas a contenidos de literatura (preguntas 3.1. y 3.2., de 1,5 puntos)\ny a las obras que el estudiante habrá leído en 2.º de Bachillerato (preguntas 3.3. y 3.4., de 1 punto). En las\npreguntas 3.1. y 3.2. el estudiante habrá de demostrar sus conocimientos acerca de las tendencias literarias\ndel movimiento o época por los que se pregunta, con referencia a los autores y obras más relevantes, más\nallá de un mero catálogo de estos. En las preguntas 3.3. y 3.4., el estudiante debe mostrar su conocimiento\nde la obra leída, relacionarla con el movimiento o tendencia literarios a los que pertenece y destacar su\nimportancia en relación con su contexto sociohistórico y la tradición literaria.",
+        "preguntas_opcionales": [
+          {
+            "id": "3.1",
+            "puntos": 1.5,
+            "enunciado": "La novela española de 1939 a 1975.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "3.2",
+            "puntos": 1.5,
+            "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro\nlorquiano.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "3.3",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          },
+          {
+            "id": "3.4",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937\ny 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "año": 2025,
+    "tipo": "Extraordinaria",
+    "convocatoria": "Extraordinaria",
+    "opcion": "Única",
+    "dia": "Única",
+    "asignatura": "Lengua Castellana y Literatura II",
+    "comunidad": "Madrid",
+    "bloques": [
+      {
+        "id": "lengua-2025-Ext-Unica-1",
+        "año": 2025,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Única",
+        "bloque": "Comunicacion",
+        "tipo": "Comunicacion",
+        "label": "Comunicación",
+        "numero": 1,
+        "tema": "Comunicación. La lengua y sus hablantes",
+        "puntuacion": 5,
+        "enunciado": "TEXTO\nHay una diferencia, a veces inmensa, entre cómo te ves tú y cómo te ve el resto del mundo.\nSiempre que salgo en una foto grupal, porque hace años que no tengo valentía suficiente como para\nautorretratarme, amplío la imagen del móvil para reconocerme. ¿De verdad soy esa?, me pregunto. Pienso,\nilusa de mí, que aparento ser más joven de lo que soy, pero está claro que no es así. El otro día, sin ir más\nlejos, una amiga de mi hermano me preguntó si yo era su tía. Él y yo nos llevamos ocho años. A la mañana\nsiguiente, me compré unas pastillas de colágeno en las que tengo depositadas todas mis esperanzas.\nRecuerdo cuando una tarde del siglo pasado fui a depilarme y la chica que me daba los tirones de\ncera afirmó que toda yo era puro músculo. Recuerdo, también, la satisfacción silenciosa que sentí al\nimaginarme siendo una mezcla mediterránea de Jane Fonda y Arnold Schwarzenegger.\nTodo lo contrario a cuando mi osteópata, ser maravilloso y profesional donde los haya, me informó\nsobre las descompensaciones, contracturas y vértebras enganchadas. Comentábamos la importancia de\nganar fuerza muscular y, mientras sonaba el crack de un ajuste en las dorsales, me explicó que, a cierta\nedad, los cuerpos se convierten en un \"desparrame\". Los caminos de la imaginación son inescrutables\nporque, en ese momento, sentí cómo me transformaba en leche llegando a ebullición, saliendo de la olla y\ndesparramándose entre los fogones. Menos mal que, al ver mi expresión de consternación, tuvo a bien\nprofundizar en los múltiples beneficios de la madurez. Gracias.\nSoy fan del discurso de Emma Thompson en la Berlinale de 2022. La actriz, que promocionaba la\npelícula Buena suerte, Leo grande, habló sobre su papel como mujer madura que descubre la sexualidad y\nlo que supuso desnudarse frontalmente ante las cámaras. Lo comparó a colocarse frente un espejo y\nmirarse. Tarea ardua, porque lo común es posar de lado, taparse con una toalla, estirarse las carnes o,\nsimplemente, mirar de refilón nuestro cuerpo de hoy. Y la realidad es que, como dice mi tía María Antonia,\nnunca estarás mejor que ahora.\nLa mayor disociación entre lo que pienso que soy y lo que perciben los otros la vivo diariamente con\nmis hijos adolescentes. Cuando crees que eres una persona tolerante y que practicas la escucha activa,\nellos te recuerdan que jamás entiendes sus verdaderas necesidades. Si piensas que eres una cocinera\ncorrecta, ellos te informan de que los espaguetis de menos de cinco euros que han probado en el bar de la\nesquina son los mejores.\nTú, que te matas a practicar mindfulness, eres catalogada de madre que pierde los nervios. Tú, que\npiensas que vistes adecuadamente, eres todo menos fashion y tú, que tenías cierta mundología, no te\nenteras de música, ni de referentes culturales y tienes que preguntar varias veces que te repitan el nombre\nde esos youtubers tan famosos y cuyas voces resuenan por toda la casa a través de sus móviles. Una amiga\ny yo compartíamos anécdotas de carácter maternofilial cuando, entre risa y risa, me dijo: \"Creía que siempre\nme verían como su superheroína. Hoy me ven como una villana. Su villana favorita\". Ser un poco villana a\nlos 51, sobre todo si eres la favorita de alguien, tampoco está tan mal. (Mercè Marrero Fuster, \"Mamá, la\nvillana favorita\", La Provincia, 28/3/2024)\n\nResponda las tres preguntas siguientes:\n1.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).\n1.2. (1 punto) Redacte un resumen del contenido del texto.\n1.3. (1,5 puntos) Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o\ndesacuerdo con alguna de las ideas que refleja.",
+        "texto_fuente": "Hay una diferencia, a veces inmensa, entre cómo te ves tú y cómo te ve el resto del mundo. Siempre que\nsalgo en una foto grupal, porque hace años que no tengo valentía suficiente como para autorretratarme,\namplío la imagen del móvil para reconocerme. Me explicó que, a cierta edad, los cuerpos se convierten en\nun \"desparrame\". Los caminos de la imaginación son inescrutables. Tú, que te matas a practicar mindfulness,\neres catalogada de madre que pierde los nervios. (Mercè Marrero Fuster, \"Mamá, la villana favorita\", La\nProvincia, 28/3/2024)",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nI. INFORMACIÓN GENERAL\nEstructura de la prueba\nLa prueba consta de un texto de carácter no especializado y una serie de preguntas. El estudiante debe\ncontestar a las preguntas según se le indica en las instrucciones. Las preguntas se estructuran de\nacuerdo con el modelo siguiente:\nBloque 1\nComprensión y comentario del texto propuesto:\n1.1. Comentario de texto: a) tema del texto (0,5 puntos); b) características lingüísticas y\nestilísticas más sobresalientes (1,5 puntos); c) tipo de texto (0,5 puntos). (Calificación total:\n2,5 puntos)\n1.2. Resumen del texto. (1 punto)\n1.3. Elaboración de un texto argumentativo sobre el tema que se propone. (1,5 puntos)\nBloque 2\nCuestiones sobre los contenidos de Lengua Castellana del currículo de 2.º de Bachillerato:\n2.1. o 2.2. Análisis sintáctico de una oración compleja o compuesta. (1,5 puntos)\n2.3. o 2.4. Cuestiones de carácter morfológico o léxico-semántico. (1 punto)\nBloque 3\nCuestiones sobre contenidos de Literatura en castellano del currículo de 2º de Bachillerato:\n3.1. o 3.2. Tema de literatura española para desarrollar. (1,5 puntos)\n3.3. o 3.4. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición\nliteraria. (1 punto)\nTiempo. La duración del examen es de 90 minutos.\nPuntuación. La prueba se califica sobre 10. En cada pregunta, figura entre paréntesis la puntuación\nmáxima asignada.\nII. CRITERIOS DE CALIFICACIÓN DE LA PRUEBA\na) Debe enunciar su tema de manera concisa en una o dos líneas de extensión como máximo (0,5\npuntos).\nb) Explicará las características lingüísticas y estilísticas más sobresalientes del texto: secuencias\ntextuales, género discursivo, estructuras oracionales, léxico, tiempos verbales, recursos estilísticos\n(repeticiones, contraposiciones, ironía, metáfora, etc.), variedades culta y estándar del español. No se\nvalorará un mero listado de elementos; es imprescindible señalar la función que las propiedades\nlingüísticas y estilísticas poseen en el texto (1,5 puntos).\nc) Indicará el tipo de texto y el género discursivo al que corresponde el fragmento propuesto (0,5\npuntos).\nEn la pregunta 1.2. el resumen no debe exceder seis o siete líneas, contendrá las ideas principales con\ncoherencia interna, se redactará con las palabras del estudiante, no será una paráfrasis y será objetivo. Se\ncalificará con un máximo de 1 punto.\nEn la pregunta 1.3. el texto argumentativo debe mostrar madurez intelectual, capacidad de reflexión y\ndestreza en la argumentación, con una posición clara y argumentos que la justifiquen. Se calificará con un\nmáximo de 1,5 puntos.\nLas preguntas del bloque 2 siguen un esquema fijo: las preguntas 2.1. y 2.2. consisten en un análisis\nsintáctico funcional interoracional e intraoracional hasta el nivel de las palabras (máximo 1,5 puntos: 1 punto\nel análisis intraoracional y 0,5 puntos el interoracional). Las preguntas 2.3. y 2.4. ofrecen elegir entre\ncuestiones de morfología y cuestiones léxico-semánticas (sinonimia, antonimia, polisemia, homonimia,\nhiperonimia e hiponimia), con una puntuación máxima de 1 punto.\nEl bloque 3 comprende preguntas de literatura (3.1. y 3.2., máximo 1,5 puntos) y de las obras leídas (3.3.\ny 3.4., máximo 1 punto), valorando conocimientos derivados del estudio de la historia de la literatura y de\nla lectura de las obras.\nSe reitera la importancia de la corrección de la expresión escrita: la máxima deducción global en el\nejercicio será de dos puntos (0,25 puntos por cada falta de ortografía repetida a partir de la segunda, hasta\ndos puntos; hasta 1 punto por errores de redacción, coherencia, cohesión, léxico o gramática).\n\nSolución orientativa 1.1: a) tema: los problemas producidos por el paso del tiempo; c) texto\nexpositivo-argumentativo, artículo de opinión.",
+        "preguntas_opcionales": [
+          {
+            "id": "1.1",
+            "puntos": 2.5,
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+          },
+          {
+            "id": "1.2",
+            "puntos": 1,
+            "enunciado": "Redacte un resumen del contenido del texto."
+          },
+          {
+            "id": "1.3",
+            "puntos": 1.5,
+            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o\ndesacuerdo con alguna de las ideas que refleja."
+          }
+        ]
+      },
+      {
+        "id": "lengua-2025-Ext-Unica-2",
+        "año": 2025,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Única",
+        "bloque": "ReflexionLengua",
+        "tipo": "ReflexionLengua",
+        "label": "Reflexión sobre la lengua",
+        "numero": 2,
+        "tema": "Reflexión sobre la lengua",
+        "puntuacion": 2.5,
+        "enunciado": "Responda una de estas dos preguntas:\n2.1. (1,5 puntos) Analice sintácticamente: Me explicó que, a cierta edad, los cuerpos se convierten en un\ndesparrame.\n2.2. (1,5 puntos) Analice sintácticamente: Tú, que practicas mindfulness, eres catalogada de madre que\npierde los nervios.\nResponda una de estas dos preguntas:\n2.3. (1 punto) Indique a qué categoría gramatical, o clase de palabras, pertenece inescrutable, analice su\nestructura morfológica y señale a qué proceso de formación de palabras responde.\n2.4. (1 punto) Defina el concepto de polisemia y ejemplifíquelo con la palabra cámara.",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nLas preguntas 2.1. y 2.2. consisten en un análisis sintáctico funcional interoracional e intraoracional de la\noración propuesta, extendido hasta el nivel de las palabras. Se calificará con un máximo de 1 punto el\nanálisis intraoracional y con un máximo de 0,5 puntos el análisis interoracional (total 1,5 puntos). Las\npreguntas 2.3. y 2.4. ofrecen elegir entre cuestiones de morfología y cuestiones léxico-semánticas, con una\npuntuación máxima de 1 punto.\n\nSolución orientativa:\n2.1. \"Me explicó que, a cierta edad, los cuerpos se convierten en un desparrame\": sujeto elíptico (Ø),\npredicado con núcleo \"explicó\", CI \"Me\", CD \"que, a cierta edad, los cuerpos se convierten en un\ndesparrame\" (oración subordinada sustantiva); dentro de ella: sujeto \"los cuerpos\", predicado \"se convierten\nen un desparrame\" (C. de régimen \"en un desparrame\"), y complemento circunstancial \"a cierta edad\".\n2.2. \"Tú, que practicas mindfulness, eres catalogada de madre que pierde los nervios\": sujeto \"Tú, que\npracticas mindfulness\" (con complemento del nombre \"que practicas mindfulness\": sujeto \"que\", predicado\n\"practicas mindfulness\", CD \"mindfulness\"), predicado \"eres catalogada de madre que pierde los nervios\"\n(C. de régimen \"de madre que pierde los nervios\", donde \"que pierde los nervios\" es complemento del\nnombre \"madre\": sujeto \"que\", predicado \"pierde los nervios\", CD \"los nervios\").\n2.3. \"inescrutable\": palabra formada por derivación (adjetivo); in- (prefijo) + escrut- (raíz/lexema) + -a (vocal\ntemática) + -ble (sufijo), o bien in- (prefijo) + escruta- (raíz/lexema) + -ble (sufijo).\n2.4. La polisemia es la propiedad de una palabra de tener varios significados relacionados. Ejemplos con\n\"cámara\": máquina fotográfica; compartimento cerrado; habitación; anillo tubular de goma de los neumáticos.",
+        "preguntas_opcionales": [
+          {
+            "id": "2.1",
+            "puntos": 1.5,
+            "enunciado": "Analice sintácticamente: Me explicó que, a cierta edad, los cuerpos se convierten en un\ndesparrame.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "2.2",
+            "puntos": 1.5,
+            "enunciado": "Analice sintácticamente: Tú, que practicas mindfulness, eres catalogada de madre que pierde\nlos nervios.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "2.3",
+            "puntos": 1,
+            "enunciado": "Indique a qué categoría gramatical, o clase de palabras, pertenece inescrutable, analice su\nestructura morfológica y señale a qué proceso de formación de palabras responde.",
+            "grupo": "morfologia"
+          },
+          {
+            "id": "2.4",
+            "puntos": 1,
+            "enunciado": "Defina el concepto de polisemia y ejemplifíquelo con la palabra cámara.",
+            "grupo": "morfologia"
+          }
+        ]
+      },
+      {
+        "id": "lengua-2025-Ext-Unica-3",
+        "año": 2025,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Única",
+        "bloque": "EducacionLiteraria",
+        "tipo": "EducacionLiteraria",
+        "label": "Educación literaria",
+        "numero": 3,
+        "tema": "Educación literaria",
+        "puntuacion": 2.5,
+        "enunciado": "Responda una de estas dos preguntas:\n3.1. (1,5 puntos) El novecentismo y la generación del 14: el ensayo, la novela novecentista. Juan Ramón\nJiménez.\n3.2. (1,5 puntos) La generación del 27: características y trayectoria poética de los poetas del 27. El teatro\nlorquiano.\nResponda una de estas dos preguntas:\n3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.\n3.4. (1 punto) Comente los aspectos más relevantes de la obra española o hispanoamericana que haya\nleído escrita en el período posterior a 1975 hasta la actualidad, en relación con su contexto sociohistórico\ny la tradición literaria.",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nEl bloque 3 comprende preguntas relativas a contenidos de literatura (preguntas 3.1. y 3.2., de 1,5 puntos)\ny a las obras que el estudiante habrá leído en 2.º de Bachillerato (preguntas 3.3. y 3.4., de 1 punto). En las\npreguntas 3.1. y 3.2. el estudiante habrá de demostrar sus conocimientos acerca de las tendencias literarias\ndel movimiento o época por los que se pregunta, con referencia a los autores y obras más relevantes, más\nallá de un mero catálogo de estos. En las preguntas 3.3. y 3.4., el estudiante debe mostrar su conocimiento\nde la obra leída, relacionarla con el movimiento o tendencia literarios a los que pertenece y destacar su\nimportancia en relación con su contexto sociohistórico y la tradición literaria.",
+        "preguntas_opcionales": [
+          {
+            "id": "3.1",
+            "puntos": 1.5,
+            "enunciado": "El novecentismo y la generación del 14: el ensayo, la novela novecentista. Juan Ramón\nJiménez.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "3.2",
+            "puntos": 1.5,
+            "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro\nlorquiano.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "3.3",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          },
+          {
+            "id": "3.4",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española o hispanoamericana que haya\nleído escrita en el período posterior a 1975 hasta la actualidad, en relación con su contexto sociohistórico\ny la tradición literaria.",
+            "grupo": "obra"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "año": 2024,
+    "tipo": "Extraordinaria",
+    "convocatoria": "Extraordinaria",
+    "opcion": "Lunes",
+    "dia": "Lunes",
+    "asignatura": "Lengua Castellana y Literatura II",
+    "comunidad": "Madrid",
+    "bloques": [
+      {
+        "id": "lengua-2024-ExtA-1",
+        "año": 2024,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Lunes",
+        "bloque": "Comunicacion",
+        "tipo": "Comunicacion",
+        "label": "Comunicación",
+        "numero": 1,
+        "tema": "Comunicación (Texto A)",
+        "puntuacion": 5,
+        "enunciado": "TEXTO A\nPreguntarse por el sentido de la felicidad equivale a preguntarse cómo vivir. La felicidad es una búsqueda a\nlo largo de la vida de cada persona. La infelicidad es el abandono de la búsqueda, del deseo de seguir\nviviendo. Más que una meta a alcanzar, es un estado de ánimo, el anhelo de una vida plena y conseguida.\nNadie ha puesto nunca en duda que la felicidad es lo más demandado y universal desde que existe\nla humanidad. Tampoco hay que explicar mucho que, más allá de ese anhelo incuestionable, sabemos poco\nacerca del contenido de la felicidad: cómo se logra, en qué consiste, qué la hace real y duradera. Estamos\nbastante de acuerdo en que es un objetivo inalcanzable e improbable. Tampoco parece acertado reducirlo\na la vivencia de algunos momentos de satisfacción que todo el mundo experimenta con relativa frecuencia.\nAlgunos filósofos se han referido a ella como el fin propio de la vida humana, pero ninguno ha considerado\nque fuera función de la filosofía ocuparse en determinar en qué consiste ser feliz. Más bien, tras dejar clara\nla pertinencia del empeño, los pensadores se han concentrado en disertar sobre las limitaciones de quienes\naspiran a ser felices, o sobre los malentendidos de una falsa idea de la felicidad, solo causa de desengaños\ny frustraciones si se da por buena sin más análisis.\nLa lección que se extrae de las enseñanzas de los filósofos es que la felicidad, en efecto, es el mayor\nbien, pero un bien que exige esfuerzo, paciencia, perseverancia y tiempo. Por eso hay que insistir en que la\nfelicidad es, más que nada, una búsqueda. No es una tarea fácil ni una especie de destino que nos aguarda\ny llegará inevitablemente. Se acerca más a una manera de vivir, a una actitud frente a lo que nos sobreviene,\na una especial forma de ver la realidad y de vernos a nosotros mismos, algo que no viene dado por arte de\nmagia, sino que se construye con voluntad y tesón. La felicidad es la búsqueda de la mejor vida que esté a\nnuestro alcance. (Victoria Camps, La búsqueda de la felicidad, 2019)\n\nA.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).\nA.2. (1 punto) Redacte un resumen del contenido del texto.\nA.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de considerar que alcanzar la felicidad\ndepende solo de uno mismo.",
+        "texto_fuente": "Preguntarse por el sentido de la felicidad equivale a preguntarse cómo vivir. La felicidad es una búsqueda a\nlo largo de la vida de cada persona. Nadie ha puesto nunca en duda que la felicidad es lo más demandado\ny universal desde que existe la humanidad. La lección que se extrae de las enseñanzas de los filósofos es\nque la felicidad, en efecto, es el mayor bien, pero un bien que exige esfuerzo, paciencia, perseverancia y\ntiempo. Por eso hay que insistir en que la felicidad es, más que nada, una búsqueda. La felicidad es la\nbúsqueda de la mejor vida que esté a nuestro alcance. (Victoria Camps, La búsqueda de la felicidad, 2019)",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nI. INFORMACIÓN GENERAL\nEstructura de la prueba\nLa prueba consta de dos textos de carácter no especializado y un juego de preguntas. El estudiante debe\noptar por uno de los dos textos y contestar a las preguntas, según se le indica en las instrucciones.\nBloque 1\nA.1. Comentario de texto: a) tema del texto (0,5 puntos); b) características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) tipo de texto (0,5 puntos). (Calificación total: 2,5 puntos)\nA.2. Resumen del texto. (1 punto)\nA.3. Elaboración de un texto argumentativo sobre el tema que se propone. (1,5 puntos)\nBloque 2\nA.4. y B.4. Análisis sintáctico de una oración compleja o compuesta. (1,5 puntos)\nA.5. y B.5. Cuestiones de carácter morfológico o léxico-semántico. (1 punto)\nBloque 3\nA.6. y B.6. Tema de literatura española. (1,5 puntos)\nA.7. y B.7. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición literaria. (1 punto)\nInstrucciones de elección: elija un texto entre A o B y responda a las preguntas 1, 2 y 3 del texto elegido;\nresponda una pregunta de 1,5 puntos entre A.4 o B.4; responda dos preguntas de 1 punto indistintamente\nentre A.5, B.5, A.7, B.7; responda una pregunta de 1,5 puntos entre A.6 o B.6.\nTiempo. La duración del examen es de hora y media.\nII. CRITERIOS DE CALIFICACIÓN DE LA PRUEBA\na) Debe enunciar su tema de manera concisa en una o dos líneas de extensión como máximo (0,5 puntos).\nb) Explicará las características lingüísticas y estilísticas más sobresalientes del texto, señalando la función\nque poseen en el texto (no un mero listado de elementos) (1,5 puntos).\nc) Indicará el tipo de texto y el género discursivo al que corresponde el fragmento propuesto (0,5 puntos).\nEn la pregunta 2, el resumen no debe exceder de seis o siete líneas, debe contener las ideas principales\ncon coherencia interna, redactarse con las palabras del estudiante, no ser una paráfrasis y ser objetivo. Se\ncalificará con un máximo de 1 punto.\nEn la pregunta 3, el estudiante debe mostrar su madurez intelectual y su destreza en la argumentación,\ncon una posición clara y argumentos que la justifiquen. Se calificará con un máximo de 1,5 puntos.\nLa máxima deducción global en el ejercicio por ortografía, puntuación, acentuación, redacción, sintaxis,\nvocabulario y presentación será de 3 puntos, según los criterios detallados: primera falta de ortografía no\npenalizada, 0,5 puntos por cada falta repetida a partir de la segunda (hasta 3 puntos); hasta 2 puntos por\nreiteración de errores de puntuación y acentuación; hasta 1 punto por errores de redacción, sintaxis,\nvocabulario y presentación.\n\nSolución orientativa 1.1: a) tema: la felicidad como una búsqueda constante de la mejor vida posible; c)\ntexto de carácter humanístico, ensayo.",
+        "preguntas_opcionales": [
+          {
+            "id": "A.1",
+            "puntos": 2.5,
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas\nsiguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+          },
+          {
+            "id": "A.2",
+            "puntos": 1,
+            "enunciado": "Redacte un resumen del contenido del texto."
+          },
+          {
+            "id": "A.3",
+            "puntos": 1.5,
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de considerar que alcanzar la felicidad\ndepende solo de uno mismo."
+          }
+        ]
+      },
+      {
+        "id": "lengua-2024-ExtA-2",
+        "año": 2024,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Lunes",
+        "bloque": "ReflexionLengua",
+        "tipo": "ReflexionLengua",
+        "label": "Reflexión sobre la lengua",
+        "numero": 2,
+        "tema": "Reflexión sobre la lengua (Texto A)",
+        "puntuacion": 2.5,
+        "enunciado": "A.4. (1,5 puntos) Analice sintácticamente: Debemos insistir en que la felicidad es una búsqueda.\nA.5. (1 punto) Indique a qué categoría gramatical, o clase de palabras, pertenece inevitablemente, analice\nsu estructura morfológica y señale a qué proceso de formación de palabras responde.",
+        "criterios": "Análisis sintáctico calificado con un máximo de 1 punto el análisis intraoracional y 0,5 puntos el interoracional\n(total 1,5 puntos). Las preguntas de morfología/léxico se califican con un máximo de 1 punto.\n\nSolución orientativa:\nA.4. \"Debemos insistir en que la felicidad es una búsqueda\": sujeto elíptico (Ø), predicado con núcleo\n\"Debemos insistir\", C. de régimen \"en que la felicidad es una búsqueda\" (enlace \"en\", término \"que la felicidad\nes una búsqueda\": oración subordinada sustantiva con sujeto \"la felicidad\" y predicado \"es una búsqueda\",\natributo \"una búsqueda\").\nA.5. \"inevitablemente\": palabra formada por derivación (adverbio); in- (prefijo) + evit- (raíz/lexema) + -a (vocal\ntemática) + -ble (sufijo) + -mente (sufijo), o bien in- (prefijo) + evita- (raíz/lexema) + -ble (sufijo) + -mente\n(sufijo).",
+        "preguntas_opcionales": [
+          {
+            "id": "A.4",
+            "puntos": 1.5,
+            "enunciado": "Analice sintácticamente: Debemos insistir en que la felicidad es una búsqueda.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "A.5",
+            "puntos": 1,
+            "enunciado": "Indique a qué categoría gramatical, o clase de palabras, pertenece inevitablemente, analice\nsu estructura morfológica y señale a qué proceso de formación de palabras responde.",
+            "grupo": "morfologia"
+          }
+        ]
+      },
+      {
+        "id": "lengua-2024-ExtA-3",
+        "año": 2024,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Lunes",
+        "bloque": "EducacionLiteraria",
+        "tipo": "EducacionLiteraria",
+        "label": "Educación literaria",
+        "numero": 3,
+        "tema": "Educación literaria (Texto A)",
+        "puntuacion": 2.5,
+        "enunciado": "A.6. (1,5 puntos) Las vanguardias en Europa, España e Hispanoamérica.\nA.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937\ny 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+        "criterios": "A.6. y B.6. Tema de literatura española (1,5 puntos): exposición de conjunto con conocimiento global del\nmovimiento literario y referencia a los autores y obras más relevantes, más allá de un mero catálogo.\nA.7. y B.7. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición literaria (1 punto).",
+        "preguntas_opcionales": [
+          {
+            "id": "A.6",
+            "puntos": 1.5,
+            "enunciado": "Las vanguardias en Europa, España e Hispanoamérica.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "A.7",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937\ny 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "año": 2024,
+    "tipo": "Extraordinaria",
+    "convocatoria": "Extraordinaria",
+    "opcion": "Martes",
+    "dia": "Martes",
+    "asignatura": "Lengua Castellana y Literatura II",
+    "comunidad": "Madrid",
+    "bloques": [
+      {
+        "id": "lengua-2024-ExtB-1",
+        "año": 2024,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Martes",
+        "bloque": "Comunicacion",
+        "tipo": "Comunicacion",
+        "label": "Comunicación",
+        "numero": 1,
+        "tema": "Comunicación (Texto B)",
+        "puntuacion": 5,
+        "enunciado": "TEXTO B\nHe perdido la cuenta de la cantidad de señores de mediana edad, con poder y prestigio, que se quejan en\nmedios y redes sociales de que su libertad de expresión y acción, especialmente en lo referente a su trato\ncon las mujeres, está siendo limitada, coartada, cuestionada y hasta suprimida. El \"ya no se puede decir\nnada\" es un lema viral. Un runrún que hermana a hombres de toda condición y profesión, un llanto\ngeneracional de los nacidos antes y durante la Transición. Un suplicio para el resto de la población.\nNo recuerdo cuándo se legisló que un hombre no pudiera ceder el paso a una mujer en el ascensor\nni tengo en la cabeza los años de cárcel que te caen por ayudar a una señora a colocar una maleta en el\ntren. Quizá no lo recuerde porque nada de esto sucedió en la realidad, pero como dice Michael Kimmel, la\nsociedad, y las mujeres en particular, tenemos que lidiar con el malestar real que sienten los hombres\nblancos ante hechos imaginarios relacionados con la intromisión femenina en sus mundos y sus reglas. No\nsolo luchas por lo tuyo, hay que estar a la que ellos se inventan.\nLas mujeres ya hemos contaminado hasta el fútbol, ese refugio de varones que hablan de pizarras y\nbalones por la banda como si hablaran de Dante o Beethoven, de dioses que pisan un campo que parece\nel Elíseo, ese paraíso que se gana y se pierde cada domingo, universo siempre vivo de épicas y pasiones\nde trinchera, deporte literario plagado de héroes y villanos y leyendas mil veces contadas de padres a hijos.\nHa sucedido que haya mujeres pidiendo derechos y libertades y todo el mundo del fútbol ha colapsado en\nun mes frenético en el que ningún hombre ha sabido meter baza de manera racional.\nAunque parezca una cantidad pequeña, sumada a las de muchas más personas, es lo que hace\nposible que existamos.\nMientras tanto, las mujeres estamos pensando en nuestras cosas. Trabajar en condiciones dignas,\nllegar a casa enteras, cuadrar la semana para ir a la peluquería, recoger al niño, reclamar esa factura que\nno nos pagan, ganar dinero y conocimientos, leer un poco y maquillarnos y desmaquillarnos. (Raquel Marcos\nOliva, \"De señoros y chicas\", elDiario.es, 23/09/2023)\n\nB.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes\npreguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).\nB.2. (1 punto) Redacte un resumen del contenido del texto.\nB.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que en el deporte las mujeres y los\nhombres perciban las mismas retribuciones.",
+        "texto_fuente": "He perdido la cuenta de la cantidad de señores de mediana edad, con poder y prestigio, que se quejan en\nmedios y redes sociales de que su libertad de expresión y acción está siendo limitada, coartada, cuestionada\ny hasta suprimida. La sociedad, y las mujeres en particular, tenemos que lidiar con el malestar real que\nsienten los hombres blancos ante hechos imaginarios. Las mujeres ya hemos contaminado hasta el fútbol,\nese refugio de varones. Mientras tanto, las mujeres estamos pensando en nuestras cosas. (Raquel Marcos\nOliva, \"De señoros y chicas\", elDiario.es, 23/09/2023)",
+        "criterios": "CRITERIOS ESPECÍFICOS DE CORRECCIÓN Y CALIFICACIÓN\nI. INFORMACIÓN GENERAL\nEstructura de la prueba\nLa prueba consta de dos textos de carácter no especializado y un juego de preguntas. El estudiante debe\noptar por uno de los dos textos y contestar a las preguntas, según se le indica en las instrucciones.\nBloque 1\nB.1. Comentario de texto: a) tema del texto (0,5 puntos); b) características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) tipo de texto (0,5 puntos). (Calificación total: 2,5 puntos)\nB.2. Resumen del texto. (1 punto)\nB.3. Elaboración de un texto argumentativo sobre el tema que se propone. (1,5 puntos)\nBloque 2\nA.4. y B.4. Análisis sintáctico de una oración compleja o compuesta. (1,5 puntos)\nA.5. y B.5. Cuestiones de carácter morfológico o léxico-semántico. (1 punto)\nBloque 3\nA.6. y B.6. Tema de literatura española. (1,5 puntos)\nA.7. y B.7. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición literaria. (1 punto)\nInstrucciones de elección: elija un texto entre A o B y responda a las preguntas 1, 2 y 3 del texto elegido;\nresponda una pregunta de 1,5 puntos entre A.4 o B.4; responda dos preguntas de 1 punto indistintamente\nentre A.5, B.5, A.7, B.7; responda una pregunta de 1,5 puntos entre A.6 o B.6.\nTiempo. La duración del examen es de hora y media.\nII. CRITERIOS DE CALIFICACIÓN DE LA PRUEBA\na) Debe enunciar su tema de manera concisa en una o dos líneas de extensión como máximo (0,5 puntos).\nb) Explicará las características lingüísticas y estilísticas más sobresalientes del texto, señalando la función\nque poseen en el texto (1,5 puntos).\nc) Indicará el tipo de texto y el género discursivo al que corresponde el fragmento propuesto (0,5 puntos).\nEn la pregunta 2, el resumen no debe exceder de seis o siete líneas, debe contener las ideas principales\ncon coherencia interna, redactarse con las palabras del estudiante, no ser una paráfrasis y ser objetivo. Se\ncalificará con un máximo de 1 punto.\nEn la pregunta 3, el estudiante debe mostrar su madurez intelectual y su destreza en la argumentación,\ncon una posición clara y argumentos que la justifiquen. Se calificará con un máximo de 1,5 puntos.\nLa máxima deducción global en el ejercicio por ortografía, puntuación, acentuación, redacción, sintaxis,\nvocabulario y presentación será de 3 puntos, según los criterios detallados en el documento oficial.\n\nSolución orientativa 1.1: a) tema: la incomodidad de algunos hombres ante el papel de la mujer en la\nsociedad actual; c) texto de carácter argumentativo, artículo de opinión.",
+        "preguntas_opcionales": [
+          {
+            "id": "B.1",
+            "puntos": 2.5,
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes\npreguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas\nmás sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+          },
+          {
+            "id": "B.2",
+            "puntos": 1,
+            "enunciado": "Redacte un resumen del contenido del texto."
+          },
+          {
+            "id": "B.3",
+            "puntos": 1.5,
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de que en el deporte las mujeres y los\nhombres perciban las mismas retribuciones."
+          }
+        ]
+      },
+      {
+        "id": "lengua-2024-ExtB-2",
+        "año": 2024,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Martes",
+        "bloque": "ReflexionLengua",
+        "tipo": "ReflexionLengua",
+        "label": "Reflexión sobre la lengua",
+        "numero": 2,
+        "tema": "Reflexión sobre la lengua (Texto B)",
+        "puntuacion": 2.5,
+        "enunciado": "B.4. (1,5 puntos) Analice sintácticamente: Las mujeres tenemos que lidiar con el malestar que sienten los\nhombres.\nB.5. (1 punto) Defina el concepto de sinonimia y ejemplifíquelo aportando al menos dos sinónimos de la\npalabra refugio.",
+        "criterios": "Análisis sintáctico calificado con un máximo de 1 punto el análisis intraoracional y 0,5 puntos el interoracional\n(total 1,5 puntos). Las preguntas de morfología/léxico se califican con un máximo de 1 punto.\n\nSolución orientativa:\nB.4. \"Las mujeres tenemos que lidiar con el malestar que sienten los hombres\": sujeto \"Las mujeres\",\npredicado \"tenemos que lidiar con el malestar que sienten los hombres\" (C. de régimen \"con el malestar que\nsienten los hombres\": término \"el malestar que sienten los hombres\", con \"que sienten los hombres\" como\ncomplemento del nombre \"malestar\": CD \"que\", sujeto \"los hombres\", predicado \"sienten\").\nB.5. La sinonimia es la relación de igualdad o semejanza de significado entre dos o más palabras. Sinónimos\nde \"refugio\": amparo, protección, cobijo, asilo, abrigo, socorro.",
+        "preguntas_opcionales": [
+          {
+            "id": "B.4",
+            "puntos": 1.5,
+            "enunciado": "Analice sintácticamente: Las mujeres tenemos que lidiar con el malestar que sienten los\nhombres.",
+            "grupo": "sintaxis"
+          },
+          {
+            "id": "B.5",
+            "puntos": 1,
+            "enunciado": "Defina el concepto de sinonimia y ejemplifíquelo aportando al menos dos sinónimos de la\npalabra refugio.",
+            "grupo": "morfologia"
+          }
+        ]
+      },
+      {
+        "id": "lengua-2024-ExtB-3",
+        "año": 2024,
+        "convocatoria": "Extraordinaria",
+        "opcion": "Martes",
+        "bloque": "EducacionLiteraria",
+        "tipo": "EducacionLiteraria",
+        "label": "Educación literaria",
+        "numero": 3,
+        "tema": "Educación literaria (Texto B)",
+        "puntuacion": 2.5,
+        "enunciado": "B.6. (1,5 puntos) La novela española de 1939 a 1975.\nB.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.",
+        "criterios": "A.6. y B.6. Tema de literatura española (1,5 puntos): exposición de conjunto con conocimiento global del\nmovimiento literario y referencia a los autores y obras más relevantes, más allá de un mero catálogo.\nA.7. y B.7. Análisis de la obra leída en relación con su contexto sociohistórico y la tradición literaria (1 punto).",
+        "preguntas_opcionales": [
+          {
+            "id": "B.6",
+            "puntos": 1.5,
+            "enunciado": "La novela española de 1939 a 1975.",
+            "grupo": "literatura"
+          },
+          {
+            "id": "B.7",
+            "puntos": 1,
+            "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875\ny 1936, en relación con su contexto sociohistórico y la tradición literaria.",
+            "grupo": "obra"
+          }
+        ]
+      }
+    ]
   }
 ]
 

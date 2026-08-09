@@ -1376,7 +1376,9 @@ Datos. $E°$(V): $\\text{Mn}^{2+}$/Mn $= -1{,}18$; $\\text{Fe}^{2+}$/Fe $= -0{,}
         bloque: "Pregunta1",
         label: "Termoquímica y cinética",
         numero: "1",
-        enunciado: `Responda a las siguientes preguntas:
+        enunciado: `![Tabla de datos termodinámicos a 300K](/quimica-imgs/2025-ordinaria/pregunta-1-tabla-termodinamica.png)
+
+Responda a las siguientes preguntas:
 a) (0,75 puntos) El nitrato de amonio es un compuesto con muchas aplicaciones, cuya síntesis se realiza
 por reacción directa de ácido nítrico y amoniaco. Escriba la reacción ajustada que se produce y, haciendo
 uso de la Tabla, calcule $\\Delta G_r^\\circ$ a 300 K. Justifique la espontaneidad de la reacción.
@@ -1465,7 +1467,9 @@ una disolución de butanoato de sodio.`,
         bloque: "Pregunta1",
         label: "Termoquímica y cinética",
         numero: "1",
-        enunciado: `Responda a las siguientes preguntas:
+        enunciado: `![Tabla de datos termodinámicos a 300K](/quimica-imgs/2025-ordinaria/pregunta-1-tabla-termodinamica.png)
+
+Responda a las siguientes preguntas:
 a) (0,75 puntos) El nitrato de amonio es un compuesto con muchas aplicaciones, cuya síntesis se realiza
 por reacción directa de ácido nítrico y amoniaco. Escriba la reacción ajustada que se produce y, haciendo
 uso de la Tabla, calcule $\\Delta G_r^\\circ$ a 300 K. Justifique la espontaneidad de la reacción.
@@ -2987,6 +2991,610 @@ disolución 0,30 M de sulfato de hierro(II).`,
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2024-extraordinaria.pdf"
+      }
+    ]
+  },
+  {
+    id: 20212,
+    año: 2021,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2021-coincidentes-A-1",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `(2 puntos) Considere la configuración electrónica $1s^22s^22p^6$.
+a) Si perteneciese a un átomo neutro, identifíquelo indicando grupo, período, símbolo y nombre.
+b) Justifique qué dos cationes, uno con carga +1 y otro con carga +2, la presentan. Identifíquelos con nombre
+y símbolo.
+c) Justifique qué dos aniones, uno con carga −1 y otro con carga −2, la presentan. Identifíquelos con nombre
+y símbolo.
+Puntuación máxima por apartado: 0,5 puntos apartado a); 0,75 puntos apartados b) y c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-A-2",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `(2 puntos) Considere la fórmula empírica $\\text{C}_4\\text{H}_8\\text{O}$:
+a) Formule y nombre dos isómeros de grupo funcional carbonilo que correspondan a la fórmula anterior.
+b) Formule y nombre dos aldehídos isómeros de cadena que correspondan a la fórmula anterior.
+c) Formule y nombre un alcohol primario de cadena lineal con doble enlace que corresponda a la fórmula
+anterior.
+d) Justifique mediante su formulación si etenil etil éter corresponde a la fórmula anterior.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-A-3",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `(2 puntos) La reacción en fase gaseosa $2\\ \\text{A} + \\text{B} \\rightarrow \\text{C} + \\text{D}$ tiene como ley de velocidad: $v = k[\\text{A}][\\text{B}]$.
+a) Indique los órdenes parciales de reacción respecto de A y de B, el orden total de reacción, y las unidades
+de la constante de velocidad.
+b) Justifique cuál de los dos reactivos se consume más rápido.
+c) Justifique con las fórmulas adecuadas cómo afecta a la velocidad de reacción que el volumen del
+recipiente donde se produce la reacción se reduzca a la mitad.
+d) Justifique, mediante la ecuación de Arrhenius, cómo afecta a la velocidad de reacción un aumento de la
+temperatura.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-A-4",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `(2 puntos) El hidróxido de calcio es muy insoluble en agua. Responda las siguientes cuestiones:
+a) Formule el equilibrio de solubilidad del hidróxido de calcio, detallando el estado de cada especie, y escriba
+la expresión para $K_s$ en función de la solubilidad.
+b) Determine el valor de la solubilidad del hidróxido de calcio en $\\text{mol}\\cdot\\text{L}^{-1}$ y en $\\text{g}\\cdot\\text{L}^{-1}$.
+c) Determine la $[\\text{OH}^-]$ y el pH de una disolución saturada de hidróxido de calcio.
+d) Justifique si la adición de unas gotas de HCl aumenta o disminuye la cantidad de hidróxido de calcio
+disuelto.
+Datos. Masas atómicas: H = 1,0; O = 16,0; Ca = 40,1. $K_s(\\text{hidróxido de calcio}) = 5{,}0 \\cdot 10^{-6}$.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-A-5",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `(2 puntos) Se introduce 1 mol de $\\text{NO}_2$ en un recipiente a 288 K y 1 atm, y se alcanza el equilibrio:
+$2\\ \\text{NO}_2(g) \\rightleftharpoons \\text{N}_2\\text{O}_4(g)$, con $\\Delta H^\\circ = -60\\ \\text{kJ/mol}$.
+a) Determine la fracción molar de cada gas en el equilibrio.
+b) Calcule a qué presión se tiene la mezcla equimolar.
+c) Justifique, sin hacer cálculos, cómo varían las fracciones molares calculadas en a) si aumenta la
+temperatura.
+Datos. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$. $K_p = 15{,}0$.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y b); 0,5 puntos apartado c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-B-1",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `(2 puntos) Considere los siguientes compuestos de carbono: $\\text{CH}_4$, $\\text{CCl}_4$, $\\text{CO}_2$.
+a) ¿En cuál/es el C tiene hibridación $sp^3$? Indique la geometría molecular para dicho/s compuesto/s.
+b) ¿Cuál/es tiene/n geometría lineal? Justifique la respuesta.
+c) ¿Cuál/es es/son apolar/es? Justifique la respuesta.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y b); 0,5 puntos apartado c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-B-2",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `(2 puntos) Considere la reacción endotérmica de descomposición: $\\text{A}(s) \\rightleftharpoons \\text{C}(g) + \\text{D}(g)$.
+a) Escriba la expresión de $K_p$ en términos de presiones parciales y de fracciones molares.
+b) Justifique si A(s) es más estable a temperaturas altas o bajas.
+c) Justifique si A(s) se descompone más al aumentar la presión total.
+d) Justifique cómo se desplaza el equilibrio al duplicar la cantidad de A(s).
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-B-3",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `(2 puntos) Considere el compuesto but-2-eno.
+a) Escriba su fórmula empírica y semidesarrollada.
+b) Escriba y ajuste su reacción de combustión.
+c) Escriba su reacción con ioduro de hidrógeno. Formule y nombre el producto resultante.
+d) Escriba su reacción de obtención a partir de un alcohol. Formule y nombre dicho alcohol.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-B-4",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `(2 puntos) A 50 mL de una disolución de $\\text{AgNO}_3$ 0,5 M se le añaden 0,35 g de Al obteniéndose Ag y
+$\\text{Al(NO}_3)_3$.
+a) Escriba y ajuste por el método del ion-electrón las semirreacciones de oxidación y reducción, y las
+reacciones iónica global y molecular. Indique cuál es la especie oxidante y cuál es la reductora.
+b) Justifique la espontaneidad de la reacción.
+c) Calcule la masa total de Ag que se obtiene.
+Datos. Masas atómicas: H = 1, N = 14, Al = 27, Ag = 108. $E^0(V)$: $\\text{Al}^{3+}/\\text{Al} = -1{,}7$; $\\text{Ag}^+/\\text{Ag} = 0{,}8$.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y c); 0,5 puntos apartado b).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      },
+      {
+        id: "q-2021-coincidentes-B-5",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `(2 puntos) Una disolución de ácido débil HX tiene un grado de disociación $\\alpha = 0{,}015$. Calcule:
+a) La molaridad inicial de la disolución de HX y su pH.
+b) La masa de KOH necesaria para preparar 100 mL de una disolución 0,75 M, y el volumen de dicha
+disolución que se utilizará para valorar 15 mL de HX.
+c) Justifique, sin realizar cálculos, si el pH en el punto de equivalencia de la valoración realizada en el
+apartado b) es ácido, básico o neutro.
+Datos. $K_a(\\text{HX}) = 5{,}0 \\cdot 10^{-4}$. Masas atómicas: H = 1,0; O = 16,0; K = 39,1.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y b); 0,5 puntos apartado c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-coincidentes.pdf"
+      }
+    ]
+  },
+  {
+    id: 20232,
+    año: 2023,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2023-coincidentes-A-1",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Dados los siguientes elementos: A (Z = 11), B (Z = 13) y C (Z = 17).
+a) (0,5 puntos) Identifique cada uno de ellos con su configuración electrónica, nombre, símbolo, grupo y
+periodo.
+b) (0,5 puntos) Defina qué es la electronegatividad y ordene los elementos en orden creciente de
+electronegatividad.
+c) (0,5 puntos) Escriba los iones positivos más estables de los anteriores elementos y ordénelos de menor
+a mayor tamaño. Justifique la respuesta.
+d) (0,5 puntos) Indique qué tipo de enlace se establece entre C y A y entre C con C. Escriba las fórmulas de
+las especies formadas.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-A-2",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `Complete las siguientes reacciones, formule los reactivos orgánicos, formule y nombre los productos
+orgánicos mayoritarios obtenidos, y en su caso, la regla que siguen, e indique el tipo de reacción:
+a) (0,5 puntos) Propeno + $\\text{H}_2\\text{O}/\\text{H}^+$ $\\rightarrow$
+b) (0,5 puntos) Butan-2-ol + $\\text{H}_2\\text{SO}_4$/calor $\\rightarrow$
+c) (0,5 puntos) Cloroetano + $\\text{Ag(OH)}$ $\\rightarrow$
+d) (0,5 puntos) Etanol + ácido metanoico $\\rightarrow$`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-A-3",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1 punto) Calcule la constante de disociación del ácido hipocloroso a 25 ºC y su grado de disociación,
+sabiendo que una disolución acuosa 0,300 M de este ácido tiene un pH de 4,02 a dicha temperatura.
+b) (1 punto) Organice las siguientes disoluciones acuosas de igual concentración, en orden creciente de su
+pH: ácido hipocloroso, hipoclorito de sodio, ácido nítrico, nitrato de potasio, hidróxido de sodio. Justifique
+la respuesta.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-A-4",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `A 73 ºC se introducen 2,0 mol de A (g) en un recipiente de 2,0 L, alcanzándose el equilibrio
+$\\text{A}(g) \\rightleftharpoons \\text{B}(g) + \\text{C}(g)$, y obteniéndose una presión de 7,3 atm de la especie C (g). Calcule:
+a) (1 punto) Las concentraciones de cada especie en el equilibrio.
+b) (0,5 puntos) $K_c$ y $K_p$.
+c) (0,5 puntos) Sabiendo que el proceso es exotérmico, razone cómo se modificará el rendimiento de la
+reacción si se realiza a 1000 K.
+Dato. $R = 0{,}082\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-A-5",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `Se construye una pila formada por un electrodo de Cr (s) sumergido en una disolución de $\\text{Cr}^{3+}$ (ac), un
+electrodo de Ni (s) sumergido en una disolución de $\\text{Ni}^{2+}$ (ac) y un puente salino:
+a) (0,5 puntos) Escriba las reacciones que tienen lugar en el ánodo y en el cátodo, y la reacción iónica final.
+b) (0,5 puntos) Escriba la notación de la pila e indique en qué sentido circula la corriente en el conductor
+eléctrico.
+c) (0,5 puntos) Determine el potencial de dicha pila y explique para qué sirve el puente salino.
+d) (0,5 puntos) Razone si es una buena elección utilizar una varilla de Cr(s) para agitar una disolución de
+$\\text{NiSO}_4$.
+Datos. $E^0(V)$: $\\text{Cr}^{3+}/\\text{Cr} = -0{,}74$; $\\text{Ni}^{2+}/\\text{Ni} = -0{,}25$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-B-1",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Para las moléculas $\\text{CO}_2$ y $\\text{H}_2\\text{O}$
+a) (0,5 puntos) Indique su geometría molecular según la teoría RPECV.
+b) (0,5 puntos) Indique la hibridación que presenta el átomo central.
+c) (1 punto) Justifique su polaridad y diga el tipo de fuerzas intermoleculares que presentan.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-B-2",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Formule los siguientes compuestos, indique qué tipo/s de isomería/s presentan.
+a) (0,5 puntos) Butano y metilpropano.
+b) (0,5 puntos) Pent-2-en-1-ol y 3-metilbut-2-en-2-ol.
+c) (0,5 puntos) Propanal y propanona.
+d) (0,5 puntos) Etilmetil éter y propan-2-ol.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-B-3",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `A una temperatura determinada la constante cinética de la reacción en fase gaseosa $\\text{A} \\rightarrow \\text{P}$ es
+$k = 5\\ \\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{s}^{-1}$.
+a) (0,5 puntos) Determine el orden total de la reacción y justifique si se trata de una reacción elemental.
+b) (0,5 puntos) Escriba la ecuación cinética y calcule la velocidad de la reacción cuando [A] = 0,1 M.
+c) (0,5 puntos) Si las energías de activación de las reacciones directa e inversa son $E_a^d = 130\\ \\text{kJ}$ y
+$E_a^i = 450\\ \\text{kJ}$, justifique si la reacción directa es exotérmica o endotérmica.
+d) (0,5 puntos) Justifique, utilizando la ecuación de Arrhenius, cómo afecta a la constante cinética y a la
+velocidad de la reacción un aumento de temperatura.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-B-4",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `Para la sal acetato de plata, $\\text{AgCH}_3\\text{COO}$:
+a) (0,5 puntos) Formule el equilibrio de solubilidad, detallando el estado de las especies, y calcule la
+solubilidad en $\\text{mol}\\cdot\\text{L}^{-1}$.
+b) (0,5 puntos) Razone cómo varía la solubilidad de una disolución saturada de acetato de plata en agua si
+se le adicionan unas gotas de disolución de sulfato de plata.
+c) (1 punto) Calcule si precipitará acetato de plata al mezclar 100 mL de disolución de nitrato de plata 1,5 M
+con 50 mL de ácido acético 1,5 M. Suponga volúmenes aditivos.
+Datos. $K_s(\\text{AgCH}_3\\text{COO}) = 2{,}3 \\cdot 10^{-3}$; $K_a(\\text{CH}_3\\text{COOH}) = 1{,}8 \\cdot 10^{-5}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      },
+      {
+        id: "q-2023-coincidentes-B-5",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `La siguiente reacción redox tiene lugar en medio ácido: $\\text{MnO}_4^- + \\text{Ag} + \\text{H}^+ \\rightarrow \\text{Mn}^{2+} + \\text{Ag}^+ + \\text{H}_2\\text{O}$
+a) (1 punto) Utilizando el método del ion electrón escriba ajustadas las semirreacciones de oxidación y
+reducción y la reacción iónica.
+b) (1 punto) Calcule los gramos de plata metálica que podrían ser oxidados por 50 mL de una disolución
+acuosa de $\\text{MnO}_4^-$ 0,20 M.
+Dato. Masa atómica (u): Ag = 107,9.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-coincidentes.pdf"
+      }
+    ]
+  },
+  {
+    id: 2026,
+    año: 2026,
+    tipo: "Ordinaria",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2026-A-1",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Redox, electroquímica y solubilidad",
+        numero: "1",
+        enunciado: `En un laboratorio de materiales se estudia la corrosión del cobre en presencia de ácido nítrico diluido,
+porque esta reacción es la responsable tanto de la disolución de cobre metálico en procesos industriales
+como de la generación de óxidos de nitrógeno contaminantes. En el proceso de corrosión, el cobre metálico
+reacciona con el ácido nítrico dando lugar a nitrato de cobre(II), óxido de nitrógeno(II) y agua.
+a) (1 punto) Ajuste la reacción molecular por el método del ion electrón, indicando cuáles son las
+semirreacciones de oxidación y reducción.
+b) (0,5 puntos) A partir de la reacción del apartado anterior, un estudiante propone reproducir el proceso
+de corrosión del cobre en una celda electroquímica formada por un electrodo de Cu y otro electrodo
+inerte de platino, ambos sumergidos en una disolución de $\\text{HNO}_3$ 1 M. Identifique el ánodo y el cátodo
+especificando en qué electrodo tiene lugar la oxidación y en cuál la reducción y calcule el potencial
+estándar de la pila.
+c) (1 punto) Por motivos medioambientales, es importante reducir la cantidad de iones $\\text{Cu}^{2+}$ presentes en
+disoluciones acuosas. Se sabe que si añadimos una disolución de NaOH de pH = 9,0, se puede formar
+un precipitado de $\\text{Cu(OH)}_2$, lo que permite eliminar el cobre por filtración.
+Escriba la ecuación química del equilibrio de solubilidad de $\\text{Cu(OH)}_2$, indicando el estado físico de cada
+especie. Determine la concentración molar de iones $\\text{Cu}^{2+}$ a partir de la cual comienza a precipitar
+$\\text{Cu(OH)}_2$ al añadir la disolución de NaOH de pH = 9,0 a 25 ºC.
+Datos. $E^\\circ(V)$: $(\\text{Cu}^{2+}/\\text{Cu}) = 0{,}34$; $(\\text{NO}_3^-/\\text{NO}) = 0{,}96$. A 25 ºC, $K_s(\\text{Cu(OH)}_2) = 2{,}2 \\cdot 10^{-20}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-A-2",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Enlace químico",
+        numero: "2A",
+        enunciado: `Considere los siguientes compuestos: LiF, $\\text{PCl}_3$, $\\text{CH}_3\\text{Br}$ y LiI.
+a) (1 punto) Para los compuestos covalentes, indique la geometría molecular según la teoría de repulsión
+de los pares de electrones de la capa de valencia (TRPECV), y la hibridación del átomo central.
+Justifique la polaridad.
+b) (1 punto) Justifique cuál de los sólidos iónicos tiene mayor energía de red, suponiendo que todos
+cristalizan con el mismo tipo de red.
+c) (0,5 puntos) Explique razonadamente qué tipo de interacciones hay que vencer en cada uno de los
+siguientes procesos: i) ebullición del $\\text{CH}_3\\text{Br}$, ii) fusión del LiF.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-A-3",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Química orgánica",
+        numero: "3A",
+        enunciado: `Conteste de forma razonada las siguientes cuestiones:
+a) (1 punto) Nombre los siguientes compuestos e identifique el grupo funcional principal.
+(1) $\\text{CH}_3-\\text{CH}_2-\\text{CH}_2\\text{OH}$  (3) $\\text{CH}_3-\\text{COO}-\\text{CH}_3$  (5) $\\text{CH}_3-\\text{CH}_2-\\text{CHO}$
+(2) $(\\text{CH}_3)_3-\\text{N}$  (4) $\\text{CH}_3-\\text{CH}=\\text{CH}_2$
+b) (1 punto) Escriba las reacciones correspondientes a los procesos siguientes:
+i) Obtención del compuesto (1) a partir de un aldehído.
+ii) Obtención del compuesto (4) a partir de un alcohol primario.
+iii) Obtención del compuesto (3).
+iv) Obtención de un polímero a partir del compuesto (4).
+c) (0,5 puntos) Formule y nombre los dos isómeros geométricos cis y trans con la misma fórmula molecular
+que la del compuesto (5).`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-A-4",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Termodinámica y cinética",
+        numero: "4A",
+        enunciado: `Se pretende sintetizar metanol líquido, $\\text{CH}_3\\text{OH}$, mediante la reacción del monóxido de carbono con
+hidrógeno molecular.
+a) (1 punto) Escriba la ecuación química ajustada detallando el estado de las especies, y calcule la energía
+de Gibbs estándar de la reacción a 25 °C.
+b) (0,5 puntos) A 25 °C, la reacción de síntesis de metanol es termodinámicamente posible, pero
+cinéticamente muy lenta. Justifique razonadamente cuál o cuáles de las siguientes propuestas aumentan
+la velocidad de reacción:
+i) Uso de un catalizador adecuado.
+ii) Aumento de la temperatura de operación.
+iii) Aumento de las presiones parciales de los reactivos.
+c) (1 punto) En un experimento se han sintetizado 145 mL de metanol de densidad $0{,}786\\ \\text{g}\\cdot\\text{cm}^{-3}$.
+Suponiendo que el rendimiento de la reacción es del 87,0 %, calcule el volumen de hidrógeno que ha
+reaccionado, medido a 25 ºC y 0,980 atm.
+Datos. A 298 K, $\\Delta H_f^\\circ(\\text{kJ}\\cdot\\text{mol}^{-1})$: $\\text{CH}_3\\text{OH}(l) = -238{,}7$; $\\text{CO}(g) = -110{,}5$. $S^\\circ(\\text{J}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1})$:
+$\\text{CH}_3\\text{OH}(l) = 126{,}8$; $\\text{CO}(g) = 197{,}7$; $\\text{H}_2(g) = 130{,}7$. $R = 0{,}0820\\ \\text{atm}\\cdot\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{K}^{-1}$.
+Masas atómicas (u): H = 1,0; C = 12,0; O = 16,0.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-B-1",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Redox, electroquímica y solubilidad",
+        numero: "1",
+        enunciado: `En un laboratorio de materiales se estudia la corrosión del cobre en presencia de ácido nítrico diluido,
+porque esta reacción es la responsable tanto de la disolución de cobre metálico en procesos industriales
+como de la generación de óxidos de nitrógeno contaminantes. En el proceso de corrosión, el cobre metálico
+reacciona con el ácido nítrico dando lugar a nitrato de cobre(II), óxido de nitrógeno(II) y agua.
+a) (1 punto) Ajuste la reacción molecular por el método del ion electrón, indicando cuáles son las
+semirreacciones de oxidación y reducción.
+b) (0,5 puntos) A partir de la reacción del apartado anterior, un estudiante propone reproducir el proceso
+de corrosión del cobre en una celda electroquímica formada por un electrodo de Cu y otro electrodo
+inerte de platino, ambos sumergidos en una disolución de $\\text{HNO}_3$ 1 M. Identifique el ánodo y el cátodo
+especificando en qué electrodo tiene lugar la oxidación y en cuál la reducción y calcule el potencial
+estándar de la pila.
+c) (1 punto) Por motivos medioambientales, es importante reducir la cantidad de iones $\\text{Cu}^{2+}$ presentes en
+disoluciones acuosas. Se sabe que si añadimos una disolución de NaOH de pH = 9,0, se puede formar
+un precipitado de $\\text{Cu(OH)}_2$, lo que permite eliminar el cobre por filtración.
+Escriba la ecuación química del equilibrio de solubilidad de $\\text{Cu(OH)}_2$, indicando el estado físico de cada
+especie. Determine la concentración molar de iones $\\text{Cu}^{2+}$ a partir de la cual comienza a precipitar
+$\\text{Cu(OH)}_2$ al añadir la disolución de NaOH de pH = 9,0 a 25 ºC.
+Datos. $E^\\circ(V)$: $(\\text{Cu}^{2+}/\\text{Cu}) = 0{,}34$; $(\\text{NO}_3^-/\\text{NO}) = 0{,}96$. A 25 ºC, $K_s(\\text{Cu(OH)}_2) = 2{,}2 \\cdot 10^{-20}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-B-2",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Estructura atómica",
+        numero: "2B",
+        enunciado: `La configuración electrónica de un elemento X es $[\\text{Ne}]ns^1$.
+a) (1 punto) Indique el valor de "n", el nombre y símbolo del elemento X, así como el grupo y el período a
+los que pertenece. Razone cómo varía la energía de ionización a lo largo de un grupo de la tabla periódica.
+b) (0,5 puntos) Justifique cuál es el catión más estable que puede formar el elemento X. Indique un catión
+divalente, un elemento neutro y un anión monovalente que sean isoelectrónicos con el catión más estable
+del elemento X.
+c) (0,5 puntos) Si el electrón más externo del elemento X es excitado del orbital ns al orbital np, ¿cómo
+cambian sus números cuánticos? Explique si se trata de una absorción o de una emisión.
+d) (0,5 puntos) Calcule la energía, en electronvoltios, asociada a la transición electrónica anterior, sabiendo
+que la longitud de onda de la radiación implicada es de 766,5 nm.
+Datos. $h = 6{,}626 \\cdot 10^{-34}\\ \\text{J}\\cdot\\text{s}^{-1}$; $c = 3{,}00 \\cdot 10^{8}\\ \\text{m}\\cdot\\text{s}^{-1}$; $1\\ \\text{eV} = 1{,}602 \\cdot 10^{-19}\\ \\text{J}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-B-3",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Química orgánica",
+        numero: "3B",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1 punto) Escriba la reacción de polimerización del alqueno obtenido en la reacción entre el etino y el
+HCl. Nombre el monómero y el polímero.
+b) (1,5 puntos) Complete las siguientes reacciones con el producto mayoritario, formulando los compuestos
+de partida, y nombrando y formulando los compuestos orgánicos A, B, C, D y E.
+i) Propan-1-ol $\\rightarrow$ A (oxidación) $\\rightarrow$ B (oxidación)
+ii) Etanol + B $\\rightarrow$ C
+iii) Butan-2-ol $+ \\text{H}_2\\text{SO}_4$ conc./calor $\\rightarrow$ D $+ \\text{HBr} \\rightarrow$ E`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
+      },
+      {
+        id: "q-2026-B-4",
+        año: 2026,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Equilibrio ácido-base",
+        numero: "4B",
+        enunciado: `Conteste a las siguientes cuestiones:
+a) (0,5 puntos) En una planta industrial de síntesis de amoniaco se preparan disoluciones para su
+comercialización mezclándolo con agua. Calcule la molaridad de la disolución de amoniaco comercial
+preparada sabiendo que se almacena en botellas de 1,0 L, al 8,0% en masa, y siendo la densidad de la
+disolución de $0{,}85\\ \\text{g}\\cdot\\text{cm}^{-3}$.
+b) (1 punto) Calcule el pH y el grado de disociación de la disolución del apartado anterior.
+c) (1 punto) Se hacen reaccionar 15,00 mL de una disolución acuosa de HCl 2,50 M con 25,00 mL de otra
+disolución acuosa de NaOH 1,70 M, ambas a 25 °C. Escriba la ecuación de la reacción que ocurre y calcule
+el pH de la disolución resultante. Considere volúmenes aditivos.
+Datos. A 25 ºC, $K_b(\\text{NH}_3) = 1{,}8 \\cdot 10^{-5}$. Masas atómicas (u): H = 1,0; N = 14,0.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
       }
     ]
   }

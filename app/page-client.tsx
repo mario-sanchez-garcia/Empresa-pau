@@ -1929,7 +1929,12 @@ function cambiarBloqueBiologia(i: number, tipoBloque: string) {
 
 function nombreAsignatura(a: string) {
   if (a === 'general') return 'General'
-  if (a === 'mates') return 'Matemáticas II'
+  // 'mates' es el código legacy de Exámenes; 'matematicas_ii' es el slug que
+  // usa Camino PAU (currentTopic.subject en CaminoTopicClient) para la misma
+  // asignatura — sin este segundo check, cualquier entrada de Historial de
+  // Camino PAU en Matemáticas II caía por el default de abajo y se mostraba
+  // como "Historia de España" (bug confirmado en producción).
+  if (a === 'mates' || a === 'matematicas_ii') return 'Matemáticas II'
   if (a === 'matematicas_ccss') return MATEMATICAS_CCSS_LABEL
   if (a === 'fisica') return 'Física'
   if (a === 'quimica') return 'Química'
@@ -1937,6 +1942,7 @@ function nombreAsignatura(a: string) {
   if (a === 'lengua') return 'Lengua Castellana y Literatura II'
   if (a === 'ingles') return 'Inglés'
   if (a === 'historia_filosofia') return 'Historia de la Filosofía'
+  if (a === 'llengua_catalana') return 'Llengua Catalana'
   return 'Historia de España'
 }
 

@@ -100,7 +100,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No tienes acceso a este tema en tu Camino actual.' }, { status: 403 })
   }
 
-  const row = sortOrder != null ? await loadCurriculumV2Row(topic.subject, sortOrder, authContext.accessToken) : null
+  // v2SortOrder solo es una referencia real a curriculum_content_v2 para temas
+  // con contentStatus 'flashcard_v2' (así lo trata también el cliente en
+  // CaminoTopicClient.tsx). Para los temas 'latex_notes' de la beta privada
+  // (betaCurriculum.ts), v2SortOrder es un simple índice de orden por
+  // asignatura reutilizado para el calendario/misiones — no una fila real de
+  // curriculum_content_v2. Tratarlo como tal aquí hacía que se corrigiera con
+  // el enunciado/rúbrica de OTRO ejercicio cuyo sort_order coincidía por
+  // casualidad (bug confirmado: alumno viendo "Determinantes, inversa y
+  // rango" corregido contra la rúbrica de "Multiplicación de Matrices").
+  const row = sortOrder != null && topic.contentStatus === 'flashcard_v2'
+    ? await loadCurriculumV2Row(topic.subject, sortOrder, authContext.accessToken)
+    : null
   const statement = row?.practice_prompt ?? topic.practicePrompt ?? topic.guidedExample ?? `Ejercicio de ${row?.title ?? topic.title}`
   const maxScore = 10
   const subjectLabel = subjectLabelFromSlug(topic.subject)

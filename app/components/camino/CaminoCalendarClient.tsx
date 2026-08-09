@@ -278,8 +278,9 @@ function saveJson(key: string, value: unknown) { window.localStorage.setItem(key
 // para que CompactWeekView pueda mostrarla junto a "Repaso libre" del día de
 // hoy sin levantar el estado hasta el padre. Se descarta sola al día
 // siguiente (comparación de fecha al leer), sin necesidad de limpiarla.
-const FREE_REVIEW_SUGGESTION_KEY = 'kairo_free_review_suggestion_v1'
-type FreeReviewSuggestion = { date: string; subject: string; focusNote: string }
+const FREE_REVIEW_SUGGESTION_KEY = 'kairo_free_review_suggestion_v2'
+type FreeReviewOption = { subject: string; focusNote: string }
+type FreeReviewSuggestion = { date: string; options: FreeReviewOption[]; selectedIndex: number }
 // `exam-${date}-${exams.length + 1}` could collide with an existing exam's id
 // once one had been deleted (the counter resets to a value already used by a
 // surviving exam on the same date) — a React key collision that can hide the
@@ -3433,7 +3434,8 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   const [notes, setNotes] = useState('')
   const [notesLoaded, setNotesLoaded] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [suggestion, setSuggestion] = useState<{ subject: string; focusNote: string } | null>(null)
+  const [options, setOptions] = useState<FreeReviewOption[]>([])
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const [loadingSuggestion, setLoadingSuggestion] = useState(false)
   const [error, setError] = useState('')
 
@@ -3460,14 +3462,17 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   // mismo día.
   useEffect(() => {
     const saved = loadJson<FreeReviewSuggestion | null>(FREE_REVIEW_SUGGESTION_KEY, null)
-    if (saved && saved.date === todayMadrid()) setSuggestion({ subject: saved.subject, focusNote: saved.focusNote })
+    if (saved && saved.date === todayMadrid() && saved.options.length > 0) {
+      setOptions(saved.options)
+      setSelectedIndex(Math.min(saved.selectedIndex, saved.options.length - 1))
+    }
   }, [])
 
   async function suggest() {
     if (subjects.length === 0 || loadingSuggestion) return
     setLoadingSuggestion(true)
     setError('')
-    setSuggestion(null)
+    setOptions([])
     try {
       const { data } = await supabase.auth.getSession()
       const token = data.session?.access_token
@@ -3487,11 +3492,11 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
         body: JSON.stringify({ subjects }),
       })
       if (!res.ok) { setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.'); return }
-      const json = await res.json() as { subject?: string; focusNote?: string }
-      if (json.subject) {
-        const focusNote = json.focusNote ?? ''
-        setSuggestion({ subject: json.subject, focusNote })
-        saveJson(FREE_REVIEW_SUGGESTION_KEY, { date: todayMadrid(), subject: json.subject, focusNote } satisfies FreeReviewSuggestion)
+      const json = await res.json() as { options?: FreeReviewOption[] }
+      if (json.options && json.options.length > 0) {
+        setOptions(json.options)
+        setSelectedIndex(0)
+        saveJson(FREE_REVIEW_SUGGESTION_KEY, { date: todayMadrid(), options: json.options, selectedIndex: 0 } satisfies FreeReviewSuggestion)
       } else setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.')
     } catch {
       setError('No se ha podido generar una sugerencia. Revisa la conexión.')
@@ -3500,8 +3505,14 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
     }
   }
 
+  function selectOption(index: number) {
+    setSelectedIndex(index)
+    saveJson(FREE_REVIEW_SUGGESTION_KEY, { date: todayMadrid(), options, selectedIndex: index } satisfies FreeReviewSuggestion)
+  }
+
   if (subjects.length === 0) return null
 
+  const suggestion = options[selectedIndex] ?? null
   const examSlug = suggestion ? (CAMINO_TO_SIM_SUBJECT[subjectSlug(suggestion.subject)] ?? subjectSlug(suggestion.subject)) : null
   const examSearchTerm = suggestion
     ? (suggestion.focusNote || suggestion.subject).replace(/^repasa\s+/i, '').slice(0, 140)
@@ -3530,21 +3541,36 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
         </button>
       </div>
       {error && <p className="mt-2 text-[10px] font-bold text-red-500">{error}</p>}
-      {suggestion && (
-        <div
-          className="mt-2 rounded-xl px-3 py-2"
-          style={{ background: CONTENT_TYPE_COLORS.suggestion.bg, border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}` }}
-        >
-          <p className="text-[9px] font-black uppercase tracking-[.1em]" style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}>💡 Sugerencia opcional</p>
-          <p className="mt-0.5 text-[11px] font-black" style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}>{suggestion.subject}</p>
-          {suggestion.focusNote && <p className="mt-0.5 text-[10px] font-semibold" style={{ color: CONTENT_TYPE_COLORS.suggestion.text, opacity: 0.85 }}>{suggestion.focusNote}</p>}
+      {options.length > 0 && (
+        <div className="mt-2">
+          <p className="mb-1.5 text-[9px] font-black uppercase tracking-[.1em]" style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}>💡 3 opciones — elige una</p>
+          <div className="grid gap-1.5">
+            {options.map((opt, i) => {
+              const active = i === selectedIndex
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => selectOption(i)}
+                  className="rounded-xl px-3 py-2 text-left transition"
+                  style={{
+                    background: active ? CONTENT_TYPE_COLORS.suggestion.bg : 'white',
+                    border: `1px solid ${active ? CONTENT_TYPE_COLORS.suggestion.border : '#e2e8f0'}`,
+                  }}
+                >
+                  <p className="text-[11px] font-black" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : '#334155' }}>{opt.subject}</p>
+                  {opt.focusNote && <p className="mt-0.5 text-[10px] font-semibold" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : '#94a3b8', opacity: active ? 0.85 : 1 }}>{opt.focusNote}</p>}
+                </button>
+              )
+            })}
+          </div>
           {examSlug && (
             <a
               href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
-              className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black"
+              className="mt-2 inline-flex items-center gap-1 text-[10px] font-black"
               style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}
             >
-              Buscar preguntas reales →
+              Buscar preguntas reales de &quot;{suggestion?.subject}&quot; →
             </a>
           )}
         </div>
@@ -3565,8 +3591,9 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
   // alumno pida una sugerencia nueva mientras está abierto.
   const [freeReviewSuggestion] = useState<FreeReviewSuggestion | null>(() => {
     const saved = loadJson<FreeReviewSuggestion | null>(FREE_REVIEW_SUGGESTION_KEY, null)
-    return saved && saved.date === todayMadrid() ? saved : null
+    return saved && saved.date === todayMadrid() && saved.options.length > 0 ? saved : null
   })
+  const selectedFreeReviewOption = freeReviewSuggestion?.options[freeReviewSuggestion.selectedIndex] ?? freeReviewSuggestion?.options[0] ?? null
   return (
     <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
       {days.map(day => {
@@ -3612,9 +3639,9 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
                     color: CONTENT_TYPE_COLORS.suggestion.text,
                     border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}`,
                   }}
-                  title={`Sugerencia opcional: ${freeReviewSuggestion?.subject}${freeReviewSuggestion?.focusNote ? ` — ${freeReviewSuggestion.focusNote}` : ''}`}
+                  title={`Sugerencia opcional: ${selectedFreeReviewOption?.subject}${selectedFreeReviewOption?.focusNote ? ` — ${selectedFreeReviewOption.focusNote}` : ''}`}
                 >
-                  💡 {shortSubjectLabel(freeReviewSuggestion?.subject ?? '')}
+                  💡 {shortSubjectLabel(selectedFreeReviewOption?.subject ?? '')}
                 </span>
               )}
               <ChevronDown size={13} className={`shrink-0 text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />

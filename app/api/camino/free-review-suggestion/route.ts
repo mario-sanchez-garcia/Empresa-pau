@@ -7,24 +7,104 @@ import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsag
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
 import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
+import { getWeakAreas } from '@/app/lib/camino/caminoWeakAreasServer'
+import { normalizeSubjectSlug, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 
 export const dynamic = 'force-dynamic'
 
 const client = new Anthropic()
 const MODEL = 'claude-sonnet-4-6'
+const OPTIONS_COUNT = 3
+
+type SuggestionOption = { subject: string; focusNote: string }
+type StudentExamRow = { subject?: unknown; date?: unknown; name?: unknown; block?: unknown; topic?: unknown }
 
 function cleanString(value: unknown, max = 200) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
+}
+
+// Cualquier fila real (historial_examenes.asignatura, getWeakAreas().subjectKey)
+// puede venir en el vocabulario corto de Exámenes ('mates', 'historia', ver
+// SIMULACRO_SUBJECT) o ya en el slug canónico de Camino ('matematicas_ii',
+// 'historia_espana', usado por user_learning_queue/camino_calendar y por las
+// labels de perfiles.subjects vía normalizeSubjectSlug). Encadenar ambos
+// normaliza cualquier fuente al mismo slug canónico para poder cruzarlas.
+function toCaminoSlug(raw: string): string {
+  return normalizeSubjectSlug(caminoSubjectFromSimulacro(raw))
 }
 
 // Deterministic fallback: rotate through the student's active subjects by
 // day of week so repeated "sin IA" suggestions on different free days don't
 // all land on the same subject. Never blocks — a free-review day should
 // always get *something* to suggest, AI or not.
-function fallbackSubject(subjects: string[]): string {
+function fallbackSubject(subjects: string[], offset = 0): string {
   if (subjects.length === 0) return ''
   const dow = new Date().getDay()
-  return subjects[dow % subjects.length]
+  return subjects[(dow + offset) % subjects.length]
+}
+
+function daysUntil(dateStr: string): number {
+  const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z')
+  const target = new Date(dateStr + 'T00:00:00Z')
+  return Math.round((target.getTime() - today.getTime()) / 86_400_000)
+}
+
+// Construye 3 opciones reales sin IA — usado tanto como fallback si la IA
+// falla como base que la IA nunca puede contradecir con datos inventados:
+// 1) el bloque con peor nota, 2) la asignatura con el parcial más próximo,
+// 3) la asignatura con menos progreso de curso — completando con rotación
+// determinista si algún alumno todavía no tiene suficiente historial/ligas
+// como para llenar las tres.
+function deterministicOptions(
+  activeSubjects: string[],
+  weakAreas: Array<{ subjectKey: string; label: string; avgScore: number }>,
+  upcomingExams: Array<{ subjectLabel: string; name: string; date: string }>,
+  progressBySlug: Map<string, { completed: number; total: number }>,
+): SuggestionOption[] {
+  const options: SuggestionOption[] = []
+  const usedSubjects = new Set<string>()
+
+  const worst = weakAreas.find(w => activeSubjects.some(s => normalizeSubjectSlug(s) === toCaminoSlug(w.subjectKey)))
+  if (worst) {
+    const label = activeSubjects.find(s => normalizeSubjectSlug(s) === toCaminoSlug(worst.subjectKey)) ?? subjectLabelFromSlug(toCaminoSlug(worst.subjectKey))
+    options.push({ subject: label, focusNote: `Tu bloque más flojo: ${worst.label} (${worst.avgScore}% de media)` })
+    usedSubjects.add(label)
+  }
+
+  const nextExam = upcomingExams.find(e => !usedSubjects.has(e.subjectLabel))
+  if (nextExam) {
+    const days = daysUntil(nextExam.date)
+    const when = days <= 0 ? 'hoy o ya pasó' : days === 1 ? 'mañana' : `en ${days} días`
+    options.push({ subject: nextExam.subjectLabel, focusNote: `Parcial "${nextExam.name}" ${when} — repasa antes de que llegue` })
+    usedSubjects.add(nextExam.subjectLabel)
+  }
+
+  const leastProgress = [...activeSubjects]
+    .filter(s => !usedSubjects.has(s))
+    .map(s => {
+      const p = progressBySlug.get(normalizeSubjectSlug(s))
+      const ratio = p && p.total > 0 ? p.completed / p.total : 1
+      return { subject: s, ratio, total: p?.total ?? 0 }
+    })
+    .filter(s => s.total > 0)
+    .sort((a, b) => a.ratio - b.ratio)[0]
+  if (leastProgress) {
+    options.push({ subject: leastProgress.subject, focusNote: `Vas más atrás aquí que en el resto de tu Camino — dale un empujón` })
+    usedSubjects.add(leastProgress.subject)
+  }
+
+  let offset = 0
+  while (options.length < OPTIONS_COUNT && activeSubjects.length > 0) {
+    const pick = fallbackSubject(activeSubjects, offset)
+    offset += 1
+    if (offset > activeSubjects.length * 2) break // evita bucle infinito si activeSubjects está vacío o es 1
+    if (usedSubjects.has(pick) && activeSubjects.length >= OPTIONS_COUNT - options.length) continue
+    options.push({ subject: pick, focusNote: 'Un repaso general no viene mal — mantén el ritmo' })
+    usedSubjects.add(pick)
+  }
+
+  return options.slice(0, OPTIONS_COUNT)
 }
 
 export async function POST(request: NextRequest) {
@@ -42,7 +122,7 @@ export async function POST(request: NextRequest) {
   const db = createServiceClient()
   const { data: profile } = await db
     .from('perfiles')
-    .select('subjects, custom_instructions, subject_levels')
+    .select('subjects, custom_instructions, subject_levels, student_exams')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -56,9 +136,8 @@ export async function POST(request: NextRequest) {
     ? profile.subject_levels as Record<string, string>
     : {}
 
-  const fallback = fallbackSubject(activeSubjects)
   if (activeSubjects.length === 0) {
-    return NextResponse.json({ subject: '', focusNote: '', source: 'fallback' })
+    return NextResponse.json({ options: [], source: 'fallback' })
   }
 
   if (!isInternalUser(user.email)) {
@@ -86,33 +165,102 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const activeSlugs = activeSubjects.map(normalizeSubjectSlug)
+  const todayStr = new Date().toISOString().slice(0, 10)
+
+  // Mismo acceso de solo lectura al historial que ya usa Chat con Kairo
+  // (ver getHistorialResumen en app/page-client.tsx) — aquí en versión
+  // servidor, agregada para las 3 sugerencias en vez de para un hilo de chat.
+  const [weakAreasRaw, queueRows, recentHistorial] = await Promise.all([
+    getWeakAreas(db, user.id),
+    db.from('user_learning_queue').select('subject, queue_status').eq('user_id', user.id).in('subject', activeSlugs).limit(2000),
+    db.from('historial_examenes').select('asignatura, nota, nota_maxima, created_at').eq('user_id', user.id).not('nota', 'is', null).order('created_at', { ascending: false }).limit(150),
+  ])
+
+  const progressBySlug = new Map<string, { completed: number; total: number }>()
+  for (const row of (queueRows.data ?? []) as Array<{ subject: string; queue_status: string }>) {
+    const slug = normalizeSubjectSlug(row.subject)
+    const entry = progressBySlug.get(slug) ?? { completed: 0, total: 0 }
+    entry.total += 1
+    if (row.queue_status === 'completed') entry.completed += 1
+    progressBySlug.set(slug, entry)
+  }
+
+  const recentBySlug = new Map<string, { count: number; sum: number; max: number; lastDate: string }>()
+  for (const row of (recentHistorial.data ?? []) as Array<{ asignatura: string; nota: number; nota_maxima: number; created_at: string }>) {
+    if (!row.nota_maxima || row.nota_maxima <= 0) continue
+    const slug = toCaminoSlug(row.asignatura)
+    const entry = recentBySlug.get(slug) ?? { count: 0, sum: 0, max: 0, lastDate: row.created_at }
+    entry.count += 1
+    entry.sum += row.nota
+    entry.max += row.nota_maxima
+    if (row.created_at > entry.lastDate) entry.lastDate = row.created_at
+    recentBySlug.set(slug, entry)
+  }
+
+  const upcomingExamsRaw = (Array.isArray(profile?.student_exams) ? profile.student_exams as StudentExamRow[] : [])
+    .filter((e): e is StudentExamRow & { subject: string; date: string } => typeof e?.subject === 'string' && typeof e?.date === 'string' && e.date >= todayStr)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 5)
+    .map(e => ({
+      subjectLabel: activeSubjects.find(s => normalizeSubjectSlug(s) === normalizeSubjectSlug(e.subject)) ?? e.subject,
+      name: cleanString(e.name, 60) || cleanString(e.block, 60) || cleanString(e.topic, 60) || 'Parcial',
+      date: e.date,
+    }))
+
+  const fallbackOptions = deterministicOptions(activeSubjects, weakAreasRaw, upcomingExamsRaw, progressBySlug)
+
   try {
-    const levelsLines = activeSubjects
-      .filter(s => subjectLevels[s])
-      .map(s => `  · ${s}: ${subjectLevels[s]}`)
-      .join('\n')
+    const perSubjectLines = activeSubjects.map(label => {
+      const slug = normalizeSubjectSlug(label)
+      const progress = progressBySlug.get(slug)
+      const recent = recentBySlug.get(slug)
+      const weak = weakAreasRaw.filter(w => toCaminoSlug(w.subjectKey) === slug).slice(0, 2)
+      const exams = upcomingExamsRaw.filter(e => e.subjectLabel === label)
+      const parts: string[] = []
+      if (progress && progress.total > 0) parts.push(`progreso del curso ${progress.completed}/${progress.total} temas`)
+      if (recent) parts.push(`media reciente ${Math.round((recent.sum / recent.max) * 100)}% (${recent.count} correcciones)`)
+      if (weak.length) parts.push(`bloques flojos: ${weak.map(w => `${w.label} (${w.avgScore}%)`).join(', ')}`)
+      if (exams.length) parts.push(`parcial próximo: "${exams[0].name}" en ${daysUntil(exams[0].date)} días`)
+      if (subjectLevels[label]) parts.push(`el alumno dice que va "${subjectLevels[label]}"`)
+      return `- ${label}: ${parts.length ? parts.join(' · ') : 'sin datos todavía'}`
+    }).join('\n')
 
     const prompt = `Eres el motor de recomendaciones de Kairo (app de preparación PAU). Un alumno tiene un día de "repaso libre" — sin misión asignada por Kairo — y quiere que le sugieras qué repasar.
-- Asignaturas activas: ${activeSubjects.join(', ')}
-${levelsLines ? `- Cómo dice que va en cada una:\n${levelsLines}` : ''}
-${customInstructions ? `- Instrucciones personalizadas activas del alumno: ${customInstructions}` : '- Sin instrucciones personalizadas activas.'}
 
-Elige UNA asignatura de la lista de asignaturas activas (prioriza una en la que vaya peor si lo ha dicho, y respeta cualquier instrucción personalizada que mencione una asignatura o tema concreto) y escribe una nota breve (máx 100 caracteres, en español, sin markdown) de en qué enfocar el repaso ese día. Responde ÚNICAMENTE con JSON válido, sin texto adicional: {"subject": "<una asignatura EXACTAMENTE como aparece en la lista de asignaturas activas>", "focusNote": "<string>"}`
+Datos reales de cada asignatura activa (progreso de curso, parciales próximos, historial de correcciones y bloques con peor nota):
+${perSubjectLines}
+${customInstructions ? `- Instrucciones personalizadas activas del alumno: ${customInstructions}` : ''}
+
+Elige TRES opciones de repaso DISTINTAS entre sí, basadas ÚNICAMENTE en los datos reales de arriba — nunca inventes una nota, un parcial o un progreso que no aparezca en la lista. Prioriza cubrir asignaturas distintas si hay más de una con datos; repite asignatura solo si no hay otra opción con motivo real. Cada opción es una asignatura (EXACTAMENTE como aparece en la lista) y una nota breve (máx 100 caracteres, en español, sin markdown) que mencione el motivo real (nota floja en un bloque concreto, parcial próximo, poco progreso, etc.). Responde ÚNICAMENTE con JSON válido, sin texto adicional: {"options": [{"subject": "<asignatura>", "focusNote": "<string>"}, {"subject": "<asignatura>", "focusNote": "<string>"}, {"subject": "<asignatura>", "focusNote": "<string>"}]}`
 
     const response = await withAnthropicRetry(() => client.messages.create({
       model: MODEL,
-      max_tokens: 150,
+      max_tokens: 400,
       messages: [{ role: 'user', content: prompt }],
     }))
 
     const text = response.content.find((b): b is Anthropic.TextBlock => b.type === 'text')?.text ?? ''
     const match = text.match(/\{[\s\S]*\}/)
     if (!match) throw new Error('no_json_in_response')
-    const parsed = JSON.parse(match[0]) as { subject?: unknown; focusNote?: unknown }
-    const subject = typeof parsed.subject === 'string' && activeSubjects.includes(parsed.subject)
-      ? parsed.subject
-      : fallback
-    const focusNote = typeof parsed.focusNote === 'string' ? parsed.focusNote.slice(0, 140) : ''
+    const parsed = JSON.parse(match[0]) as { options?: unknown }
+
+    const parsedOptions: SuggestionOption[] = Array.isArray(parsed.options)
+      ? parsed.options
+        .filter((o): o is { subject: unknown; focusNote: unknown } => typeof o === 'object' && o !== null)
+        .filter(o => typeof o.subject === 'string' && activeSubjects.includes(o.subject))
+        .map(o => ({ subject: o.subject as string, focusNote: typeof o.focusNote === 'string' ? o.focusNote.slice(0, 140) : '' }))
+      : []
+
+    // La IA puede devolver menos de 3 válidas (subject inventado, JSON
+    // parcial) — se completa con las candidatas deterministas reales en vez
+    // de dejar el panel con menos de 3 opciones.
+    const options = [...parsedOptions]
+    for (const fb of fallbackOptions) {
+      if (options.length >= OPTIONS_COUNT) break
+      if (options.some(o => o.subject === fb.subject && o.focusNote === fb.focusNote)) continue
+      options.push(fb)
+    }
 
     const usage = extractAnthropicTokenUsage(response)
     logAiUsageEvent({
@@ -124,11 +272,11 @@ Elige UNA asignatura de la lista de asignaturas activas (prioriza una en la que 
       outputTokens: usage.outputTokens,
       totalTokens: usage.totalTokens,
       status: 'success',
-      metadata: { subjectCount: activeSubjects.length },
+      metadata: { subjectCount: activeSubjects.length, optionsCount: options.length },
       accessToken: authContext.accessToken,
     }).catch(() => {})
 
-    return NextResponse.json({ subject, focusNote, source: 'ai' })
+    return NextResponse.json({ options: options.slice(0, OPTIONS_COUNT), source: 'ai' })
   } catch (err) {
     console.error('[camino/free-review-suggestion] falling back to deterministic pick:', err)
     logAiUsageEvent({
@@ -141,6 +289,6 @@ Elige UNA asignatura de la lista de asignaturas activas (prioriza una en la que 
       metadata: { subjectCount: activeSubjects.length },
       accessToken: authContext.accessToken,
     }).catch(() => {})
-    return NextResponse.json({ subject: fallback, focusNote: '', source: 'fallback' })
+    return NextResponse.json({ options: fallbackOptions, source: 'fallback' })
   }
 }

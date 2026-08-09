@@ -6,7 +6,8 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
 import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
-import AuthSessionRedirect from './AuthSessionRedirect'
+import LandingAuthProvider from './LandingAuthState'
+import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta } from './LandingCta'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -106,8 +107,8 @@ export default function LandingPage() {
   const M = dmMono.style.fontFamily
 
   return (
+    <LandingAuthProvider>
     <div style={{ fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)', background: '#f9f9f9', color: '#1c1c1c' }}>
-      <AuthSessionRedirect />
 
       <style>{`
         /* ── Reset ── */
@@ -286,9 +287,7 @@ export default function LandingPage() {
           <Link href="/pricing" className="v4c-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
             Precios
           </Link>
-          <Link href="/login" className="v4c-btn-nav" style={{ padding: '7px 16px', border: '1px solid rgba(255,255,255,.3)', fontSize: 11, color: '#fff', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase' }}>
-            Entrar →
-          </Link>
+          <NavLoginLink />
         </div>
       </nav>
 
@@ -330,10 +329,7 @@ export default function LandingPage() {
             Prepara<span style={{ display: 'block', letterSpacing: '-.01em' }}>la PAU.</span>
           </h1>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <Link href="/onboarding" className="v4c-cta-circle" style={{ width: 140, height: 140, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontFamily: B, fontSize: 17, letterSpacing: '.06em', color: '#111', textAlign: 'center', lineHeight: 1.1 }}>Empieza<br />gratis</span>
-              <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(0,0,0,.45)', letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
-            </Link>
+            <HeroCta />
           </div>
           <Link href="#como-funciona" style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.35)', letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.15)', paddingBottom: 2, display: 'inline-block' }}>
             Ver cómo funciona
@@ -578,9 +574,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={plan.name === PLAN_COPY.free.label ? '/onboarding' : '/login'} style={{ fontFamily: M, fontSize: 10, color: '#fff', letterSpacing: '.1em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.3)', paddingBottom: 1, display: 'inline-block' }}>
-                  {plan.cta}
-                </Link>
+                <PricingPlanCta isFree={plan.name === PLAN_COPY.free.label} cta={plan.cta} />
               </div>
             ))}
           </div>
@@ -604,10 +598,7 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="v4c-cta-right">
-          <Link href="/onboarding" className="v4c-cta-circle-inv">
-            <span style={{ fontFamily: B, fontSize: 16, letterSpacing: '.06em', color: '#fff', textAlign: 'center', lineHeight: 1.1 }}>Empieza<br />gratis</span>
-            <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
-          </Link>
+          <BottomCta />
         </div>
       </div>
 
@@ -658,5 +649,6 @@ export default function LandingPage() {
       `}} />
 
     </div>
+    </LandingAuthProvider>
   )
 }

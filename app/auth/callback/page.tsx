@@ -10,6 +10,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
+import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
 import { loadLocalDraft, setLocalDraftId } from '@/app/lib/onboarding/onboardingDraftStorage'
 import { sendOnboardingEvent, flushQueuedOnboardingEvents } from '@/app/lib/onboarding/onboardingEvents'
 
@@ -123,15 +124,12 @@ function CallbackHandler() {
             headers: { Authorization: `Bearer ${token}` },
           })
           if (res.ok) {
-            const { onboarding } = await res.json()
-            // Mismo criterio que hasProfile en CaminoCalendarClient.
-            const completo = Boolean(
-              onboarding?.completedAt &&
-              onboarding?.community &&
-              onboarding?.subjects?.length
-            )
-            if (!completo) {
-              go('/onboarding')
+            const { onboarding, draft } = await res.json()
+            // Mismo criterio que hasProfile en CaminoCalendarClient, más
+            // recuperación de un borrador server-side sin terminar.
+            const dest = resolveOnboardingDestination({ onboarding, draft })
+            if (dest !== '/camino') {
+              go(dest)
               return
             }
           }

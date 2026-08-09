@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Eye, EyeOff } from 'lucide-react'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
+import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
@@ -79,7 +80,7 @@ export default function Login() {
         window.location.href = '/onboarding'
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error, data } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         setMensaje(mensajeAuthLegible(error.message))
       } else {
@@ -87,7 +88,26 @@ export default function Login() {
         // varias cuentas probadas en el mismo dispositivo); se descarta al
         // iniciar sesión y se reconcilia con el servidor de la cuenta real.
         clearOnboarding()
-        window.location.href = returnTo
+        // El destino se resuelve server-side (Bearer token -> /api/onboarding/me)
+        // para que funcione igual en un dispositivo nuevo sin localStorage:
+        // completo -> returnTo (normalmente /camino); incompleto o con un
+        // borrador sin terminar -> recuperar ese estado en vez de confiar
+        // ciegamente en returnTo.
+        let dest = returnTo
+        try {
+          const token = data.session?.access_token
+          if (token) {
+            const res = await fetch('/api/onboarding/me', { headers: { Authorization: `Bearer ${token}` } })
+            if (res.ok) {
+              const json = await res.json()
+              const resolved = resolveOnboardingDestination(json)
+              dest = resolved === '/camino' ? returnTo : resolved
+            }
+          }
+        } catch {
+          // Nunca bloquear el login por esta comprobación.
+        }
+        window.location.href = dest
       }
     }
     setCargando(false)

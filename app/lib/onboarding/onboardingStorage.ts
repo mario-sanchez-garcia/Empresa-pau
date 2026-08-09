@@ -93,9 +93,14 @@ export function syncOnboardingCommunity(data: Partial<OnboardingData>) {
 // datos de OTRA cuenta. Por eso distinguimos "el servidor confirma que no
 // hay onboarding" (status 'empty', autoritativo) de "no se pudo consultar"
 // (status 'error', se ignora y se mantiene el estado local ya pintado).
+export interface OnboardingActiveDraft {
+  id: string
+  status: 'claimed' | 'processing' | 'failed'
+}
+
 export type OnboardingRestoreResult =
   | { status: 'found'; data: OnboardingData }
-  | { status: 'empty' }
+  | { status: 'empty'; draft: OnboardingActiveDraft | null }
   | { status: 'error' }
 
 export async function restoreOnboardingFromServer(accessToken: string): Promise<OnboardingRestoreResult> {
@@ -105,8 +110,8 @@ export async function restoreOnboardingFromServer(accessToken: string): Promise<
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     if (!res.ok) return { status: 'error' }
-    const json = await res.json() as { onboarding?: Partial<OnboardingData> | null }
-    if (!json.onboarding?.completedAt) return { status: 'empty' }
+    const json = await res.json() as { onboarding?: Partial<OnboardingData> | null; draft?: OnboardingActiveDraft | null }
+    if (!json.onboarding?.completedAt) return { status: 'empty', draft: json.draft ?? null }
     saveOnboarding(json.onboarding)
     syncOnboardingCommunity(json.onboarding)
     return { status: 'found', data: loadOnboarding() }

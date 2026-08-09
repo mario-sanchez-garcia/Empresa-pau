@@ -338,6 +338,12 @@ export default function OnboardingFlow() {
           if (result.status === 'found') {
             if (!isPreview) { router.replace('/camino'); return }
             saved = result.data
+          } else if (result.status === 'empty' && result.draft && !isPreview) {
+            // Ya existe un borrador server-side (claimed/processing/failed)
+            // para esta cuenta — retomar la finalización en vez de volver a
+            // hacer las 11 preguntas (ver AGENTS.md / plan de auth-ux).
+            router.replace(`/onboarding/finalizando?draft=${encodeURIComponent(result.draft.id)}`)
+            return
           } else if (result.status === 'empty' && saved.completedAt) {
             // Copia local "completada" que no pertenece a esta cuenta.
             clearOnboarding()

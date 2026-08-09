@@ -83,9 +83,32 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'No se pudo recuperar el onboarding' }, { status: 500 })
   }
 
+  // Fase 2 (signup al final): borrador server-side de un intento de
+  // onboarding no terminado (claimed/processing/failed). No sustituye la
+  // comprobación de completitud de arriba — es lo que permite recuperar
+  // ("Continuar" en landing/login) el intento en curso desde CUALQUIER
+  // dispositivo, sin depender de localStorage.
+  const { data: draftRow } = await db
+    .from('onboarding_drafts')
+    .select('id, status, processing_stage, last_error_code')
+    .eq('claimed_by', user.id)
+    .in('status', ['claimed', 'processing', 'failed'])
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const draft = draftRow
+    ? {
+        id: draftRow.id as string,
+        status: draftRow.status as 'claimed' | 'processing' | 'failed',
+        processingStage: (draftRow.processing_stage as string | null) ?? null,
+        lastErrorCode: (draftRow.last_error_code as string | null) ?? null,
+      }
+    : null
+
   const payload = data?.payload as Record<string, unknown> | null | undefined
   if (!data || !payload || payload.onboarding_completed !== true) {
-    return NextResponse.json({ onboarding: null })
+    return NextResponse.json({ onboarding: null, draft })
   }
 
   // perfiles.subjects es la fuente de verdad actual (la escriben
@@ -129,5 +152,6 @@ export async function GET(request: NextRequest) {
       gradeThreshold: typeof perfil?.grade_threshold === 'number' ? perfil.grade_threshold : null,
       subjectGradeThresholds: (perfil?.subject_grade_thresholds as Record<string, number> | null) ?? {},
     },
+    draft,
   })
 }

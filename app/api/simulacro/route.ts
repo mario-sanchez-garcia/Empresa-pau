@@ -197,17 +197,31 @@ export async function POST(request: NextRequest) {
     const isRepeat = Boolean(simulacroRecord.repeated_from_id)
     if (!internalUser) {
       if (!isRepeat) {
+        const RATE_LIMIT_WINDOW_SECONDS = 24 * 60 * 60
         const rateLimit = await checkAiRateLimit({
           userId: authContext.user.id,
           route: '/api/simulacro',
           action: correctionAction,
           limit: 1,
-          windowSeconds: 24 * 60 * 60,
+          windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
           accessToken: authContext.accessToken
         })
 
         if (!rateLimit.allowed) {
-          return rateLimitResponse(correctionAction, rateLimit)
+          // Excepción: si ESTE simulacro se empezó antes de que arrancara la
+          // ventana de la corrección diaria (es decir, ya estaba en marcha
+          // cuando se consumió el cupo de hoy con otro), se deja terminar
+          // igual — el límite diario existe para espaciar cuánto contenido
+          // NUEVO se corrige por día, no para dejar a medias trabajo que el
+          // alumno ya había empezado de verdad. Empezar uno nuevo mientras
+          // el cupo está gastado sigue bloqueado sin excepción: solo
+          // "creado antes de que empezara la ventana actual" cuenta, así que
+          // no sirve para crear uno nuevo y reclamar la excepción al momento.
+          const windowStart = Date.now() - RATE_LIMIT_WINDOW_SECONDS * 1000
+          const startedBeforeWindow = new Date(simulacroRecord.created_at as string).getTime() < windowStart
+          if (!startedBeforeWindow) {
+            return rateLimitResponse(correctionAction, rateLimit)
+          }
         }
       }
 

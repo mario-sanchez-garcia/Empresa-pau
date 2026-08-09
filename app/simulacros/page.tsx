@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle2, Eye, EyeOff, PlayCircle, RotateCcw } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, PlayCircle, RotateCcw, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
@@ -66,6 +66,7 @@ function SimulacrosPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
   const [repeatingId, setRepeatingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const router = useRouter()
   const { ccaa } = useCCAA()
   const stats = useMemo(() => buildStats(history), [history])
@@ -293,6 +294,39 @@ function SimulacrosPage() {
     }
   }
 
+  // Borrar un intento que se quedó "en progreso" y no se va a terminar —
+  // solo intentos sin corregir: uno ya completado es historial real (nota,
+  // corrección) y nunca se ofrece borrar aquí. RLS ya protege esto (policy
+  // "Users can manage their own simulacros", solo el dueño), así que es un
+  // delete directo desde el cliente, mismo patrón que el resto de esta
+  // página (insert de createSimulacro/repeatSimulacro).
+  async function deleteSimulacro(recordId: string) {
+    if (deletingId) return
+    if (!window.confirm('¿Borrar este intento sin terminar? No se puede deshacer.')) return
+    setDeletingId(recordId)
+    setErrorMessage('')
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const currentUserId = sessionData.session?.user?.id
+      if (!currentUserId) { router.push('/login'); return }
+
+      const { error } = await supabase
+        .from('historial_simulacros')
+        .delete()
+        .eq('id', recordId)
+        .eq('user_id', currentUserId)
+        .neq('estado', 'completado')
+      if (error) {
+        console.error('SIMULACRO_DELETE_ERROR', error)
+        setErrorMessage('No se pudo borrar. Inténtalo de nuevo en unos segundos.')
+        return
+      }
+      setHistory(current => current.filter(item => item.id !== recordId))
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   const cfg = SUBJECTS[subject]
   const autoInfo = autoModeInfo(mode, weakCandidateCount)
   const effectiveYearChoiceRender = mode === 'personalizado' ? yearChoice : 'all'
@@ -451,6 +485,18 @@ function SimulacrosPage() {
                       >
                         <RotateCcw size={11} />
                         {repeatingId === item.id ? 'Preparando…' : 'Repetir para mejorar'}
+                      </button>
+                    )}
+                    {item.estado !== 'completado' && (
+                      <button
+                        type="button"
+                        onClick={() => void deleteSimulacro(item.id)}
+                        disabled={deletingId === item.id}
+                        title="Borrar intento sin terminar"
+                        aria-label="Borrar intento sin terminar"
+                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 999, background: 'transparent', color: '#94a3b8', border: '1px solid #f1f5f9', cursor: deletingId === item.id ? 'default' : 'pointer', opacity: deletingId === item.id ? .5 : 1 }}
+                      >
+                        <Trash2 size={12} />
                       </button>
                     )}
                   </div>

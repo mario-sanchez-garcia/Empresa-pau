@@ -805,7 +805,1247 @@ const examenesMatematicasCCSSMadridGenerados: Examen[] = [
   }
 ]
 
+const examenMadrid2026Ordinaria: Examen = {
+  id: 7200,
+  año: 2026,
+  tipo: "Ordinaria",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    { id: "CCSS-2026-O-1", bloque: "Pregunta 1", opcion: "A",
+      enunciado: "**Pregunta 1 (2,5 puntos). Responda los dos apartados. Esta pregunta no tiene opcionalidad.**\n\nEl barómetro de octubre de 2025 del Centro de Investigaciones Sociológicas (CIS) recoge las entrevistas realizadas a una muestra de 4029 personas. La Pregunta 10R plantea al entrevistado: “¿Cuál es, a su juicio, el principal problema que existe actualmente en España? ¿Y el segundo? ¿Y el tercero?” De los 333 entrevistados entre 18 y 24 años, un 35,5 % mencionan como alguno de los tres problemas “la vivienda”, un 26,7 % “la inmigración” y un 25,1 % “los problemas relacionados con la calidad del empleo”. En los barómetros de septiembre y julio de 2025, “la vivienda” fue mencionada como respuesta a la Pregunta 10R por el 31,9 % y el 29,3 % de los jóvenes en la misma franja de edad, respectivamente.\n\na) (1,5 puntos) Calcule el intervalo de confianza al 95 % para la proporción de jóvenes de 18 a 24 años que consideran la vivienda como uno de los tres principales problemas de España en octubre de 2025.\n\nb) (1 punto) Para el barómetro de noviembre se desea volver a estimar la proporción de jóvenes de 18 a 24 años que consideran la vivienda como uno de los tres principales problemas de España. Se quiere que esta estimación tenga un margen de error de cinco puntos porcentuales y un nivel de confianza del 97 %. Calcule el tamaño de muestra que sería necesario asumiendo que la proporción es $p=0,355$.\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 1. (Puntuación máxima: 2,5 puntos)\nApartado (1.a): 1,5 puntos.\nCálculo correcto de z_(α/2) ............................................................................. 0,3 puntos.\nJustificación correcta del uso de la aproximación normal.......................... 0,4 puntos.\nPlanteamiento correcto de la fórmula del intervalo de confianza ............. 0,4 puntos.\nCálculo correcto del intervalo de confianza................................................ 0,4 puntos.\nApartado (1.b): 1 punto.\nCálculo correcto de z_(α/2)............................................................................. 0,3 puntos.\nPlanteamiento correcto de la fórmula del error.......................................... 0,2 puntos.\nCálculo correcto del tamaño mínimo muestral .......................................... 0,5 puntos.\n\nSolución orientativa: con n=333 y proporción muestral p̂=0,355, como np̂=118,215>5 y n(1-p̂)=214,785>5 se usa la aproximación normal; con z_(α/2)=1,96 (95%), el intervalo de confianza es (0,355 ± 1,96·√(0,355·0,645/333)) ≈ (0,3036; 0,4064). Para el apartado b), con z_(α/2)=2,17 (97%), E=0,05 y p̂=0,355, se obtiene n ≥ 2,17²·0,355·0,645/0,05² = 431,2882, por lo que la muestra mínima es n=432 entrevistados." },
+
+    { id: "CCSS-2026-O-2A", bloque: "Pregunta 2", opcion: "A",
+      enunciado: "**Pregunta 2. Opción 2.1 (2,5 puntos).**\n\nConsidere la función real de variable real\n$$\nf(x)=x(1-x^2)+e^{-\\lambda x},\n$$\ndonde $\\lambda$ es un parámetro real sin especificar.\n\na) (1 punto) Calcule $F(x)$, la primitiva de $f(x)$, tal que $F(0)=1$.\n\nb) (1 punto) Obtenga el área entre la curva de $f(x)$ y el eje horizontal en el intervalo $[0,1]$.\n\nc) (0,5 puntos) ¿Para qué valores de $\\lambda$ es $f'(0)$ positiva?\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nOpción 2.1 Puntuación máxima: 2,5 puntos\nApartado (2.1.a): 1 punto.\nCálculo correcto de la primitiva................................................................... 0,5 puntos.\nCálculo correcto de la constante................................................................. 0,5 puntos.\nApartado (2.1.b): 1 punto.\nJustificación correcta de la positividad de f(x) en [0, 1]............................... 0,3 puntos.\nPlanteamiento correcto del área pedida (no penalizar por no dar el área en u²)........ 0,3 puntos.\nCálculo correcto del área ............................................................................ 0,4 puntos.\nApartado (2.1.c): 0,5 puntos.\nCálculo correcto de la derivada................................................................... 0,3 puntos.\nIdentificación correcta de f'(0) y obtención de la condición sobre λ........... 0,2 puntos.\n\nSolución orientativa: $F(x)=\\dfrac{x^2}{2}-\\dfrac{x^4}{4}-\\dfrac{e^{-\\lambda x}}{\\lambda}+C$, con $C=1+\\dfrac1\\lambda=\\dfrac{\\lambda+1}{\\lambda}$. Como $f(x)\\geq0$ en $[0,1]$, el área es $\\int_0^1 f(x)\\,dx=F(1)-F(0)=\\dfrac14+\\dfrac{1-e^{-\\lambda}}{\\lambda}$. Además $f'(x)=1-3x^2-\\lambda e^{-\\lambda x}$, por lo que $f'(0)=1-\\lambda>0 \\iff \\lambda<1$." },
+
+    { id: "CCSS-2026-O-2B", bloque: "Pregunta 2", opcion: "B",
+      enunciado: "**Pregunta 2. Opción 2.2 (2,5 puntos).**\n\nSea la función real de variable real definida por\n$$\nf(x)=\n\\begin{cases}\n\\dfrac{x+2}{(x-2)^2}, & x<0,\\\\[4pt]\n\\dfrac{x^2+x^3}{x^2+1}, & x\\geq 0.\n\\end{cases}\n$$\n\na) (0,5 puntos) Determine razonadamente el dominio de $f(x)$.\n\nb) (0,5 puntos) Estudie la continuidad de $f(x)$ en $x=0$.\n\nc) (0,5 puntos) Calcule la asíntota de $f(x)$ cuando $x\\to-\\infty$.\n\nd) (1 punto) Calcule la asíntota de $f(x)$ cuando $x\\to+\\infty$.\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nOpción 2.2 Puntuación máxima: 2,5 puntos\nApartado (2.2.a): 0,5 puntos.\nJustificación correcta del dominio en la rama x < 0..................................... 0,4 puntos.\nJustificación correcta del dominio en la rama x ≥ 0...................................... 0,1 puntos.\nApartado (2.2.b): 0,5 puntos.\nPlanteamiento de la definición de continuidad............................................ 0,1 puntos.\nCálculo correcto de los límites..................................................................... 0,1 puntos.\nConclusión correcta sobre la no continuidad en x=0.................................. 0,3 puntos.\nApartado (2.2.c): 0,5 puntos.\nCálculo correcto de la asíntota horizontal................................................... 0,4 puntos.\nComunicación correcta del resultado.......................................................... 0,1 puntos.\nApartado (2.2.d): 1 punto.\nIdentificación de la existencia de una asíntota oblicua............................... 0,2 puntos.\nCálculo correcto de la pendiente.................................................................. 0,3 puntos.\nCálculo correcto de la ordenada en el origen............................................... 0,4 puntos.\nComunicación correcta del resultado........................................................... 0,1 puntos.\n\nSolución orientativa: el denominador $(x-2)^2$ solo se anula en $x=2$ (fuera de la rama $x<0$) y $x^2+1>0$ siempre, por lo que $\\mathrm{Dom}\\,f=\\mathbb{R}$. $f(0)=0$, $\\lim_{x\\to0^-}f(x)=1/2$, $\\lim_{x\\to0^+}f(x)=0$: la función no es continua en $x=0$. Cuando $x\\to-\\infty$, $\\lim f(x)=0$ (asíntota horizontal $y=0$, sin asíntota oblicua). Cuando $x\\to+\\infty$, hay asíntota oblicua $y=x+1$ (pendiente $m=1$, ordenada $n=1$)." },
+
+    { id: "CCSS-2026-O-3A", bloque: "Pregunta 3", opcion: "A",
+      enunciado: "**Pregunta 3. Opción 3.1 (2,5 puntos).**\n\nConsidere las siguientes matrices:\n$$\nA=\\begin{pmatrix}1/2&1&3/2\\\\1&1/2&1\\\\3/2&1&1/2\\end{pmatrix}\n\\qquad\nB=\\begin{pmatrix}1&0&0\\\\0&1/2&0\\\\0&0&1/4\\end{pmatrix}.\n$$\n\na) (1,5 puntos) Calcule la matriz $X$ en la ecuación matricial $AXB=A+B$.\n\nb) (1 punto) Calcule el determinante $|C^2B|$, siendo $C=2(A^{-1})^t$.\n\n*Nota: $M^t$ denota la matriz traspuesta de la matriz $M$.*\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nOpción 3.1 Puntuación máxima: 2,5 puntos\nApartado (3.1.a): 1,5 puntos.\nCálculo correcto de la matriz inversa de A.......................................... 0,4 puntos.\nCálculo correcto de la matriz inversa de B ........................................ 0,1 puntos.\nPlanteamiento correcto de la ecuación para despejar X.................... 0,5 puntos.\nCálculo correcto de X.......................................................................... 0,5 puntos.\nApartado (3.1.b): 1 punto.\nPlanteamiento correcto del cálculo del determinante......................... 0,5 puntos.\nCálculo correcto del determinante....................................................... 0,5 puntos.\n\nSolución orientativa: $|A|=1$, con $A^{-1}=\\begin{pmatrix}-3/4&1&1/4\\\\1&-2&1\\\\1/4&1&-3/4\\end{pmatrix}$ y $B^{-1}=\\begin{pmatrix}1&0&0\\\\0&2&0\\\\0&0&4\\end{pmatrix}$. De $AXB=A+B \\iff X=B^{-1}+A^{-1}$ se obtiene $X=\\begin{pmatrix}1/4&1&1/4\\\\1&0&1\\\\1/4&1&13/4\\end{pmatrix}$. Además $|C|=2^3|A^{-1}|=8/|A|=8$, y $|C^2B|=|C|^2|B|=64/8=8$." },
+
+    { id: "CCSS-2026-O-3B", bloque: "Pregunta 3", opcion: "B",
+      enunciado: "**Pregunta 3. Opción 3.2 (2,5 puntos).**\n\nConsidere la región $S$ del plano delimitada por las siguientes restricciones:\n$$\nx\\leq 6,\\quad 3y-2x\\leq 10,\\quad 3y\\geq 2-2x,\\quad x\\leq 10-y,\\quad y\\geq x-6.\n$$\n\na) (2 puntos) Calcule las coordenadas de los vértices de $S$ y represente gráficamente la región $S$.\n\nb) (0,5 puntos) Se desea minimizar el triple de $y$ menos la mitad de $x$ en $S$. Indique el valor mínimo y el punto de la región en el cual se alcanza.\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nOpción 3.2 Puntuación máxima: 2,5 puntos\nApartado (3.2.a): 2 puntos.\nCálculo correcto de los cinco vértices ................................................ 1,5 puntos (−0,3 puntos por cada vértice incorrecto o faltante).\nRepresentación gráfica correcta de la región factible......................... 0,5 puntos.\nApartado (3.2.b): 0,5 puntos.\nPlanteamiento correcto de la función objetivo.................................... 0,1 puntos.\nMinimización correcta.......................................................................... 0,4 puntos.\n\nSolución orientativa: los vértices de $S$ son $A(4,6)$, $B(6,4)$, $C(6,0)$, $D(4,-2)$ y $E(-2,2)$. La función $f(x,y)=3y-\\tfrac{x}{2}$ toma los valores $16$, $9$, $-3$, $-8$ y $7$ respectivamente en esos vértices; el mínimo se alcanza en $D(4,-2)$, con valor $-8$." },
+
+    { id: "CCSS-2026-O-4A", bloque: "Pregunta 4", opcion: "A",
+      enunciado: "**Pregunta 4. Opción 4.1 (2,5 puntos).**\n\nSean $A$, $B$ y $C$ tres sucesos de los que se conoce la siguiente información:\n$$\nP(A)=0,4,\\quad P(B)=0,6,\\quad P(C)=0,5,\n$$\n$$\nP(A\\mid C)=0,6,\\quad P(B\\mid C)=0,8,\n$$\n$$\nP(A\\cap B\\mid C)=P(A\\mid C)P(B\\mid C),\\qquad P(A\\cap B\\mid \\overline C)=0,08.\n$$\n\na) (1 punto) Determine si $A$ y $B$ son independientes.\n\nb) (1,5 puntos) Determine la probabilidad de que $C$ ocurra sabiendo que $A$ y $B$ ocurrieron.\n\n*Nota: $\\overline S$ denota el suceso complementario (contrario) del suceso $S$.*\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nOpción 4.1 Puntuación máxima: 2,5 puntos\nApartado (4.1.a): 1 punto.\nPlanteamiento correcto de la independencia de sucesos................... 0,2 puntos.\nPlanteamiento correcto de la probabilidad de la intersección............ 0,4 puntos.\nJustificación correcta de la dependencia de los sucesos................... 0,4 puntos.\nApartado (4.1.b): 1,5 puntos.\nIdentificación correcta de la probabilidad pedida.................................0,3 puntos.\nPlanteamiento correcto de la probabilidad.......................................... 0,4 puntos.\nUso correcto de la independencia condicional................................... 0,4 puntos.\nCálculo correcto de la probabilidad pedida ........................................ 0,4 puntos.\n\nSolución orientativa: $P(A\\cap B)=P(A\\cap B\\mid C)P(C)+P(A\\cap B\\mid\\overline C)P(\\overline C)=(0,6\\cdot0,8)\\cdot0,5+0,08\\cdot0,5=0,28$. Como $P(A)P(B)=0,24\\neq P(A\\cap B)$, $A$ y $B$ no son independientes. Por Bayes, $P(C\\mid A\\cap B)=\\dfrac{P(A\\cap B\\mid C)P(C)}{P(A\\cap B)}=\\dfrac{0,48\\cdot0,5}{0,28}=\\dfrac{0,24}{0,28}\\approx0,8571$, usando que $P(A\\cap B\\mid C)=P(A\\mid C)P(B\\mid C)=0,48$." },
+
+    { id: "CCSS-2026-O-4B", bloque: "Pregunta 4", opcion: "B",
+      enunciado: "**Pregunta 4. Opción 4.2 (2,5 puntos).**\n\nEn un laboratorio farmacéutico se realiza un test de control de calidad para detectar productos defectuosos antes de su distribución. Se conoce la siguiente información:\n- El 3 % de los productos presenta un defecto grave, el 7 % un defecto leve y el resto no presenta defectos.\n- Si el defecto es grave, el test da positivo el 98 % de las veces.\n- Si el defecto es leve, el test da positivo el 80 % de las veces.\n- Si el producto no tiene defectos, el test da positivo el 5 % de las veces.\n\na) (1,2 puntos) Calcule la probabilidad de que el test de un producto seleccionado al azar dé negativo.\n\nb) (1,3 puntos) Si el test de un producto ha dado positivo, calcule la probabilidad de que el defecto sea grave.\n\nFuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Ordinaria Soluciones Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nOpción 4.2 Puntuación máxima: 2,5 puntos\nApartado (4.2.a): 1,2 puntos.\nIdentificación correcta de la probabilidad pedida................................. 0,4 puntos.\nPlanteamiento correcto de la probabilidad........................................... 0,3 puntos.\nCálculo correcto de la probabilidad pedida.......................................... 0,5 puntos.\nApartado (4.2.b): 1,3 puntos.\nIdentificación correcta de la probabilidad pedida................................. 0,4 puntos.\nPlanteamiento correcto de la probabilidad........................................... 0,5 puntos.\nCálculo correcto de la probabilidad pedida.......................................... 0,4 puntos.\nNOTA FINAL: por cada suceso no definido se penalizará con 0,1 puntos en la puntuación total de la Opción 4.2.\n\nSolución orientativa: con $P(G)=0,03$, $P(L)=0,07$, $P(N)=0,90$ y $P(+\\mid G)=0,98$, $P(+\\mid L)=0,80$, $P(+\\mid N)=0,05$ (luego $P(-\\mid G)=0,02$, $P(-\\mid L)=0,20$, $P(-\\mid N)=0,95$), se obtiene $P(-)=0,02\\cdot0,03+0,20\\cdot0,07+0,95\\cdot0,90=0,8696$. Además $P(+)=0,98\\cdot0,03+0,80\\cdot0,07+0,05\\cdot0,90=0,1304$, y $P(G\\mid+)=\\dfrac{0,0294}{0,1304}\\approx0,2255$." }
+  ]
+}
+
+const examenMadrid2026Modelo: Examen = {
+  id: 7201,
+  año: 2026,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    { id: "CCSS-2026-M-1", bloque: "Ejercicio 1", opcion: "A",
+      enunciado: "**Ejercicio 1 (2,5 puntos). Responda los dos apartados. Este ejercicio no tiene opcionalidad.**\n\nEn la Comunidad Autónoma de Aragón se encuentra la única Denominación de Origen Protegida (DOP) de melocotón, el Melocotón de Calanda, que celebró su 26º aniversario en 2025. El Departamento de Agricultura de Aragón registró comercialmente para la DOP tres variedades tradicionales de este producto, Jesca, Calante y Evaisa. La DOP exige unas características que deben cumplir sus frutos en cuanto a su aspecto, coloración, calibre, dureza, contenido en azúcar, etc.\n\na) (1 punto) La información recogida durante estos años permite indicar que el peso de los melocotones de la variedad Jesca puede ser aproximado por una distribución normal con desviación típica 50 gramos. Determine el número mínimo de melocotones que sería necesario seleccionar en una muestra aleatoria simple para estimar el peso medio de los melocotones de esta variedad de manera que, con un nivel de confianza del 96,8 %, el margen de error en la estimación no supere los 15 gramos.\n\nb) (1,5 puntos) Durante los dos últimos meses de crecimiento, los melocotones de la DOP Melocotón de Calanda permanecen embolsados uno a uno en el propio árbol mediante bolsas protectoras que garantizan su pureza y evitan el contacto con productos fitosanitarios. Se calcula que en la última campaña se embolsaron unos 250 millones de melocotones. Pese a ello, las tormentas de verano con granizo pueden dañar un 5 % de los frutos. En una cooperativa de las empresas certificadas se reciben melocotones para su comercialización como DOP y se inspecciona una muestra aleatoria simple de 400 melocotones. Obtenga el número esperado de melocotones no dañados y calcule, aproximando por la distribución normal adecuada, la probabilidad de que al menos 375 melocotones no estén dañados.\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nEjercicio 1 (2,5 puntos)\nApartado (1.a): 1 punto\nDeterminar el valor crítico z_(α/2) ......................................................................... 0,3 puntos\nPlanteamiento con la aplicación de la fórmula del error .................................... 0,2 puntos\nCálculo correcto del tamaño mínimo de la muestra ............................................0,5 puntos\nApartado (1.b): 1,5 puntos\nCálculo del número esperado de melocotones ................................................... 0,2 puntos\nAproximación correcta y justificada a la distribución normal ............................ 0,5 puntos\nCálculo correcto de la probabilidad pedida .......................................................... 0,8 puntos\n\nSolución orientativa: la solución oficial calcula, con confianza indicada en el enunciado (96,8 %; el documento oficial de soluciones desarrolla el cálculo con z≈2,12-2,14, nótese ligera inconsistencia numérica en el original), n ≥ (z_(α/2)·σ/15)² ≈ 50,88, por lo que el tamaño mínimo es 51 melocotones. En el apartado b), con Y~B(400; 0,95), el número esperado de no dañados es E(Y)=380, y aproximando por N(380; √19≈4,36) con corrección de Yates, P(Y≥375) ≈ P(Z≥(374,5-380)/4,36) = P(Z≥-1,26) = 0,8962." },
+
+    { id: "CCSS-2026-M-2A", bloque: "Ejercicio 2", opcion: "A",
+      enunciado: "**Ejercicio 2. Pregunta 2.1 (2,5 puntos).**\n\nSe consideran las matrices $A$ y $B$ dadas por:\n$$\nA=\\begin{pmatrix}-1&-1\\\\4&5\\end{pmatrix}\n\\qquad\nB=\\begin{pmatrix}1&-1&1\\end{pmatrix}.\n$$\n\na) (1,5 puntos) Calcule la matriz $C$ tal que $(I+2C^t)^{-1}=A$, donde $I$ es la matriz identidad de orden dos.\n\nb) (1 punto) Calcule, si es posible, la matriz $D$ tal que $D^t=\\dfrac{B^tB}{|BB^t|}$.\n\n*Nota: para cualquier matriz $M$, $M^t$ indica su matriz traspuesta.*\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 2.1 (2,5 puntos)\nApartado (2.1.a): 1,5 puntos\nObtención de la expresión correcta de C ............................................................ 0,4 puntos\nCálculo correcto de A⁻¹......................................................................................... 0,6 puntos\nCálculo correcto de C ........................................................................................... 0,5 puntos\nApartado (2.1.b): 1 punto\nCálculo correcto de BtB ........................................................................................ 0,4 puntos\nCálculo correcto de BBt........................................................................................ 0,2 puntos\nCálculo correcto de Dt.......................................................................................... 0,2 puntos\nCálculo correcto de D .......................................................................................... 0,2 puntos\n\nSolución orientativa: de $(I+2C^t)^{-1}=A$ se deduce $C=\\tfrac12(A^{-1}-I)^t$; calculando $A^{-1}=\\begin{pmatrix}-5&-1\\\\4&1\\end{pmatrix}$ mediante Gauss-Jordan, resulta $C=\\begin{pmatrix}-3&2\\\\-1/2&0\\end{pmatrix}$. Para el apartado b), $B^tB=\\begin{pmatrix}1&-1&1\\\\-1&1&-1\\\\1&-1&1\\end{pmatrix}$, $BB^t=(3)$, por lo que $D^t=\\begin{pmatrix}1/3&-1/3&1/3\\\\-1/3&1/3&-1/3\\\\1/3&-1/3&1/3\\end{pmatrix}=D$." },
+
+    { id: "CCSS-2026-M-2B", bloque: "Ejercicio 2", opcion: "B",
+      enunciado: "**Ejercicio 2. Pregunta 2.2 (2,5 puntos).**\n\nEl azafrán ecológico es una especia culinaria muy apreciada y costosa. Una empresa lo envasa y comercializa en distintos formatos: sobres de papel reciclado, cajas de plástico y cajas de metal. Cada uno de ellos se envasa en una línea de envasado diferente. Se sabe que el total del azafrán pendiente de envasar a última hora de un día determinado se podría distribuir bien en 15 sobres de papel y 4 cajas de plástico, o bien en 4 cajas de plástico y 3 cajas de metal. Por otra parte, el contenido de un sobre de papel más el de una caja de plástico es 5 gramos inferior que el de una caja de metal. Además, si al total del contenido de 5 cajas de plástico se le añade un gramo más de azafrán, se dobla la capacidad conjunta de los otros dos envases. Indique cuántos gramos de azafrán contiene cada uno de los envases en que puede comercializarse el azafrán.\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 2.2 (2,5 puntos)\nDescripción adecuada de las tres incógnitas ....................................................... 0,3 puntos\nPlanteamiento correcto del sistema de ecuaciones ............................................ 0,9 puntos\nResolución correcta del sistema ............................................................................ 1 punto\nObtención correcta de la solución contextualizada ............................................ 0,3 puntos\n\nSolución orientativa: con $x$ = gramos en un sobre de papel, $y$ = gramos en una caja de plástico, $z$ = gramos en una caja de metal, el sistema es\n$$\\begin{cases}15x+4y=4y+3z\\\\x+y=z-5\\\\5y+1=2(x+z)\\end{cases}$$\ny se obtiene $x=3$, $y=7$, $z=15$ gramos." },
+
+    { id: "CCSS-2026-M-3A", bloque: "Ejercicio 3", opcion: "A",
+      enunciado: "**Ejercicio 3. Pregunta 3.1 (2,5 puntos).**\n\nDada la función real de variable real definida por la siguiente expresión:\n$$\nf(x)=\n\\begin{cases}\n\\dfrac{x-1}{3-x}, & x<1,\\\\[4pt]\n\\dfrac{2-x}{3+x}, & x\\geq 1.\n\\end{cases}\n$$\n\na) (1,3 puntos) Estudie la continuidad de $f(x)$ en el punto $x=1$ y determine sus asíntotas.\n\nb) (1,2 puntos) Calcule el área de la región acotada del plano delimitada por la gráfica de la función $g(x)=(3x^2+9x)f(x)$, el eje de abscisas y las rectas $x=1$ y $x=3$.\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 3.1 (2,5 puntos)\nApartado (3.1.a): 1,3 puntos\nEstudio correcto de la discontinuidad en x = 1 ..................................................0,3 puntos\nJustificación correcta de la no existencia de asíntotas verticales ....................0,3 puntos\nDeterminación correcta de las asíntotas horizontales .......................................0,5 puntos\nJustificación correcta de la no existencia de asíntotas oblicuas .......................0,2 puntos\nApartado (3.1.b): 1,2 puntos\nCálculo correcto de los puntos de corte con el eje OX .......................................0,2 puntos\nPlanteamiento correcto del área pedida ...............................................................0,5 puntos\nCálculo correcto del área pedida ...........................................................................0,5 puntos\n\nSolución orientativa: $\\lim_{x\\to1^+}f(x)=1/4=f(1)$ y $\\lim_{x\\to1^-}f(x)=0$, luego $f$ no es continua en $x=1$. No hay asíntotas verticales (los denominadores se anulan en $x=3$ y $x=-3$, fuera de sus respectivos dominios de rama). Como $\\lim_{x\\to-\\infty}f(x)=-1$ y $\\lim_{x\\to+\\infty}f(x)=-1$, hay una única asíntota horizontal $y=-1$ (no hay oblicuas). Para el área, $g(x)=3x(2-x)$ corta al eje en $x=0,2$; el área entre $x=1$ y $x=3$ es $|\\int_1^2 3x(2-x)dx|+|\\int_2^3 3x(2-x)dx|=2+4=6\\ u^2$." },
+
+    { id: "CCSS-2026-M-3B", bloque: "Ejercicio 3", opcion: "B",
+      enunciado: "**Ejercicio 3. Pregunta 3.2 (2,5 puntos).**\n\nDada la función real de variable real $f(x)=\\dfrac{2x^2-3x}{a}$ donde $a>0$ es un parámetro real.\n\na) (1,2 puntos) Determine los cortes con los ejes de coordenadas, así como los intervalos de crecimiento y decrecimiento de la función.\n\nb) (1,3 puntos) Determine el valor de $a$ para que la función $f(x)$ tenga una primitiva, $F(x)$, que verifique $F(0)=2$ y $F(3)=7$.\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 3.2 (2,5 puntos)\nApartado (3.2.a): 1,2 puntos\nCálculo correcto de los intervalos de crecimiento y decrecimiento ...................0,8 puntos\nCálculo correcto de los puntos de corte con los ejes ...........................................0,4 puntos\nApartado (3.2.b): 1,3 puntos\nCálculo correcto de la primitiva .............................................................................0,8 puntos\nCálculo correcto del parámetro a .........................................................................0,5 puntos\n\nSolución orientativa: $f$ corta al eje de abscisas en $x=0$ y $x=3/2$, y al eje de ordenadas en $y=0$. Con $f'(x)=(4x-3)/a$, que se anula en $x=3/4$, y $a>0$, la función decrece en $(-\\infty,3/4)$ y crece en $(3/4,+\\infty)$. La primitiva es $F(x)=\\tfrac1a\\left(\\tfrac{2x^3}{3}-\\tfrac{3x^2}{2}\\right)+C$; de $F(0)=2$ se obtiene $C=2$, y de $F(3)=7$ resulta $\\tfrac{9}{2a}+2=7 \\Rightarrow a=9/10$." },
+
+    { id: "CCSS-2026-M-4A", bloque: "Ejercicio 4", opcion: "A",
+      enunciado: "**Ejercicio 4. Pregunta 4.1 (2,5 puntos).**\n\nDe dos sucesos $A$ y $B$ se sabe que $P(B)=0,5$, $P(A\\mid B)=0,2$ y $P(A\\cup B)=0,8$.\n\na) (0,8 puntos) Obtenga la probabilidad de que no ocurra ninguno de los dos sucesos.\n\nb) (0,7 puntos) Calcule la probabilidad de que ocurra el suceso $B$ pero no el suceso $A$.\n\nc) (1 punto) Justifique razonadamente si los sucesos $A$ y $B$ son independientes.\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 4.1 (2,5 puntos)\nApartado (4.1.a): 0,8 puntos\nPlanteamiento correcto de la probabilidad ...........................................................0,5 puntos\nCálculo correcto de la probabilidad ......................................................................0,3 puntos\nApartado (4.1.b): 0,7 puntos\nPlanteamiento correcto de la probabilidad ...........................................................0,5 puntos\nCálculo correcto de la probabilidad ......................................................................0,2 puntos\nApartado (4.1.c): 1 punto\nPlanteamiento correcto de la independencia de sucesos ..................................0,3 puntos\nJustificación correcta de la dependencia de los sucesos ...................................0,7 puntos\n\nSolución orientativa: $P(\\overline A\\cap\\overline B)=1-P(A\\cup B)=0,2$. Como $P(A\\mid B)=P(A\\cap B)/P(B)$, $P(A\\cap B)=0,10$, luego $P(\\overline A\\cap B)=P(B)-P(A\\cap B)=0,40$. Con $P(A\\cup B)=P(A)+P(B)-P(A\\cap B)$ se obtiene $P(A)=0,40$; como $P(A)\\cdot P(B)=0,20\\neq P(A\\cap B)=0,10$, los sucesos no son independientes." },
+
+    { id: "CCSS-2026-M-4B", bloque: "Ejercicio 4", opcion: "B",
+      enunciado: "**Ejercicio 4. Pregunta 4.2 (2,5 puntos).**\n\nEn una comunidad de vecinos se ha realizado una votación para analizar la conveniencia de instalar placas solares como medida de ahorro energético. El 26 % de los propietarios votaron en blanco y el resto se repartieron por igual entre los favorables a esta medida y los que votaron en contra. Un 10 % de los que votaron en blanco son propietarios que tienen la vivienda alquilada. Entre los propietarios favorables a esta medida, un 18 % también la tienen alquilada y sólo un 5 % la tienen alquilada entre los propietarios que votaron en contra. Como no hay voluntarios, el presidente de la Comunidad para el próximo año se elegirá por sorteo entre los propietarios de todas las viviendas.\n\na) (1 punto) ¿Cuál es la probabilidad de que el futuro presidente de la comunidad de vecinos tenga la vivienda alquilada?\n\nb) (1,5 puntos) Una vez realizado el sorteo, se comprueba que el nuevo presidente no tiene su vivienda alquilada. ¿Cuál es la probabilidad de que estuviera a favor de la instalación de placas solares en la votación realizada?\n\nFuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).",
+      puntuacion: 2.5, criterios: "Fuente: 2025-2026 Modelo examen Matemáticas Aplicadas a las Ciencias Sociales II.pdf (Universidades Públicas de la Comunidad de Madrid).\nSe valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final contextualizada. La calificación debe hacerse en múltiplos de 0,1 puntos.\n\nCriterios y soluciones oficiales extraídos del PDF:\nPregunta 4.2 (2,5 puntos)\nApartado (4.2.a): 1 punto\nPlanteamiento correcto de la probabilidad ...........................................................0,6 puntos\nCálculo correcto de la probabilidad ......................................................................0,4 puntos\nApartado (4.2.b): 1,5 puntos\nPlanteamiento correcto de la probabilidad ..............................................................1 punto\nCálculo correcto de la probabilidad ......................................................................0,5 puntos\nNOTA final: la no definición de los sucesos se penalizará con 0,3 puntos en la puntuación total de la pregunta.\n\nSolución orientativa: con $P(A_1)=0,26$ (blanco), $P(A_2)=P(A_3)=0,37$ (a favor/en contra) y $P(Q\\mid A_1)=0,10$, $P(Q\\mid A_2)=0,18$, $P(Q\\mid A_3)=0,05$ ($Q$=vivienda alquilada), se obtiene $P(Q)=0,10\\cdot0,26+0,18\\cdot0,37+0,05\\cdot0,37=0,1111$. Para el apartado b), $P(A_2\\mid\\overline Q)=\\dfrac{P(A_2\\cap\\overline Q)}{P(\\overline Q)}=\\dfrac{0,82\\cdot0,37}{0,8889}\\approx0,3413$." }
+  ]
+}
+
+const examenMadrid2018Modelo: Examen = {
+  id: 7300,
+  año: 2018,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2018-M-1A',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).**
+
+Se considera la matriz $A = \\begin{pmatrix} 0 & a & a \\\\ a & 0 & a \\\\ a & a & 0 \\end{pmatrix}$ dependiente del parámetro real $a$.
+
+a) Determínense los valores de $a$ para los que la matriz $A$ es invertible.
+
+b) Para $a = 1$, despéjese y determínese la matriz $X$ de la ecuación matricial $A \\cdot X = A + 2Id$, donde $Id$ representa la matriz identidad de orden 3.`,
+      `Apartado a): 1 punto. Cálculo correcto del determinante (0,50); solución correcta (0,50).
+Apartado b): 1 punto. Despejar correctamente la matriz X (0,50); determinar correctamente la matriz X (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).**
+
+Una bodega desea fijar el precio de venta al público de las 250 botellas de vino blanco y de las 500 de vino tinto que tiene en stock. Para no incurrir en pérdidas saben que el precio de venta al público de la botella de vino blanco debe ser como mínimo de 3 euros, de la misma manera el precio de venta al público de la botella de vino tinto debe ser de, como mínimo, 4 euros. Además saben que, para ser competitivos con esos precios de venta al público, el coste de 2 botellas de vino blanco y una de tinto debería ser a lo sumo 15 euros. Por el mismo motivo, el coste total de una botella de vino blanco y una de tinto no debe sobrepasar los 10 euros.
+
+Determínense los respectivos precios de venta al público por unidad de las botellas de vino blanco y de las de vino tinto, para que el ingreso total al vender el stock de 250 botellas de vino blanco y 500 de vino tinto sea máximo.`,
+      `Planteamiento correcto del problema de programación lineal (0,75); representación correcta de la región factible y localización correcta de los vértices (0,75); localización del máximo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).**
+
+Se considera la función real de variable real $f(x) = 4x^3 - 12x^2 + 16$.
+
+a) Calcúlese la ecuación de la recta tangente a la gráfica de $f(x)$ en el punto de abscisa $x = 1$.
+
+b) Calcúlese el área de la región limitada por la gráfica de $f(x)$, el eje de abscisas y las rectas $x = -2$ y $x = 3$.`,
+      `Apartado a): 1 punto. Cálculo correcto de la pendiente de la recta tangente (0,50); obtención de la ordenada en el origen (0,25); expresión correcta de la ecuación (0,25).
+Apartado b): 1 punto. Planteamiento correcto de la integral (0,25); cálculo correcto de la primitiva (0,50); cálculo del área (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).**
+
+Se consideran los sucesos $A$ y $B$ de un experimento aleatorio tales que: $P(A) = 0{,}4$; $P(B) = 0{,}5$; $P(A \\mid B) = 0{,}7$.
+
+Calcúlese:
+
+a) $P(A \\cup B)$.
+
+b) $P(\\overline{A} \\mid B)$.
+
+*Nota: $\\overline{S}$ denota el suceso complementario del suceso $S$.*`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-5A',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+Un determinado partido político desea estimar la proporción de votantes, $p$, que actualmente se decantaría por él.
+
+a) Asumiendo que $p = 0{,}5$, determínese el tamaño mínimo necesario de una muestra de votantes para garantizar que, con una confianza del 90 %, el margen de error en la estimación no supere el 2 % ($\\pm$ 2 %).
+
+b) Se tomó una muestra aleatoria simple de 1200 votantes de los cuales 240 afirmaron que votarían por el partido en cuestión. Obténgase un intervalo de confianza del 95 % para la proporción de votantes de ese partido en la población.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-1B',
+      'Ejercicio 1',
+      'B',
+      `**Ejercicio 1 (2 puntos).**
+
+Se considera el sistema de ecuaciones dependiente del parámetro real $a$:
+$$x + y + z = 3$$
+$$2x + y + z = 2$$
+$$5x + 3y + az = a + 4$$
+
+a) Discútase en función de los valores del parámetro $a$.
+
+b) Resuélvase para $a = 1$.`,
+      `Apartado a): 1 punto. Cálculo correcto del determinante de A y del valor crítico (0,50); discusión correcta (0,50).
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2 (2 puntos).**
+
+Se considera la función real de variable real $f(x) = \\dfrac{3x^2+3}{x}$.
+
+a) Calcúlense el dominio y las asíntotas de $f(x)$.
+
+b) Determínense sus intervalos de crecimiento y decrecimiento.`,
+      `Apartado a): 1 punto. Cálculo del dominio (0,25); obtención de la asíntota vertical (0,25); obtención de la asíntota oblicua (0,50).
+Apartado b): 1 punto. Obtención correcta de la derivada (0,50); obtención correcta de los intervalos de crecimiento/decrecimiento (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3 (2 puntos).**
+
+El beneficio diario (en miles de euros) de una empresa productora de cemento viene dado por la función $f(x) = -2x^2 + 14x - 12$, donde $x$ expresa las toneladas de cemento producidas al día, con $x \\in [0, 8]$.
+
+a) Calcúlense $f(0)$ y $f(8)$ e interprétense los resultados en el contexto del problema. Hállense las toneladas de cemento que deben producirse diariamente para obtener el máximo beneficio posible.
+
+b) Determínese entre qué valores debe estar la producción diaria de cemento para que la empresa no tenga pérdidas.`,
+      `Apartado a): 1 punto. Obtención de f(0) y f(8) (0,25); obtención del máximo relativo (0,50); obtención del máximo absoluto (0,25).
+Apartado b): 1 punto. Obtención de los puntos de corte con el eje OX (0,50); determinación correcta del signo de la función (0,25); interpretación de la solución en el contexto del problema (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4 (2 puntos).**
+
+Se consideran los sucesos $A$ y $B$ de un experimento aleatorio tales que: $P(A) = 0{,}3$; $P(B) = 0{,}8$; $P(A \\cup B) = 0{,}9$.
+
+Calcúlese:
+
+a) $P(\\overline{A} \\mid B)$.
+
+b) $P(A \\mid \\overline{B})$.
+
+*Nota: $\\overline{S}$ denota el suceso complementario del suceso $S$.*`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2018-M-5B',
+      'Ejercicio 5',
+      'B',
+      `**Ejercicio 5 (2 puntos).**
+
+El peso, en kilogramos, de los niños de diez años en la Comunidad de Madrid se puede aproximar por una variable aleatoria con distribución normal de media $\\mu$ desconocida y desviación típica $\\sigma = 3$ kilogramos.
+
+a) Calcúlese un intervalo de confianza al 95 % para $\\mu$ si se ha tomado una muestra aleatoria simple de 9 niños de diez años y se han obtenido los siguientes pesos en kilogramos: 37, 40, 42, 39, 41, 40, 39, 42, 40.
+
+b) Determínese el tamaño mínimo que debe tener una muestra aleatoria simple para que el error máximo cometido en la estimación de la media muestral sea menor que 1 kilogramo con un nivel de confianza del 98 %.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño mínimo de la muestra (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2019Modelo: Examen = {
+  id: 7301,
+  año: 2019,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2019-M-1A',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).**
+
+Se consideran las matrices: $A = \\begin{pmatrix} 2 & 3 & 5 \\\\ 1 & 3 & 6 \\\\ 3 & 3 & m \\end{pmatrix}$ y $B = \\begin{pmatrix} 1 & 1 & 0 \\\\ 1 & 0 & 1 \\\\ 0 & 0 & 1 \\end{pmatrix}$, donde $m$ es un parámetro real.
+
+a) Determínense los valores de $m$ para los que la matriz $A$ es invertible.
+
+b) Considérese la ecuación matricial $A \\cdot X = A \\cdot B + B$. Para $m = 5$, exprésese $X$ en función de $A$ y $B$ y calcúlese la matriz $X$.`,
+      `Apartado a): 1 punto. Cálculo correcto del determinante (0,50); determinación de los valores críticos (0,50).
+Apartado b): 1 punto. Expresión correcta de X en términos de A y B (0,25); cálculo correcto de la matriz X (0,75).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).**
+
+Sea $S$ la región del plano definida por: $-2x + 3y \\leq 4$; $2x + y \\geq 4$; $2x - y \\leq 4$.
+
+a) Represéntese la región $S$ y calcúlense las coordenadas de sus vértices.
+
+b) Obténganse los valores máximo y mínimo de la función $f(x,y) = 0{,}5x + \\dfrac{1}{3}y$ en $S$, indicando los puntos de la región en los cuales se alcanzan dichos valores máximo y mínimo.`,
+      `Apartado a): 1 punto. Representación correcta de la región S (0,50); determinación correcta de los vértices (0,50).
+Apartado b): 1 punto. Cálculo correcto de las coordenadas del máximo y mínimo (0,50); determinación correcta del valor máximo y mínimo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).**
+
+Se considera la función real de variable real $f(x) = \\dfrac{x^2-1}{x^2+x-2}$.
+
+a) Calcúlese la ecuación de la recta tangente a la gráfica de $f(x)$ en el punto de abscisa $x = 0$.
+
+b) Calcúlense sus asíntotas verticales y horizontales, si las tuviese.`,
+      `Apartado a): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la derivada (0,50); ecuación correcta de la tangente (0,25).
+Apartado b): 1 punto. Determinación correcta de la asíntota vertical en x=-2 (0,25); no existencia de asíntota vertical en x=1 (0,50); determinación de las asíntotas horizontales (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).**
+
+En una determinada sede de la EVAU hay un 45 % de alumnos de la modalidad de ciencias y un 40 % de Ciencias Sociales. Todos los alumnos de Ciencias Sociales hacen el examen de Matemáticas Aplicadas a las Ciencias Sociales II (MACCSSII). De los alumnos de Ciencias de esa sede, un 5 % va a realizar el examen de MACCSSII. En esa sede ningún alumno del resto de modalidades se examina de MACCSSII. Se toma a un alumno al azar de esa sede. Calcúlese la probabilidad de que:
+
+a) Se examine de MACCSSII.
+
+b) Sabiendo que se examina de MACCSSII, sea un alumno de la modalidad de Ciencias.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-5A',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+Una plataforma de televisión quiere lanzar un nuevo paquete de contenidos de pago. Por ello desea estimar la proporción de clientes, $P$, que estarían dispuestos a contratarlo.
+
+a) Asumiendo que la proporción poblacional es $P = 0{,}5$, determínese el tamaño mínimo necesario de una muestra de individuos para garantizar que, con una confianza del 95 %, el margen de error en la estimación no supere el 2 % ($\\pm$ 2 %).
+
+b) Se tomó una muestra aleatoria simple de 500 clientes de los cuales 85 afirmaron que contratarían el paquete. Obténgase un intervalo de confianza del 90 % para la proporción de individuos que estarían dispuestos a contratar el paquete.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); obtención correcta del tamaño (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo (0,25); cálculo correcto del intervalo de confianza (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-1B',
+      'Ejercicio 1',
+      'B',
+      `**Ejercicio 1 (2 puntos).**
+
+Se considera el sistema de ecuaciones dependiente del parámetro real $a$:
+$$6x + 2y + z = 1$$
+$$x + 3y + z = 2$$
+$$5x - y + az = -1$$
+
+a) Discútase en función de los valores del parámetro $a$.
+
+b) Resuélvase para $a = 0$.`,
+      `Apartado a): 1 punto. Cálculo correcto del determinante y valor crítico (0,50); discusión correcta (0,50).
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2 (2 puntos).**
+
+Considérese la función real de variable real:
+$$f(x) = \\begin{cases} 2x + a & \\text{si } x < -1, \\\\ e^{2x+2} & \\text{si } x \\geq -1. \\end{cases}$$
+
+a) Determínese el valor del parámetro $a \\in \\mathbb{R}$ para el cual $f(x)$ es una función continua en $x = -1$.
+
+b) Hállese el área de la región limitada por el eje de abscisas, las rectas $x = 0$ y $x = 1$ y la gráfica de $f(x)$.`,
+      `Apartado a): 1 punto. Planteamiento correcto de la condición de continuidad en x=-1 (0,25); cálculo correcto de los límites laterales en x=-1 (0,50); determinación del valor del parámetro (0,25).
+Apartado b): 1 punto. Planteamiento correcto (0,25); cálculo de la primitiva (0,50); determinación del área (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3 (2 puntos).**
+
+Se considera la función real de variable real: $f(x) = \\dfrac{x-1}{x^2+1}$.
+
+a) Determínense sus intervalos de crecimiento y decrecimiento.
+
+b) Calcúlense sus máximos y mínimos locales, si los tuviese.`,
+      `Apartado a): 1 punto. Determinación correcta de la derivada (0,50); determinación correcta de los intervalos pedidos (0,50).
+Apartado b): 1 punto. Obtención correcta de los valores críticos (0,50); cálculo correcto del máximo y mínimo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4 (2 puntos).**
+
+Se escoge al azar un cliente de un determinado hotel de la costa española. Se sabe que la probabilidad de que sea español es 0,2. La probabilidad de que siendo extranjero sea hombre es 0,45. Finalmente la probabilidad de que sea una mujer española es 0,1. Calcúlese la probabilidad de que:
+
+a) Conocido que es español, sea un hombre.
+
+b) Sea una mujer.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2019-M-5B',
+      'Ejercicio 5',
+      'B',
+      `**Ejercicio 5 (2 puntos).**
+
+El contenido en azúcares, medido en kilogramos (kg), de los botes de 1 kg de miel natural del Valle de Valdeón se puede aproximar por una variable aleatoria con distribución normal de media $\\mu$ kg y desviación típica $\\sigma = 0{,}1$ kg.
+
+a) Determínese el tamaño mínimo que debe tener una muestra aleatoria simple para que el error máximo cometido en la estimación de $\\mu$ sea menor que 0,025 kg, con un nivel de confianza del 95 %.
+
+b) Sabiendo que $\\mu = 0{,}7$ kg, calcúlese la probabilidad de que al tomar una muestra aleatoria simple de tamaño 20, la media del contenido en azúcares de esos botes sea menor que 0,65 kg.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del tamaño (0,25); obtención correcta del tamaño de la muestra (0,50).
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); planteamiento de la probabilidad (0,25); cálculo correcto de la probabilidad (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2020Modelo: Examen = {
+  id: 7302,
+  año: 2020,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2020-M-1A',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).**
+
+Se consideran las matrices $A = \\begin{pmatrix} a & 1 \\\\ b & 2 \\end{pmatrix}$, $I = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$, $B = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\end{pmatrix}$.
+
+a) Calcule los valores de $a$ y de $b$ para que se verifique $A^2 = 2I$.
+
+b) Para $a = 0$ y $b = 2$, determine la matriz $X$ tal que $XA = B - X$.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); determinación correcta de los valores de a y de b (0,25).
+Apartado b): 1 punto. Expresión correcta de X (0,50); determinación correcta de la matriz X (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).**
+
+Se considera la función real de variable real $f(x)$ definida por
+$$f(x) = \\begin{cases} -x+a & x < -8 \\\\ \\sqrt[3]{x} & -8 \\leq x < 1 \\\\ \\ln x & x \\geq 1 \\end{cases}$$
+donde $\\ln$ denota el logaritmo neperiano y $a \\in \\mathbb{R}$.
+
+a) Proporcione el valor del parámetro $a$ para que la función anterior sea continua en el punto de abscisa $x = -8$ y analice la continuidad de la función en el resto de los puntos de su dominio.
+
+b) Obtenga la recta tangente a la función en el punto $x = e$ y estudie el crecimiento/decrecimiento de esta recta. Justifique su respuesta.`,
+      `Apartado a): 1 punto. Planteamiento correcto de la condición de continuidad (0,25); determinación correcta del parámetro (0,25); estudio de la continuidad en el resto del dominio (0,50).
+Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la derivada (0,25); obtención correcta de la recta tangente (0,25); indicación del crecimiento/decrecimiento (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).** Dada la curva $f(x) = x^2 + 4x - 5$.
+
+a) Halle el punto en el que la recta tangente a la curva es paralela a la recta $y - 6x + 1 = 0$, indicando su abscisa y ordenada.
+
+b) Calcule el área del recinto acotado del plano limitado por la gráfica de $f(x)$ y la curva $g(x) = -x^2 + 4x + 3$.`,
+      `Apartado a): 1 punto. Cálculo correcto de la derivada (0,25); planteamiento y resolución de la condición de paralelismo (0,50); coordenadas del punto (0,25).
+Apartado b): 1 punto. Puntos de corte entre las curvas (0,25); planteamiento correcto de la integral (0,25); resolución de la integral indefinida (0,25); resolución de la integral definida (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).**
+
+En una tienda en periodo de rebajas, el 80 % de las ventas son de ropa y el 20 % restante son complementos de moda. De las ventas que se realizan en la campaña, el 20 % de las ventas de ropa son devueltas, mientras que solo se devuelven el 10 % de los complementos. Si una de las ventas es elegida al azar, calcule la probabilidad de que la venta:
+
+a) Sea una prenda de ropa y sea devuelta.
+
+b) Sea devuelta.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-5A',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+La cantidad de principio activo en las pastillas de una determinada marca de detergente puede aproximarse por una variable aleatoria con distribución normal de media $\\mu$ mg y varianza 0,09 mg².
+
+a) Si una muestra aleatoria simple de 400 pastillas proporcionó una cantidad media de principio activo de 13 mg, halle un intervalo de confianza al 99 % para la media poblacional.
+
+b) Determine el tamaño muestral mínimo para que el error máximo cometido en la estimación de $\\mu$ por la media muestral sea menor de 0,05 mg con un nivel de confianza del 98 %.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del tamaño mínimo de la muestra (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-1B',
+      'Ejercicio 1',
+      'B',
+      `**Ejercicio 1 (2 puntos).** Dadas las matrices $A = \\begin{pmatrix} 1 & 0 & 2 \\\\ 0 & 2 & 1 \\end{pmatrix}$, $B = \\begin{pmatrix} 1 & 0 & m \\\\ 0 & 1 & 1 \\\\ m-1 & 0 & 1 \\end{pmatrix}$, $C = \\begin{pmatrix} 3 & 1 \\\\ 0 & 2 \\\\ 4 & 3 \\end{pmatrix}$.
+
+a) Proporcione el valor de $m$ para que $A \\cdot B = C^t$.
+
+b) Para $m = 0$, calcule $B^{-1}$.`,
+      `Apartado a): 1 punto. Cálculo correcto del producto de matrices (0,50); determinación correcta del parámetro m (0,25).
+Apartado b): 1 punto. Cálculo correcto del determinante (0,50); obtención de la matriz inversa (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2 (2 puntos).** Dado el sistema de ecuaciones:
+$$x + ay + z = 6$$
+$$2x - y + z = a - 1$$
+$$-x + y + z = 2$$
+
+a) Discuta el sistema para los distintos valores de $a \\in \\mathbb{R}$.
+
+b) Resuelva el sistema de ecuaciones para $a = 2$.`,
+      `Apartado a): 1 punto. Cálculo correcto del determinante y valor crítico (0,50); discusión correcta (0,25).
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3 (2 puntos).**
+
+Se considera la función real de variable real definida por: $f(x) = \\sqrt{2}\\,x\\,e^{-x^2}$.
+
+a) Determine los intervalos de crecimiento y decrecimiento de la función y calcule $\\lim_{x \\to -\\infty} f(x)$.
+
+b) Halle el área del recinto acotado del plano delimitado por la gráfica de la función, el eje de abscisas y las rectas $x = -1$ y $x = 1$.`,
+      `Apartado a): 1 punto. Obtención correcta de la derivada (0,25); determinación correcta de los intervalos de crecimiento/decrecimiento (0,50); cálculo correcto del límite (0,25).
+Apartado b): 1 punto. Planteamiento correcto del área (0,50); cálculo correcto de primitiva/s (0,25); cálculo correcto de integral/es definida/s (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4 (2 puntos).**
+
+Se lanza un dado para decidir el número de veces que se lanza una moneda.
+
+a) Obtenga la probabilidad de no observar ninguna cruz.
+
+b) Dado que no se observó ninguna cruz, ¿cuál es la probabilidad de haber lanzado la moneda 2 veces?`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2020-M-5B',
+      'Ejercicio 5',
+      'B',
+      `**Ejercicio 5 (2 puntos).**
+
+En verano, en Madrid, se instalan puestos callejeros de venta de melones y sandías. Se sabe que el peso de las sandías puede aproximarse por una variable con distribución normal de media $\\mu$ y desviación típica $\\sigma = 450$ g.
+
+a) Si se toma una muestra de 25 sandías y se obtiene una media muestral de $\\bar{x} = 2700$ g, calcule un intervalo de confianza al 95 % para la media poblacional.
+
+b) Si el peso medio de las sandías es $\\mu = 3000$ g, calcule la probabilidad de que una muestra de cuatro sandías cogidas al azar pesen en media entre 3000 g y 3450 g.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo de confianza (0,50).
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); tipificación correcta de la variable (0,25); determinación correcta de la probabilidad (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2021Modelo: Examen = {
+  id: 7303,
+  año: 2021,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2021-M-1A',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).**
+
+Se consideran las matrices $A = \\begin{pmatrix} 1 & 0 & 0 \\\\ a & 1 & 0 \\\\ b & c & 1 \\end{pmatrix}$, $B = \\begin{pmatrix} 0 & 0 & 0 \\\\ 1 & 0 & 0 \\\\ 1 & 1 & 0 \\end{pmatrix}$.
+
+a) Determine los valores de los parámetros reales $a$, $b$ y $c$ para que se verifique $A^2 = A - B$.
+
+b) Para $a = b = c = 2$, estudie si la matriz $A$ es invertible y, en caso afirmativo, calcule su inversa.`,
+      `Apartado a): 1 punto. Planteamiento correcto del producto de matrices (0,50); determinación correcta de a, b y c (0,50).
+Apartado b): 1 punto. Estudio correcto de la invertibilidad (0,50); cálculo correcto de la inversa (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).**
+
+Se considera la función real de variable real $f(x) = ax^2 + bx + c$.
+
+a) Obtenga los coeficientes reales $a$, $b$ y $c$ de $f(x)$ sabiendo que la función tiene un extremo relativo en el punto de abscisa $x = -3$ y que la ecuación de la recta tangente a la gráfica de $f(x)$ en el punto de abscisa $x = 0$ es $y = 6x + 8$.
+
+b) Para $a = 2$, $b = 1$ y $c = 1$, calcule la integral $\\displaystyle\\int_1^e \\dfrac{f(x)}{x}\\,dx$.`,
+      `Apartado a): 1 punto. Planteamiento de la condición de extremo relativo (0,50); determinación correcta de a, b y c a partir de la recta tangente (0,50).
+Apartado b): 1 punto. Cálculo correcto de la primitiva (0,50); cálculo correcto de la integral definida (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).** Dada la función $f(x) = x + \\dfrac{4}{x^2}$.
+
+a) Halle el dominio de la función y sus asíntotas.
+
+b) Determine los intervalos de crecimiento y decrecimiento de la función y, si los hubiera, sus extremos relativos.`,
+      `Apartado a): 1 punto. Cálculo correcto del dominio (0,25); determinación correcta de la asíntota vertical (0,25); determinación correcta de la asíntota oblicua (0,50).
+Apartado b): 1 punto. Obtención correcta de la derivada (0,50); determinación correcta de los intervalos y del extremo relativo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).**
+
+En un mercado agropecuario el 70 % de las verduras que se comercializan son de proximidad y el resto no. El 30 % de las verduras de proximidad son ecológicas, mientras que de las que no son de proximidad, solo son ecológicas el 10 %. Si un cliente elegido al azar ha realizado una compra de una verdura, calcule las siguientes probabilidades:
+
+a) Probabilidad de que la verdura comprada no sea ecológica.
+
+b) Probabilidad de que la verdura sea de proximidad o ecológica.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-5A',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+El número de kilómetros que un corredor entrena a la semana mientras prepara una carrera popular se puede aproximar por una variable aleatoria de distribución normal de media $\\mu$ km y desviación típica $\\sigma = 10$ km.
+
+a) Se toma una muestra aleatoria simple de 20 atletas, obteniéndose una media muestral de 30 km. Determine un intervalo de confianza al 95 % para $\\mu$.
+
+b) Suponga que $\\mu = 28$ km. Calcule la probabilidad de que al tomar una muestra aleatoria simple de 10 atletas, la media muestral, $\\bar{X}$, esté entre 28 y 30 km.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo (0,25); determinación correcta del intervalo (0,50).
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); tipificación correcta (0,25); determinación correcta de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-1B',
+      'Ejercicio 1',
+      'B',
+      `**Ejercicio 1 (2 puntos).**
+
+Un agricultor dispone de 5 hectáreas, como máximo, de terreno para dedicar a la plantación de trigo y cebada. Cada hectárea dedicada al trigo le supone un beneficio de 200 euros, mientras que cada hectárea dedicada a la cebada le supone un beneficio de 60 euros. Entre ambos cultivos es obligatorio plantar como mínimo una hectárea, y la normativa autonómica le obliga a que el cultivo de trigo ocupe como mucho una hectárea más que el de cebada. Represente la región factible, determine las hectáreas que debería dedicar a cada cultivo para maximizar sus beneficios y obtenga el valor del beneficio máximo.`,
+      `Planteamiento correcto del problema de programación lineal (0,75); representación correcta de la región factible y localización correcta de los vértices (0,75); localización del máximo y valor del beneficio máximo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2 (2 puntos).**
+
+Se considera el siguiente sistema de ecuaciones lineales dependiente del parámetro real $a$:
+$$x + y + z = 2a - 1$$
+$$2x + y + az = 1$$
+$$x + ay + z = 1$$
+
+a) Discuta el sistema en función de los valores del parámetro $a$.
+
+b) Resuelva el sistema de ecuaciones para $a = 0$.`,
+      `Apartado a): 1 punto. Cálculo correcto del determinante y valor crítico (0,50); discusión correcta (0,50).
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3 (2 puntos).**
+
+Se considera la función real de variable real definida por
+$$f(x) = \\begin{cases} x^2 + ax - \\dfrac{1}{9} & \\text{si } x \\leq 0, \\\\ \\dfrac{x+1}{x^2-9} & \\text{si } x > 0. \\end{cases}$$
+
+a) Determine el dominio de $f(x)$ y calcule el valor del parámetro $a \\in \\mathbb{R}$ para que $f(x)$ sea derivable en todo su dominio.
+
+b) Para $a = 0$ determine, si existen, las asíntotas de $f(x)$.`,
+      `Apartado a): 1 punto. Determinación correcta del dominio (0,25); planteamiento correcto de la derivabilidad (0,25); cálculo correcto del parámetro (0,50).
+Apartado b): 1 punto. Determinación correcta de la asíntota vertical (0,50); determinación correcta de la asíntota horizontal (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4 (2 puntos).**
+
+Sean $C$ y $D$ dos sucesos de un experimento aleatorio tales que $P(C) = 0{,}4$, $P(D) = 0{,}6$ y $P(C \\cup D) = 0{,}8$.
+
+Calcule:
+
+a) $P(C \\mid D)$.
+
+b) $P(\\overline{C} \\cap D \\mid C)$.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2021-M-5B',
+      'Ejercicio 5',
+      'B',
+      `**Ejercicio 5 (2 puntos).**
+
+Las calorías consumidas por un atleta durante una carrera popular se pueden aproximar por una variable aleatoria con distribución normal de media $\\mu$ calorías y desviación típica $\\sigma = 300$ calorías.
+
+a) Determine el tamaño mínimo que debe tener una muestra aleatoria simple para que el error máximo cometido en la estimación de $\\mu$ sea menor de 100 calorías con un nivel de confianza del 95 %.
+
+b) Suponga que $\\mu = 3000$ calorías. Calcule la probabilidad de que al tomar una muestra aleatoria simple de tamaño $n = 50$ atletas, la media de las calorías consumidas durante la carrera sea mayor que 2700 calorías.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño mínimo (0,50).
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); planteamiento de la probabilidad (0,25); cálculo correcto de la probabilidad (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2022Modelo: Examen = {
+  id: 7304,
+  año: 2022,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2022-M-1A',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).**
+
+Se considera la matriz $A = \\begin{pmatrix} 2 & 1 & 1 \\\\ 1 & a & 2 \\\\ 0 & 1 & 1 \\end{pmatrix}$.
+
+a) Determine los valores del parámetro real $a$ para los cuales la matriz $A$ es invertible.
+
+b) Calcule, para $a = 0$, la matriz inversa $A^{-1}$.`,
+      `Apartado a): 1 punto. Expresión correcta de la condición de existencia de la inversa (0,25); cálculo correcto del parámetro (0,75).
+Apartado b): 1 punto. Planteamiento correcto (0,25); cálculo correcto de la inversa (0,75).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).** Sea $S$ la región del plano definida por: $x + y \\geq 3$, $2x + y \\leq 8$, $x + 2y \\leq 10$, $x \\geq 0$, $y \\geq 0$.
+
+a) Represente gráficamente la región $S$ y calcule las coordenadas de sus vértices.
+
+b) Obtenga el valor máximo de la función $f(x,y) = 2x + 3y$ en $S$, indicando el punto de la región en el cual se alcanza el máximo y el valor máximo alcanzado.`,
+      `Apartado a): 1 punto. Representación correcta de la región factible (0,50); obtención correcta de los vértices (0,50).
+Apartado b): 1 punto. Determinar el máximo de la función (0,50); encontrar el punto de valor máximo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).** Se considera la función real de variable real $f(x) = \\sqrt{1+x^2}$.
+
+a) Calcule la ecuación de la recta tangente a la gráfica de $f(x)$ en el punto de abscisa $x = 0$.
+
+b) Calcule $\\displaystyle\\int_0^1 2x\\,f(x)\\,dx$.`,
+      `Apartado a): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la pendiente (0,50); ecuación correcta de la recta tangente (0,25).
+Apartado b): 1 punto. Determinación correcta de la primitiva (0,75); cálculo correcto de la integral definida (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).**
+
+Una empresa de reparto de comida a domicilio reparte platos de dos restaurantes. El 60 % de los platos que reparte proceden del primer restaurante y el 40 % restante del segundo. El 50 % de los platos que reparte del primer restaurante están cocinados con productos ecológicos, siendo este porcentaje de un 80 % para el segundo restaurante. Elegido un plato al azar:
+
+a) Calcule la probabilidad de que esté cocinado con productos ecológicos.
+
+b) Si el plato seleccionado no está cocinado con productos ecológicos, obtenga la probabilidad de que proceda del segundo restaurante.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-5A',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+El tiempo diario de juego con videoconsolas de un estudiante de secundaria sigue una distribución normal de media $\\mu$ y desviación típica 0,25 horas.
+
+a) Se toma una muestra aleatoria simple de tamaño 25. Calcule la probabilidad de que la media muestral $\\bar{X}$ no supere las 2,9 horas si $\\mu = 2{,}75$ horas.
+
+b) Sabiendo que para una muestra aleatoria simple de 64 personas se ha obtenido un intervalo de confianza $(2{,}9388, 3{,}0613)$ para $\\mu$, determine el nivel de confianza con el que se obtuvo dicho intervalo.`,
+      `Apartado a): 1 punto. Expresión de la distribución de la media muestral (0,25); tipificación correcta de la variable (0,25); obtención correcta de la probabilidad (0,50).
+Apartado b): 1 punto. Expresión correcta de la fórmula del error (0,25); cálculo correcto de z_(α/2) (0,25); obtención correcta del nivel de confianza (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-1B',
+      'Ejercicio 1',
+      'B',
+      `**Ejercicio 1 (2 puntos).**
+
+Se considera el sistema de ecuaciones dependiente del parámetro real $a$:
+$$x - y + z = 2$$
+$$x - y + az = -1$$
+$$2x + y + z = 6$$
+
+a) Discuta el sistema en función de los valores del parámetro real $a$.
+
+b) Resuelva el sistema para $a = -2$.`,
+      `Apartado a): 1 punto. Determinación correcta del valor crítico (0,50); discusión correcta (0,50).
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2 (2 puntos).** Se considera la función real de variable real definida por $f(x) = \\dfrac{10}{x^2+2x-3}$.
+
+a) Determine el dominio de $f(x)$ y calcule sus asíntotas.
+
+b) Obtenga los intervalos de crecimiento y decrecimiento de $f(x)$ y determine los extremos relativos indicando si corresponden a máximos o mínimos.`,
+      `Apartado a): 1 punto. Estudio correcto del dominio (0,50); determinación correcta de las asíntotas verticales (0,25); determinación correcta de la asíntota horizontal (0,25).
+Apartado b): 1 punto. Determinación correcta de la derivada (0,25); determinación correcta de los intervalos (0,50); cálculo correcto de los extremos (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3 (2 puntos).** Considere la función real de variable real definida por:
+$$f(x) = \\begin{cases} ax^2 - 2x & \\text{si } x \\leq 2 \\\\ \\ln(x-1) & \\text{si } x > 2 \\end{cases}$$
+
+a) Determine para qué valores de $a \\in \\mathbb{R}$ la función $f(x)$ es continua en su dominio.
+
+b) Para $a = 1$, halle el área de la región acotada delimitada por la función $f(x)$, el eje de abscisas y las rectas $x = -1$, $x = 0$.`,
+      `Apartado a): 1 punto. Estudio de la continuidad si x no es 2 (0,25); planteamiento correcto de la condición de continuidad en x=2 (0,25); obtención correcta del valor del parámetro (0,50).
+Apartado b): 1 punto. Planteamiento correcto de la integral y los límites (0,25); cálculo correcto de la primitiva (0,50); cálculo correcto del área (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4 (2 puntos).**
+
+Entre los deportistas profesionales, el 50 % disfrutan de una beca de alto rendimiento y el 30 % está cursando estudios superiores. Se sabe también que el 10 % de los deportistas profesionales disfrutan de una beca de alto rendimiento y además están cursando estudios superiores. Seleccionado un deportista profesional al azar, calcule la probabilidad de que:
+
+a) Disfrute de una beca de alto rendimiento o esté cursando estudios superiores.
+
+b) No disfrute de una beca de alto rendimiento, sabiendo que no está cursando estudios superiores.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2022-M-5B',
+      'Ejercicio 5',
+      'B',
+      `**Ejercicio 5 (2 puntos).**
+
+Una empresa que gestiona una aplicación de movilidad sostenible sabe que el tiempo que tardan en llegar a la universidad en coche los estudiantes se puede aproximar por una variable aleatoria normal de media $\\mu$ minutos y desviación típica $\\sigma = 6$ minutos.
+
+a) Una muestra aleatoria simple de 81 universitarios proporciona un tiempo medio de traslado de 44 minutos. Calcule el intervalo de confianza al 90 % para estimar $\\mu$.
+
+b) Determine el tamaño mínimo de una muestra aleatoria simple para obtener un intervalo de confianza para $\\mu$ de amplitud a lo sumo de 3 minutos, con un nivel de confianza del 95 %.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo (0,25); determinación correcta del intervalo (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño de la muestra (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2023Modelo: Examen = {
+  id: 7305,
+  año: 2023,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2023-M-1A',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).** Considere la matriz $A = \\begin{pmatrix} 1 & -1 & a \\\\ a & 1 & -a \\\\ 1 & 1 & 1 \\end{pmatrix}$.
+
+a) Determine los valores de $a$ para los cuales la matriz $A$ es invertible.
+
+b) Calcule $A^{-1}$ para $a = 1$.`,
+      `Apartado a): 1 punto. Planteamiento de la condición de existencia de inversa (0,25); obtención de la ecuación (0,25); determinación correcta de los valores pedidos (0,50).
+Apartado b): 1 punto. Planteamiento correcto de A⁻¹ (0,50); cálculo y operaciones correctas (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).**
+
+Una empresa de transportes ha comprado dos furgonetas, una grande y otra mediana. La normativa vigente solo permite circular un máximo de 400 000 km a la grande, 250 000 km a la mediana y un total de 600 000 km entre ambas. Por las rutas que establece la empresa, por cada kilómetro que recorre la furgoneta grande, la mediana circula como máximo 2 km; y por cada kilómetro que recorre la furgoneta mediana, la grande hace un máximo de 4 km. Por cada kilómetro de circulación de la furgoneta grande se obtiene un beneficio de 10 céntimos y por cada kilómetro de circulación de la mediana un beneficio de 5 céntimos.
+
+Determine el máximo beneficio posible y el número de kilómetros que debe recorrer cada una de las furgonetas para obtenerlo.`,
+      `Establecer correctamente las restricciones (0,50); expresión correcta de la función objetivo (0,50); representación correcta de la región factible y obtención de vértices (0,50); encontrar el punto de valor máximo (0,25); determinar el máximo de la función (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).**
+
+a) Represente la gráfica de la función $f(x) = x^3 - 3x + 1$ prestando especial atención a la determinación de sus intervalos de crecimiento y decrecimiento. Determine los valores de $x$ en los que $f$ alcanza máximos o mínimos relativos.
+
+b) Represente la gráfica de $g(x) = f(x-3) + 2$, donde $f$ es la función del apartado anterior.`,
+      `Apartado a): 1 punto. Razonamiento sobre el crecimiento de la función (0,25); determinación correcta de los intervalos pedidos (0,75).
+Apartado b): 1 punto. Representación correcta de la función (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).**
+
+Considere el lanzamiento de un dado equilibrado. Sea $A$ el suceso "el resultado es 1 o 2", $B$ el suceso "el resultado es 2 o 3" y $C$ "el resultado es par".
+
+a) Verifique que $P(A \\mid C) = P(B \\mid C) = P(A \\cap B \\mid C)$.
+
+b) Calcule $P(A \\cup B \\mid C)$.`,
+      `Apartado a): 1 punto. Planteamiento correcto de la probabilidad (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto de la probabilidad (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-5A',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+Para una población en la que se observa una variable aleatoria $X$ con distribución normal, de media desconocida y desviación típica igual a 1,5, se tomó una muestra aleatoria simple para estimar la media poblacional y se obtuvo un intervalo de confianza cuyos extremos son 11,0703 y 12,9297.
+
+a) Determine el valor de la media muestral.
+
+b) Si el tamaño de la muestra fue 10, ¿cuál es el nivel de confianza del intervalo obtenido?`,
+      `Apartado a): 1 punto. Expresión correcta de la distribución de la media (0,25); tipificación correcta de la variable (0,25); obtención correcta de la probabilidad (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-1B',
+      'Ejercicio 1',
+      'B',
+      `**Ejercicio 1 (2 puntos).** Se considera el sistema de ecuaciones lineales dependiente del parámetro $a \\in \\mathbb{R}$:
+$$x + ay = a$$
+$$ax + y + az = 0$$
+$$z = 1$$
+
+a) Discuta la compatibilidad del sistema para los diferentes valores de $a$.
+
+b) Resuelva el sistema para $a = 2$.`,
+      `Apartado a): 1 punto. Obtención correcta del determinante de la matriz de coeficientes (0,25); cálculo correcto de los valores críticos (0,25); discusión correcta (0,50).
+Apartado b): 1 punto. Solución correcta del sistema (0,50); planteamiento del problema (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2 (2 puntos).**
+
+a) Determine el área de la región acotada del plano limitada inferiormente por el eje de las $x$ y superiormente por la parábola $y = 9x - x^2$.
+
+b) Determine el área de la región acotada del plano limitada inferiormente por la parábola $y = 9x - x^2$ y superiormente por las rectas tangentes a esa parábola en los puntos de corte con el eje de las $x$.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,25); cálculo correcto de la integral indefinida (0,50); cálculo correcto del área (0,25).
+Apartado b): 1 punto. Obtención de la asíntota vertical (0,50); obtención de la asíntota horizontal (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3 (2 puntos).**
+
+Una pastelería hace diariamente una cantidad fija de dulces cuya masa requiere de un tiempo de reposo, el cual tiene que ser de una a dos horas. La pastelería usa un ingrediente secreto. La cantidad necesaria de ingrediente secreto, medida en gramos, varía en función del tiempo de reposo de la masa según la función:
+$$Q(t) = \\frac{1}{2}t^4 - 3t^2 + 5, \\quad 1 \\leq t \\leq 2$$
+siendo $t$ el tiempo de reposo medido en horas.
+
+a) La producción diaria de dulces tiene un coste fijo de 150 euros más el coste por el uso del ingrediente secreto, el cual cuesta 100 euros/gramo. Obtenga la función que representa el coste de producción diaria de estos dulces y encuentre el tiempo de reposo de la masa que minimiza dicho coste. Indique el valor del coste mínimo.
+
+b) Obtenga el tiempo de reposo que maximiza el coste de producción e indique la cantidad de ingrediente secreto que se necesitaría en este caso.`,
+      `Planteamiento correcto (0,50); obtención correcta de la función a optimizar (0,50); cálculo correcto de la derivada de la función (0,50); cálculo correcto del tiempo de reposo (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4 (2 puntos).**
+
+a) Se tienen 7 sobres cerrados. Uno de ellos contiene un premio y el resto son sobres vacíos. Se lanza un dado y luego se descartan tantos sobres vacíos como el dado indique. Posteriormente, se escoge al azar uno de los sobres que restan. ¿Cuál es la probabilidad de escoger el sobre premiado?
+
+b) Si salió el premio, ¿cuál es la probabilidad de que el resultado del dado haya sido el 1?`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2023-M-5B',
+      'Ejercicio 5',
+      'B',
+      `**Ejercicio 5 (2 puntos).**
+
+Para estimar la proporción de estudiantes de una determinada facultad que utilizan la cafetería se toma una muestra de estudiantes al azar.
+
+a) Sabiendo que la proporción poblacional es $P = 0{,}55$, determine el tamaño mínimo necesario de la muestra de estudiantes para garantizar que, con una confianza del 98,02 %, el margen de error en la estimación no supera el 10 %.
+
+b) Si la muestra aleatoria fue de 100 estudiantes, de los cuales 70 utilizaban la cafetería, determine un intervalo de confianza al 95 % para la proporción de estudiantes que utilizan la cafetería.`,
+      `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del error (0,25); determinación correcta del tamaño de la muestra (0,50).
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2024Modelo: Examen = {
+  id: 7306,
+  año: 2024,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2024-M-1',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2 puntos).** Se consideran las matrices $A = \\begin{pmatrix} a & 2 & 1 \\\\ 2 & a & 1 \\\\ 1 & 4 & c \\end{pmatrix}$, $B = \\begin{pmatrix} 1 \\\\ 1 \\\\ c \\end{pmatrix}$.
+
+a) Determine los valores de los parámetros $a, c \\in \\mathbb{R}$ para los que se verifica $A \\cdot B = 6B$.
+
+b) Para $a = 1$ y $c = -1$, calcule $B^t \\cdot A \\cdot B$, donde $B^t$ denota la matriz transpuesta de $B$.`,
+      `Apartado a): 1 punto. Cálculo correcto de AB (0,50); obtención correcta de los parámetros (0,50).
+Apartado b): 1 punto. Obtención correcta de la traspuesta (0,25); realiza correctamente el producto (0,75).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-2',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2 (2 puntos).** Se considera la función real de variable real definida por $f(x) = x^3 + x^2 - x - a$, $a \\in \\mathbb{R}$.
+
+a) Obtenga el valor del parámetro real $a$ para que la función $f(x)$ tenga una primitiva que pase por los puntos $(0,1)$ y $(-1, 1/4)$. Señale la expresión de esta primitiva.
+
+b) Para $a = 1$, determine los intervalos de crecimiento y decrecimiento de la función clasificando, si procede, los extremos relativos de la función.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,25); determinación de la primitiva (0,25); cálculo correcto de la constante de integración (0,25); cálculo correcto del parámetro (0,25).
+Apartado b): 1 punto. Determinación correcta de la derivada (0,25); determinación correcta de los intervalos (0,25); determinación correcta de las abscisas de extremos y su clasificación (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-3',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3 (2 puntos).** Se considera la función real de variable real definida por
+$$f(x) = \\begin{cases} \\dfrac{x^2-1}{x-1} & \\text{si } x < 1 \\\\ x^2+2x+1 & \\text{si } x \\geq 1 \\end{cases}$$
+
+a) Estudie la continuidad de la función $f(x)$ e indique el tipo de discontinuidad si procede.
+
+b) Calcule el área de la región acotada del plano delimitada por la gráfica de la función anterior, el eje de abscisas y las rectas $x = 1$ y $x = 2$.`,
+      `Apartado a): 1 punto. Planteamiento correcto de la continuidad en x≠1 (0,25) y en x=1 (0,25); cálculo correcto de los límites laterales (0,25); determinación correcta de la discontinuidad (0,25).
+Apartado b): 1 punto. Planteamiento correcto de la integral y los límites (0,25); cálculo correcto de la integral indefinida (0,50); cálculo correcto de la integral definida (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-4',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4 (2 puntos).** Se considera la función real de variable real: $f(x) = \\dfrac{x^3+4x}{x^2-4}$.
+
+a) Determine las asíntotas de esta función.
+
+b) Obtenga la ecuación de la recta tangente a la función en el punto de abscisa $x = -1$.`,
+      `Apartado a): 1 punto. Discusión correcta de la no existencia de asíntotas horizontales (0,25); obtención correcta de la asíntota vertical (0,25); obtención correcta de la asíntota oblicua (0,50).
+Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la pendiente (0,50); ecuación correcta de la tangente (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-5',
+      'Ejercicio 5',
+      'A',
+      `**Ejercicio 5 (2 puntos).**
+
+Se desea vender batido de chocolate y batido de fresa en una fiesta escolar para recaudar fondos para el viaje de fin de curso. Con la leche de la que se dispone se pueden elaborar 35 litros de batido, y hay cacao en polvo para 30 litros de batido de chocolate como máximo. Se necesitan 15 minutos de preparación por litro de batido de chocolate y 20 minutos por litro de batido de fresa para que tengan la textura correcta. Los batidos tienen que estar listos en 10 horas. Solo hay una batidora y el beneficio que se obtendrá por litro de batido de chocolate es de 10 euros, y por litro de batido de fresa de 11 euros. ¿Cuántos litros de cada tipo de batido se deben producir para maximizar los beneficios? ¿Cuál es el beneficio máximo?`,
+      `Representación correcta de la región factible (0,75); obtención correcta de los vértices (0,75); encontrar el punto de valor máximo y su valor (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-6',
+      'Ejercicio 6',
+      'A',
+      `**Ejercicio 6 (2 puntos).**
+
+Una caja de Lego contiene un total de 50 piezas de tres tipos diferentes (A, B, C). La cantidad de piezas del tipo A más la del tipo B es igual a cuatro veces la cantidad del tipo C. Si a las piezas del tipo A le sumamos el doble de las piezas del tipo B y cuatro veces las del tipo C, el total de piezas de la caja sería de 100. Plantee un sistema de ecuaciones para saber la cantidad de piezas de cada tipo que contendrá la caja.`,
+      `Planteamiento correcto de las ecuaciones (1 punto); resolución correcta del sistema (1 punto).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-7',
+      'Ejercicio 7',
+      'A',
+      `**Ejercicio 7 (2 puntos).** Se considera el siguiente sistema de ecuaciones lineales dependiente del parámetro real $a$:
+$$a^2x - ay = a$$
+$$a^3x - y = 1$$
+
+a) Discuta el sistema en función de los valores del parámetro $a$.
+
+b) Resuelva el sistema de ecuaciones para $a = 2$.`,
+      `Apartado a): 1 punto. Determinación correcta del valor crítico (0,50); discusión correcta (0,50).
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-8',
+      'Ejercicio 8',
+      'A',
+      `**Ejercicio 8 (2 puntos).**
+
+Un estudio europeo sobre hábitos de uso de internet indica que el 62 % de los hombres españoles mayores de 16 años participa en redes sociales y que el 81 % lee noticias en internet. Además, el 95 % de los hombres de este estudio participa en redes sociales o lee noticias en internet. Eligiendo un hombre español mayor de 16 años al azar, calcule la probabilidad de que:
+
+a) Participe en redes sociales y lea noticias en internet.
+
+b) No participe en redes sociales, sabiendo que no lee noticias en internet.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-9',
+      'Ejercicio 9',
+      'A',
+      `**Ejercicio 9 (2 puntos).**
+
+Se sabe que la proporción de hogares españoles con dos o más ordenadores es $p = 0{,}75$. Se toma una muestra aleatoria simple de tamaño $n = 140$ hogares. Determine:
+
+a) El número esperado de hogares que no tendrán dos o más ordenadores en la muestra elegida.
+
+b) La probabilidad de que, en la muestra de 140 hogares, el número de ellos con dos o más ordenadores sea entre 98 y 112 hogares.`,
+      `Apartado a): 1 punto. Expresión correcta de la distribución (0,25); planteamiento correcto (0,25); obtención correcta de la media (0,50).
+Apartado b): 1 punto. Expresión correcta de la aproximación a la normal (0,25); planteamiento correcto de la probabilidad (0,25); tipificación correcta de la variable (0,25); determinación correcta de la probabilidad (0,25).`
+    ),
+    preguntaCCSS(
+      'CCSS-2024-M-10',
+      'Ejercicio 10',
+      'A',
+      `**Ejercicio 10 (2 puntos).**
+
+Durante el adiestramiento de un perro para encontrar trufas, se le deja libre una vez al día en una zona de monte apropiada para encontrar este preciado hongo. En cada operación de búsqueda del animal se ha observado que este se dirige siempre hacia una de tres zonas de monte diferentes, denominadas A, B y C. En dos de cada diez operaciones de búsqueda se dirige hacia A, en cinco de cada diez hacia B y el resto hacia C. El perro detecta trufas en A un 35 % de las veces, un 15 % en B y un 40 % en C. Eligiendo al azar un perro en adiestramiento, calcule la probabilidad de que:
+
+a) Detecte una trufa en una operación de búsqueda.
+
+b) Sabiendo que ha encontrado una trufa, esta haya sido encontrada en la zona B.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+    ),
+  ]
+}
+
+const examenMadrid2025Modelo: Examen = {
+  id: 7307,
+  año: 2025,
+  tipo: "Modelo",
+  asignatura: MATEMATICAS_CCSS_LABEL,
+  comunidad: 'Madrid',
+  preguntas: [
+    preguntaCCSS(
+      'CCSS-2025-M-1',
+      'Ejercicio 1',
+      'A',
+      `**Ejercicio 1 (2,5 puntos). Responda los tres apartados, este ejercicio no tiene opcionalidad.**
+
+HidroBio es una marca de un preparado en polvo para elaborar suero bebible que se utiliza para rehidratar a pacientes con gastroenteritis. El suero se prepara disolviendo un sobre de HidroBio en un litro de agua. La marca comercializa tres tipos de sobres, de sabor a naranja, fresa o limón. El contenido de cada sobre reacciona químicamente con el agua produciéndose en esa reacción un determinado principio activo, en cantidad variable en función del tiempo, de manera que la tasa de variación instantánea de la cantidad de principio activo, medida en mg/hora, viene dada por la función
+$$c(t) = \\frac{3}{2}\\left(t - \\frac{t^2}{2}\\right)$$
+siendo $t$ el tiempo transcurrido, en horas, desde la elaboración del preparado hasta pasadas tres horas. La cantidad de principio activo presente en la disolución potencia además el sabor del preparado, de forma que a más cantidad de principio más intenso es el sabor.
+
+a) (1 punto) Indique la cantidad de principio activo al cabo de 60 minutos de haber sido preparado el suero.
+
+b) (0,75 puntos) ¿Va aumentando la cantidad de principio activo a lo largo de las 3 primeras horas? ¿Por qué?
+
+c) (0,75 puntos) Se ha observado que para conseguir que los menores de 5 años ingieran el suero más fácilmente, lo mejor es disolver un sobre con sabor a fresa y darles el primer vaso en el momento en que el sabor de la disolución sea más intenso. ¿Cuándo le daría el primer vaso de suero a una niña de 4 años? Determine cuál será la cantidad de principio activo en el litro de suero en ese momento.`,
+      `Apartado a): 1 punto. Cálculo correcto de la primitiva (0,50); cálculo correcto de F(t) (0,25); cálculo correcto de F(1) (0,25).
+Apartado b): 0,75 puntos. Cálculo correcto de los intervalos de crecimiento y decrecimiento (0,50); justificación correcta del aumento en las dos primeras horas (0,25).
+Apartado c): 0,75 puntos. Cálculo correcto del valor t=2 (0,50); cálculo correcto de F(2) (0,25).`,
+      2.5
+    ),
+    preguntaCCSS(
+      'CCSS-2025-M-2A',
+      'Ejercicio 2',
+      'A',
+      `**Ejercicio 2. Pregunta 2.1 (2,5 puntos).**
+
+Se consideran las matrices $A = \\begin{pmatrix} 2 & 3 \\\\ 0 & -1 \\end{pmatrix}$ y $B = \\begin{pmatrix} 1 & -100 \\\\ -1 & 1 \\end{pmatrix}$.
+
+a) (1,25 puntos) Calcule la matriz $D$ tal que $B(D^t + A^{-1})B^{-1} = 2I$, donde $I$ es la matriz identidad de tamaño $2 \\times 2$.
+
+b) (1,25 puntos) La matriz $A$ verifica la igualdad $A^2 = A + 2I$. Calcule $A^4$.`,
+      `Apartado a): 1,25 puntos. Cálculo correcto de A⁻¹ (0,50); cálculo correcto de D (0,75).
+Apartado b): 1,25 puntos. Cálculo correcto de A⁴ (1,25).`,
+      2.5
+    ),
+    preguntaCCSS(
+      'CCSS-2025-M-2B',
+      'Ejercicio 2',
+      'B',
+      `**Ejercicio 2. Pregunta 2.2 (2,5 puntos).**
+
+Se considera el siguiente sistema de ecuaciones lineales dependiente del parámetro real $a$:
+$$x - y + z = -1$$
+$$ax + (-a+2)y = 2$$
+$$2x - (a+3)y + (a+2)z = -5$$
+
+a) (1,5 puntos) Discuta el sistema en función de los valores del parámetro $a$.
+
+b) (1 punto) Resuelva el sistema de ecuaciones para $a = 1$.`,
+      `Apartado a): 1,5 puntos. Cálculo correcto del determinante (0,25); cálculo correcto de los valores críticos (0,50); discusión correcta del sistema (0,75).
+Apartado b): 1 punto. Obtención de la solución del sistema (1,00).`,
+      2.5
+    ),
+    preguntaCCSS(
+      'CCSS-2025-M-3A',
+      'Ejercicio 3',
+      'A',
+      `**Ejercicio 3. Pregunta 3.1 (2,5 puntos).**
+
+Una comunidad autónoma española quiere evaluar el nivel de compromiso con el reciclaje de sus ciudadanos y ciudadanas. Para ello, se realiza un estudio en dos municipios seleccionados al azar. En el primer municipio, la proporción de personas comprometidas con el reciclaje es de $p = 0{,}7$. Se toma una muestra aleatoria simple de 600 personas de dicho municipio:
+
+a) (1 punto) Determine el número esperado de personas en la muestra elegida que no estarán comprometidas con prácticas de reciclaje.
+
+b) (1,5 puntos) Mediante la aproximación por una normal, calcule la probabilidad de que el número de personas comprometidas con el reciclaje esté entre 408 y 432, ambos inclusive.`,
+      `Apartado a): 1 punto. Determinación de la distribución y sus parámetros (0,25); cálculo de la esperanza (0,25); determinación correcta del número esperado de personas no comprometidas (0,50).
+Apartado b): 1,5 puntos. Aproximación correcta y justificada a la distribución normal (0,75); cálculo correcto de la probabilidad pedida (0,75).`,
+      2.5
+    ),
+    preguntaCCSS(
+      'CCSS-2025-M-3B',
+      'Ejercicio 3',
+      'B',
+      `**Ejercicio 3. Pregunta 3.2 (2,5 puntos).**
+
+En el segundo municipio del estudio de reciclaje:
+
+a) (1,25 puntos) Se tomó una muestra aleatoria simple de 450 personas de las cuales 351 se declaran comprometidas con prácticas de reciclaje. Obtenga un intervalo de confianza del 90 % para la proporción de personas del segundo municipio comprometidas con prácticas de reciclaje.
+
+b) (1,25 puntos) Asumiendo que la proporción poblacional de los comprometidos con el reciclaje en este segundo municipio es $p = 0{,}8$, determine el tamaño mínimo necesario de una muestra de personas para garantizar, con un nivel de confianza del 95 %, que el margen de error en la estimación no supere el 3 % ($\\pm$3 %).`,
+      `Apartado a): 1,25 puntos. Determinación de la proporción (0,25); determinación del valor z_(α/2) (0,25); aplicación de la fórmula del error (0,25); determinación correcta del intervalo (0,50).
+Apartado b): 1,25 puntos. Determinación del valor crítico z_(α/2) (0,25); planteamiento con la fórmula del error (0,25); cálculo correcto del tamaño mínimo de la muestra (0,75).`,
+      2.5
+    ),
+    preguntaCCSS(
+      'CCSS-2025-M-4A',
+      'Ejercicio 4',
+      'A',
+      `**Ejercicio 4. Pregunta 4.1 (2,5 puntos).**
+
+De dos sucesos $A$ y $B$ sabemos que: $P(A \\cup B) = 1$, $P(B) = 0{,}8$ y $P(\\overline{A}) = 0{,}55$, donde $\\overline{A}$ es el suceso complementario de $A$.
+
+a) (1 punto) Calcule $P(A \\mid B)$.
+
+b) (1 punto) Calcule $P(\\overline{B} \\mid A)$ siendo $\\overline{B}$ el suceso complementario de $B$.
+
+c) (0,5 puntos) Calcule $P(\\overline{A} \\cap B)$.`,
+      `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
+Apartado c): 0,5 puntos. Cálculo correcto de la probabilidad (0,50).`,
+      2.5
+    ),
+    preguntaCCSS(
+      'CCSS-2025-M-4B',
+      'Ejercicio 4',
+      'B',
+      `**Ejercicio 4. Pregunta 4.2 (2,5 puntos).**
+
+En los premios Grammy Latino, se sabe que el 40 % de los artistas nominados en la categoría de Mejor Álbum del Año son dúos, el 30 % son grupos musicales (más de dos artistas) y el 30 % son solistas. Además, se ha observado que el 20 % de los dúos, el 15 % de los grupos musicales y el 25 % de los solistas nominados han ganado el premio de Mejor Álbum del Año. Eligiendo al azar un artista nominado al Mejor Álbum del Año, y sabiendo que en este concurso los artistas sólo pueden presentarse por una de las tres categorías musicales, calcule la probabilidad de que:
+
+a) (1,25 puntos) Haya ganado el Grammy Latino en dicha categoría.
+
+b) (1,25 puntos) Dicho artista sea solista, sabiendo que ha ganado el Grammy Latino en dicha categoría.`,
+      `Apartado a): 1,25 puntos. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,75).
+Apartado b): 1,25 puntos. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,75).`,
+      2.5
+    ),
+  ]
+}
+
 export const examenesMatematicasCCSSMadrid: Examen[] = [
   examenMadrid2025Ordinaria,
   ...examenesMatematicasCCSSMadridGenerados,
+  examenMadrid2026Ordinaria,
+  examenMadrid2026Modelo,
+  examenMadrid2018Modelo,
+  examenMadrid2019Modelo,
+  examenMadrid2020Modelo,
+  examenMadrid2021Modelo,
+  examenMadrid2022Modelo,
+  examenMadrid2023Modelo,
+  examenMadrid2024Modelo,
+  examenMadrid2025Modelo,
 ].sort((a, b) => b.año - a.año || a.tipo.localeCompare(b.tipo))

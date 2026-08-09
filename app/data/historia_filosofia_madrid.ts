@@ -1,4 +1,4 @@
-export type ConvocatoriaMadrid = 'ordinaria' | 'extraordinaria'
+export type ConvocatoriaMadrid = 'ordinaria' | 'extraordinaria' | 'modelo'
 
 export type FormatoHistoriaFilosofiaMadrid =
 | 'madrid_clasico_texto_ab_tres_preguntas'
@@ -464,6 +464,229 @@ pregunta('3A', 'Pregunta 3A — Ser humano moderno', 'Exponga el problema del se
 pregunta('3B', 'Pregunta 3B — Realidad y/o conocimiento moderno', 'Exponga el problema de la realidad y/o el conocimiento en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
 pregunta('4A', 'Pregunta 4A — Dios contemporáneo', 'Exponga el problema de Dios en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
 pregunta('4B', 'Pregunta 4B — Sociedad y/o política contemporánea', 'Exponga el problema de la sociedad y/o la política en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+],
+},
+{
+id: 'historia-filosofia-mad-2025-extraordinaria',
+comunidad: 'Madrid',
+asignatura: 'historia_filosofia',
+anio: 2025,
+curso: '2024-2025',
+convocatoria: 'extraordinaria',
+variante: 'A',
+formato: 'madrid_2025_texto_ab_cuatro_preguntas',
+instrucciones: instrucciones2025,
+duracion: '90 minutos',
+criteriosGenerales: [
+'Pregunta 1: identificar y explicar la tesis del texto, ponerla en diálogo con otro autor o corriente filosófica y utilizar vocabulario preciso.',
+'Pregunta 2: exponer el problema de la ética y/o la moral o el de Dios en un autor, autora o corriente filosófica de la época antigua o medieval.',
+'Pregunta 3: exponer el problema del ser humano o el de la ética y/o la moral en un autor, autora o corriente filosófica de la época moderna.',
+'Pregunta 4: exponer el problema de la sociedad y/o la política o el de la realidad y/o el conocimiento en un autor, autora o corriente filosófica de la época contemporánea.',
+],
+textos: [
+{
+opcion: 'A',
+autor: 'René Descartes',
+obra: 'Meditaciones metafísicas',
+problema: 'Cogito y sustancia pensante',
+texto:
+'Cerraré ahora los ojos, me taparé los oídos, suspenderé mis sentidos; hasta borraré de mi pensamiento toda imagen de las cosas corpóreas, o, al menos, como es casi imposible, las reputaré vanas y falsas; de este modo, en coloquio solo conmigo y examinando mis adentros, procuraré ir conociéndome mejor y familiarizarme más conmigo mismo. Soy una cosa que piensa, es decir, que duda, afirma, quiere, no quiere, y que también imagina y siente, pues como he observado más arriba, aunque lo que siento e imagino acaso no sea nada fuera de mí y en sí mismo, con todo estoy seguro de que esos modos de pensar residen y se hallan en mí, sin duda. Y con lo poco que acabo de decir, creo haber enumerado todo lo que sé de cierto, o al menos, todo lo que he advertido saber hasta aquí.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Descartes practica la duda metódica retirando la atención de los sentidos y de las cosas corpóreas para examinarse a sí mismo. Descubre así que es una cosa que piensa —que duda, afirma, quiere, imagina y siente— y que esa existencia como sujeto pensante es la primera verdad cierta e indudable: el cogito o sustancia pensante. Puede ponerse en diálogo con Agustín de Hipona, cuyo argumento contra el escepticismo anticipa la misma certeza a partir de la conciencia de la propia existencia, o con Hume, para quien la noción de sustancia o "yo" no corresponde a ninguna impresión y es, por tanto, una ficción.',
+},
+{
+opcion: 'B',
+autor: 'Friedrich Nietzsche',
+obra: 'La gaya ciencia',
+problema: 'Muerte de Dios y nihilismo',
+texto:
+'El mayor acontecimiento reciente —que "Dios ha muerto", que la creencia en el dios cristiano ha perdido credibilidad— comienza ya a arrojar sus primeras sombras sobre Europa. Por lo menos a aquellos pocos cuyos ojos, o el recelo que poseen en sus ojos, son lo suficientemente fuertes y sutiles para este espectáculo, les parece que algún sol se ha puesto, alguna confianza antigua y profunda se ha convertido en duda: a ellos nuestro viejo mundo tiene que parecerles cada día más crepuscular, más desconfiado, más extraño, "más viejo". Pero esencialmente puede decirse: el acontecimiento mismo es demasiado grande, demasiado lejano, demasiado apartado de la capacidad de comprensión de muchos como para que pueda decirse siquiera que su noticia haya llegado, y menos aún que muchos sepan qué ha ocurrido propiamente con él —y todo lo que ahora, después de que esa creencia ha sido sepultada, tiene que desmoronarse porque estaba construido sobre ella, apoyado en ella, entrelazado con ella: por ejemplo, toda nuestra moral europea.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Nietzsche interpreta la "muerte de Dios" como la pérdida de credibilidad de la fe cristiana y, con ella, del fundamento de la moral y la cultura europeas construidas sobre esa creencia. Se trata de un acontecimiento inmenso, todavía no percibido por la mayoría, cuyas consecuencias arrastran todo lo que se apoyaba en él y anuncian el nihilismo. Puede ponerse en diálogo con Platón, para quien existía una verdad y unos valores morales absolutos anclados en el mundo de las Ideas, frente a los cuales Nietzsche opone la voluntad de poder como origen de toda valoración.',
+},
+],
+preguntasComunes: [
+pregunta('2A', 'Pregunta 2A — Ética y/o moral antigua o medieval', 'Exponga el problema de la ética y/o la moral en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('2B', 'Pregunta 2B — Dios antiguo o medieval', 'Exponga el problema de Dios en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('3A', 'Pregunta 3A — Ser humano moderno', 'Exponga el problema del ser humano en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('3B', 'Pregunta 3B — Ética y/o moral moderna', 'Exponga el problema de la ética y/o la moral en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('4A', 'Pregunta 4A — Sociedad y/o política contemporánea', 'Exponga el problema de la sociedad y/o la política en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+pregunta('4B', 'Pregunta 4B — Realidad y/o conocimiento contemporáneo', 'Exponga el problema de la realidad y/o el conocimiento en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+],
+},
+{
+id: 'historia-filosofia-mad-2025-extraordinaria-coincidencias',
+comunidad: 'Madrid',
+asignatura: 'historia_filosofia',
+anio: 2025,
+curso: '2024-2025',
+convocatoria: 'extraordinaria',
+variante: 'C / Coincidencias',
+formato: 'madrid_2025_texto_ab_cuatro_preguntas',
+instrucciones: instrucciones2025,
+duracion: '90 minutos',
+criteriosGenerales: [
+'Pregunta 1: identificar y explicar la tesis del texto, ponerla en diálogo con otro autor o corriente filosófica y utilizar vocabulario preciso.',
+'Pregunta 2: exponer el problema de la sociedad y/o la política o el de Dios en un autor, autora o corriente filosófica de la época antigua o medieval.',
+'Pregunta 3: exponer el problema de la realidad y/o el conocimiento o el de la ética y/o la moral en un autor, autora o corriente filosófica de la época moderna.',
+'Pregunta 4: exponer el problema del ser humano o el de la sociedad y/o la política en un autor, autora o corriente filosófica de la época contemporánea.',
+],
+textos: [
+{
+opcion: 'A',
+autor: 'Platón',
+obra: 'Fedón',
+problema: 'Teoría de la reminiscencia',
+texto:
+'–¿Acaso desde que nacimos veíamos, oíamos, y teníamos los demás sentidos? –Desde luego que sí. –¿Era preciso, entonces, decimos, que tengamos adquirido el conocimiento de lo igual antes que estos? –Sí. –Por lo tanto, antes de nacer, según parece, nos es necesario haberlo adquirido. –Eso parece. –Así que si, habiéndolo adquirido antes de nacer, nacimos teniéndolo, ¿sabíamos ya antes de nacer y apenas nacidos no solo lo igual, lo mayor, y lo menor, y todo lo de esa clase? Pues el razonamiento nuestro de ahora no versa más sobre lo igual en sí que sobre lo bello en sí, y lo bueno en sí, y lo justo y lo santo, y, a lo que precisamente me refiero, sobre todo aquello que identificamos como "lo que es en sí", tanto al preguntar en nuestras preguntas como al responder en nuestras respuestas. De modo que nos es necesario haber adquirido los conocimientos de todo eso antes de nacer.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Platón argumenta que, puesto que el conocimiento de lo igual, lo bello o lo bueno en sí no puede derivarse de los sentidos (ya presentes al nacer), dicho conocimiento tuvo que adquirirse antes de nacer: es innato, y aprender es recordarlo. Esta es la base de la teoría de la reminiscencia. Puede ponerse en diálogo con Descartes, quien también admite ideas innatas aunque sin defender la preexistencia del alma, o con Hume, para quien no hay ideas innatas y la mente es en origen una tabula rasa que solo conoce a partir de la experiencia.',
+},
+{
+opcion: 'B',
+autor: 'Jean-Jacques Rousseau',
+obra: 'Del contrato social',
+problema: 'Contrato social',
+texto:
+'Supongo a los hombres llegados a un punto en que los obstáculos que se oponen a su conservación en el estado de naturaleza superan con su resistencia a las fuerzas que cada individuo puede emplear para mantenerse en dicho estado. Desde este momento, ese estado primitivo no puede ya subsistir, y el género humano perecería si no cambiase de manera de ser. Ahora bien: como los hombres no pueden engendrar fuerzas nuevas, sino solo unir y dirigir aquellas que existen, no han tenido para conservarse otro medio que formar por agregación una suma de fuerzas que pueda superar la resistencia, ponerlas en juego mediante un solo móvil y hacerlas obrar a coro. Esta suma de fuerzas no puede nacer sino del concurso de muchos; pero siendo la fuerza y la libertad de cada hombre los primeros instrumentos de su conservación, ¿cómo las comprometerá sin perjudicarse y sin descuidar los cuidados que se debe a sí mismo? Esta dificultad, referida a nuestro problema, puede enunciarse en los siguientes términos: "Encontrar una forma de asociación que defienda y proteja con toda la fuerza común a la persona y a los bienes de cada asociado, y por virtud de la cual cada uno, uniéndose a todos, no obedezca sino a sí mismo y quede tan libre como antes". Tal es el problema fundamental, al cual da solución el Contrato social.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Rousseau plantea que, cuando los obstáculos naturales superan la capacidad de cada individuo para conservarse, los hombres deben unir sus fuerzas mediante una asociación que los proteja sin que ninguno pierda su libertad: cada uno, al unirse a todos, no debe obedecer sino a sí mismo, quedando tan libre como antes. Este es el problema fundamental que resuelve el contrato social. Puede ponerse en diálogo con Hobbes o Locke, cuyos modelos de contrato exigen una cesión de la libertad o soberanía individual distinta a la que propone Rousseau.',
+},
+],
+preguntasComunes: [
+pregunta('2A', 'Pregunta 2A — Sociedad y/o política antigua o medieval', 'Exponga el problema de la sociedad y/o la política en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('2B', 'Pregunta 2B — Dios antiguo o medieval', 'Exponga el problema de Dios en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('3A', 'Pregunta 3A — Realidad y/o conocimiento moderno', 'Exponga el problema de la realidad y/o el conocimiento en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('3B', 'Pregunta 3B — Ética y/o moral moderna', 'Exponga el problema de la ética y/o la moral en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('4A', 'Pregunta 4A — Ser humano contemporáneo', 'Exponga el problema del ser humano en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+pregunta('4B', 'Pregunta 4B — Sociedad y/o política contemporánea', 'Exponga el problema de la sociedad y/o la política en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+],
+},
+{
+id: 'historia-filosofia-mad-2026-ordinaria',
+comunidad: 'Madrid',
+asignatura: 'historia_filosofia',
+anio: 2026,
+curso: '2025-2026',
+convocatoria: 'ordinaria',
+variante: 'E',
+formato: 'madrid_2025_texto_ab_cuatro_preguntas',
+instrucciones: instrucciones2025,
+duracion: '90 minutos',
+criteriosGenerales: [
+'Pregunta 1: identificar y explicar la tesis del texto, ponerla en diálogo con otro autor o corriente filosófica y utilizar vocabulario preciso.',
+'Pregunta 2: exponer el problema de la ética y/o la moral o el del ser humano en un autor, autora o corriente filosófica de la época antigua o medieval.',
+'Pregunta 3: exponer el problema de Dios o el de la sociedad y/o la política en un autor, autora o corriente filosófica de la época moderna.',
+'Pregunta 4: exponer el problema de la realidad y/o el conocimiento o el de la ética y/o la moral en un autor, autora o corriente filosófica de la época contemporánea.',
+],
+textos: [
+{
+opcion: 'A',
+autor: 'Platón',
+obra: 'Fedón',
+problema: 'Alma y cuerpo',
+texto:
+'– Míralo también con el enfoque siguiente: siempre que estén en un mismo organismo alma y cuerpo, al uno le prescribe la naturaleza que sea esclavo y esté sometido, y a la otra mandar y ser dueña. Y según esto, de nuevo, ¿cuál de ellos te parece que es semejante a lo divino y cuál a lo mortal? ¿O no te parece que lo divino es lo que está naturalmente capacitado para mandar y ejercer de guía, mientras que lo mortal lo está para ser guiado y hacer de siervo? – Me lo parece, desde luego.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica perteneciente a la misma o diferente época la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Platón defiende que en el compuesto humano el alma y el cuerpo tienen naturalezas distintas: el alma está hecha para mandar y guiar, por ser semejante a lo divino, mientras que el cuerpo debe obedecer y servir, por ser semejante a lo mortal. Se trata de una concepción dualista jerárquica del ser humano. Puede ponerse en diálogo con Aristóteles, para quien el alma no es una sustancia separada que gobierna al cuerpo desde fuera, sino la forma del cuerpo vivo, de modo que ambos constituyen una unidad funcional inseparable y no una relación de dominio y servidumbre.',
+},
+{
+opcion: 'B',
+autor: 'David Hume',
+obra: 'Investigación sobre el entendimiento humano',
+problema: 'Causalidad y experiencia',
+texto:
+'Cuando se nos presenta un objeto o suceso cualquiera, por mucha sagacidad y agudeza que tengamos, nos es imposible descubrir, o incluso conjeturar sin la ayuda de la experiencia, el suceso que pueda resultar de él o llevar nuestra previsión más allá del objeto que está inmediatamente presente a nuestra memoria y sentidos. Incluso después de un caso o experimento en que hayamos observado que determinado acontecimiento sigue a otro, no tenemos derecho a enunciar una regla general o anticipar lo que ocurrirá en casos semejantes [...]. Pero cuando determinada clase de acontecimientos ha estado siempre, en todos los casos, unida a otra, no tenemos ya escrúpulos en predecir el uno con la aparición del otro y en utilizar el único razonamiento que puede darnos seguridad sobre una cuestión de hecho o existencia.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica perteneciente a la misma o diferente época la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Hume sostiene que no podemos descubrir por la razón, ni siquiera tras un único caso observado, qué efecto seguirá a una causa: solo la experiencia repetida de la conjunción constante entre dos sucesos nos autoriza a predecir uno a partir de la aparición del otro. La conexión causal no es, por tanto, una necesidad racional, sino un hábito nacido de la costumbre. Puede ponerse en diálogo con Descartes, para quien la razón alcanza por sí misma verdades necesarias y universales, o con Kant, quien reconoce que la experiencia por sí sola no basta y postula la causalidad como una categoría a priori del entendimiento.',
+},
+],
+preguntasComunes: [
+pregunta('2A', 'Pregunta 2A — Ética y/o moral antigua o medieval', 'Exponga el problema de la ética y/o la moral en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('2B', 'Pregunta 2B — Ser humano antiguo o medieval', 'Exponga el problema del ser humano en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('3A', 'Pregunta 3A — Dios moderno', 'Exponga el problema de Dios en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('3B', 'Pregunta 3B — Sociedad y/o política moderna', 'Exponga el problema de la sociedad y/o la política en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('4A', 'Pregunta 4A — Realidad y/o conocimiento contemporáneo', 'Exponga el problema de realidad y/o conocimiento en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+pregunta('4B', 'Pregunta 4B — Ética y/o moral contemporánea', 'Exponga el problema de la ética y/o moral en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+],
+},
+{
+id: 'historia-filosofia-mad-2026-modelo',
+comunidad: 'Madrid',
+asignatura: 'historia_filosofia',
+anio: 2026,
+curso: '2025-2026',
+convocatoria: 'modelo',
+formato: 'madrid_2025_texto_ab_cuatro_preguntas',
+instrucciones: instrucciones2025,
+duracion: '90 minutos',
+criteriosGenerales: [
+'Pregunta 1: identificar y explicar la tesis del texto, ponerla en diálogo con otro autor o corriente filosófica y utilizar vocabulario preciso.',
+'Pregunta 2: exponer el problema del ser humano o el de la sociedad y/o la política en un autor, autora o corriente filosófica de la época antigua o medieval.',
+'Pregunta 3: exponer el problema de la realidad y/o el conocimiento o el de la ética y/o la moral en un autor, autora o corriente filosófica de la época moderna.',
+'Pregunta 4: exponer el problema de la ética y/o la moral o el de Dios en un autor, autora o corriente filosófica de la época contemporánea.',
+],
+textos: [
+{
+opcion: 'A',
+autor: 'Santo Tomás de Aquino',
+obra: 'Suma Teológica',
+problema: 'Existencia de Dios (cuarta vía)',
+texto:
+'Vemos en los seres que unos son más o menos buenos, verdaderos y nobles que otros, y lo mismo sucede con las diversas cualidades. Pero el más y el menos se atribuye a las cosas según su diversa proximidad a lo máximo, y por esto se dice lo más caliente de lo que más se aproxima al máximo calor. Por tanto, ha de existir algo que sea verísimo, nobilísimo y óptimo, y por ello ente o ser supremo; pues, como dice el Filósofo, lo que es verdad máxima es máxima entidad. Ahora bien, lo máximo en cualquier género es causa de todo lo que en aquel género existe, y así el fuego, que tiene el máximo calor, es causa del calor de todo lo caliente, según dice Aristóteles. Existe, por consiguiente, algo que es para todas las cosas causa de su ser, de su bondad y de todas sus perfecciones, y a esto llamamos Dios.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica perteneciente a la misma o diferente época la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Santo Tomás expone la cuarta vía: observamos en los seres grados de perfección (bondad, verdad, nobleza) que se miden por su proximidad a un máximo. Ese máximo en cada género es causa de las perfecciones de ese género, igual que el fuego, máximo calor, es causa del calor de las cosas calientes. Debe existir, por tanto, algo que sea causa del ser y de todas las perfecciones de las demás cosas: a ese ser supremo lo llamamos Dios.',
+},
+{
+opcion: 'B',
+autor: 'Karl Marx',
+obra: 'La ideología alemana',
+problema: 'Comunismo como movimiento histórico',
+texto:
+'Para nosotros, el comunismo no es un estado que debe implantarse, un ideal al que haya de sujetarse la realidad. Nosotros llamamos comunismo al movimiento real que anula y supera al estado de cosas actual. Las condiciones de este movimiento se desprenden de la premisa actualmente existente. Por lo demás, la masa de los simples obreros —de la fuerza de trabajo excluida en masa del capital o de cualquier satisfacción, por limitada que ella sea— y, por tanto, la pérdida no puramente temporal de este mismo trabajo como fuente segura de vida, presupone, a través de la competencia, el mercado mundial. Por tanto, el proletariado solo puede existir en un plano histórico-mundial, lo mismo que el comunismo, su acción, solo puede llegar a cobrar realidad como existencia histórico-universal. Existencia histórico-universal de los individuos, es decir, existencia de los individuos directamente vinculada a la historia universal.',
+preguntas: [
+{ id: '1.1', titulo: 'Pregunta 1.1 — Tesis principal', puntos: 1.25, enunciado: 'Identifique y explique la tesis principal defendida en el texto propuesto.' },
+{ id: '1.2', titulo: 'Pregunta 1.2 — Diálogo filosófico', puntos: 1.25, enunciado: 'Mediante un pequeño texto justificativo, ponga en diálogo con algún otro autor, autora o corriente filosófica perteneciente a la misma o diferente época la cuestión discutida en el texto.' },
+],
+solucionOrientativa:
+'Marx presenta el comunismo no como un ideal abstracto, sino como un movimiento histórico real que surge de las condiciones materiales existentes y supera al capitalismo. El proletariado tiene una dimensión mundial porque el mercado capitalista también es mundial, de modo que el comunismo solo puede realizarse como transformación histórico-universal, vinculada a la historia de todos los individuos.',
+},
+],
+preguntasComunes: [
+pregunta('2A', 'Pregunta 2A — Ser humano antiguo o medieval', 'Exponga el problema del ser humano en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('2B', 'Pregunta 2B — Sociedad y/o política antigua o medieval', 'Exponga el problema de la sociedad y/o la política en un autor, autora o corriente filosófica de la época antigua o medieval.', 'Pregunta 2'),
+pregunta('3A', 'Pregunta 3A — Realidad y/o conocimiento moderno', 'Exponga el problema de la realidad y/o el conocimiento en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('3B', 'Pregunta 3B — Ética y/o moral moderna', 'Exponga el problema de la ética y/o la moral en un autor, autora o corriente filosófica de la época moderna.', 'Pregunta 3'),
+pregunta('4A', 'Pregunta 4A — Ética y/o moral contemporánea', 'Exponga el problema de la ética y/o la moral en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
+pregunta('4B', 'Pregunta 4B — Dios contemporáneo', 'Exponga el problema de Dios en un autor, autora o corriente filosófica de la época contemporánea.', 'Pregunta 4'),
 ],
 },
 ]

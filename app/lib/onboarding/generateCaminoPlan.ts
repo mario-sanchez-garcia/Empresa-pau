@@ -19,12 +19,12 @@ import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 export const VALID_START_MODES = ['zero', 'first_block', 'mid', 'review', 'unknown'] as const
 export type StartMode = typeof VALID_START_MODES[number]
 
-// Private beta scope: Camino PAU is active only for the four core PAU subjects.
-export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana'])
+// Private beta scope: Camino PAU is active only for these core PAU subjects.
+export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica'])
 
 function subjectForDay(dateStr: string, subjects: string[]): string | null {
   if (subjects.length === 1) return subjects[0]
-  const ordered = ['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana']
+  const ordered = ['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica']
     .filter(subject => subjects.includes(subject))
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
   if (dow === 0 || dow === 6) return null

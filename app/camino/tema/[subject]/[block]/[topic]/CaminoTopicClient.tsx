@@ -54,6 +54,12 @@ const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
   'historia_espana:siglo-xx:guerra-civil':                           { min: 98,  max: 106 },
   'historia_espana:franquismo-democracia:franquismo':                { min: 107, max: 118 },
   'historia_espana:franquismo-democracia:transicion-democracia':     { min: 119, max: 128 },
+  // Física (bloques 1-5, sujeto fisica en curriculum_content_v2)
+  'fisica:campo-gravitatorio:campo-gravitatorio':         { min: 1,  max: 12 },
+  'fisica:campo-electromagnetico:campo-electromagnetico': { min: 13, max: 23 },
+  'fisica:vibraciones-ondas:vibraciones-ondas':           { min: 24, max: 33 },
+  'fisica:optica-geometrica:optica-geometrica':           { min: 34, max: 41 },
+  'fisica:fisica-siglo-xx:fisica-siglo-xx':               { min: 42, max: 57 },
 }
 
 const TOPIC_PROGRESS_KEY = 'kairo_camino_topic_progress_v1'

@@ -8,7 +8,7 @@ import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 
 export const dynamic = 'force-dynamic'
 
-const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana'])
+const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica'])
 
 type QueueSourceItem = {
   sort_order: number

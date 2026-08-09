@@ -17,6 +17,7 @@ const PRIVATE_BETA_SUBJECT_MESSAGES: Record<string, string> = {
   'Matemáticas CCSS': 'Ordenando tus temas de Matemáticas CCSS…',
   'Lengua Castellana': 'Preparando comentario, gramática y literatura…',
   'Historia de España': 'Construyendo tu cronología de Historia de España…',
+  'Física': 'Ordenando tus temas de Física…',
 }
 
 export function buildPersonalizedLoadingMessages(input: LoadingMessageInput): string[] {

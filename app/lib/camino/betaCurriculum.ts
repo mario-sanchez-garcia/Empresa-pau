@@ -5,6 +5,7 @@ export const PRIVATE_BETA_SUBJECTS = [
   'matematicas_ccss',
   'lengua',
   'historia_espana',
+  'fisica',
 ] as const
 
 export type PrivateBetaSubject = typeof PRIVATE_BETA_SUBJECTS[number]
@@ -664,6 +665,12 @@ export const PRIVATE_BETA_CURRICULUM_TOPICS: CaminoCurriculumTopic[] = [
   topic({ subject: 'historia_espana', orderIndex: 8, blockSlug: 'siglo-xx', blockTitle: 'Siglo XX', topicSlug: 'guerra-civil', title: 'La Guerra Civil', tags: ['sublevación', 'bandos', 'no intervención', 'consecuencias'] }),
   topic({ subject: 'historia_espana', orderIndex: 9, blockSlug: 'franquismo-democracia', blockTitle: 'Franquismo y democracia', topicSlug: 'franquismo', title: 'El franquismo', tags: ['dictadura', 'autarquía', 'desarrollismo', 'oposición'] }),
   topic({ subject: 'historia_espana', orderIndex: 10, blockSlug: 'franquismo-democracia', blockTitle: 'Franquismo y democracia', topicSlug: 'transicion-democracia', title: 'La Transición y la Constitución de 1978', tags: ['Transición', 'Constitución de 1978', 'autonomías', 'democracia'] }),
+
+  topic({ subject: 'fisica', orderIndex: 1, blockSlug: 'campo-gravitatorio', blockTitle: 'Campo Gravitatorio', topicSlug: 'campo-gravitatorio', title: 'Campo Gravitatorio', tags: ['gravitación', 'campo gravitatorio', 'energía potencial', 'velocidad orbital'] }),
+  topic({ subject: 'fisica', orderIndex: 2, blockSlug: 'campo-electromagnetico', blockTitle: 'Campo Electromagnético', topicSlug: 'campo-electromagnetico', title: 'Campo Electromagnético', tags: ['campo eléctrico', 'ley de Coulomb', 'fuerza de Lorentz', 'inducción electromagnética'], prerequisites: ['campo-gravitatorio'] }),
+  topic({ subject: 'fisica', orderIndex: 3, blockSlug: 'vibraciones-ondas', blockTitle: 'Vibraciones y Ondas', topicSlug: 'vibraciones-ondas', title: 'Vibraciones y Ondas', tags: ['MAS', 'ondas', 'sonido', 'efecto Doppler'] }),
+  topic({ subject: 'fisica', orderIndex: 4, blockSlug: 'optica-geometrica', blockTitle: 'Óptica Geométrica', topicSlug: 'optica-geometrica', title: 'Óptica Geométrica', tags: ['refracción', 'ley de Snell', 'lentes', 'espejos'], prerequisites: ['vibraciones-ondas'] }),
+  topic({ subject: 'fisica', orderIndex: 5, blockSlug: 'fisica-siglo-xx', blockTitle: 'Física del Siglo XX', topicSlug: 'fisica-siglo-xx', title: 'Física del Siglo XX', tags: ['relatividad', 'efecto fotoeléctrico', 'modelo de Bohr', 'radiactividad'] }),
 ].map(item => ({
   ...item,
   orderIndex: item.subject === 'matematicas_ii'
@@ -675,5 +682,6 @@ function subjectOffset(subject: PrivateBetaSubject) {
   if (subject === 'matematicas_ccss') return 1000
   if (subject === 'lengua') return 2000
   if (subject === 'historia_espana') return 3000
+  if (subject === 'fisica') return 4000
   return 0
 }

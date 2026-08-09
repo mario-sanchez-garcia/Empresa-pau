@@ -46,6 +46,7 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatChemicalNotation)
   text = mapOutsideMath(text, formatBulletPoints)
   text = mapOutsideMath(text, formatExamStructure)
+  text = mapOutsideMath(text, formatUnitExponents)
   text = protectTextOnlySymbolsInMath(text)
 
   return normalizeDisplayMathBlocks(text
@@ -269,6 +270,31 @@ function normalizeExistingMath(text: string) {
 // "No character metrics" warning and typesets nothing, so "50 €/m²" silently
 // lost its "€" on screen. Wrapping them in \text{} renders them properly.
 // Idempotent: an already-wrapped symbol is rewritten to itself.
+// Unit chains extracted from the PDFs keep their exponents as plain text
+// ("mol·L−1·s−1", "kJ·mol−1", "R = 0,082 atm·L·K−1·mol−1"), which reads as a
+// subtraction rather than a power. Typeset the whole chain.
+// Only unambiguous unit symbols are listed: single letters that double as
+// variable or matrix names in these exams (A, C, V, T, N, W, J) are excluded,
+// and a chain is only touched when it actually carries an exponent.
+const UNIT_SYMBOL = '(?:kJ|kg|mol|atm|Hz|cm|mm|Pa|K|L|g|m|s)'
+const UNIT_EXPONENT = '(?:[−-][123])'
+
+function formatUnitExponents(text: string) {
+  const chain = new RegExp(
+    `\\b${UNIT_SYMBOL}${UNIT_EXPONENT}?(?:(?:\\s*[·⋅]\\s*|\\s+)${UNIT_SYMBOL}${UNIT_EXPONENT}?)*`,
+    'g'
+  )
+  return text.replace(chain, match => {
+    if (!new RegExp(UNIT_EXPONENT).test(match)) return match
+    const factor = new RegExp(`^(${UNIT_SYMBOL})(${UNIT_EXPONENT})?$`)
+    const parts = match.split(/\s*[·⋅]\s*|\s+/).map(piece => {
+      const bits = piece.match(factor)
+      return bits ? `\\text{${bits[1]}}${bits[2] ? `^{-${bits[2].slice(1)}}` : ''}` : null
+    })
+    return parts.every(Boolean) ? `$${parts.join('\\cdot ')}$` : match
+  })
+}
+
 function protectTextOnlySymbolsInMath(text: string) {
   return mapOutsideCodeFences(text, part => part.replace(MATH_TOKEN, token => {
     const delimiter = token.startsWith('$$') ? '$$' : '$'

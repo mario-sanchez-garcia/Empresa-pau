@@ -323,7 +323,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
     id: "f-2024-jun-B4",
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
-    enunciado: "El prisma de sección triangular mostrado en la figura está hecho\nde un material con índice de refracción np. Se halla inmerso en aire, con índice\nde refracción igual a 1.\n\na) Determine el índice de refracción np si se sabe que el ángulo límite para la\nreflexión total en el paso del prisma al aire vale 45, 58◦.\n\nb) Considere un rayo de luz que incide perpendicularmente sobre la superficie\ndel prisma desde el aire, en el punto P. Elabore un diagrama mostrando su\nrecorrido en el interior del prisma hasta que vuelve a emerger al aire, y\ncalcule el ángulo de refracción a la salida.",
+    enunciado: "El prisma de sección triangular mostrado en la figura está hecho\nde un material con índice de refracción np. Se halla inmerso en aire, con índice\nde refracción igual a 1.\n\na) Determine el índice de refracción np si se sabe que el ángulo límite para la\nreflexión total en el paso del prisma al aire vale 45, 58◦.\n\nb) Considere un rayo de luz que incide perpendicularmente sobre la superficie\ndel prisma desde el aire, en el punto P. Elabore un diagrama mostrando su\nrecorrido en el interior del prisma hasta que vuelve a emerger al aire, y\ncalcule el ángulo de refracción a la salida.\n\n![Esquema óptico del paralelepípedo](/fisica-imgs/madrid/2024/ordinaria/fisica-2024-ordinaria-b4.png)",
     apartados: [],
     puntos: 2,
   },
@@ -342,7 +342,9 @@ $t = 1$ d: 8,90 $\\quad$ 10,77
 a) Calcule el período de semidesintegración de cada radioisótopo.
 
 b) Si $M_1$ y $M_2$ denotan las respectivas masas atómicas de los radioisótopos, determine el cociente
-$M_2/M_1$.`,
+$M_2/M_1$.
+
+![Gráfica del efecto fotoeléctrico](/fisica-imgs/madrid/2024/ordinaria/fisica-2024-ordinaria-b5.png)`,
     apartados: [],
     puntos: 2,
   },
@@ -396,7 +398,9 @@ carga $-q$ desde el infinito a la posición $(a, a)$.
 b) El flujo del campo eléctrico a través de las superficies cerradas
 $S_1$ y $S_2$.
 
-Dato: Permitividad eléctrica del vacío; $\\varepsilon_0 = 1/(4\\pi K)$.`,
+Dato: Permitividad eléctrica del vacío; $\\varepsilon_0 = 1/(4\\pi K)$.
+
+![Distribución de tres cargas puntuales en el plano](/fisica-imgs/madrid/2023/ordinaria/fisica-2023-ordinaria-a3.png)`,
     apartados: [],
     puntos: 2,
   },
@@ -490,7 +494,7 @@ del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.`,
     id: "f-2023-jun-B4",
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
-    enunciado: "Un rayo de luz incide sobre la cara izquierda del\nprisma de la figura, el cual está construido con un material cuyo\níndice de refracción vale 1,66.\n\na) \tDetermine los ángulos α y\nβ de la trayectoria que sigue\nel rayo de luz que entra en el prisma desde el aire con\nun ángulo de incidencia de 50º.\n\nb) \tCalcule el ángulo límite con el que deberá incidir desde\nel aire el rayo de luz para que este no emerja del prisma.\n\nDato: Índice de refracción del aire, n = 1.",
+    enunciado: "Un rayo de luz incide sobre la cara izquierda del\nprisma de la figura, el cual está construido con un material cuyo\níndice de refracción vale 1,66.\n\na) \tDetermine los ángulos α y\nβ de la trayectoria que sigue\nel rayo de luz que entra en el prisma desde el aire con\nun ángulo de incidencia de 50º.\n\nb) \tCalcule el ángulo límite con el que deberá incidir desde\nel aire el rayo de luz para que este no emerja del prisma.\n\nDato: Índice de refracción del aire, n = 1.\n\n![Esquema de lentes delgadas](/fisica-imgs/madrid/2023/ordinaria/fisica-2023-ordinaria-b4.png)",
     apartados: [],
     puntos: 2,
   },
@@ -515,7 +519,9 @@ frenado y de la intensidad de corriente máxima para
 el haz de luz de 379 nm si se disminuyese a la mitad
 la intensidad del haz.
 
-Datos: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.`,
+Datos: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.
+
+![Gráfica de actividad radiactiva frente al tiempo](/fisica-imgs/madrid/2023/ordinaria/fisica-2023-ordinaria-b5.png)`,
     apartados: [],
     puntos: 2,
   },
@@ -567,7 +573,9 @@ a) La intensidad de la corriente en el circuito formado por la
 varilla, la resistencia y los tramos de raíl entre ellas.
 
 b) La fuerza $\\vec{F}$ que el campo magnético ejerce sobre la
-varilla.`,
+varilla.
+
+![Esquema de campo magnético generado por corrientes](/fisica-imgs/madrid/2022/ordinaria/fisica-2022-ordinaria-a3.png)`,
     apartados: [],
     puntos: 2,
   },
@@ -628,7 +636,9 @@ b) ¿Cuál sería el nivel de intensidad en el punto B si se
 agregase sobre él otro foco de igual potencia a una
 altura de $h/2$?
 
-Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
+Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.
+
+![Representación de una onda transversal](/fisica-imgs/madrid/2022/ordinaria/fisica-2022-ordinaria-b2.png)`,
     apartados: [],
     puntos: 2,
   },
@@ -652,7 +662,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
     id: "f-2022-jun-B4",
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
-    enunciado: "Una lámina de vidrio se halla sobre un líquido\nde índice de refracción desconocido. La longitud de onda de la\nluz en el vidrio se reduce a un 70 % de su valor en el aire. Si se\nemite luz desde el líquido, los rayos con ángulos de incidencia\nsuperiores a 30º en la cara inferior de la lámina no se refractan\nal aire por su cara superior. Calcule:\n\na) \tEl índice de refracción del vidrio.\n\nb) \tEl índice de refracción del líquido.\n\nDato: Índice de refracción del aire, naire = 1.",
+    enunciado: "Una lámina de vidrio se halla sobre un líquido\nde índice de refracción desconocido. La longitud de onda de la\nluz en el vidrio se reduce a un 70 % de su valor en el aire. Si se\nemite luz desde el líquido, los rayos con ángulos de incidencia\nsuperiores a 30º en la cara inferior de la lámina no se refractan\nal aire por su cara superior. Calcule:\n\na) \tEl índice de refracción del vidrio.\n\nb) \tEl índice de refracción del líquido.\n\nDato: Índice de refracción del aire, naire = 1.\n\n![Esquema de lámina de vidrio sobre líquido](/fisica-imgs/madrid/2022/ordinaria/fisica-2022-ordinaria-b4.png)",
     apartados: [],
     puntos: 2,
   },
@@ -870,7 +880,9 @@ siguientes casos:
 a) La velocidad de la barra es constante e igual a $\\vec{v} = 10^2\ \\hat{i}$ m s$^{-1}$.
 
 b) La barra parte del reposo y su aceleración es
-constante e igual a $\\vec{a} = 5\ \\hat{i}$ m s$^{-2}$.`,
+constante e igual a $\\vec{a} = 5\ \\hat{i}$ m s$^{-2}$.
+
+![Dos cargas puntuales en el plano](/fisica-imgs/madrid/2020/ordinaria/fisica-2020-ordinaria-a3.png)`,
     apartados: [],
     puntos: 2,
   },
@@ -944,7 +956,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
     id: "f-2020-jun-B4",
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
-    enunciado: "Una placa de vidrio de 4 cm de espesor\ny de índice de refracción 1,5 se encuentra sumergida\nentre dos aceites de índices de refracción 1,4 y 1,2\nrespectivamente. Proveniente del aceite de índice 1,4\nincide sobre el vidrio un haz de luz con un ángulo de\nincidencia de 30º. Calcule:\n\na) \tLa distancia, d, entre el rayo reflejado por la cara\nsuperior del vidrio y el refractado después de\nreflejarse en la cara inferior del vidrio.\n\nb) \tEl ángulo de incidencia mínimo en la cara\nsuperior \tdel \tvidrio \tnecesario \tpara \tque \tse\nproduzca el fenómeno de reflexión total en la cara inferior de la placa de vidrio.",
+    enunciado: "Una placa de vidrio de 4 cm de espesor\ny de índice de refracción 1,5 se encuentra sumergida\nentre dos aceites de índices de refracción 1,4 y 1,2\nrespectivamente. Proveniente del aceite de índice 1,4\nincide sobre el vidrio un haz de luz con un ángulo de\nincidencia de 30º. Calcule:\n\na) \tLa distancia, d, entre el rayo reflejado por la cara\nsuperior del vidrio y el refractado después de\nreflejarse en la cara inferior del vidrio.\n\nb) \tEl ángulo de incidencia mínimo en la cara\nsuperior \tdel \tvidrio \tnecesario \tpara \tque \tse\nproduzca el fenómeno de reflexión total en la cara inferior de la placa de vidrio.\n\n![Esquema de refracción y reflexión en una placa de vidrio](/fisica-imgs/madrid/2020/ordinaria/fisica-2020-ordinaria-b4.png)",
     apartados: [],
     puntos: 2,
   },
@@ -970,7 +982,9 @@ los fotones incidentes es de
 $10 \\cdot 10^{14}$ Hz.
 
 Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Masa del electrón, $m_e = 9{,}1 \\cdot 10^{-31}\ \\text{kg}$; Constante de
-Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$.`,
+Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$.
+
+![Gráfica de energía cinética máxima frente a frecuencia](/fisica-imgs/madrid/2020/ordinaria/fisica-2020-ordinaria-b5.png)`,
     apartados: [],
     puntos: 2,
   },

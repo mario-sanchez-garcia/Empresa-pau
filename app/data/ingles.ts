@@ -608,6 +608,112 @@ When I recently visited it, I realised that getting to Killarney can be sustaina
 
 // ─── Shared correction criteria strings ──────────────────────────────────────
 
+
+// ── 2021-2022 Ordinaria coincidencias/adicional Madrid ──────────────────────
+const t2021OrdCoinA = `In Praise of Loud Women
+The label “loud woman” has never been a compliment, even though some women
+may wear it as a badge of honour. In everyday life, there is still something
+uncomfortable for a woman about being called loud, because the implication is
+that a) you don’t care about the people around you and b) you don’t care what
+other people think about you. Anecdotally, many women will say that they
+learned from an early age that being loud – whatever this means – was not
+welcome behaviour.
+What a loud woman looks like, though, has changed hugely in the past two
+decades. With Michelle Obama publishing her autobiography, Becoming, it is
+clear that a new generation of women want to redefine the term. As the former
+first lady puts it: “I admit it: I am louder than the average human being and I have
+no fear of speaking my mind. These traits don’t come from the colour of my skin,
+but from an unwavering belief in my own intelligence.” If you ask women whom
+they would most like to be as a public speaker, many will say Obama. Her
+speaking style – controlled passion, warm authority, approachable charisma – is
+extremely attractive. She is the new kind of loud: the volume is calculated and in
+tune with the audience.
+Thanks to digital platforms and social media, there has been a huge shift in the
+past twenty years in how women communicate and build a platform. Many of the
+women in the Top 10 chart of most popular TED speakers cannot be defined as
+loud, although their reach is extraordinary and they have built lucrative careers
+off the back of it. Often their message is about how to have your quiet voice heard
+in a noisy world.
+Adapted from “In praise of loud women,” The Guardian, October 6th, 2018.
+< https://www.theguardian.com/lifeandstyle/2018/nov/06/ >`
+
+const t2021OrdCoinB = `Dogs are Humans’ Oldest Companions
+A study of dog DNA has shown that our “best friend” in the animal world may
+also be our oldest one. The analysis reveals that dog domestication can be traced
+back 11,000 years, to the end of the last Ice Age, and that they were domesticated
+before any other known species.
+Our canine companions were widespread across the northern hemisphere at this
+time and had already split into five different types. Despite the expansion of
+European dogs during the colonial era, traces of these ancient indigenous breeds
+survive today in the Americas, Asia, Africa and Oceania.
+The research fills in some of the gaps in the natural history of our close animal
+companions. Dr Skoglund told BBC News: “Dogs are really unique in being this
+quite strange thing if you think about it; when all people were still hunter
+gatherers, they domesticated what is really a wild carnivore – wolves are pretty
+frightening in many parts of the world.” To some extent, dog genetic patterns
+mirror human ones, because people took their animal companions with them
+when they moved.
+G. Larson, a co-author from the University of Oxford, said: "Dogs are our oldest
+and closest animal partner.” Dogs are thought to have evolved from wolves that
+ventured into human camps, perhaps sniffing around for food. As they were
+tamed, they could then have served humans as hunting companions or guards.
+Dr Skoglund said it was unclear where the initial domestication occurred: “Dog
+history has been so dynamic that you can’t really count on it still being there to
+readily read in their DNA. We really don’t know – that’s the fascinating thing
+about it.” Many animals, such as cats, probably became our pets when humans
+settled down to farm the land a little over 6,000 years ago.
+Adapted from “Dogs are humans’ oldest companions, DNA shows,” BBC News,
+October 30, 2020. <https://bbc.in/2TOkLks>`
+
+const t2022OrdCoinA = `Knocker Uppers
+Until the 1970s in some areas, many workers were woken by the sound of a tap at their bedroom
+window. On the street outside, walking to their next customer's house, would be a figure holding a long
+stick. The "knocker upper" was a common sight in Britain, particularly in the northern mill towns, where
+people worked shifts, or in London where dockers kept unusual hours. While the standard implement
+was a long fishing rod-like stick, other methods were employed, such as soft hammers, rattles and even
+pea shooters.
+"They used to come down the street with their big, long poles," remembers Paul Stafford. "I would sleep
+with my brother in the back room upstairs and my parents slept in the front. The knocker upper wouldn't
+hang around either, just three or four taps and then he'd be off. We never heard it in the back, though
+it used to wake my father in the front."
+One problem knocker uppers faced was making sure workers did not get woken up for free. "When
+knocking up began to be a regular trade, the public complained of being bothered by our loud rapping
+or ringing,” Mrs. Waters, a knocker upper in the north of England told Canada's Huron Expositor
+newspaper in 1878. "Knocker uppers also found out that while they knocked up one who paid them,
+they knocked up several on each side who did not," she continued. The solution they hit on was
+modifying a long stick, with which to tap on the bedroom windows of their clients, loudly enough to wake
+up those intended but softly enough not to disturb the rest.
+The trade spread rapidly across the country, particularly in areas where poorly paid workers were
+required to work shifts but could not afford their own watches.
+Adapted from “Knocker uppers: Waking up the workers in industrial Britain,” BBC News, March 27,
+2016. <https://www.bbc.com/news/uk-england-35840393>`
+
+const t2022OrdCoinB = `The Secret History of ‘Monopoly’
+One night in late 1932, a Philadelphia businessman and his wife, Todd, introduced their friends
+Charles and Esther Darrow to a real-estate board game they had recently learned. As the two
+couples sat around the board, enthusiastically rolling the cube, purchasing properties and moving
+their tokens around, Mr. Todd was pleased to note that the Darrows liked the game. Charles Todd,
+in fact, made them a set of their own, and began teaching them some of the more advanced rules.
+The game didn’t have an official name: it wasn’t sold in a box but passed from friend to friend.
+However, everybody called it ‘the monopoly game’.
+Together with other friends, they played many times. One day, despite all of his exposure to the
+game, Darrow – who was unemployed, and desperate for money to support his family – asked
+Charles Todd for a written copy of the rules. Todd was slightly perplexed, as he had never written
+them up, nor did it appear that written rules existed elsewhere.
+The truth is that the rules to the game had been invented in Washington DC in 1903 by a bold,
+progressive woman named Elizabeth Magie. But her place in the game’s folk history was lost for
+decades. Today, Magie’s story can be told in full. But even though much of the story has been
+around for 40 years, the Charles Darrow myth persists as an inspirational parable of American
+innovation – thanks in no small part to Monopoly’s publisher and the man himself. After he sold a
+version of the game to Parker Brothers, it became a phenomenal success, eventually making him
+a millionaire. One journalist after another asked him how he had managed to invent Monopoly, “It’s
+a freak,” Darrow told the Germantown Bulletin, a Philadelphia paper. “Entirely unexpected and
+illogical.”
+Adapted from “The secret history of Monopoly: the capitalist board game’s leftwing origins,” The
+Guardian, April 15, 2015. <https://www.theguardian.com/lifeandstyle/2015/apr/11/secret-history-
+monopoly-capitalist-game-leftwing-origins>`
+
+
 const crit1 = "1 punto por apartado (2 en total). La respuesta TRUE o FALSE debe ir justificada con una cita textual completa. Sin cita = 0 puntos en ese apartado."
 const crit1_ng = "1 punto por apartado (2 en total). Indica T/F/NG eligiendo 2 de los 3 enunciados. En T/F copia la oración del texto como evidencia. Si la respuesta es NG, no escribas nada más."
 const crit2 = "1 punto por pregunta (2 en total). 0,5 puntos por las ideas parafraseadas + 0,5 puntos por la expresión. No copiar el texto literal."
@@ -2817,6 +2923,167 @@ d) Complete the following sentence to report what was said.
 The manager told me _______________________________________________.`,
       "Have you ever stayed at a really bad hotel or accommodation? Describe the experience or imagine what it would have been like.",
       "Turismo / Humor"
+    ),
+  },
+
+  // ── 2020-2021 y 2021-2022 Ordinaria coincidencias/adicional ────────────────
+  {
+    id: 62,
+    año: 2021,
+    tipo: "Ordinaria",
+    convocatoria: "Ordinaria",
+    opcion: "A",
+    asignatura: "Inglés",
+    comunidad: "Madrid",
+    dia: "12:00",
+    titulo: "In Praise of Loud Women",
+    preguntas: makePreguntas(
+      "ing-2021OrdCoin-A",
+      t2021OrdCoinA,
+      `Are the following statements TRUE or FALSE? Copy the evidence from the text. No
+marks are given for only TRUE or FALSE.
+a) “Loud woman” is generally considered a pleasing comment.
+b) No significant changes have taken place in women’s speech in the last two decades.`,
+      `In your own words and based on the ideas in the text, answer the following questions.
+Do not copy from the text.
+a) Has “being loud” been an acceptable social behaviour for women? Explain.
+b) Why is Michelle Obama popular as a speaker?`,
+      `Find the words in the text that mean:
+a) inference (paragraph 1)
+b) mind (paragraph 1)
+c) obvious (paragraph 2)
+d) outstanding (paragraph 3)`,
+      `Complete the following sentences. Use the appropriate form of the word in brackets
+when given.
+a) Is _______ (be) female a disadvantage in public speaking? Mrs. Clinton’s problem
+might lie in our contradictory attitudes _______ women’s public speech.
+b) Last month, Michelle Obama _______ (do) a talk at the Democratic National
+Convention _______ rocked.
+c) TEDWomen is a conference _______ the power of women and girls to be creators
+and change-makers. The program of speakers, workshops and events _______
+(spark) some of TED’s most iconic moments so far.
+d) Women are more _______ (like) to speak up if questions_______ (ask).`,
+      `Good communication skills can help you in your life. Discuss.`,
+      "Comunicación / Género"
+    ),
+  },
+  {
+    id: 63,
+    año: 2021,
+    tipo: "Ordinaria",
+    convocatoria: "Ordinaria",
+    opcion: "B",
+    asignatura: "Inglés",
+    comunidad: "Madrid",
+    dia: "12:00",
+    titulo: "Dogs are Humans’ Oldest Companions",
+    preguntas: makePreguntas(
+      "ing-2021OrdCoin-B",
+      t2021OrdCoinB,
+      `Are the following statements TRUE or FALSE? Copy the evidence from the text. No
+marks are given for only TRUE or FALSE.
+a) Dogs were domesticated almost ten thousand years ago.
+b) The investigation provides several data about the evolution of dogs that we did not know
+before.`,
+      `In your own words and based on the ideas in the text, answer the following questions. Do
+not copy from the text.
+a) Why is dog genomics partly similar to the one of human beings?
+b) What does the text say about the origin of dogs?`,
+      `Find the words in the text that mean:
+a) signs (paragraph 2)
+b) scary (paragraph 3)
+c) domesticated (paragraph 4)
+d) cultivate (paragraph 5)`,
+      `Complete the following sentences. Use the appropriate form of the word in brackets when
+given.
+a) Since recorded history began, scientists _______ (distinguish) between species
+_______ the basis of how they look, behave or live.
+b) Mammals _______ dogs or cats or rabbits do not lay eggs, but the mother keeps the egg
+inside her and _______ (give) birth to the fully developed baby animal.
+c) _______ (use) DNA from ancient dogs is showing us just _______ far back our shared
+history goes.
+d) Researchers found dog owners were likely to live _______ (long) than those _______
+didn’t have dogs.`,
+      `What are the pros and cons of keeping a pet?`,
+      "Animales / Ciencia"
+    ),
+  },
+  {
+    id: 64,
+    año: 2022,
+    tipo: "Ordinaria",
+    convocatoria: "Ordinaria",
+    opcion: "A",
+    asignatura: "Inglés",
+    comunidad: "Madrid",
+    dia: "12:00",
+    titulo: "Knocker Uppers",
+    preguntas: makePreguntas(
+      "ing-2022OrdCoin-A",
+      t2022OrdCoinA,
+      `Are the following statements TRUE or FALSE? Copy the evidence from the text. Use a
+complete sentence. No marks are given for only TRUE or FALSE.
+a) Knocker uppers only used sticks to do their jobs.
+b) Knocker uppers waited for their clients to wake up before moving to the next house.`,
+      `In your own words and based on the ideas in the text, answer the following questions.
+Do not copy from the text.
+a) Which two main problems did knocker uppers have at the beginning?
+b) What kind of people hired knocker uppers?`,
+      `Find the words in the text that mean:
+a) familiar (paragraph 1)
+b) on an upper floor (paragraph 2)
+c) went on (paragraph 3)
+d) annoy (paragraph 3)`,
+      `Complete the following sentences. Use the appropriate form of the word in brackets
+when given.
+a) I _______ (usual) sleep well but recently I've been having such strange dreams that they’re
+beginning _______ (scare) me.
+b) The less you sleep, the _______ (big) the impact _______ your health.
+c) If you _______ (set) the alarm clock as I told you last night, you _______ (not / oversleep).
+d) Last week, she _______ (ask) how many hours she needs to be ready ________ an exam.`,
+      `“A good laugh and a long sleep are the best cures for anything.” Do you agree? Justify your answer.`,
+      "Historia social / Trabajo"
+    ),
+  },
+  {
+    id: 65,
+    año: 2022,
+    tipo: "Ordinaria",
+    convocatoria: "Ordinaria",
+    opcion: "B",
+    asignatura: "Inglés",
+    comunidad: "Madrid",
+    dia: "12:00",
+    titulo: "The Secret History of Monopoly",
+    preguntas: makePreguntas(
+      "ing-2022OrdCoin-B",
+      t2022OrdCoinB,
+      `Are the following statements TRUE or FALSE? Copy the evidence from the text. No
+marks are given for only TRUE or FALSE.
+a) Todd easily facilitated the written rules for Monopoly.
+b) Magie copied the rules from the Darrows.`,
+      `In your own words and based on the ideas in the text, answer the following questions.
+Do not copy from the text.
+a) How was Monopoly played originally?
+b) How did Charles Darrow make a profit from the Monopoly game?`,
+      `Find the words in the text that mean:
+a) happy (paragraph 1)
+b) actually (paragraph 1)
+c) provide for (paragraph 2)
+d) surprising (paragraph 3)`,
+      `Complete the following sentences. Use the appropriate form of the word in brackets
+when given.
+a) Acknowledged as a very _______ (success) game, Monopoly is a board game where two or
+more players play against _______ another.
+b) The history of Monopoly is based _______ accounts that were known a long time after it
+_______ (register) by Parker Bros.
+c) There were few possibilities _______ Magie to be recognized as the inventor of the game
+because she _______ (lose) the legal war.
+d) Complete the following sentence to report what was said.
+“Who was the best Trivial Pursuit player in 2021?”
+I asked my sister ______________________________________________________________.`,
+      `What is your favorite board game? Why? Explain.`,
+      "Juegos / Historia"
     ),
   },
 

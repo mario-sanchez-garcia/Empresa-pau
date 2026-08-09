@@ -3,6 +3,7 @@ export interface Pregunta {
   bloque: string
   opcion: "A" | "B"
   enunciado: string
+  imagenes?: string[]
   puntuacion: number
   criterios: string
 }
@@ -718,30 +719,78 @@ b) (1.25 puntos) $P\\bigl((A \\cap B) \\mid \\overline{C}\\bigr)$.`,
   {
     id: 3, año: 2025, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2025-Jl-1A", bloque:"Algebra", opcion:"A",
-        enunciado:`$A=\\begin{pmatrix}1&2&-1\\\\0&1&1\\\\2&1&0\\end{pmatrix}$.\n\na) $\\det(A)$\n\nb) $A^{-1}$\n\nc) $AX=\\begin{pmatrix}2\\\\1\\\\3\\end{pmatrix}$`,
-        puntuacion:2.5, criterios:"Determinante (0.5 pts), inversa (1.25 pts), sistema (0.75 pts)." },
-      { id:"2025-Jl-1B", bloque:"Algebra", opcion:"B",
-        enunciado:`Sistema segun $\\lambda$:\n$$\\begin{cases} x+y+z=2 \\\\ x+\\lambda y+2z=3 \\\\ 2x+y+\\lambda z=4 \\end{cases}$$`,
-        puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion (1 pt), resolucion SCD (0.5 pts)." },
-      { id:"2025-Jl-2A", bloque:"Analisis", opcion:"A",
-        enunciado:`$f(x)=\\dfrac{\\ln x}{x}$ para $x>0$.\n\na) Asintotas.\n\nb) Extremos e inflexion.\n\nc) $\\displaystyle\\int_1^e \\dfrac{\\ln x}{x}\\,dx$`,
-        puntuacion:2.5, criterios:"Asintotas (0.5 pts), extremos (1 pt), integral por sustitucion (1 pt)." },
-      { id:"2025-Jl-2B", bloque:"Analisis", opcion:"B",
-        enunciado:`Area entre $y=\\sin x$ e $y=\\cos x$ en $[0, \\pi]$.`,
-        puntuacion:2.5, criterios:"Interseccion (0.5 pts), planteamiento con abs (0.75 pts), calculo (1 pt), resultado (0.25 pts)." },
-      { id:"2025-Jl-3A", bloque:"Geometria", opcion:"A",
-        enunciado:`Rectas $r: \\frac{x-1}{1}=\\frac{y}{2}=\\frac{z+1}{-1}$ y $s: \\frac{x}{2}=\\frac{y-1}{1}=\\frac{z}{1}$.\n\na) Posicion relativa.\n\nb) Distancia si se cruzan.`,
-        puntuacion:2.5, criterios:"Paralelismo (0.5 pts), interseccion (0.75 pts), cruzadas (0.25 pts), distancia (1 pt)." },
-      { id:"2025-Jl-3B", bloque:"Geometria", opcion:"B",
-        enunciado:`Tetraedro $A(0,0,0)$, $B(1,0,0)$, $C(0,1,0)$, $D(0,0,1)$.\n\na) Volumen.\n\nb) Plano de la cara $BCD$.\n\nc) Distancia de $A$ al plano $BCD$.`,
-        puntuacion:2.5, criterios:"Volumen (1 pt), plano BCD (0.75 pts), distancia (0.75 pts)." },
-      { id:"2025-Jl-4A", bloque:"Probabilidad", opcion:"A",
-        enunciado:`$X\\sim B(n=12, p=0{,}25)$.\n\na) $P(X=3)$\n\nb) $P(X\\leq 2)$\n\nc) Esperanza y varianza`,
-        puntuacion:2.5, criterios:"Formula binomial (0.5 pts), a (0.75 pts), b (0.75 pts), E y V (0.5 pts)." },
-      { id:"2025-Jl-4B", bloque:"Probabilidad", opcion:"B",
-        enunciado:`$X\\sim N(80, 10)$.\n\na) $P(70<X<95)$\n\nb) $P(X<60)$\n\nc) $k$: $P(X>k)=0{,}05$`,
-        puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), c (0.5 pts)." }
+      { id:"2025-Ext-11", bloque:"Algebra", opcion:"A",
+        enunciado:`En una granja se crían conejos, gallinas y pavos. El coste diario de la comida por animal es de 1,50 euros si es conejo, de 4 céntimos de euro si es gallina, y de 30 céntimos de euro si se trata de un pavo. El coste diario en comida para estos animales en la granja asciende a 44 euros.
+
+Se sabe que hay tantas gallinas como cuatro veces el número de pavos más la cuarta parte de los conejos. Además, el doble del número de gallinas es igual a la suma de conejos y pavos más diez veces el número de conejos.
+
+Se pide averiguar el número de animales de cada tipo en la granja.`,
+        puntuacion:2.5, criterios:"Por cada ecuación correctamente planteada: 0.5 pts. Resolución del sistema: 1 punto. Si una ecuación está mal planteada, pero el sistema resultante se resuelve correctamente, se podrá valorar la resolución hasta 0.5 pts." },
+      { id:"2025-Ext-12", bloque:"Algebra", opcion:"B",
+        enunciado:`Dadas las matrices reales
+
+$$A=\\begin{pmatrix}0&1&2\\\\1&3&a\\\\a&0&0\\end{pmatrix},\\quad B=\\begin{pmatrix}1&3&0\\\\a&1&0\\\\0&0&1\\end{pmatrix}$$
+
+se pide:
+
+a) (1.25 puntos) Estudiar para qué valores del parámetro real $a$ se cumple que la matriz $AB$ tiene rango 3.
+
+b) (1.25 puntos) Calcular la inversa de $B$ para los valores de $a$ para los que sea posible.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.75 pts; resolución: 0.5 pts. b) Planteamiento: 0.75 pts; resolución: 0.5 pts." },
+      { id:"2025-Ext-21", bloque:"Analisis", opcion:"A",
+        enunciado:`Sean las funciones
+
+$$f(x)=\\dfrac{e}{e^x-e},\\quad g(x)=\\dfrac{1}{x-1}.$$
+
+Se pide:
+
+a) (1 punto) Calcular $\\displaystyle\\lim_{x\\to 1}\\bigl(f(x)-g(x)\\bigr)$.
+
+b) (0.75 puntos) Estudiar los intervalos de crecimiento y decrecimiento de $f$ en su dominio.
+
+c) (0.75 puntos) Calcular las asíntotas de la función $g(x)+g(-x)$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Derivada: 0.25 pts; determinación del decrecimiento en el dominio: 0.5 pts. c) Cada asíntota: 0.25 pts." },
+      { id:"2025-Ext-22", bloque:"Analisis", opcion:"B",
+        enunciado:`Se considera la parábola $f(x)=-x^2+4$.
+
+a) (1 punto) Calcular el área de la región limitada por la recta $y=0$ y la gráfica de $f$.
+
+b) (1.5 puntos) Determinar las dimensiones del rectángulo de mayor área que puede construirse apoyado sobre el eje $OX$, inscrito bajo la parábola y con los lados paralelos a los ejes de coordenadas. Calcular también dicha área máxima.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Función área de una variable: 0.5 pts; punto crítico: 0.5 pts; discusión de máximo local: 0.25 pts; área correcta: 0.25 pts." },
+      { id:"2025-Ext-31", bloque:"Geometria", opcion:"A",
+        enunciado:`Sean el punto $A(1,2,3)$, la recta
+
+$$r\\equiv \\dfrac{x-1}{2}=\\dfrac{y}{0}=\\dfrac{z-2}{1}$$
+
+y el plano $\\pi: x+2y-2z=1$. Se pide:
+
+a) (0.75 puntos) Calcular la distancia de la recta $r$ al plano $\\pi$.
+
+b) (0.75 puntos) Calcular la proyección ortogonal del punto $A$ sobre la recta $r$.
+
+c) (1 punto) Calcular el volumen del tetraedro formado por el origen de coordenadas y los puntos de corte con los ejes de un plano que pasa por $A$ y es paralelo a $\\pi$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.25 pts. b) Planteamiento: 0.5 pts; resolución: 0.25 pts. c) Planteamiento: 0.5 pts; resolución: 0.5 pts." },
+      { id:"2025-Ext-32", bloque:"Geometria", opcion:"B",
+        enunciado:`Sea $S$ el segmento de extremos $A(0,1,0)$ y $B(1,0,1)$.
+
+a) (1.5 puntos) Determinar el punto de $S$ cuya distancia a $A$ sea el doble de su distancia a $B$.
+
+b) (1 punto) Hallar la ecuación del plano perpendicular a $S$ que pasa por el punto medio del segmento.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 1 punto; resolución: 0.5 pts. Se penalizará con 0.25 pts si el punto obtenido no pertenece al segmento. b) Planteamiento: 0.5 pts; resolución: 0.5 pts." },
+      { id:"2025-Ext-4A", bloque:"Probabilidad", opcion:"A",
+        enunciado:`En una línea de tren, el 80% de los trenes llegan puntuales o con menos de 30 minutos de retraso, el 15% llegan con un retraso de entre 30 y 60 minutos, y el resto llega con más de una hora de retraso.
+
+a) (1 punto) Un usuario realiza 40 viajes y en 10 de ellos el retraso fue superior a una hora. El usuario afirma que la probabilidad de que ocurra esto es menor que una entre un millón. ¿Ha calculado correctamente dicha probabilidad?
+
+b) (1.5 puntos) En enero de 2025 un viajero hizo 6 trayectos diarios en esta línea. Aproximando mediante una distribución normal, calcular la probabilidad de que como mucho la sexta parte de sus viajes dieran derecho a devolución.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Parámetros de la normal: 0.25 pts cada uno; probabilidad: 1 punto (planteamiento 0.5 pts, resolución 0.5 pts). Sin corrección por continuidad se penaliza 0.25 pts." },
+      { id:"2025-Ext-4B", bloque:"Probabilidad", opcion:"B",
+        enunciado:`En una línea de tren, el 80% de los trenes llegan puntuales o con menos de 30 minutos de retraso, el 15% llegan con un retraso de entre 30 y 60 minutos, y el resto llega con más de una hora de retraso.
+
+a) (1 punto) Un usuario realiza 40 viajes y en 10 de ellos el retraso fue superior a una hora. El usuario afirma que la probabilidad de que ocurra esto es menor que una entre un millón. ¿Ha calculado correctamente dicha probabilidad?
+
+b) (1.5 puntos) En enero de 2025 un viajero hizo 6 trayectos diarios en esta línea. Aproximando mediante una distribución normal, calcular la probabilidad de que como mucho la sexta parte de sus viajes dieran derecho a devolución.`,
+        puntuacion:2.5, criterios:"Pregunta sin optatividad en el examen oficial. a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Parámetros de la normal: 0.25 pts cada uno; probabilidad: 1 punto (planteamiento 0.5 pts, resolución 0.5 pts). Sin corrección por continuidad se penaliza 0.25 pts." }
     ]
   },
   {
@@ -992,30 +1041,88 @@ c) (1.25 puntos) Calcule una ecuación de la recta $r_2$ que pase por $P$ y sea 
   {
     id: 9, año: 2022, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2022-Jl-1A", bloque:"Algebra", opcion:"A",
-        enunciado:`Familia $A_k=\\begin{pmatrix}k&1\\\\2&k-1\\end{pmatrix}$.\n\na) Valores de $k$ para los que $A_k$ no es invertible.\n\nb) Para $k=2$, resuelve $A_kX=\\begin{pmatrix}3\\\\1\\end{pmatrix}$.`,
-        puntuacion:2.5, criterios:"Determinante en k (0.75 pts), valores k (0.75 pts), sistema k=2 (1 pt)." },
-      { id:"2022-Jl-1B", bloque:"Algebra", opcion:"B",
-        enunciado:`Sistema segun $m$:\n$$\\begin{cases}x+y-z=2\\\\x+my+z=m\\\\2x+y+mz=3\\end{cases}$$`,
-        puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion (1 pt), resolucion (0.5 pts)." },
-      { id:"2022-Jl-2A", bloque:"Analisis", opcion:"A",
-        enunciado:`$f(x)=\\dfrac{x^2}{x^2-4}$: dominio, asintotas, monotonia y grafica.`,
-        puntuacion:2.5, criterios:"Dominio y asintotas (0.75 pts), monotonia (1 pt), grafica (0.75 pts)." },
-      { id:"2022-Jl-2B", bloque:"Analisis", opcion:"B",
-        enunciado:`Area entre $y=x^3$ e $y=x$.`,
-        puntuacion:2.5, criterios:"Interseccion (0.5 pts), planteamiento (0.75 pts), calculo (1 pt), resultado (0.25 pts)." },
-      { id:"2022-Jl-3A", bloque:"Geometria", opcion:"A",
-        enunciado:`$\\pi_1:x-y+z=2$ y $\\pi_2:2x+y-z=1$.\n\na) Posicion relativa.\n\nb) Recta interseccion.\n\nc) Plano perp. a $\\pi_1$ por la recta.`,
-        puntuacion:2.5, criterios:"Posicion (0.5 pts), recta (1 pt), plano (1 pt)." },
-      { id:"2022-Jl-3B", bloque:"Geometria", opcion:"B",
-        enunciado:`$A(1,2,0)$, $B(0,1,1)$, $C(2,0,1)$.\n\na) Plano por $ABC$.\n\nb) Area del triangulo.\n\nc) Distancia del origen al plano.`,
-        puntuacion:2.5, criterios:"Plano (1 pt), area (0.75 pts), distancia (0.75 pts)." },
-      { id:"2022-Jl-4A", bloque:"Probabilidad", opcion:"A",
-        enunciado:`$X\\sim N(100,15)$.\n\na) $P(X>115)$\n\nb) $P(85<X<115)$\n\nc) $k$: $P(X<k)=0{,}9$`,
-        puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), c (0.5 pts)." },
-      { id:"2022-Jl-4B", bloque:"Probabilidad", opcion:"B",
-        enunciado:`$X\\sim B(n=8, p=0{,}4)$.\n\na) $P(X=3)$\n\nb) $P(X\\geq 2)$\n\nc) Esperanza y varianza`,
-        puntuacion:2.5, criterios:"Binomial (0.5 pts), a (0.75 pts), b (0.75 pts), E y V (0.5 pts)." }
+      { id:"2022-Ext-A1", bloque:"Algebra", opcion:"A",
+        enunciado:`En una estantería de una biblioteca hay ensayos, novelas y biografías. Tres de cada dieciséis libros de la estantería son ensayos. Las biografías junto con la tercera parte de los ensayos exceden en dos a las novelas. Si retiráramos la mitad de los ensayos y la quinta parte de las novelas quedarían ciento cinco libros.
+
+Calcule el número de libros de cada clase que hay en la estantería.`,
+        puntuacion:2.5, criterios:"Planteamiento correcto del sistema: 1.5 pts (0.5 por ecuación). Resolución: 0.5 pts. Interpretación del resultado: 0.5 pts. Si alguna ecuación está mal planteada pero se resuelve correctamente el sistema resultante, se podrá valorar la resolución hasta 0.5 pts." },
+      { id:"2022-Ext-A2", bloque:"Analisis", opcion:"A",
+        enunciado:`Sea la función
+
+$$f(x)=\\begin{cases}\\dfrac{2x+1}{x} & \\text{si } x<0\\\\ x^2-4x+3 & \\text{si } x\\ge 0\\end{cases}$$
+
+Se pide:
+
+a) (0.75 puntos) Estudiar la continuidad de $f$ en $\\mathbb{R}$.
+
+b) (0.25 puntos) Estudiar si $f$ es derivable en $x=0$.
+
+c) (0.75 puntos) Calcular las asíntotas horizontales y verticales de $f$.
+
+d) (0.75 puntos) Para $x\\in(0,+\\infty)$, hallar el punto de la gráfica en el que la recta tangente tiene pendiente nula, escribir la ecuación de dicha tangente y clasificar el extremo relativo correspondiente.`,
+        puntuacion:2.5, criterios:"a) Continuidad: 0.75 pts. b) Derivabilidad en 0: 0.25 pts. c) Asíntotas: 0.75 pts. d) Punto de tangente horizontal, ecuación de la tangente y clasificación del extremo relativo: 0.75 pts." },
+      { id:"2022-Ext-A3", bloque:"Geometria", opcion:"A",
+        enunciado:`Sean el plano $\\pi\\equiv z=x$ y los puntos $A(0,-1,0)$ y $B(0,1,0)$, contenidos en $\\pi$.
+
+a) (1.25 puntos) Si $A$ y $B$ son vértices contiguos de un cuadrado contenido en $\\pi$, determinar los posibles vértices restantes $C$ y $D$.
+
+b) (1.25 puntos) Si $A$ y $B$ son vértices opuestos de un cuadrado contenido en $\\pi$, determinar los otros dos vértices.`,
+        puntuacion:2.5, criterios:"Se valorará el planteamiento geométrico correcto en el plano dado, la construcción de vectores perpendiculares adecuados, los cálculos y la comprobación de que los vértices pertenecen al plano." },
+      { id:"2022-Ext-A4", bloque:"Probabilidad", opcion:"A",
+        enunciado:`Tres quintas partes de los estudiantes de Bachillerato de un instituto están matriculados en Matemáticas II. Se eligen al azar 6 estudiantes.
+
+a) (0.75 puntos) Calcular la probabilidad de que exactamente 4 estén matriculados en Matemáticas II.
+
+b) (0.75 puntos) Calcular la probabilidad de que al menos uno esté matriculado en Matemáticas II.
+
+c) (1 punto) En el instituto hay 120 estudiantes de Bachillerato. Aproximando la distribución binomial por una normal, calcular la probabilidad de que más de 60 estén matriculados en Matemáticas II.`,
+        puntuacion:2.5, criterios:"a) Identificación binomial y cálculo de probabilidad: 0.75 pts. b) Probabilidad complementaria o suma adecuada: 0.75 pts. c) Parámetros de la normal, aproximación y cálculo de la probabilidad: 1 punto." },
+      { id:"2022-Ext-B1", bloque:"Algebra", opcion:"B",
+        enunciado:`Sean las matrices
+
+$$A=\\begin{pmatrix}1&-1&k\\\\k&1&-1\\end{pmatrix},\\quad B=\\begin{pmatrix}1&1\\\\1&-1\\\\1&0\\end{pmatrix}.$$
+
+Se pide:
+
+a) (1 punto) Calcular los valores de $k$ para los que la matriz $AB$ tiene inversa. Para $k=1$, calcular $(AB)^{-1}$.
+
+b) (0.75 puntos) Calcular $BA$ y discutir su rango según los valores de $k$.
+
+c) (0.75 puntos) Para $k=1$, escribir un sistema incompatible de 3 ecuaciones lineales con 3 incógnitas cuya matriz de coeficientes sea $BA$.`,
+        puntuacion:2.5, criterios:"a) Cálculo de $AB$ y discusión de invertibilidad; inversa para $k=1$. b) Cálculo de $BA$ y discusión del rango por valores de $k$. c) Construcción justificada de un sistema incompatible con matriz de coeficientes $BA$ para $k=1$." },
+      { id:"2022-Ext-B2", bloque:"Analisis", opcion:"B",
+        enunciado:`Sea la función
+
+$$f(x)=\\begin{cases}x & \\text{si } x\\le 0\\\\ x\\ln x & \\text{si } x>0\\end{cases}$$
+
+Se pide:
+
+a) (0.75 puntos) Estudiar la continuidad y la derivabilidad de $f$ en $x=0$.
+
+b) (1 punto) Estudiar los intervalos de crecimiento y decrecimiento, así como sus máximos y mínimos relativos.
+
+c) (0.75 puntos) Calcular $\\displaystyle\\int_1^2 f(x)\\,dx$.`,
+        puntuacion:2.5, criterios:"a) Continuidad y derivabilidad en 0: 0.75 pts. b) Derivada, intervalos de crecimiento/decrecimiento y extremos relativos: 1 punto. c) Planteamiento y cálculo de la integral: 0.75 pts." },
+      { id:"2022-Ext-B3", bloque:"Geometria", opcion:"B",
+        enunciado:`Sean las rectas
+
+$$r\\equiv\\begin{cases}x+y+2=0\\\\y-2z+1=0\\end{cases},\\quad s\\equiv\\begin{cases}x=2-2t\\\\y=5+2t\\\\z=t\\end{cases},\\quad t\\in\\mathbb{R}.$$
+
+Se pide:
+
+a) (1 punto) Estudiar la posición relativa de $r$ y $s$ y calcular la distancia entre ellas.
+
+b) (0.75 puntos) Hallar la ecuación del plano $\\pi$ que contiene a $r$ y a $s$.
+
+c) (0.75 puntos) Sean $P$ y $Q$ los puntos de $r$ y $s$, respectivamente, contenidos en el plano $z=0$. Hallar la ecuación de la recta que pasa por $P$ y $Q$.`,
+        puntuacion:2.5, criterios:"a) Posición relativa y distancia: 1 punto. b) Plano que contiene ambas rectas: 0.75 pts. c) Puntos de corte con $z=0$ y recta que pasa por ellos: 0.75 pts." },
+      { id:"2022-Ext-B4", bloque:"Probabilidad", opcion:"B",
+        enunciado:`Una empresa fabrica productos de tres tipos, $A$, $B$ y $C$. Cuatro séptimas partes de los productos son de tipo $A$, dos séptimas partes son de tipo $B$ y el resto son de tipo $C$. Se exportan el 40% de los productos de tipo $A$, el 60% de los de tipo $B$ y el 20% de los de tipo $C$.
+
+a) (1.25 puntos) Calcular la probabilidad de que un producto elegido al azar sea exportado.
+
+b) (1.25 puntos) Calcular la probabilidad de que un producto sea de tipo $C$ sabiendo que ha sido exportado.`,
+        puntuacion:2.5, criterios:"a) Probabilidad total de exportación: planteamiento y cálculo. b) Probabilidad condicionada mediante Bayes: planteamiento y cálculo." }
     ]
   },
   {
@@ -1318,6 +1425,123 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
         enunciado:`3 monedas. $X$ = num. de caras.\n\na) Tabla de distribucion.\n\nb) Esperanza y varianza.\n\nc) P(al menos 2 caras)`,
         puntuacion:2.5, criterios:"Tabla (1 pt), E y V (0.75 pts), P(X>=2) (0.75 pts)." }
     ]
+  },
+  {
+    id: 17, año: 2018, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      { id:"2018-Ext-1A", bloque:"Algebra", opcion:"A",
+        enunciado:`Dadas las matrices $A=\\begin{pmatrix}14&0&10\\\\0&7&5\\\\3&4&5\\alpha\\end{pmatrix}$, $X=\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}$ y $B=\\begin{pmatrix}2\\\\37/2\\\\11\\end{pmatrix}$, se pide:\n\na) (1.25 puntos) Discutir el rango de la matriz $A$, en función de los valores del parámetro $\\alpha$.\n\nb) (0.75 puntos) Para $\\alpha=0$, calcular, si es posible, $A^{-1}$.\n\nc) (0.5 puntos) Resolver, si es posible, el sistema $AX=B$, en el caso $\\alpha=1$.`,
+        puntuacion:2.5, criterios:"a) Valor crítico α=1: 0.75 pts (planteamiento 0.5, resolución 0.25); rango en cada caso (α=1, α≠1): 0.25 pts cada uno. b) Procedimiento: 0.5 pts, cálculos: 0.25 pts. c) Procedimiento: 0.25 pts, cálculos: 0.25 pts." },
+      { id:"2018-Ext-2A", bloque:"Analisis", opcion:"A",
+        enunciado:`Se considera la función $f(x)=\\begin{cases}8e^{2x-4} & \\text{si } x\\le 2\\\\ \\dfrac{x^3-4x}{x-2} & \\text{si } x>2\\end{cases}$ y se pide:\n\na) (0.75 puntos) Estudiar la continuidad de $f$ en $x=2$.\n\nb) (1 punto) Calcular las asíntotas horizontales de $f(x)$. ¿Hay alguna asíntota vertical?\n\nc) (0.75 puntos) Calcular $\\displaystyle\\int_0^2 f(x)\\,dx$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts; cada límite lateral: 0.25 pts. b) Saber qué límites calcular: 0.25 pts, calcular cada uno: 0.25 pts, justificar que no hay A.V.: 0.25 pts. c) Sustituir f(x) adecuadamente: 0.25 pts, primitiva correcta: 0.25 pts, regla de Barrow: 0.25 pts." },
+      { id:"2018-Ext-3A", bloque:"Geometria", opcion:"A",
+        enunciado:`Se consideran los vectores $\\vec u=(-1,2,3)$, $\\vec v=(2,0,-1)$ y el punto $A(-4,4,7)$. Se pide:\n\na) (1 punto) Determinar un vector $\\vec w_1$ que sea ortogonal a $\\vec u$ y $\\vec v$, unitario y con tercera coordenada negativa.\n\nb) (0.75 puntos) Hallar un vector no nulo $\\vec w_2$ que sea combinación lineal de $\\vec u$ y $\\vec v$ y ortogonal a $\\vec v$.\n\nc) (0.75 puntos) Determinar los vértices del paralelogramo cuyos lados tienen las direcciones de los vectores $\\vec u$ y $\\vec v$ y una de sus diagonales es el segmento $\\overrightarrow{OA}$.`,
+        puntuacion:2.5, criterios:"a) Dirección ortogonal: 0.5 pts, hacerlo unitario: 0.25 pts, elegir signo adecuado: 0.25 pts. b) Planteamiento: 0.5 pts, resolución: 0.25 pts. c) Planteamiento: 0.5 pts, resolución: 0.25 pts." },
+      { id:"2018-Ext-4A", bloque:"Probabilidad", opcion:"A",
+        enunciado:`Según los datos de la Fundación para la Diabetes, el 13.8% de los españoles mayores de 18 años tiene diabetes, aunque el 43% de ellos no sabe que la tiene. Se elige al azar un español mayor de 18 años.\n\na) (1 punto) ¿Cuál es la probabilidad de que sea diabético y lo sepa?, ¿cuál la de que no sea diabético o no sepa que lo es?\n\nb) (1.5 puntos) Cierto test diagnostica correctamente el 96% de los casos positivos de diabetes, pero da un 2% de falsos positivos. Si un español mayor de 18 años da positivo en el test, ¿cuál es la probabilidad de que realmente sea diabético?`,
+        puntuacion:2.5, criterios:"a) Cada probabilidad pedida: 0.5 pts (resultado 0.25, justificación 0.25). b) Probabilidad de dar positivo en el test: 0.5 pts; probabilidad de diabético condicionado a positivo (Bayes): 1 punto (procedimiento 0.5, resultado 0.5)." },
+      { id:"2018-Ext-1B", bloque:"Algebra", opcion:"B",
+        enunciado:`Un grupo de estudiantes ha realizado un viaje por tres países (Francia, Alemania y Suiza). En los hoteles cada estudiante ha pagado: 20 euros diarios en Francia, 25 euros diarios en Alemania y 30 euros diarios en Suiza. En comidas cada uno ha gastado: 20 euros diarios en Francia, 15 euros diarios en Alemania y 25 euros diarios en Suiza. Además, el transportista les ha cobrado 8 euros diarios a cada uno. Sabiendo que el gasto total del viaje ha sido 765 euros por persona, que ha durado 15 días y que han estado en Francia el doble de días que en Suiza, obtenga el número de días que han estado en cada uno de los tres países.`,
+        puntuacion:2.5, criterios:"Planteamiento correcto del sistema (3 ecuaciones): 1.5 pts (0.5 por ecuación). Resolución del sistema: 1 punto (procedimiento 0.5, cálculos 0.5). Si alguna ecuación está mal planteada pero se obtiene un sistema de 3x3, se califica la parte correspondiente a su resolución." },
+      { id:"2018-Ext-2B", bloque:"Analisis", opcion:"B",
+        enunciado:`El dibujo adjunto muestra la gráfica de una función $y=f(x)$: para $x\\in[-2,-1]$ un segmento que sube linealmente desde $(-2,0)$ hasta el pico $(-1,1)$; para $x\\in[-1,0]$ un segmento que baja linealmente desde $(-1,1)$ hasta $(0,0)$; y para $x\\in[0,2]$ un arco de parábola creciente (tipo $y=x^2$) que pasa por $(1,1)$ y llega hasta aproximadamente $(2,4)$. Usando la información de la figura, se pide:\n\na) (0.5 puntos) Indicar los valores de $f(-1)$ y $f'(1)$.\n\nb) (1 punto) Justificar, usando límites laterales, si $f$ es continua en los puntos $x=-1$ y $x=0$.\n\nc) (0.5 puntos) Indicar razonadamente si $f$ es derivable en los puntos $x=-1$ y $x=0$.\n\nd) (0.5 puntos) Determinar el valor de $\\displaystyle\\int_{-2}^0 f(x)\\,dx$.`,
+        imagenes:["/mates-imgs/madrid/2018/extraordinaria/2018-extra-2b-grafica.png"],
+        puntuacion:2.5, criterios:"a) Cada valor correcto: 0.25 pts. b) Estudiar continuidad en cada punto: 0.5 pts. c) Justificar no derivabilidad en cada punto: 0.25 pts. d) Resultado: 0.25 pts, justificación: 0.25 pts." },
+      { id:"2018-Ext-3B", bloque:"Geometria", opcion:"B",
+        enunciado:`Dados el punto $P(0,-1,1)$ y la recta $r$, que pasa por el punto $Q(1,0,1)$ y tiene como vector director $\\vec v=(0,1,2)$, se pide:\n\na) (0.5 puntos) Hallar la ecuación implícita del plano que contiene a $r$ y pasa por $P$.\n\nb) (0.5 puntos) Encontrar el punto $S$ contenido en $r$ tal que el vector $\\overrightarrow{SP}$ sea perpendicular a la recta $r$.\n\nc) (1.5 puntos) Hallar el área del triángulo cuyos vértices son el punto $P$ y dos puntos $T_1$, $T_2$, contenidos en la recta $r$, que están a distancia $\\sqrt{5}$ de $P$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts, resolución: 0.25 pts. b) Planteamiento: 0.25 pts, resolución: 0.25 pts. c) Hallar T1 y T2: 1 punto; área del triángulo: 0.5 pts." },
+      { id:"2018-Ext-4B", bloque:"Probabilidad", opcion:"B",
+        enunciado:`La variable aleatoria $X$ sigue una distribución normal de media $\\mu=8.5$ y desviación típica $\\sigma=2.5$. Se pide:\n\na) (1.25 puntos) Calcular el valor $a$ tal que $P(X\\le a)=0.05$.\n\nb) (1.25 puntos) Calcular la probabilidad de que la variable tome un valor comprendido entre 8 y 9.3.`,
+        puntuacion:2.5, criterios:"a) Procedimiento: 0.75 pts, cálculos: 0.5 pts. b) Procedimiento: 0.75 pts, cálculos: 0.5 pts." }
+    ]
+  },
+  {
+    id: 18, año: 2019, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      { id:"2019-Ext-1A", bloque:"Algebra", opcion:"A",
+        enunciado:`Dado el sistema de ecuaciones $\\begin{cases}kx+(k+1)y+z=0\\\\-x+ky-z=0\\\\(k-1)x-y=-(k+1)\\end{cases}$, se pide:\n\na) (2 puntos) Discutir el sistema según los valores del parámetro real $k$.\n\nb) (0.5 puntos) Resolver el sistema para $k=-1$.`,
+        puntuacion:2.5, criterios:"a) Obtener valores críticos k=±1: 0.5 pts (planteamiento 0.25, resolución 0.25). Discutir cada uno de los tres casos (k=-1, k=1, k≠±1): 0.5 pts cada uno (resultado 0.25, justificación 0.25). b) Procedimiento: 0.25 pts, cálculos: 0.25 pts." },
+      { id:"2019-Ext-2A", bloque:"Analisis", opcion:"A",
+        enunciado:`a) (1.25 puntos) Sean $f$ y $g$ dos funciones derivables de las que se conocen los siguientes datos: $f(1)=1$, $f'(1)=2$, $g(1)=3$, $g'(1)=4$. Dada $h(x)=f((x+1)^2)$, use la regla de la cadena para calcular $h'(0)$. Dada $k(x)=\\dfrac{f(x)}{g(x)}$, calcule $k'(1)$.\n\nb) (1.25 puntos) Calcule la integral $\\displaystyle\\int (\\sin x)^4(\\cos x)^3\\,dx$ (se puede usar el cambio de variable $t=\\sin x$).`,
+        puntuacion:2.5, criterios:"a) Calcular h'(0): 0.5 pts (regla de la cadena 0.25, resultado 0.25). Calcular k'(1): 0.75 pts (derivada del cociente 0.5, resultado 0.25). b) Planteamiento del cambio de variable: 0.5 pts, primitiva polinómica: 0.5 pts, deshacer el cambio: 0.25 pts." },
+      { id:"2019-Ext-3A", bloque:"Geometria", opcion:"A",
+        enunciado:`Dados los puntos $A(1,1,1)$, $B(1,3,-3)$ y $C(-3,-1,1)$, se pide:\n\na) (1 punto) Determinar la ecuación del plano que contiene a los tres puntos.\n\nb) (0.5 puntos) Obtener un punto $D$ (distinto de $A$, $B$ y $C$) tal que los vectores $\\overrightarrow{AB}$, $\\overrightarrow{AC}$ y $\\overrightarrow{AD}$ sean linealmente dependientes.\n\nc) (1 punto) Encontrar un punto $P$ del eje $OX$, de modo que el volumen del tetraedro de vértices $A$, $B$, $C$ y $P$ sea igual a 1.`,
+        puntuacion:2.5, criterios:"a) Procedimiento: 0.5 pts, cálculos: 0.5 pts. b) Elección adecuada de D: 0.25 pts, justificación: 0.25 pts. c) Saber la forma de un punto del eje OX: 0.25 pts, planteamiento: 0.5 pts, resultado: 0.25 pts." },
+      { id:"2019-Ext-4A", bloque:"Probabilidad", opcion:"A",
+        enunciado:`Una empresa ha llevado a cabo un proceso de selección de personal.\n\na) (1.25 puntos) Se sabe que el 40% del total de aspirantes han sido seleccionados en el proceso. Si entre los aspirantes había un grupo de 8 amigos, calcule la probabilidad de que al menos 2 de ellos hayan sido seleccionados.\n\nb) (1.25 puntos) Las puntuaciones obtenidas por los aspirantes siguen una distribución normal, $X$, de media $5.6$ y desviación típica $\\sigma$. Sabiendo que la probabilidad de obtener una puntuación $X\\le 8.2$ es $0.67$, calcule $\\sigma$.`,
+        puntuacion:2.5, criterios:"a) Identificar la variable binomial: 0.5 pts, calcular la probabilidad: 0.75 pts (proceso 0.5, cálculos 0.25). b) Planteamiento: 0.75 pts, resolución: 0.5 pts." },
+      { id:"2019-Ext-1B", bloque:"Algebra", opcion:"B",
+        enunciado:`Dadas las matrices $A=\\begin{pmatrix}1-a&1\\\\1&1+a\\end{pmatrix}$, $I=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}$, se pide:\n\na) (1 punto) Calcular para qué valores $a\\in\\mathbb{R}$ se verifica $A^2-I=2A$.\n\nb) (0.75 puntos) Calcular los números reales $a$ para los que la matriz $A$ admite inversa y calcularla, cuando sea posible, en función del parámetro $a$.\n\nc) (0.75 puntos) Calcular, en función de $a$, el determinante de la matriz $(AA^t)^2$, donde $A^t$ denota la matriz traspuesta de $A$.`,
+        puntuacion:2.5, criterios:"a) Calcular A²-I y 2A: 0.5 pts, obtener los valores de a: 0.5 pts. b) Obtener a: 0.25 pts, calcular la inversa en función del parámetro: 0.5 pts. c) Procedimiento: 0.5 pts, resultado: 0.25 pts." },
+      { id:"2019-Ext-2B", bloque:"Analisis", opcion:"B",
+        enunciado:`Un brote de una enfermedad se propaga a lo largo de unos días. El número de enfermos $t$ días después de iniciarse el brote viene dado por una función $F(t)$ tal que $F'(t)=t^2(10-t)$.\n\na) (1 punto) Sabiendo que inicialmente había 6 personas afectadas, calcule la función $F(t)$.\n\nb) (1 punto) Calcule cuántos días después de iniciarse el brote se alcanza el número máximo de enfermos y cuál es ese número.\n\nc) (0.5 puntos) Calcule, usando el teorema de Bolzano, cuántos días dura el brote.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts, primitiva: 0.5 pts, ajustar la constante: 0.25 pts. b) Puntos críticos: 0.5 pts, justificar máximo en t=10: 0.25 pts, número máximo de enfermos: 0.25 pts. c) Planteamiento: 0.25 pts, aplicar Bolzano: 0.25 pts." },
+      { id:"2019-Ext-3B", bloque:"Geometria", opcion:"B",
+        enunciado:`Dados el plano $\\pi\\equiv 2x+3y-z=4$, y las rectas $r\\equiv\\begin{cases}x+y-z=0\\\\x+y+z=2\\end{cases}$ y $s\\equiv(x,y,z)=(1,2,3)+\\lambda(1,0,1)$, con $\\lambda\\in\\mathbb{R}$, se pide:\n\na) (1 punto) Calcular el punto simétrico de $P(1,2,3)$ respecto de $\\pi$.\n\nb) (1 punto) Hallar la ecuación de la recta perpendicular al plano $\\pi$, que pasa por el punto intersección de las rectas $r$ y $s$.\n\nc) (0.5 puntos) Calcular el ángulo que forman entre sí las rectas $r$ y $s$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.5 pts, resolución: 0.5 pts. c) Planteamiento: 0.25 pts, resolución: 0.25 pts." },
+      { id:"2019-Ext-4B", bloque:"Probabilidad", opcion:"B",
+        enunciado:`Un concesionario dispone de vehículos de baja y alta gama, siendo los de alta gama 1/3 de las existencias. Entre los de baja gama, la probabilidad de tener un defecto de fabricación que obligue a revisarlos durante el rodaje es del 1.6%, mientras que para los de alta gama es del 0.9%. En un control de calidad preventa, se elige al azar un vehículo para examinarlo.\n\na) (1 punto) Calcule la probabilidad de que el vehículo elegido resulte defectuoso.\n\nb) (1.5 puntos) Si se comprueba que el vehículo elegido es defectuoso, calcule la probabilidad de que sea de gama baja.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.75 pts, resolución: 0.75 pts." }
+    ]
+  },
+  {
+    id: 19, año: 2020, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      { id:"2020-Ext-A1", bloque:"Algebra", opcion:"A",
+        enunciado:`Sea $A$ una matriz de tamaño $3\\times4$ tal que sus dos primeras filas son $(1,1,1,1)$ y $(1,2,3,4)$, y sin ningún cero en la tercera fila. En cada uno de los apartados siguientes, se pide poner un ejemplo de matriz $A$ que verifique la condición pedida, justificándolo apropiadamente:\n\na) (0.5 puntos) La tercera fila de $A$ es combinación lineal de las dos primeras.\n\nb) (0.5 puntos) Las tres filas de $A$ son linealmente independientes.\n\nc) (0.5 puntos) $A$ es la matriz ampliada de un sistema compatible determinado.\n\nd) (0.5 puntos) $A$ es la matriz ampliada de un sistema compatible indeterminado.\n\ne) (0.5 puntos) $A$ es la matriz ampliada de un sistema incompatible.`,
+        puntuacion:2.5, criterios:"En cada apartado: dar el ejemplo 0.25 pts, justificar que cumple la condición 0.25 pts." },
+      { id:"2020-Ext-A2", bloque:"Analisis", opcion:"A",
+        enunciado:`Dada la función $f(x)=\\begin{cases}\\dfrac{x-1}{x^2-1} & \\text{si } x<1,\\, x\\ne-1\\\\ \\dfrac{x^2+1}{4x} & \\text{si } x\\ge1\\end{cases}$, se pide:\n\na) (0.5 puntos) Calcular $f(0)$ y $(f\\circ f)(0)$.\n\nb) (1.25 puntos) Estudiar la continuidad y derivabilidad de $f(x)$ en $x=1$ y determinar si en dicho punto existe un extremo relativo.\n\nc) (0.75 puntos) Estudiar sus asíntotas.`,
+        puntuacion:2.5, criterios:"a) Cada valor obtenido: 0.25 pts. b) Continuidad: 0.5 pts, derivabilidad: 0.5 pts, caracterizar el extremo: 0.25 pts. c) Cada asíntota: 0.25 pts." },
+      { id:"2020-Ext-A3", bloque:"Geometria", opcion:"A",
+        enunciado:`Dados el punto $P(3,3,0)$ y la recta $r\\equiv\\dfrac{x-2}{-1}=\\dfrac{y}{1}=\\dfrac{z+1}{0}$, se pide:\n\na) (0.75 puntos) Escribir la ecuación del plano que contiene al punto $P$ y a la recta $r$.\n\nb) (1 punto) Calcular el punto simétrico de $P$ respecto de $r$.\n\nc) (0.75 puntos) Hallar dos puntos $A$ y $B$ de $r$ tales que el triángulo $ABP$ sea rectángulo, tenga área $\\dfrac{3}{\\sqrt2}$ y el ángulo recto en $A$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.25 pts. b) Planteamiento: 0.5 pts, resolución: 0.5 pts. c) Planteamiento: 0.5 pts, encontrar una solución correcta: 0.25 pts." },
+      { id:"2020-Ext-A4", bloque:"Probabilidad", opcion:"A",
+        enunciado:`Se tienen tres urnas $A$, $B$ y $C$. La urna $A$ contiene 4 bolas rojas y 2 negras, la urna $B$ contiene 3 bolas de cada color y la urna $C$ contiene 6 bolas negras. Se elige una urna al azar y se extraen de ella dos bolas de manera consecutiva y sin reemplazamiento. Se pide:\n\na) (1 punto) Calcular la probabilidad de que la primera bola extraída sea roja.\n\nb) (1 punto) Calcular la probabilidad de que la primera bola extraída sea roja y la segunda sea negra.\n\nc) (0.5 puntos) Sabiendo que la primera bola extraída es roja, calcular la probabilidad de que la segunda sea negra.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.5 pts, resolución: 0.5 pts. c) Planteamiento: 0.25 pts, resolución: 0.25 pts." },
+      { id:"2020-Ext-B1", bloque:"Algebra", opcion:"B",
+        enunciado:`Sean las matrices $A=\\begin{pmatrix}0&-1&2\\\\2&1&-1\\\\1&0&1\\end{pmatrix}$, $I=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&1\\end{pmatrix}$, $B=\\begin{pmatrix}2&-1\\\\1&0\\\\0&1\\end{pmatrix}$. Se pide:\n\na) (1 punto) Calcular, si es posible, la inversa de la matriz $A$.\n\nb) (0.5 puntos) Calcular la matriz $C=A^2-2I$.\n\nc) (1 punto) Calcular el determinante de la matriz $D=ABB^t$ (donde $B^t$ denota la matriz traspuesta de $B$).`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.25 pts, resolución: 0.25 pts. c) Planteamiento: 0.5 pts, resolución: 0.5 pts." },
+      { id:"2020-Ext-B2", bloque:"Analisis", opcion:"B",
+        enunciado:`La potencia generada por una pila viene dada por la expresión $P(t)=25\\,t\\,e^{-t^2/4}$, donde $t>0$ es el tiempo de funcionamiento.\n\na) (0.5 puntos) Calcular hacia qué valor tiende la potencia generada por la pila si se deja en funcionamiento indefinidamente.\n\nb) (0.75 puntos) Determinar la potencia máxima que genera la pila y el instante en el que se alcanza.\n\nc) (1.25 puntos) La energía total generada por la pila hasta el instante $t$, $E(t)$, se relaciona con la potencia mediante $E'(t)=P(t)$, con $E(0)=0$. Calcular la energía producida por la pila entre el instante $t=0$ y el instante $t=2$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts, cálculo del límite: 0.25 pts. b) Planteamiento: 0.25 pts, cálculo del instante: 0.25 pts, cálculo del máximo: 0.25 pts. c) Planteamiento: 0.5 pts, primitiva: 0.5 pts, regla de Barrow: 0.25 pts." },
+      { id:"2020-Ext-B3", bloque:"Geometria", opcion:"B",
+        enunciado:`Del paralelogramo $ABCD$, se conocen los vértices consecutivos $A(1,0,-1)$, $B(2,1,0)$ y $C(4,3,-2)$. Se pide:\n\na) (1 punto) Calcular una ecuación de la recta que pasa por el punto medio del segmento $AC$ y es perpendicular a los segmentos $AC$ y $BC$.\n\nb) (1 punto) Hallar las coordenadas del vértice $D$ y el área del paralelogramo resultante.\n\nc) (0.5 puntos) Calcular el coseno del ángulo que forman los vectores $\\overrightarrow{AB}$ y $\\overrightarrow{AC}$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Determinar D: 0.5 pts, determinar el área: 0.5 pts. c) Planteamiento: 0.25 pts, resolución: 0.25 pts." },
+      { id:"2020-Ext-B4", bloque:"Probabilidad", opcion:"B",
+        enunciado:`En un experimento aleatorio hay dos sucesos independientes $X$, $Y$. Sabemos que $P(X)=0.4$ y que $P(X\\cap\\overline Y)=0.08$ (donde $\\overline Y$ es el suceso complementario de $Y$). Se pide:\n\na) (1 punto) Calcular $P(Y)$.\n\nb) (0.5 puntos) Calcular $P(X\\cup Y)$.\n\nc) (1 punto) Si $X$ es un resultado no deseado, de manera que consideramos que el experimento es un éxito cuando NO sucede $X$, y repetimos el experimento en 8 ocasiones, hallar la probabilidad de haber tenido éxito al menos 2 veces.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.25 pts, resolución: 0.25 pts. c) Identificar la binomial: 0.5 pts, resultado: 0.5 pts." }
+    ]
+  },
+  {
+    id: 20, año: 2021, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      { id:"2021-Ext-A1", bloque:"Algebra", opcion:"A",
+        enunciado:`Tres amigas, Sara, Cristina y Jimena, tienen un total de 15000 seguidores en una red social. Si Jimena perdiera el 25% de sus seguidores todavía tendría el triple de seguidores que Sara. Además, la mitad de los seguidores de Sara más la quinta parte de los de Cristina suponen la cuarta parte de los seguidores de Jimena. Calcule cuántos seguidores tiene cada una de las tres amigas.`,
+        puntuacion:2.5, criterios:"Plantear correctamente cada ecuación: 0.5 pts. Resolución correcta del sistema: 1 punto. Máximo 0.5 pts si se resuelve correctamente un sistema mal planteado." },
+      { id:"2021-Ext-A2", bloque:"Analisis", opcion:"A",
+        enunciado:`a) (1.25 puntos) Calcule, en caso de existir, el valor de los siguientes límites:\n\na.1) (0.5 puntos) $\\displaystyle\\lim_{x\\to0}\\dfrac{x^2(1-2x)}{x-2x^2-\\sin x}$\n\na.2) (0.75 puntos) $\\displaystyle\\lim_{x\\to\\infty}\\dfrac1x\\left(\\dfrac3x-\\dfrac{2}{\\sin\\frac1x}\\right)$ (indicación: use el cambio de variable $t=1/x$ donde sea necesario).\n\nb) (1.25 puntos) Calcule las siguientes integrales:\n\nb.1) (0.5 puntos) $\\displaystyle\\int\\dfrac{x}{x^2-1}\\,dx$\n\nb.2) (0.75 puntos) $\\displaystyle\\int_0^1 x^2e^{-x}\\,dx$`,
+        puntuacion:2.5, criterios:"a.1) Cada aplicación correcta de L'Hôpital: 0.25 pts. a.2) Cambio de variable: 0.5 pts, aplicación de L'Hôpital: 0.25 pts. b.1) Resolver correctamente: 0.5 pts. b.2) Cada integración por partes correcta: 0.25 pts, regla de Barrow: 0.25 pts." },
+      { id:"2021-Ext-A3", bloque:"Geometria", opcion:"A",
+        enunciado:`Dado el punto $A(1,0,-1)$, la recta $r\\equiv x-1=y+1=\\dfrac{z-2}{2}$ y el plano $\\pi\\equiv x+y-z=6$, se pide:\n\na) (0.75 puntos) Hallar el ángulo que forman el plano $\\pi$ y el plano perpendicular a la recta $r$ que pasa por el punto $A$.\n\nb) (0.75 puntos) Determinar la distancia entre la recta $r$ y el plano $\\pi$.\n\nc) (1 punto) Calcular una ecuación de la recta que pasa por $A$, forma un ángulo recto con la recta $r$ y no corta al plano $\\pi$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.25 pts. b) Planteamiento: 0.5 pts, resolución: 0.25 pts. c) Planteamiento: 0.5 pts, resolución: 0.5 pts." },
+      { id:"2021-Ext-A4", bloque:"Probabilidad", opcion:"A",
+        enunciado:`En una urna hay dos bolas blancas y cuatro bolas negras. Se extrae una bola al azar. Si la bola extraída es blanca, se devuelve a la urna y se añade otra bola blanca; si es negra, no se devuelve a la urna. A continuación, se vuelve a extraer una bola al azar de la urna.\n\na) (1 punto) ¿Cuál es la probabilidad de que las dos bolas extraídas sean de distinto color?\n\nb) (1.5 puntos) ¿Cuál es la probabilidad de que la primera bola extraída fuera negra, sabiendo que la segunda ha sido blanca?`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 0.75 pts, resolución: 0.25 pts. b) Uso correcto del teorema de Bayes y probabilidad total: 1 punto, resolución: 0.5 pts." },
+      { id:"2021-Ext-1B", bloque:"Algebra", opcion:"B",
+        enunciado:`a) (0.75 puntos) Encuentre un único sistema de dos ecuaciones lineales en las variables $x$ e $y$, que tenga como soluciones $\\{x=1,y=2\\}$ y $\\{x=0,y=0\\}$.\n\nb) (1 punto) Encuentre un sistema de dos ecuaciones lineales en las variables $x$, $y$ y $z$ cuyas soluciones sean, en función del parámetro $\\lambda\\in\\mathbb{R}$: $\\begin{cases}x=\\lambda\\\\y=\\lambda-2\\\\z=\\lambda-1\\end{cases}$\n\nc) (0.75 puntos) Encuentre un sistema de tres ecuaciones lineales con dos incógnitas, $x$ e $y$, que solo tenga como solución a $x=1$ e $y=2$.`,
+        puntuacion:2.5, criterios:"a) y c) Dar el ejemplo: 0.5 pts, justificación: 0.25 pts. b) Llegar al sistema: 0.75 pts, justificación: 0.25 pts." },
+      { id:"2021-Ext-2B", bloque:"Analisis", opcion:"B",
+        enunciado:`Sea la función $f(x)=x^3-|x|+2$.\n\na) (0.75 puntos) Estudie la continuidad y la derivabilidad de $f$ en $x=0$.\n\nb) (1 punto) Determine los extremos relativos de $f(x)$ en la recta real.\n\nc) (0.75 puntos) Calcule el área de la región delimitada por la gráfica de $f$, el eje de abcisas $y=0$, y las rectas $x=-1$ y $x=1$.`,
+        puntuacion:2.5, criterios:"a) Continuidad: 0.25 pts, derivabilidad: 0.5 pts. b) Decidir que x=0 es extremo: 0.25 pts, hallar el otro punto crítico: 0.5 pts, demostrar que es mínimo: 0.25 pts. c) Primitiva: 0.25 pts, Barrow: 0.25 pts, resultado: 0.25 pts." },
+      { id:"2021-Ext-3B", bloque:"Geometria", opcion:"B",
+        enunciado:`Dadas las rectas $r\\equiv\\dfrac{x-2}{1}=\\dfrac{y+1}{1}=\\dfrac{z+4}{-3}$, $s\\equiv\\begin{cases}x+z=2\\\\-2x+y-2z=1\\end{cases}$\n\na) (1.5 puntos) Escriba una ecuación de la recta perpendicular común a $r$ y a $s$.\n\nb) (1 punto) Calcule la distancia entre $r$ y $s$.`,
+        puntuacion:2.5, criterios:"a) Planteamiento: 1 punto, resolución: 0.5 pts. b) Planteamiento: 0.75 pts, resolución: 0.25 pts." },
+      { id:"2021-Ext-4B", bloque:"Probabilidad", opcion:"B",
+        enunciado:`Según las estadísticas meteorológicas, en una ciudad nórdica llueve un promedio del 45% de los días. Un climatólogo analiza los registros pluviométricos de 100 días elegidos al azar entre los de los últimos 50 años.\n\na) (1 punto) Exprese cómo calcular con exactitud la probabilidad de que en 40 de ellos haya llovido.\n\nb) (1.5 puntos) Calcule dicha probabilidad aproximándola mediante una normal.`,
+        puntuacion:2.5, criterios:"a) Identificar la binomial: 0.5 pts, expresar la probabilidad: 0.5 pts. b) Cálculo de parámetros de la normal: 0.5 pts, cálculo de la probabilidad: 1 punto (planteamiento 0.5, resolución 0.5)." }
+    ]
   }
 ]
 
@@ -1354,7 +1578,7 @@ export interface ExamenHistoria {
   año: number
   tipo: "Ordinaria" | "Extraordinaria" | "Modelo"
   opcion: "A" | "B"
-  dia?: "Lunes" | "Martes"
+  dia?: "Lunes" | "Martes" | "Coincidencias"
   asignatura: "Historia de España"
   comunidad: string
   preguntas: PreguntaHistoria[]
@@ -2206,6 +2430,1518 @@ export const examenesHistoria: ExamenHistoria[] = [
         criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
         texto_fuente: "A todos los trabajadores:\nEl día 5 del mes en curso comenzó la insurrección gloriosa del proletariado contra la burguesía y después de probada la capacidad revolucionaria de las masas obreras para los objetivos de Gobierno ofreciendo alternativas de ataque y defensa ponderadas, estimamos necesaria una tregua en la lucha, deponiendo las armas en evitación de males mayores. Por ello, reunidos todos los Comités\nRevolucionarios con el provincial, se acordó la vuelta a la normalidad, encareciéndoos a todos os reintegréis de forma ordenada, consciente y serena, al trabajo.\nEsta retirada nuestra, camaradas, la consideramos honrosa por inevitable. La diferencia de medios de lucha, cuando nosotros hemos rendido tributo de ideales y hombría en el teatro de la guerra, y el enemigo cuenta con medios modernos de combate, nos llevó por ética revolucionaria a adoptar esta actitud extrema. Es un alto en el camino, un paréntesis, un descanso reparador después de tanto sobresfuerzo.\nNosotros, camaradas, os recordamos esta frase heroica: “Al proletariado se le puede derrotar, pero jamás vencer”.\nÚltima proclama del Comité Provincial Revolucionario de Asturias, 18 de octubre de 1934.",
       }
+    ]
+  },
+  {
+    id: 8000,
+    año: 2018,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2018-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas\nen los ámbitos social, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de\nCórdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y\nsociedad estamental.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y\nalcance de las reformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2018-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2018-extra-a-fuente.png",
+        enunciado: "Relacione esta imagen con el reinado de Isabel II (1833-1868): la primera guerra carlista.\n\nAbrazo de Vergara en 1839. Grabado.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2018-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "La dictadura de Primo de Rivera. El final del reinado de Alfonso XIII.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8001,
+    año: 2018,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2018-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas\ninternos. Guerras y     sublevación en Europa.\n4. Principales factores de la crisis demográfica y económica del siglo XVII y sus\nconsecuencias.\n5. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura,\nindustria y comercio con América. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2018-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2018-extra-b-fuente.png",
+        enunciado: "Relacione esta imagen con el bienio reformista (1931-1933) en la Segunda República.\n\nCuarto gobierno republicano de Manuel Azaña, 1933.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2018-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo.\n2. Responda a la cuestión histórica planteada en el texto.",
+        texto_fuente: "Lo mismo si el sufragio es universal que restringido, nunca hay más que un solo elector, el\nMinistro de la Gobernación. Éste con sus gobernadores de provincia y el innumerable\nejército de empleados de todas clases (...) ejecuta y consuma las elecciones, de cualquier\nespecie que sean, desde el fondo de su despacho, situado en el centro de Madrid.\nPara hacer las listas de electores se ponen en ellas algunos nombres verdaderamente\nperdidos entre una multitud de imaginarios y, sobre todo, de difuntos. La representación de\nestos últimos se da siempre a agentes disfrazados de paisano para ir a votar. El autor de\nestas líneas, ha visto repetidas veces que su padre, fallecido ya hace algunos años, iba a\ndepositar su voto en la urna bajo la figura de un barrendero de la ciudad o de un sabueso de\npolicía, vestido con traje prestado. (...)\nEste sistema de elecciones por medio de la resurrección de los muertos y los agentes de\npolicía vestidos de paisano no es, sin embargo, lo peor de los medios empleados para\nfalsear el sufragio por nuestros pretendidos defensores del parlamentarismo y del sistema\nrepresentativo. Apresurémonos a decir que ordinariamente no se detienen en esas\napariencias de humano respeto, y que lo que hacen es pura y sencillamente aumentar el\nnúmero de votos hasta tener asegurada la elección del candidato adicto.\nValentí Almirall, España tal cual es (1886).\n\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo\n(puntuación máxima: 1,5 puntos).\n2. Responda a la siguiente cuestión (puntuación máxima: 3 puntos): La Restauración\nBorbónica: Cánovas del Castillo y el turno de partidos.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8002,
+    año: 2019,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2019-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos\nsocial, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio\ncon América. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2019-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2019-extra-a-fuente.png",
+        enunciado: "Relacione esta imagen con el Sexenio Democrático (1868-1874).\n\nCaricatura del golpe de estado del General Pavía en la revista La Madeja Política (enero de 1874).",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2019-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "La proclamación de la Segunda República. La Constitución de 1931. El bienio reformista (1931-1933).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8003,
+    año: 2019,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2019-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2019-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2019-extra-b-fuente.png",
+        enunciado: "Relacione esta fotografía con el restablecimiento de la democracia: las elecciones de junio de 1977.\n\nEl Presidente del Gobierno Adolfo Suárez y su esposa Amparo Illana votan en las elecciones generales\nde 15 junio 1977.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2019-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo.\n2. Responda a la cuestión histórica planteada en el texto.",
+        texto_fuente: "Abdicaciones de Bayona (Francia), 5 de mayo de 1808\n\nDe Fernando VII en su padre:\n\n“Mi venerado padre y señor. Para dar a Vuestra Majestad una prueba de mi amor, de mi obediencia\ny de mi sumisión, y para acceder a los deseos que Vuestra Majestad me ha manifestado reiteradas veces,\nrenuncio mi corona a favor de Vuestra Majestad, deseando que Vuestra Majestad pueda gozarla por\nmuchos años. Recomiendo a Vuestra Majestad las personas que me han servido desde el 19 de marzo”.\n\nDe Carlos IV en Napoleón Bonaparte:\n\n“Su Majestad el rey Carlos, que no ha tenido en toda su vida otra mira que la felicidad de sus\nvasallos, constante en la idea de que todos los actos de un soberano deben únicamente dirigirse a este\nfin (...) ha resuelto ceder, como cede por el presente, todos sus derechos al trono de España y de las\nIndias a Su Majestad el emperador Napoleón, como único que, en el estado a que han llegado las cosas,\npuede restablecer el orden; entendiéndose que dicha cesión sólo ha de tener efecto para hacer gozar a\nsus vasallos de las condiciones siguientes:\n\n1º. La integridad del reino será mantenida: el príncipe que el emperador Napoleón juzgue debe\ncolocar en el trono de España será independiente y los límites de la España no sufrirán alteración alguna.\n\n2º. La religión católica, apostólica y romana será la única en España. No se tolerará en su territorio\nreligión alguna reformada y mucho menos infiel, según el uso establecido actualmente”.\n\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): La Guerra de la Independencia:\nantecedentes y causas.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8004,
+    año: 2020,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2020-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de\nla Edad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio\ncon América. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2020-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la Restauración Borbónica (1874-1902). (Puntuación máxima: 1 punto).\nLa llegada de Alfonso XII al trono, entrada a caballo en Madrid. Fuente: Casa Real de España.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2020-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA:\nLa Guerra Civil: la sublevación militar y el estallido de la guerra. La dimensión internacional del\nconflicto.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8005,
+    año: 2020,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2020-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la península Ibérica. Principales aportaciones romanas en los ámbitos\nsocial, económico y cultural.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2020-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la política económica del franquismo: el desarrollismo. (Puntuación\nmáxima: 1 punto).\n\nCadena de montaje del Seat Seiscientos. Fuente: El Diario.es",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2020-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\nPreámbulo\nDon Fernando Séptimo, por la gracia de Dios y la Constitución de la Monarquía española, Rey de las\nEspañas, y en su ausencia y cautividad la Regencia del reino, nombrada por las Cortes generales y\nextraordinarias, a todos los que las presentes vieren y entendieren, sabed: Que las mismas Cortes han\ndecretado y sancionado la siguiente\nCONSTITUCIÓN POLÍTICA DE LA MONARQUÍA ESPAÑOLA\nEn el nombre de Dios todopoderoso, Padre, Hijo y Espíritu Santo, autor y supremo legislador de la sociedad.\nLas Cortes generales y extraordinarias de la Nación española, bien convencidas, después del más detenido\nexamen y madura deliberación, de que las antiguas leyes fundamentales de esta Monarquía, acompañadas\nde las oportunas providencias y precauciones, que aseguren de un modo estable y permanente su entero\ncumplimiento, podrán llenar debidamente el grande objeto de promover la gloria, la prosperidad y el bien de\ntoda la Nación, decretan la siguiente Constitución política para el buen gobierno y recta administración del\nEstado.\nDado en Cádiz, 19 de marzo de 1812.\n\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La Constitución de 1812. (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8006,
+    año: 2020,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2020-extra-coincidencias-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2020-extra-coincidencias-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-coincidencias-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2.\nExplique el contexto histórico de la dictadura de Primo de Rivera. (Puntuación máxima: 1 punto).\nPrimer despacho de Miguel Primo de Rivera con Alfonso XIII. Fuente. El Mundo.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2020-extra-coincidencias-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA:\nEl reinado de Fernando VII: liberalismo frente a absolutismo. El proceso de independencia de las\ncolonias americanas.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8007,
+    año: 2020,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2020-extra-coincidencias-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de\nrepoblación.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y\ncomercio con América. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2020-extra-coincidencias-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-coincidencias-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2.\nExplique el contexto histórico del problema de Cuba y la guerra entre España y Estados Unidos.\n(Puntuación máxima: 1 punto).\nEjército de Operaciones en Cuba. 3ª compañía del primer batallón del regimiento de Navarra.\nFuente: Biblioteca Nacional.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2020-extra-coincidencias-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“Creo modestamente que en esta nueva hora de España y al pedirles su voto no traigo mis\npapeles en blanco ni soy una incógnita. Prometimos devolverle la soberanía al pueblo español, y\nmañana la ejerce. Prometimos normalizar nuestra vida política, gestionar la transición en paz, construir\nla democracia desde la legalidad, y creemos que con las lógicas deficiencias lo hemos conseguido. (…)\nque todas las familias políticas pudieran tener un lugar en las Cortes, y el miércoles pueden lograrlo.\nPero si ustedes nos dan su voto,\nPuedo prometer y prometo que nuestros actos de gobierno constituirán un conjunto escalonado\nde medidas racionales y objetivas para la progresiva solución de nuestros problemas.\nPuedo prometer y prometo intentar elaborar una Constitución en colaboración con todos los\ngrupos representados en las Cortes, cualquiera que sea su número de escaños.\nPuedo prometer y prometo, porque después de las elecciones ya existirán los instrumentos\nnecesarios, dedicar todos los esfuerzos a lograr un entendimiento social que permita fijar las nuevas\nlíneas básicas que ha de seguir la economía española en los próximos años.\nPuedo prometer y prometo que los hombres de Unión de Centro Democrático promoverán una\nreforma fiscal que garantice, de una vez para todas, que pague más quien más tiene.\nPuedo prometer y prometo un marco legal para institucionalizar cada región según sus propias\ncaracterísticas. (…)”.\nAdolfo Suárez, 13 de junio de 1977.\nEspacio Electoral en Televisión Española de cara a las elecciones de 15 de junio de 1977.\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: Las etapas políticas de la Democracia. Los gobiernos de la UCD.\n(Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8008,
+    año: 2021,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2021-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2021-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico del inicio de la Guerra de la Independencia. (Puntuación máxima: 1\npunto).\nFrancisco de Goya, Los fusilamientos del 3 de mayo (Museo del Prado)",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2021-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: Política económica del franquismo: de la autarquía al desarrollismo. Transformaciones\nsociales: causas y evolución.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8009,
+    año: 2021,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2021-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2021-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la alternancia política en 1982. (Puntuación máxima: 1 punto).\n\nPrimer gobierno del Partido Socialista Obrero Español, 1982-1986",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2021-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n\n“He recibido de España un gran número de felicitaciones con motivo de mi cumpleaños (...) Cuantos me\nhan escrito muestran igual convicción de que sólo el restablecimiento de la monarquía constitucional puede\nponer término a la opresión, a la incertidumbre y a las crueles perturbaciones que experimenta España (...) Por\nvirtud de la espontánea y solemne abdicación de mi augusta madre, soy el único representante del derecho\nmonárquico en España. Arranca éste de una legislación secular, confirmada por todos los precedentes históricos,\ny está indudablemente unida a todas las instituciones representativas (...)\nHuérfana la nación ahora de todo derecho público e indefinidamente privada de sus libertades, natural es\nque vuelva los ojos a su acostumbrado derecho constitucional (...) Por todo esto, sin duda, lo único que inspira ya\nconfianza en España es una Monarquía hereditaria y representativa, mirándola como irremplazable garantía de\nsus derechos e intereses desde las clases obreras a las más elevadas.\n(...) Sea lo que sea de mi propia suerte, ni dejaré de ser buen español, ni, como todos mis antepasados,\nbuen católico, ni, como hombre del siglo, verdaderamente liberal”.\n\nAlfonso de Borbón, Inglaterra, 1 de diciembre 1874.\n\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La Restauración Borbónica. Cánovas del\nCastillo y el turno de partidos.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8010,
+    año: 2021,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2021-extra-coincidencias-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2021-extra-coincidencias-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-coincidencias-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2.\nExplique el contexto histórico de los inicios del desarrollismo en el Franquismo. (Puntuación máxima: 1\npunto).\nEmigrantes saliendo de la Estación de Francia, Barcelona, 1962 (Fotografía de Xavier Miserachs)",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2021-extra-coincidencias-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: Las Cortes de Cádiz. La Constitución de 1812.\nE i\nli\nd d l\nió d F\ni\nB\nl\n1962 (f",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8011,
+    año: 2021,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2021-extra-coincidencias-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2021-extra-coincidencias-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-coincidencias-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la década moderada durante el reinado de Isabel II. (Puntuación\nmáxima: 1 punto).\n(Fuente: A Carreras y X. Tafunell, Estadísticas históricas de España, siglos XIX y XX).",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2021-extra-coincidencias-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“Respecto a la serie de afirmaciones que se han hecho esta tarde contra el voto de la mujer, he de decir,\ncon toda la cordialidad necesaria, que no están apoyadas en la realidad. Tomemos al azar algunas de ellas. Que\n¿cuándo las mujeres se han levantado para protestar de la guerra de Marruecos? Primero: ¿y por qué no los\nhombres? Segundo: ¿quién protestó y se levantó en Zaragoza cuando la guerra de Cuba más que las mujeres?\n(Rumores).\n¡Las mujeres! ¿Cómo puede decirse que cuando las mujeres dan señales de vida por la República se las\nconcederá como premio el derecho a votar? ¿Es que no han luchado las mujeres por la República? (…) ¿No\npagan los impuestos para sostener al Estado en la misma forma que las otras y que los varones? ¿No refluye\nsobre ellas toda la consecuencia de la legislación que se elabora aquí para los dos sexos, pero solamente dirigida\ny matizada por uno? ¿Cómo puede decirse que la mujer no ha luchado y que necesita una época, largos años de\nRepública, para demostrar su capacidad? ¿Y por qué no los hombres? ¿Por qué el hombre, al advenimiento de la\nRepública, ha de tener sus derechos y ha de ponerse un lazadero a los de la mujer? (...)”\nIntervención de Clara Campoamor, Sesión de las Cortes Constituyentes, 1 de octubre de 1931.\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La proclamación de la Segunda República.\nLa Constitución de 1931.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8012,
+    año: 2022,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2022-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2022-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con el contexto internacional del franquismo: el reconocimiento exterior\n(Puntuación máxima: 1 punto).\nFranco y el presidente de Estados Unidos, Eisenhower, durante su visita a España en 1959.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2022-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: El reinado de Isabel II (1833-1868): la primera guerra carlista. Evolución política, partidos\ny conflictos. El Estatuto Real de 1834 y las Constituciones de 1837 y 1845.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8013,
+    año: 2022,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2022-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Al Ándalus: economía, sociedad y cultura.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2022-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente tabla (Puntuación máxima: 0,5 puntos).\n2. Relacione esta tabla con la evolución demográfica en el siglo XIX (Puntuación máxima: 1 punto).\nCrecimiento de la población española, 1717-1910\nAños\nPoblación (en miles)\nTasa media de crecimiento\n(%)\n1717\n7.500,0\n1768\n9.308,9\n0,42\n1787\n10.409,9\n0,59\n1797\n10.541,2\n0,13\n1860\n15.649,1\n0,63\n1887\n17.560,1\n0,43\n1900\n18.608,1\n0,45\n1910\n19.944,6\n0,70",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2022-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“Españoles: Gracias por vuestra adhesión y por la serena y viril manifestación pública que me ofrecéis en\ndesagravio a las agresiones que han sido objeto varias de nuestras representaciones y establecimientos españoles\nen Europa, que nos demuestran, una vez más, lo que podemos esperar de determinados países corrompidos que\naclara perfectamente su política constante contra nuestros intereses.\nNo es la más importante, aunque se presenta en su apariencia, el asalto y destrucción de nuestra Embajada\nen Portugal, realizada en un estado de anarquía y de caos en que se debate la nación hermana y nadie más\ninteresado que nosotros en que pueda ser restablecido en ellos el orden y la autoridad.\nTodo obedece a una conspiración masónico-izquierdista en la clase política en contubernio con la subversión\ncomunista-terrorista en lo social, que, si a nosotros nos honra, a ellos les envilece.\nEstas manifestaciones demuestran, por otra parte, que el pueblo español no es un pueblo muerto, al que se\nle engaña; está despierto y vela sus razones y confía que la valía de las fuerzas guardadoras del orden público y\nsuprema garantía de la unidad de las Fuerzas de Tierra, Mar y Aire, respaldando la voluntad de la Nación, permiten\nal pueblo español descansar tranquilo.\nEvidentemente, el ser español ha vuelto a ser hoy algo en el mundo. ¡Arriba España!”\n(Último discurso de Francisco Franco, 1 de octubre de 1975, desde un balcón del Palacio Real sobre la Plaza\nde Oriente)\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La crisis del franquismo desde 1973 a la muerte de Franco (Puntuación\nmáxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8014,
+    año: 2022,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2022-extra-coincidencias-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2022-extra-coincidencias-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-coincidencias-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ncuadro. (Puntuación máxima: 0,5 puntos).\n2. Relacione este cuadro con las características principales de las desamortizaciones de Mendizábal y\nMadoz (Puntuación máxima: 1 punto).\nDesamortización de bienes raíces, censos y foros. Volumen total de las ventas\nEtapas\nFincas del clero\nFincas de propios\nOtras fincas\n1798-1808\n1.392.777\n0\n83.902\n1820-1823\n99.900\n0\n0\n1836-1849\n3.820.100\n0\n0\n1855-1856\n323.819\n159.773\n283.130\n1859-1867\n1.272.671\n2.028.673\n911.505\nFuente: Jordi Nadal, El fracaso de la revolución industrial en España, p. 56.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2022-extra-coincidencias-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: La dictadura de Primo de Rivera. El final del reinado de Alfonso XIII.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8015,
+    año: 2022,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2022-extra-coincidencias-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2022-extra-coincidencias-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-coincidencias-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con los costes humanos de la Guerra Civil (Puntuación máxima: 1 punto).\nExiliados españoles en Francia. Fotografía de Robert Capa (1939)",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2022-extra-coincidencias-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“Vizcaínos: una facción antirreligiosa y antimonárquica se ha apoderado del mando durante la larga\nenfermedad de nuestro difunto rey, y trata de ir adquiriendo ascendientes para exponeros sin defensa a los\nataques de la revolución y de la anarquía que combatimos en 1823. Sus partidarios aparentan que consideran\nlas leyes antiguas y fundamentales del reino abolidas por otras nuevas, y, después de haber alterado el orden\nde sucesión al trono con una audacia de que no presenta otro ejemplar la historia, quieren hacer a España\ncómplice de sus abominables maquinaciones que la propaganda revolucionaria inventa para destruir el orden\nsocial en Europa.\n[…] rompiendo las cadenas de la esclavitud que os querían imponer, habéis proclamado a vuestro legítimo\nsoberano el magnánimo y virtuoso D. Carlos María Isidro de Borbón, que se os ha presentado rodeado del amor\nde todos los españoles, para cicatrizar las llagas que el genio destructor del orden social os había causado.\nVizcaínos: perseverad como todos los buenos españoles en vuestra valerosa resolución”.\n(Proclama de la Diputación de Vizcaya, 1833)\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Isabel II (1833-1868): la primera guerra carlista. (Puntuación\nmáxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8016,
+    año: 2023,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2023-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n4. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n5. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2023-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ncuadro. (Puntuación máxima: 0,5 puntos).\n2.\nRelacione los siguientes datos con el problema de Cuba y la guerra entre España y Estados Unidos\n(Puntuación máxima: 1 punto).\nBalance de las tropas españolas en la guerra de Cuba\nAño\nEfectivos a 1\nde enero\nIncorporados\nen el año\nFallecidos en\nla isla\nRepatriados a\nEspaña\n1895\n10.000\n67.354\n2.622\n3.799\n1896\n70.933\n83.727\n11.009\n6.233\n1897\n137.418\n13.634\n12.583\n25.197\n1898\n113.272\n15.797\n5.804\n74.987\n1899\n48.278\n227\n229\n48.276\nTotal\n180.739\n32.247\n158.492\nFuente: Maluquer de Motes, J., De la gran depresión a la modernización económica del siglo XIX, Barcelona,\nPenínsula, 1999, p. 42.",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2023-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: La proclamación de la Segunda República. La Constitución de 1931. El bienio\nreformista (1931-1933).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8017,
+    año: 2023,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2023-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2023-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente\nimagen. (Puntuación máxima: 0,5 puntos).\n2.\nRelacione esta imagen con la oposición a la dictadura franquista (Puntuación máxima: 1 punto).\nPolicía frente a estudiantes en la Universidad Complutense de Madrid, 1968",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2023-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“Manifiesto que al Señor Don Fernando VII hacen en 12 de abril del año de 1814 los que suscriben como\ndiputados en las actuales Cortes ordinarias de su opinión acerca de la soberana autoridad, ilegitimidad con que\nse ha eludido la antigua Constitución Española, mérito de esta, nulidad de la nueva, y de cuantas disposiciones\ndieron las llamadas Cortes generales y extraordinarias de Cádiz […]\nLa monarquía absoluta (voz que por igual causa oye el Pueblo con harta equivocación) es una obra de la\nrazón y de la inteligencia: está subordinada a la ley divina, a la justicia y a las reglas fundamentales del Estado:\nfue establecida por derecho de conquista o por la sumisión voluntaria de los primeros hombres que eligieron sus\nReyes. Así que el Soberano absoluto no tiene facultad de usar sin razón de su autoridad (derecho que no quiso\ntener el mismo Dios): por esto ha sido necesario que el poder Soberano fuese absoluto, para prescribir a los\nsúbditos todo lo que mira al interés común, y obligar a la obediencia a los que se niegan a ella. Pero los que,\ndeclaman contra el Gobierno monárquico, confunden el poder absoluto con el arbitrario […] La única diferencia\nque hay entre el poder de un Rey y el de una República es que aquel puede ser limitado y el de esta no puede\nserlo: llamándose absoluto en razón de la fuerza con que pueda ejecutar la ley que constituye el interés de las\nsociedades civiles […]\nEl Soberano no puede disponer de la vida de sus súbditos, sino conformarse con el orden de justicia\nestablecido en su Estado. Hay entre el Príncipe y el Pueblo ciertas convenciones que se renuevan con juramento\nen la consagración de cada Rey: hay leyes, y cuanto se hace contra sus disposiciones es nulo en derecho.\nPóngase al lado de esta definición la antigua Constitución Española, y medítese la injusticia que se le hace”.\n(Manifiesto que algunos diputados dirigen a Fernando VII a su regreso a España)\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII: liberalismo frente a absolutismo (Puntuación\nmáxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8018,
+    año: 2023,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2023-extra-coincidencias-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2023-extra-coincidencias-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-coincidencias-a-fuente.png",
+        enunciado: "A.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ncuadro. (Puntuación máxima: 0,5 puntos).\n2.\nRelacione los datos con la política económica del franquismo (Puntuación máxima: 1 punto).\nEvolución de la población activa (en porcentaje) por sectores en 1940-1975\nAgricultura\nIndustria\nServicios\n1930\n45,5\n26,1\n28,0\n1940\n50,5\n22,1\n27,4\n1950\n47,6\n26,5\n25,9\n1960\n39,7\n33,0\n27,3\n1970\n29,1\n37,3\n33,6\n1975\n21,7\n38,0\n40,3\nFuente: Anuarios Estadísticos del INE",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2023-extra-coincidencias-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: La revolución industrial en la España del siglo XIX. El sistema de comunicaciones: el\nferrocarril. Proteccionismo y librecambismo. La aparición de la banca moderna.\nB",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8019,
+    año: 2023,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2023-extra-coincidencias-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Los Austrias del Siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
+        puntuacion: 4,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2023-extra-coincidencias-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-coincidencias-b-fuente.png",
+        enunciado: "B.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente\nimagen. (Puntuación máxima: 0,5 puntos).\n2.\nExplique el contexto histórico de las Cortes de Cádiz (Puntuación máxima: 1 punto).\nEl juramento de las Cortes de Cádiz en 1810. Cuadro de José Casado del Alisal",
+        puntuacion: 1.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2023-extra-coincidencias-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“A los obreros y a la opinión pública:\nHa llegado el momento de poner en práctica, sin vacilación alguna, los propósitos anunciados por los\nrepresentantes de la Unión General de Trabajadores y la Confederación General del Trabajo en el manifiesto\nsuscrito por estos organismos en el mes de marzo último.\nDurante el tiempo transcurrido desde esa fecha hasta el momento actual, la afirmación hecha por el\nproletariado al demandar como remedio a los males que padece España un cambio fundamental de régimen\npolítico, ha sido corroborada por la actitud que sucesivamente han ido adoptando importantes organismos\nnacionales, desde la enérgica afirmación de la existencia de las Juntas de defensa del arma de infantería, frente\na los intentos de disolución de esos organismos por los Poderes públicos, hasta la Asamblea de parlamentarios\ncelebrada en Barcelona el día 19 de julio, y la adhesión a las conclusiones de esa Asamblea de numerosos\nAyuntamientos, que dan público testimonio de las ansias de renovación que existen en todo el país […]\nPedimos la constitución de un Gobierno provisional que asuma los Poderes ejecutivo y moderador, y\nprepare, previas las modificaciones imprescindibles en una legislación viciada, la celebración de elecciones\nsinceras de unas Cortes Constituyentes que aborden, en plena libertad, los problemas fundamentales de la\nConstitución política del país. Mientras no se haya conseguido ese objetivo, la organización obrera se halla\nabsolutamente decidida a mantenerse en su actitud de huelga”.\n(Comités nacionales de la UGT y el PSOE, Madrid, 12 de agosto de 1917, publicado en El Socialista,\nmeses después).\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: Repercusiones de la Primera Guerra Mundial en España. La crisis de\n1917 y el trienio bolchevique (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8020,
+    año: 2024,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2024-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (3 puntos) CUESTIONES:\n1. Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2. Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n3. Los Reyes Católicos: unión dinástica e instituciones de gobierno. La guerra de Granada.\n4. La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2024-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-a-fuente.png",
+        enunciado: "A.2 (2,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al\nsiguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la Guerra de la Independencia. (Puntuación máxima: 2 puntos).\nFrancisco de Goya: El 3 de mayo en Madrid o Los fusilamientos (óleo sobre lienzo, Museo del Prado)",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2024-extra-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: La Dictadura de Primo de Rivera y el final del reinado de Alfonso XIII.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8021,
+    año: 2024,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2024-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (3 puntos) CUESTIONES:\n1. La monarquía visigoda.\n2. Modelos de repoblación. Organización estamental en los reinos cristianos medievales.\n3. Sociedad, economía y cultura de los siglos XVI y XVII.\n4. Las reformas borbónicas en los virreinatos americanos.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2024-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-b-fuente.png",
+        enunciado: "B.2 (2,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente tabla. (Puntuación máxima: 0,5 puntos).\n2. Relacione los datos con La democracia (1982-2018): la normalización democrática. (Puntuación\nmáxima: 2 puntos).\nResultados de la votación para el Congreso de los Diputados en las elecciones legislativas celebradas\nen octubre de 1982.",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2024-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n\n“Título II-De las Cortes\n\nArt. 18. La potestad de hacer las leyes reside en las Cortes con el Rey.\n\nArt. 19. Las Cortes se componen de dos Cuerpos Colegisladores, iguales en facultades: el Senado\ny el Congreso de los Diputados.\n\nTítulo III-Del Senado\nArt. 20. El Senado se compone:\nPrimero. De Senadores por derecho propio.\nSegundo. De Senadores vitalicios nombrados por la Corona.\nTercero. De Senadores elegidos por las Corporaciones del Estado y mayores contribuyentes en\nla forma que determine la ley. El número de los Senadores por derecho propio y vitalicios no podrá exceder\nde 180. Este número será el de los Senadores electivos.\nArt. 21. Son Senadores por derecho propio:\n-Los hijos del Rey y del sucesor inmediato de la Corona, que hayan llegado a la mayoría de edad.\nLos grandes de España que lo fueren por sí (…). Los Capitanes generales del Ejército y el Almirante de\nla Armada. El Patriarca de las Indias y los Arzobispos. El Presidente del Consejo de Estado, el del Tribunal\nSupremo (…)\nTítulo IV – Del Congreso de los Diputados\nArt. 27. El Congreso de los Diputados se compondrá de los que nombren las Juntas electorales,\nen la forma que determine la ley. Se nombrará un Diputado a lo menos por cada 50.000 almas de\npoblación.\nArt. 29. Para ser elegido Diputado se requiere ser español, de estado seglar, mayor de edad, y\ngozar de todos los derechos civiles. La ley determinará con qué clase de funciones es incompatible el\ncargo de Diputado, y los casos de reelección”.\n(Constitución de 1876)\n\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El sistema canovista: la Constitución de 1876 y el turno de partidos.\n(Puntuación máxima: 3 puntos).\n\nPartido\nPartido\nSocialista\nObrero\nEspañol\nAlianza\nPopular-\nPDP\nUnión de\nCentro\nDemocrático\nPartido\nComunista\nde\nEspaña\nConvergència\ni Unió\nCentro\nDemocrático\ny Social\nPartido\nNacionalista\nVasco-EAJ\nOtros\n\nEscaños\n202\n107\n11\n4\n12\n2\n8\n4\n% votos\n48,1\n26,3\n6,7\n4\n3,6\n2,8\n1,8\n\nVotos\n10.127.392\n5.548.107\n1.425.093\n846.515\n772.726\n604.309\n395.656",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8022,
+    año: 2024,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2024-extra-coincidencias-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A.1 (3 puntos) CUESTIONES:\n1. La monarquía visigoda.\n2. La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3. Los Austrias del siglo XVII. Política interior y exterior.\n4. Sociedad, economía y cultura del siglo XVIII.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2024-extra-coincidencias-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-coincidencias-a-fuente.png",
+        enunciado: "A.2 (2,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al\nsiguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las transformaciones económicas durante la dictadura franquista (1939-\n1975). (Puntuación máxima: 2 puntos).\nSEAT alcanza la cifra de un millón de coches fabricados, 1969",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2024-extra-coincidencias-a-tema",
+        tipo: "tema",
+        label: "Tema",
+        enunciado: "A.3 (4,5 puntos) TEMA: El reinado de Carlos IV. La Guerra de la Independencia.",
+        puntuacion: 4.5,
+        criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+      }
+    ]
+  },
+  {
+    id: 8023,
+    año: 2024,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2024-extra-coincidencias-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "B.1 (3 puntos) CUESTIONES:\n1. El Paleolítico y el Neolítico.\n2. Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n3. Exploración, conquista y colonización de América (desde 1492 y durante el siglo XVI).\n4. La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2024-extra-coincidencias-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-coincidencias-b-fuente.png",
+        enunciado: "B.2 (2,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione la imagen con el régimen de la Restauración (1874-1902): la oposición al sistema.\n(Puntuación máxima: 2 puntos).\nAsesinato de Cánovas por un anarquista en 1897. Ilustración de época",
+        puntuacion: 2.5,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2024-extra-coincidencias-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
+        texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“Al dirigirme a todos los españoles con brevedad y concisión, en las circunstancias\nextraordinarias que en estos momentos estamos viviendo, pido a todos la mayor serenidad y confianza,\ny les hago saber que he cursado a los Capitanes Generales de las regiones militares, zonas marítimas y\nregiones aéreas la orden siguiente:\nAnte la situación creada por los sucesos desarrollados en el palacio del Congreso, y para evitar\ncualquier posible confusión, confirmo que he ordenado a las autoridades civiles y a la Junta de Jefes de\nEstado Mayor que tomen todas las medidas necesarias para mantener el orden constitucional dentro de\nla legalidad vigente.\nCualquier medida de carácter militar que, en su caso, hubiera de tomarse deberá contar con la\naprobación de la Junta de Jefes de Estado Mayor.\nLa Corona, símbolo de la permanencia y unidad de la Patria, no puede tolerar en forma alguna\nacciones o actitudes de personas que pretendan interrumpir por la fuerza el proceso democrático que la\nConstitución votada por el pueblo español determinó en su día a través de referéndum”.\n(Mensaje televisado a los españoles del rey Juan Carlos I en la noche del 23-24 de febrero de\n1981)\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La Transición (1975-1982): retos, logros, dificultades y resistencias\nal establecimiento de la democracia. (Puntuación máxima: 3 puntos).",
+        puntuacion: 4.5,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8024,
+    año: 2025,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2025-extra-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Los Austrias del siglo XVI. Política interior y exterior.\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2025-extra-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-fuente-1.png",
+        enunciado: "Fuente 1:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al\nsiguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la Guerra de la Independencia. (Puntuación máxima: 2,5 puntos).\nDos de mayo, Joaquín Sorolla, óleo sobre lienzo (Museo Nacional del Prado)",
+        puntuacion: 3,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2025-extra-a-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
+        texto_fuente: "C. (4 puntos) ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas.\n1.Análisis de texto:\n“Las elecciones celebradas el domingo me revelan claramente que no tengo hoy el amor de mi\npueblo. Mi conciencia dice que ese desvío no será definitivo, porque procuré siempre servir a España,\npuesto el único afán en el interés público hasta en las más críticas coyunturas.\nUn rey puede equivocarse, y, sin duda, erré yo alguna vez; pero sé bien que nuestra patria se\nmostró en todo momento generosa ante las culpas sin malicia.\nSoy el rey de todos los españoles, y también un español. Hallaría medios sobrados para mantener\nmi regia prerrogativa, en eficaz forcejeo con quienes la combaten. Pero, resueltamente, quiero apartarme\nde cuanto sea lanzar a un compatriota contra otro en fratricida guerra civil. No renuncio a ninguno de mis\nderechos, porque más que míos son depósito acumulado por la Historia, de cuya custodia ha de pedirme\nun día cuenta rigurosa.\nEspero a conocer la auténtica y adecuada expresión de la conciencia colectiva, y mientras habla\nla nación, suspendo deliberadamente el ejercicio del poder real y me aparto de España, reconociéndola\nasí como única señora de sus destinos. También ahora creo cumplir el deber que me dicta mi amor a la\nPatria. Pido a Dios que tan hondo como yo lo sientan y lo cumplan los demás españoles”.\nRenuncia del rey el 14 de abril de 1931 (La Voz, 16 de abril de 1931, p. 8).\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El final del reinado de Alfonso XIII. (Puntuación máxima: 2,5 puntos).\n2.Tema: La dictadura franquista (1939-1975): Institucionalización del régimen. Relaciones internacionales\ny etapas políticas.",
+        puntuacion: 4,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8025,
+    año: 2025,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2025-extra-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Los Austrias del siglo XVI. Política interior y exterior.\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2025-extra-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-fuente-2.png",
+        enunciado: "Fuente 2:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ndocumento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con la evolución de la población y de las ciudades en el siglo XIX. (Puntuación\nmáxima: 2,5 puntos).\nLa madrileña calle de Alcalá, finales del siglo XIX, fotografía de Mariano Moreno (Instituto de Patrimonio\nCultural de España)",
+        puntuacion: 3,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2025-extra-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
+        texto_fuente: "C. (4 puntos) ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas.\n1.Análisis de texto:\n“Las elecciones celebradas el domingo me revelan claramente que no tengo hoy el amor de mi\npueblo. Mi conciencia dice que ese desvío no será definitivo, porque procuré siempre servir a España,\npuesto el único afán en el interés público hasta en las más críticas coyunturas.\nUn rey puede equivocarse, y, sin duda, erré yo alguna vez; pero sé bien que nuestra patria se\nmostró en todo momento generosa ante las culpas sin malicia.\nSoy el rey de todos los españoles, y también un español. Hallaría medios sobrados para mantener\nmi regia prerrogativa, en eficaz forcejeo con quienes la combaten. Pero, resueltamente, quiero apartarme\nde cuanto sea lanzar a un compatriota contra otro en fratricida guerra civil. No renuncio a ninguno de mis\nderechos, porque más que míos son depósito acumulado por la Historia, de cuya custodia ha de pedirme\nun día cuenta rigurosa.\nEspero a conocer la auténtica y adecuada expresión de la conciencia colectiva, y mientras habla\nla nación, suspendo deliberadamente el ejercicio del poder real y me aparto de España, reconociéndola\nasí como única señora de sus destinos. También ahora creo cumplir el deber que me dicta mi amor a la\nPatria. Pido a Dios que tan hondo como yo lo sientan y lo cumplan los demás españoles”.\nRenuncia del rey el 14 de abril de 1931 (La Voz, 16 de abril de 1931, p. 8).\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El final del reinado de Alfonso XIII. (Puntuación máxima: 2,5 puntos).\n2.Tema: La dictadura franquista (1939-1975): Institucionalización del régimen. Relaciones internacionales\ny etapas políticas.",
+        puntuacion: 4,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8026,
+    año: 2025,
+    tipo: "Extraordinaria",
+    opcion: "A",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2025-extra-coincidencias-a-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: evolución política.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Exploración y conquista de América. Incorporación del Nuevo Mundo a la Monarquía hispánica (desde\n1492 y durante el siglo XVI).\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2025-extra-coincidencias-a-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-coincidencias-fuente-1.png",
+        enunciado: "Fuente 1:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al\nsiguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las transformaciones económicas y sociales del siglo XIX: las\ndesamortizaciones. (Puntuación máxima: 2,5 puntos).\nEtapas\nFincas del clero\nFincas de propios\nOtras fincas\n1798-1808\n1.392.777\n0\n83.902\n1820-1823\n99.900\n0\n0\n1836-1849\n3.820.100\n0\n0\n1855-1856\n323.819\n159.773\n283.130\n1859-1867\n1.272.671\n2.028.673\n911.505\nDesamortización de bienes raíces, volumen de las ventas, en miles de reales de vellón. Fuente: Jordi\nNadal, El fracaso de la revolución industrial en España, 1814-1913 (1984)",
+        puntuacion: 3,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2025-extra-coincidencias-a-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
+        texto_fuente: "C. (4 puntos) ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas.\n1.Análisis de texto:\n“Españoles: Al llegar para mí la hora de rendir la vida ante el Altísimo y comparecer ante su\ninapelable juicio, pido a Dios que me acoja benigno a su presencia, pues quise vivir y morir como católico.\n[…] Por el amor que siento por nuestra patria, os pido que perseveréis en la unidad y en la paz, y que\nrodeéis al futuro rey de España, don Juan Carlos de Borbón, del mismo afecto y lealtad que a mí me\nhabéis brindado […] No olvidéis que los enemigos de España y de la civilización cristiana están alerta.\nVelad también vosotros, y para ello deponed, frente a los supremos intereses de la patria y del pueblo\nespañol, toda mira personal. No cejéis en alcanzar la justicia social y la cultura para todos los hombres\nde España, y haced de ello vuestro primordial objetivo.\nMantened la unidad de las tierras de España, exaltando la rica multiplicidad de sus regiones como\nfuente de la fortaleza de la unidad de la Patria. Quisiera en mi último momento unir los nombres de Dios\ny España, y abrazaros a todos para gritar juntos por última vez, en los umbrales de mi muerte: ¡Arriba\nEspaña! ¡Viva España!”\n(Mensaje póstumo de Franco, 1975, en diario Informaciones, 20 de noviembre de 1975).\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La evolución política tras la muerte de Franco. (Puntuación máxima:\n2,5 puntos).\n2.Tema: La proclamación de la Segunda República, el Gobierno provisional y la Constitución de 1931. El\nsufragio femenino.",
+        puntuacion: 4,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 8027,
+    año: 2025,
+    tipo: "Extraordinaria",
+    opcion: "B",
+    dia: "Coincidencias",
+    asignatura: "Historia de España",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "h-2025-extra-coincidencias-b-cuestiones",
+        tipo: "cuestiones",
+        label: "Cuestiones",
+        enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: evolución política.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Exploración y conquista de América. Incorporación del Nuevo Mundo a la Monarquía hispánica (desde\n1492 y durante el siglo XVI).\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+        puntuacion: 3,
+        criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+      },
+      {
+        id: "h-2025-extra-coincidencias-b-fuente",
+        tipo: "fuente",
+        label: "Fuente",
+        imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-coincidencias-fuente-2.png",
+        enunciado: "Fuente 2:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ndocumento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con Isabel II: las Regencias. Los grupos políticos, el Estatuto Real de 1834 y la\nConstitución de 1837. (Puntuación máxima: 2,5 puntos).\nIsabel II, niña, hacia 1835, óleo sobre lienzo, colección Museo Nacional del Prado",
+        puntuacion: 3,
+        criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+      },
+      {
+        id: "h-2025-extra-coincidencias-b-texto",
+        tipo: "texto",
+        label: "Texto",
+        enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
+        texto_fuente: "C. (4 puntos) ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas.\n1.Análisis de texto:\n“Españoles: Al llegar para mí la hora de rendir la vida ante el Altísimo y comparecer ante su\ninapelable juicio, pido a Dios que me acoja benigno a su presencia, pues quise vivir y morir como católico.\n[…] Por el amor que siento por nuestra patria, os pido que perseveréis en la unidad y en la paz, y que\nrodeéis al futuro rey de España, don Juan Carlos de Borbón, del mismo afecto y lealtad que a mí me\nhabéis brindado […] No olvidéis que los enemigos de España y de la civilización cristiana están alerta.\nVelad también vosotros, y para ello deponed, frente a los supremos intereses de la patria y del pueblo\nespañol, toda mira personal. No cejéis en alcanzar la justicia social y la cultura para todos los hombres\nde España, y haced de ello vuestro primordial objetivo.\nMantened la unidad de las tierras de España, exaltando la rica multiplicidad de sus regiones como\nfuente de la fortaleza de la unidad de la Patria. Quisiera en mi último momento unir los nombres de Dios\ny España, y abrazaros a todos para gritar juntos por última vez, en los umbrales de mi muerte: ¡Arriba\nEspaña! ¡Viva España!”\n(Mensaje póstumo de Franco, 1975, en diario Informaciones, 20 de noviembre de 1975).\nANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La evolución política tras la muerte de Franco. (Puntuación máxima:\n2,5 puntos).\n2.Tema: La proclamación de la Segunda República, el Gobierno provisional y la Constitución de 1931. El\nsufragio femenino.",
+        puntuacion: 4,
+        criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+      }
+    ]
+  },
+  {
+    id: 1000, año: 2018, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2018-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "1) Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2) Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3) Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de\nrepoblación.\n4) La Monarquía Hispánica de Felipe II. Gobierno y administración.  Los problemas internos. Guerras y\nsublevación en Europa.\n5) La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.\n6) Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2018-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2018-modelo-a-fuente.png",
+          enunciado: "FUENTE HISTÓRICA: relacione esta imagen con las Cortes de Cádiz\n\"El Juramento de las Cortes de Cádiz en 1810\"pintado por José María Casado del Alisal (1862). Congreso de los Diputados",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2018-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "TEMA: La Transición: alternativas políticas tras la muerte de Franco. El papel del Rey y el gobierno de\nAdolfo Suárez. El restablecimiento de la democracia: las elecciones de junio de 1977. La Constitución\nde 1978. El estado de las autonomías. El terrorismo durante la transición.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1001, año: 2018, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2018-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "1) Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2) Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n3) Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n4) El Imperio de los Austrias: España bajo Carlos I.  Política interior y conflictos europeos.\n5) Exploración   y   colonización   de   América.   Consecuencias   de   los descubrimientos en España,\nEuropa y América.\n6) La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2018-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2018-modelo-b-fuente.png",
+          enunciado: "FUENTE HISTÓRICA: relacione la siguiente gráfica con la oposición a la dictadura franquista: principales grupos y\nevolución en el tiempo.\nCuantificación de huelgas, 1963-1972\nHuelgas\nNúmero de\nhuelguistas\nJornadas de trabajo\nperdidas\n1963\n241\n38.572\n124.598\n1964\n126\n119.290\n141.153\n1965\n150\n58.591\n189.548\n1966\n147\n36.977\n184.760\n1967\n513\n198.740\n235.962\n1968\n309\n130.742\n240.659\n1969\n439\n205.325\n559.551\n1970\n1.542\n440.114\n1.092.364\n1971\n549\n196.665\n859.693\n1972\n713\n277.806\n586.616\nFuente: M.Tuñón de Lara, España bajo la dictadura franquista",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2018-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "TEXTO:   Real Decreto declarando la Venta de bienes del Clero\nAtendiendo a la necesidad y conveniencia de disminuir la deuda pública consolidada, y de entregar al interés\nindividual la masa de bienes raíces, que han venido a ser propiedad de la Nación, a fin de que la agricultura y el\ncomercio saquen de ellos las ventajas que no podrían conseguirse por entero en su actual estado (...)\nconformándome con lo propuesto por el Consejo de Ministros, en nombre de mi excelsa hija la reina doña Isabel II,\nhe venido en decretar lo siguiente:\nArtículo 1º. Quedan declarados en venta desde ahora todos los bienes raíces de cualquier clase que hubiesen\npertenecido a las comunidades y corporaciones religiosas extinguidas y los demás que hayan sido adjudicados a la\nNación por cualquier título o motivo...\nArtículo 2º. Se exceptúan de esta medida general los edificios que el gobierno destine para el servicio público o para\nconservar monumentos de las artes, o para honrar la memoria de hazañas nacionales. El mismo gobierno publicará\nla lista de los edificios que con este objeto deben quedar excluidos de la venta pública.\nArtículo 4º. Que todos los medios rústicos susceptibles de división, sin menoscabo de su valor, o sin graves\ndificultades para su propia venta, se distribuyan en el mayor número de partes o suertes que se pudiere.\nArtículo 5º. Que estas suertes se pongan en venta con total separación, como si cada una hubiese compuesto una\npropiedad aislada.\nEn el Pardo a 19 de febrero de 1836. D. Juan Álvarez Mendizábal Gaceta de Madrid, 21 de febrero de 1836.\nANÁLISIS DEL TEXTO Y CUESTIÓN:\n1.\nExplique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo (puntuación máxima:\n1,5 puntos).\n2.\nResponda a la siguiente cuestión (puntuación máxima: 3 puntos): El reinado de Isabel II (1833-1868): las\ndesamortizaciones de Mendizábal y Madoz.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+        }
+    ]
+  },
+  {
+    id: 1002, año: 2019, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2019-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad\nestamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y\ncomercio con América. Causas del despegue económico de Cataluña.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2019-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2019-modelo-a-fuente.png",
+          enunciado: "FUENTE HISTÓRICA:\n\nRelacione este mapa con la Guerra de la Independencia: bandos en conflicto y fases de la\nguerra.\n\nGuerra de la Independencia. Despliegue francés 1808-1809.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2019-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "TEMA: Política económica del franquismo: de la autarquía al desarrollismo. Transformaciones\nsociales: causas y evolución.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1003, año: 2019, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2019-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los\námbitos social, económico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de\nNavarra al final de la Edad Media.\n4. Principales factores de la crisis demográfica y económica del siglo XVII y sus\nconsecuencias.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema\nsucesorio.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y\nalcance de las reformas.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2019-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2019-modelo-b-fuente.png",
+          enunciado: "FUENTE HISTÓRICA:\nComente la imagen y su relación con la proclamación de la Segunda República.\n\nPeriódico “Heraldo de Madrid” de abril de 1931.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2019-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): El reinado de Amadeo\nde Saboya.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "TEXTO:\nAbdicación de Amadeo I\n«Al Congreso: Grande fue la honra que merecía la Nación española eligiéndome para\nocupar su trono, honra tanto más por mí apreciada cuanto se me ofrecía rodeada de las\ndificultades y peligros que lleva consigo la empresa de gobernar un país tan hondamente\nperturbado (…).\nConozco que me engañó mi buen deseo. Dos años ha que ciño la corona de España, y\nla España vive en constante lucha, viendo cada día más lejana la era de paz y ventura que\ntan ardientemente anhelo. Si fuesen extranjeros los enemigos de su dicha, entonces, al frente\nde estos soldados, tan valientes como sufridos, sería el primero en combatirlos, pero todos los\nque con la espada, con la pluma, con la palabra, agravan y perpetúan los males de la Nación\nson españoles; todos invocan el dulce nombre de la patria, todos pelean y se agitan por su\nbien, y entre el fragor del combate, entre el confuso, atronador y contradictorio clamor de los\npartidos, entre tantas y tan opuestas manifestaciones de la opinión pública, es imposible\natinar sobre cuál es la verdadera, y más importante aún, hallar el remedio para tamaños\nmales. Lo he buscado ávidamente dentro de la ley y no lo he hallado. Fuera de la ley no ha de\nbuscarlo quien ha prometido observarla. Nadie achacará a flaqueza de ánimo mi resolución\n(…)\nEstas son, señores diputados, las razones que me mueven a devolver a la Nación y en\nsu nombre a vosotros la Corona que me ofreció el voto nacional, haciendo de ella renuncia\npor mí, por mis hijos y sucesores»\nAmadeo, Palacio de Madrid, 11 de febrero de 1873.",
+        }
+    ]
+  },
+  {
+    id: 1004, año: 2020, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2020-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de\nrepoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2020-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2020-modelo-a-fuente.png",
+          enunciado: "A.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido. (Puntuación\nmáxima: 0´5 puntos).\n2. 2. Explique el contexto histórico de la Constitución de 1978. (Puntuación máxima: 1 punto).\n\nLos siete “padres” de la Constitución española de 1978.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2020-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "A.3 (4,5 puntos) TEMA:\nEl Sexenio Democrático (1868-1874): la constitución de 1869. Evolución política: gobierno provisional,\nreinado de Amadeo de Saboya y Primera República.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1005, año: 2020, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2020-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad\nestamental.\n4. El significado de1492. La guerra de Granada y el descubrimiento de América.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2020-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2020-modelo-b-fuente.png",
+          enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido. (Puntuación\nmáxima: 0´5 puntos).\n2. Explique el contexto histórico del reinado de Isabel II (1833): la Constitución de 1837. (Puntuación\nmáxima: 1 punto).\n\nIsabel II jurando la Constitución de 1837 en su mayoría de edad. (Autor: José Castelaro y Perera. Título:\n“Isabel II jurando la Constitución”. 1844).",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2020-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): La creación del Estado franquista.\nEtapas de la Dictadura y principales características de cada una de ellas.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "B.3 (4,5 puntos) TEXTO:\n\nLa Junta de Defensa Nacional, creada por Decreto de veinticuatro de julio de 1936, y el régimen\nprovisional de Mandos combinados respondían a las más apremiantes necesidades de la liberación de\nEspaña (…)\n\nRazones de todo linaje señalan la alta conveniencia de concentrar en un solo poder todos\naquellos que han de conducir a la victoria final, y al establecimiento, consolidación y desarrollo del\nnuevo Estado, con la asistencia fervorosa de la Nación.\nEn consideración a los motivos expuestos, y segura de interpretar el verdadero sentir nacional, esta\nJunta, al servicio de España, promulga el siguiente Decreto:\n\nArtículo 1º El cumplimiento de acuerdo adoptado por la Junta de Defensa Nacional, se nombra\nJefe del Gobierno del Estado Español al Excmo. Sr. General de División D. Francisco Franco\nBahamonde, quien asumirá todos los poderes del nuevo Estado.\n\nArtículo 2º Se le nombra asimismo Generalísimo de las fuerzas nacionales de tierra, mar y aire, y\nse le confiere el cargo de General Jefe de los Ejércitos de operaciones.\n\n(Nombramiento del general Francisco Franco como Jefe del Gobierno del Estado y Generalísimo de\nlas fuerzas nacionales. Boletín Oficial de la Junta de Defensa Nacional, 29 de septiembre de 1936).",
+        }
+    ]
+  },
+  {
+    id: 1006, año: 2021, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2021-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio\ncon América. Causas del despegue económico de Cataluña.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2021-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2021-modelo-a-fuente.png",
+          enunciado: "A.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2.\nExplique el contexto histórico del reinado de Isabel II: la primera guerra carlista. (Puntuación\nmáxima: 1 punto).\nUnidad carlista, cuadro del pintor Ferrer Dalmau.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2021-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "A.3 (4,5 puntos) TEMA:\nLa Guerra Civil: la sublevación militar y el estallido de la guerra. La dimensión internacional del\nconflicto.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1007, año: 2021, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2021-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2021-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2021-modelo-b-fuente.png",
+          enunciado: "B.2 (1,5 puntos) FUENTE:\n1.\nExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2.\nExplique el contexto histórico de la Segunda República. El Frente Popular. Las elecciones de\n1936 y el nuevo gobierno (Puntuación máxima: 1 punto).\n1 de mayo de 1936, Salamanca. Fuente: El País.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2021-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El Sexenio Democrático (1868-1874): la Constitución de 1869.\nEvolución política: gobierno provisional. (Puntuación máxima: 3 puntos).",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "B.3 (4,5 puntos) TEXTO:\nLa Nación española y en su nombre las Cortes Constituyentes, elegidas por sufragio universal (...)\ndecretan y sancionan la siguiente Constitución.\nArt. 16. Ningún español que se halle en el pleno goce de sus derechos civiles podrá ser privado del\nderecho de votar en las elecciones de senadores, diputados a Cortes, diputados provinciales y concejales.\nArt. 17. Tampoco podrá ser privado ningún español: Del derecho de emitir libremente sus ideas (...) Del\nderecho a reunirse pacíficamente. Del derecho de asociarse para todos los fines de la vida humana (...)\nArt. 21. La Nación se obliga a mantener el culto y los ministros de la religión católica. El ejercicio público\no privado de cualquier otro culto queda garantizado (...)\nArt. 32. La soberanía reside esencialmente en la Nación, de la cual emanan todos los poderes.\nArt. 33. La forma de Gobierno de la Nación española es la Monarquía.\nArt. 34. La potestad de hacer las leyes reside en las Cortes. El Rey sanciona y promulga las leyes.\nArt. 93. Se establecerá el juicio por jurados (...)\nArt. 108. Las Cortes Constituyentes reformarán el sistema actual del gobierno de las provincias de\nUltramar, cuando hayan tomado asiento los diputados de Cuba y Puerto Rico (…)\nArtículos de la Constitución de 1869.",
+        }
+    ]
+  },
+  {
+    id: 1008, año: 2022, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2022-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2022-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2022-modelo-a-fuente.png",
+          enunciado: "A.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la dimensión internacional de la Guerra Civil Española (Puntuación\nmáxima: 1 punto).\nHomenaje de despedida de la FET y de las JONS a la Legión Cóndor en León (1939).",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2022-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "A.3 (4,5 puntos) TEMA: El reinado de Isabel II (1833-1868): las desamortizaciones de Mendizábal y Madoz.\nDe la sociedad estamental a la sociedad de clases.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1009, año: 2022, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2022-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "B.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2022-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2022-modelo-b-fuente.png",
+          enunciado: "B.2 (1,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la\nsiguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con el movimiento obrero y campesino durante la Restauración Borbónica\n(Puntuación máxima: 1 punto).\n\nAsamblea en Barcelona de la sección española de la Asociación Internacional de Trabajadores.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2022-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): Las elecciones de junio de 1977. La\nConstitución de 1978. El Estado de las Autonomías.\n\nC\nd\nl\nl\ni\nó l\nió",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "B.3 (4,5 puntos) TEXTO:\n\n“Preámbulo.- La Nación española, deseando establecer la justicia, la libertad y la seguridad y promover el\nbien de cuantos la integran, en uso de su soberanía proclama su voluntad de:\n\nGarantizar la convivencia democrática dentro de la Constitución y de las leyes conforme a un orden\neconómico y social justo (…)\n\nArtículo 2\n\nLa Constitución se fundamenta en la indisoluble unidad de la Nación española, patria común e indivisible\nde todos los españoles y reconoce y garantiza el derecho a la autonomía de las nacionalidades y regiones que la\nintegran y la solidaridad entre todas ellas (…)\n\nArtículo 143.-En el ejercicio del derecho a la autonomía reconocido en el artículo 2 de la Constitución, las\nprovincias limítrofes con características históricas, culturales y económicas comunes, los territorios insulares y\nlas provincias con entidad regional histórica podrán acceder a su autogobierno y constituirse en Comunidades\nAutónomas con arreglo a lo previsto en este Título y en los respectivos estatutos”.\n\nConstitución de 1978 (Preámbulo, Título Preliminar y Título VIII)",
+        }
+    ]
+  },
+  {
+    id: 1010, año: 2023, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2023-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A.1. (4 puntos) CUESTIONES\n1.-El reino visigodo: origen y organización política. Los concilios.\n2.-Al Ándalus: reinos de taifas. Reino nazarí.\n3.-Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4.-El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5.-Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6.-La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2023-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2023-modelo-a-fuente.png",
+          enunciado: "A.2. (1.5 puntos) FUENTE\n1.-Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente\nimagen (Puntuación máxima: 0.5 puntos)\n2.-Explique el contexto histórico de la crisis de 1917 (Puntuación máxima: 1 punto)\n\nHuelga general revolucionaria de 1917 (Granada). Fuente: diario Ideal.",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2023-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "A.3. (4.5 puntos) TEMA: El reinado de Fernando VII: liberalismo frente a absolutismo. El proceso de\nindependencia de las colonias americanas.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1011, año: 2023, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2023-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "B.1. (4 puntos) CUESTIONES\n1.-Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2.-Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3.-Los reinos cristianos de la Edad Media: organización política, régimen señorial y sociedad estamental.\n4.-La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5.-Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6.-La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
+          puntuacion: 4,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2023-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2023-modelo-b-fuente.png",
+          enunciado: "B.2. (1.5 puntos) FUENTE\n1.-Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente\nimagen (Puntuación máxima: 0.5 puntos)\n2.-Relacione este mapa con la evolución demográfica en el siglo XIX (Puntuación máxima: 1 punto)",
+          puntuacion: 1.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2023-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1.-Resuma con brevedad el contenido del texto (Puntuación máxima: 0.5 puntos).\n2.-Señale y explique las ideas fundamentales del texto (Puntuación máxima: 1 punto).\n3.-Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La Transición: alternativas políticas tras la\nmuerte de Franco. El papel del rey y el gobierno de Adolfo Suárez.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "B.3. (4.5 puntos) TEXTO:\n\n“La transición española y la portuguesa, como todos los procesos de cambio que transforman sistemas y\nregímenes políticos, tienen algunos elementos comunes, pero tienen unos evidentes elementos de diferenciación.\nEn el caso portugués, se habla de un proceso de ruptura y hundimiento del régimen anterior, todo ello con el inmenso\ncapital político que supone que fuera un cambio pacífico. En el caso español, se habla de consenso y de un proceso\nde cambio pactado. En Portugal hay una fecha y un símbolo del cambio. En España nadie sabe decir cuándo\nempieza la transición.\n\n(…) Al analizar la transición, seguimos anclados en la contraposición entre reforma y ruptura. No es tan\nsimple. Una buena parte de los que aprobaron la ley de Reforma Política creyeron que iban a pilotar el proceso de\ncambio reformando las leyes del franquismo, y creyeron –la mayoría seguramente de buena fe- que con la ley de\nReforma Política –que, sin duda, fue un elemento desencadenante de todo el proceso de cambio- se estaban\nreformando las Leyes Fundamentales del Movimiento, es decir, las del régimen de Franco. Sin embargo, lo que\nocurrió tras las primeras elecciones fue que se redactó una Constitución y, por cierto, por una asamblea que no fue\nelegida para ser constituyente, lo que hubiera sido ilegal teniendo como referencia la ley de Reforma Política”.\n\n(Intervención de Felipe González en el Encuentro celebrado en Lisboa los días 26 y 27 de septiembre de\n1998, publicado en Herrero de Miñón, M. (ed.), La transición democrática en España, Bilbao, Fundación BBV, 1999,\nvol. I).",
+        }
+    ]
+  },
+  {
+    id: 1012, año: 2024, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2024-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A.1 (3 puntos) CUESTIONES:\n1. La Hispania romana.\n2. Al-Ándalus: evolución política.\n3. Los Austrias del siglo XVI. Política interior y exterior.\n4. Sociedad, economía y cultura del siglo XVIII.",
+          puntuacion: 3,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2024-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2024-modelo-a-fuente.png",
+          enunciado: "A.2 (2,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ndocumento. (Puntuación máxima: 0,5 puntos).\n2. Relacione los datos con las transformaciones económicas durante la dictadura franquista. (Puntuación\nmáxima: 2 puntos).\n\nEvolución de la población activa (en porcentaje) por sectores en 1940-1975\n\nAgricultura\nIndustria\nServicios\n1930\n45,5\n26,1\n28,0\n1940\n50,5\n22,1\n27,4\n1950\n47,6\n26,5\n25,9\n1960\n39,7\n33,0\n27,3\n1970\n29,1\n37,3\n33,6\n1975\n21,7\n38,0\n40,3\nFuente: Anuarios Estadísticos del INE",
+          puntuacion: 2.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2024-modelo-A-tema",
+          tipo: "tema",
+          label: "Tema",
+          enunciado: "A.3 (4,5 puntos) TEMA: Las guerras de Cuba, el conflicto bélico contra Estados Unidos y la crisis de 1898.",
+          puntuacion: 4.5,
+          criterios: "Se valorará la capacidad de síntesis, claridad y organización expositiva, referencias cronológicas y espaciales, y adecuación al tema planteado.",
+        }
+    ]
+  },
+  {
+    id: 1013, año: 2024, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2024-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "B.1 (3 puntos) CUESTIONES:\n1. El Paleolítico y el Neolítico.\n2. Los reinos cristianos: evolución de la conquista de la Península y organización política.\n3. Exploración, conquista y colonización de América (desde 1492 y durante el siglo XVI).\n4. La Guerra de Sucesión. La Paz de Utrecht. Los Pactos de Familia.",
+          puntuacion: 3,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2024-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2024-modelo-b-fuente.png",
+          enunciado: "B.2 (2,5 puntos) FUENTE:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente\nimagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las Cortes de Cádiz. (Puntuación máxima: 2 puntos).\n\nEl juramento de las Cortes de Cádiz en 1810 (pintura de José Casado del Alisal, realizada en 1863)",
+          puntuacion: 2.5,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2024-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La crisis de la Restauración: La oposición al régimen. (Puntuación\nmáxima: 3 puntos).",
+          puntuacion: 4.5,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "B.3 (4,5 puntos) TEXTO:\n“A los obreros y a la opinión pública:\nHa llegado el momento de poner en práctica, sin vacilación alguna, los propósitos anunciados por los\nrepresentantes de la Unión General de Trabajadores y la Confederación General del Trabajo en el manifiesto\nsuscrito por estos organismos en el mes de marzo último.\nDurante el tiempo transcurrido desde esa fecha hasta el momento actual, la afirmación hecha por el proletariado\nal demandar como remedio a los males que padece España un cambio fundamental de régimen político, ha sido\ncorroborada por la actitud que sucesivamente han ido adoptando importantes organismos nacionales, desde la\nenérgica afirmación de la existencia de las Juntas de defensa del arma de infantería, frente a los intentos de\ndisolución de esos organismos por los Poderes públicos, hasta la Asamblea de parlamentarios celebrada en\nBarcelona el día 19 de julio, y la adhesión a las conclusiones de esa Asamblea de numerosos Ayuntamientos,\nque dan público testimonio de las ansias de renovación que existen en todo el país […]\nPedimos la constitución de un Gobierno provisional que asuma los Poderes ejecutivo y moderador, y prepare,\nprevias las modificaciones imprescindibles en una legislación viciada, la celebración de elecciones sinceras de\nunas Cortes Constituyentes que aborden, en plena libertad, los problemas fundamentales de la Constitución\npolítica del país. Mientras no se haya conseguido ese objetivo, la organización obrera se halla absolutamente\ndecidida a mantenerse en su actitud de huelga”.\n(Comités nacionales de la UGT y el PSOE, Madrid, 12 de agosto de 1917, publicado en El Socialista, meses\ndespués).",
+        }
+    ]
+  },
+  {
+    id: 1014, año: 2026, tipo: "Modelo", opcion: "A",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2026-modelo-A-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3.-Responda a una de estas dos preguntas:\n-Sociedad, economía y cultura de los siglos XVI y XVII.\n-La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
+          puntuacion: 3,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2026-modelo-A-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2026-modelo-a-fuente.png",
+          enunciado: "Fuente 1:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al\nsiguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con el bienio reformista de la Segunda República: Reformas estructurales y\nrealizaciones sociales y culturales. (Puntuación máxima: 2,5 puntos).\nEl presidente de la República Niceto Alcalá Zamora con el jefe del Gobierno Manuel Azaña, en la\nprimera Feria del Libro de Madrid (abril 1933). Archivo General de la Administración",
+          puntuacion: 3,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2026-modelo-A-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII. (Puntuación máxima: 2,5 puntos).\n\n2.Tema: El sistema canovista: la Constitución de 1876 y el turno de partidos. La oposición al sistema.",
+          puntuacion: 4,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "C. (4 puntos) ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas.\n1.Análisis de texto:\n“Bien públicos y notorios fueron a todos mis vasallos los escandalosos sucesos que precedieron,\nacompañaron y siguieron al establecimiento de la democrática constitución de Cádiz en el mes de Marzo\nde 1820 [...]\nEl voto general clamó por todas partes contra la tiránica constitución; clamó por la cesación de un\ncódigo nulo en su origen, ilegal en su formación, injusto en su contenido; clamó finalmente por el\nsostenimiento de la Santa Religión de sus mayores, por la restitución de sus leyes fundamentales, y por\nla conservación de mis legítimos derechos que heredé de mis antepasados, que con la prevenida\nsolemnidad habían jurado mis vasallos. [...]\nLa Europa entera, conociendo profundamente mi cautiverio y el de toda mi Real Familia, la mísera\nsituación de mis vasallos fieles y leales, y las máximas perniciosas que profusamente esparcían a toda\ncosta los agentes españoles por todas partes, determinaron poner fin a un estado de cosas, que era el\nescándalo universal, que caminaba a trastornar todos los Tronos y todas las instituciones antiguas,\ncambiándolas en la irreligión y en la inmoralidad [...]\nHe venido en decretar lo siguiente:\nPrimero. Son nulos y de ningún valor todos los actos del Gobierno llamado constitucional (de\ncualquiera clase y condición que sean) que ha dominado a mis pueblos desde el 7 de Marzo de 1820\nhasta hoy día 1º de Octubre de 1823, declarando, como declaro, que en toda esta época he carecido de\nlibertad, obligado a sancionar las leyes y a expedir las órdenes, decretos y reglamentos que contra mi\nvoluntad se meditaban y expedían por el mismo Gobierno.”\n(Decreto de Fernando VII de 1 de octubre de 1823, en Gaceta de Madrid, 7 de octubre de 1823).",
+        }
+    ]
+  },
+  {
+    id: 1015, año: 2026, tipo: "Modelo", opcion: "B",
+    asignatura: "Historia de España", comunidad: "Madrid",
+    preguntas: [
+        {
+          id: "h-2026-modelo-B-cuestiones",
+          tipo: "cuestiones",
+          label: "Cuestiones",
+          enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3.-Responda a una de estas dos preguntas:\n-Sociedad, economía y cultura de los siglos XVI y XVII.\n-La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
+          puntuacion: 3,
+          criterios: "Se valorará la capacidad de síntesis, precisión histórica, referencias cronológicas y espaciales, y el uso de lenguaje histórico adecuado.",
+        },
+        {
+          id: "h-2026-modelo-B-fuente",
+          tipo: "fuente",
+          label: "Fuente",
+          imagen_url: "/historia-imgs/modelos/historia-2026-modelo-b-fuente.png",
+          enunciado: "Fuente 2:\n1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente\ndocumento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con: España en Europa. Consecuencias económicas y sociales del proceso de\nintegración en la Unión Europea. (Puntuación máxima: 2,5 puntos).\n\nColas en la sede del Banco de España en Barcelona para cambiar pesetas por euros, 2 de enero de\n2002 (Fotografía: Manuel S. Urbano, El País)",
+          puntuacion: 3,
+          criterios: "Se valorará la identificación del tipo de fuente, su localización cronológica, el contenido y la relación con el proceso histórico correspondiente.",
+        },
+        {
+          id: "h-2026-modelo-B-texto",
+          tipo: "texto",
+          label: "Texto",
+          enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII. (Puntuación máxima: 2,5 puntos).\n\n2.Tema: El sistema canovista: la Constitución de 1876 y el turno de partidos. La oposición al sistema.",
+          puntuacion: 4,
+          criterios: "Se valorará la comprensión del texto, el resumen, la explicación de las ideas fundamentales y la contextualización histórica precisa.",
+          texto_fuente: "C. (4 puntos) ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas.\n1.Análisis de texto:\n“Bien públicos y notorios fueron a todos mis vasallos los escandalosos sucesos que precedieron,\nacompañaron y siguieron al establecimiento de la democrática constitución de Cádiz en el mes de Marzo\nde 1820 [...]\nEl voto general clamó por todas partes contra la tiránica constitución; clamó por la cesación de un\ncódigo nulo en su origen, ilegal en su formación, injusto en su contenido; clamó finalmente por el\nsostenimiento de la Santa Religión de sus mayores, por la restitución de sus leyes fundamentales, y por\nla conservación de mis legítimos derechos que heredé de mis antepasados, que con la prevenida\nsolemnidad habían jurado mis vasallos. [...]\nLa Europa entera, conociendo profundamente mi cautiverio y el de toda mi Real Familia, la mísera\nsituación de mis vasallos fieles y leales, y las máximas perniciosas que profusamente esparcían a toda\ncosta los agentes españoles por todas partes, determinaron poner fin a un estado de cosas, que era el\nescándalo universal, que caminaba a trastornar todos los Tronos y todas las instituciones antiguas,\ncambiándolas en la irreligión y en la inmoralidad [...]\nHe venido en decretar lo siguiente:\nPrimero. Son nulos y de ningún valor todos los actos del Gobierno llamado constitucional (de\ncualquiera clase y condición que sean) que ha dominado a mis pueblos desde el 7 de Marzo de 1820\nhasta hoy día 1º de Octubre de 1823, declarando, como declaro, que en toda esta época he carecido de\nlibertad, obligado a sancionar las leyes y a expedir las órdenes, decretos y reglamentos que contra mi\nvoluntad se meditaban y expedían por el mismo Gobierno.”\n(Decreto de Fernando VII de 1 de octubre de 1823, en Gaceta de Madrid, 7 de octubre de 1823).",
+        }
     ]
   }
 ]

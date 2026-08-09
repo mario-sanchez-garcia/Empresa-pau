@@ -42,6 +42,7 @@ import RichTextArea from '@/components/shared/RichTextArea'
 import RepeatExamModal, { type RepeatExamSource } from '@/components/shared/RepeatExamModal'
 import PhotoAttachButton, { type PhotoAttachment } from '@/components/shared/PhotoAttachButton'
 import { normalizeSubjectSlug } from './lib/camino/caminoCurriculumPlan'
+import { AYUDA_FAQS } from './lib/ayudaFaqs'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from './lib/camino/gradeThreshold'
 import {
   ArrowUpRight,
@@ -957,6 +958,13 @@ export default function Home() {
   const [cargandoPlan, setCargandoPlan] = useState(false)
   const [contextoChat, setContextoChat] = useState('')
   const [chatContextTopic, setChatContextTopic] = useState<string | null>(null)
+  // Disparo diferido de "Pregúntale esto a Kairo" (ver /ayuda) — no se
+  // puede llamar enviarChat() directamente en el mismo efecto que acaba de
+  // hacer cambiarAsignatura()/setContextoChat(), porque ese efecto sigue
+  // leyendo el estado de ANTES de esos setState (cierre obsoleto de React).
+  // Un efecto aparte que reacciona a este estado sí ve ya el asignatura/
+  // contextoChat actualizados, porque corre en el render siguiente.
+  const [pendingAutoSend, setPendingAutoSend] = useState<{ text: string; context: string } | null>(null)
   const [chatFeedback, setChatFeedback] = useState<Partial<Record<number, 'up' | 'down'>>>({})
   const [caminoExerciseNotice, setCaminoExerciseNotice] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -1036,6 +1044,27 @@ export default function Home() {
       setContextoChat(`Camino PAU curso: ${label}. Ayuda al alumno con este tema sin inventar datos ni copiar apuntes.`)
       if (question) setInputChat(question)
       setMensajes(current => current.length ? current : [{ rol: 'kairo', texto: `Estoy contigo en este tema de Camino PAU${label ? `: ${label}` : ''}. Pregúntame la duda concreta y la trabajamos paso a paso.` }])
+    } else if (urlSection === 'chat' && params.get('from') === 'ayuda_faq') {
+      // "Pregúntale esto a Kairo" / "¿Sigues con dudas?" desde /ayuda — ver
+      // app/ayuda/page.tsx (askKairoHref) y app/lib/ayudaFaqs.ts (fuente
+      // única de la pregunta+respuesta, por id, nunca copiada en la URL).
+      const faqId = params.get('faqId')
+      const faq = faqId ? AYUDA_FAQS.find(f => f.id === faqId) ?? null : null
+      const targetSubject = (faq?.subject ?? 'general') as Asignatura
+      cambiarAsignatura(targetSubject)
+      if (faq) {
+        const ctx = `El alumno ha pulsado "Pregúntale esto a Kairo" sobre esta pregunta frecuente que ya se le mostró en la página de Ayuda de la app — tu respuesta NUNCA debe contradecirla ni repetir el mismo dato de forma distinta; amplíala, aclárala o da un ejemplo si hace falta, pero mantente consistente con lo que ya leyó:\nPregunta del FAQ: ${faq.q}\nRespuesta del FAQ ya mostrada al alumno: ${faq.a}`
+        setContextoChat(ctx)
+        // Espera a que el hilo real termine de cargar antes de disparar el
+        // auto-envío — si no, un loadChatThread lento podía resolver
+        // DESPUÉS del envío y machacar el mensaje recién mandado con el
+        // historial persistido (carrera entre el fetch y enviarChat).
+        loadChatThread(targetSubject).then(() => setPendingAutoSend({ text: faq.q, context: ctx }))
+      } else {
+        // Sin faqId (botón genérico "¿Sigues con dudas?"): chat en blanco,
+        // sin auto-envío — el alumno escribe su propia pregunta.
+        loadChatThread(targetSubject)
+      }
     } else if (urlSection === 'chat') {
       // Entrada normal al chat (sin contexto de Camino sembrado arriba):
       // carga el hilo real guardado de la asignatura inicial, si existe.
@@ -1045,6 +1074,19 @@ export default function Home() {
       loadChatThread(initialSubject ?? asignatura)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Dispara el envío automático de "Pregúntale esto a Kairo" (ver
+  // pendingAutoSend arriba) una vez que asignatura/contextoChat ya se
+  // aplicaron de verdad — este efecto corre en el render siguiente al que
+  // los estableció, así enviarChat ve el estado correcto en vez de uno
+  // obsoleto.
+  useEffect(() => {
+    if (!pendingAutoSend) return
+    const { text, context } = pendingAutoSend
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Disparador de un solo uso: se limpia al consumirse, no hay bucle posible
+    setPendingAutoSend(null)
+    void enviarChat(text, context)
+  }, [pendingAutoSend]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -2325,15 +2367,22 @@ function cambiarTipo(t: Tipo) {
     }
   }
 
-  async function enviarChat() {
-    if (!inputChat.trim() && !chatAdjunto) return
+  // overrideText/overrideContext: usados por el auto-envío de "Pregúntale
+  // esto a Kairo" (ver pendingAutoSend) para mandar un texto/contexto
+  // concretos sin depender de inputChat/contextoChat en estado — necesario
+  // porque ese efecto los establece en el mismo ciclo en el que se dispara
+  // el envío, y leer el estado ahí daría el valor de ANTES de aplicarlos.
+  async function enviarChat(overrideText?: string, overrideContext?: string) {
+    const textoBase = overrideText ?? inputChat
+    if (!textoBase.trim() && !chatAdjunto) return
     // Foto fija de la asignatura activa al enviar — si el alumno cambia de
     // pill mientras esta respuesta sigue en curso, el mensaje se sigue
     // guardando en el hilo correcto (el de cuando se envió), no en el que
     // esté activo cuando termine de llegar la respuesta.
     const chatSubject = asignatura
     const adjunto = chatAdjunto
-    const textoMensaje = inputChat.trim() || '¿Está bien esto que he hecho?'
+    const effectiveContext = overrideContext ?? contextoChat
+    const textoMensaje = textoBase.trim() || '¿Está bien esto que he hecho?'
     const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: textoMensaje, ts: Date.now(), imagenPreview: adjunto?.preview }
     const hist = [...mensajes, nuevoMensaje]
     setMensajes(hist)
@@ -2363,7 +2412,7 @@ function cambiarTipo(t: Tipo) {
         body: JSON.stringify({
           pregunta: chatSystemIntro +
             (historialResumen ? 'HISTORIAL DEL ALUMNO (solo lectura — úsalo para responder con precisión, nunca inventes datos fuera de él): ' + historialResumen + '\n' : '') +
-            (contextoChat ? 'CONTEXTO: ' + contextoChat + '\n' : '') +
+            (effectiveContext ? 'CONTEXTO: ' + effectiveContext + '\n' : '') +
             // Solo los últimos ~20 mensajes como contexto — un hilo persistente
             // puede crecer durante semanas, y reenviar TODO el historial cada
             // vez haría crecer el coste/tokens de cada respuesta sin tope. El
@@ -6280,7 +6329,7 @@ function cambiarTipo(t: Tipo) {
                       <div className="chat-input-wrap">
                         <PhotoAttachButton value={chatAdjunto} onChange={setChatAdjunto} disabled={cargandoChat} compact />
                         <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder={chatAdjunto ? 'Pregúntale a Kairo sobre esta foto (opcional)...' : 'Pregunta lo que quieras a Kairo...'} rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
-                        <button className="chat-send-btn" onClick={enviarChat} disabled={(!inputChat.trim() && !chatAdjunto) || cargandoChat}>
+                        <button className="chat-send-btn" onClick={() => enviarChat()} disabled={(!inputChat.trim() && !chatAdjunto) || cargandoChat}>
                           {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
                           {cargandoChat ? 'Pensando...' : 'Enviar'}
                         </button>

@@ -17,6 +17,7 @@ import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type CaminoPlanId } from '@/app/lib/camino/caminoPlanLimits'
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
+import { MAX_LIGAS_PER_USER } from '@/app/lib/camino/leagueRounds'
 import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
@@ -914,7 +915,7 @@ export default function CaminoCalendarClient() {
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
-  const [liga, setLiga] = useState<LigaInfo | null>(null)
+  const [ligas, setLigas] = useState<LigaInfo[]>([])
   const [ligaLoading, setLigaLoading] = useState(true)
   const [globalTop, setGlobalTop] = useState<GlobalTopEntry[] | null>(null)
   const [globalNextTarget, setGlobalNextTarget] = useState<{ name: string; xpNeeded: number } | null>(null)
@@ -1317,7 +1318,7 @@ export default function CaminoCalendarClient() {
       const token = data.session?.access_token ?? null
       if (!token || cancelled) { if (!cancelled) setLigaLoading(false); return }
       const res = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${token}` } })
-      if (!cancelled && res.ok) { const d = await res.json(); setLiga(d.liga ?? null) }
+      if (!cancelled && res.ok) { const d = await res.json(); setLigas(d.ligas ?? []) }
       if (!cancelled) setLigaLoading(false)
     }).catch(() => { if (!cancelled) setLigaLoading(false) })
     return () => { cancelled = true }
@@ -1381,11 +1382,15 @@ export default function CaminoCalendarClient() {
   // que ya se ve justo debajo en "Mi liga". Ahora usamos esa misma fuente
   // (liga.miembros, ya con el username correcto) para que el héroe y la
   // lista de abajo nunca discrepen.
-  const heroRank: number | null = liga
-    ? (() => {
-        const idx = [...liga.miembros].sort((a, b) => b.total_xp - a.total_xp).findIndex(m => m.name === 'Tú')
-        return idx >= 0 ? idx + 1 : null
-      })()
+  // Con hasta MAX_LIGAS_PER_USER ligas, se muestra el mejor puesto entre
+  // todas — el alumno enseña su mejor posición, no una liga arbitraria.
+  const heroRank: number | null = ligas.length
+    ? ligas.reduce<number | null>((best, l) => {
+        const idx = [...l.miembros].sort((a, b) => b.total_xp - a.total_xp).findIndex(m => m.name === 'Tú')
+        const rank = idx >= 0 ? idx + 1 : null
+        if (rank == null) return best
+        return best == null ? rank : Math.min(best, rank)
+      }, null)
     : null
   const onboardingSubjects = normalizeOnboardingSubjects(onboarding?.subjects ?? [])
   const courseGroups = courseTopicsForSubjects(onboardingSubjects, curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM)
@@ -1511,7 +1516,7 @@ export default function CaminoCalendarClient() {
     })
     const json = await res.json()
     if (!res.ok) return { error: json.error ?? 'Error al crear liga' }
-    setLiga(json.liga)
+    setLigas(json.ligas ?? [])
     return {}
   }
 
@@ -1526,7 +1531,7 @@ export default function CaminoCalendarClient() {
     const json = await res.json()
     if (!res.ok) return { error: json.error ?? 'Error al unirse' }
     const refreshRes = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${session.access_token}` } })
-    if (refreshRes.ok) { const d = await refreshRes.json(); setLiga(d.liga ?? null) }
+    if (refreshRes.ok) { const d = await refreshRes.json(); setLigas(d.ligas ?? []) }
     return {}
   }
 
@@ -1573,7 +1578,7 @@ export default function CaminoCalendarClient() {
       setToast(`¡Misión completada! +${xpAwarded} XP`)
       fetch('/api/ligas', { headers: { Authorization: `Bearer ${session.access_token}` } })
         .then(r => r.ok ? r.json() : null)
-        .then(data => { if (data?.liga) setLiga(data.liga) })
+        .then(data => { if (data?.ligas) setLigas(data.ligas) })
         .catch(() => undefined)
       refreshLeaderboard()
     } else if (json.reason === 'already_completed') {
@@ -2358,7 +2363,7 @@ export default function CaminoCalendarClient() {
                 Clasificación →
               </button>
             </div>
-            <LigaSection liga={liga} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+            <LigaSection ligas={ligas} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
             {globalTop && globalTop.length > 0 && (
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
                 <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Top 5 Global</p>
@@ -3834,13 +3839,18 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label><span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</span>{children}</label> }
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
 
-function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaInfo | null; loading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
+function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: LigaInfo[]; loading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
   const [mode, setMode] = useState<'idle' | 'creating' | 'joining'>('idle')
   const [nombre, setNombre] = useState('')
   const [codigo, setCodigo] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const activeIndex = Math.min(selectedIndex, Math.max(0, ligas.length - 1))
+  const activeLiga = ligas[activeIndex] ?? null
+  const canAddMore = ligas.length < MAX_LIGAS_PER_USER
 
   async function handleCreate() {
     if (!nombre.trim()) return
@@ -3848,7 +3858,7 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
     const result = await onCreateLiga(nombre.trim())
     setBusy(false)
     if (result.error) { setErr(result.error); return }
-    setMode('idle'); setNombre('')
+    setMode('idle'); setNombre(''); setSelectedIndex(ligas.length)
   }
 
   async function handleJoin() {
@@ -3857,53 +3867,17 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
     const result = await onJoinLiga(codigo.trim())
     setBusy(false)
     if (result.error) { setErr(result.error); return }
-    setMode('idle'); setCodigo('')
+    setMode('idle'); setCodigo(''); setSelectedIndex(ligas.length)
   }
 
   function copyLink() {
-    if (!liga) return
-    navigator.clipboard.writeText(`${window.location.origin}/liga/${liga.codigo}`)
+    if (!activeLiga) return
+    navigator.clipboard.writeText(`${window.location.origin}/liga/${activeLiga.codigo}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (loading) return <p className="text-xs font-bold text-slate-400">Cargando liga…</p>
-
-  if (liga) {
-    const ranked = [...liga.miembros]
-      .sort((a, b) => b.total_xp - a.total_xp)
-      .map((m, i) => ({ ...m, rank: i + 1 }))
-    return (
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>{liga.nombre}</div>
-          <button
-            onClick={copyLink}
-            style={{ fontSize: 10, fontWeight: 800, color: copied ? '#16a34a' : '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-          >
-            {copied ? '✓ Copiado' : 'Compartir liga'}
-          </button>
-        </div>
-        {ranked.map(m => (
-          <RankingRow key={m.user_id} rank={m.rank} name={m.name} xp={m.total_xp} isMe={m.name === 'Tú'} theme="light" />
-        ))}
-      </div>
-    )
-  }
-
-  if (mode === 'idle') return (
-    <div>
-      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">
-          + Crear liga
-        </button>
-        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
-          Unirme a una liga
-        </button>
-      </div>
-    </div>
-  )
+  if (loading) return <p className="text-xs font-bold text-slate-400">Cargando ligas…</p>
 
   if (mode === 'creating') return (
     <div>
@@ -3917,7 +3891,7 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
     </div>
   )
 
-  return (
+  if (mode === 'joining') return (
     <div>
       <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Unirme a una liga</p>
       <div className="flex gap-2">
@@ -3926,6 +3900,62 @@ function LigaSection({ liga, loading, onCreateLiga, onJoinLiga }: { liga: LigaIn
         <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
       </div>
       {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
+    </div>
+  )
+
+  if (ligas.length === 0) return (
+    <div>
+      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">
+          + Crear liga
+        </button>
+        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
+          Unirme a una liga
+        </button>
+      </div>
+    </div>
+  )
+
+  const ranked = activeLiga
+    ? [...activeLiga.miembros].sort((a, b) => b.total_xp - a.total_xp).map((m, i) => ({ ...m, rank: i + 1 }))
+    : []
+
+  return (
+    <div>
+      {ligas.length > 1 && (
+        <div className="mb-2.5 flex flex-wrap gap-1.5">
+          {ligas.map((l, i) => (
+            <button
+              key={l.id}
+              onClick={() => setSelectedIndex(i)}
+              className="rounded-full px-2.5 py-1 text-[10.5px] font-black transition"
+              style={{ background: i === activeIndex ? '#2563eb' : '#f1f5f9', color: i === activeIndex ? 'white' : '#64748b' }}
+            >
+              {l.nombre}
+            </button>
+          ))}
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>{activeLiga?.nombre}</div>
+        <button
+          onClick={copyLink}
+          style={{ fontSize: 10, fontWeight: 800, color: copied ? '#16a34a' : '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
+          {copied ? '✓ Copiado' : 'Compartir liga'}
+        </button>
+      </div>
+      {ranked.map(m => (
+        <RankingRow key={m.user_id} rank={m.rank} name={m.name} xp={m.total_xp} isMe={m.name === 'Tú'} theme="light" />
+      ))}
+      {canAddMore && (
+        <div className="mt-2.5 flex items-center gap-2">
+          <button onClick={() => { setMode('creating'); setErr(null) }} className="text-[10.5px] font-black text-blue-700">+ Crear otra liga</button>
+          <span className="text-slate-300">·</span>
+          <button onClick={() => { setMode('joining'); setErr(null) }} className="text-[10.5px] font-black text-slate-500">Unirme a otra</button>
+        </div>
+      )}
     </div>
   )
 }

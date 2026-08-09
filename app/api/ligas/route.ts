@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createServiceSupabase } from '@/app/lib/camino/caminoProgressServer'
-import { getXpByUserInRange, currentWeekRange } from '@/app/lib/camino/leagueRounds'
+import { getXpByUserInRange, currentWeekRange, MAX_LIGAS_PER_USER } from '@/app/lib/camino/leagueRounds'
 import { resolveDisplayNames } from '@/app/lib/camino/rankingNames'
 
 export const dynamic = 'force-dynamic'
@@ -37,31 +37,37 @@ async function buildLigaPayload(db: NonNullable<ReturnType<typeof createServiceS
   return { id: ligaRow.id, codigo: ligaRow.codigo, nombre: ligaRow.nombre, miembros }
 }
 
-// GET — devuelve la liga del usuario actual (o null si no tiene)
+// Todas las ligas a las que pertenece el usuario, con su ranking de
+// miembros ya calculado — usado tanto por GET como por el POST de creación
+// (que devuelve la lista completa actualizada, no solo la liga nueva, para
+// que el cliente pueda pintar directamente sin un segundo fetch).
+async function buildAllLigasPayload(db: NonNullable<ReturnType<typeof createServiceSupabase>>, userId: string) {
+  const { data: memberships } = await db
+    .from('liga_miembros')
+    .select('liga_id, ligas(id, codigo, nombre)')
+    .eq('user_id', userId)
+
+  const ligaRows = (memberships ?? [])
+    .map(m => m.ligas as unknown as { id: string; codigo: string; nombre: string } | null)
+    .filter((l): l is { id: string; codigo: string; nombre: string } => l !== null)
+
+  return Promise.all(ligaRows.map(ligaRow => buildLigaPayload(db, ligaRow, userId)))
+}
+
+// GET — devuelve TODAS las ligas del usuario actual (hasta MAX_LIGAS_PER_USER)
 export async function GET(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
   const { user } = authContext
 
   const db = createServiceSupabase()
-  if (!db) return NextResponse.json({ liga: null })
+  if (!db) return NextResponse.json({ ligas: [] })
 
-  const { data: membership } = await db
-    .from('liga_miembros')
-    .select('liga_id, ligas(id, codigo, nombre)')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  if (!membership) return NextResponse.json({ liga: null })
-
-  const ligaRow = membership.ligas as unknown as { id: string; codigo: string; nombre: string } | null
-  if (!ligaRow) return NextResponse.json({ liga: null })
-
-  const liga = await buildLigaPayload(db, ligaRow, user.id)
-  return NextResponse.json({ liga })
+  const ligas = await buildAllLigasPayload(db, user.id)
+  return NextResponse.json({ ligas })
 }
 
-// POST — crear una liga nueva
+// POST — crear una liga nueva (hasta un máximo de MAX_LIGAS_PER_USER por alumno)
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
@@ -78,8 +84,13 @@ export async function POST(request: NextRequest) {
   const db = createServiceSupabase()
   if (!db) return NextResponse.json({ error: 'Servicio no disponible' }, { status: 500 })
 
-  const { data: existing } = await db.from('liga_miembros').select('liga_id').eq('user_id', user.id).maybeSingle()
-  if (existing) return NextResponse.json({ error: 'Ya perteneces a una liga' }, { status: 409 })
+  const { count: existingCount } = await db
+    .from('liga_miembros')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+  if ((existingCount ?? 0) >= MAX_LIGAS_PER_USER) {
+    return NextResponse.json({ error: `Ya perteneces al máximo de ${MAX_LIGAS_PER_USER} ligas` }, { status: 409 })
+  }
 
   let codigo = generateCode()
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -98,6 +109,6 @@ export async function POST(request: NextRequest) {
 
   await db.from('liga_miembros').insert({ liga_id: ligaRow.id, user_id: user.id })
 
-  const liga = await buildLigaPayload(db, ligaRow as { id: string; codigo: string; nombre: string }, user.id)
-  return NextResponse.json({ liga })
+  const ligas = await buildAllLigasPayload(db, user.id)
+  return NextResponse.json({ ligas })
 }

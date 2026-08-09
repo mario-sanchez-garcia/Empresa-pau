@@ -18,18 +18,23 @@ type GlobalPeriod = 'total' | 'month' | 'week'
 const MIN_PARTICIPANTS_FOR_PERCENTILE = 50
 
 type Medal = 'oro' | 'plata' | 'bronce'
-type PastRound = { periodStart: string; periodEnd: string; scopeType: string; label: string; roundXp: number; rank: number; medal: Medal | null }
+type TopPctTier = 'top5' | 'top10' | 'top25' | 'top50'
+type PastRound = { periodStart: string; periodEnd: string; scopeType: string; label: string; roundXp: number; rank: number; medal: Medal | null; topPct: TopPctTier | null }
 type TemporadasData = {
   medals: Record<Medal, number>
+  topPctCounts: Record<TopPctTier, number>
   currentRoundXp: number
   currentRoundRange: { start: string; end: string }
   currentRank: number | null
   currentTotalParticipants: number
   currentMedal: Medal | null
+  currentTopPct: TopPctTier | null
   daysRemaining: number
   pastRounds: PastRound[]
 }
 const MEDAL_EMOJI: Record<Medal, string> = { oro: '🥇', plata: '🥈', bronce: '🥉' }
+const TOP_PCT_LABEL: Record<TopPctTier, string> = { top5: 'Top 5%', top10: 'Top 10%', top25: 'Top 25%', top50: 'Top 50%' }
+const TOP_PCT_ORDER: TopPctTier[] = ['top5', 'top10', 'top25', 'top50']
 
 function formatMonthLabel(dateISO: string): string {
   const d = new Date(dateISO + 'T12:00:00Z')
@@ -72,12 +77,35 @@ function PeriodToggle<T extends string>({ period, options, onChange }: { period:
   )
 }
 
-function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undefined; onCopyInvite: () => void; copied: boolean }) {
+function LigaSwitcher({ ligas, activeIndex, onSelect }: { ligas: LigaInfo[]; activeIndex: number; onSelect: (i: number) => void }) {
+  if (ligas.length <= 1) return null
+  return (
+    <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+      {ligas.map((l, i) => (
+        <button
+          key={l.id}
+          onClick={() => onSelect(i)}
+          style={{
+            padding: '5px 12px', borderRadius: 999, border: 'none', cursor: 'pointer',
+            fontSize: 11, fontWeight: 700,
+            background: i === activeIndex ? 'rgba(255,255,255,0.14)' : 'transparent',
+            color: i === activeIndex ? 'white' : 'rgba(255,255,255,0.35)',
+          }}
+        >
+          {l.nombre}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function LigaTab({ ligas, onCopyInvite, copied }: { ligas: LigaInfo[] | undefined; onCopyInvite: (liga: LigaInfo) => void; copied: boolean }) {
   const [period, setPeriod] = useState<'total' | 'week'>('total')
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
-  if (liga === undefined) return <Loading />
+  if (ligas === undefined) return <Loading />
 
-  if (!liga) {
+  if (ligas.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1.6 }}>
@@ -87,9 +115,14 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
     )
   }
 
+  const activeIndex = Math.min(selectedIndex, ligas.length - 1)
+  const liga = ligas[activeIndex]
+  const switcher = <LigaSwitcher ligas={ligas} activeIndex={activeIndex} onSelect={setSelectedIndex} />
+
   if (liga.miembros.length <= 1) {
     return (
       <div>
+        {switcher}
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
           {liga.nombre}
         </p>
@@ -99,7 +132,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>Invita a amigos con tu enlace y en cuanto se unan verás aquí quién va primero cada semana.</p>
         </div>
         <button
-          onClick={onCopyInvite}
+          onClick={() => onCopyInvite(liga)}
           style={{ marginTop: 8, width: '100%', padding: '12px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'color 200ms' }}
         >
           {copied ? '¡Enlace copiado! ✓' : '🔗 Invitar a amigos'}
@@ -122,6 +155,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
 
   return (
     <div>
+      {switcher}
       <PeriodToggle period={period} options={[{ value: 'total', label: 'XP total' }, { value: 'week', label: 'Esta semana' }]} onChange={setPeriod} />
       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
         {liga.nombre}
@@ -142,7 +176,7 @@ function LigaTab({ liga, onCopyInvite, copied }: { liga: LigaInfo | null | undef
         </>
       )}
       <button
-        onClick={onCopyInvite}
+        onClick={() => onCopyInvite(liga)}
         style={{ marginTop: 20, width: '100%', padding: '12px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'color 200ms' }}
       >
         {copied ? '¡Enlace copiado! ✓' : '🔗 Invitar a amigos'}
@@ -230,15 +264,16 @@ function TemporadasTab({ token }: { token: string }) {
     )
   }
 
-  const { medals, currentRoundXp, currentRoundRange, currentRank, currentTotalParticipants, currentMedal, daysRemaining, pastRounds } = data
+  const { medals, topPctCounts, currentRoundXp, currentRoundRange, currentRank, currentTotalParticipants, currentMedal, currentTopPct, daysRemaining, pastRounds } = data
   const hasCurrentStanding = currentRoundXp > 0 && currentRank != null
+  const hasAnyTopPct = TOP_PCT_ORDER.some(t => topPctCounts[t] > 0)
 
   return (
     <div>
       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
         Medallero
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: hasAnyTopPct ? 10 : 20 }}>
         {(['oro', 'plata', 'bronce'] as const).map(medal => (
           <div key={medal} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '14px 8px', textAlign: 'center' }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>{MEDAL_EMOJI[medal]}</div>
@@ -248,12 +283,26 @@ function TemporadasTab({ token }: { token: string }) {
         ))}
       </div>
 
+      {/* Niveles top% — eje aparte del medallero: solo cuentan las
+          temporadas en las que además se consiguió oro en alguna liga (ver
+          /api/ligas/etapas). Anidados: top5% también suma a top10/25/50. */}
+      {hasAnyTopPct && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 20 }}>
+          {TOP_PCT_ORDER.map(tier => (
+            <div key={tier} style={{ background: topPctCounts[tier] > 0 ? 'rgba(250,204,21,0.08)' : 'rgba(255,255,255,0.04)', border: topPctCounts[tier] > 0 ? '1px solid rgba(250,204,21,0.25)' : '1px solid transparent', borderRadius: 10, padding: '10px 4px', textAlign: 'center' }}>
+              <div style={{ fontSize: 15, fontWeight: 900, color: topPctCounts[tier] > 0 ? '#facc15' : 'rgba(255,255,255,0.3)' }}>{topPctCounts[tier]}</div>
+              <div style={{ fontSize: 8.5, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{TOP_PCT_LABEL[tier]}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
         <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 4 }}>Temporada actual · {formatMonthLabel(currentRoundRange.start)}</p>
         <p style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>{currentRoundXp.toLocaleString('es-ES')} <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>XP</span></p>
         {hasCurrentStanding ? (
           <p style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
-            Puesto provisional #{currentRank} de {currentTotalParticipants}{currentMedal ? ` · ${MEDAL_EMOJI[currentMedal]} ${currentMedal}` : ''}
+            Puesto provisional #{currentRank} de {currentTotalParticipants}{currentMedal ? ` · ${MEDAL_EMOJI[currentMedal]} ${currentMedal}` : ''}{currentTopPct ? ` · ⭐ ${TOP_PCT_LABEL[currentTopPct]}` : ''}
           </p>
         ) : (
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Todavía no tienes XP esta temporada.</p>
@@ -277,7 +326,14 @@ function TemporadasTab({ token }: { token: string }) {
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
               <span style={{ fontSize: 17, minWidth: 26, textAlign: 'center' }}>{r.medal ? MEDAL_EMOJI[r.medal] : '—'}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.label}
+                  {r.topPct && (
+                    <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, color: '#facc15', background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.3)', borderRadius: 999, padding: '1px 7px' }}>
+                      ⭐ {TOP_PCT_LABEL[r.topPct]}
+                    </span>
+                  )}
+                </div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{formatMonthLabel(r.periodStart)} · #{r.rank}</div>
               </div>
               <span style={{ fontSize: 13, fontWeight: 800, color: '#60a5fa', flexShrink: 0 }}>{r.roundXp.toLocaleString('es-ES')} XP</span>
@@ -291,18 +347,17 @@ function TemporadasTab({ token }: { token: string }) {
 
 export default function FullRankingModal({ token, onClose }: { token: string; onClose: () => void }) {
   const [tab, setTab] = useState<'liga' | 'global' | 'temporadas'>('liga')
-  const [liga, setLiga] = useState<LigaInfo | null | undefined>(undefined)
+  const [ligas, setLigas] = useState<LigaInfo[] | undefined>(undefined)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     fetch('/api/ligas', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => setLiga((d.liga as LigaInfo) ?? null))
-      .catch(() => setLiga(null))
+      .then(d => setLigas((d.ligas as LigaInfo[]) ?? []))
+      .catch(() => setLigas([]))
   }, [token])
 
-  async function copyInvite() {
-    if (!liga) return
+  async function copyInvite(liga: LigaInfo) {
     await navigator.clipboard.writeText(`${window.location.origin}/liga/${liga.codigo}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2200)
@@ -365,7 +420,7 @@ export default function FullRankingModal({ token, onClose }: { token: string; on
               transition={{ duration: 0.15 }}
             >
               {tab === 'liga'
-                ? <LigaTab liga={liga} onCopyInvite={copyInvite} copied={copied} />
+                ? <LigaTab ligas={ligas} onCopyInvite={copyInvite} copied={copied} />
                 : tab === 'global'
                   ? <GlobalTab token={token} />
                   : <TemporadasTab token={token} />

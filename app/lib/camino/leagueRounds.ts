@@ -7,6 +7,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export type ScopeType = 'personal' | 'comunidad_materia' | 'global'
 export type Medal = 'oro' | 'plata' | 'bronce'
 
+// Máximo de ligas simultáneas por alumno.
+export const MAX_LIGAS_PER_USER = 3
+
 // Cortes por percentil dentro del ámbito (liga/comunidad+materia/global).
 // Ordenados de más exigente a menos — el primer corte que el alumno
 // cumple es su medalla.
@@ -46,6 +49,44 @@ export function medalForRank(rank: number, totalParticipants: number): Medal | n
   if (totalParticipants <= 0 || rank < 1) return null
   const percentile = rank / totalParticipants
   return MEDAL_TIERS.find(tier => percentile <= tier.topPercentile)?.name ?? null
+}
+
+// Niveles "top %" de temporada — eje independiente del medallero
+// oro/plata/bronce, calculado siempre sobre la población GLOBAL (todos los
+// alumnos con actividad esa ronda, sin importar su liga). Ordenados de más
+// exigente a menos, mismo patrón que MEDAL_TIERS: el primer corte que el
+// alumno cumple es su nivel — top5% también implica top10/25/50 (anidados),
+// pero solo se guarda el más exigente; la expansión se hace al leer
+// (ver nestedTopPctTiers).
+export type TopPctTier = 'top5' | 'top10' | 'top25' | 'top50'
+
+export const TOP_PCT_TIERS: Array<{ tier: TopPctTier; topPercentile: number }> = [
+  { tier: 'top5', topPercentile: 0.05 },
+  { tier: 'top10', topPercentile: 0.10 },
+  { tier: 'top25', topPercentile: 0.25 },
+  { tier: 'top50', topPercentile: 0.50 },
+]
+
+// Mismo orden que TOP_PCT_TIERS, de más a menos exigente — usado para
+// expandir un nivel guardado a todos los niveles anidados que implica.
+const TOP_PCT_TIER_ORDER: TopPctTier[] = TOP_PCT_TIERS.map(t => t.tier)
+
+// Con menos participantes que esto, un "top 5%" no significa nada de fiar
+// (5% de 12 alumnos es "el primero") — mismo principio que
+// MIN_PARTICIPANTS_FOR_PERCENTILE en FullRankingModal.tsx.
+export const MIN_PARTICIPANTS_FOR_TOP_PCT = 50
+
+export function topPctForRank(rank: number, totalParticipants: number): TopPctTier | null {
+  if (totalParticipants < MIN_PARTICIPANTS_FOR_TOP_PCT || rank < 1) return null
+  const percentile = rank / totalParticipants
+  return TOP_PCT_TIERS.find(t => percentile <= t.topPercentile)?.tier ?? null
+}
+
+// top5 implica top10/top25/top50 — devuelve `tier` y todos los niveles
+// menos exigentes que alcanzar `tier` ya cumple automáticamente.
+export function nestedTopPctTiers(tier: TopPctTier): TopPctTier[] {
+  const idx = TOP_PCT_TIER_ORDER.indexOf(tier)
+  return idx === -1 ? [] : TOP_PCT_TIER_ORDER.slice(idx)
 }
 
 function toDateOnly(date: Date): string {

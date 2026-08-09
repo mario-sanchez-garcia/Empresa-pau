@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
-import { previousRoundRange, medalForRank, scopeKeyForComunidadMateria, type ScopeType, type Medal } from '@/app/lib/camino/leagueRounds'
+import { previousRoundRange, medalForRank, topPctForRank, scopeKeyForComunidadMateria, type ScopeType, type Medal, type TopPctTier } from '@/app/lib/camino/leagueRounds'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +54,38 @@ async function insertRoundResults(
     return { created: false }
   }
 
-  return { created: true, participants: ranked.length }
+  return { created: true, participants: ranked.length, rondaId: ronda.id as string }
+}
+
+// Niveles "top %" de temporada — SOLO para el ámbito global (población
+// completa, no una liga concreta). Se guarda únicamente el nivel más
+// exigente alcanzado; la expansión a niveles anidados (top5% -> también
+// top10/25/50) se hace al leer, en /api/ligas/etapas. Por debajo de
+// MIN_PARTICIPANTS_FOR_TOP_PCT, topPctForRank ya devuelve null para todos —
+// nada que insertar, no hace falta comprobarlo aquí aparte.
+async function insertTopPctResults(
+  db: ReturnType<typeof createServiceClient>,
+  rondaId: string,
+  ranked: RankedEntry[],
+) {
+  const total = ranked.length
+  const rows = ranked
+    .map(entry => ({ userId: entry.userId, rank: entry.rank, tier: topPctForRank(entry.rank, total) }))
+    .filter((entry): entry is { userId: string; rank: number; tier: TopPctTier } => entry.tier !== null)
+    .map(entry => ({
+      ronda_id: rondaId,
+      user_id: entry.userId,
+      tier: entry.tier,
+      rank: entry.rank,
+      total_participants: total,
+    }))
+
+  if (!rows.length) return
+
+  const { error } = await db.from('ligas_top_pct_resultados').insert(rows)
+  if (error) {
+    console.error('[close-liga-round] failed to insert top_pct resultados', error)
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -107,7 +138,11 @@ export async function GET(request: NextRequest) {
   for (const row of events) {
     globalByUser.set(row.user_id, (globalByUser.get(row.user_id) ?? 0) + Number(row.xp_amount ?? 0))
   }
-  const globalResult = await insertRoundResults(db, 'global', 'global', periodStart, periodEnd, rankBySum(globalByUser))
+  const globalRanked = rankBySum(globalByUser)
+  const globalResult = await insertRoundResults(db, 'global', 'global', periodStart, periodEnd, globalRanked)
+  if (globalResult.created && globalResult.rondaId) {
+    await insertTopPctResults(db, globalResult.rondaId, globalRanked)
+  }
 
   // ---------------------------------------------------------------
   // 2. Personal (ligas existentes)

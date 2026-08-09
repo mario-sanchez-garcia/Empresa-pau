@@ -969,6 +969,7 @@ export default function Home() {
   const historialResumenCacheRef = useRef<Partial<Record<Asignatura, string>>>({})
   const cfg = ASIGNATURAS[asignatura]
   const { ccaa, setCCAA } = useCCAA()
+  const examFilterCommunity = asignatura === 'matematicas_ccss' ? 'Madrid' : ccaa
   const isCatalunaMates = asignatura === 'mates' && ccaa === 'Cataluña'
   const isMadridMathStyle = asignatura === 'mates' || asignatura === 'matematicas_ccss'
   const isCatalunaHistoria = asignatura === 'historia' && ccaa === 'Cataluña'
@@ -1209,7 +1210,7 @@ const availableQuestionsForExam = (examen: any) => ((examen?.preguntas ?? []) as
 const hasStructuredQuestions = (examen: any) => Array.isArray(examen?.preguntas) && availableQuestionsForExam(examen).length > 0 // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
 
 const perteneceAComunidadSeleccionada = (examen: any) => // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-  (examen.comunidad ?? examen.ccaa) === ccaa
+  (examen.comunidad ?? examen.ccaa) === examFilterCommunity
 
 // `?? []`, not `?? examenesHistoria`: a subject with no entry in the map
 // (e.g. 'general', deliberately kept out of HOME_SUBJECTS/the map since it

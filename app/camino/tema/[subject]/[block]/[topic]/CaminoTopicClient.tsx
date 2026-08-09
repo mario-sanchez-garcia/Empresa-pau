@@ -900,7 +900,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           nota_maxima: maxScore,
           enunciado: statement.substring(0, 2000),
           respuesta: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : studentAnswer.substring(0, 4000),
-          correccion: storedCorrection
+          correccion: storedCorrection,
+          v2_sort_order: selectedSortOrder
         })
         calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
         if (rawScore != null) {
@@ -1152,8 +1153,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             {missionXpStatus === 'already_completed' && !repeatOfId && !repeatConfirmed && !entryConfirmed ? (
               <div style={{ borderRadius: 12, border: '1px solid #bbf7d0', background: '#f0fdf4', padding: '20px 18px', textAlign: 'center' }}>
                 <p style={{ fontSize: 14, fontWeight: 900, color: '#065f46', marginBottom: 6 }}>Ya has completado este ejercicio</p>
+                {current.score != null && (
+                  <p style={{ fontSize: 26, fontWeight: 900, color: '#059669', marginBottom: 6 }}>{current.score}/10</p>
+                )}
                 <p style={{ fontSize: 12.5, fontWeight: 600, color: '#166534', marginBottom: 16, lineHeight: 1.6 }}>
-                  Puedes repetirlo para intentar mejorar tu nota, o volver a Mis Cursos.
+                  {current.score != null ? 'Tu nota la última vez. Puedes repetirlo para intentar mejorarla, o volver a Mis Cursos.' : 'Puedes repetirlo para intentar mejorar tu nota, o volver a Mis Cursos.'}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
                   <button

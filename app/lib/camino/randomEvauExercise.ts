@@ -144,11 +144,35 @@ function textForQuestion(question: ExamQuestion) {
   return `${question.bloque ?? ''} ${question.label ?? ''} ${question.titulo ?? ''} ${question.tema ?? ''} ${question.autor ?? ''} ${question.problema ?? ''} ${question.enunciado ?? ''} ${question.texto ?? ''} ${question.criterios ?? ''}`
 }
 
-function inferTopicSlug(blockSlug: string, text: string) {
+// Qué familias de TOPIC_KEYWORDS tiene sentido buscar dentro del texto de
+// cada asignatura. Sin este filtro, inferTopicSlug/normalizeBlockSlug
+// probaban TODAS las familias sobre CUALQUIER pregunta — una de Historia que
+// simplemente contuviera la palabra "sistema" (p.ej. "el sistema canovista")
+// se etiquetaba internamente como blockSlug/topicSlug 'algebra' porque
+// TOPIC_KEYWORDS.algebra incluye 'sistema'. flattenCandidates ya restringe el
+// banco de preguntas a la asignatura correcta (sourceForSubject), así que
+// esto nunca mezclaba contenido real entre asignaturas — pero sí generaba
+// una etiqueta de tema interna incorrecta que podía desviar el matching de
+// scoreCandidates dentro de la propia asignatura.
+const SUBJECT_KEYWORD_FAMILIES: Record<CaminoExamSubject, string[]> = {
+  mates: ['algebra', 'analisis', 'integrales', 'geometria', 'probabilidad', 'estadistica'],
+  matematicas_ccss: ['algebra', 'analisis', 'integrales', 'probabilidad', 'estadistica'],
+  fisica: ['campo', 'ondas'],
+  quimica: ['equilibrio', 'acido_base', 'redox'],
+  biologia: [],
+  lengua: ['sintaxis', 'comentario', 'literatura'],
+  historia: ['restauracion', 'republica', 'franquismo'],
+  historia_filosofia: ['platon', 'descartes', 'kant', 'hume', 'marx'],
+  ingles: ['reading', 'writing'],
+}
+
+function inferTopicSlug(subject: CaminoExamSubject, blockSlug: string, text: string) {
   const normalized = normalizeText(text)
-  const topic = Object.entries(TOPIC_KEYWORDS).find(([, words]) =>
-    words.some(word => normalized.includes(normalizeText(word)))
-  )?.[0]
+  const allowedFamilies = new Set(SUBJECT_KEYWORD_FAMILIES[subject] ?? [])
+  const topic = Object.entries(TOPIC_KEYWORDS)
+    .filter(([family]) => allowedFamilies.has(family))
+    .find(([, words]) => words.some(word => normalized.includes(normalizeText(word))))
+    ?.[0]
 
   return topic ?? blockSlug
 }
@@ -156,6 +180,7 @@ function inferTopicSlug(blockSlug: string, text: string) {
 function normalizeBlockSlug(question: ExamQuestion, subject: CaminoExamSubject) {
   const explicitBlock = slugifyEvauParam(question.bloque)
   const text = normalizeText(textForQuestion(question))
+  const isMathSubject = subject === 'mates' || subject === 'matematicas_ccss'
 
   if (subject === 'mates') {
     if (explicitBlock.includes('algebra')) return 'algebra'
@@ -164,11 +189,11 @@ function normalizeBlockSlug(question: ExamQuestion, subject: CaminoExamSubject) 
     if (explicitBlock.includes('probabilidad')) return 'probabilidad'
   }
 
-  if (TOPIC_KEYWORDS.algebra.some(word => text.includes(normalizeText(word)))) return 'algebra'
-  if (TOPIC_KEYWORDS.integrales.some(word => text.includes(normalizeText(word)))) return 'analisis'
-  if (TOPIC_KEYWORDS.analisis.some(word => text.includes(normalizeText(word)))) return 'analisis'
-  if (TOPIC_KEYWORDS.estadistica.some(word => text.includes(normalizeText(word)))) return 'probabilidad'
-  if (TOPIC_KEYWORDS.probabilidad.some(word => text.includes(normalizeText(word)))) return 'probabilidad'
+  if (isMathSubject && TOPIC_KEYWORDS.algebra.some(word => text.includes(normalizeText(word)))) return 'algebra'
+  if (isMathSubject && TOPIC_KEYWORDS.integrales.some(word => text.includes(normalizeText(word)))) return 'analisis'
+  if (isMathSubject && TOPIC_KEYWORDS.analisis.some(word => text.includes(normalizeText(word)))) return 'analisis'
+  if (isMathSubject && TOPIC_KEYWORDS.estadistica.some(word => text.includes(normalizeText(word)))) return 'probabilidad'
+  if (isMathSubject && TOPIC_KEYWORDS.probabilidad.some(word => text.includes(normalizeText(word)))) return 'probabilidad'
   if (subject === 'mates' && TOPIC_KEYWORDS.geometria.some(word => text.includes(normalizeText(word)))) return 'geometria'
   if (subject === 'lengua' && TOPIC_KEYWORDS.sintaxis.some(word => text.includes(normalizeText(word)))) return 'reflexion-lengua'
   if (subject === 'lengua' && TOPIC_KEYWORDS.comentario.some(word => text.includes(normalizeText(word)))) return 'comunicacion'
@@ -225,7 +250,7 @@ function flattenCandidates(subject: CaminoExamSubject, community = 'Madrid'): Ex
     .flatMap(exam => (exam.preguntas ?? []).map((question, questionIndex) => {
       const text = textForQuestion(question)
       const blockSlug = normalizeBlockSlug(question, subject)
-      const topicSlug = inferTopicSlug(blockSlug, text)
+      const topicSlug = inferTopicSlug(subject, blockSlug, text)
       return {
         subject,
         exerciseId: String(question.id ?? `${exam.id}-${questionIndex}`),

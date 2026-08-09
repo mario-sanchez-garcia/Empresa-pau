@@ -23,7 +23,7 @@ import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from './lib/contentQuality'
-import { getRandomEvauExerciseForMission, getRandomUnseenEvauExercise, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
+import { getRandomEvauExerciseForMission, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
 import { normalizeScoreToTen } from './lib/camino/scoreNormalization'
 import CatPreguntaCard from './components/CatPreguntaCard'
 import CatHistoriaEjercicioCard from './components/CatHistoriaEjercicioCard'
@@ -972,10 +972,6 @@ export default function Home() {
   const fileRef = useRef<HTMLInputElement>(null)
   const lastImageTimingRef = useRef<{ requestId: string; ms: number; chars: number } | null>(null)
   const randomEvauResolutionKeyRef = useRef('')
-  // Última asignatura para la que ya se hizo la selección aleatoria por
-  // defecto al entrar en Exámenes — evita repetir el sorteo en cada render,
-  // pero permite un sorteo nuevo cada vez que el alumno cambia de asignatura.
-  const autoExerciseSubjectRef = useRef<string | null>(null)
   // Un hilo persistente por asignatura (chat_threads/chat_messages en Supabase,
   // ver migración 20260806150000). Cache en memoria por sesión de navegador
   // para no re-pedir el hilo al alternar entre pills ya visitados; se llena
@@ -1829,42 +1825,6 @@ useEffect(() => {
 
   window.history.replaceState(null, '', resolved.targetUrl)
 }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-// Selección por defecto al entrar en Exámenes: en vez de dejar la pantalla
-// vacía esperando que el alumno elija año/convocatoria/pregunta a mano, se
-// sortea un ejercicio del banco PAU que todavía no aparece en su historial
-// (comprobado siempre contra historial_examenes, no solo contra un
-// "recientes" local). El alumno sigue pudiendo cambiarlo a mano con los
-// desplegables en cualquier momento — esto solo fija el punto de partida.
-// Cataluña y Filosofía quedan fuera (isCatalunaExam las incluye a ambas):
-// usan fuentes de datos y flujos de selección propios, no
-// selectMadridExerciseById.
-useEffect(() => {
-  if (seccion !== 'examenes' || isCatalunaExam || !usuario?.id) return
-  if (autoExerciseSubjectRef.current === asignatura) return
-  if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search)
-    // La otra selección aleatoria (deep-link desde Camino PAU, mode=random /
-    // mode=selected) ya se encarga de elegir el ejercicio para esta visita —
-    // no pisarla con un segundo sorteo independiente.
-    if ((params.get('source') ?? '').startsWith('camino')) return
-  }
-  autoExerciseSubjectRef.current = asignatura
-
-  let cancelled = false
-  supabase
-    .from('historial_examenes')
-    .select('tipo, año')
-    .eq('user_id', usuario.id)
-    .eq('asignatura', asignatura)
-    .then(({ data }) => {
-      if (cancelled) return
-      const doneKeys = new Set((data ?? []).map((row: any) => `${row.tipo}-${row.año}`)) // eslint-disable-line @typescript-eslint/no-explicit-any -- fila de historial_examenes sin tipado estricto
-      const resolved = getRandomUnseenEvauExercise(asignatura, ccaa, doneKeys)
-      if (resolved) selectMadridExerciseById(resolved.subject, resolved.exerciseId)
-    })
-  return () => { cancelled = true }
-}, [seccion, asignatura, ccaa, isCatalunaExam, usuario?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
 function puntosBloqueFisica(tipoBloque: string) {
   return (

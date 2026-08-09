@@ -31,6 +31,7 @@ import { sendOnboardingEvent, ONBOARDING_FLOW_VERSION, type OnboardingStepId } f
 import { createActiveDurationTracker } from '@/app/lib/onboarding/activeDuration'
 import { loadLocalDraft, saveLocalDraft } from '@/app/lib/onboarding/onboardingDraftStorage'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
+import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 
 type Step = 'welcome' | 'pain' | 'pain-result' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'preview' | 'signup'
 
@@ -88,10 +89,6 @@ const PAIN_RESULT_COPY: Record<PainType, { title: string; body: string }> = {
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
 const HF_EQUATIONS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125527_d366f113-8e29-4f93-b91c-7a6c40bfe1d1.png'
-// Cálida y vertical, con espacio negativo pensado para overlay de texto —
-// usada solo en la pantalla final de creación de cuenta, para que no repita
-// el tono frío/azulado del resto del onboarding.
-const HF_NOTEBOOKS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260803_141057_8f95b1c4-b3e9-4af7-938d-625d917ad654.png'
 
 const STEP_PHOTO: Partial<Record<Step, string>> = {
   pain: HF_EQUATIONS,
@@ -1058,30 +1055,52 @@ export default function OnboardingFlow() {
     const password = signupPassword
     const terms = signupTerms
     return (
-      <div style={{ display: 'flex', minHeight: '100dvh', overflow: 'hidden', background: '#111' }}>
-        {/* Left — cinematic photo (mismo tratamiento que el resto del onboarding) */}
-        <div className="onb-photo-panel" style={{ width: '44%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          <img src={HF_NOTEBOOKS} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.6) saturate(1.05)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.15) 0%, rgba(17,17,17,.7) 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(17,17,17,.8) 0%, transparent 55%)' }} />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '32px 36px' }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>
-              Último paso
-            </div>
-            <div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(44px, 5.5vw, 72px)', lineHeight: .92, color: '#fff', letterSpacing: '.01em' }}>
-                Guarda<br />tu Camino.
+      <div style={{ display: 'flex', minHeight: '100dvh', overflow: 'hidden', background: '#0d0d0d' }}>
+        {/* Left — mismo panel que /login (imagen, gradiente, logo, tagline, stats) */}
+        <div className="onb-photo-panel" style={{ position: 'sticky', top: 0, height: '100dvh', width: '46%', flexShrink: 0, overflow: 'hidden' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/login-bg.png"
+            alt=""
+            aria-hidden
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.4) brightness(1.05) contrast(1.08)' }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(13,13,13,.78) 0%, rgba(13,13,13,.35) 45%, rgba(13,13,13,.82) 100%)' }} />
+
+          {/* Logo */}
+          <div style={{ position: 'absolute', top: 32, left: 36, zIndex: 2 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 30, width: 'auto', mixBlendMode: 'lighten', display: 'block' }} />
+          </div>
+
+          {/* Tagline */}
+          <div style={{ position: 'absolute', bottom: 100, left: 36, right: 36, zIndex: 2 }}>
+            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(44px, 5vw, 68px)', lineHeight: .92, letterSpacing: '.01em', color: '#fff', marginBottom: 16 }}>
+              Guarda<br />tu Camino.
+            </h2>
+            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'rgba(255,255,255,.4)', letterSpacing: '.1em', textTransform: 'uppercase', lineHeight: 1.6 }}>
+              Exámenes reales · Corrección IA · Plan diario
+            </p>
+          </div>
+
+          {/* Stats */}
+          <div style={{ position: 'absolute', bottom: 32, left: 36, right: 36, zIndex: 2, display: 'flex', gap: 32, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 20 }}>
+            {[
+              { v: PLATFORM_STRUCTURED_EXERCISES_LABEL, l: PLATFORM_STRUCTURED_EXERCISES_TEXT },
+              { v: '38', l: 'Semanas PAU' },
+              { v: '<30s', l: 'Corrección' },
+            ].map(s => (
+              <div key={s.l}>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: '#fff', letterSpacing: '.01em', lineHeight: 1 }}>{s.v}</div>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 3 }}>{s.l}</div>
               </div>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', maxWidth: 300, lineHeight: 1.6, marginTop: 16 }}>
-                Sin cuenta, tu preparación se pierde al cerrar la pestaña. Con una cuenta, tus misiones te esperan cada día.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
         {/* Right — cuenta */}
         <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 24, textAlign: 'center', overflowY: 'auto' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Guarda tu Camino.</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Crea tu cuenta.</div>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
             Ya tenemos todo para construir tu preparación. Crea tu cuenta para guardar tu Camino y generar tus primeras misiones.
           </p>

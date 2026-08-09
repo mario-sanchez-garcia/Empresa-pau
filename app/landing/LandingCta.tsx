@@ -18,7 +18,7 @@ export function NavLoginLink() {
   if (status === 'authed') return null
   return (
     <Link href="/login" className="v4c-btn-nav" style={{ padding: '7px 16px', border: '1px solid rgba(255,255,255,.3)', fontSize: 11, color: '#fff', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase' }}>
-      Entrar →
+      Iniciar sesión →
     </Link>
   )
 }

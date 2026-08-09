@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { supabase } from '../lib/supabase'
@@ -7,7 +8,6 @@ import { Eye, EyeOff } from 'lucide-react'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
-import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -19,13 +19,11 @@ export default function Login() {
   // ── Auth state (preservado exactamente) ──────────────────────────────────────
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [modo, setModo]         = useState<'login' | 'registro'>('login')
   const [mensaje, setMensaje]   = useState('')
   const [cargando, setCargando] = useState(false)
 
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [showPwd, setShowPwd]               = useState(false)
-  const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const isError   = !!mensaje && !mensaje.includes('confirmar')
   const isSuccess = !!mensaje && mensaje.includes('confirmar')
 
@@ -49,78 +47,45 @@ export default function Login() {
     }
   }
 
-  // ── Email/password handler ────────────────────────────────────────────────────
+  // ── Email/password handler (login únicamente — /login ya no crea cuentas) ────
   async function handleSubmit() {
     if (!email || !password) return
-    if (modo === 'registro' && !aceptaTerminos) {
-      setMensaje('Debes aceptar los Términos y la Política de Privacidad para crear una cuenta.')
-      return
-    }
     setCargando(true)
     setMensaje('')
-    if (modo === 'registro') {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          terms_version: LEGAL_VERSIONS.terminos.version,
-          privacy_version: LEGAL_VERSIONS.privacidad.version,
-        }),
-      })
-      const result = await res.json()
-      if (!res.ok) {
-        setMensaje(mensajeAuthLegible(result.error))
-      } else if (result.needsConfirmation) {
-        window.location.href = `/confirmar-email?email=${encodeURIComponent(email)}`
-      } else {
-        clearOnboarding()
-        await supabase.auth.setSession(result.session)
-        window.location.href = '/onboarding'
-      }
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setMensaje(mensajeAuthLegible(error.message))
     } else {
-      const { error, data } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        setMensaje(mensajeAuthLegible(error.message))
-      } else {
-        // El navegador puede tener onboarding local de otra cuenta (p.ej.
-        // varias cuentas probadas en el mismo dispositivo); se descarta al
-        // iniciar sesión y se reconcilia con el servidor de la cuenta real.
-        clearOnboarding()
-        // El destino se resuelve server-side (Bearer token -> /api/onboarding/me)
-        // para que funcione igual en un dispositivo nuevo sin localStorage:
-        // completo -> returnTo (normalmente /camino); incompleto o con un
-        // borrador sin terminar -> recuperar ese estado en vez de confiar
-        // ciegamente en returnTo.
-        let dest = returnTo
-        try {
-          const token = data.session?.access_token
-          if (token) {
-            const res = await fetch('/api/onboarding/me', { headers: { Authorization: `Bearer ${token}` } })
-            if (res.ok) {
-              const json = await res.json()
-              const resolved = resolveOnboardingDestination(json)
-              dest = resolved === '/camino' ? returnTo : resolved
-            }
+      // El navegador puede tener onboarding local de otra cuenta (p.ej.
+      // varias cuentas probadas en el mismo dispositivo); se descarta al
+      // iniciar sesión y se reconcilia con el servidor de la cuenta real.
+      clearOnboarding()
+      // El destino se resuelve server-side (Bearer token -> /api/onboarding/me)
+      // para que funcione igual en un dispositivo nuevo sin localStorage:
+      // completo -> returnTo (normalmente /camino); incompleto o con un
+      // borrador sin terminar -> recuperar ese estado en vez de confiar
+      // ciegamente en returnTo.
+      let dest = returnTo
+      try {
+        const token = data.session?.access_token
+        if (token) {
+          const res = await fetch('/api/onboarding/me', { headers: { Authorization: `Bearer ${token}` } })
+          if (res.ok) {
+            const json = await res.json()
+            const resolved = resolveOnboardingDestination(json)
+            dest = resolved === '/camino' ? returnTo : resolved
           }
-        } catch {
-          // Nunca bloquear el login por esta comprobación.
         }
-        window.location.href = dest
+      } catch {
+        // Nunca bloquear el login por esta comprobación.
       }
+      window.location.href = dest
     }
     setCargando(false)
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') handleSubmit()
-  }
-
-  function switchModo() {
-    setModo(m => m === 'login' ? 'registro' : 'login')
-    setMensaje('')
-    setAceptaTerminos(false)
   }
 
   function mensajeAuthLegible(error?: string) {
@@ -335,10 +300,10 @@ export default function Login() {
               lineHeight: .92, letterSpacing: '.01em',
               color: '#fff', marginBottom: 10,
             }}>
-              {modo === 'login' ? 'Bienvenido.' : 'Empieza ya.'}
+              Bienvenido.
             </h1>
             <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.35)', letterSpacing: '.12em', textTransform: 'uppercase' }}>
-              {modo === 'login' ? 'Entra en tu cuenta' : 'Crea tu cuenta · Gratis'}
+              Entra en tu cuenta
             </p>
           </div>
 
@@ -401,11 +366,9 @@ export default function Login() {
                 <label htmlFor="login-password" style={{ fontFamily: M, fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,.35)', letterSpacing: '.14em', textTransform: 'uppercase' }}>
                   Contraseña
                 </label>
-                {modo === 'login' && (
-                  <button type="button" className="lg-link" style={{ fontSize: 11 }}>
-                    ¿La olvidaste?
-                  </button>
-                )}
+                <button type="button" className="lg-link" style={{ fontSize: 11 }}>
+                  ¿La olvidaste?
+                </button>
               </div>
               <div className="lg-field">
                 <input
@@ -415,7 +378,7 @@ export default function Login() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  autoComplete={modo === 'login' ? 'current-password' : 'new-password'}
+                  autoComplete="current-password"
                   aria-required="true"
                 />
                 <button
@@ -447,36 +410,13 @@ export default function Login() {
             </div>
           )}
 
-          {/* Terms checkbox — registro only */}
-          {modo === 'registro' && (
-            <label style={{
-              display: 'flex', alignItems: 'flex-start', gap: 10,
-              marginTop: 16, cursor: 'pointer',
-            }}>
-              <input
-                type="checkbox"
-                checked={aceptaTerminos}
-                onChange={e => setAceptaTerminos(e.target.checked)}
-                style={{ marginTop: 2, flexShrink: 0, width: 15, height: 15, accentColor: '#fff', cursor: 'pointer' }}
-                aria-required="true"
-              />
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,.45)', lineHeight: 1.65 }}>
-                He leído y acepto los{' '}
-                <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.75)', textDecoration: 'underline', textUnderlineOffset: 2 }}>Términos</a>
-                {' '}y la{' '}
-                <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.75)', textDecoration: 'underline', textUnderlineOffset: 2 }}>Privacidad</a>
-                {' '}de Kairo.
-              </span>
-            </label>
-          )}
-
           {/* Submit */}
           <div className="lg-up" style={{ marginTop: 22, animationDelay: '160ms' }}>
             <button
               type="button"
               className="lg-btn-primary"
               onClick={handleSubmit}
-              disabled={cargando || (modo === 'registro' && !aceptaTerminos)}
+              disabled={cargando}
               aria-busy={cargando}
             >
               {cargando
@@ -485,20 +425,20 @@ export default function Login() {
                     border: '2px solid rgba(0,0,0,.2)',
                     borderTopColor: '#0d0d0d', borderRadius: '50%',
                   }} aria-label="Cargando..." />
-                : modo === 'login' ? 'Entrar a Kairo' : 'Crear cuenta gratis'
+                : 'Entrar a Kairo'
               }
             </button>
           </div>
 
-          {/* Mode toggle */}
+          {/* Primera vez -> onboarding (LOGIN es solo para usuarios existentes) */}
           <div className="lg-up" style={{
             textAlign: 'center', marginTop: 20, animationDelay: '190ms',
             fontSize: 13, color: 'rgba(255,255,255,.3)',
           }}>
-            {modo === 'login' ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-            <button type="button" className="lg-link" onClick={switchModo}>
-              {modo === 'login' ? 'Crear una cuenta' : 'Iniciar sesión'}
-            </button>
+            ¿Es tu primera vez?{' '}
+            <Link href="/onboarding" className="lg-link">
+              Empieza aquí
+            </Link>
           </div>
 
           {/* Legal footer */}

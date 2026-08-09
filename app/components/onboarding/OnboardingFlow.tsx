@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Check, Lock, Plus, Search, Trash2 } from 'lucide-react'
@@ -188,7 +189,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   'grade-threshold': { title: '¿A partir de qué nota quieres repetir para mejorar?', help: 'Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.' },
   confirm: { title: 'Así vamos a preparar tu Camino', help: 'Revisa cada bloque y edítalo si algo no encaja.' },
   preview: { title: 'Así se organizará tu preparación', help: 'Una vista previa de cómo Kairo organiza tu Camino.' },
-  signup: { title: 'Tu Camino está listo para construirse', help: 'Crea tu cuenta para guardar tu preparación.' },
+  signup: { title: 'Guarda tu Camino', help: 'Crea tu cuenta para guardar tu preparación.' },
 }
 
 const SIDEBAR_STEPS = ['Dolor', 'Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
@@ -789,7 +790,12 @@ export default function OnboardingFlow() {
           {/* Header */}
           <div className="onb-header-pad" style={{ padding: '22px 44px', borderBottom: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'relative', zIndex: 1 }}>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: '.05em', color: '#fff' }}>Kairo</span>
-            <span style={{ padding: '4px 10px', border: '1px solid rgba(37,99,235,.3)', background: 'rgba(37,99,235,.1)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#3b82f6' }}>Beta privada</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{ padding: '4px 10px', border: '1px solid rgba(37,99,235,.3)', background: 'rgba(37,99,235,.1)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#3b82f6' }}>Beta privada</span>
+              <Link href="/login" style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(255,255,255,.35)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                ¿Ya tienes cuenta? Inicia sesión
+              </Link>
+            </div>
           </div>
 
           {/* Main */}
@@ -1049,9 +1055,9 @@ export default function OnboardingFlow() {
     const terms = signupTerms
     return (
       <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 18, padding: 24, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Tu Camino está listo para construirse.</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Guarda tu Camino.</div>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
-          Solo falta crear tu cuenta para guardar tu preparación y generar tus primeras misiones.
+          Ya tenemos todo para construir tu preparación. Crea tu cuenta para guardar tu Camino y generar tus primeras misiones.
         </p>
         {authError && (
           <div style={{ maxWidth: 380 }}>
@@ -1072,12 +1078,12 @@ export default function OnboardingFlow() {
               onClick={handleGoogleSignup}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', height: 48, background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
             >
-              Continuar con Google
+              Crear mi cuenta con Google
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
-              o
+              o con email
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
             </div>
 
@@ -1106,7 +1112,7 @@ export default function OnboardingFlow() {
               disabled={!email || !password || !terms}
               style={{ width: '100%', height: 48, background: (!email || !password || !terms) ? '#333' : '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: (!email || !password || !terms) ? 'not-allowed' : 'pointer' }}
             >
-              Continuar con email
+              Crear mi cuenta
             </button>
           </div>
         ) : (

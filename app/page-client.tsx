@@ -551,6 +551,7 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
   const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const hasValue = options.some(o => o.active)
 
   // Antes el menú era position:absolute + left:0 dentro de .exams-filter-bar
@@ -565,16 +566,26 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
     if (rect) {
       const menuWidth = Math.min(240, window.innerWidth - 24)
       const left = Math.min(rect.left, window.innerWidth - menuWidth - 12)
+      const availableBelow = Math.max(180, window.innerHeight - rect.bottom - 16)
       setMenuStyle({
         position: 'fixed',
         top: rect.bottom + 4,
         left: Math.max(12, left),
         width: menuWidth,
+        maxHeight: Math.min(360, availableBelow),
+        overflowY: 'auto',
         zIndex: 200
       })
     }
     setOpen(true)
   }
+
+  useEffect(() => {
+    if (!open) return
+    window.requestAnimationFrame(() => {
+      if (menuRef.current) menuRef.current.scrollTop = 0
+    })
+  }, [open, options])
 
   useEffect(() => {
     if (!open) return
@@ -604,7 +615,7 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
       {open && (
         <>
           <div className="exam-filter-menu-backdrop" onClick={() => setOpen(false)} />
-          <div className="exam-filter-menu" style={menuStyle}>
+          <div ref={menuRef} className="exam-filter-menu" style={menuStyle}>
             {options.map(option => (
               <button
                 type="button"

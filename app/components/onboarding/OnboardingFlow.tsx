@@ -88,6 +88,10 @@ const PAIN_RESULT_COPY: Record<PainType, { title: string; body: string }> = {
 const HF_FLATLAY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125450_f5670e8f-277d-470e-82b0-58dd6db26d4b.png'
 const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
 const HF_EQUATIONS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125527_d366f113-8e29-4f93-b91c-7a6c40bfe1d1.png'
+// Cálida y vertical, con espacio negativo pensado para overlay de texto —
+// usada solo en la pantalla final de creación de cuenta, para que no repita
+// el tono frío/azulado del resto del onboarding.
+const HF_NOTEBOOKS = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260803_141057_8f95b1c4-b3e9-4af7-938d-625d917ad654.png'
 
 const STEP_PHOTO: Partial<Record<Step, string>> = {
   pain: HF_EQUATIONS,
@@ -1054,80 +1058,103 @@ export default function OnboardingFlow() {
     const password = signupPassword
     const terms = signupTerms
     return (
-      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', gap: 18, padding: 24, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Guarda tu Camino.</div>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
-          Ya tenemos todo para construir tu preparación. Crea tu cuenta para guardar tu Camino y generar tus primeras misiones.
-        </p>
-        {authError && (
-          <div style={{ maxWidth: 380 }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#f87171', margin: 0 }}>{authError}</p>
-            {/ya (tienes|existe) una cuenta/i.test(authError) && (
-              <a
-                href={`/login?returnTo=${encodeURIComponent(`/onboarding/finalizando?draft=${loadLocalDraft()?.draftId ?? ''}`)}`}
-                style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 700, color: '#60a5fa', textDecoration: 'underline' }}
-              >
-                Iniciar sesión con esta cuenta →
-              </a>
-            )}
-          </div>
-        )}
-        {signupOptionsReady ? (
-          <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <button
-              onClick={handleGoogleSignup}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', height: 48, background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
-            >
-              Crear mi cuenta con Google
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
-              o con email
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+      <div style={{ display: 'flex', minHeight: '100dvh', overflow: 'hidden', background: '#111' }}>
+        {/* Left — cinematic photo (mismo tratamiento que el resto del onboarding) */}
+        <div className="onb-photo-panel" style={{ width: '44%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+          <img src={HF_NOTEBOOKS} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.6) saturate(1.05)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.15) 0%, rgba(17,17,17,.7) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(17,17,17,.8) 0%, transparent 55%)' }} />
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '32px 36px' }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>
+              Último paso
             </div>
+            <div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(44px, 5.5vw, 72px)', lineHeight: .92, color: '#fff', letterSpacing: '.01em' }}>
+                Guarda<br />tu Camino.
+              </div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', maxWidth: 300, lineHeight: 1.6, marginTop: 16 }}>
+                Sin cuenta, tu preparación se pierde al cerrar la pestaña. Con una cuenta, tus misiones te esperan cada día.
+              </p>
+            </div>
+          </div>
+        </div>
 
-            <input
-              type="email"
-              value={email}
-              onChange={e => setSignupEmail(e.target.value)}
-              placeholder="tu@email.com"
-              className="onb-input"
-              style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={e => setSignupPassword(e.target.value)}
-              placeholder="Contraseña"
-              className="onb-input"
-              style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
-            />
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11, color: 'rgba(255,255,255,.4)', textAlign: 'left', cursor: 'pointer' }}>
-              <input type="checkbox" checked={terms} onChange={e => setSignupTerms(e.target.checked)} style={{ marginTop: 2 }} />
-              <span>Acepto los <a href="/legal/terminos" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Términos</a> y la <a href="/legal/privacidad" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Política de Privacidad</a>.</span>
-            </label>
-            <button
-              onClick={() => { if (email && password && terms) void handleEmailSignup(email, password) }}
-              disabled={!email || !password || !terms}
-              style={{ width: '100%', height: 48, background: (!email || !password || !terms) ? '#333' : '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: (!email || !password || !terms) ? 'not-allowed' : 'pointer' }}
-            >
-              Crear mi cuenta
-            </button>
-          </div>
-        ) : (
-          // Comprobando si ya hay sesión (usuario existente reanudando onboarding)
-          // — nunca se enseñan los botones de Google/email hasta saber que hacen
-          // falta de verdad, para no dar el parpadeo de "signup" que luego se
-          // redirige solo a /camino.
-          <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '24px 0' }}>
-            <div style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid rgba(255,255,255,.15)', borderTopColor: '#fff', animation: 'spin .7s linear infinite' }} />
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', margin: 0 }}>Comprobando tu sesión…</p>
-          </div>
-        )}
-        <button onClick={() => setStep('preview')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
-          ← Volver
-        </button>
+        {/* Right — cuenta */}
+        <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 24, textAlign: 'center', overflowY: 'auto' }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Guarda tu Camino.</div>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
+            Ya tenemos todo para construir tu preparación. Crea tu cuenta para guardar tu Camino y generar tus primeras misiones.
+          </p>
+          {authError && (
+            <div style={{ maxWidth: 380 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#f87171', margin: 0 }}>{authError}</p>
+              {/ya (tienes|existe) una cuenta/i.test(authError) && (
+                <a
+                  href={`/login?returnTo=${encodeURIComponent(`/onboarding/finalizando?draft=${loadLocalDraft()?.draftId ?? ''}`)}`}
+                  style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 700, color: '#60a5fa', textDecoration: 'underline' }}
+                >
+                  Iniciar sesión con esta cuenta →
+                </a>
+              )}
+            </div>
+          )}
+          {signupOptionsReady ? (
+            <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <button
+                onClick={handleGoogleSignup}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', height: 48, background: '#fff', border: 'none', color: '#111', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}
+              >
+                Crear mi cuenta con Google
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+                o con email
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
+              </div>
+
+              <input
+                type="email"
+                value={email}
+                onChange={e => setSignupEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="onb-input"
+                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={e => setSignupPassword(e.target.value)}
+                placeholder="Contraseña"
+                className="onb-input"
+                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+              />
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11, color: 'rgba(255,255,255,.4)', textAlign: 'left', cursor: 'pointer' }}>
+                <input type="checkbox" checked={terms} onChange={e => setSignupTerms(e.target.checked)} style={{ marginTop: 2 }} />
+                <span>Acepto los <a href="/legal/terminos" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Términos</a> y la <a href="/legal/privacidad" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,.6)' }}>Política de Privacidad</a>.</span>
+              </label>
+              <button
+                onClick={() => { if (email && password && terms) void handleEmailSignup(email, password) }}
+                disabled={!email || !password || !terms}
+                style={{ width: '100%', height: 48, background: (!email || !password || !terms) ? '#333' : '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: (!email || !password || !terms) ? 'not-allowed' : 'pointer' }}
+              >
+                Crear mi cuenta
+              </button>
+            </div>
+          ) : (
+            // Comprobando si ya hay sesión (usuario existente reanudando onboarding)
+            // — nunca se enseñan los botones de Google/email hasta saber que hacen
+            // falta de verdad, para no dar el parpadeo de "signup" que luego se
+            // redirige solo a /camino.
+            <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '24px 0' }}>
+              <div style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid rgba(255,255,255,.15)', borderTopColor: '#fff', animation: 'spin .7s linear infinite' }} />
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', margin: 0 }}>Comprobando tu sesión…</p>
+            </div>
+          )}
+          <button onClick={() => setStep('preview')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
+            ← Volver
+          </button>
+        </div>
       </div>
     )
   }

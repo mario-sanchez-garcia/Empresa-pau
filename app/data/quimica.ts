@@ -3597,6 +3597,1612 @@ Datos. A 25 ºC, $K_b(\\text{NH}_3) = 1{,}8 \\cdot 10^{-5}$. Masas atómicas (u)
         pdfFuente: "/quimica-pdfs/quimica-2026.pdf"
       }
     ]
+  },
+  {
+    id: 20183,
+    año: 2018,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2018-modelo-A-1",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Considere las sustancias $\\text{I}_2$, Cu y CaO y conteste razonadamente:
+a) Qué tipo de enlace presenta cada una de ellas.
+b) Cuál tiene menor punto de fusión.
+c) Cuál conduce la electricidad cuando está fundido pero es aislante en estado sólido.
+d) Si cada una de las sustancias del enunciado es o no soluble en agua.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-A-2",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `La solubilidad del carbonato de plata, a 25 °C, es 0,0318 g·L$^{-1}$.
+a) Escriba el equilibrio de solubilidad de esta sal en agua.
+b) Calcule la concentración molar de ion plata en una disolución saturada de carbonato de plata, a 25 °C.
+c) Calcule la constante del producto de solubilidad del carbonato de plata a 25 °C.
+d) Explique, con un ejemplo, cómo variará la solubilidad de esta sal por efecto de un ion común.
+Datos. Masas atómicas: C = 12,0; O = 16,0; Ag = 107,9.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-A-3",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `Escriba la fórmula semidesarrollada y el nombre de dos posibles compuestos que tengan 4 carbonos y contengan en su estructura:
+a) Un grupo éter.
+b) Un grupo alcohol en un cicloalcano.
+c) Un grupo ester.
+d) Un grupo halógeno y un triple enlace en una cadena lineal.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-A-4",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `Se hace pasar una corriente de 1,8 A durante 1,5 horas a través de 500 mL de una disolución de yoduro de cobalto(II) 0,3 M. Se observa que se deposita metal y se forma yodo molecular.
+a) Escriba las semirreacciones de oxidación y reducción que se producen en el cátodo y en el ánodo.
+b) Calcule la masa de metal depositada.
+c) Calcule la concentración de $\\text{Co}^{2+}$ que queda en disolución.
+d) Calcule la masa de yodo molecular obtenida.
+Datos. F = 96485 C. Masas atómicas: Co = 59; I = 127.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-A-5",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `Se dispone de una disolución de ácido metanoico 0,5 M. Calcule:
+a) El pH de la disolución.
+b) El grado de disociación de la base BOH 0,3 M que presenta un pOH igual que el pH de la disolución de ácido metanoico.
+c) El volumen de base BOH 0,3 M necesario para neutralizar una disolución de ácido metanoico obtenida al mezclar 50 mL de la disolución del enunciado con 150 mL de agua.
+Dato. $K_a = 1{,}85 \\cdot 10^{-5}$.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y b); 0,5 puntos apartado c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-B-1",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Considere los cuatro elementos con la siguiente configuración electrónica en los niveles de energía más externos: A: $2s^22p^4$; B: $2s^2$; C: $3s^23p^2$; D: $3s^23p^5$.
+a) Identifique los cuatro elementos con nombre y símbolo. Indique grupo y periodo al que pertenecen.
+b) Indique un catión y un anión que sean isoelectrónicos con $\\text{A}^{2-}$.
+c) Justifique si la segunda energía de ionización para el elemento A es superior o inferior a la primera.
+d) En el espectro del átomo hidrógeno hay una línea situada a 434 nm. Calcule $\\Delta E$, en kJ·mol$^{-1}$, para la transición asociada a esa línea.
+Datos. $h = 6{,}62 \\cdot 10^{-34}$ J·s; $N_A = 6{,}023 \\cdot 10^{23}$; $c = 3{,}00 \\cdot 10^8$ m·s$^{-1}$.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-B-2",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Sabiendo que la reacción ajustada $2\\text{A} + \\text{B} \\rightarrow \\text{P}$ es elemental:
+a) Escriba la ley de velocidad para dicha reacción.
+b) Determine los órdenes parciales de reacción respecto a ambos reactivos, el orden total y las unidades de la constante cinética.
+c) ¿Cuál es la molecularidad de la reacción?
+d) Explique cómo afecta a la velocidad de la reacción un aumento de la temperatura.
+Puntuación máxima por apartado: 0,5 puntos cada apartado.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-B-3",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `Escriba las reacciones que tendrían lugar entre but–3–en–1–ol y cada uno de los siguientes reactivos. Indique en cada caso de qué tipo de reacción se trata y nombre los productos obtenidos.
+a) Ácido sulfúrico y calor.
+b) Ácido clorhídrico.
+c) $\\text{KMnO}_4$ (oxidante).
+d) Ácido etanoico en medio ácido.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-B-4",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `Cuando se introducen 2 mol de A y 2 mol de B en un recipiente de 20 L y se calienta a 600 ºC, se establece el siguiente equilibrio: $\\text{A}(g) + \\text{B}(g) \\rightleftharpoons \\text{C}(g)$, con una constante $K_p = 0{,}42$. Calcule:
+a) La constante $K_c$.
+b) Las concentraciones de A, B y C en el equilibrio.
+c) Las presiones parciales de A, B y C en el equilibrio.
+d) Justifique hacia dónde se desplazaría el equilibrio si aumentase la presión total.
+Dato. $R = 0{,}082$ atm·L·K$^{-1}$·mol$^{-1}$.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      },
+      {
+        id: "q-2018-modelo-B-5",
+        año: 2018,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `Cuando el yodo molecular reacciona con el ácido nítrico se produce $\\text{HIO}_3$, dióxido de nitrógeno y agua.
+a) Escriba y ajuste las semirreacciones de oxidación y reducción que tienen lugar.
+b) Escriba, ajustadas, la reacción iónica global y la reacción molecular global.
+c) Calcule el volumen de ácido nítrico del 65% de riqueza en masa y densidad 1,5 g·cm$^{-3}$ que reacciona con 25,4 g de yodo molecular.
+d) Calcule el volumen de dióxido de nitrógeno gaseoso que se produce con los datos del apartado anterior, medido a 20 ºC y 684 mm de Hg.
+Datos. $R = 0{,}082$ atm·L·K$^{-1}$·mol$^{-1}$. Masas atómicas: H = 1; N = 14; O = 16; I = 127.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2018-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20193,
+    año: 2019,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2019-modelo-A-1",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Considere las sustancias $\\text{Cl}_2$, $\\text{NH}_3$, Mg y NaBr.
+a) Justifique el tipo de enlace presente en cada una de ellas.
+b) Explique si conducen la corriente eléctrica a temperatura ambiente.
+c) Escriba las estructuras de Lewis de aquellas que sean covalentes.
+d) Justifique si $\\text{NH}_3$ puede formar enlace de hidrógeno.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-A-2",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `La solubilidad del cromato de plata en agua a 25ºC es 0,00435 g/100 mL.
+a) Escriba el equilibrio de solubilidad en agua del cromato de plata, indicando los estados de cada especie.
+b) Calcule el producto de solubilidad de la sal a 25 ºC.
+c) Calcule si se formará precipitado cuando se mezclan 20 mL de cromato de sodio 0,8 M con 300 mL de nitrato de plata 0,5 M. Considere los volúmenes aditivos.
+Datos: Masas atómicas: O = 16,0; Cr = 52,0; Ag = 107,8.
+Puntuación máxima por apartado: 0,5 puntos a); 0,75 puntos b) y c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-A-3",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `Se toman 2 mL de una disolución de ácido nítrico 0,1 M y se añade el agua necesaria para preparar 250 mL de una nueva disolución. Calcule:
+a) El pH de esta nueva disolución.
+b) La concentración de una disolución de ácido etanoico que tiene el mismo pH que la disolución del apartado anterior.
+c) El volumen de una disolución de hidróxido de sodio 0,2 M que se necesita para neutralizar 10 mL de la disolución de ácido nítrico 0,1 M.
+Datos: $pK_a$ (ácido etanoico) = 4,74.
+Puntuación máxima por apartado: 0,75 puntos a) y b); 0,5 puntos c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-A-4",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `El aminoácido valina es el ácido 2−amino−3−metilbutanoico.
+a) Escriba su fórmula semidesarrollada.
+b) Formule y nombre un compuesto que sea isómero de cadena de la valina.
+c) Escriba la reacción de la valina con el metanol, nombre el producto orgánico formado e indique a qué tipo de reacción corresponde.
+d) Formule y nombre el compuesto que resulta al sustituir el grupo amino por un grupo hidroxilo en la valina.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-A-5",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `En una celda electrolítica conteniendo $\\text{CuCl}_2$ fundido se hace pasar una cierta cantidad de corriente durante 2 horas, observándose que se deposita cobre metálico y se desprende cloro.
+a) Disocie la sal y escriba ajustadas las reacciones que se producen en el ánodo y en el cátodo.
+b) Determine la intensidad de corriente necesaria para depositar 15,9 g de cobre.
+c) Calcule el volumen de cloro obtenido a 25 ºC y 1 atm.
+Datos. Masa atómica: Cu = 63,5. F = 96485 C. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$.
+Puntuación máxima por apartado: 0,5 puntos a); 0,75 puntos b) y c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-B-1",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Considere las configuraciones electrónicas de tres elementos A: $1s^22s^22p^63s^23p^4$; B: $1s^22s^22p^63s^23p^5$ y C: $1s^22s^22p^63s^1$.
+a) Indique para cada elemento el grupo, el periodo, el nombre y el símbolo.
+b) Defina primera energía de ionización y justifique en cuál de los tres elementos es menor.
+c) En el espectro de emisión del átomo de hidrógeno hay una línea situada en la zona visible cuya energía asociada es 291,87 kJ·mol$^{-1}$. Calcule a qué transición corresponde.
+Datos. $h = 6{,}626 \\cdot 10^{-34}$ J·s; $N_A = 6{,}022 \\cdot 10^{23}$ mol$^{-1}$; $R_H = 2{,}180 \\cdot 10^{-18}$ J; $R_H = 1{,}097 \\cdot 10^7$ m$^{-1}$; $c = 3 \\cdot 10^8$ m·s$^{-1}$.
+Puntuación máxima por apartado: 0,75 puntos a) y c); 0,5 puntos b).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-B-2",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Complete las siguientes reacciones formulando los reactivos y el producto mayoritario. Nombre el producto e identifique el tipo de reacción al que corresponden.
+a) Metilbut−2−eno + HBr →
+b) Ácido metanoico + propan−2−ol →
+c) Ácido butanoico + reductor fuerte/ácido →
+d) Pentan−2−ol + $\\text{H}_2\\text{SO}_4$/calor →
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-B-3",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `Tras estudiar la reacción en fase gaseosa $\\text{A} + 2\\text{B} \\rightarrow 2\\text{C}$, se ha determinado que si se duplica la concentración de A, manteniendo constante la de B, la velocidad se duplica y si se duplica la concentración de B, manteniendo constante la de A, la velocidad se multiplica por 4.
+a) Obtenga razonadamente la ecuación de velocidad para dicha reacción.
+b) Justifique si la reacción puede ser elemental.
+c) Obtenga las unidades de la constante de velocidad.
+d) Explique cómo afecta a la velocidad de la reacción la presencia de un catalizador.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-B-4",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `En medio básico el permanganato de potasio reacciona con el sulfito de potasio, dando dióxido de manganeso, sulfato de potasio e hidróxido de potasio.
+a) Escriba las semirreacciones ajustadas que tienen lugar e indique cuál es el oxidante y cuál el reductor.
+b) Escriba ajustadas la reacción iónica global y la reacción molecular global.
+c) Calcule el volumen de una disolución de permanganato de potasio 0,25 M que reacciona con 20 mL de una disolución de sulfito de potasio 0,33 M.
+Puntuación máxima por apartado: 0,75 puntos a) y c); 0,5 puntos b).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      },
+      {
+        id: "q-2019-modelo-B-5",
+        año: 2019,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `En un recipiente cerrado, se calienta a 182 ºC pentacloruro de arsénico gaseoso que se disocia en tricloruro de arsénico gaseoso y en cloro molecular. En el equilibrio y a una presión total de 1 atm, el pentacloruro de arsénico se disocia un 29,2 %. Calcule:
+a) Las presiones parciales de los tres gases en el equilibrio.
+b) $K_c$ y $K_p$.
+c) Las concentraciones molares de todas las sustancias en el equilibrio.
+Dato: $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$.
+Puntuación máxima por apartado: 0,75 puntos a) y b); 0,5 puntos c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2019-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20203,
+    año: 2020,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2020-modelo-A-1",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Considere los elementos X (Z = 9), Y (Z = 12) y Z (Z = 16).
+a) Escriba su configuración electrónica e indique el número de electrones de la capa de valencia.
+b) Identifíquelos con su nombre y símbolo. Determine grupo y periodo de cada elemento e indique si se trata de un metal o no metal.
+c) Para cada uno de los elementos, justifique cuál es su ion más estable.
+d) Formule el compuesto binario formado por los elementos X e Y, nómbrelo e indique el tipo de enlace que presenta.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-A-2",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `Para los ácidos cloroetanoico, benzoico y propanoico:
+a) Escriba la fórmula semidesarrollada de cada uno de los ácidos indicados.
+b) Justifique cuál de los tres es el ácido más fuerte.
+c) Justifique si la disolución formada tras valorar cada uno de los ácidos con NaOH tiene pH ácido, básico o neutro.
+d) Calcule el pH de una disolución 0,2 M de ácido benzoico.
+Datos. $K_a$ (ácido cloroetanoico) = $1{,}3 \\cdot 10^{-3}$; $K_a$ (ácido benzoico) = $6{,}3 \\cdot 10^{-5}$; $K_a$ (ácido propanoico) = $1{,}3 \\cdot 10^{-5}$.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-A-3",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `Se establece el equilibrio $\\text{PCl}_5(g) \\rightleftharpoons \\text{PCl}_3(g) + \\text{Cl}_2(g)$ calentando 10,4 g de pentacloruro de fósforo a 150 ºC en un recipiente de 1 L y se observa que la presión total que se alcanza en el equilibrio es 1,91 atm.
+a) Calcule las concentraciones molares de todas las especies en el equilibrio.
+b) Calcule las constantes del equilibrio $K_c$ y $K_p$.
+c) Justifique cómo afecta a la disociación de $\\text{PCl}_5$ un aumento de la presión del sistema, por reducción de volumen, a temperatura constante.
+Datos. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas: P = 31,0; Cl = 35,5.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y b); 0,5 puntos apartado c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-A-4",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `Partiendo del but−1−eno se lleva a cabo la siguiente serie de reacciones:
+i. But−1−eno + agua (ácido sulfúrico diluido) → B (mayoritario) + C (minoritario)
+ii. B + oxidante → D
+iii. C + ácido etanoico → E
+a) Formule cada una de las reacciones y nombre los productos orgánicos formados.
+b) Nombre y explique la regla que sigue la primera reacción para que el producto B sea mayoritario.
+c) Indique el tipo de reacción en cada caso.
+Puntuación máxima por apartado: 1 punto apartado a); 0,5 puntos apartados b) y c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-A-5",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `Una disolución de permanganato de potasio en medio ácido sulfúrico, oxida al agua oxigenada formándose oxígeno, sulfato de manganeso (II), sulfato de potasio y agua.
+a) Formule y ajuste las semirreacciones de oxidación y reducción que tienen lugar.
+b) Ajuste las reacciones iónica y molecular globales por el método del ion-electrón.
+c) Calcule el volumen de $\\text{O}_2$, medido a 21ºC y 720 mm Hg, que se libera al añadir permanganato de potasio en exceso a 200 mL de peróxido de hidrógeno 0,01 mol·L$^{-1}$.
+Datos. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$.
+Puntuación máxima por apartado: 0,5 puntos apartado a); 0,75 puntos apartados b) y c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-B-1",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Dados los siguientes compuestos: $\\text{BCl}_3$, KI y $\\text{NH}_3$.
+a) Justifique el tipo de enlace intramolecular presente en cada uno de ellos.
+b) Explique si conducen la corriente eléctrica a temperatura ambiente.
+c) Dibuje las estructuras de Lewis de aquellos que sean covalentes, e indique su geometría molecular.
+d) Justifique si alguno de los tres compuestos forma enlace de hidrógeno.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-B-2",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Dados los compuestos orgánicos: A (cloroeteno), B (1,6-hexanodiamina), C (ácido hexanodioico).
+a) Formule los compuestos orgánicos indicados.
+b) Formule y nombre el compuesto que resulta de la polimerización de A.
+c) Formule y nombre el compuesto que resulta de la polimerización de B con C.
+d) Justifique si se trata de polímeros de adición o condensación en cada caso.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-B-3",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `Para la reacción endotérmica: $\\text{Sb}_2\\text{O}_5(g) \\rightleftharpoons \\text{Sb}_2\\text{O}_3(g) + \\text{O}_2(g)$, explique cómo evoluciona el equilibrio en cada caso.
+a) Disminución de la presión a temperatura constante.
+b) Adición de $\\text{Sb}_2\\text{O}_3$ a volumen y temperatura constantes.
+c) Adición de un catalizador a presión y temperatura constantes.
+d) Aumento de la temperatura.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-B-4",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `Se lleva a cabo la electrólisis de una disolución acuosa de sulfato de cobre (II) de concentración $4 \\cdot 10^{-2}$ mol·L$^{-1}$ para obtener cobre metálico.
+a) Escriba los procesos que ocurren en el ánodo y en el cátodo y el proceso global ajustado sabiendo que en el ánodo el $\\text{H}_2\\text{O}$ se descompone en $\\text{H}^+$ y $\\text{O}_2$.
+b) Calcule el tiempo necesario para depositar todo el cobre contenido en 250 mL de dicha disolución al pasar una corriente de 1,2 A.
+c) Determine el volumen de gas desprendido en el ánodo en el proceso del apartado anterior, a 25 ºC y 1,5 atm.
+Datos. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$; $F = 96485$ C.
+Puntuación máxima por apartado: 0,5 puntos apartado a); 0,75 puntos apartados b) y c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      },
+      {
+        id: "q-2020-modelo-B-5",
+        año: 2020,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `Una disolución contiene iones fluoruro y sulfato en concentración de $10^{-2}$ mol·L$^{-1}$ de cada ion. A dicha disolución se añade progresivamente otra que contiene iones bario.
+a) Escriba los equilibrios de solubilidad de cada sal.
+b) Calcule la solubilidad de cada una de ellas en g·L$^{-1}$.
+c) Calcule la concentración de iones bario que debe haber en la disolución para que empiece a precipitar cada sal.
+d) Indique, razonadamente, cuál será el orden de precipitación.
+Datos. $K_s$ (fluoruro de bario) = $2 \\cdot 10^{-6}$; $K_s$ (sulfato de bario) = $10^{-10}$. Masas atómicas: O = 16,0; F = 19,0; S = 32,0; Ba = 137,3.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2020-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20213,
+    año: 2021,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2021-modelo-A-1",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Considere los elementos cuyas configuraciones electrónicas son: A: $1s^22s^22p^4$; B: $1s^22s^2$; C: $1s^22s^22p^63s^23p^2$; D: $1s^22s^22p^63s^23p^5$.
+a) Identifique el nombre y símbolo de cada elemento, e indique el grupo y periodo a los que pertenece.
+b) Para los elementos A y B, justifique cuál de ellos tiene mayor radio atómico.
+c) Indique el estado o estados de oxidación más probable(s) de cada elemento.
+d) Justifique qué elemento, C ó D, tiene mayor energía de ionización.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-A-2",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `Se introducen 46,0 g de tetraóxido de dinitrógeno en un recipiente de 1,00 L a 359,5 K y se cierra. Cuando se alcanza el equilibrio, $\\text{N}_2\\text{O}_4(g) \\rightleftharpoons 2\\text{NO}_2(g)$, la presión parcial de $\\text{NO}_2$ es 10,0 atm.
+a) Calcule la presión total de la mezcla en el equilibrio.
+b) Calcule $K_p$ y $K_c$.
+c) Si aumenta la presión, por disminución de volumen, ¿en qué sentido se desplaza el equilibrio?
+Datos. Masas atómicas: N = 14; O = 16. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y b); 0,5 puntos apartado c).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-A-3",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `Justifique si las siguientes afirmaciones son verdaderas o falsas.
+a) La deshidratación de un alcohol con ácido sulfúrico en caliente conduce a un alquino.
+b) La oxidación de propanal con dicromato de potasio conduce a propan−1−ol.
+c) Las amidas se producen por reacción de amoniaco y un compuesto ácido.
+d) La polimerización de cloruro de vinilo (cloroeteno) produce polietileno y cloro.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-A-4",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `Se disuelven 23,0 g de ácido metanoico en agua hasta obtener 10,0 L de disolución, cuyo pH es 2,52. Calcule:
+a) El grado de disociación del ácido metanoico.
+b) $K_a$ del ácido metanoico.
+c) $K_b$ de la especie conjugada.
+d) El volumen de una disolución de hidróxido de potasio 0,20 mol·L$^{-1}$ necesario para neutralizar 10,0 mL de la disolución de ácido metanoico.
+Datos. Masas atómicas: H = 1; C = 12; O = 16.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-A-5",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `Se construye una celda galvánica con un electrodo de manganeso y un electrodo de plata.
+a) Formule las semirreacciones de oxidación y reducción que se producen. Ajuste la reacción global por el método del ion-electrón.
+b) Determine el potencial de la celda galvánica.
+c) Justifique qué ocurre si se introduce una barra de plata en una disolución de manganeso (II).
+Datos. $E^0(V)$: $\\text{Mn}^{2+}/\\text{Mn} = -1{,}18$; $\\text{Ag}^+/\\text{Ag} = 0{,}80$.
+Puntuación máxima por apartado: 0,75 puntos apartados a) y c); 0,5 puntos apartado b).`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-B-1",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Considere las moléculas $\\text{BF}_3$ y $\\text{NH}_3$.
+a) Escriba su estructura de Lewis.
+b) Indique su geometría molecular utilizando la teoría de repulsión de pares de electrones de la capa de valencia.
+c) Indique cuál es la hibridación del átomo central de cada una de ellas.
+d) Explique la polaridad de ambas moléculas.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-B-2",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Para una reacción del tipo $2\\text{A}(g) + \\text{B}(g) \\rightarrow \\text{C}(g)$ a una temperatura determinada, se han obtenido los siguientes datos:
+Experimento 1: $[A]_{inicial} = 0{,}020$ mol·L$^{-1}$; $[B]_{inicial} = 0{,}010$ mol·L$^{-1}$; velocidad inicial $= 0{,}028$ mol·L$^{-1}$·s$^{-1}$.
+Experimento 2: $[A]_{inicial} = 0{,}020$ mol·L$^{-1}$; $[B]_{inicial} = 0{,}020$ mol·L$^{-1}$; velocidad inicial $= 0{,}057$ mol·L$^{-1}$·s$^{-1}$.
+Experimento 3: $[A]_{inicial} = 0{,}040$ mol·L$^{-1}$; $[B]_{inicial} = 0{,}020$ mol·L$^{-1}$; velocidad inicial $= 0{,}224$ mol·L$^{-1}$·s$^{-1}$.
+a) Determine el orden total de la reacción y escriba su ley de velocidad.
+b) Calcule la constante de velocidad.
+c) Justifique, mediante la ecuación de Arrhenius, cómo afecta a la velocidad de reacción una disminución de temperatura.
+d) Explique cómo modifica la energía de activación la adición de un catalizador.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-B-3",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `Justifique si el pH de cada una de las disoluciones obtenidas al disolver en agua las siguientes sustancias es ácido, básico o neutro.
+a) Fluoruro de amonio.
+b) Nitrito de sodio.
+c) Nitrato de potasio.
+d) Cloruro de amonio.
+Datos. $K_a$ (HF) = $6{,}8 \\cdot 10^{-4}$; $K_a$ ($\\text{HNO}_2$) = $4{,}4 \\cdot 10^{-4}$; $K_b$ ($\\text{NH}_3$) = $1{,}8 \\cdot 10^{-5}$.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-B-4",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `Nombre y formule los siguientes compuestos:
+a) Dos hidrocarburos saturados, isómeros de cadena, de fórmula molecular $\\text{C}_5\\text{H}_{12}$.
+b) Dos alcoholes, isómeros de posición, de fórmula molecular $\\text{C}_4\\text{H}_{10}\\text{O}$.
+c) Dos isómeros lineales, de fórmula molecular $\\text{C}_4\\text{H}_8\\text{O}_2$ y con un grupo carboxilato.
+d) Dos hidrocarburos aromáticos de fórmula molecular $\\text{C}_8\\text{H}_{10}$.
+Puntuación máxima por apartado: 0,5 puntos.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      },
+      {
+        id: "q-2021-modelo-B-5",
+        año: 2021,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `En presencia de ácido sulfúrico, el óxido de manganeso (IV) reacciona con el yoduro de potasio y se forma yodo molecular, sulfato de manganeso (II), sulfato de potasio y agua.
+a) Escriba y ajuste por el método del ion-electrón las reacciones iónica y molecular.
+b) Calcule la masa, en gramos, de yodo molecular que se obtiene si reaccionan 2,0 kg de pirolusita, mineral que contiene un 75% en masa de óxido de manganeso (IV).
+Datos. Masas atómicas: O = 16; Mn = 55; I = 127.
+Puntuación máxima por apartado: 1 punto.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2021-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20223,
+    año: 2022,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2022-modelo-A-1",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Considere los elementos A (Z = 11), B (Z = 15) y C (Z = 17).
+a) (0,5 puntos) Escriba la configuración electrónica de cada elemento.
+b) (0,5 puntos) Identifíquelos con su nombre, símbolo, grupo y periodo.
+c) (0,5 puntos) Justifique cuál es el elemento que tiene menor energía de ionización.
+d) (0,5 puntos) Formule y nombre un compuesto binario formado por los elementos B y C en su menor estado de oxidación, e indique el tipo de enlace que presenta.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-A-2",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `Responda las siguientes cuestiones:
+a) (1 punto) Obtenga el porcentaje de riqueza en masa de una muestra de hidróxido de sodio, sabiendo que 100 g de muestra son neutralizados con 100 mL de una disolución de ácido clorhídrico 12 M.
+b) (1 punto) Calcule el pH de una disolución preparada al añadir 22 g de la muestra de hidróxido de sodio del apartado anterior, a 200 mL de una disolución de ácido clorhídrico 2,0 M. Considere que no hay cambio de volumen.
+Datos. Masas atómicas (u): H = 1; O = 16; Na = 23.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-A-3",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `La reacción en fase gaseosa $\\text{A} + \\text{B} \\rightarrow \\text{C} + \\text{D}$ es exotérmica y su ecuación cinética es $v = k[A]^2$. Justifique si las siguientes afirmaciones son verdaderas o falsas:
+a) (0,5 puntos) El reactivo A se consume más deprisa que el B.
+b) (0,5 puntos) Un aumento de la presión total produce un aumento en la velocidad de la reacción.
+c) (0,5 puntos) Una vez iniciada la reacción, la velocidad es constante si la temperatura no varía.
+d) (0,5 puntos) Un aumento de la temperatura disminuye la velocidad de reacción.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-A-4",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `Para cada una de las siguientes reacciones, formule y nombre todos los compuestos orgánicos que intervengan:
+a) (0,5 puntos) $\\text{CH}_3-\\text{CH}_2-\\text{CHOH}-\\text{CH}_3 + \\text{H}_2\\text{SO}_4$/calor →
+b) (0,5 puntos) $\\text{CH}_3\\text{OH} + \\text{CH}_3\\text{COOH} + \\text{H}^+$ →
+c) (0,5 puntos) $\\text{CH}_3-\\text{CH}=\\text{CH}-\\text{CH}_3 + \\text{HCl}$ →
+d) (0,5 puntos) $\\text{CH}_3-\\text{CH}_2-\\text{COOH} + \\text{NH}_2-\\text{CH}_2-\\text{CH}_3$ →`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-A-5",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `Una disolución de dicromato de potasio en medio ácido sulfúrico, reacciona con plata y se forma sulfato de cromo (III), sulfato de plata y sulfato de potasio.
+a) (0,5 puntos) Formule y ajuste las semirreacciones de oxidación y reducción que tienen lugar.
+b) (0,75 puntos) Ajuste las reacciones iónica y molecular globales por el método del ion-electrón.
+c) (0,75 puntos) Calcule el volumen de disolución de ácido sulfúrico de concentración 1,47 g·L$^{-1}$ que se necesita para oxidar 2,16 g de plata.
+Datos. Masas atómicas (u): H = 1,0; O = 16,0; S = 32,1; Ag = 107,9.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-B-1",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Para cada una de las siguientes moléculas: $\\text{BCl}_3$, $\\text{BeF}_2$ y $\\text{PH}_3$.
+a) (0,5 puntos) Dibuje su estructura de Lewis.
+b) (0,5 puntos) Indique la geometría según la TRPEV.
+c) (0,5 puntos) Indique la hibridación del átomo central.
+d) (0,5 puntos) Justifique su polaridad.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-B-2",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Responda las siguientes cuestiones:
+a) (1 punto) Formule la siguiente reacción, indique de qué tipo es, y nombre el producto orgánico obtenido: ácido hexanoico + hexan−1−amina →
+b) (1 punto) El nailon 6,6 es una poliamida que se obtiene según la reacción: n(ácido hexanodioico) + n(hexano−1,6−diamina) → Poliamida + $2n\\text{H}_2\\text{O}$.
+Nombre el tipo de reacción y detalle el nombre de los grupos funcionales que intervienen en su síntesis.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-B-3",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `En un recipiente de 20 L y a 900 ºC, se mezclan 5,0 mol de CO y 10,0 mol de $\\text{H}_2\\text{O}$. Transcurre la reacción $\\text{CO}(g) + \\text{H}_2\\text{O}(g) \\rightleftharpoons \\text{H}_2(g) + \\text{CO}_2(g)$, obteniéndose 4,5 mol de $\\text{CO}_2$. Calcule:
+a) (0,5 puntos) Las concentraciones de cada especie en el equilibrio.
+b) (0,5 puntos) La presión total.
+c) (0,5 puntos) $K_c$ y $K_p$.
+d) (0,5 puntos) Explique sin realizar cálculos, cómo se modifica el equilibrio si se añade $\\text{H}_2(g)$.
+Dato. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-B-4",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `Se lleva a cabo la electrólisis de una disolución acuosa de cobre (II).
+a) (1 punto) Escriba las reacciones que se producen en el cátodo y en el ánodo y calcule la carga necesaria para depositar 7,5 g de cobre.
+b) (1 punto) Si se utiliza la misma carga del apartado anterior para llevar a cabo la electrólisis del agua, ¿qué volumen de hidrógeno se desprende a 33 ºC y 726 mmHg?
+Datos. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$. $F = 96485$ C·mol$^{-1}$. Masa atómica (u): Cu = 63,5.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      },
+      {
+        id: "q-2022-modelo-B-5",
+        año: 2022,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `Considere disoluciones acuosas de idéntica concentración de los compuestos: HCl, $\\text{NH}_4\\text{I}$, NaBr y KCN.
+a) (1 punto) Deduzca, sin hacer cálculos, si las disoluciones son ácidas, básicas o neutras. Escriba las reacciones correspondientes.
+b) (1 punto) Ordénelas, razonadamente, en orden creciente de pH.
+Datos. $K_a$ (HCN) = $4{,}9 \\cdot 10^{-10}$; $K_b$ ($\\text{NH}_3$) = $1{,}8 \\cdot 10^{-5}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2022-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20233,
+    año: 2023,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2023-modelo-A-1",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Responda las siguientes cuestiones.
+a) (0,75 puntos) Para las moléculas: $\\text{BCl}_3$ y $\\text{NCl}_3$, indique la hibridación del átomo central y su geometría, y justifique su polaridad.
+b) (0,75 puntos) Explique los conceptos de sustancias moleculares y sólidos covalentes describiendo los tipos de enlaces y fuerzas intermoleculares que intervienen.
+c) (0,5 puntos) Justifique si el bromo tiene mayor punto de fusión que el bromuro de potasio.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-A-2",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `Responda las siguientes cuestiones:
+a) (0,5 puntos) Formule los siguientes compuestos: 2−cloro−4−metilhexanamida; etinilmetil éter.
+b) (1 punto) Complete las siguientes reacciones, diga de qué tipo son, y en su caso, la regla que siguen, y nombre el/los producto/s orgánico/s obtenido/s.
+$\\text{CH}_3-\\text{CH}_2-\\text{CH}_2\\text{OH} + \\text{H}_2\\text{SO}_4$/calor →
+$\\text{CH}_3-\\text{CH}_2-\\text{CHOH}-\\text{CH}_3 + \\text{H}_2\\text{SO}_4$/calor →
+c) (0,5 puntos) Indique el nombre del polímero que se obtiene a partir de cloroeteno, diga el tipo de reacción por la que se forma y formule la unidad repetitiva del polímero.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-A-3",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `Responda las siguientes cuestiones:
+a) (0,5 puntos) Para las sustancias $\\text{NH}_4^+$, $\\text{Cl}^-$ y HClO, justifique cuáles son sus bases o ácidos conjugados, escribiendo el equilibrio correspondiente según la teoría de Brönsted-Lowry.
+b) (0,5 puntos) Para las sustancias $\\text{NH}_4^+$, $\\text{Cl}^-$ y HClO justifique y ordene de menor a mayor basicidad las que son bases y las bases conjugadas de las que son ácidos.
+c) (1 punto) Calcule el volumen de disolución acuosa preparada con 2,0 g de HClO para que el pH sea 2.
+Datos. $K_a$ (HClO) = $3{,}2 \\cdot 10^{-8}$; $K_b$ ($\\text{NH}_3$) = $1{,}8 \\cdot 10^{-5}$. Masas atómicas (u): H = 1,0; O = 16,0; Cl = 35,5.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-A-4",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `Se coloca una muestra de 7,2 g de $\\text{NH}_4\\text{HS}(s)$ en un recipiente de 4,0 L, cerrado al vacío y a 23 ºC. La muestra se descompone alcanzando el equilibrio: $\\text{NH}_4\\text{HS}(s) \\rightleftharpoons \\text{NH}_3(g) + \\text{H}_2\\text{S}(g)$, siendo la presión total de 0,80 atm.
+a) (1 punto) Determine la cantidad en mol de cada especie en el equilibrio.
+b) (0,5 puntos) Obtenga $K_c$ y $K_p$.
+c) (0,5 puntos) Calcule el porcentaje de sólido descompuesto.
+Datos. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$. Masas atómicas (u): H = 1,0; N = 14,0; S = 32,0.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-A-5",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `Se lleva a cabo la electrólisis de bromuro de plomo (II) fundido, utilizando una corriente de 12 A.
+a) (0,75 puntos) Ajuste las semirreacciones que tienen lugar en el ánodo, en el cátodo y la reacción iónica global, identificando el electrodo positivo y negativo.
+b) (0,5 puntos) Calcule la fuerza electromotriz necesaria para llevar a cabo la electrólisis.
+c) (0,75 puntos) Determine el tiempo que debe mantenerse la corriente para obtener 10,0 g de plomo.
+Datos. $F = 96485$ C·mol$^{-1}$. Masa atómica (u): Pb = 207,2. $E^0(V)$: $\\text{Br}_2/\\text{Br}^- = 1{,}09$; $\\text{Pb}^{2+}/\\text{Pb} = -0{,}13$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-B-1",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Responda las siguientes cuestiones:
+a) (0,5 puntos) Para el átomo de hidrógeno, calcule la energía del electrón en la segunda órbita, según el modelo atómico de Bohr. Justifique el significado del signo.
+b) (1 punto) Haciendo uso de los números cuánticos obtenga razonadamente el número máximo de subniveles, orbitales y electrones que hay en el tercer nivel energético de un átomo.
+c) (0,5 puntos) Escriba la configuración electrónica en el estado fundamental del elemento A (Z = 29) y de su ion más estable.
+Dato. $R_H = 2{,}18 \\cdot 10^{-18}$ J.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-B-2",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Responda las siguientes cuestiones:
+a) (1 punto) Nombre los siguientes compuestos: $\\text{CH}_2=\\text{C}(\\text{CH}_2-\\text{CH}_3)-\\text{CH}(\\text{CH}_3)-\\text{CH}_3$; $\\text{CH}_3-\\text{CH}_2-\\text{NH}_2$; $\\text{CH}_3-\\text{C}(\\text{CH}_3)_2-\\text{CHOH}-\\text{CH}_3$; $\\text{CH}_3-\\text{CO}-\\text{O}-\\text{C}_6\\text{H}_5$.
+b) (0,5 puntos) Formule la siguiente reacción, indique de qué tipo es, el nombre de la regla que sigue y del/de los producto/s orgánico/s obtenido/s: $\\text{CH}_3-\\text{CH}=\\text{CH}_2 + \\text{HBr}$ →
+c) (0,5 puntos) Esquematice y ajuste la reacción que tiene lugar por la unión sucesiva del monómero etanodiol con el monómero ácido pentanodioico. Detalle como producto la unidad repetitiva. Nombre el tipo de reacción y la clase de polímero que se obtiene.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-B-3",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `En la tabla se detallan los resultados experimentales que se obtienen de la velocidad inicial para la reacción: $\\text{A}(ac) + \\text{B}(ac) \\rightarrow \\text{C}(ac)$, con diferentes concentraciones de los reactivos.
+Experimento 1: [A] = 0,1 M; [B] = 0,1 M; $v_0 = 4{,}0 \\cdot 10^{-4}$ mol·L$^{-1}$·s$^{-1}$.
+Experimento 2: [A] = 0,2 M; [B] = 0,1 M; $v_0 = 1{,}6 \\cdot 10^{-3}$ mol·L$^{-1}$·s$^{-1}$.
+Experimento 3: [A] = 0,5 M; [B] = 0,1 M; $v_0 = 1{,}0 \\cdot 10^{-2}$ mol·L$^{-1}$·s$^{-1}$.
+Experimento 4: [A] = 0,5 M; [B] = 0,5 M; $v_0 = 1{,}0 \\cdot 10^{-2}$ mol·L$^{-1}$·s$^{-1}$.
+a) (1 punto) Calcule los órdenes parciales y total de la reacción.
+b) (1 punto) Escriba la ecuación de velocidad y obtenga la constante de velocidad y sus unidades.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-B-4",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `Responda las siguientes cuestiones justificando la respuesta:
+a) (0,5 puntos) ¿Qué tipo de reacciones tienen $K_c = K_p$?
+b) (0,5 puntos) ¿La constante de equilibrio de una reacción aumenta o disminuye por un aumento de temperatura?
+c) (0,5 puntos) Escriba la expresión de la constante de equilibrio $K_c$ en función de concentraciones y $K_p$ en función de presiones para la reacción: $2\\text{CaSO}_4(s) \\rightleftharpoons 2\\text{CaO}(s) + 2\\text{SO}_2(g) + \\text{O}_2(g)$.
+d) (0,5 puntos) ¿Se modifica el equilibrio de la reacción del apartado c) al realizar la reacción en presencia de un catalizador?`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      },
+      {
+        id: "q-2023-modelo-B-5",
+        año: 2023,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `Se hacen reaccionar 3,3 g de azufre sólido con 15 g de $\\text{K}_2\\text{Cr}_2\\text{O}_7$ en medio básico, para dar $\\text{SO}_2$, $\\text{Cr}_2\\text{O}_3$ y KOH.
+a) (0,75 puntos) Ajuste por el método del ion-electrón las semirreacciones de oxidación y reducción, así como las reacciones iónica y molecular.
+b) (0,5 puntos) Indique las especies que actúan como oxidante y reductora.
+c) (0,75 puntos) Determine cuál es el reactivo limitante de la reacción y calcule el volumen de dióxido de azufre $\\text{SO}_2$ que se obtendrá, medido a 1 atm y 25 °C.
+Datos. Masas atómicas (u): H = 1,0; O = 16,0; S = 32,1; K = 39,1; Cr = 52,0; $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2023-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20243,
+    año: 2024,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2024-modelo-A-1",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        enunciado: `Considere los elementos A (Z = 11), B (Z = 13) y C (Z = 16):
+a) (0,5 puntos) Escriba su configuración electrónica.
+b) (0,5 puntos) Identifíquelos con el nombre, símbolo, grupo y periodo.
+c) (0,5 puntos) Razone cuál es el ion más estable de cada elemento, indicando símbolo y carga.
+d) (0,5 puntos) Razone qué elemento tiene el menor radio atómico.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-A-2",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        enunciado: `Complete las siguientes reacciones, nombre todos los compuestos orgánicos e indique el tipo de reacción:
+a) (0,5 puntos) $\\text{CH}_3-\\text{CH}_2-\\text{CHOH}-\\text{CH}_2-\\text{CH}_3 + \\text{H}_2\\text{SO}_4$ / calor →
+b) (0,5 puntos) $\\text{CH}_3-\\text{COOH} + \\text{CH}_3-\\text{CHOH}-\\text{CH}_3 + \\text{H}^+$ →
+c) (0,5 puntos) $\\text{CH}_3-\\text{CHBr}-\\text{CH}_3 + \\text{NaOH}$ / EtOH →
+d) (0,5 puntos) $\\text{CH}_3-\\text{CH}=\\text{CH}_2 + \\text{H}_2\\text{O}$ / $\\text{H}^+$ →`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-A-3",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        enunciado: `El clorato de potasio (sólido) se descompone para dar cloruro de potasio (sólido) y oxígeno molecular (gas). Para esta reacción de descomposición a 25 ºC, calcule:
+a) (0,5 puntos) La variación de entalpía estándar.
+b) (0,5 puntos) La variación de entropía estándar.
+c) (0,5 puntos) La variación de energía de Gibbs estándar, y razone si la reacción es espontánea.
+d) (0,5 puntos) Determine si a 100 ºC la reacción es espontánea o no. Considere $H^0$ e $S^0$ constantes con la temperatura.
+Propiedades termodinámicas a 25 ºC: $\\text{KClO}_3(s)$: $\\Delta H_f^0 = -391{,}2$ kJ·mol$^{-1}$, $\\Delta G_f^0 = -289{,}9$ kJ·mol$^{-1}$, $S^0 = 143{,}0$ J·mol$^{-1}$·K$^{-1}$; $\\text{KCl}(s)$: $\\Delta H_f^0 = -435{,}9$ kJ·mol$^{-1}$, $\\Delta G_f^0 = -408{,}3$ kJ·mol$^{-1}$, $S^0 = 82{,}7$ J·mol$^{-1}$·K$^{-1}$; $\\text{O}_2(g)$: $\\Delta H_f^0 = 0$, $\\Delta G_f^0 = 0$, $S^0 = 205{,}0$ J·mol$^{-1}$·K$^{-1}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-A-4",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        enunciado: `Para el equilibrio: $\\text{A}_2(g) + \\text{B}_2(g) \\rightleftharpoons 2\\text{AB}(g)$, $K_p = 5$ a 25 ºC y $K_p = 36$ a 300 ºC.
+A la temperatura de 300 ºC, en un recipiente de 5,0 L, calentamos 2,0 mol de $\\text{A}_2$ y 2,0 mol de $\\text{B}_2$.
+a) (0,5 puntos) Razone si la formación de AB es exotérmica o endotérmica.
+b) (1 punto) Calcule las concentraciones de todas las sustancias implicadas en el equilibrio a 300ºC.
+c) (0,5 puntos) Con los datos disponibles, calcule $K_p$ a 300 ºC para el equilibrio: $\\frac{1}{2}\\text{A}_2(g) + \\frac{1}{2}\\text{B}_2(g) \\rightleftharpoons \\text{AB}(g)$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-A-5",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        enunciado: `El dicromato de potasio en presencia de ácido clorhídrico reacciona con el cloruro de estaño(II), obteniéndose cloruro de estaño(IV) y cloruro de cromo(III).
+a) (1 punto) Formule y ajuste las semirreacciones de oxidación y reducción utilizando el método del ion electrón, indicando cuál es el cátodo y el ánodo y las especies oxidante y reductora. Escriba la reacción completa iónica y molecular.
+b) (1 punto) Determine la riqueza en % masa de la disolución de HCl comercial de densidad 1,18 g·mL$^{-1}$ que se ha utilizado para preparar el ácido clorhídrico empleado en la reacción sabiendo que 25,0 mL de la disolución de ácido clorhídrico reaccionan con 12,0 g de cloruro de estaño(II).
+Datos. Masas atómicas (u): H = 1,0; Cl = 35,5; Sn = 118,7.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-B-1",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        enunciado: `Para las siguientes moléculas: $\\text{CCl}_4$, $\\text{NF}_3$ y $\\text{H}_2\\text{O}$.
+a) (0,5 puntos) Dibuje sus estructuras de Lewis.
+b) (0,5 puntos) Escriba el tipo de geometría molecular que presentan según la TRPECV.
+c) (0,5 puntos) Indique la hibridación del átomo central.
+d) (0,5 puntos) Justifique su polaridad.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-B-2",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        enunciado: `Para los compuestos: dietil éter, but–2–eno, butan–2–ol y butanal, conteste las siguientes cuestiones utilizando siempre las fórmulas semidesarrolladas de todos los compuestos orgánicos implicados.
+a) (0,5 puntos) ¿Cuáles son isómeros de función? Indique el/los tipo/s de compuesto/s implicado/s y su fórmula molecular.
+b) (0,5 puntos) ¿Cuál presenta isomería geométrica? Justifique la respuesta escribiendo la fórmula desarrollada y asignando el nombre preciso para cada isómero.
+c) (0,5 puntos) ¿Cuál puede dar un alqueno al tratarlo con ácido sulfúrico? Escriba la reacción y nombre los posibles productos indicando el mayoritario.
+d) (0,5 puntos) ¿Cuál puede dar un ácido por oxidación? Escriba la fórmula y el nombre del ácido.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-B-3",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        enunciado: `El cloruro de oro(III) es una sal muy poco soluble en agua. Responda a las siguientes cuestiones:
+a) (0,5 puntos) Escriba el equilibrio de solubilidad del cloruro de oro(III) en agua, detallando el estado de las especies, y la expresión de $K_s$ en función de su solubilidad.
+b) (0,75 puntos) Sabiendo que la sal presenta una solubilidad de 0,010 mg en 100 mL de agua a 20 ºC, calcule la constante del producto de solubilidad a esa temperatura.
+c) (0,75 puntos) Calcule la nueva solubilidad si se añade sulfuro de oro(III) a la disolución del enunciado, hasta alcanzar una concentración total de Au(III) de 0,1 M. Razone y explique el efecto que tiene lugar.
+Datos. Masas atómicas (u): Cl = 35,5; Au = 197,0.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-B-4",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        enunciado: `A partir de los valores de potenciales normales de reducción, responda razonadamente a las siguientes cuestiones:
+a) (0,75 puntos) Determine el potencial de una pila galvánica formada por un electrodo de platino sumergido en una disolución de permanganato de potasio en medio ácido sulfúrico y un electrodo de plomo sumergido en una disolución de nitrato de plomo(II). Ajuste las semirreacciones de oxidación y reducción, indicando el ánodo y el cátodo.
+b) (0,5 puntos) Ordene las especies $\\text{MnO}_4^-$, $\\text{Pb}^{2+}$, $\\text{Cu}^+$ y $\\text{Fe}^{2+}$ de menor a mayor poder oxidante.
+c) (0,75 puntos) Explique el proceso que tiene lugar si una pieza de hierro metálico se introduce en una disolución de cobre(I). Razone su espontaneidad.
+Datos. $E^0(V)$: $\\text{Fe}^{2+}/\\text{Fe} = -0{,}44$; $\\text{Pb}^{2+}/\\text{Pb} = -0{,}13$; $\\text{Cu}^+/\\text{Cu} = 0{,}52$; $\\text{MnO}_4^-/\\text{Mn}^{2+} = 1{,}52$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      },
+      {
+        id: "q-2024-modelo-B-5",
+        año: 2024,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        enunciado: `Se preparan disoluciones acuosas de igual concentración de los siguientes compuestos a 25ºC: ácido metanoico, cloruro de potasio, cianuro de sodio y nitrato de amonio.
+a) (0,75 punto) Sin hacer cálculo, justifique el carácter ácido, básico o neutro de cada una. Escriba las reacciones de ionización para cada uno de ellos, y las de hidrólisis del ion que lo requiera.
+b) (0,5 punto) Haciendo uso de los datos de las constantes de acidez y basicidad, justifique cuál es la disolución más ácida y la más básica, y escriba la reacción que se produce al mezclar ambas.
+c) (0,75 puntos) Calcule el pH de una disolución 0,125 M de ácido metanoico.
+Datos. $K_a$ (ácido cianhídrico) = $10^{-11}$; $K_b$ (amoniaco) = $10^{-5}$; $K_a$ (ácido metanoico) = $10^{-4}$.`,
+        puntuacion: 2,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2024-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20253,
+    año: 2025,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2025-modelo-A-1",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "1",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1 punto) En el laboratorio se dispone de una disolución acuosa de $\\text{Ag}^+$ 1 M y varios electrodos, cuyos potenciales de reducción se indican en la Tabla 1. Utilizando estos datos, razone qué electrodo/s puede/n actuar de ánodo para que en el cátodo se obtenga plata metálica de forma espontánea. Para el/los procesos redox seleccionado/s, escriba las reacciones que tienen lugar en el ánodo y en el cátodo, y calcule el potencial de la pila formada.
+b) (0,75 puntos) A partir de los datos de la Tabla 1, razone si se disuelve plata metálica en una disolución de ácido nítrico 1 M. Formule y ajuste por el método del ion electrón las semirreacciones de oxidación, reducción y la reacción iónica.
+c) (0,75 puntos) La galvanostegia es un proceso electrolítico mediante el cual se recubre un objeto metálico con una lámina de otro metal; esta técnica se emplea, por ejemplo, para el cromado, dorado o plateado de metales menos nobles. Se ha preparado una disolución de nitrato de plata y se quiere utilizar para recubrir de plata una cucharilla metálica. Calcule durante cuántos minutos debe ser aplicada una corriente de 5,00 A a la disolución de nitrato de plata para depositar 10,1 g de plata metálica sobre la cucharilla.
+Tabla 1. Potenciales de reducción $E^0(V)$: $\\text{Au}^{3+}/\\text{Au} = 1{,}52$; $\\text{NO}_3^-/\\text{NO} = 0{,}96$; $\\text{Ag}^+/\\text{Ag} = 0{,}80$; $\\text{Cu}^{2+}/\\text{Cu} = 0{,}34$; $\\text{Fe}^{2+}/\\text{Fe} = -0{,}44$.
+Datos. Masa atómica (u): Ag = 107,9. $F = 96485$ C·mol$^{-1}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-A-2",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Estructura atómica y enlace",
+        numero: "2A",
+        enunciado: `Dados los elementos: A (Z = 11), B (Z = 16) y C (Z = 17), responda a las siguientes cuestiones:
+a) (1 punto) Identifique su nombre, símbolo y escriba su configuración electrónica. Indique y explique de forma razonada cuál es su ion más estable.
+b) (1 punto) Justifique qué elemento presenta mayor radio atómico, mayor energía de ionización y mayor afinidad electrónica.
+c) (0,5 puntos) Considere los compuestos que se obtienen cuando se combina A: i) consigo mismo y ii) con el elemento C. Para cada uno de ellos escriba su fórmula y explique el tipo de enlace más probable.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-A-3",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Química orgánica",
+        numero: "3A",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1,25 puntos) Indique el producto mayoritario de reacción, y nombre y explique la regla que lo produce. Escriba los nombres de reactivos y productos de los compuestos orgánicos, indicando cis y trans para los isómeros geométricos cuando existan:
+i) Etenilciclohexano + HCl → ii) $\\text{CH}_3-\\text{CHOH}-(\\text{CH}_2)_2-\\text{CH}_3 + \\text{H}_2\\text{SO}_4$ / calor →
+b) (1,25 puntos) Complete las siguientes reacciones identificando las sustancias A, B, C y D (fórmula y nombre): i) etanol + $\\text{H}_2\\text{SO}_4$/calor → A; ii) etanol + oxidante (frío) → B; iii) B + oxidante → C; iv) n A (polimerización) → D.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-A-4",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Equilibrio químico",
+        numero: "4A",
+        enunciado: `Para las siguientes reacciones en equilibrio, responda a las preguntas:
+a) (1,25 puntos) $\\text{H}_2\\text{S}(g) + \\text{I}_2(s) \\rightleftharpoons 2\\text{HI}(g) + \\text{S}(s)$ a 60 ºC. Calcule $K_p$ y $K_c$ si las presiones parciales en el equilibrio para HI y $\\text{H}_2\\text{S}$ son $3{,}65 \\cdot 10^{-3}$ atm y 0,99 atm, respectivamente.
+b) (1,25 puntos) $\\text{SO}_2(g) + \\frac{1}{2}\\text{O}_2(g) \\rightleftharpoons \\text{SO}_3(g)$. Utilizando las entalpías de formación, determine hacia dónde se desplazará el equilibrio al aumentar la temperatura.
+Datos. $R = 0{,}082$ atm·L·mol$^{-1}$·K$^{-1}$; $\\Delta H_f^0(\\text{SO}_3, g) = -395{,}7$ kJ·mol$^{-1}$; $\\Delta H_f^0(\\text{SO}_2, g) = -296{,}8$ kJ·mol$^{-1}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-B-1",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "1",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1 punto) En el laboratorio se dispone de una disolución acuosa de $\\text{Ag}^+$ 1 M y varios electrodos, cuyos potenciales de reducción se indican en la Tabla 1. Utilizando estos datos, razone qué electrodo/s puede/n actuar de ánodo para que en el cátodo se obtenga plata metálica de forma espontánea. Para el/los procesos redox seleccionado/s, escriba las reacciones que tienen lugar en el ánodo y en el cátodo, y calcule el potencial de la pila formada.
+b) (0,75 puntos) A partir de los datos de la Tabla 1, razone si se disuelve plata metálica en una disolución de ácido nítrico 1 M. Formule y ajuste por el método del ion electrón las semirreacciones de oxidación, reducción y la reacción iónica.
+c) (0,75 puntos) La galvanostegia es un proceso electrolítico mediante el cual se recubre un objeto metálico con una lámina de otro metal; esta técnica se emplea, por ejemplo, para el cromado, dorado o plateado de metales menos nobles. Se ha preparado una disolución de nitrato de plata y se quiere utilizar para recubrir de plata una cucharilla metálica. Calcule durante cuántos minutos debe ser aplicada una corriente de 5,00 A a la disolución de nitrato de plata para depositar 10,1 g de plata metálica sobre la cucharilla.
+Tabla 1. Potenciales de reducción $E^0(V)$: $\\text{Au}^{3+}/\\text{Au} = 1{,}52$; $\\text{NO}_3^-/\\text{NO} = 0{,}96$; $\\text{Ag}^+/\\text{Ag} = 0{,}80$; $\\text{Cu}^{2+}/\\text{Cu} = 0{,}34$; $\\text{Fe}^{2+}/\\text{Fe} = -0{,}44$.
+Datos. Masa atómica (u): Ag = 107,9. $F = 96485$ C·mol$^{-1}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-B-2",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Enlace químico",
+        numero: "2B",
+        enunciado: `A temperatura ambiente, la sal común, NaCl, es un sólido cristalino y el $\\text{COCl}_2$ es un gas.
+a) (0,75 puntos) Explique el tipo de enlace intramolecular para cada una de las sustancias.
+b) (0,75 puntos) Dibuje la estructura de Lewis y nombre y dibuje la geometría molecular de $\\text{COCl}_2$ utilizando el modelo de repulsión de pares de electrones de la capa de valencia. Indique la hibridación del átomo de C.
+c) (1 punto) Represente el ciclo de Born-Haber para la formación de NaCl (s): $\\text{Na}(s) + \\frac{1}{2}\\text{Cl}_2(g) \\rightarrow \\text{NaCl}(s)$, indicando el nombre de las energías implicadas en cada etapa.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-B-3",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Verdadero o falso",
+        numero: "3B",
+        enunciado: `Indique si cada una de las siguientes afirmaciones es verdadera o falsa y justifique las respuestas formulando la reacción a la que se alude.
+a) (0,75 puntos) La adición de hidrógeno molecular, en presencia de un catalizador, al doble enlace del trans−but−2−eno permite obtener el alcano correspondiente.
+b) (0,75 puntos) La reducción del butanal conduce al ácido carboxílico con el mismo número de átomos de carbono.
+c) (0,5 puntos) La etilamina se comporta como base en una disolución acuosa.
+d) (0,5 puntos) La deshidratación del etanol, por el ácido sulfúrico, produce etino.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      },
+      {
+        id: "q-2025-modelo-B-4",
+        año: 2025,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Ácido-base",
+        numero: "4B",
+        enunciado: `Se dispone de 3 disoluciones acuosas a 25 °C: i) $\\text{HNO}_3$ con pH = 1; ii) ácido acetilsalicílico ($\\text{C}_8\\text{H}_7\\text{O}_2\\text{COOH}$) con pH = 2,24; iii) NaOH con pH = 12.
+a) (1,25 puntos) Para cada disolución, escriba los equilibrios de disociación en agua y calcule su concentración inicial.
+b) (1,25 puntos) Explique, sin hacer cálculos, si al combinar volúmenes iguales de las disoluciones anteriores de $\\text{HNO}_3$ y de NaOH, el pH será igual, superior o inferior a 7.
+Dato. $K_a(\\text{C}_8\\text{H}_7\\text{O}_2\\text{COOH}) = 3{,}1 \\cdot 10^{-4}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2025-modelo.pdf"
+      }
+    ]
+  },
+  {
+    id: 20263,
+    año: 2026,
+    tipo: "Modelo",
+    asignatura: "Química",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "q-2026-modelo-A-1",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Enlace químico y ácido-base",
+        numero: "1",
+        enunciado: `Los fertilizantes son productos que se utilizan para enriquecer el suelo y mejorar la calidad de las plantas. Contienen nutrientes esenciales como nitrógeno, fósforo y potasio, y micronutrientes como hierro, cobre y zinc, todos ellos necesarios para su buen estado y crecimiento.
+El primer fertilizante nitrogenado sólido que se ha producido a gran escala es el nitrato de amonio ($\\text{NH}_4\\text{NO}_3$) y se obtiene por reacción de $\\text{NH}_3$ con $\\text{HNO}_3$. El fertilizante de potasio más utilizado es el KCl, debido a su bajo coste, su alta concentración en potasio y su buena solubilidad.
+a) (1 punto) Justifique el tipo de enlace en las siguientes sustancias: KCl, Cu, $\\text{NH}_4^+$ y $\\text{NH}_3$.
+b) (0,5 puntos) Escriba las estructuras de Lewis de $\\text{NH}_3$ y $\\text{NH}_4^+$ e indique si alguna de las sustancias presenta un enlace de coordinación (covalente dativo).
+c) (0,5 puntos) Indique y dibuje la geometría de la molécula de amoniaco y del ion amonio mediante la teoría de repulsión de pares de electrones de la capa de valencia (RPECV).
+d) (0,5 puntos) El pH del suelo afecta a la disponibilidad de los nutrientes vegetales. Sabiendo que en un determinado suelo se utiliza como fertilizante el nitrato de amonio, justifique si la mayor parte de los nutrientes de ese suelo son más solubles en medio ácido, neutro o básico. Escriba las reacciones necesarias para justificarlo.
+Dato. $pK_b$(amoniaco) = 4,75.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-A-2",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Estructura atómica",
+        numero: "2A",
+        enunciado: `Considere los elementos A, B y C. El electrón más externo del elemento A está en un orbital con los tres primeros números cuánticos (3,0,0) y su ion más estable es $\\text{A}^+$; el elemento B pertenece al grupo de los alcalinotérreos y su electrón más externo está en un orbital (3,0,0); el ion más estable del elemento C es $\\text{C}^-$ y su electrón más externo está en un orbital 3p.
+a) (1 punto) Identifique cada elemento con su nombre, símbolo, configuración electrónica, grupo y periodo.
+b) (0,5 puntos) Justifique qué elemento presenta menor energía de ionización.
+c) (0,5 puntos) Escriba el nombre del número cuántico $m_l$. Indique cuántos electrones con $m_l = 0$ hay en los átomos A y B.
+d) (0,5 puntos) La segunda energía de ionización del elemento A es 4560 kJ·mol$^{-1}$ mientras que la del elemento B es 1451 kJ·mol$^{-1}$. Justifique por qué es mayor la del elemento A.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-A-3",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Química orgánica",
+        numero: "3A",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1,5 puntos) Nombre los siguientes compuestos, indique para cada pareja si son isómeros y el tipo de isomería que presentan y escriba su fórmula molecular.
+i) $\\text{CH}_3-\\text{CO}-\\text{NH}-\\text{CH}_3$ y $\\text{CH}_3-\\text{CH}_2-\\text{CO}-\\text{NH}_2$
+ii) $\\text{CH}_3-\\text{CH}(\\text{CH}_3)-\\text{COO}-\\text{CH}_2-\\text{CH}_3$ y $\\text{CH}_3-(\\text{CH}_2)_2-\\text{CH}(\\text{CH}_3)-\\text{COOH}$
+iii) cis−1−cloro−2−metilprop−1−eno y trans−1−cloro−2−metilprop−1−eno (mismo compuesto, ver figura del enunciado original).
+b) (1 punto) Complete las siguientes reacciones, formule y nombre todos los compuestos orgánicos, e indique el tipo de reacción.
+i) But−2−eno + HCl → ii) $\\text{CH}_3-\\text{CH}_2-\\text{CH}_2-\\text{CHOH}-\\text{CH}_3$ + oxidante (débil) →
+iii) A + etanol → $\\text{HCOO}-\\text{CH}_2-\\text{CH}_3 + \\text{H}_2\\text{O}$ iv) cis−pent−2−eno + $\\text{H}_2$/Pt →
+v) $\\text{CH}_3-\\text{CH}=\\text{CH}-(\\text{CH}_2)_2-\\text{CH}_3 + \\text{H}_2\\text{O}$/$\\text{H}^+$ →`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-A-4",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Equilibrio químico",
+        numero: "4A",
+        enunciado: `En la tabla se recogen los valores de $K_p$ para el equilibrio $\\text{A}(g) \\rightleftharpoons 2\\text{B}(g)$ a distintas temperaturas. Además, se sabe que a 789 K el compuesto A está disociado un 40%:
+Tabla. Valores de $K_p$: 727 K, $K_p = 1{,}860$; 789 K, $K_p = 0{,}956$; 830 K, $K_p = 0{,}130$.
+a) (0,5 puntos) Razone cómo afecta a la presión parcial de A un aumento de la temperatura.
+b) (1 punto) Calcule las fracciones molares de A y B en el equilibrio a 789 K.
+c) (0,5 puntos) Calcule la presión total del sistema a 789 K.
+d) (0,5 puntos) Justifique cómo afecta al equilibrio la adición de gas helio manteniendo el volumen y la temperatura constantes.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-B-1",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Enlace químico y ácido-base",
+        numero: "1",
+        enunciado: `Los fertilizantes son productos que se utilizan para enriquecer el suelo y mejorar la calidad de las plantas. Contienen nutrientes esenciales como nitrógeno, fósforo y potasio, y micronutrientes como hierro, cobre y zinc, todos ellos necesarios para su buen estado y crecimiento.
+El primer fertilizante nitrogenado sólido que se ha producido a gran escala es el nitrato de amonio ($\\text{NH}_4\\text{NO}_3$) y se obtiene por reacción de $\\text{NH}_3$ con $\\text{HNO}_3$. El fertilizante de potasio más utilizado es el KCl, debido a su bajo coste, su alta concentración en potasio y su buena solubilidad.
+a) (1 punto) Justifique el tipo de enlace en las siguientes sustancias: KCl, Cu, $\\text{NH}_4^+$ y $\\text{NH}_3$.
+b) (0,5 puntos) Escriba las estructuras de Lewis de $\\text{NH}_3$ y $\\text{NH}_4^+$ e indique si alguna de las sustancias presenta un enlace de coordinación (covalente dativo).
+c) (0,5 puntos) Indique y dibuje la geometría de la molécula de amoniaco y del ion amonio mediante la teoría de repulsión de pares de electrones de la capa de valencia (RPECV).
+d) (0,5 puntos) El pH del suelo afecta a la disponibilidad de los nutrientes vegetales. Sabiendo que en un determinado suelo se utiliza como fertilizante el nitrato de amonio, justifique si la mayor parte de los nutrientes de ese suelo son más solubles en medio ácido, neutro o básico. Escriba las reacciones necesarias para justificarlo.
+Dato. $pK_b$(amoniaco) = 4,75.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-B-2",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Verdadero o falso",
+        numero: "2B",
+        enunciado: `Justifique si son verdaderas o falsas las siguientes afirmaciones.
+a) (0,5 puntos) La energía de red del LiF es mayor que la del KF, suponiendo que ambos compuestos cristalizan con el mismo tipo de red.
+b) (0,5 puntos) En estado fundido los compuestos covalentes sí conducen la electricidad.
+c) (0,5 puntos) La hibridación del átomo de boro en el $\\text{BF}_3$ es $sp^3$.
+d) (0,5 puntos) La temperatura de ebullición del $\\text{H}_2\\text{S}$ es mayor que la del $\\text{H}_2\\text{O}$.
+e) (0,5 puntos) Las fuerzas intermoleculares más fuertes que presenta el $\\text{PH}_3$ son debidas a enlaces de hidrógeno.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-B-3",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Química orgánica",
+        numero: "3B",
+        enunciado: `Responda a las siguientes cuestiones:
+a) (1 punto) Formule las siguientes reacciones para el propan−1−ol. Escriba el nombre de todos los reactivos y productos orgánicos, e indique el tipo de reacción.
+i) propan−1−ol + HBr → ii) propan−1−ol + oxidante (fuerte) →
+iii) propan−1−ol + $\\text{CH}_3-\\text{CH}(\\text{CH}_3)-(\\text{CH}_2)_2-\\text{COOH}$ → iv) propan−1−ol + $\\text{H}_2\\text{SO}_4$/calor →
+b) (0,5 puntos) Nombre los siguientes compuestos orgánicos e indique a qué tipo de compuesto orgánico pertenecen:
+i) $\\text{CH}_3-\\text{CH}(\\text{CH}_3)-\\text{C}(\\text{CH}_3)_2-\\text{CHO}$
+ii) $\\text{CH}_3-\\text{CH}_2-\\text{CH}(\\text{CH}_3)-\\text{CH}(\\text{CH}_3)-\\text{C}\\equiv\\text{C}-\\text{CH}_3$
+iii) cis−5−metilhex−2−eno.
+c) (1 punto) Formule y ajuste la reacción de combustión de butano indicando el estado de las especies, a 298 K y 1,00 atm. Calcule la cantidad de calor que se desprende en la combustión de 12,0 L de butano en esas condiciones.
+Datos. A 298 K, $\\Delta H_f^0$ (kJ·mol$^{-1}$): $\\text{C}_4\\text{H}_{10}(g) = -125{,}7$; $\\text{H}_2\\text{O}(l) = -285{,}8$; $\\text{CO}_2(g) = -393{,}5$. $R = 0{,}0820$ atm·L·mol$^{-1}$·K$^{-1}$.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      },
+      {
+        id: "q-2026-modelo-B-4",
+        año: 2026,
+        convocatoria: "Modelo",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Redox y ácido-base",
+        numero: "4B",
+        enunciado: `El cromato de potasio reacciona con ácido clorhídrico produciendo cloruro de cromo(III), cloruro de potasio, agua y cloro.
+a) (1 punto) Escriba las semirreacciones de oxidación y reducción ajustadas por el método de ion electrón, la reacción iónica y la molecular.
+b) (0,5 puntos) Se sabe que el cromato de potasio comercial tiene una riqueza del 70,0% en masa. Calcule la masa de cromato de potasio comercial necesaria para obtener 60,0 g de cloruro de cromo(III).
+c) (0,5 puntos) El ácido clorhídrico empleado en el proceso tiene una concentración de $1{,}25 \\cdot 10^{-2}$ M. Calcule su pH.
+d) (0,5 puntos) Calcule la concentración que debe tener una disolución de ácido acético (ácido etanoico) para que tenga el mismo pH que la disolución de ácido clorhídrico del apartado c).
+Datos. $K_a$ (ácido acético) = $1{,}8 \\cdot 10^{-5}$. Masas atómicas (u): O = 16,0; Cl = 35,5; K = 39,1; Cr = 52,0.`,
+        puntuacion: 2.5,
+        criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
+        pdfFuente: "/quimica-pdfs/quimica-2026-modelo.pdf"
+      }
+    ]
   }
 
 ]

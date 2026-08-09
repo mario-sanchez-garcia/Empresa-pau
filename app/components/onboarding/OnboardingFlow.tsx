@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Check, Lock, Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -196,6 +197,14 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
 const SIDEBAR_STEPS = ['Dolor', 'Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
+
+// Mismas instancias next/font que usa /login — el panel de signup (post-onboarding)
+// tiene que renderizar con exactamente las mismas formas de letra que el login real,
+// no solo el mismo layout/foto. El resto del onboarding sigue con el @import de arriba.
+const signupBebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+const signupDmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
+const SIGNUP_FONT_DISPLAY = signupBebas.style.fontFamily
+const SIGNUP_FONT_MONO = signupDmMono.style.fontFamily
 
 const BASE_CSS = `
 *{box-sizing:border-box}
@@ -1075,10 +1084,10 @@ export default function OnboardingFlow() {
 
           {/* Tagline */}
           <div style={{ position: 'absolute', bottom: 100, left: 36, right: 36, zIndex: 2 }}>
-            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(44px, 5vw, 68px)', lineHeight: .92, letterSpacing: '.01em', color: '#fff', marginBottom: 16 }}>
+            <h2 style={{ fontFamily: SIGNUP_FONT_DISPLAY, fontSize: 'clamp(44px, 5vw, 68px)', lineHeight: .92, letterSpacing: '.01em', color: '#fff', marginBottom: 16 }}>
               Guarda<br />tu Camino.
             </h2>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'rgba(255,255,255,.4)', letterSpacing: '.1em', textTransform: 'uppercase', lineHeight: 1.6 }}>
+            <p style={{ fontFamily: SIGNUP_FONT_MONO, fontSize: 11, color: 'rgba(255,255,255,.4)', letterSpacing: '.1em', textTransform: 'uppercase', lineHeight: 1.6 }}>
               Exámenes reales · Corrección IA · Plan diario
             </p>
           </div>
@@ -1091,8 +1100,8 @@ export default function OnboardingFlow() {
               { v: '<30s', l: 'Corrección' },
             ].map(s => (
               <div key={s.l}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: '#fff', letterSpacing: '.01em', lineHeight: 1 }}>{s.v}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 3 }}>{s.l}</div>
+                <div style={{ fontFamily: SIGNUP_FONT_DISPLAY, fontSize: 26, color: '#fff', letterSpacing: '.01em', lineHeight: 1 }}>{s.v}</div>
+                <div style={{ fontFamily: SIGNUP_FONT_MONO, fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 3 }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -1100,7 +1109,7 @@ export default function OnboardingFlow() {
 
         {/* Right — cuenta */}
         <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 24, textAlign: 'center', overflowY: 'auto' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Crea tu cuenta.</div>
+          <div style={{ fontFamily: SIGNUP_FONT_DISPLAY, fontSize: 'clamp(32px, 5vw, 44px)', color: '#fff', letterSpacing: '.01em' }}>Crea tu cuenta.</div>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
             Ya tenemos todo para construir tu preparación. Crea tu cuenta para guardar tu Camino y generar tus primeras misiones.
           </p>
@@ -1126,7 +1135,7 @@ export default function OnboardingFlow() {
                 Crear mi cuenta con Google
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.25)', fontFamily: SIGNUP_FONT_MONO, fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
                 o con email
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.1)' }} />
@@ -1138,7 +1147,7 @@ export default function OnboardingFlow() {
                 onChange={e => setSignupEmail(e.target.value)}
                 placeholder="tu@email.com"
                 className="onb-input"
-                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px', fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}
               />
               <input
                 type="password"
@@ -1146,7 +1155,7 @@ export default function OnboardingFlow() {
                 onChange={e => setSignupPassword(e.target.value)}
                 placeholder="Contraseña"
                 className="onb-input"
-                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px' }}
+                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', color: '#fff', padding: '12px 14px', fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}
               />
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 11, color: 'rgba(255,255,255,.4)', textAlign: 'left', cursor: 'pointer' }}>
                 <input type="checkbox" checked={terms} onChange={e => setSignupTerms(e.target.checked)} style={{ marginTop: 2 }} />

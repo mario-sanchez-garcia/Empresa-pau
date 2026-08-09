@@ -738,7 +738,7 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
   const config = ASIGNATURAS[subject]
   const title = SUBJECT_CARDS[subject].title
   const Icon = config.icon
-  const isPendingDataSubject = subject === 'matematicas_ccss'
+  const isMadridOnlySubject = subject === 'matematicas_ccss'
 
   return (
     <div style={{ background: 'rgba(255, 255, 255, 0.96)', borderRadius: '28px', border: '1px solid rgba(219, 231, 251, 0.95)', padding: '34px', marginBottom: '22px', boxShadow: WARM.shadow, textAlign: 'center' }}>
@@ -746,11 +746,11 @@ function EmptyQuestionsState({ subject }: { subject: Asignatura }) {
         <SearchX size={30} />
       </div>
       <div style={{ fontSize: '20px', fontWeight: 850, color: WARM.ink, marginBottom: '8px' }}>
-        {isPendingDataSubject ? 'No hay exámenes disponibles todavía para esta asignatura.' : `No hay preguntas de ${title} para este filtro.`}
+        {`No hay preguntas de ${title} para este filtro.`}
       </div>
       <p style={{ maxWidth: '620px', margin: '0 auto', color: WARM.muted, fontSize: '15px', lineHeight: 1.7, fontWeight: 650 }}>
-        {isPendingDataSubject
-          ? 'Los PDFs de Matemáticas CCSS Madrid están registrados como fuente, pero sus ejercicios aún no están transcritos de forma estructurada.'
+        {isMadridOnlySubject
+          ? 'Matemáticas CCSS está cargada para Madrid. Revisa que la comunidad seleccionada sea Madrid o prueba otra convocatoria/año.'
           : 'Prueba con otra convocatoria, año, opción o comunidad.'}
       </p>
       <div style={{ marginTop: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px', padding: '7px 12px', background: config.light, color: config.color, border: '1px solid ' + config.soft, fontSize: '12px', fontWeight: 800 }}>
@@ -985,6 +985,12 @@ export default function Home() {
   const visibleSubjectCards = showAllSubjects
     ? orderedHomeSubjects
     : [...pinnedClean, ...fillerSubjects].slice(0, targetCount)
+
+  useEffect(() => {
+    if (asignatura === 'matematicas_ccss' && ccaa !== 'Madrid') {
+      setCCAA('Madrid')
+    }
+  }, [asignatura, ccaa, setCCAA])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -1943,6 +1949,7 @@ function reset() {
 
 function cambiarAsignatura(a: Asignatura) {
   setAsignatura(a)
+  if (a === 'matematicas_ccss') setCCAA('Madrid')
   setCaminoExerciseNotice('')
   setExamenIdx(0)
   setCatEjercicioIdx(0)

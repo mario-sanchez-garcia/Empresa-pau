@@ -1141,6 +1141,329 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   // 2018 Ordinaria escaneada + Julio Extraordinaria preservadas
   // ══════════════════════════════════════════════
 
+
+  // ══════════════════════════════════════════════
+  // JULIO 2025, 2021, 2020, 2019 y 2018 — Extraordinaria Madrid
+  // ══════════════════════════════════════════════
+
+  {
+    id: "f-2025-jul-1",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "A",
+    tipo: "RadioactividadModerna", numero: "1",
+    enunciado: `En Lund, Suecia, se está construyendo la futura Fuente Europea de Neutrones por Espalación. En sus instalaciones se aceleran protones, $H^+$, hasta alcanzar una energía cinética de $2\ \text{GeV}$. Posteriormente, el haz impacta sobre un blanco de tungsteno que emite neutrones, que atraviesan moderadores para modificar su energía cinética.`,
+    apartados: [
+      "Determine la masa relativista de los protones al final del acelerador lineal, cuando su energía cinética es de $2\\ \text{GeV}$.",
+      "Si se obtienen neutrones con una energía cinética de $25\\ \text{meV}$ (no relativista), calcule su velocidad y su longitud de onda de de Broglie.",
+    ],
+    datos: ["$c = 3{,}0\\cdot10^8\\ \text{m s}^{-1}$", "$e = 1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_{p0}=1{,}67\\cdot10^{-27}\\ \text{kg}$", "$m_n=1{,}67\\cdot10^{-27}\\ \text{kg}$", "$h=6{,}63\\cdot10^{-34}\\ \text{J s}$"],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2025-jul-2A",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "A",
+    tipo: "Gravitacion", numero: "2.A",
+    enunciado: `Una nave alienígena se sitúa en una órbita circular de radio $r$ en torno a la Tierra. Los tripulantes observan que tardan $1{,}59$ h en dar una vuelta completa y saben que la velocidad de escape desde la órbita es $10{,}7\\ \text{km s}^{-1}$.`,
+    apartados: [
+      "Deduzca las expresiones del periodo de la órbita y de la velocidad de escape desde la órbita en función de $G$, $M_T$ y $r$.",
+      "Calcule el radio de la órbita de la nave y la masa de la Tierra.",
+    ],
+    datos: ["$G = 6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$"],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2025-jul-2B",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "B",
+    tipo: "Gravitacion", numero: "2.B",
+    enunciado: `Sean dos partículas idénticas de masas $m_1=m_2=3\\ \text{kg}$, situadas en los puntos $P_1(0,0)$ m y $P_2(6,0)$ m del plano $xy$.`,
+    apartados: [
+      "Halle el campo gravitatorio creado por ambas partículas en el punto $(3,3)$ m.",
+      "Calcule el trabajo que realiza la fuerza gravitatoria para llevar una partícula de masa $m=1\\ \text{kg}$ desde $(3,3)$ m hasta $(0,3)$ m.",
+    ],
+    datos: ["$G = 6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$"],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2025-jul-3A",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "A",
+    tipo: "Ondas", numero: "3.A",
+    enunciado: `Un muelle de constante elástica $k$ tiene uno de sus extremos unido a una pared y el otro a un bloque de masa $m$. El bloque se mueve sobre una superficie horizontal sin rozamiento. Se separa $5$ cm de la posición de equilibrio y se suelta; al pasar por el equilibrio su energía cinética es $0{,}02$ J.`,
+    apartados: [
+      "Determine la constante elástica del muelle.",
+      "Si la masa del bloque es $m=4\\ \text{kg}$, calcule el periodo de las oscilaciones y el módulo de la velocidad cuando $x=2$ cm.",
+    ],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2025-jul-3B",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "B",
+    tipo: "Optica", numero: "3.B",
+    enunciado: `Se sitúa a la izquierda de una lente convergente un objeto de $4$ cm de altura, formándose una imagen real de tamaño $2$ cm. La distancia entre la posición del objeto y la imagen es de $45$ cm.`,
+    apartados: [
+      "Determine la posición del objeto, la posición de la imagen y la distancia focal de la lente.",
+      "Halle la posición en la que debe colocarse el objeto para que la imagen real tenga tamaño $4$ cm. Realice el diagrama de rayos.",
+    ],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2025-jul-4A",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "A",
+    tipo: "Electricidad", numero: "4.A",
+    enunciado: `Un espectrómetro de masas consta de un selector de velocidades y de un detector de iones. En el selector hay un campo eléctrico y un campo magnético mutuamente perpendiculares para que solo los iones con cierta velocidad viajen en línea recta. Se inyectan iones $Ca^{2+}$ con $\\vec v=2{,}4\\cdot10^5\\,\\vec i\\ \text{m s}^{-1}$ y el campo magnético es $\\vec B_1=1{,}0\\,\\vec j\\ \text{mT}$. A la salida penetran en una región con $\\vec B_2=1{,}5\\,\\vec j\\ \text{T}$.\n\n![Selector de velocidades del espectrómetro](/fisica-imgs/madrid/2025/extraordinaria/fisica-2025-extraordinaria-4a-parte-a.png)\n\n![Detector de iones del espectrómetro](/fisica-imgs/madrid/2025/extraordinaria/fisica-2025-extraordinaria-4a-parte-b.png)`,
+    apartados: [
+      "Calcule el campo eléctrico $\\vec E$ necesario para que los iones lleguen al detector.",
+      "Calcule el radio de la trayectoria circular descrita en el detector.",
+    ],
+    datos: ["$N_A = 6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "Masa atómica de $Ca^{2+}$: $40\\ \text{u}$"],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2025-jul-4B",
+    año: 2025, convocatoria: "Extraordinaria", opcion: "B",
+    tipo: "Electricidad", numero: "4.B",
+    enunciado: `Un hilo rectilíneo infinito paralelo al eje $z$ pasa por el punto $(0,6,0)$ cm y transporta una corriente $I=5$ A en el sentido positivo del eje $z$.\n\n![Dos hilos rectilíneos en el plano xy](/fisica-imgs/madrid/2025/extraordinaria/fisica-2025-extraordinaria-4b.png)`,
+    apartados: [
+      "Calcule el campo magnético creado por el hilo en el punto $(4,2,0)$ cm.",
+      "Determine la intensidad que debe transportar un segundo hilo paralelo al eje $z$ situado en $(6,0,0)$ cm para que el campo total en $(4,2,0)$ cm sea cero.",
+    ],
+    datos: ["$\\mu_0 = 4\\pi\\cdot10^{-7}\\ \text{T m A}^{-1}$"],
+    puntos: 2.5,
+  },
+
+  {
+    id: "f-2021-jul-A1", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    enunciado: `Una nave espacial queda atrapada en una órbita circular alrededor de un planeta esférico desconocido. Su velocidad orbital es $25000\\ \text{km h}^{-1}$ y tarda $5$ h en dar una vuelta completa.`,
+    apartados: ["Determine el radio de la órbita circular y la masa del planeta.", "Si la densidad del planeta es $16150\\ \text{kg m}^{-3}$, calcule el radio del planeta y la gravedad en su superficie."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-A2", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    enunciado: `Anacleto graba con un teléfono inteligente, a través de una pared, una conversación situada a $5$ m. Por efecto de la pared, al teléfono solo llega un $2\%$ de la intensidad que llegaría sin pared. El nivel de una conversación a $1$ m es $50$ dB.`,
+    apartados: ["Calcule el nivel de intensidad sonora que llega al teléfono.", "Si el teléfono graba conversaciones a $100$ m, calcule el nivel más bajo que puede medir."],
+    datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-A3", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    enunciado: `Se tienen tres hilos indefinidos de corriente. Los hilos de intensidades $I_1=2$ A e $I_2=2$ A son paralelos al eje $x$ y pasan por $(0,0,0)$ y $(0,0,4)$ m. El tercer hilo, de intensidad $I_3=3$ A, pasa por el origen y es paralelo al eje $y$. Todas las corrientes van en el sentido positivo de los ejes.\n\n![Tres hilos indefinidos de corriente](/fisica-imgs/madrid/2021/extraordinaria/fisica-2021-extraordinaria-a3.png)`,
+    apartados: ["Calcule el campo magnético total creado por los tres hilos en $(0,0,2)$ m.", "Calcule la fuerza magnética por unidad de longitud que ejerce el hilo $I_1$ sobre el hilo $I_2$ e indique si es atractiva o repulsiva."],
+    datos: ["$\\mu_0=4\\pi\\cdot10^{-7}\\ \text{N A}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-A4", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    enunciado: `Sistema óptico formado por dos lentes convergentes: una lente A de distancia focal $f'_A$ y otra lente B, situada $80$ cm a la derecha de A, con $f'_B=30$ cm. Un objeto de $5$ cm de altura está $15$ cm a la izquierda de A.`,
+    apartados: ["Si la imagen final aparece $75$ cm a la derecha de B, calcule $f'_A$ y el tamaño de la imagen final.", "Determine dónde situar el objeto a la izquierda de A para que el sistema forme la imagen en el infinito."], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-A5", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    enunciado: `En un acelerador se originan un electrón relativista de velocidad $0{,}75c$ y un fotón de $15$ MeV.`,
+    apartados: ["Calcule la masa relativista y la energía cinética del electrón.", "Determine la longitud de onda del fotón y la longitud de de Broglie del electrón."],
+    datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_e=9{,}1\\cdot10^{-31}\\ \text{kg}$", "$h=6{,}63\\cdot10^{-34}\\ \text{J s}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-B1", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    enunciado: `Una partícula de masa $m$ está en el origen. La componente $x$ del campo gravitatorio creado en el punto $(2,2)$ m es $-1{,}18\\cdot10^{-11}\\ \text{N kg}^{-1}$.`,
+    apartados: ["Calcule la masa $m$.", "Calcule el trabajo del campo para llevar una masa $M=5$ kg desde $(4,0)$ m a $(2,2)$ m."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-B2", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    enunciado: `Una onda transversal se propaga por una cuerda en el sentido positivo del eje $x$. En los instantes $t=0$ s y $t=2$ s: $y(x,0)=0{,}1\\cos(\\pi-4\\pi x)$ m e $y(x,2)=0{,}1\\cos(11\\pi-4\\pi x)$ m.`,
+    apartados: ["Calcule la frecuencia angular y la expresión matemática de la onda.", "Calcule la velocidad de propagación y la aceleración máxima de oscilación."], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-B3", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    enunciado: `Un espectrómetro de masas selecciona iones positivos de oxígeno $^{18}O^+$ mediante un selector con campos perpendiculares $\\vec E=4{,}0\\cdot10^5\\,\\vec j\\ \text{V m}^{-1}$ y $\\vec B_1=2\\,\\vec k\\ \text{T}$. Después pasan a una región con $\\vec B_2=5\\,\\vec k\\ \text{T}$.\n\n![Esquema de espectrómetro de masas](/fisica-imgs/madrid/2021/extraordinaria/fisica-2021-extraordinaria-b3.png)`,
+    apartados: ["Calcule la velocidad de los iones que viajan en línea recta.", "Calcule el radio de la órbita circular en la segunda región."],
+    datos: ["$m=2{,}7\\cdot10^{-26}\\ \text{kg}$", "$q=+e$", "$e=1{,}6\\cdot10^{-19}\\ \text{C}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-B4", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    enunciado: `Dos medios A y B tienen índices $n_A$ y $n_B$. Un rayo de frecuencia $6{,}04\\cdot10^{14}$ Hz incide desde A hacia B. El ángulo límite para reflexión total es $45{,}58^\\circ$ y $n_A-n_B=0{,}6$.`,
+    apartados: ["Determine los índices de refracción $n_A$ y $n_B$.", "Determine las longitudes de onda en los medios A y B."],
+    datos: ["$c=3\\cdot10^8\\ \text{m s}^{-1}$"], puntos: 2,
+  },
+  {
+    id: "f-2021-jul-B5", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    enunciado: `El patrón del kilogramo es un cilindro de platino-iridio con un $90\%$ en masa de Pt. El isótopo $^{190}$Pt es radiactivo, con tiempo de semidesintegración $6{,}5\\cdot10^{11}$ años, y representa el $0{,}012\%$ en masa de una muestra de platino.`,
+    apartados: ["Calcule la actividad inicial del patrón del kilogramo.", "Calcule la masa final de $^{190}$Pt transcurridos mil millones de años."],
+    datos: ["$M(^{190}Pt)=189{,}96\\ \text{u}$", "$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$"], puntos: 2,
+  },
+
+  {
+    id: "f-2020-jul-A1", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    enunciado: `Calisto, satélite de Júpiter, tiene densidad $1{,}83\\ \text{g cm}^{-3}$ y radio $2410$ km. Da una revolución alrededor de Júpiter cada $16{,}89$ días.`,
+    apartados: ["Calcule la masa del satélite y la aceleración de la gravedad en su superficie.", "Obtenga la energía cinética y la energía mecánica de Calisto en su órbita circular."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_J=1{,}90\\cdot10^{27}\\ \text{kg}$"], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-A2", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    enunciado: `Un violín emite ondas sonoras con una potencia de $5\\cdot10^{-3}$ W al tocar la nota Fa de $698$ Hz.`,
+    apartados: ["Indique si la onda es longitudinal o transversal y obtenga su longitud de onda.", "Calcule el nivel sonoro percibido a $20$ m por $15$ violines tocando al unísono."],
+    datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$", "$v_s=340\\ \text{m s}^{-1}$"], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-A3", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    enunciado: `Dos cargas puntuales $q_A=+5$ nC y $q_B=-5$ nC están en $(-4,0)$ cm y $(4,0)$ cm.`,
+    apartados: ["Determine el potencial y el campo eléctrico en el origen.", "Determine el potencial y el campo eléctrico en el punto $(0,3)$ cm."],
+    datos: ["$K=9\\cdot10^9\\ \text{N m}^2\\text{C}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-A4", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    enunciado: `Sobre la cara A de un prisma transparente incide perpendicularmente desde el aire un rayo de luz a $5$ cm del vértice superior, cuyo ángulo es de $30^\\circ$.\n\n![Prisma de material transparente](/fisica-imgs/madrid/2020/extraordinaria/fisica-2020-extraordinaria-a4.png)`,
+    apartados: ["Calcule el tiempo que tarda el rayo en alcanzar la cara B y el ángulo de emergencia si el material es vidrio de índice $1{,}5$.", "Razone si el rayo emergerá por la cara B si el prisma es de diamante, de índice $2{,}5$."],
+    datos: ["$c=3\\cdot10^8\\ \text{m s}^{-1}$", "$n_{aire}=1$"], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-A5", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    enunciado: `Para obtener imágenes del corazón se utiliza $^{201}$Tl, que emite rayos gamma con periodo de semidesintegración de $3{,}04$ días. Se recomienda inyectar $0{,}9\\ \text{MBq kg}^{-1}$.`,
+    apartados: ["Obtenga la constante de desintegración y la masa recomendada para un paciente de $75$ kg.", "Calcule el tiempo para que la actividad se reduzca al $1\%$ de la inicial."],
+    datos: ["$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$M(^{201}Tl)=201\\ \text{u}$"], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-B1", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    enunciado: `La sonda Mars Reconnaissance Orbiter se situó en 2006 en una órbita circular alrededor de Marte a $290$ km de altura. Actualmente tiene una masa de $1031$ kg.`,
+    apartados: ["Calcule el periodo de revolución y la velocidad orbital alrededor de Marte.", "Obtenga la energía mínima necesaria para que escape del campo gravitatorio marciano."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_{Marte}=6{,}42\\cdot10^{23}\\ \text{kg}$", "$R_{Marte}=3{,}39\\cdot10^6\\ \text{m}$"], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-B2", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    enunciado: `Un oscilador de frecuencia $1000$ Hz genera en una cuerda una onda transversal que se propaga en sentido positivo del eje $x$, con longitud de onda $1{,}5$ m. La velocidad máxima de oscilación es $100\\ \text{m s}^{-1}$. En $x=0$ m y $t=600\\ \mu$s, la elongación es $1$ cm y la velocidad de oscilación es positiva.`,
+    apartados: ["Determine la velocidad de propagación y la amplitud.", "Halle la fase inicial y escriba la expresión matemática de la onda."], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-B3", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    enunciado: `Una espira circular de radio $6$ cm, inicialmente en el plano $xy$, está inmersa en un campo magnético homogéneo dirigido según $+z$.`,
+    apartados: ["Calcule el flujo y la fem inducida en $t=7$ ms si $B=3t^2$.", "Calcule el flujo y la fem inducida en $t=7$ ms si $B=8$ mT y la espira gira a $60\\ \text{rad s}^{-1}$ alrededor del eje $y$."], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-B4", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    enunciado: `Determine las posiciones donde debe colocarse un objeto real a la izquierda de una lente convergente de potencia $2{,}5$ dioptrías para que el tamaño de la imagen sea el indicado.`,
+    apartados: ["Imagen derecha y del doble que el objeto.", "Imagen invertida y de la mitad que el objeto. Indique la naturaleza de la imagen y trace los rayos."], puntos: 2,
+  },
+  {
+    id: "f-2020-jul-B5", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    enunciado: `Un sistema atómico de tres niveles energéticos se utiliza para obtener radiación láser. Respecto al fundamental, el segundo y tercer nivel están a $2{,}07$ eV y $2{,}76$ eV. La absorción se produce del nivel 1 al 3 y la emisión láser del 2 al 1.`,
+    apartados: ["Halle la longitud de onda y frecuencia del fotón necesario para la absorción.", "Calcule la longitud de onda emitida y la potencia del láser si se emiten $2\\cdot10^{16}$ fotones/s."],
+    datos: ["$h=6{,}63\\cdot10^{-34}\\ \text{J s}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$", "$e=1{,}6\\cdot10^{-19}\\ \text{C}$"], puntos: 2,
+  },
+
+  {
+    id: "f-2019-jul-A1", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    enunciado: `Los satélites LAGEOS son cuerpos esféricos de masa $405$ kg en órbita circular alrededor de la Tierra a $5900$ km sobre su superficie.`,
+    apartados: ["Determine el periodo de estos satélites.", "Calcule la energía requerida para pasar desde la superficie terrestre a dicha órbita."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_T=5{,}97\\cdot10^{24}\\ \text{kg}$", "$R_T=6{,}37\\cdot10^6\\ \text{m}$"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-A2", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    enunciado: `Un detector situado a $200$ m de una sirena mide $80$ dB. Suponga que la sirena emite como fuente puntual.`,
+    apartados: ["Determine la potencia sonora de la sirena.", "Calcule a qué distancia mediría la misma intensidad si la sirena tuviese el doble de potencia."],
+    datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-A3", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    enunciado: `Una carga $q_1=10\\ \mu$C está en el origen y otra carga $q_2=20\\ \mu$C en $(3,0)$ m.`,
+    apartados: ["Calcule el punto donde el campo eléctrico total es nulo.", "Calcule el trabajo del campo para transportar un electrón desde $(3,4)$ m hasta $(2,0)$ m."],
+    datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$K=9\\cdot10^9\\ \text{N m}^2\\text{C}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-A4", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    enunciado: `Una lente convergente de $10$ cm de distancia focal forma la imagen de un objeto de tamaño $y=1$ cm. Se quiere que la imagen se forme $14$ cm a la derecha de la lente.`,
+    apartados: ["Determine dónde situar el objeto y el tamaño de la imagen.", "Realice el trazado de rayos correspondiente."], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-A5", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    enunciado: `Al iluminar un material con luz de $\\lambda=589$ nm se liberan electrones con energía cinética máxima $0{,}577$ eV; con luz ultravioleta de $\\lambda=179{,}76$ nm la energía máxima es $5{,}38$ eV.`,
+    apartados: ["Determine la constante de Planck y el trabajo de extracción.", "Calcule la longitud de onda de de Broglie del electrón de energía cinética máxima en el caso ultravioleta."],
+    datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_e=9{,}1\\cdot10^{-31}\\ \text{kg}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-B1", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    enunciado: `El satélite Europa describe una órbita circular alrededor de Júpiter de radio $671100$ km y periodo $3{,}55$ días terrestres.`,
+    apartados: ["Determine la masa de Júpiter.", "Determine la velocidad de escape desde la superficie de Júpiter."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$R_{Júpiter}=69911$ km"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-B2", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    enunciado: `Una onda transversal que se propaga por el eje $x$ viene dada por $y(x,t)=0{,}05\\cos(8\\pi t-4\\pi x+\\varphi_0)$ en unidades SI.`,
+    apartados: ["Determine $\\varphi_0$ si en $t=5$ s la velocidad de oscilación de $x=3$ m es nula y su aceleración es positiva.", "Determine el tiempo que tarda la onda en llegar a $x=8$ m si la fuente comienza a emitir en $t=0$ en el origen."], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-B3", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    enunciado: `Un positrón se acelera mediante una diferencia de potencial $\\Delta V$ y entra en una región con un campo magnético $B=5\\ \mu$T perpendicular a su velocidad. El radio de la órbita circular es $50$ cm.`,
+    apartados: ["Obtenga la diferencia de potencial utilizada para acelerar el positrón.", "Obtenga la frecuencia angular de giro del positrón."],
+    datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_p=9{,}1\\cdot10^{-31}\\ \text{kg}$"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-B4", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    enunciado: `Desde lo alto de un trampolín, Carlos ve a Laura en el fondo de la piscina mirando con un ángulo de $30^\\circ$ respecto a la vertical. La altura de observación es $4$ m, la piscina tiene $3$ m de profundidad y $n_{agua}=1{,}33$.`,
+    apartados: ["Determine la distancia respecto a la vertical del trampolín a la que se encuentra Laura.", "Determine el ángulo límite entre agua y aire y realice un esquema del rayo."],
+    datos: ["$n_{aire}=1$"], puntos: 2,
+  },
+  {
+    id: "f-2019-jul-B5", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    enunciado: `Una muestra de madera de un sarcófago se ha datado por $^{14}$C con edad de $3200$ años. En la muestra se ha detectado que la cantidad de $^{14}$C ha disminuido un $32\%$ respecto a la original.`,
+    apartados: ["Calcule la vida media del $^{14}$C y el periodo de semidesintegración.", "Si la muestra actual contiene $8\\ \mu$g de $^{14}$C, calcule su actividad."],
+    datos: ["$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$M(^{14}C)=14{,}0\\ \text{u}$"], puntos: 2,
+  },
+
+  {
+    id: "f-2018-jul-A1", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    enunciado: `La masa de un objeto en la superficie terrestre es de $50$ kg.`,
+    apartados: ["Determine la masa y el peso del objeto en la superficie de Mercurio.", "Calcule a qué altura sobre Mercurio su peso se reduce a la tercera parte."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_M=3{,}30\\cdot10^{23}\\ \text{kg}$", "$R_M=2{,}44\\cdot10^6\\ \text{m}$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-A2", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    enunciado: `El nivel de intensidad sonora de la sirena de un barco es $80$ dB a $10$ m. Suponga que la sirena es un foco puntual.`,
+    apartados: ["Calcule la potencia de la sirena y la intensidad a $1$ km.", "Calcule las distancias donde se alcanza $70$ dB y donde el sonido deja de ser audible."],
+    datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-A3", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    enunciado: `Dos cargas positivas e iguales situadas en $(2,2)$ m y $(-2,-2)$ m generan en $(1,1)$ m un campo de módulo $E=5\\cdot10^3\\ \text{N C}^{-1}$.`,
+    apartados: ["Determine el valor de las cargas y el vector campo eléctrico en $(-1,-1)$ m.", "Calcule el trabajo necesario para traer una carga de $2\\ \mu$C desde el infinito hasta $(-1,-1)$ m."],
+    datos: ["$K=9\\cdot10^9\\ \text{N m}^2\\text{C}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-A4", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    enunciado: `Un sistema óptico centrado está formado por dos lentes delgadas divergentes iguales, de distancia focal $f'=-20$ cm, separadas $5$ cm. Un objeto luminoso de tamaño $y=2$ cm se sitúa a $60$ cm a la izquierda de la primera lente.`,
+    apartados: ["Determine la posición de la imagen formada por la primera lente y realice la construcción geométrica.", "Determine la posición y tamaño de la imagen final formada por las dos lentes."], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-A5", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    enunciado: `El $^{14}$C tiene un periodo de semidesintegración de $5730$ años. Inicialmente se tiene una muestra de $2$ mg.`,
+    apartados: ["Determine el tiempo para que la muestra se reduzca a $0{,}5$ mg.", "Calcule la actividad inicial."],
+    datos: ["$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$M(^{14}C)=14{,}00\\ \text{u}$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-B1", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    enunciado: `Un satélite artificial de masa $712$ kg describe una órbita circular alrededor de la Tierra a $694$ km de altura.`,
+    apartados: ["Calcule la velocidad y el periodo del satélite.", "Calcule la energía necesaria para trasladarlo a otra órbita circular a $1000$ km de altura."],
+    datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_T=5{,}97\\cdot10^{24}\\ \text{kg}$", "$R_T=6{,}37\\cdot10^6\\ \text{m}$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-B2", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    enunciado: `Una onda armónica transversal de periodo $T=4$ s se propaga en el sentido positivo del eje $x$. En $t=0$, $Y(x,0)=0{,}2\\sin(-4\\pi x+\\pi/3)$, con $x$ e $Y$ en metros.`,
+    apartados: ["Determine amplitud, frecuencia, longitud de onda y velocidad de propagación.", "Determine la velocidad y aceleración de oscilación del punto $x=0{,}40$ m en $t=8$ s."], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-B3", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    enunciado: `Dos hilos rectilíneos indefinidos y paralelos al eje $z$ están en el plano $yz$. Uno pasa por $(0,-5,0)$ cm con $I_1=30$ A en sentido $+z$; el otro pasa por $(0,5,0)$ cm con corriente $I_2$ en sentido $-z$. En el origen, $B=2{,}8\\cdot10^{-4}$ T.`,
+    apartados: ["Calcule $I_2$ y el campo magnético en $(0,10,0)$ cm.", "Calcule la fuerza magnética por unidad de longitud sobre el conductor de $(0,-5,0)$ cm debida al otro."],
+    datos: ["$\\mu_0=4\\pi\\cdot10^{-7}\\ \text{N A}^{-2}$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-B4", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    enunciado: `Un material transparente de índice $n=2$ está en aire y limitado por dos superficies planas no paralelas que forman un ángulo $\\alpha$. Un rayo incide perpendicularmente sobre la primera superficie y emerge por la segunda con $90^\\circ$ respecto a la normal, como se muestra en la figura.\n\n![Material transparente limitado por dos superficies no paralelas](/fisica-imgs/madrid/2018/extraordinaria/fisica-2018-extraordinaria-b4.png)`,
+    apartados: ["Calcule el ángulo límite material-aire y el ángulo $\\alpha$.", "Calcule el ángulo de incidencia en la primera superficie para que el ángulo de emergencia por la segunda sea igual que él."],
+    datos: ["$n_{aire}=1$"], puntos: 2,
+  },
+  {
+    id: "f-2018-jul-B5", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    enunciado: `Al iluminar un metal con luz de longitud de onda en el vacío $\\lambda=700$ nm, se emiten electrones con energía cinética máxima $0{,}45$ eV. Al cambiar la longitud de onda, la energía cinética máxima es $1{,}49$ eV.`,
+    apartados: ["Calcule la frecuencia de la luz utilizada en la segunda medida.", "Determine a partir de qué frecuencia no se observará efecto fotoeléctrico."],
+    datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$", "$h=6{,}63\\cdot10^{-34}\\ \text{J s}$"], puntos: 2,
+  },
+
   {
       id: "f-2024-jul-A1",
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
@@ -1181,7 +1504,9 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
       id: "f-2024-jul-A4",
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Optica", numero: "A.4",
-      enunciado: "Dos cristales de grosor 10 cm e índices de refracción n₁ = 1,40 y n₂ = 1,50 están separados por una capa de aire de espesor desconocido e. Un rayo incide por el punto A con ángulo de 30° y sale por el punto B. La distancia horizontal entre A y B es d = 9,2 cm.",
+      enunciado: `Dos cristales de grosor 10 cm e índices de refracción n₁ = 1,40 y n₂ = 1,50 están separados por una capa de aire de espesor desconocido e. Un rayo incide por el punto A con ángulo de 30° y sale por el punto B. La distancia horizontal entre A y B es d = 9,2 cm.
+
+![Cristales separados por aire](/fisica-imgs/madrid/2024/extraordinaria/fisica-2024-extraordinaria-a4.png)`,
       apartados: [
         "El espesor e de la capa de aire.",
         "El tiempo que tarda el rayo de luz en llegar desde el punto A hasta el punto B.",
@@ -1217,7 +1542,9 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
       id: "f-2024-jul-B2",
       año: 2024, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Ondas", numero: "B.2",
-      enunciado: "En la figura se representa la elongación de una onda transversal en t = 0 en función de la posición x. La onda se propaga en el sentido negativo del eje x. El tiempo que tarda el punto en x = 0 desde que sale de su posición inicial hasta que vuelve a la misma es de 0,5 s. La amplitud es 3 cm y la longitud de onda 1,5 m.",
+      enunciado: `En la figura se representa la elongación de una onda transversal en t = 0 en función de la posición x. La onda se propaga en el sentido negativo del eje x. El tiempo que tarda el punto en x = 0 desde que sale de su posición inicial hasta que vuelve a la misma es de 0,5 s. La amplitud es 3 cm y la longitud de onda 1,5 m.
+
+![Elongación de una onda transversal](/fisica-imgs/madrid/2024/extraordinaria/fisica-2024-extraordinaria-b2.png)`,
       apartados: [
         "La longitud de onda y la velocidad de propagación.",
         "La expresión matemática de la onda.",
@@ -1275,7 +1602,9 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
       id: "f-2022-jul-A2",
       año: 2022, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Ondas", numero: "A.2",
-      enunciado: "Por una cuerda dispuesta a lo largo del eje x viaja una onda armónica. Los elementos A (xA = 0 m) y B (xB = 2 m) oscilan en fase y cortan al eje x cada 4 s. No hay entre A y B ningún otro elemento que oscile en fase con ellos.",
+      enunciado: `Por una cuerda dispuesta a lo largo del eje x viaja una onda armónica. Los elementos A (xA = 0 m) y B (xB = 2 m) oscilan en fase y cortan al eje x cada 4 s. No hay entre A y B ningún otro elemento que oscile en fase con ellos.
+
+![Onda armónica en una cuerda](/fisica-imgs/madrid/2022/extraordinaria/fisica-2022-extraordinaria-a2.png)`,
       apartados: [
         "Calcule el valor de la velocidad de propagación.",
         "Escriba la expresión matemática de la onda, si esta viaja en el sentido negativo del eje x y en el instante inicial los elementos A y B presentan desplazamiento +10 cm y velocidad nula.",
@@ -1415,7 +1744,9 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
       id: "f-2023-jul-A4",
       año: 2023, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Optica", numero: "A.4",
-      enunciado: "Un observador está situado al borde de un estanque de profundidad H = 2 m. Su visual está a H' = 1,6 m sobre la superficie del agua. En el fondo hay un foco puntual de luz. El observador lo ve cuando mira hacia el punto A de la superficie a d = 1,2 m del borde.",
+      enunciado: `Un observador está situado al borde de un estanque de profundidad H = 2 m. Su visual está a H' = 1,6 m sobre la superficie del agua. En el fondo hay un foco puntual de luz. El observador lo ve cuando mira hacia el punto A de la superficie a d = 1,2 m del borde.
+
+![Observador al borde de un estanque](/fisica-imgs/madrid/2023/extraordinaria/fisica-2023-extraordinaria-a4.png)`,
       apartados: [
         "El índice de refracción del agua si la longitud de onda de la luz vale 375 nm en ella y 500 nm en el aire.",
         "La distancia D del foco a la pared del estanque.",
@@ -1439,7 +1770,9 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
       id: "f-2023-jul-B1",
       año: 2023, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Gravitacion", numero: "B.1",
-      enunciado: "En su aproximación al planeta Fomalhaut II, el astronauta Rocannon avista Fomalhautillo según un ángulo α = 53,13° con respecto de la radial hacia el planeta. La fuerza total es F = (9,5 î − 66,4 ĵ) N sobre una nave de masa conjunta 8000 kg.",
+      enunciado: `En su aproximación al planeta Fomalhaut II, el astronauta Rocannon avista Fomalhautillo según un ángulo α = 53,13° con respecto de la radial hacia el planeta. La fuerza total es F = (9,5 î − 66,4 ĵ) N sobre una nave de masa conjunta 8000 kg.
+
+![Aproximación al planeta Fomalhaut II](/fisica-imgs/madrid/2023/extraordinaria/fisica-2023-extraordinaria-b1.png)`,
       apartados: [
         "¿A qué distancia R' se encuentra Rocannon del satélite?",
         "¿A qué distancia R se encuentra Rocannon del planeta?",

@@ -34,13 +34,14 @@ const defaults: Preferences = {
 }
 
 // onboarding.subjects son las etiquetas largas que usa el onboarding
-// (los 4 únicos temarios activos en la beta privada); Asignatura por
+// (los temarios activos en la beta privada); Asignatura por
 // defecto / Historial usan los slugs cortos de /examenes (page-client.tsx).
 const ONBOARDING_LABEL_TO_EXAM_SLUG: Record<string, string> = {
   'Matemáticas II': 'mates',
   'Matemáticas CCSS': 'matematicas_ccss',
   'Lengua Castellana': 'lengua',
   'Historia de España': 'historia',
+  'Física': 'fisica',
 }
 
 // Fallback for "Asignatura por defecto" only, for the brief window before

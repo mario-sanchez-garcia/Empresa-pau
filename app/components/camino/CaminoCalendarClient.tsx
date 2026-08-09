@@ -1730,6 +1730,7 @@ export default function CaminoCalendarClient() {
       'Matemáticas CCSS': 'matematicas_ccss',
       'Lengua Castellana': 'lengua',
       'Historia de España': 'historia_espana',
+      'Física': 'fisica',
     }
     const slug = SUBJECT_TO_SLUG[subjectLabel]
     if (!slug) return
@@ -3883,6 +3884,7 @@ const ADDABLE_SUBJECT_OPTS = [
   { id: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
   { id: 'Lengua Castellana', color: '#0891b2', bg: '#ecfeff' },
   { id: 'Historia de España', color: '#b45309', bg: '#fff7ed' },
+  { id: 'Física', color: '#0f766e', bg: '#f0fdfa' },
 ]
 
 function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {

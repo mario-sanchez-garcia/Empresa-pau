@@ -94,12 +94,16 @@ function deterministicOptions(
     usedSubjects.add(leastProgress.subject)
   }
 
+  // Prefiere una asignatura todavía no usada; una vez se han agotado todas
+  // las distintas (p.ej. un alumno con una sola asignatura activa), sigue
+  // rellenando repitiendo — mejor una asignatura repetida que quedarse con
+  // menos de 3 opciones. offset<20 acota el bucle sin depender de
+  // activeSubjects.length (que rompía este límite con solo 1 asignatura).
   let offset = 0
-  while (options.length < OPTIONS_COUNT && activeSubjects.length > 0) {
+  while (options.length < OPTIONS_COUNT && activeSubjects.length > 0 && offset < 20) {
     const pick = fallbackSubject(activeSubjects, offset)
     offset += 1
-    if (offset > activeSubjects.length * 2) break // evita bucle infinito si activeSubjects está vacío o es 1
-    if (usedSubjects.has(pick) && activeSubjects.length >= OPTIONS_COUNT - options.length) continue
+    if (usedSubjects.has(pick) && usedSubjects.size < activeSubjects.length) continue
     options.push({ subject: pick, focusNote: 'Un repaso general no viene mal — mantén el ritmo' })
     usedSubjects.add(pick)
   }

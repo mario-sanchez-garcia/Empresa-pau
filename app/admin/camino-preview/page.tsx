@@ -29,7 +29,7 @@ type V2Row = {
   practice_prompt: string | null
 }
 
-type SubjectKey = 'matematicas_ii' | 'historia_espana'
+type SubjectKey = 'matematicas_ii' | 'historia_espana' | 'fisica'
 
 type LoadState =
   | { status: 'idle' }
@@ -173,6 +173,7 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
 const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
   { key: 'matematicas_ii', label: 'Matemáticas II', blockOrder: ['Álgebra', 'Geometría', 'Análisis', 'Probabilidad'] },
   { key: 'historia_espana', label: 'Historia de España' },
+  { key: 'fisica', label: 'Física', blockOrder: ['Campo Gravitatorio', 'Campo Electromagnético', 'Vibraciones y Ondas', 'Óptica Geométrica', 'Física del Siglo XX'] },
 ]
 
 // ─── Page ────────────────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/l
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
+import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { CONTENT_TYPE_COLORS } from '@/app/lib/camino/contentTypeColors'
 import DivisionIcon from '@/components/shared/DivisionIcon'
@@ -886,6 +887,13 @@ export default function CaminoCalendarClient() {
   const [weeklyXP, setWeeklyXP] = useState(0)
   const [weeklySimsCompleted, setWeeklySimsCompleted] = useState(0)
   const [weeklyExamsCompleted, setWeeklyExamsCompleted] = useState(0)
+  // Asignaturas donde el alumno ya trabajó hoy por su cuenta desde
+  // /examenes o /simulacros (no vía Camino, que ya se refleja como misión
+  // normal en camino_calendar con source='free_initiative' — ver
+  // /api/camino/complete-mission). Esas dos fuentes no tienen un tema
+  // exacto enlazable a v2_sort_order, así que aquí solo se refleja a nivel
+  // de asignatura+día, sin intentar excluir contenido del plan por ello.
+  const [freeActivitySubjectsToday, setFreeActivitySubjectsToday] = useState<string[]>([])
   const [rankingOpen, setRankingOpen] = useState(false)
 
   const [showFullRanking, setShowFullRanking] = useState(false)
@@ -1069,7 +1077,8 @@ export default function CaminoCalendarClient() {
       const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, fisicaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult, examsWeekResult] = await Promise.all([
+      const todayStr = todayMadrid()
+      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, fisicaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult, examsWeekResult, freeExamsToday, freeSimsToday] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
@@ -1086,8 +1095,21 @@ export default function CaminoCalendarClient() {
         // misma condición que usa award-exam-xp/route.ts para considerar una
         // corrección real (no evaluable = no cuenta).
         supabase.from('historial_examenes').select('*', { count: 'exact', head: true }).eq('user_id', userId).not('nota', 'is', null).gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
+        // Práctica libre de hoy fuera de Camino (Exámenes/Simulacros directos)
+        // — sin v2_sort_order/tema exacto enlazable, así que solo se agrega a
+        // nivel de asignatura para el indicador "también trabajaste hoy".
+        supabase.from('historial_examenes').select('asignatura').eq('user_id', userId).neq('tipo', 'Camino PAU').not('nota', 'is', null).gte('created_at', todayStr + 'T00:00:00Z').lte('created_at', todayStr + 'T23:59:59Z'),
+        supabase.from('historial_simulacros').select('asignatura').eq('user_id', userId).eq('estado', 'completado').gte('created_at', todayStr + 'T00:00:00Z').lte('created_at', todayStr + 'T23:59:59Z'),
       ])
       if (cancelled) return
+      const freeSubjects = new Set<string>()
+      for (const row of (freeExamsToday.data ?? []) as Array<{ asignatura: string }>) {
+        freeSubjects.add(subjectLabelFromSlug(caminoSubjectFromSimulacro(row.asignatura)))
+      }
+      for (const row of (freeSimsToday.data ?? []) as Array<{ asignatura: string }>) {
+        freeSubjects.add(subjectLabelFromSlug(caminoSubjectFromSimulacro(row.asignatura)))
+      }
+      setFreeActivitySubjectsToday([...freeSubjects])
       if (calDays && calDays.length > 0) {
         setCalendar(calDays)
         saveCalendarWeeksToCache(calDays)
@@ -2003,6 +2025,20 @@ export default function CaminoCalendarClient() {
             <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales · sigue con las bonus</span>
           </div>
 
+          {/* Trabajo de hoy hecho por iniciativa propia fuera de Camino
+              (Exámenes/Simulacros directos) — sin tema exacto enlazable a una
+              misión, así que se muestra aquí a nivel de asignatura en vez de
+              como una tarjeta de misión. El trabajo hecho dentro de Camino
+              (Mis Cursos) ya aparece como misión normal más abajo, marcada
+              "✎ Por tu cuenta". */}
+          {freeActivitySubjectsToday.length > 0 && (
+            <div style={{ padding: '10px 20px', borderBottom: '1px solid #f1f5f9', background: '#ecfdf5' }}>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: '#059669' }}>
+                ✎ Hoy también trabajaste por tu cuenta: {freeActivitySubjectsToday.join(', ')}
+              </span>
+            </div>
+          )}
+
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
             <div className="camino-mission-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb', cursor: 'default' }}>
@@ -2086,7 +2122,11 @@ export default function CaminoCalendarClient() {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
                         <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
                         {mission.block && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.block}</span></>}
-                        <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f3e8ff', color: '#7c3aed' }}>Extra</span>
+                        {mission.metadata?.free_initiative ? (
+                          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#ecfdf5', color: '#059669' }}>✎ Por tu cuenta</span>
+                        ) : (
+                          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f3e8ff', color: '#7c3aed' }}>Extra</span>
+                        )}
                         {!!mission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡ Exprés</span>}
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: mission.status === 'done' ? '#94a3b8' : '#0f172a', lineHeight: 1.3, textDecoration: mission.status === 'done' ? 'line-through' : 'none', marginBottom: 8 }}>{mission.title}</div>
@@ -3525,7 +3565,11 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
   return (
     <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
       {days.map(day => {
-        const main = day.missions.filter(m => m.role === 'main')
+        // Igual que en DayCard: el trabajo hecho por iniciativa propia
+        // (metadata.free_initiative) cuenta como actividad real del día,
+        // aunque se guarde como misión 'bonus' — si no, ese día se seguía
+        // viendo como "Repaso libre" pese a haber trabajo real.
+        const main = day.missions.filter(m => m.role === 'main' || m.metadata?.free_initiative)
         const done = main.length > 0 && main.every(m => m.status === 'done')
         const subjects = [...new Set(main.map(m => m.subject))]
         const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : 'Repaso libre'
@@ -3613,13 +3657,18 @@ function WeeklyGoalCard({ completed, target }: { completed: number; target: numb
 function MissionRow({ mission, onPostpone, onComplete, compact = false }: { mission: Mission; onPostpone: (id: string) => void; onComplete?: (mission: Mission) => void; compact?: boolean }) {
   const theme = themeFor(mission.subject)
   const target = hrefForMission(mission)
-  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.missionType === 'review' && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-black text-indigo-700">Repaso</span>}{mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
+  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.missionType === 'review' && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-black text-indigo-700">Repaso</span>}{mission.metadata?.free_initiative ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">✎ Por tu cuenta</span> : mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
-  const main = day.missions.filter(mission => mission.role === 'main')
+  // Las misiones 'bonus' con metadata.free_initiative (trabajo hecho por
+  // iniciativa propia, ver /api/camino/complete-mission) cuentan aquí igual
+  // que una misión 'main' — si no, un día donde el alumno solo trabajó por
+  // su cuenta se veía como "Descanso o repaso libre" pese a haber hecho
+  // algo real.
+  const main = day.missions.filter(mission => mission.role === 'main' || mission.metadata?.free_initiative)
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}{!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 type ExamDraft = { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }

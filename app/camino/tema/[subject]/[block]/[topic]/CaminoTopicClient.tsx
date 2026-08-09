@@ -875,6 +875,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             } else if (cmJson.reason === 'already_completed') {
               setMissionXpStatus('already_completed')
               toastText = `Ya completaste esta misión hoy. La corrección se guarda igual.`
+            } else if (cmJson.reason === 'free_initiative_recorded') {
+              // El servidor ya marcó este tema como completado por iniciativa
+              // propia (cola avanzada al siguiente tema distinto, calendario
+              // de hoy reflejado) — ver /api/camino/complete-mission.
+              setMissionXpStatus('free_practice')
+              toastText = `Práctica libre guardada · reflejada en tu calendario de hoy. Kairo no volverá a programarte este tema.`
             } else if (cmJson.reason === 'no_pending_mission') {
               setMissionXpStatus('free_practice')
               toastText = `Práctica libre guardada. El XP se gana con las misiones de tu Camino.`

@@ -4,6 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { awardXp } from '@/app/lib/camino/awardXp'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
+import { getTopicByV2SortOrder, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,11 +82,68 @@ export async function POST(request: NextRequest) {
         .lte('scheduled_date', today)
         .limit(10)
 
-      const reason = existing?.some(row => row.status === 'completed')
-        ? 'already_completed'
-        : 'no_pending_mission'
+      if (existing?.some(row => row.status === 'completed')) {
+        return NextResponse.json({ success: false, reason: 'already_completed' })
+      }
 
-      return NextResponse.json({ success: false, reason })
+      // Ninguna fila pendiente/missed/completada para este subject+v2_sort_order:
+      // el alumno ha hecho este contenido por iniciativa propia (típicamente
+      // abierto directo desde La Zona → Mis Cursos), sin que Kairo se lo
+      // hubiera asignado todavía. Principio de diseño: lo que Kairo programa
+      // nunca debe repetir contenido ya hecho, venga de donde venga — así que
+      // en vez de devolver simplemente "sin misión pendiente":
+      //   1. Se marca la fila de user_learning_queue como completada. El
+      //      motor de generación (ensureCaminoCalendar) solo lee
+      //      queue_status='pending', así que deja de considerar este tema y
+      //      el cursor de esa asignatura avanza solo al siguiente contenido
+      //      distinto la próxima vez que genere el calendario.
+      //   2. Se deja un registro 'completed' en camino_calendar fechado hoy,
+      //      con source='free_initiative' — así el calendario semanal refleja
+      //      el trabajo hecho por libre iniciativa (tachado/hecho, distinto
+      //      visualmente de una misión asignada), e injectWeakReviewMissions
+      //      (que también excluye status='completed') tampoco vuelve a
+      //      sugerirlo como repaso.
+      // No se otorga XP de misión aquí: sigue siendo "práctica libre" como ya
+      // comunica el toast del cliente — esto solo corrige que Kairo deje de
+      // volver a programar algo que el alumno ya hizo por su cuenta.
+      const { data: queueRow } = await db
+        .from('user_learning_queue')
+        .select('id, block_key')
+        .eq('user_id', user.id)
+        .eq('subject', subject)
+        .eq('v2_sort_order', v2SortOrder)
+        .in('queue_status', ['pending', 'scheduled'])
+        .limit(1)
+        .maybeSingle()
+
+      if (queueRow?.id) {
+        await db
+          .from('user_learning_queue')
+          .update({ queue_status: 'completed' })
+          .eq('id', queueRow.id)
+      }
+
+      const topic = getTopicByV2SortOrder(subject, v2SortOrder)
+      await db.from('camino_calendar').upsert({
+        user_id: user.id,
+        scheduled_date: today,
+        subject,
+        v2_sort_order: v2SortOrder,
+        title: sanitizeLessonTitle(title ?? topic?.title ?? 'Práctica libre'),
+        block_key: queueRow?.block_key ?? null,
+        block_slug: topic?.blockSlug ?? null,
+        mission_type: missionType,
+        is_main: false,
+        is_bonus: true,
+        status: 'completed',
+        completed_at: now,
+        xp_awarded: 0,
+        source: 'free_initiative',
+        generated_by: 'free_initiative_v1',
+        metadata: { free_initiative: true },
+      }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order' })
+
+      return NextResponse.json({ success: false, reason: 'free_initiative_recorded' })
     }
 
     // PASO 2 — Marcar calendario como completado. Acepta tanto 'pending' como

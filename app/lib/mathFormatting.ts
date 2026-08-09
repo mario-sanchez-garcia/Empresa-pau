@@ -46,6 +46,7 @@ export function normalizeExamStatement(input?: string | null) {
   text = mapOutsideMath(text, formatChemicalNotation)
   text = mapOutsideMath(text, formatBulletPoints)
   text = mapOutsideMath(text, formatExamStructure)
+  text = protectTextOnlySymbolsInMath(text)
 
   return normalizeDisplayMathBlocks(text
     .replace(/[ \t]{2,}/g, ' ')
@@ -264,6 +265,20 @@ function normalizeExistingMath(text: string) {
   }))
 }
 
+// KaTeX ships no glyph for currency signs in math mode — it emits a
+// "No character metrics" warning and typesets nothing, so "50 €/m²" silently
+// lost its "€" on screen. Wrapping them in \text{} renders them properly.
+// Idempotent: an already-wrapped symbol is rewritten to itself.
+function protectTextOnlySymbolsInMath(text: string) {
+  return mapOutsideCodeFences(text, part => part.replace(MATH_TOKEN, token => {
+    const delimiter = token.startsWith('$$') ? '$$' : '$'
+    const body = token
+      .slice(delimiter.length, -delimiter.length)
+      .replace(/\\text\{([€£¥])\}|([€£¥])/g, (_, wrapped, bare) => `\\text{${wrapped ?? bare}}`)
+    return `${delimiter}${body}${delimiter}`
+  }))
+}
+
 function mapOutsideMath(text: string, formatter: (value: string) => string) {
   return mapOutsideCodeFences(text, part => part
     .split(MATH_TOKEN)
@@ -302,14 +317,28 @@ function repairLostLatex(text: string) {
     .replace(new RegExp(`(^|[^\\\\\\w])(egin|end)\\{(${ENVIRONMENTS})\\}`, 'g'),
       (_, prefix, command, environment) => `${prefix}\\${command === 'egin' ? 'begin' : 'end'}{${environment}}`)
     .replace(/(^|[^\\\w])(dfrac|tfrac|frac|sqrt)\s*(?=\{)/g, '$1\\$2')
-    .replace(/(^|[^\\\w])(int|sum|prod|cdot|times|leq|geq|neq|approx|rightarrow|text)\b/g, '$1\\$2')
+    // Bare-word repairs must never fire on ordinary prose. Measured across the
+    // whole question corpus, `int|sum|prod|text|times` matched 868 times and
+    // EVERY hit was a real word — "intérpretes", "To sum up", "el text
+    // anterior", "ancient times", "texts" — never a backslash-stripped macro.
+    // Worse, \b treats the boundary before an accented letter as a word break,
+    // so "intérpretes" became "\intérpretes", and a later wrapper then pulled
+    // the surrounding prose into a math span ("Shakespeare's times," rendered
+    // as $s \times,$). So those five tokens are now repaired only when
+    // neighbouring syntax actually proves math context, and the operator-only
+    // tokens use a Unicode-aware boundary that accented letters cannot fake.
+    .replace(/(^|[^\\\p{L}\d])(cdot|leq|geq|neq|approx|rightarrow)(?![\p{L}\d])/gu, '$1\\$2')
+    .replace(/(^|[^\\\p{L}\d])(int|sum|prod)(?=[_^])/gu, '$1\\$2')
+    .replace(/(^|[^\\\p{L}\d])(text)(?=\{)/gu, '$1\\$2')
     .replace(/(^|[^\\\w])(leftrightarrow|rightleftharpoons)\b/g, '$1\\rightleftharpoons')
     .replace(/\bdisplaystylelim\b/g, '\\displaystyle\\lim')
     .replace(/(?<!\\)mathbbR\b|(?<!\\)mathbb\{R\}/g, '\\mathbb{R}')
     .replace(/(^|[^\\\w])(?:ec|vec)\{([A-Za-z])\}/g, '$1\\vec{$2}')
     .replace(/(^|[^\\\w])hat\{([ijk])\}/g, '$1\\hat{$2}')
-    .replace(new RegExp(`\\btext(${UNITS}|Sol)\\b`, 'g'), '\\text{$1}')
-    .replace(/\b(infty|infinity)\b/g, '\\infty')
+    // Only a quantity turns "textkg" into a unit: without the leading number
+    // this also rewrote the English plural "texts" into "\text{s}".
+    .replace(new RegExp(`(\\d\\s*)text(${UNITS}|Sol)\\b`, 'g'), '$1\\text{$2}')
+    .replace(/(?<!\\)\b(infty|infinity)\b/g, '\\infty')
     .replace(/\blim_\{([^{}]*?)\s+o\s+([^{}]+)\}/g, '\\lim_{$1 \\to $2}')
     .replace(/\bx\s+o\s+(\\infty|[+-]?\d+)/g, 'x \\to $1')
     .replace(/\b(Delta)\b(?=\s*[A-ZHGS]\b|\s*[=+\-])/g, '\\Delta')
@@ -350,7 +379,11 @@ function formatLatexEnvironment(environment: string, body: string) {
     .replace(/\s*;\s*/g, ' \\\\ ')
     .replace(/\s*\|\s*/g, ' & ')
     .replace(/(?<!\\)\\\s+(?=\d|[A-Za-z])/g, () => ` ${String.raw`\\`} `)
-    .replace(/\s*\\\\\s*/g, () => ` ${String.raw`\\`}\n`)
+    // A row separator can carry an optional spacing argument ("\\[4pt]"). The
+    // newline must go after that argument, not between them: splitting them
+    // starts the next row with a literal "[4pt]", which KaTeX happily
+    // typesets as a visible cell instead of applying it as row spacing.
+    .replace(/\s*\\\\(\s*\[[^\]\n]*\])?\s*/g, (_, spacing) => ` ${String.raw`\\`}${spacing ? spacing.trim() : ''}\n`)
     .replace(/\s*&\s*/g, ' & ')
     .replace(/[ \t]{2,}/g, ' ')
     .trim()
@@ -481,7 +514,17 @@ function convertPlainTextEquationSystems(text: string) {
   return text.replace(
     /([:：]\s*\n)((?:[ \t]*[^\n]{3,80}[=<>≤≥][^\n]*\n){2,})(?=\n)/g,
     (match, colon, body) => {
-      const lines = body.split('\n').map((l: string) => l.trim()).filter(Boolean)
+      const lines = body
+        .split('\n')
+        .map((l: string) => l.trim())
+        .filter(Boolean)
+        // An equation that already arrived wrapped in its own display block
+        // ("$$x - y + z = -1$$") would otherwise be nested inside the $$…$$
+        // built below, and the inner delimiters then split the environment
+        // into stray "$$\begin{cases}$$" fragments with the equations left
+        // outside as prose. Unwrap matching delimiters before assembling.
+        .map((l: string) => l.replace(/^(\$\$|\$)([\s\S]*)\1$/, '$2').trim())
+        .filter(Boolean)
       const isSystem = lines.every((l: string) => /[=<>≤≥]/.test(l) && l.length < 80)
       if (!isSystem) return match
       const latexLines = lines.map((l: string) =>
@@ -509,7 +552,12 @@ function normalizePdfGlyphs(text: string) {
 function normalizeSoftLineBreaks(text: string) {
   return text
     .replace(/([A-Za-z\u00c0-\u017f])-\s*\n\s*([A-Za-z\u00c0-\u017f])/g, '$1$2')
-    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[)]|[-\u2022]|\$\$)/gi, '$1 ')
+    // The lookahead lists every line start that must survive as a real break,
+    // because formatExamStructure later needs the newline to recognise a
+    // section marker. "2.1."-style numbered sub-questions were missing, so in
+    // Lengua the whole exercise collapsed into one running paragraph instead
+    // of one bold sub-question per line, unlike every other subject.
+    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[)]|[0-9]+\.[0-9]+\.|[-\u2022]|\$\$)/gi, '$1 ')
 }
 
 function formatBulletPoints(text: string) {
@@ -617,7 +665,17 @@ function formatExamStructure(text: string) {
     .replace(/(^|\n)\s*([ivx]+\))/gi, '$1**$2**')
     .replace(/\b(Desarrolle el tema:|Tema:|Conceptos?:|Defina:|Definiciones?:)/gi, '**$1**')
     .replace(/(\*\*)?(\(\s*\d+(?:[,.]\d+)?\s*puntos?\s*\))(\*\*)?/gi,
-      (match, before, score, after) => before && after ? match : `**${score}**`)
+      (match: string, before: string, score: string, after: string, offset: number, whole: string) => {
+        if (before && after) return match
+        // Never re-bold a score that already sits inside a bold span, such as
+        // the heading "**Ejercicio 2. Pregunta 2.2 (2,5 puntos).**". Doing so
+        // closes and reopens the span mid-sentence, and markdown then renders
+        // "**Ejercicio 2. Pregunta 2.2 **(2,5 puntos)**.**" as broken text.
+        // An odd number of "**" earlier on the line means we are inside one.
+        const lineStart = whole.lastIndexOf('\n', offset) + 1
+        const marksBefore = (whole.slice(lineStart, offset).match(/\*\*/g) || []).length
+        return marksBefore % 2 === 1 ? match : `**${score}**`
+      })
     .replace(/\n{3,}/g, '\n\n')
 }
 

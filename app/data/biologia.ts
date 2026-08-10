@@ -1103,5 +1103,363 @@ d) Indique cuál es la ploidía y el número de cromátidas por cromosoma en una
       }
     ]
   },
+  {
+    id: 2019,
+    año: 2019,
+    tipo: "Ordinaria",
+    asignatura: "Biología",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "bio-2019-A-1",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        tema: "Con relación a las aportaciones de Mendel al estudio de la herencia",
+        enunciado: `Con relación a las aportaciones de Mendel al estudio de la herencia:
+El esquema adjunto muestra la transmisión de un carácter en una familia, representado por los símbolos oscuros, producido por un solo gen autosómico con dos alelos. Los cuadrados representan hombres y los círculos mujeres.
+
+![Pedigrí de transmisión hereditaria](/biologia-imgs/madrid/2019/ordinaria/pregunta-A1-pedigri.png)
+
+a) Indique si el carácter presenta herencia dominante o recesiva. Razone la respuesta (0,75 puntos).
+b) Indique los genotipos de los individuos de la generación I y de los individuos II.4 y II.5, utilizando “A” para el alelo dominante y “a” para el alelo recesivo (0,5 puntos).
+c) Defina alelo, fenotipo y cruzamiento prueba (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-A-2",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        tema: "Los lípidos son uno de los componentes de las membranas biológicas",
+        enunciado: `Los lípidos son uno de los componentes de las membranas biológicas:
+a) Explique la composición química de los fosfolípidos. Explique a qué se debe su carácter anfipático y cómo se disponen en las membranas biológicas (1,5 puntos).
+b) Explique qué son los ácidos grasos y de qué depende su punto de fusión (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-A-3",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        tema: "Con respecto a los microorganismos y su utilización a nivel industrial",
+        enunciado: `Con respecto a los microorganismos y su utilización a nivel industrial:
+a) Con relación al proceso de fabricación del pan, indique qué microorganismo interviene en dicho proceso, el tipo de reacción que lleva a cabo, así como el sustrato y los productos generados en la misma (1 punto).
+b) Cite dos ejemplos de antibióticos obtenidos a partir de microorganismos, uno de origen fúngico y otro de origen bacteriano (0,5 puntos).
+c) Cite dos ejemplos de hormonas de interés sanitario sintetizadas a nivel industrial por microorganismos modificados genéticamente (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-A-4",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        tema: "Referente a la glucolisis",
+        enunciado: `Referente a la glucolisis:
+a) Explique razonadamente si la glucolisis es un proceso anabólico o catabólico (0,5 puntos).
+b) Indique cuáles son los productos de este proceso metabólico y su localización a nivel celular (1 punto).
+c) Explique cómo se produce la síntesis de ATP en la glucolisis (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-A-5",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        tema: "Con relación al ciclo celular",
+        enunciado: `Con relación al ciclo celular:
+a) Mencione un proceso característico que ocurra en la siguientes fases del ciclo celular de una célula vegetal: G1, S, G2, anafase mitótica y citocinesis (1,25 puntos).
+b) ¿Cuándo se dice que una célula se encuentra en la denominada fase G0? Mencione un ejemplo de células que nunca se encuentran en dicha fase (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-B-1",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        tema: "En relación a las células animales y vegetales",
+        enunciado: `En relación a las células animales y vegetales:
+
+![Esquema de célula vegetal con orgánulos numerados](/biologia-imgs/madrid/2019/ordinaria/pregunta-B1-celula-vegetal.png)
+
+a) Identifique en el esquema adjunto, los componentes numerados del 1 al 8 (1 punto).
+b) Indique dos componentes presentes en las células vegetales pero no en las animales y la función de los mismos (1 punto).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-B-2",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        tema: "En relación con la respuesta inmune",
+        enunciado: `En relación con la respuesta inmune:
+a) Defina inmunidad humoral e inmunidad celular, indicando el elemento celular o molecular más característico de cada una de ellas (0,5 puntos).
+b) Defina anticuerpo y antígeno y explique qué entiende por especificidad en la relación antígeno-anticuerpo (0,75 puntos).
+c) Defina enfermedad autoinmune e indique dos ejemplos (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-B-3",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        tema: "Respecto a la mutación",
+        enunciado: `Respecto a la mutación:
+a) Describa brevemente las causas por las que se originan las mutaciones (0,5 puntos).
+b) Describa brevemente los tipos de mutación génica o puntual (0,5 puntos).
+c) Defina brevemente los tipos más frecuentes de mutación cromosómica (1 punto).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-B-4",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        tema: "En relación con las biomoléculas",
+        enunciado: `En relación con las biomoléculas:
+a) Defina cofactor enzimático y coenzima, e indique la diferencia entre ambos. Nombre un ejemplo de cada uno de ellos (1,25 puntos).
+b) Indique un ejemplo de cada una de las biomoléculas siguientes: polisacárido con función estructural, ácido nucleico con función estructural y proteína con función estructural (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2019-B-5",
+        año: 2019,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        tema: "Con relación a la microbiología",
+        enunciado: `Con relación a la microbiología:
+a) Defina los conceptos: infección, pandemia, patógeno y esterilización (1 punto).
+b) Indique cuatro enfermedades infecciosas humanas no bacterianas y sus respectivos agentes causantes (1 punto).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+    ],
+  },
+  {
+    id: 2018,
+    año: 2018,
+    tipo: "Ordinaria",
+    asignatura: "Biología",
+    comunidad: "Madrid",
+    preguntas: [
+      {
+        id: "bio-2018-A-1",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        tema: "En relación con la expresión del material genético",
+        enunciado: `En relación con la expresión del material genético:
+a) Explique la relación entre mutación y evolución (0,5 puntos).
+b) En la siguiente secuencia de nucleótidos de una cadena de ADN: 3’TTGACGTAA 5’ introduzca una deleción de una base en posición 5 e indique la secuencia de ADN obtenida. Explique si el péptido obtenido, una vez producida la transcripción y la traducción, sería el mismo o diferente (0,5 puntos).
+c) Copie y complete la siguiente tabla (1 punto).
+
+![Tabla para completar sobre ARNt y ARNr](/biologia-imgs/madrid/2018/ordinaria/pregunta-A1c-tabla-arn.png)`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-A-2",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        tema: "Con respecto a la estructura, composición y metabolismo de los microorganismos",
+        enunciado: `Con respecto a la estructura, composición y metabolismo de los microorganismos:
+Para los siguientes microorganismos: 1. Cianobacteria; 2. Enterobacteria; 3. Alga verde unicelular; 4. Levadura:
+a) Indique el principal componente de su pared celular (1 punto).
+b) Relacione los anteriores microorganismos con las siguientes tipologías: a. Eucariota fotoautótrofo; b. Eucariota quimioheterótrofo; c. Procariota fotoautótrofo; d. Procariota quimioheterótrofo (1 punto).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-A-3",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        tema: "En relación con los procesos de división celular",
+        enunciado: `En relación con los procesos de división celular:
+La célula representada en el esquema pertenece a una especie diploide:
+
+![Esquema de división celular](/biologia-imgs/madrid/2018/ordinaria/pregunta-A3-division-celular.png)
+
+a) Indique cuántos cromosomas tiene esta especie y justifique si es animal o vegetal (0,5 puntos).
+b) Indique a qué proceso, y a qué fase concreta de ese proceso, de división celular corresponde la imagen representada. Indique cuál es la ploidía de las células hijas resultantes del mismo (0,75 puntos).
+c) Nombre y describa el proceso sufrido por los cromosomas representados con fragmentos blancos y negros e indique en qué fase se ha producido dicho proceso (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-A-4",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        tema: "Referente a las biomoléculas",
+        enunciado: `Referente a las biomoléculas:
+a) Indique la reacción que está representada en la figura, explique los grupos y moléculas implicadas en esta reacción y especifique qué tipo de macromoléculas se forman (1 punto).
+
+![Reacción de formación del enlace peptídico](/biologia-imgs/madrid/2018/ordinaria/pregunta-A4a-enlace-peptidico.png)
+
+b) Defina brevemente los siguientes términos: anfipático, anfótero, anómero y enantiómero (1 punto).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-A-5",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        tema: "Con respecto a algunas estructuras celulares",
+        enunciado: `Con respecto a algunas estructuras celulares:
+a) Indique la estructura, composición molecular, función y localización de los ribosomas eucarióticos (1 punto).
+b) Indique la relación funcional entre el proceso de endocitosis y los lisosomas (0,5 puntos).
+c) Indique cuál es la estructura del centrosoma eucariótico y su función (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-B-1",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        tema: "Con relación al metabolismo de los seres vivos",
+        enunciado: `Con relación al metabolismo de los seres vivos:
+a) Defina qué es el metabolismo quimioheterótrofo (0,5 puntos).
+b) Indique el nombre de la vía metabólica correspondiente a cada definición (1,5 puntos).
+1. Producción de ATP aprovechando la energía que liberan los H+ al volver a la matriz mitocondrial.
+2. Degradación de glucosa con formación de piruvato y NADH.
+3. Reducción del O2, formación de H2O y creación de un gradiente quimiosmótico.
+4. Formación de CO2 y poder reductor en forma de NADH y FADH2 para la obtención de energía.
+5. Regeneración de NAD+, formación de CO2 y etanol.
+6. Degradación de ácidos grasos con producción de Acetil-CoA, NADH y FADH2.`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-B-2",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        tema: "Con relación a las aportaciones de Mendel al estudio de la herencia",
+        enunciado: `Con relación a las aportaciones de Mendel al estudio de la herencia:
+El esquema adjunto muestra la transmisión de un carácter (representado por los símbolos oscuros) en una familia, producido por un solo gen autosómico con dos alelos (los cuadrados representan hombres y los círculos mujeres).
+
+![Pedigrí familiar de transmisión hereditaria](/biologia-imgs/madrid/2018/ordinaria/pregunta-B2-pedigri.png)
+
+a) Indique si el carácter presenta herencia dominante o recesiva. Razone la respuesta (0,75 puntos).
+b) Indique los genotipos de los individuos de la generación I y los descendientes de éstos (II.2 al II.5), utilizando “A” para el alelo dominante y “a” para el alelo recesivo (0,75 puntos).
+c) Explique la diferencia entre un gen autosómico y un gen ligado al sexo (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-B-3",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        tema: "En relación con los antígenos",
+        enunciado: `En relación con los antígenos:
+a) Defínalos e indique su naturaleza química (0,5 puntos).
+b) Cite el nombre de las zonas de unión del antígeno y el anticuerpo respectivamente (0,5 puntos).
+c) Nombre y describa brevemente los tipos de reacción antígeno-anticuerpo (1 punto).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-B-4",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        tema: "En relación al papel de los microorganismos en los ciclos biogeoquímicos",
+        enunciado: `En relación al papel de los microorganismos en los ciclos biogeoquímicos:
+Las bacterias del género Rhizobium son organismos simbióticos:
+a) ¿Qué nombre recibe la asociación simbiótica que forman? ¿Con qué organismos la forman? ¿A qué parte u órgano concreto del organismo anterior se asocian? (1 punto).
+b) ¿Para qué ciclo biogeoquímico son importantes los Rhizobium? ¿Qué función realizan los Rhizobium en dicho ciclo biogeoquímico? (0,5 puntos).
+c) Explique en qué benefician los Rhizobium al suelo y al otro organismo simbiótico (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+      {
+        id: "bio-2018-B-5",
+        año: 2018,
+        convocatoria: "Ordinaria",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        tema: "En relación con las vitaminas como biomoléculas",
+        enunciado: `En relación con las vitaminas como biomoléculas:
+a) Cite seis ejemplos de vitaminas indicando si son hidrosolubles o liposolubles (0,75 puntos).
+b) Indique qué papel juegan las vitaminas en el metabolismo (0,5 puntos).
+c) Explique por qué es necesario que los seres humanos tomemos vitaminas en la dieta y si esto le ocurre a todos los organismos. Indique si un exceso de vitaminas puede ser perjudicial para la salud y con qué tipo de vitaminas ocurriría (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
+      },
+    ],
+  },
   ...examenesBiologiaCataluna,
 ]

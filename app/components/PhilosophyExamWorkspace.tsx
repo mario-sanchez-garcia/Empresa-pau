@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Camera, Check, ChevronDown, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
@@ -424,8 +425,12 @@ type PhiloFilterOption = { label: string; active: boolean; onSelect: () => void 
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: PhiloFilterOption[] }) {
   const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
+  const [mounted, setMounted] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const hasValue = options.some(o => o.active)
+
+  useEffect(() => { setMounted(true) }, [])
 
   // Antes el menú era position:absolute + left:0 (CSS compartida en
   // globals.css) dentro de .exams-filter-bar (overflow-x:auto, que por el
@@ -438,16 +443,26 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
     if (rect) {
       const menuWidth = Math.min(240, window.innerWidth - 24)
       const left = Math.min(rect.left, window.innerWidth - menuWidth - 12)
+      const availableBelow = Math.max(180, window.innerHeight - rect.bottom - 16)
       setMenuStyle({
         position: 'fixed',
         top: rect.bottom + 4,
         left: Math.max(12, left),
         width: menuWidth,
+        maxHeight: Math.min(360, availableBelow),
+        overflowY: 'auto',
         zIndex: 200
       })
     }
     setOpen(true)
   }
+
+  useEffect(() => {
+    if (!open) return
+    window.requestAnimationFrame(() => {
+      if (menuRef.current) menuRef.current.scrollTop = 0
+    })
+  }, [open, options])
 
   useEffect(() => {
     if (!open) return
@@ -482,10 +497,15 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
           }}
         />
       </button>
-      {open && (
+      {/* El menú va en un portal a <body>: .exams-workspace lleva .pau-reveal,
+          cuya animación con fill-mode "both" deja un transform aplicado de
+          forma permanente, y un transform ≠ none convierte a ese ancestro en
+          el bloque contenedor de sus descendientes position:fixed — el menú y
+          el backdrop se dibujaban desplazados hacia el centro de la pantalla. */}
+      {open && mounted && createPortal(
         <>
           <div className="exam-filter-menu-backdrop" onClick={() => setOpen(false)} />
-          <div className="exam-filter-menu" style={menuStyle}>
+          <div ref={menuRef} className="exam-filter-menu" style={menuStyle}>
             {options.map(option => (
               <button
                 type="button"
@@ -498,7 +518,8 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
               </button>
             ))}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )

@@ -1,5 +1,6 @@
 ﻿'use client'
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import SidebarNav from '@/app/components/SidebarNav'
 import type { CSSProperties } from 'react'
 import type { Components } from 'react-markdown'
@@ -551,9 +552,12 @@ function stringifyForSearch(value: unknown): string {
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
   const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
+  const [mounted, setMounted] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const hasValue = options.some(o => o.active)
+
+  useEffect(() => { setMounted(true) }, [])
 
   // Antes el menú era position:absolute + left:0 dentro de .exams-filter-bar
   // (overflow-x:auto, lo que además clipa overflow-y por la regla implícita
@@ -613,7 +617,11 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
         <span className="exam-filter-value">{value}</span>
         <ChevronDown size={11} style={{ flexShrink: 0, color: open ? '#2563eb' : '#94a3b8', transition: 'transform 180ms cubic-bezier(0.23,1,0.32,1), color 140ms', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
       </button>
-      {open && (
+      {/* Portal a <body>: cualquier ancestro con transform (p. ej. .pau-reveal,
+          cuya animación con fill-mode "both" deja el transform aplicado) pasa a
+          ser el bloque contenedor de los descendientes position:fixed y
+          desplazaría menú y backdrop respecto al viewport. */}
+      {open && mounted && createPortal(
         <>
           <div className="exam-filter-menu-backdrop" onClick={() => setOpen(false)} />
           <div ref={menuRef} className="exam-filter-menu" style={menuStyle}>
@@ -629,7 +637,8 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
               </button>
             ))}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )

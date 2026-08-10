@@ -289,7 +289,7 @@ Nota: $\\overline{A}$ y $A-B$ denotan, respectivamente, el suceso contrario de $
       preguntaModelo("M2022-2A", "Analisis", "A", `Sea la función
 
 $$f(x)=\\begin{cases}
-\\dfrac{1-\\sin x}{x}, & x<0\\\\
+1-\\dfrac{\\sin x}{x}, & x<0\\\\
 xe^{4-x^2}, & x\\geq 0
 \\end{cases}$$
 

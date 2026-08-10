@@ -506,7 +506,7 @@ b) (0.5 puntos) El determinante de $A$ vale 1.
 
 c) (0.5 puntos) La matriz $A$ coincide con su traspuesta.
 
-d) (1 punto) Para una cierta matriz cuadrada $C$, distinta de la matriz nula y de la identidad, se verifica que $A\\cdot C=C\\cdot A$. Debe proponer ejemplos concretos para las dos matrices $A$ y $C$.`),
+d) (1 punto) Para una cierta matriz cuadrada $C$, distinta de la matriz nula y de la identidad, se verifica que $A\\cdot C=C\\cdot A$. (Debe proponer ejemplos concretos para las dos matrices $A$ y $C$.)`),
       preguntaModelo("M2019-2A", "Analisis", "A", `La contaminación por dióxido de nitrógeno, $NO_2$, en cierta estación de medición de una ciudad, durante el pasado mes de abril, se puede modelar por la función
 
 $$c(t)=80-6t+\\dfrac{23t^2}{20}-\\dfrac{t^3}{30}\\ \\mathrm{mg/m^3},$$

@@ -898,7 +898,8 @@ a) Determínense los valores de $a$ para los que la matriz $A$ es invertible.
 
 b) Para $a = 1$, despéjese y determínese la matriz $X$ de la ecuación matricial $A \\cdot X = A + 2Id$, donde $Id$ representa la matriz identidad de orden 3.`,
       `Apartado a): 1 punto. Cálculo correcto del determinante (0,50); solución correcta (0,50).
-Apartado b): 1 punto. Despejar correctamente la matriz X (0,50); determinar correctamente la matriz X (0,50).`
+Apartado b): 1 punto. Despejar correctamente la matriz X (0,50); determinar correctamente la matriz X (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-2A',
@@ -909,7 +910,8 @@ Apartado b): 1 punto. Despejar correctamente la matriz X (0,50); determinar corr
 Una bodega desea fijar el precio de venta al público de las 250 botellas de vino blanco y de las 500 de vino tinto que tiene en stock. Para no incurrir en pérdidas saben que el precio de venta al público de la botella de vino blanco debe ser como mínimo de 3 euros, de la misma manera el precio de venta al público de la botella de vino tinto debe ser de, como mínimo, 4 euros. Además saben que, para ser competitivos con esos precios de venta al público, el coste de 2 botellas de vino blanco y una de tinto debería ser a lo sumo 15 euros. Por el mismo motivo, el coste total de una botella de vino blanco y una de tinto no debe sobrepasar los 10 euros.
 
 Determínense los respectivos precios de venta al público por unidad de las botellas de vino blanco y de las de vino tinto, para que el ingreso total al vender el stock de 250 botellas de vino blanco y 500 de vino tinto sea máximo.`,
-      `Planteamiento correcto del problema de programación lineal (0,75); representación correcta de la región factible y localización correcta de los vértices (0,75); localización del máximo (0,50).`
+      `Planteamiento correcto del problema de programación lineal (0,75); representación correcta de la región factible y localización correcta de los vértices (0,75); localización del máximo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-3A',
@@ -923,7 +925,8 @@ a) Calcúlese la ecuación de la recta tangente a la gráfica de $f(x)$ en el pu
 
 b) Calcúlese el área de la región limitada por la gráfica de $f(x)$, el eje de abscisas y las rectas $x = -2$ y $x = 3$.`,
       `Apartado a): 1 punto. Cálculo correcto de la pendiente de la recta tangente (0,50); obtención de la ordenada en el origen (0,25); expresión correcta de la ecuación (0,25).
-Apartado b): 1 punto. Planteamiento correcto de la integral (0,25); cálculo correcto de la primitiva (0,50); cálculo del área (0,25).`
+Apartado b): 1 punto. Planteamiento correcto de la integral (0,25); cálculo correcto de la primitiva (0,50); cálculo del área (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-4A',
@@ -941,7 +944,8 @@ b) $P(\\overline{A} \\mid B)$.
 
 *Nota: $\\overline{S}$ denota el suceso complementario del suceso $S$.*`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-5A',
@@ -955,7 +959,8 @@ a) Asumiendo que $p = 0{,}5$, determínese el tamaño mínimo necesario de una m
 
 b) Se tomó una muestra aleatoria simple de 1200 votantes de los cuales 240 afirmaron que votarían por el partido en cuestión. Obténgase un intervalo de confianza del 95 % para la proporción de votantes de ese partido en la población.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-1B',
@@ -972,7 +977,8 @@ a) Discútase en función de los valores del parámetro $a$.
 
 b) Resuélvase para $a = 1$.`,
       `Apartado a): 1 punto. Cálculo correcto del determinante de A y del valor crítico (0,50); discusión correcta (0,50).
-Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-2B',
@@ -986,7 +992,8 @@ a) Calcúlense el dominio y las asíntotas de $f(x)$.
 
 b) Determínense sus intervalos de crecimiento y decrecimiento.`,
       `Apartado a): 1 punto. Cálculo del dominio (0,25); obtención de la asíntota vertical (0,25); obtención de la asíntota oblicua (0,50).
-Apartado b): 1 punto. Obtención correcta de la derivada (0,50); obtención correcta de los intervalos de crecimiento/decrecimiento (0,50).`
+Apartado b): 1 punto. Obtención correcta de la derivada (0,50); obtención correcta de los intervalos de crecimiento/decrecimiento (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-3B',
@@ -1000,7 +1007,8 @@ a) Calcúlense $f(0)$ y $f(8)$ e interprétense los resultados en el contexto de
 
 b) Determínese entre qué valores debe estar la producción diaria de cemento para que la empresa no tenga pérdidas.`,
       `Apartado a): 1 punto. Obtención de f(0) y f(8) (0,25); obtención del máximo relativo (0,50); obtención del máximo absoluto (0,25).
-Apartado b): 1 punto. Obtención de los puntos de corte con el eje OX (0,50); determinación correcta del signo de la función (0,25); interpretación de la solución en el contexto del problema (0,25).`
+Apartado b): 1 punto. Obtención de los puntos de corte con el eje OX (0,50); determinación correcta del signo de la función (0,25); interpretación de la solución en el contexto del problema (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-4B',
@@ -1018,7 +1026,8 @@ b) $P(A \\mid \\overline{B})$.
 
 *Nota: $\\overline{S}$ denota el suceso complementario del suceso $S$.*`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2018-M-5B',
@@ -1032,7 +1041,8 @@ a) Calcúlese un intervalo de confianza al 95 % para $\\mu$ si se ha tomado una 
 
 b) Determínese el tamaño mínimo que debe tener una muestra aleatoria simple para que el error máximo cometido en la estimación de la media muestral sea menor que 1 kilogramo con un nivel de confianza del 98 %.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño mínimo de la muestra (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño mínimo de la muestra (0,50).`,
+      2
     ),
   ]
 }
@@ -1056,7 +1066,8 @@ a) Determínense los valores de $m$ para los que la matriz $A$ es invertible.
 
 b) Considérese la ecuación matricial $A \\cdot X = A \\cdot B + B$. Para $m = 5$, exprésese $X$ en función de $A$ y $B$ y calcúlese la matriz $X$.`,
       `Apartado a): 1 punto. Cálculo correcto del determinante (0,50); determinación de los valores críticos (0,50).
-Apartado b): 1 punto. Expresión correcta de X en términos de A y B (0,25); cálculo correcto de la matriz X (0,75).`
+Apartado b): 1 punto. Expresión correcta de X en términos de A y B (0,25); cálculo correcto de la matriz X (0,75).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-2A',
@@ -1070,7 +1081,8 @@ a) Represéntese la región $S$ y calcúlense las coordenadas de sus vértices.
 
 b) Obténganse los valores máximo y mínimo de la función $f(x,y) = 0{,}5x + \\dfrac{1}{3}y$ en $S$, indicando los puntos de la región en los cuales se alcanzan dichos valores máximo y mínimo.`,
       `Apartado a): 1 punto. Representación correcta de la región S (0,50); determinación correcta de los vértices (0,50).
-Apartado b): 1 punto. Cálculo correcto de las coordenadas del máximo y mínimo (0,50); determinación correcta del valor máximo y mínimo (0,50).`
+Apartado b): 1 punto. Cálculo correcto de las coordenadas del máximo y mínimo (0,50); determinación correcta del valor máximo y mínimo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-3A',
@@ -1084,7 +1096,8 @@ a) Calcúlese la ecuación de la recta tangente a la gráfica de $f(x)$ en el pu
 
 b) Calcúlense sus asíntotas verticales y horizontales, si las tuviese.`,
       `Apartado a): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la derivada (0,50); ecuación correcta de la tangente (0,25).
-Apartado b): 1 punto. Determinación correcta de la asíntota vertical en x=-2 (0,25); no existencia de asíntota vertical en x=1 (0,50); determinación de las asíntotas horizontales (0,25).`
+Apartado b): 1 punto. Determinación correcta de la asíntota vertical en x=-2 (0,25); no existencia de asíntota vertical en x=1 (0,50); determinación de las asíntotas horizontales (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-4A',
@@ -1098,7 +1111,8 @@ a) Se examine de MACCSSII.
 
 b) Sabiendo que se examina de MACCSSII, sea un alumno de la modalidad de Ciencias.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-5A',
@@ -1112,7 +1126,8 @@ a) Asumiendo que la proporción poblacional es $P = 0{,}5$, determínese el tama
 
 b) Se tomó una muestra aleatoria simple de 500 clientes de los cuales 85 afirmaron que contratarían el paquete. Obténgase un intervalo de confianza del 90 % para la proporción de individuos que estarían dispuestos a contratar el paquete.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); obtención correcta del tamaño (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo (0,25); cálculo correcto del intervalo de confianza (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo (0,25); cálculo correcto del intervalo de confianza (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-1B',
@@ -1129,7 +1144,8 @@ a) Discútase en función de los valores del parámetro $a$.
 
 b) Resuélvase para $a = 0$.`,
       `Apartado a): 1 punto. Cálculo correcto del determinante y valor crítico (0,50); discusión correcta (0,50).
-Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-2B',
@@ -1144,7 +1160,8 @@ a) Determínese el valor del parámetro $a \\in \\mathbb{R}$ para el cual $f(x)$
 
 b) Hállese el área de la región limitada por el eje de abscisas, las rectas $x = 0$ y $x = 1$ y la gráfica de $f(x)$.`,
       `Apartado a): 1 punto. Planteamiento correcto de la condición de continuidad en x=-1 (0,25); cálculo correcto de los límites laterales en x=-1 (0,50); determinación del valor del parámetro (0,25).
-Apartado b): 1 punto. Planteamiento correcto (0,25); cálculo de la primitiva (0,50); determinación del área (0,25).`
+Apartado b): 1 punto. Planteamiento correcto (0,25); cálculo de la primitiva (0,50); determinación del área (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-3B',
@@ -1158,7 +1175,8 @@ a) Determínense sus intervalos de crecimiento y decrecimiento.
 
 b) Calcúlense sus máximos y mínimos locales, si los tuviese.`,
       `Apartado a): 1 punto. Determinación correcta de la derivada (0,50); determinación correcta de los intervalos pedidos (0,50).
-Apartado b): 1 punto. Obtención correcta de los valores críticos (0,50); cálculo correcto del máximo y mínimo (0,50).`
+Apartado b): 1 punto. Obtención correcta de los valores críticos (0,50); cálculo correcto del máximo y mínimo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-4B',
@@ -1172,7 +1190,8 @@ a) Conocido que es español, sea un hombre.
 
 b) Sea una mujer.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad pedida (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2019-M-5B',
@@ -1186,7 +1205,8 @@ a) Determínese el tamaño mínimo que debe tener una muestra aleatoria simple p
 
 b) Sabiendo que $\\mu = 0{,}7$ kg, calcúlese la probabilidad de que al tomar una muestra aleatoria simple de tamaño 20, la media del contenido en azúcares de esos botes sea menor que 0,65 kg.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del tamaño (0,25); obtención correcta del tamaño de la muestra (0,50).
-Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); planteamiento de la probabilidad (0,25); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); planteamiento de la probabilidad (0,25); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
   ]
 }
@@ -1210,7 +1230,8 @@ a) Calcule los valores de $a$ y de $b$ para que se verifique $A^2 = 2I$.
 
 b) Para $a = 0$ y $b = 2$, determine la matriz $X$ tal que $XA = B - X$.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); determinación correcta de los valores de a y de b (0,25).
-Apartado b): 1 punto. Expresión correcta de X (0,50); determinación correcta de la matriz X (0,50).`
+Apartado b): 1 punto. Expresión correcta de X (0,50); determinación correcta de la matriz X (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-2A',
@@ -1226,7 +1247,8 @@ a) Proporcione el valor del parámetro $a$ para que la función anterior sea con
 
 b) Obtenga la recta tangente a la función en el punto $x = e$ y estudie el crecimiento/decrecimiento de esta recta. Justifique su respuesta.`,
       `Apartado a): 1 punto. Planteamiento correcto de la condición de continuidad (0,25); determinación correcta del parámetro (0,25); estudio de la continuidad en el resto del dominio (0,50).
-Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la derivada (0,25); obtención correcta de la recta tangente (0,25); indicación del crecimiento/decrecimiento (0,25).`
+Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la derivada (0,25); obtención correcta de la recta tangente (0,25); indicación del crecimiento/decrecimiento (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-3A',
@@ -1238,7 +1260,8 @@ a) Halle el punto en el que la recta tangente a la curva es paralela a la recta 
 
 b) Calcule el área del recinto acotado del plano limitado por la gráfica de $f(x)$ y la curva $g(x) = -x^2 + 4x + 3$.`,
       `Apartado a): 1 punto. Cálculo correcto de la derivada (0,25); planteamiento y resolución de la condición de paralelismo (0,50); coordenadas del punto (0,25).
-Apartado b): 1 punto. Puntos de corte entre las curvas (0,25); planteamiento correcto de la integral (0,25); resolución de la integral indefinida (0,25); resolución de la integral definida (0,25).`
+Apartado b): 1 punto. Puntos de corte entre las curvas (0,25); planteamiento correcto de la integral (0,25); resolución de la integral indefinida (0,25); resolución de la integral definida (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-4A',
@@ -1252,7 +1275,8 @@ a) Sea una prenda de ropa y sea devuelta.
 
 b) Sea devuelta.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-5A',
@@ -1266,7 +1290,8 @@ a) Si una muestra aleatoria simple de 400 pastillas proporcionó una cantidad me
 
 b) Determine el tamaño muestral mínimo para que el error máximo cometido en la estimación de $\\mu$ por la media muestral sea menor de 0,05 mg con un nivel de confianza del 98 %.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo de confianza (0,25); determinación correcta del intervalo (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del tamaño mínimo de la muestra (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del tamaño mínimo de la muestra (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-1B',
@@ -1278,7 +1303,8 @@ a) Proporcione el valor de $m$ para que $A \\cdot B = C^t$.
 
 b) Para $m = 0$, calcule $B^{-1}$.`,
       `Apartado a): 1 punto. Cálculo correcto del producto de matrices (0,50); determinación correcta del parámetro m (0,25).
-Apartado b): 1 punto. Cálculo correcto del determinante (0,50); obtención de la matriz inversa (0,50).`
+Apartado b): 1 punto. Cálculo correcto del determinante (0,50); obtención de la matriz inversa (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-2B',
@@ -1293,7 +1319,8 @@ a) Discuta el sistema para los distintos valores de $a \\in \\mathbb{R}$.
 
 b) Resuelva el sistema de ecuaciones para $a = 2$.`,
       `Apartado a): 1 punto. Cálculo correcto del determinante y valor crítico (0,50); discusión correcta (0,25).
-Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-3B',
@@ -1307,7 +1334,8 @@ a) Determine los intervalos de crecimiento y decrecimiento de la función y calc
 
 b) Halle el área del recinto acotado del plano delimitado por la gráfica de la función, el eje de abscisas y las rectas $x = -1$ y $x = 1$.`,
       `Apartado a): 1 punto. Obtención correcta de la derivada (0,25); determinación correcta de los intervalos de crecimiento/decrecimiento (0,50); cálculo correcto del límite (0,25).
-Apartado b): 1 punto. Planteamiento correcto del área (0,50); cálculo correcto de primitiva/s (0,25); cálculo correcto de integral/es definida/s (0,25).`
+Apartado b): 1 punto. Planteamiento correcto del área (0,50); cálculo correcto de primitiva/s (0,25); cálculo correcto de integral/es definida/s (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-4B',
@@ -1321,7 +1349,8 @@ a) Obtenga la probabilidad de no observar ninguna cruz.
 
 b) Dado que no se observó ninguna cruz, ¿cuál es la probabilidad de haber lanzado la moneda 2 veces?`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2020-M-5B',
@@ -1335,7 +1364,8 @@ a) Si se toma una muestra de 25 sandías y se obtiene una media muestral de $\\b
 
 b) Si el peso medio de las sandías es $\\mu = 3000$ g, calcule la probabilidad de que una muestra de cuatro sandías cogidas al azar pesen en media entre 3000 g y 3450 g.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo de confianza (0,50).
-Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); tipificación correcta de la variable (0,25); determinación correcta de la probabilidad (0,50).`
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); tipificación correcta de la variable (0,25); determinación correcta de la probabilidad (0,50).`,
+      2
     ),
   ]
 }
@@ -1359,7 +1389,8 @@ a) Determine los valores de los parámetros reales $a$, $b$ y $c$ para que se ve
 
 b) Para $a = b = c = 2$, estudie si la matriz $A$ es invertible y, en caso afirmativo, calcule su inversa.`,
       `Apartado a): 1 punto. Planteamiento correcto del producto de matrices (0,50); determinación correcta de a, b y c (0,50).
-Apartado b): 1 punto. Estudio correcto de la invertibilidad (0,50); cálculo correcto de la inversa (0,50).`
+Apartado b): 1 punto. Estudio correcto de la invertibilidad (0,50); cálculo correcto de la inversa (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-2A',
@@ -1373,7 +1404,8 @@ a) Obtenga los coeficientes reales $a$, $b$ y $c$ de $f(x)$ sabiendo que la func
 
 b) Para $a = 2$, $b = 1$ y $c = 1$, calcule la integral $\\displaystyle\\int_1^e \\dfrac{f(x)}{x}\\,dx$.`,
       `Apartado a): 1 punto. Planteamiento de la condición de extremo relativo (0,50); determinación correcta de a, b y c a partir de la recta tangente (0,50).
-Apartado b): 1 punto. Cálculo correcto de la primitiva (0,50); cálculo correcto de la integral definida (0,50).`
+Apartado b): 1 punto. Cálculo correcto de la primitiva (0,50); cálculo correcto de la integral definida (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-3A',
@@ -1385,7 +1417,8 @@ a) Halle el dominio de la función y sus asíntotas.
 
 b) Determine los intervalos de crecimiento y decrecimiento de la función y, si los hubiera, sus extremos relativos.`,
       `Apartado a): 1 punto. Cálculo correcto del dominio (0,25); determinación correcta de la asíntota vertical (0,25); determinación correcta de la asíntota oblicua (0,50).
-Apartado b): 1 punto. Obtención correcta de la derivada (0,50); determinación correcta de los intervalos y del extremo relativo (0,50).`
+Apartado b): 1 punto. Obtención correcta de la derivada (0,50); determinación correcta de los intervalos y del extremo relativo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-4A',
@@ -1399,7 +1432,8 @@ a) Probabilidad de que la verdura comprada no sea ecológica.
 
 b) Probabilidad de que la verdura sea de proximidad o ecológica.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-5A',
@@ -1413,7 +1447,8 @@ a) Se toma una muestra aleatoria simple de 20 atletas, obteniéndose una media m
 
 b) Suponga que $\\mu = 28$ km. Calcule la probabilidad de que al tomar una muestra aleatoria simple de 10 atletas, la media muestral, $\\bar{X}$, esté entre 28 y 30 km.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del intervalo (0,25); determinación correcta del intervalo (0,50).
-Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); tipificación correcta (0,25); determinación correcta de la probabilidad (0,50).`
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); tipificación correcta (0,25); determinación correcta de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-1B',
@@ -1422,7 +1457,8 @@ Apartado b): 1 punto. Expresión correcta de la distribución de la media muestr
       `**Ejercicio 1 (2 puntos).**
 
 Un agricultor dispone de 5 hectáreas, como máximo, de terreno para dedicar a la plantación de trigo y cebada. Cada hectárea dedicada al trigo le supone un beneficio de 200 euros, mientras que cada hectárea dedicada a la cebada le supone un beneficio de 60 euros. Entre ambos cultivos es obligatorio plantar como mínimo una hectárea, y la normativa autonómica le obliga a que el cultivo de trigo ocupe como mucho una hectárea más que el de cebada. Represente la región factible, determine las hectáreas que debería dedicar a cada cultivo para maximizar sus beneficios y obtenga el valor del beneficio máximo.`,
-      `Planteamiento correcto del problema de programación lineal (0,75); representación correcta de la región factible y localización correcta de los vértices (0,75); localización del máximo y valor del beneficio máximo (0,50).`
+      `Planteamiento correcto del problema de programación lineal (0,75); representación correcta de la región factible y localización correcta de los vértices (0,75); localización del máximo y valor del beneficio máximo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-2B',
@@ -1439,7 +1475,8 @@ a) Discuta el sistema en función de los valores del parámetro $a$.
 
 b) Resuelva el sistema de ecuaciones para $a = 0$.`,
       `Apartado a): 1 punto. Cálculo correcto del determinante y valor crítico (0,50); discusión correcta (0,50).
-Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-3B',
@@ -1454,7 +1491,8 @@ a) Determine el dominio de $f(x)$ y calcule el valor del parámetro $a \\in \\ma
 
 b) Para $a = 0$ determine, si existen, las asíntotas de $f(x)$.`,
       `Apartado a): 1 punto. Determinación correcta del dominio (0,25); planteamiento correcto de la derivabilidad (0,25); cálculo correcto del parámetro (0,50).
-Apartado b): 1 punto. Determinación correcta de la asíntota vertical (0,50); determinación correcta de la asíntota horizontal (0,50).`
+Apartado b): 1 punto. Determinación correcta de la asíntota vertical (0,50); determinación correcta de la asíntota horizontal (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-4B',
@@ -1470,7 +1508,8 @@ a) $P(C \\mid D)$.
 
 b) $P(\\overline{C} \\cap D \\mid C)$.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2021-M-5B',
@@ -1484,7 +1523,8 @@ a) Determine el tamaño mínimo que debe tener una muestra aleatoria simple para
 
 b) Suponga que $\\mu = 3000$ calorías. Calcule la probabilidad de que al tomar una muestra aleatoria simple de tamaño $n = 50$ atletas, la media de las calorías consumidas durante la carrera sea mayor que 2700 calorías.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño mínimo (0,50).
-Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); planteamiento de la probabilidad (0,25); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Expresión correcta de la distribución de la media muestral (0,25); planteamiento de la probabilidad (0,25); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
   ]
 }
@@ -1508,7 +1548,8 @@ a) Determine los valores del parámetro real $a$ para los cuales la matriz $A$ e
 
 b) Calcule, para $a = 0$, la matriz inversa $A^{-1}$.`,
       `Apartado a): 1 punto. Expresión correcta de la condición de existencia de la inversa (0,25); cálculo correcto del parámetro (0,75).
-Apartado b): 1 punto. Planteamiento correcto (0,25); cálculo correcto de la inversa (0,75).`
+Apartado b): 1 punto. Planteamiento correcto (0,25); cálculo correcto de la inversa (0,75).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-2A',
@@ -1520,7 +1561,8 @@ a) Represente gráficamente la región $S$ y calcule las coordenadas de sus vér
 
 b) Obtenga el valor máximo de la función $f(x,y) = 2x + 3y$ en $S$, indicando el punto de la región en el cual se alcanza el máximo y el valor máximo alcanzado.`,
       `Apartado a): 1 punto. Representación correcta de la región factible (0,50); obtención correcta de los vértices (0,50).
-Apartado b): 1 punto. Determinar el máximo de la función (0,50); encontrar el punto de valor máximo (0,50).`
+Apartado b): 1 punto. Determinar el máximo de la función (0,50); encontrar el punto de valor máximo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-3A',
@@ -1532,7 +1574,8 @@ a) Calcule la ecuación de la recta tangente a la gráfica de $f(x)$ en el punto
 
 b) Calcule $\\displaystyle\\int_0^1 2x\\,f(x)\\,dx$.`,
       `Apartado a): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la pendiente (0,50); ecuación correcta de la recta tangente (0,25).
-Apartado b): 1 punto. Determinación correcta de la primitiva (0,75); cálculo correcto de la integral definida (0,25).`
+Apartado b): 1 punto. Determinación correcta de la primitiva (0,75); cálculo correcto de la integral definida (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-4A',
@@ -1546,7 +1589,8 @@ a) Calcule la probabilidad de que esté cocinado con productos ecológicos.
 
 b) Si el plato seleccionado no está cocinado con productos ecológicos, obtenga la probabilidad de que proceda del segundo restaurante.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-5A',
@@ -1560,7 +1604,8 @@ a) Se toma una muestra aleatoria simple de tamaño 25. Calcule la probabilidad d
 
 b) Sabiendo que para una muestra aleatoria simple de 64 personas se ha obtenido un intervalo de confianza $(2{,}9388, 3{,}0613)$ para $\\mu$, determine el nivel de confianza con el que se obtuvo dicho intervalo.`,
       `Apartado a): 1 punto. Expresión de la distribución de la media muestral (0,25); tipificación correcta de la variable (0,25); obtención correcta de la probabilidad (0,50).
-Apartado b): 1 punto. Expresión correcta de la fórmula del error (0,25); cálculo correcto de z_(α/2) (0,25); obtención correcta del nivel de confianza (0,50).`
+Apartado b): 1 punto. Expresión correcta de la fórmula del error (0,25); cálculo correcto de z_(α/2) (0,25); obtención correcta del nivel de confianza (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-1B',
@@ -1577,7 +1622,8 @@ a) Discuta el sistema en función de los valores del parámetro real $a$.
 
 b) Resuelva el sistema para $a = -2$.`,
       `Apartado a): 1 punto. Determinación correcta del valor crítico (0,50); discusión correcta (0,50).
-Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-2B',
@@ -1589,7 +1635,8 @@ a) Determine el dominio de $f(x)$ y calcule sus asíntotas.
 
 b) Obtenga los intervalos de crecimiento y decrecimiento de $f(x)$ y determine los extremos relativos indicando si corresponden a máximos o mínimos.`,
       `Apartado a): 1 punto. Estudio correcto del dominio (0,50); determinación correcta de las asíntotas verticales (0,25); determinación correcta de la asíntota horizontal (0,25).
-Apartado b): 1 punto. Determinación correcta de la derivada (0,25); determinación correcta de los intervalos (0,50); cálculo correcto de los extremos (0,25).`
+Apartado b): 1 punto. Determinación correcta de la derivada (0,25); determinación correcta de los intervalos (0,50); cálculo correcto de los extremos (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-3B',
@@ -1602,7 +1649,8 @@ a) Determine para qué valores de $a \\in \\mathbb{R}$ la función $f(x)$ es con
 
 b) Para $a = 1$, halle el área de la región acotada delimitada por la función $f(x)$, el eje de abscisas y las rectas $x = -1$, $x = 0$.`,
       `Apartado a): 1 punto. Estudio de la continuidad si x no es 2 (0,25); planteamiento correcto de la condición de continuidad en x=2 (0,25); obtención correcta del valor del parámetro (0,50).
-Apartado b): 1 punto. Planteamiento correcto de la integral y los límites (0,25); cálculo correcto de la primitiva (0,50); cálculo correcto del área (0,25).`
+Apartado b): 1 punto. Planteamiento correcto de la integral y los límites (0,25); cálculo correcto de la primitiva (0,50); cálculo correcto del área (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-4B',
@@ -1616,7 +1664,8 @@ a) Disfrute de una beca de alto rendimiento o esté cursando estudios superiores
 
 b) No disfrute de una beca de alto rendimiento, sabiendo que no está cursando estudios superiores.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2022-M-5B',
@@ -1630,7 +1679,8 @@ a) Una muestra aleatoria simple de 81 universitarios proporciona un tiempo medio
 
 b) Determine el tamaño mínimo de una muestra aleatoria simple para obtener un intervalo de confianza para $\\mu$ de amplitud a lo sumo de 3 minutos, con un nivel de confianza del 95 %.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del intervalo (0,25); determinación correcta del intervalo (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño de la muestra (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta de la fórmula del error (0,25); determinación correcta del tamaño de la muestra (0,50).`,
+      2
     ),
   ]
 }
@@ -1652,7 +1702,8 @@ a) Determine los valores de $a$ para los cuales la matriz $A$ es invertible.
 
 b) Calcule $A^{-1}$ para $a = 1$.`,
       `Apartado a): 1 punto. Planteamiento de la condición de existencia de inversa (0,25); obtención de la ecuación (0,25); determinación correcta de los valores pedidos (0,50).
-Apartado b): 1 punto. Planteamiento correcto de A⁻¹ (0,50); cálculo y operaciones correctas (0,50).`
+Apartado b): 1 punto. Planteamiento correcto de A⁻¹ (0,50); cálculo y operaciones correctas (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-2A',
@@ -1663,7 +1714,8 @@ Apartado b): 1 punto. Planteamiento correcto de A⁻¹ (0,50); cálculo y operac
 Una empresa de transportes ha comprado dos furgonetas, una grande y otra mediana. La normativa vigente solo permite circular un máximo de 400 000 km a la grande, 250 000 km a la mediana y un total de 600 000 km entre ambas. Por las rutas que establece la empresa, por cada kilómetro que recorre la furgoneta grande, la mediana circula como máximo 2 km; y por cada kilómetro que recorre la furgoneta mediana, la grande hace un máximo de 4 km. Por cada kilómetro de circulación de la furgoneta grande se obtiene un beneficio de 10 céntimos y por cada kilómetro de circulación de la mediana un beneficio de 5 céntimos.
 
 Determine el máximo beneficio posible y el número de kilómetros que debe recorrer cada una de las furgonetas para obtenerlo.`,
-      `Establecer correctamente las restricciones (0,50); expresión correcta de la función objetivo (0,50); representación correcta de la región factible y obtención de vértices (0,50); encontrar el punto de valor máximo (0,25); determinar el máximo de la función (0,25).`
+      `Establecer correctamente las restricciones (0,50); expresión correcta de la función objetivo (0,50); representación correcta de la región factible y obtención de vértices (0,50); encontrar el punto de valor máximo (0,25); determinar el máximo de la función (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-3A',
@@ -1675,7 +1727,8 @@ a) Represente la gráfica de la función $f(x) = x^3 - 3x + 1$ prestando especia
 
 b) Represente la gráfica de $g(x) = f(x-3) + 2$, donde $f$ es la función del apartado anterior.`,
       `Apartado a): 1 punto. Razonamiento sobre el crecimiento de la función (0,25); determinación correcta de los intervalos pedidos (0,75).
-Apartado b): 1 punto. Representación correcta de la función (0,50).`
+Apartado b): 1 punto. Representación correcta de la función (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-4A',
@@ -1689,7 +1742,8 @@ a) Verifique que $P(A \\mid C) = P(B \\mid C) = P(A \\cap B \\mid C)$.
 
 b) Calcule $P(A \\cup B \\mid C)$.`,
       `Apartado a): 1 punto. Planteamiento correcto de la probabilidad (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto de la probabilidad (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto de la probabilidad (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-5A',
@@ -1703,7 +1757,8 @@ a) Determine el valor de la media muestral.
 
 b) Si el tamaño de la muestra fue 10, ¿cuál es el nivel de confianza del intervalo obtenido?`,
       `Apartado a): 1 punto. Expresión correcta de la distribución de la media (0,25); tipificación correcta de la variable (0,25); obtención correcta de la probabilidad (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-1B',
@@ -1718,7 +1773,8 @@ a) Discuta la compatibilidad del sistema para los diferentes valores de $a$.
 
 b) Resuelva el sistema para $a = 2$.`,
       `Apartado a): 1 punto. Obtención correcta del determinante de la matriz de coeficientes (0,25); cálculo correcto de los valores críticos (0,25); discusión correcta (0,50).
-Apartado b): 1 punto. Solución correcta del sistema (0,50); planteamiento del problema (0,50).`
+Apartado b): 1 punto. Solución correcta del sistema (0,50); planteamiento del problema (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-2B',
@@ -1730,7 +1786,8 @@ a) Determine el área de la región acotada del plano limitada inferiormente por
 
 b) Determine el área de la región acotada del plano limitada inferiormente por la parábola $y = 9x - x^2$ y superiormente por las rectas tangentes a esa parábola en los puntos de corte con el eje de las $x$.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,25); cálculo correcto de la integral indefinida (0,50); cálculo correcto del área (0,25).
-Apartado b): 1 punto. Obtención de la asíntota vertical (0,50); obtención de la asíntota horizontal (0,50).`
+Apartado b): 1 punto. Obtención de la asíntota vertical (0,50); obtención de la asíntota horizontal (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-3B',
@@ -1745,7 +1802,8 @@ siendo $t$ el tiempo de reposo medido en horas.
 a) La producción diaria de dulces tiene un coste fijo de 150 euros más el coste por el uso del ingrediente secreto, el cual cuesta 100 euros/gramo. Obtenga la función que representa el coste de producción diaria de estos dulces y encuentre el tiempo de reposo de la masa que minimiza dicho coste. Indique el valor del coste mínimo.
 
 b) Obtenga el tiempo de reposo que maximiza el coste de producción e indique la cantidad de ingrediente secreto que se necesitaría en este caso.`,
-      `Planteamiento correcto (0,50); obtención correcta de la función a optimizar (0,50); cálculo correcto de la derivada de la función (0,50); cálculo correcto del tiempo de reposo (0,50).`
+      `Planteamiento correcto (0,50); obtención correcta de la función a optimizar (0,50); cálculo correcto de la derivada de la función (0,50); cálculo correcto del tiempo de reposo (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-4B',
@@ -1757,7 +1815,8 @@ a) Se tienen 7 sobres cerrados. Uno de ellos contiene un premio y el resto son s
 
 b) Si salió el premio, ¿cuál es la probabilidad de que el resultado del dado haya sido el 1?`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2023-M-5B',
@@ -1771,7 +1830,8 @@ a) Sabiendo que la proporción poblacional es $P = 0{,}55$, determine el tamaño
 
 b) Si la muestra aleatoria fue de 100 estudiantes, de los cuales 70 utilizaban la cafetería, determine un intervalo de confianza al 95 % para la proporción de estudiantes que utilizan la cafetería.`,
       `Apartado a): 1 punto. Cálculo correcto de z_(α/2) (0,25); expresión correcta del error (0,25); determinación correcta del tamaño de la muestra (0,50).
-Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo (0,50).`
+Apartado b): 1 punto. Cálculo correcto de z_(α/2) (0,25); planteamiento correcto (0,25); obtención correcta del intervalo (0,50).`,
+      2
     ),
   ]
 }
@@ -1793,7 +1853,8 @@ a) Determine los valores de los parámetros $a, c \\in \\mathbb{R}$ para los que
 
 b) Para $a = 1$ y $c = -1$, calcule $B^t \\cdot A \\cdot B$, donde $B^t$ denota la matriz transpuesta de $B$.`,
       `Apartado a): 1 punto. Cálculo correcto de AB (0,50); obtención correcta de los parámetros (0,50).
-Apartado b): 1 punto. Obtención correcta de la traspuesta (0,25); realiza correctamente el producto (0,75).`
+Apartado b): 1 punto. Obtención correcta de la traspuesta (0,25); realiza correctamente el producto (0,75).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-2',
@@ -1805,7 +1866,8 @@ a) Obtenga el valor del parámetro real $a$ para que la función $f(x)$ tenga un
 
 b) Para $a = 1$, determine los intervalos de crecimiento y decrecimiento de la función clasificando, si procede, los extremos relativos de la función.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,25); determinación de la primitiva (0,25); cálculo correcto de la constante de integración (0,25); cálculo correcto del parámetro (0,25).
-Apartado b): 1 punto. Determinación correcta de la derivada (0,25); determinación correcta de los intervalos (0,25); determinación correcta de las abscisas de extremos y su clasificación (0,50).`
+Apartado b): 1 punto. Determinación correcta de la derivada (0,25); determinación correcta de los intervalos (0,25); determinación correcta de las abscisas de extremos y su clasificación (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-3',
@@ -1818,7 +1880,8 @@ a) Estudie la continuidad de la función $f(x)$ e indique el tipo de discontinui
 
 b) Calcule el área de la región acotada del plano delimitada por la gráfica de la función anterior, el eje de abscisas y las rectas $x = 1$ y $x = 2$.`,
       `Apartado a): 1 punto. Planteamiento correcto de la continuidad en x≠1 (0,25) y en x=1 (0,25); cálculo correcto de los límites laterales (0,25); determinación correcta de la discontinuidad (0,25).
-Apartado b): 1 punto. Planteamiento correcto de la integral y los límites (0,25); cálculo correcto de la integral indefinida (0,50); cálculo correcto de la integral definida (0,25).`
+Apartado b): 1 punto. Planteamiento correcto de la integral y los límites (0,25); cálculo correcto de la integral indefinida (0,50); cálculo correcto de la integral definida (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-4',
@@ -1830,7 +1893,8 @@ a) Determine las asíntotas de esta función.
 
 b) Obtenga la ecuación de la recta tangente a la función en el punto de abscisa $x = -1$.`,
       `Apartado a): 1 punto. Discusión correcta de la no existencia de asíntotas horizontales (0,25); obtención correcta de la asíntota vertical (0,25); obtención correcta de la asíntota oblicua (0,50).
-Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la pendiente (0,50); ecuación correcta de la tangente (0,25).`
+Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25); cálculo correcto de la pendiente (0,50); ecuación correcta de la tangente (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-5',
@@ -1839,21 +1903,23 @@ Apartado b): 1 punto. Expresión correcta de la ecuación de la tangente (0,25);
       `**Ejercicio 5 (2 puntos).**
 
 Se desea vender batido de chocolate y batido de fresa en una fiesta escolar para recaudar fondos para el viaje de fin de curso. Con la leche de la que se dispone se pueden elaborar 35 litros de batido, y hay cacao en polvo para 30 litros de batido de chocolate como máximo. Se necesitan 15 minutos de preparación por litro de batido de chocolate y 20 minutos por litro de batido de fresa para que tengan la textura correcta. Los batidos tienen que estar listos en 10 horas. Solo hay una batidora y el beneficio que se obtendrá por litro de batido de chocolate es de 10 euros, y por litro de batido de fresa de 11 euros. ¿Cuántos litros de cada tipo de batido se deben producir para maximizar los beneficios? ¿Cuál es el beneficio máximo?`,
-      `Representación correcta de la región factible (0,75); obtención correcta de los vértices (0,75); encontrar el punto de valor máximo y su valor (0,50).`
+      `Representación correcta de la región factible (0,75); obtención correcta de los vértices (0,75); encontrar el punto de valor máximo y su valor (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-6',
-      'Ejercicio 6',
-      'A',
+      'Ejercicio 1',
+      'B',
       `**Ejercicio 6 (2 puntos).**
 
 Una caja de Lego contiene un total de 50 piezas de tres tipos diferentes (A, B, C). La cantidad de piezas del tipo A más la del tipo B es igual a cuatro veces la cantidad del tipo C. Si a las piezas del tipo A le sumamos el doble de las piezas del tipo B y cuatro veces las del tipo C, el total de piezas de la caja sería de 100. Plantee un sistema de ecuaciones para saber la cantidad de piezas de cada tipo que contendrá la caja.`,
-      `Planteamiento correcto de las ecuaciones (1 punto); resolución correcta del sistema (1 punto).`
+      `Planteamiento correcto de las ecuaciones (1 punto); resolución correcta del sistema (1 punto).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-7',
-      'Ejercicio 7',
-      'A',
+      'Ejercicio 2',
+      'B',
       `**Ejercicio 7 (2 puntos).** Se considera el siguiente sistema de ecuaciones lineales dependiente del parámetro real $a$:
 $$a^2x - ay = a$$
 $$a^3x - y = 1$$
@@ -1862,12 +1928,13 @@ a) Discuta el sistema en función de los valores del parámetro $a$.
 
 b) Resuelva el sistema de ecuaciones para $a = 2$.`,
       `Apartado a): 1 punto. Determinación correcta del valor crítico (0,50); discusión correcta (0,50).
-Apartado b): 1 punto. Solución correcta del sistema (1,00).`
+Apartado b): 1 punto. Solución correcta del sistema (1,00).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-8',
-      'Ejercicio 8',
-      'A',
+      'Ejercicio 3',
+      'B',
       `**Ejercicio 8 (2 puntos).**
 
 Un estudio europeo sobre hábitos de uso de internet indica que el 62 % de los hombres españoles mayores de 16 años participa en redes sociales y que el 81 % lee noticias en internet. Además, el 95 % de los hombres de este estudio participa en redes sociales o lee noticias en internet. Eligiendo un hombre español mayor de 16 años al azar, calcule la probabilidad de que:
@@ -1876,12 +1943,13 @@ a) Participe en redes sociales y lea noticias en internet.
 
 b) No participe en redes sociales, sabiendo que no lee noticias en internet.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-9',
-      'Ejercicio 9',
-      'A',
+      'Ejercicio 4',
+      'B',
       `**Ejercicio 9 (2 puntos).**
 
 Se sabe que la proporción de hogares españoles con dos o más ordenadores es $p = 0{,}75$. Se toma una muestra aleatoria simple de tamaño $n = 140$ hogares. Determine:
@@ -1890,12 +1958,13 @@ a) El número esperado de hogares que no tendrán dos o más ordenadores en la m
 
 b) La probabilidad de que, en la muestra de 140 hogares, el número de ellos con dos o más ordenadores sea entre 98 y 112 hogares.`,
       `Apartado a): 1 punto. Expresión correcta de la distribución (0,25); planteamiento correcto (0,25); obtención correcta de la media (0,50).
-Apartado b): 1 punto. Expresión correcta de la aproximación a la normal (0,25); planteamiento correcto de la probabilidad (0,25); tipificación correcta de la variable (0,25); determinación correcta de la probabilidad (0,25).`
+Apartado b): 1 punto. Expresión correcta de la aproximación a la normal (0,25); planteamiento correcto de la probabilidad (0,25); tipificación correcta de la variable (0,25); determinación correcta de la probabilidad (0,25).`,
+      2
     ),
     preguntaCCSS(
       'CCSS-2024-M-10',
-      'Ejercicio 10',
-      'A',
+      'Ejercicio 5',
+      'B',
       `**Ejercicio 10 (2 puntos).**
 
 Durante el adiestramiento de un perro para encontrar trufas, se le deja libre una vez al día en una zona de monte apropiada para encontrar este preciado hongo. En cada operación de búsqueda del animal se ha observado que este se dirige siempre hacia una de tres zonas de monte diferentes, denominadas A, B y C. En dos de cada diez operaciones de búsqueda se dirige hacia A, en cinco de cada diez hacia B y el resto hacia C. El perro detecta trufas en A un 35 % de las veces, un 15 % en B y un 40 % en C. Eligiendo al azar un perro en adiestramiento, calcule la probabilidad de que:
@@ -1904,7 +1973,8 @@ a) Detecte una trufa en una operación de búsqueda.
 
 b) Sabiendo que ha encontrado una trufa, esta haya sido encontrada en la zona B.`,
       `Apartado a): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).
-Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`
+Apartado b): 1 punto. Planteamiento correcto (0,50); cálculo correcto de la probabilidad (0,50).`,
+      2
     ),
   ]
 }

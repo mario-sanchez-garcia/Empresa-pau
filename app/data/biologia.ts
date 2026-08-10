@@ -1,4 +1,5 @@
 import { examenesBiologiaCataluna } from "./biologia_cataluna"
+import { examenesBiologiaModelos } from "./biologia_modelos"
 
 export type BloqueBiologia = "Pregunta1" | "Pregunta2" | "Pregunta3" | "Pregunta4" | "Pregunta5" | `Ejercicio${number}${"" | "A" | "B"}`
 
@@ -40,6 +41,7 @@ export const BIOLOGIA_TOPICS: Array<{ tipo: BloqueBiologia; label: string; pts: 
 ]
 
 export const examenesBiologia: ExamenBiologia[] = [
+  ...examenesBiologiaModelos,
   {
     id: 2025,
     año: 2025,

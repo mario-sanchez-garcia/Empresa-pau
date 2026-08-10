@@ -203,7 +203,7 @@ a) (0.75 puntos) Comprobar que los puntos $A$, $B$, $C$ y $D$ no son coplanarios
 b) (0.75 puntos) Hallar el área del triángulo que forman los puntos $B$, $C$ y $D$ y el ángulo $\\widehat{B}$ del mismo.
 
 c) (1 punto) Hallar uno de los puntos $E$ del plano determinado por $A$, $B$ y $C$ tales que el cuadrilátero $ABCE$ sea un paralelogramo. Hallar el área de dicho paralelogramo.`),
-      preguntaModelo("M2024-4B", "Probabilidad", "B", `En un espacio muestral se tienen dos sucesos incompatibles, $A_1$ de probabilidad 0.5 y $A_2$ de probabilidad 0.3 y se considera $A_3=A_1\\cup A_2$. De cierto suceso $B$ de probabilidad 0.4 se sabe que es independiente de $A_1$ y que la probabilidad del suceso $A_3\\cap B$ es 0.1. Con estos datos se pide:
+      preguntaModelo("M2024-4B", "Probabilidad", "B", `En un espacio muestral se tienen dos sucesos incompatibles, $A_1$ de probabilidad 0.5 y $A_2$ de probabilidad 0.3 y se considera $A_3=\\overline{A_1\\cup A_2}$. De cierto suceso $B$ de probabilidad 0.4 se sabe que es independiente de $A_1$ y que la probabilidad del suceso $A_3\\cap B$ es 0.1. Con estos datos se pide:
 
 a) (1 punto) Calcular la probabilidad de $A_3$.
 

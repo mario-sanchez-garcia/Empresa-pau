@@ -949,12 +949,13 @@ c) Razone si en el caso de dos genes ligados se cumple la tercera ley de Mendel 
         numero: "A.1",
         tema: "Referente a los virus como agentes causantes de enfermedades",
         enunciado: `(2 puntos) Referente a los virus como agentes causantes de enfermedades: 
+
+![Ciclo lítico de un virus con fases A-E](/biologia-imgs/madrid/2020/ordinaria/pregunta-A1-ciclo-litico-virus.png)
+
 a) Nombre el proceso de infección representado en la figura adjunta . Identifique las fases señaladas con letras (1,5 puntos).
 b) Cite dos tipos de agentes acelulares no víricos y el tipo de organismos al que afectan (0,5 puntos).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",
-        requiereImagen: true,
-        imagenes: [],
       },
       {
         id: "bio-2020-A-2",

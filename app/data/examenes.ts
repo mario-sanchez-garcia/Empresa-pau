@@ -180,7 +180,7 @@ b) (1 punto) Calcular la probabilidad de que la selección gane el tercer partid
 c) (1 punto) Si sabemos que la selección ha ganado el tercer partido, determinar la probabilidad de que no haya ganado alguno de los dos encuentros anteriores.`),
       preguntaModelo("M2024-1B", "Algebra", "B", `Consideremos las matrices reales
 
-$$A=\\begin{pmatrix}m&1\\\\1&0\\\\m&3\\end{pmatrix},\\qquad B=\\begin{pmatrix}1&m&0\\\\m&0&1\\end{pmatrix}.$$
+$$A=\\begin{pmatrix}m&1&1\\\\0&m&3\\end{pmatrix},\\qquad B=\\begin{pmatrix}1&m\\\\0&m\\\\0&1\\end{pmatrix}.$$
 
 Se pide:
 

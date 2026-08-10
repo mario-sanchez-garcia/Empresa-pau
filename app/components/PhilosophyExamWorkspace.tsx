@@ -438,17 +438,20 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
   // borde derecho de esa barra con scroll horizontal se salía de la
   // pantalla o quedaba recortado. position:fixed calculado desde
   // getBoundingClientRect() escapa de ese overflow.
+  // Sin `width` fija: el menú se ajusta a su contenido entre minWidth y
+  // maxWidth para que etiquetas largas ("2A · Pregunta 2A — Ética y/o
+  // moral…") no queden cortadas. El ancho real solo se conoce tras pintar,
+  // así que el efecto de abajo corrige `left` si se sale por la derecha.
   function openMenu() {
     const rect = triggerRef.current?.getBoundingClientRect()
     if (rect) {
-      const menuWidth = Math.min(240, window.innerWidth - 24)
-      const left = Math.min(rect.left, window.innerWidth - menuWidth - 12)
       const availableBelow = Math.max(180, window.innerHeight - rect.bottom - 16)
       setMenuStyle({
         position: 'fixed',
         top: rect.bottom + 4,
-        left: Math.max(12, left),
-        width: menuWidth,
+        left: Math.max(12, rect.left),
+        minWidth: Math.max(rect.width, 160),
+        maxWidth: Math.min(360, window.innerWidth - 24),
         maxHeight: Math.min(360, availableBelow),
         overflowY: 'auto',
         zIndex: 200
@@ -460,7 +463,16 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
   useEffect(() => {
     if (!open) return
     window.requestAnimationFrame(() => {
-      if (menuRef.current) menuRef.current.scrollTop = 0
+      const menu = menuRef.current
+      if (!menu) return
+      menu.scrollTop = 0
+      const overflowRight = menu.getBoundingClientRect().right - (window.innerWidth - 12)
+      if (overflowRight > 0) {
+        setMenuStyle(style => ({
+          ...style,
+          left: Math.max(12, Number(style.left ?? 0) - overflowRight)
+        }))
+      }
     })
   }, [open, options])
 

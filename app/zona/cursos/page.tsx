@@ -189,6 +189,14 @@ export default function ZonaCursosPage() {
   const [user, setUser] = useState<ZonaUser | null>(null)
   const [groups, setGroups] = useState<SubjectGroup[]>([])
   const [selectedSubject, setSelectedSubject] = useState<string>('')
+  // Deep-link desde "Sugiéreme qué repasar" (ver FreeReviewPanel en
+  // CaminoCalendarClient.tsx): ?subject=<slug camino> preselecciona la
+  // asignatura sugerida en vez de caer siempre en la primera del alumno.
+  // Leído una sola vez al montar — no necesita reaccionar a cambios de URL
+  // en caliente, y evita el Suspense boundary que exige useSearchParams.
+  const [requestedSubject] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('subject') : null
+  )
   const [loading, setLoading] = useState(true)
   const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
   const [confirmItem, setConfirmItem] = useState<CourseEntry | null>(null)
@@ -227,7 +235,11 @@ export default function ZonaCursosPage() {
 
       const built = buildSubjectGroups((queueRows ?? []) as QueueRow[], (calendarRows ?? []) as CalendarRow[], (gradeRows ?? []) as HistorialGradeRow[])
       setGroups(built)
-      setSelectedSubject(prev => (prev && built.some(g => g.subject === prev)) ? prev : (built[0]?.subject ?? ''))
+      setSelectedSubject(prev => {
+        if (prev && built.some(g => g.subject === prev)) return prev
+        if (requestedSubject && built.some(g => g.subject === requestedSubject)) return requestedSubject
+        return built[0]?.subject ?? ''
+      })
 
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData.session?.access_token
@@ -247,7 +259,7 @@ export default function ZonaCursosPage() {
       setLoading(false)
     }
     load()
-  }, [router])
+  }, [router, requestedSubject])
 
   const activeGroup = useMemo(() => groups.find(g => g.subject === selectedSubject) ?? groups[0], [groups, selectedSubject])
   const overallStats = useMemo(() => {

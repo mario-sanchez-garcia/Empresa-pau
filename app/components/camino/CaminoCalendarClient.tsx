@@ -3513,6 +3513,7 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   if (subjects.length === 0) return null
 
   const suggestion = options[selectedIndex] ?? null
+  const caminoSlug = suggestion ? subjectSlug(suggestion.subject) : null
   const examSlug = suggestion ? (CAMINO_TO_SIM_SUBJECT[subjectSlug(suggestion.subject)] ?? subjectSlug(suggestion.subject)) : null
   const examSearchTerm = suggestion
     ? (suggestion.focusNote || suggestion.subject).replace(/^repasa\s+/i, '').slice(0, 140)
@@ -3564,14 +3565,32 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
               )
             })}
           </div>
-          {examSlug && (
-            <a
-              href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
-              className="mt-2 inline-flex items-center gap-1 text-[10px] font-black"
-              style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}
-            >
-              Buscar preguntas reales de &quot;{suggestion?.subject}&quot; →
-            </a>
+          {suggestion && (
+            <div className="mt-2">
+              <p className="mb-1.5 text-[9px] font-black uppercase tracking-[.1em] text-slate-400">
+                ¿Cómo repasas &quot;{suggestion.subject}&quot;?
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {examSlug && (
+                  <a
+                    href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
+                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black"
+                    style={{ background: CONTENT_TYPE_COLORS.suggestion.text, color: 'white' }}
+                  >
+                    📝 Ejercicios de Exámenes
+                  </a>
+                )}
+                {caminoSlug && (
+                  <a
+                    href={`/zona/cursos?subject=${encodeURIComponent(caminoSlug)}&source=camino_free_review`}
+                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black"
+                    style={{ background: 'white', color: CONTENT_TYPE_COLORS.suggestion.text, border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}` }}
+                  >
+                    📘 Hacer el curso
+                  </a>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}

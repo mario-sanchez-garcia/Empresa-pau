@@ -1060,7 +1060,10 @@ b) Cite los cuatro tipos morfológicos que pueden presentar los organismos proca
         numero: "B.3",
         tema: "En relación con la información genética de los seres vivos",
         enunciado: `(2 puntos) En relación con la información genética de los seres vivos: 
-a) Relacione cada uno de los conceptos de la columna izquierda con uno de los de la columna derecha (1 punto). (1) $ARN$ polimerasa (A) Replicación (2) Sustitución nucleotídica (3) $ADN$ Polimerasa I (B) Transcripción (4) Sitio P (5) Inserción / Deleción (C) Traducción (6) Burbuja bidireccional (7) Subunidad ribosomal (D) Mutación (8) Caperuza 5’ 
+a) Relacione cada uno de los conceptos de la columna izquierda con uno de los de la columna derecha (1 punto).
+
+![Tabla de conceptos y procesos de genética molecular](/biologia-imgs/madrid/2020/ordinaria/pregunta-B3-tabla-genetica.png)
+
 b) Explique cuál es el dogma central de la biología molecular. Describa en un gráfico qué elementos lo componen y qué procesos los relacionan entre sí (1 punto).`,
         puntuacion: 2,
         criterios: "Cada pregunta se calificará sobre 2 puntos. Se valorará el uso correcto del lenguaje biológico, la claridad y concreción de la respuesta, el ajuste estricto al enunciado oficial y la presentación.",

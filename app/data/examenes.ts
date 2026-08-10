@@ -1132,7 +1132,7 @@ b) (1.25 puntos) Calcular la probabilidad de que un producto sea de tipo $C$ sab
         enunciado: "Tres hermanos quieren repartirse de forma equitativa un total de 540 acciones valoradas en 1560 euros, que\ncorresponden a tres empresas A,B y C. Sabiendo que el valor actual en bolsa de la acción A es el triple que el de\nB y la mitad que el de C, que el número de acciones de C es la mitad que el de B y que el actual valor en bolsa\nde la acción B es 1 euro, encuentre el número de cada tipo de acción que le corresponde a cada hermano.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-A2", bloque: "Analisis", opcion: "A",
-        enunciado: "Calcule el área de la región delimitada por las gráficas de las funciones\nf (x) = 2 + x − x2, g(x) = 2x2 − 4x.",
+        enunciado: "Calcule el área de la región delimitada por las gráficas de las funciones\n$$\nf(x)=2+x-x^{2},\\qquad g(x)=2x^{2}-4x.\n$$",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
       { id: "2021-J-A3", bloque: "Geometria", opcion: "A",
         enunciado: `Sean la recta $$r \\equiv \\begin{cases} -x - y + z = 0 \\\\ 2x + 3y - z + 1 = 0 \\end{cases}$$ y el plano $\\pi \\equiv 2x + y - z + 3 = 0$. Se pide:

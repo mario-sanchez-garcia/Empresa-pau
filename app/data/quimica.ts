@@ -893,7 +893,7 @@ Datos. Masas atómicas (u): O = 16,0; Al = 27,0; Cl = 35,5; K = 39,1.`,
         bloque: "Pregunta1",
         label: "Pregunta 1",
         numero: "B.1",
-        enunciado: "Dadas las siguientes especies: Fe, BH3, CHCl3 y MgF2.\na) (0,5 puntos) Justifique qué tipo de enlace presenta cada una de ellas.\nb) (0,5 puntos) Indique cuál/es conducirán la corriente en estado sólido y cuál/es lo harán en estado fundido.\nc) (1 punto) Para las especies covalentes: indique y represente la geometría molecular, diga la hibridación\ndel átomo central, y justifique su polaridad.",
+        enunciado: "Dadas las siguientes especies: Fe, BH₃, CHCl₃ y MgF₂.\na) (0,5 puntos) Justifique qué tipo de enlace presenta cada una de ellas.\nb) (0,5 puntos) Indique cuál/es conducirán la corriente en estado sólido y cuál/es lo harán en estado fundido.\nc) (1 punto) Para las especies covalentes: indique y represente la geometría molecular, diga la hibridación\ndel átomo central, y justifique su polaridad.",
         puntuacion: 2,
         criterios: "Se valorará la claridad, formulación y nomenclatura correctas, el planteamiento químico, el desarrollo razonado, los cálculos, las unidades y la respuesta final.",
         pdfFuente: "/quimica-pdfs/quimica-2022.pdf"

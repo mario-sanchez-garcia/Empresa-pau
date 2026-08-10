@@ -1117,7 +1117,7 @@ Dato: Constante de la Ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
     id: "f-2019-jun-B4",
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
-    enunciado: "Un rayo de luz se propaga según muestra el esquema de la\nfigura. Primero incide con un ángulo i 1 desde un medio de índice de\nrefracción n1 = 1,6 sobre un medio de índice de refracción n 2 = 1,3 de\nmanera que el rayo reflejado y el rayo refractado forman entre sí un ángulo\nde 90º. El rayo refractado incide con el ángulo crítico i c sobre otro medio\nde índice de refracción n3 desconocido. Determine:\n\na) \tLos ángulos de incidencia i 1 e ic.\n\nb) \tEl índice de refracción n 3.",
+    enunciado: "Un rayo de luz se propaga según muestra el esquema de la\nfigura. Primero incide con un ángulo i₁ desde un medio de índice de\nrefracción n₁ = 1,6 sobre un medio de índice de refracción n₂ = 1,3 de\nmanera que el rayo reflejado y el rayo refractado forman entre sí un ángulo\nde 90º. El rayo refractado incide con el ángulo crítico $i_{c}$ sobre otro medio\nde índice de refracción n₃ desconocido. Determine:\n\na) \tLos ángulos de incidencia i₁ e $i_{c}$.\n\nb) \tEl índice de refracción n₃.",
     apartados: [],
     puntos: 2,
   },

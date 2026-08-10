@@ -14,7 +14,6 @@ import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import RichTextArea from '@/components/shared/RichTextArea'
-import { ExamContentCard } from '@/components/shared/ExamPracticeUI'
 
 type Comunidad = 'Madrid' | 'Cataluña'
 type Convocatoria = 'ordinaria' | 'extraordinaria'
@@ -370,9 +369,16 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
             </div>
             {selectedQuestion?.titulo && <p style={{ marginTop: 8, fontSize: 18, fontWeight: 900, color: '#0f172a', lineHeight: 1.2 }}>{selectedQuestion.titulo}</p>}
           </div>
-          <div className="grid gap-5 p-6">
+          {/* Misma estructura que el resto de asignaturas (ver page-client): el
+              texto fuente va en su tarjeta, igual que "Texto fuente oficial" de
+              Historia, y el enunciado va suelto bajo su etiqueta, sin una
+              segunda tarjeta blanca dentro de la tarjeta del ejercicio. */}
+          <div style={{ padding: 18 }}>
             {sourceText && (
-              <ExamContentCard title={ccaa === 'Cataluña' ? 'Texto filosófico / fuente oficial' : 'Texto filosófico'} color={UI.color} borderColor={UI.border} soft>
+              <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 850, color: UI.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+                  {ccaa === 'Cataluña' ? 'Texto filosófico / fuente oficial' : 'Texto filosófico'}
+                </div>
                 <ExamStatement
                   text={sourceText}
                   storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:fuente`}
@@ -380,9 +386,10 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
                   softColor={UI.light}
                   readingMode
                 />
-              </ExamContentCard>
+              </div>
             )}
-            <ExamContentCard title="Enunciado oficial" color={UI.color} borderColor={UI.border}>
+            <div>
+              <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginBottom: 8 }}>Enunciado</div>
               <ExamStatement
                 text={selectedQuestion?.enunciado ?? ''}
                 storageKey={`filosofia:${ccaa}:${selectedExam?.id ?? 'examen'}:${selectedQuestion?.id ?? 'pregunta'}:enunciado`}
@@ -391,7 +398,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
                 readingMode
               />
               {wordLimit && <div className="mt-3 text-xs font-bold text-slate-500">Límite: {wordLimit}</div>}
-            </ExamContentCard>
+            </div>
           </div>
           <section className="border-t p-6" style={{ borderColor: UI.border }}>
             <div className="mb-4 flex gap-2">

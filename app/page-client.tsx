@@ -5823,21 +5823,6 @@ function cambiarTipo(t: Tipo) {
                       />
                     </div>
                   )}
-                  {asignatura === 'ingles' && (
-                    <div style={{ padding: '20px 22px', borderRadius: '22px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 14px 34px rgba(37,99,235,0.07)', marginBottom: '18px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Question</div>
-                      <ExamStatement
-                        key={`${preguntaActivaKey}-enunciado`}
-                        text={enunciadoActivo}
-                        format="raw"
-                        components={mdComponents}
-                        storageKey={enunciadoStorageKey}
-                        accentColor={cfg.color}
-                        softColor={cfg.light}
-                        readingMode
-                      />
-                    </div>
-                  )}
                   {!preguntaActivaIncompleta && (asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
@@ -5895,28 +5880,29 @@ function cambiarTipo(t: Tipo) {
                       ))}
                     </div>
                   )}
-                  {asignatura !== 'ingles' && (
-                    <div>
-                      <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginBottom: 8 }}>Enunciado</div>
-                      {preguntaActivaIncompleta ? (
-                        <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
-                          <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
-                          <div style={{ fontSize: '15px', lineHeight: 1.6, fontWeight: 650 }}>Estamos terminando de adaptar este contenido.</div>
-                          <div style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.5, color: '#64748b', fontWeight: 650 }}>Prueba otro ejercicio mientras tanto.</div>
-                        </div>
-                      ) : (
-                        <ExamStatement
-                          text={enunciadoActivo}
-                          format="raw"
-                          components={mdComponents}
-                          storageKey={enunciadoStorageKey}
-                          accentColor={cfg.color}
-                          softColor={cfg.light}
-                          readingMode={asignatura === 'lengua'}
-                        />
-                      )}
-                    </div>
-                  )}
+                  {/* Inglés usaba aquí una tarjeta blanca "Question" anidada dentro de
+                      la tarjeta del ejercicio; ahora comparte este bloque con el resto
+                      de asignaturas para que la estructura sea la misma en todas. */}
+                  <div>
+                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginBottom: 8 }}>Enunciado</div>
+                    {preguntaActivaIncompleta ? (
+                      <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
+                        <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
+                        <div style={{ fontSize: '15px', lineHeight: 1.6, fontWeight: 650 }}>Estamos terminando de adaptar este contenido.</div>
+                        <div style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.5, color: '#64748b', fontWeight: 650 }}>Prueba otro ejercicio mientras tanto.</div>
+                      </div>
+                    ) : (
+                      <ExamStatement
+                        text={enunciadoActivo}
+                        format="raw"
+                        components={mdComponents}
+                        storageKey={enunciadoStorageKey}
+                        accentColor={cfg.color}
+                        softColor={cfg.light}
+                        readingMode={asignatura === 'lengua' || asignatura === 'ingles'}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             )}

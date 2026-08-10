@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import { normalizeExamStatement, normalizeCorrectionMarkdownForRender } from '@/app/lib/mathFormatting'
@@ -65,7 +66,7 @@ export default function MathMarkdown({
     return (
       <div className={`math-markdown max-w-none ${className}`}>
         <ReactMarkdown
-          remarkPlugins={[remarkMath]}
+          remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b' }]]}
           components={{ ...defaultComponents, ...(components ?? {}) }}
         >
@@ -83,7 +84,7 @@ export default function MathMarkdown({
   return (
     <div className={`math-markdown max-w-none ${className}`}>
       <ReactMarkdown
-        remarkPlugins={[remarkMath]}
+        remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b' }]]}
         components={{ ...defaultComponents, ...(components ?? {}) }}
       >

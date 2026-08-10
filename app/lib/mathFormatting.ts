@@ -583,7 +583,9 @@ function normalizeSoftLineBreaks(text: string) {
     // section marker. "2.1."-style numbered sub-questions were missing, so in
     // Lengua the whole exercise collapsed into one running paragraph instead
     // of one bold sub-question per line, unlike every other subject.
-    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[)]|[0-9]+\.[0-9]+\.|[-\u2022]|\$\$)/gi, '$1 ')
+    // "|" is in the list because a markdown table only parses when each row
+    // keeps its own line \u2014 joining them turns the table into a run of pipes.
+    .replace(/([^\n])\n(?!\n|[a-e]\)|[ivx]+\)|Datos?[.:]|Dato[.:]|[A-Z]\.|[0-9]+[)]|[0-9]+\.[0-9]+\.|[-\u2022]|\||\$\$)/gi, '$1 ')
 }
 
 function formatBulletPoints(text: string) {

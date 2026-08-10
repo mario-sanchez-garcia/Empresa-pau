@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import SidebarNav from '@/app/components/SidebarNav'
 import XpExplainerDrawer from '@/components/ayuda/XpExplainerDrawer'
 import { AYUDA_FAQS, type AyudaFaq } from '@/app/lib/ayudaFaqs'
@@ -43,6 +44,8 @@ function askKairoHref(faq?: AyudaFaq): string {
 }
 
 export default function AyudaPage() {
+  const [xpDrawerOpen, setXpDrawerOpen] = useState(false)
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
@@ -52,21 +55,17 @@ export default function AyudaPage() {
         }
       `}</style>
       <SidebarNav />
+      <XpExplainerDrawer open={xpDrawerOpen} onClose={() => setXpDrawerOpen(false)} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
         <div style={{ padding: '36px 36px 0', maxWidth: 780 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>
-                Ayuda
-              </p>
-              <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 8 }}>
-                Cómo funciona Kairo
-              </h1>
-            </div>
-            <XpExplainerDrawer />
-          </div>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>
+            Ayuda
+          </p>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 8 }}>
+            Cómo funciona Kairo
+          </h1>
           <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
             Todo lo que necesitas saber para sacarle partido a la app.
           </p>
@@ -120,17 +119,33 @@ export default function AyudaPage() {
                 <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.65, marginBottom: 10 }}>
                   {faq.a}
                 </p>
-                <a
-                  href={askKairoHref(faq)}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    fontSize: 12, fontWeight: 800, color: '#2563eb',
-                    background: '#eff6ff', border: '1px solid #bfdbfe',
-                    borderRadius: 999, padding: '6px 12px', textDecoration: 'none',
-                  }}
-                >
-                  💬 Pregúntale esto a Kairo
-                </a>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {faq.id === 'xp' && (
+                    <button
+                      type="button"
+                      onClick={() => setXpDrawerOpen(true)}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        fontSize: 12, fontWeight: 800, color: 'white',
+                        background: '#2563eb', border: '1px solid #2563eb',
+                        borderRadius: 999, padding: '6px 12px', cursor: 'pointer',
+                      }}
+                    >
+                      📊 Ver cómo se calcula
+                    </button>
+                  )}
+                  <a
+                    href={askKairoHref(faq)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      fontSize: 12, fontWeight: 800, color: '#2563eb',
+                      background: '#eff6ff', border: '1px solid #bfdbfe',
+                      borderRadius: 999, padding: '6px 12px', textDecoration: 'none',
+                    }}
+                  >
+                    💬 Pregúntale esto a Kairo
+                  </a>
+                </div>
               </div>
             ))}
           </div>

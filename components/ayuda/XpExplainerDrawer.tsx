@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, Zap } from 'lucide-react'
+import { X } from 'lucide-react'
 import {
   DIFFICULTY_XP_MULTIPLIER,
   streakBonusFraction,
@@ -20,7 +20,6 @@ const INK = '#0f172a'
 const MUTED = '#64748b'
 const FAINT = '#94a3b8'
 const BLUE = '#2563eb'
-const BLUE_SOFT = '#eff6ff'
 const BORDER = '#e2e8f0'
 const AMBER = '#f59e0b'
 const PURPLE = '#7c3aed'
@@ -52,14 +51,16 @@ const NEAR_CEILING_B = { from: 8, to: 9 }
 // anterior (repeatImprovement.ts), nunca contra el primero.
 const ATTEMPT_TIMELINE = [4, 5, 4, 6, 8]
 
-export default function XpExplainerDrawer() {
-  const [open, setOpen] = useState(false)
+// Controlado desde fuera (ver app/ayuda/page.tsx): el disparador ya no vive
+// aquí dentro — es la propia tarjeta del FAQ "¿Cómo funciona el XP?" la que
+// abre este panel, así que el open/close se gestiona en el padre.
+export default function XpExplainerDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [xpTotal, setXpTotal] = useState<number | null>(null)
 
   useEffect(() => {
     if (!open) return
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKeyDown)
     const prevOverflow = document.body.style.overflow
@@ -68,6 +69,7 @@ export default function XpExplainerDrawer() {
       document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = prevOverflow
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onClose es una arrow inline del padre; solo importa reenganchar el listener cuando cambia `open`
   }, [open])
 
   // Se pide solo al abrir (no en cada render) para marcar la división real
@@ -96,27 +98,12 @@ export default function XpExplainerDrawer() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 7,
-          padding: '9px 16px', borderRadius: 999,
-          background: BLUE_SOFT, border: `1px solid #bfdbfe`,
-          color: BLUE, fontSize: 12.5, fontWeight: 900, cursor: 'pointer',
-          flexShrink: 0,
-        }}
-      >
-        <Zap size={14} />
-        XP y divisiones
-      </button>
-
       {open && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Cómo funciona el XP"
-          onClick={() => setOpen(false)}
+          onClick={onClose}
           style={{
             position: 'fixed', inset: 0, zIndex: 'var(--z-modal-bg, 50)',
             background: 'rgba(15,23,42,0.45)', backdropFilter: 'blur(4px)',
@@ -145,7 +132,7 @@ export default function XpExplainerDrawer() {
               </div>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={onClose}
                 aria-label="Cerrar"
                 style={{ flexShrink: 0, width: 32, height: 32, borderRadius: '50%', background: '#f1f5f9', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: MUTED }}
               >

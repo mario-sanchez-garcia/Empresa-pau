@@ -13,9 +13,11 @@ const M = dmMono.style.fontFamily
 // Cada una conserva exactamente el markup/estilo original de app/landing/page.tsx,
 // solo cambiando destino/etiqueta/visibilidad según el estado.
 
+// Se muestra siempre, incluso con sesión activa: el dispositivo puede estar
+// compartido (p. ej. dos hermanos con el mismo ordenador) y cada quien debe
+// poder entrar con su propia cuenta sin que el link desaparezca solo porque
+// ya hay una sesión distinta abierta.
 export function NavLoginLink() {
-  const { status } = useLandingAuth()
-  if (status === 'authed') return null
   return (
     <Link href="/login" className="v4c-btn-nav" style={{ padding: '7px 16px', border: '1px solid rgba(255,255,255,.3)', fontSize: 11, color: '#fff', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase' }}>
       Iniciar sesión →

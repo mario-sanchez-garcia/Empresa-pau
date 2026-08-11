@@ -908,7 +908,11 @@ export default function OnboardingFlow() {
           </div>
 
           {/* Body */}
-          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
+          {/* Término medio: flex-start (no centrado en todo el hueco libre,
+              que en steps con pocas opciones dejaba un vacío enorme) con un
+              margen moderado (no pegado al título, que quedaba demasiado
+              compacto). */}
+          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', position: 'relative' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${step}-content`}
@@ -916,7 +920,7 @@ export default function OnboardingFlow() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                style={{ width: '100%' }}
+                style={{ width: '100%', marginTop: 'clamp(48px, 9vh, 110px)' }}
               >
                 {renderStep()}
               </motion.div>

@@ -323,7 +323,7 @@ export default function LandingPage() {
         {/* Hero text */}
         <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 32px' }}>
           <p style={{ fontFamily: M, fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.35)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 18 }}>
-            Selectividad · Madrid · Cataluña · 2026
+            Selectividad · Madrid · 2026
           </p>
           <h1 style={{ fontFamily: B, fontSize: 'clamp(72px, 14vw, 184px)', lineHeight: .92, letterSpacing: '.01em', color: '#fff', marginBottom: 40 }}>
             Prepara<span style={{ display: 'block', letterSpacing: '-.01em' }}>la PAU.</span>

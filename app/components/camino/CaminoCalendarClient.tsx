@@ -2394,7 +2394,7 @@ export default function CaminoCalendarClient() {
                 { subject: 'historia_espana',  label: 'Historia España', total: 10, color: '#b45309' },
                 { subject: 'lengua',           label: 'Lengua',          total: 8,  color: '#0891b2' },
                 { subject: 'matematicas_ccss', label: 'Mat. CCSS',       total: 6,  color: '#7c3aed' },
-                { subject: 'fisica',           label: 'Física',          total: 5,  color: '#0f766e' },
+                { subject: 'fisica',           label: 'Física',          total: 57, color: '#0f766e' },
               ] as const).filter(({ subject }) => subjectProgress[subject] != null).map(({ subject, label, total, color }) => {
                 const done = subjectProgress[subject] ?? 0
                 const pct = Math.min(100, Math.round((done / total) * 100))

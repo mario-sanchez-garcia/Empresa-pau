@@ -1468,28 +1468,6 @@
     ]
   },
   {
-    "subject": "fisica",
-    "blockSlug": "campo-gravitatorio",
-    "blockTitle": "Campo gravitatorio",
-    "topicSlug": "satelites-energia-orbital",
-    "title": "Satélites y energía orbital",
-    "orderIndex": 1,
-    "contentStatus": "itinerary_only",
-    "explanation": "",
-    "guidedExample": "",
-    "practicePrompt": "",
-    "rawLatex": "",
-    "evauPracticeQuery": {
-      "subject": "fisica",
-      "block": "campo-gravitatorio",
-      "topic": "satelites"
-    },
-    "source": "contenidos_2_bach",
-    "compatibleSubjects": [
-      "fisica"
-    ]
-  },
-  {
     "subject": "quimica",
     "blockSlug": "equilibrio-quimico",
     "blockTitle": "Equilibrio químico",
@@ -4586,5 +4564,1316 @@
       "historia_espana"
     ],
     "v2SortOrder": 128
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "ley-de-gravitacion-universal",
+    "title": "Ley de Gravitación Universal",
+    "orderIndex": 1,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "ley-de-gravitacion-universal"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 1
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "intensidad-del-campo-gravitatorio",
+    "title": "Intensidad del Campo Gravitatorio",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "intensidad-del-campo-gravitatorio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 2
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "lineas-de-campo-gravitatorio",
+    "title": "Líneas de Campo Gravitatorio",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "lineas-de-campo-gravitatorio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 3
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "momento-angular-y-fuerzas-centrales",
+    "title": "Momento Angular y Fuerzas Centrales",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "momento-angular-y-fuerzas-centrales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 4
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "leyes-de-kepler",
+    "title": "Leyes de Kepler",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "leyes-de-kepler"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "trabajo-y-caracter-conservativo-del-campo-gravitatorio",
+    "title": "Trabajo y Carácter Conservativo del Campo Gravitatorio",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "trabajo-y-caracter-conservativo-del-campo-gravitatorio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 6
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "energia-potencial-gravitatoria",
+    "title": "Energía Potencial Gravitatoria",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "energia-potencial-gravitatoria"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "potencial-gravitatorio",
+    "title": "Potencial Gravitatorio",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "potencial-gravitatorio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "energia-mecanica-en-el-campo-gravitatorio",
+    "title": "Energía Mecánica en el Campo Gravitatorio",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "energia-mecanica-en-el-campo-gravitatorio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "velocidad-orbital",
+    "title": "Velocidad Orbital",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "velocidad-orbital"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "velocidad-de-escape",
+    "title": "Velocidad de Escape",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "velocidad-de-escape"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-gravitatorio",
+    "blockTitle": "Campo Gravitatorio",
+    "topicSlug": "introduccion-a-la-cosmologia-y-astrofisica",
+    "title": "Introducción a la Cosmología y Astrofísica",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-gravitatorio",
+      "topic": "introduccion-a-la-cosmologia-y-astrofisica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 12
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "ley-de-coulomb",
+    "title": "Ley de Coulomb",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "ley-de-coulomb"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 13
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "intensidad-del-campo-electrico",
+    "title": "Intensidad del Campo Eléctrico",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "intensidad-del-campo-electrico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 14
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "movimiento-de-cargas-en-campos-uniformes",
+    "title": "Movimiento de Cargas en Campos Uniformes",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "movimiento-de-cargas-en-campos-uniformes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 15
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "teorema-de-gauss",
+    "title": "Teorema de Gauss",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "teorema-de-gauss"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 16
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "trabajo-y-caracter-conservativo-del-campo-electrico",
+    "title": "Trabajo y Carácter Conservativo del Campo Eléctrico",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "trabajo-y-caracter-conservativo-del-campo-electrico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 17
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "potencial-electrico",
+    "title": "Potencial Eléctrico",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "potencial-electrico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 18
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "campo-magnetico-creado-por-corrientes",
+    "title": "Campo Magnético Creado por Corrientes",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "campo-magnetico-creado-por-corrientes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 19
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "fuerza-de-lorentz",
+    "title": "Fuerza de Lorentz",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "fuerza-de-lorentz"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 20
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira",
+    "title": "Fuerza Magnética sobre una Corriente y Momento sobre una Espira",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 21
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "flujo-magnetico-e-induccion-electromagnetica",
+    "title": "Flujo Magnético e Inducción Electromagnética",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "flujo-magnetico-e-induccion-electromagnetica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 22
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "campo-electromagnetico",
+    "blockTitle": "Campo Electromagnético",
+    "topicSlug": "generacion-de-corriente-alterna",
+    "title": "Generación de Corriente Alterna",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "campo-electromagnetico",
+      "topic": "generacion-de-corriente-alterna"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 23
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "movimiento-armonico-simple-mas-elongacion-y-ecuacion",
+    "title": "Movimiento Armónico Simple (MAS): Elongación y Ecuación",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "movimiento-armonico-simple-mas-elongacion-y-ecuacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 24
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "velocidad-y-aceleracion-en-el-mas",
+    "title": "Velocidad y Aceleración en el MAS",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "velocidad-y-aceleracion-en-el-mas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 25
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "dinamica-del-mas-fuerza-recuperadora",
+    "title": "Dinámica del MAS: Fuerza Recuperadora",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "dinamica-del-mas-fuerza-recuperadora"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 26
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "energia-en-el-mas",
+    "title": "Energía en el MAS",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "energia-en-el-mas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 27
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "el-pendulo-simple",
+    "title": "El Péndulo Simple",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "el-pendulo-simple"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 28
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "ondas-definicion-y-tipos",
+    "title": "Ondas: Definición y Tipos",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "ondas-definicion-y-tipos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 29
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "ecuacion-de-una-onda-armonica",
+    "title": "Ecuación de una Onda Armónica",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "ecuacion-de-una-onda-armonica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 30
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "energia-e-intensidad-de-una-onda",
+    "title": "Energía e Intensidad de una Onda",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "energia-e-intensidad-de-una-onda"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 31
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "el-sonido-velocidad-y-cualidades",
+    "title": "El Sonido: Velocidad y Cualidades",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "el-sonido-velocidad-y-cualidades"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 32
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "vibraciones-ondas",
+    "blockTitle": "Vibraciones y Ondas",
+    "topicSlug": "efecto-doppler",
+    "title": "Efecto Doppler",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "vibraciones-ondas",
+      "topic": "efecto-doppler"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 33
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "naturaleza-de-la-luz-y-el-modelo-de-rayos",
+    "title": "Naturaleza de la Luz y el Modelo de Rayos",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "naturaleza-de-la-luz-y-el-modelo-de-rayos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 34
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "indice-de-refraccion",
+    "title": "Índice de Refracción",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "indice-de-refraccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 35
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "reflexion-de-la-luz-y-espejos",
+    "title": "Reflexión de la Luz y Espejos",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "reflexion-de-la-luz-y-espejos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 36
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "refraccion-y-ley-de-snell",
+    "title": "Refracción y Ley de Snell",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "refraccion-y-ley-de-snell"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 37
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "reflexion-total-y-angulo-limite",
+    "title": "Reflexión Total y Ángulo Límite",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "reflexion-total-y-angulo-limite"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 38
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "lentes-delgadas-ecuacion-fundamental",
+    "title": "Lentes Delgadas: Ecuación Fundamental",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "lentes-delgadas-ecuacion-fundamental"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 39
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "aumento-lateral-en-lentes-y-espejos",
+    "title": "Aumento Lateral en Lentes y Espejos",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "aumento-lateral-en-lentes-y-espejos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "optica-geometrica",
+    "blockTitle": "Óptica Geométrica",
+    "topicSlug": "defectos-visuales-e-instrumentos-opticos",
+    "title": "Defectos Visuales e Instrumentos Ópticos",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "optica-geometrica",
+      "topic": "defectos-visuales-e-instrumentos-opticos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "postulados-de-la-relatividad-especial",
+    "title": "Postulados de la Relatividad Especial",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "postulados-de-la-relatividad-especial"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "dilatacion-del-tiempo",
+    "title": "Dilatación del Tiempo",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "dilatacion-del-tiempo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 43
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "contraccion-de-la-longitud",
+    "title": "Contracción de la Longitud",
+    "orderIndex": 44,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "contraccion-de-la-longitud"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 44
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "equivalencia-masa-energia",
+    "title": "Equivalencia Masa-Energía",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "equivalencia-masa-energia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 45
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "energia-y-cantidad-de-movimiento-relativistas",
+    "title": "Energía y Cantidad de Movimiento Relativistas",
+    "orderIndex": 46,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "energia-y-cantidad-de-movimiento-relativistas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 46
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "hipotesis-de-planck-y-cuantizacion-de-la-energia",
+    "title": "Hipótesis de Planck y Cuantización de la Energía",
+    "orderIndex": 47,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "hipotesis-de-planck-y-cuantizacion-de-la-energia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 47
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "efecto-fotoelectrico",
+    "title": "Efecto Fotoeléctrico",
+    "orderIndex": 48,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "efecto-fotoelectrico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 48
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "hipotesis-de-de-broglie-dualidad-onda-corpusculo",
+    "title": "Hipótesis de De Broglie: Dualidad Onda-Corpúsculo",
+    "orderIndex": 49,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "hipotesis-de-de-broglie-dualidad-onda-corpusculo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 49
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "principio-de-incertidumbre-de-heisenberg",
+    "title": "Principio de Incertidumbre de Heisenberg",
+    "orderIndex": 50,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "principio-de-incertidumbre-de-heisenberg"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 50
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "modelo-atomico-de-bohr",
+    "title": "Modelo Atómico de Bohr",
+    "orderIndex": 51,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "modelo-atomico-de-bohr"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 51
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "composicion-del-nucleo-atomico",
+    "title": "Composición del Núcleo Atómico",
+    "orderIndex": 52,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "composicion-del-nucleo-atomico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 52
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "energia-de-enlace-nuclear-y-defecto-de-masa",
+    "title": "Energía de Enlace Nuclear y Defecto de Masa",
+    "orderIndex": 53,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "energia-de-enlace-nuclear-y-defecto-de-masa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 53
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "radiactividad-desintegracion-alfa-beta-y-gamma",
+    "title": "Radiactividad: Desintegración Alfa, Beta y Gamma",
+    "orderIndex": 54,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "radiactividad-desintegracion-alfa-beta-y-gamma"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 54
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "ley-de-desintegracion-radiactiva",
+    "title": "Ley de Desintegración Radiactiva",
+    "orderIndex": 55,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "ley-de-desintegracion-radiactiva"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 55
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "fision-nuclear",
+    "title": "Fisión Nuclear",
+    "orderIndex": 56,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "fision-nuclear"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 56
+  },
+  {
+    "subject": "fisica",
+    "blockSlug": "fisica-siglo-xx",
+    "blockTitle": "Física del Siglo XX",
+    "topicSlug": "fusion-nuclear",
+    "title": "Fusión Nuclear",
+    "orderIndex": 57,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "fisica",
+      "block": "fisica-siglo-xx",
+      "topic": "fusion-nuclear"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "fisica"
+    ],
+    "v2SortOrder": 57
   }
 ]

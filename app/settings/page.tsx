@@ -42,6 +42,7 @@ const ONBOARDING_LABEL_TO_EXAM_SLUG: Record<string, string> = {
   'Lengua Castellana': 'lengua',
   'Historia de España': 'historia',
   'Física': 'fisica',
+  'Química': 'quimica',
 }
 
 // Fallback for "Asignatura por defecto" only, for the brief window before

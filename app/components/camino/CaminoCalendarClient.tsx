@@ -1080,7 +1080,7 @@ export default function CaminoCalendarClient() {
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
       const todayStr = todayMadrid()
-      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, fisicaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult, examsWeekResult, freeExamsToday, freeSimsToday] = await Promise.all([
+      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, fisicaCount, quimicaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult, examsWeekResult, freeExamsToday, freeSimsToday] = await Promise.all([
         fetchCaminoCalendar(userId),
         calcularRacha(userId, supabase),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
@@ -1088,6 +1088,7 @@ export default function CaminoCalendarClient() {
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'lengua'),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
         supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'fisica'),
+        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'quimica'),
         supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
         supabase.from('camino_xp_events').select('xp_amount').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
         supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
@@ -1142,6 +1143,7 @@ export default function CaminoCalendarClient() {
         lengua: lenguaCount.count ?? 0,
         historia_espana: historiaCount.count ?? 0,
         fisica: fisicaCount.count ?? 0,
+        quimica: quimicaCount.count ?? 0,
       })
       setXpTotal(Number(progressRow.data?.xp_total) || 0)
       setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
@@ -1760,6 +1762,7 @@ export default function CaminoCalendarClient() {
       'Lengua Castellana': 'lengua',
       'Historia de España': 'historia_espana',
       'Física': 'fisica',
+      'Química': 'quimica',
     }
     const slug = SUBJECT_TO_SLUG[subjectLabel]
     if (!slug) return
@@ -2386,7 +2389,7 @@ export default function CaminoCalendarClient() {
           </div>
 
           {/* Avance por asignatura */}
-          {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null || subjectProgress.fisica != null) && (
+          {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null || subjectProgress.fisica != null || subjectProgress.quimica != null) && (
             <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
               <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Tu avance</div>
               {([
@@ -2395,6 +2398,7 @@ export default function CaminoCalendarClient() {
                 { subject: 'lengua',           label: 'Lengua',          total: 8,  color: '#0891b2' },
                 { subject: 'matematicas_ccss', label: 'Mat. CCSS',       total: 6,  color: '#7c3aed' },
                 { subject: 'fisica',           label: 'Física',          total: 57, color: '#0f766e' },
+                { subject: 'quimica',          label: 'Química',         total: 68, color: '#65a30d' },
               ] as const).filter(({ subject }) => subjectProgress[subject] != null).map(({ subject, label, total, color }) => {
                 const done = subjectProgress[subject] ?? 0
                 const pct = Math.min(100, Math.round((done / total) * 100))
@@ -4012,6 +4016,7 @@ const ADDABLE_SUBJECT_OPTS = [
   { id: 'Lengua Castellana', color: '#0891b2', bg: '#ecfeff' },
   { id: 'Historia de España', color: '#b45309', bg: '#fff7ed' },
   { id: 'Física', color: '#0f766e', bg: '#f0fdfa' },
+  { id: 'Química', color: '#65a30d', bg: '#f7fee7' },
 ]
 
 function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {

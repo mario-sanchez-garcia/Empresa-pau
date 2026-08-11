@@ -18,6 +18,7 @@ const PRIVATE_BETA_SUBJECT_MESSAGES: Record<string, string> = {
   'Lengua Castellana': 'Preparando comentario, gramática y literatura…',
   'Historia de España': 'Construyendo tu cronología de Historia de España…',
   'Física': 'Ordenando tus temas de Física…',
+  'Química': 'Ordenando tus temas de Química…',
 }
 
 export function buildPersonalizedLoadingMessages(input: LoadingMessageInput): string[] {

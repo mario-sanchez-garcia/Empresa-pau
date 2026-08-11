@@ -6,6 +6,7 @@ export const PRIVATE_BETA_SUBJECTS = [
   'lengua',
   'historia_espana',
   'fisica',
+  'quimica',
 ] as const
 
 export type PrivateBetaSubject = typeof PRIVATE_BETA_SUBJECTS[number]
@@ -671,6 +672,15 @@ export const PRIVATE_BETA_CURRICULUM_TOPICS: CaminoCurriculumTopic[] = [
   topic({ subject: 'fisica', orderIndex: 3, blockSlug: 'vibraciones-ondas', blockTitle: 'Vibraciones y Ondas', topicSlug: 'vibraciones-ondas', title: 'Vibraciones y Ondas', tags: ['MAS', 'ondas', 'sonido', 'efecto Doppler'] }),
   topic({ subject: 'fisica', orderIndex: 4, blockSlug: 'optica-geometrica', blockTitle: 'Óptica Geométrica', topicSlug: 'optica-geometrica', title: 'Óptica Geométrica', tags: ['refracción', 'ley de Snell', 'lentes', 'espejos'], prerequisites: ['vibraciones-ondas'] }),
   topic({ subject: 'fisica', orderIndex: 5, blockSlug: 'fisica-siglo-xx', blockTitle: 'Física del Siglo XX', topicSlug: 'fisica-siglo-xx', title: 'Física del Siglo XX', tags: ['relatividad', 'efecto fotoeléctrico', 'modelo de Bohr', 'radiactividad'] }),
+
+  topic({ subject: 'quimica', orderIndex: 1, blockSlug: 'estequiometria', blockTitle: 'Estequiometría', topicSlug: 'estequiometria', title: 'Estequiometría', tags: ['mol', 'Avogadro', 'leyes ponderales', 'cálculos estequiométricos'] }),
+  topic({ subject: 'quimica', orderIndex: 2, blockSlug: 'estructura-atomica', blockTitle: 'Estructura Atómica y Clasificación Periódica', topicSlug: 'estructura-atomica', title: 'Estructura Atómica y Clasificación Periódica', tags: ['configuración electrónica', 'tabla periódica', 'propiedades periódicas'], prerequisites: ['estequiometria'] }),
+  topic({ subject: 'quimica', orderIndex: 3, blockSlug: 'enlace-quimico', blockTitle: 'Enlace Químico y Propiedades de las Sustancias', topicSlug: 'enlace-quimico', title: 'Enlace Químico y Propiedades de las Sustancias', tags: ['enlace iónico', 'enlace covalente', 'enlace metálico', 'fuerzas intermoleculares'], prerequisites: ['estructura-atomica'] }),
+  topic({ subject: 'quimica', orderIndex: 4, blockSlug: 'termoquimica', blockTitle: 'Termoquímica', topicSlug: 'termoquimica', title: 'Termoquímica', tags: ['entalpía', 'ley de Hess', 'espontaneidad', 'entropía'] }),
+  topic({ subject: 'quimica', orderIndex: 5, blockSlug: 'equilibrio-cinetica', blockTitle: 'Equilibrio Químico y Cinética', topicSlug: 'equilibrio-cinetica', title: 'Equilibrio Químico y Cinética', tags: ['Kc', 'Kp', 'Le Chatelier', 'velocidad de reacción'], prerequisites: ['termoquimica'] }),
+  topic({ subject: 'quimica', orderIndex: 6, blockSlug: 'acido-base', blockTitle: 'Ácido-Base', topicSlug: 'acido-base', title: 'Ácido-Base', tags: ['pH', 'Ka', 'Kb', 'valoraciones ácido-base'], prerequisites: ['equilibrio-cinetica'] }),
+  topic({ subject: 'quimica', orderIndex: 7, blockSlug: 'electroquimica', blockTitle: 'Electroquímica', topicSlug: 'electroquimica', title: 'Electroquímica', tags: ['redox', 'pilas', 'electrólisis', 'potenciales de reducción'] }),
+  topic({ subject: 'quimica', orderIndex: 8, blockSlug: 'quimica-organica', blockTitle: 'Química Orgánica', topicSlug: 'quimica-organica', title: 'Química Orgánica', tags: ['grupos funcionales', 'nomenclatura orgánica', 'isomería', 'reacciones orgánicas'] }),
 ].map(item => ({
   ...item,
   orderIndex: item.subject === 'matematicas_ii'
@@ -683,5 +693,6 @@ function subjectOffset(subject: PrivateBetaSubject) {
   if (subject === 'lengua') return 2000
   if (subject === 'historia_espana') return 3000
   if (subject === 'fisica') return 4000
+  if (subject === 'quimica') return 5000
   return 0
 }

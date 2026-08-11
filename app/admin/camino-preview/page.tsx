@@ -29,7 +29,7 @@ type V2Row = {
   practice_prompt: string | null
 }
 
-type SubjectKey = 'matematicas_ii' | 'historia_espana' | 'fisica'
+type SubjectKey = 'matematicas_ii' | 'historia_espana' | 'fisica' | 'quimica'
 
 type LoadState =
   | { status: 'idle' }
@@ -174,6 +174,7 @@ const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
   { key: 'matematicas_ii', label: 'Matemáticas II', blockOrder: ['Álgebra', 'Geometría', 'Análisis', 'Probabilidad'] },
   { key: 'historia_espana', label: 'Historia de España' },
   { key: 'fisica', label: 'Física', blockOrder: ['Campo Gravitatorio', 'Campo Electromagnético', 'Vibraciones y Ondas', 'Óptica Geométrica', 'Física del Siglo XX'] },
+  { key: 'quimica', label: 'Química', blockOrder: ['Estequiometría', 'Estructura Atómica y Clasificación Periódica', 'Enlace Químico y Propiedades de las Sustancias', 'Termoquímica', 'Equilibrio Químico y Cinética', 'Ácido-Base', 'Electroquímica', 'Química Orgánica'] },
 ]
 
 // ─── Page ────────────────────────────────────────────────────────────────────

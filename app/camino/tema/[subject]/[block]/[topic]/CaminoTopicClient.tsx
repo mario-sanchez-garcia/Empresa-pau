@@ -60,6 +60,15 @@ const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
   'fisica:vibraciones-ondas:vibraciones-ondas':           { min: 24, max: 33 },
   'fisica:optica-geometrica:optica-geometrica':           { min: 34, max: 41 },
   'fisica:fisica-siglo-xx:fisica-siglo-xx':               { min: 42, max: 57 },
+  // Química (bloques 1-8, sujeto quimica en curriculum_content_v2)
+  'quimica:estequiometria:estequiometria':                 { min: 58,  max: 65  },
+  'quimica:estructura-atomica:estructura-atomica':         { min: 66,  max: 73  },
+  'quimica:enlace-quimico:enlace-quimico':                 { min: 74,  max: 81  },
+  'quimica:termoquimica:termoquimica':                     { min: 82,  max: 88  },
+  'quimica:equilibrio-cinetica:equilibrio-cinetica':       { min: 89,  max: 99  },
+  'quimica:acido-base:acido-base':                         { min: 100, max: 107 },
+  'quimica:electroquimica:electroquimica':                 { min: 108, max: 115 },
+  'quimica:quimica-organica:quimica-organica':             { min: 116, max: 125 },
 }
 
 const TOPIC_PROGRESS_KEY = 'kairo_camino_topic_progress_v1'

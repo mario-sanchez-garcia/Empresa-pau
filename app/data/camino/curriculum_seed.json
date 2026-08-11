@@ -1468,28 +1468,6 @@
     ]
   },
   {
-    "subject": "quimica",
-    "blockSlug": "equilibrio-quimico",
-    "blockTitle": "Equilibrio químico",
-    "topicSlug": "kc-kp-le-chatelier",
-    "title": "Kc, Kp y Le Châtelier",
-    "orderIndex": 1,
-    "contentStatus": "itinerary_only",
-    "explanation": "",
-    "guidedExample": "",
-    "practicePrompt": "",
-    "rawLatex": "",
-    "evauPracticeQuery": {
-      "subject": "quimica",
-      "block": "equilibrio",
-      "topic": "le-chatelier"
-    },
-    "source": "contenidos_2_bach",
-    "compatibleSubjects": [
-      "quimica"
-    ]
-  },
-  {
     "subject": "biologia",
     "blockSlug": "genetica",
     "blockTitle": "Genética",
@@ -5875,5 +5853,1569 @@
       "fisica"
     ],
     "v2SortOrder": 57
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "el-mol-y-el-numero-de-avogadro",
+    "title": "El Mol y el Número de Avogadro",
+    "orderIndex": 1,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "el-mol-y-el-numero-de-avogadro"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 58
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "leyes-ponderales-de-las-reacciones-quimicas",
+    "title": "Leyes Ponderales de las Reacciones Químicas",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "leyes-ponderales-de-las-reacciones-quimicas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 59
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "calculos-estequiometricos-con-reactivos-y-productos",
+    "title": "Cálculos Estequiométricos con Reactivos y Productos",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "calculos-estequiometricos-con-reactivos-y-productos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 60
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "reactivo-limitante-y-en-exceso",
+    "title": "Reactivo Limitante y en Exceso",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "reactivo-limitante-y-en-exceso"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 61
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "rendimiento-de-una-reaccion-quimica",
+    "title": "Rendimiento de una Reacción Química",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "rendimiento-de-una-reaccion-quimica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 62
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "riqueza-o-pureza-de-un-reactivo",
+    "title": "Riqueza o Pureza de un Reactivo",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "riqueza-o-pureza-de-un-reactivo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 63
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "concentracion-de-disoluciones",
+    "title": "Concentración de Disoluciones",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "concentracion-de-disoluciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 64
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estequiometria",
+    "blockTitle": "Estequiometría",
+    "topicSlug": "ley-de-los-gases-ideales-aplicada-a-reacciones",
+    "title": "Ley de los Gases Ideales Aplicada a Reacciones",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estequiometria",
+      "topic": "ley-de-los-gases-ideales-aplicada-a-reacciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 65
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "evolucion-de-los-modelos-atomicos",
+    "title": "Evolución de los Modelos Atómicos",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "evolucion-de-los-modelos-atomicos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 66
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "el-atomo-de-bohr-y-los-espectros-atomicos",
+    "title": "El Átomo de Bohr y los Espectros Atómicos",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "el-atomo-de-bohr-y-los-espectros-atomicos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 67
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "numeros-cuanticos-y-orbitales-atomicos",
+    "title": "Números Cuánticos y Orbitales Atómicos",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "numeros-cuanticos-y-orbitales-atomicos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 68
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "configuracion-electronica-de-los-elementos",
+    "title": "Configuración Electrónica de los Elementos",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "configuracion-electronica-de-los-elementos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 69
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "el-sistema-periodico-actual",
+    "title": "El Sistema Periódico Actual",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "el-sistema-periodico-actual"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 70
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "radio-atomico-y-radio-ionico",
+    "title": "Radio Atómico y Radio Iónico",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "radio-atomico-y-radio-ionico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 71
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "energia-de-ionizacion-y-afinidad-electronica",
+    "title": "Energía de Ionización y Afinidad Electrónica",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "energia-de-ionizacion-y-afinidad-electronica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 72
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "estructura-atomica",
+    "blockTitle": "Estructura Atómica y Clasificación Periódica",
+    "topicSlug": "electronegatividad-y-caracter-metalico",
+    "title": "Electronegatividad y Carácter Metálico",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "estructura-atomica",
+      "topic": "electronegatividad-y-caracter-metalico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 73
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "el-enlace-ionico-y-sus-propiedades",
+    "title": "El Enlace Iónico y sus Propiedades",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "el-enlace-ionico-y-sus-propiedades"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 74
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "energia-reticular-y-ciclo-de-born-haber",
+    "title": "Energía Reticular y Ciclo de Born-Haber",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "energia-reticular-y-ciclo-de-born-haber"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 75
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "el-enlace-covalente-estructuras-de-lewis",
+    "title": "El Enlace Covalente: Estructuras de Lewis",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "el-enlace-covalente-estructuras-de-lewis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 76
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "geometria-molecular-teoria-rpecv",
+    "title": "Geometría Molecular: Teoría RPECV",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "geometria-molecular-teoria-rpecv"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 77
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "polaridad-de-enlaces-y-moleculas",
+    "title": "Polaridad de Enlaces y Moléculas",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "polaridad-de-enlaces-y-moleculas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 78
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "el-enlace-metalico-y-propiedades-de-los-metales",
+    "title": "El Enlace Metálico y Propiedades de los Metales",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "el-enlace-metalico-y-propiedades-de-los-metales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 79
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "fuerzas-intermoleculares",
+    "title": "Fuerzas Intermoleculares",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "fuerzas-intermoleculares"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 80
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "enlace-quimico",
+    "blockTitle": "Enlace Químico y Propiedades de las Sustancias",
+    "topicSlug": "propiedades-de-las-sustancias-covalentes",
+    "title": "Propiedades de las Sustancias Covalentes",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "enlace-quimico",
+      "topic": "propiedades-de-las-sustancias-covalentes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 81
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "sistemas-termodinamicos-y-primer-principio",
+    "title": "Sistemas Termodinámicos y Primer Principio",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "sistemas-termodinamicos-y-primer-principio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 82
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "entalpia-de-reaccion",
+    "title": "Entalpía de Reacción",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "entalpia-de-reaccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 83
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "ley-de-hess",
+    "title": "Ley de Hess",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "ley-de-hess"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 84
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "entalpias-de-formacion-y-de-enlace",
+    "title": "Entalpías de Formación y de Enlace",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "entalpias-de-formacion-y-de-enlace"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 85
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "entropia-y-segundo-principio-de-la-termodinamica",
+    "title": "Entropía y Segundo Principio de la Termodinámica",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "entropia-y-segundo-principio-de-la-termodinamica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 86
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "energia-libre-de-gibbs-y-espontaneidad",
+    "title": "Energía Libre de Gibbs y Espontaneidad",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "energia-libre-de-gibbs-y-espontaneidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 87
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "termoquimica",
+    "blockTitle": "Termoquímica",
+    "topicSlug": "calorimetria",
+    "title": "Calorimetría",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "termoquimica",
+      "topic": "calorimetria"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 88
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "el-equilibrio-quimico-y-la-constante-kc",
+    "title": "El Equilibrio Químico y la Constante Kc",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "el-equilibrio-quimico-y-la-constante-kc"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 89
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "la-constante-kp-y-su-relacion-con-kc",
+    "title": "La Constante Kp y su Relación con Kc",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "la-constante-kp-y-su-relacion-con-kc"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 90
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "grado-de-disociacion",
+    "title": "Grado de Disociación",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "grado-de-disociacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 91
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "cociente-de-reaccion-y-sentido-de-la-reaccion",
+    "title": "Cociente de Reacción y Sentido de la Reacción",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "cociente-de-reaccion-y-sentido-de-la-reaccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 92
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "principio-de-le-chatelier",
+    "title": "Principio de Le Chatelier",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "principio-de-le-chatelier"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 93
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "efecto-de-la-presion-y-la-temperatura-en-el-equilibrio",
+    "title": "Efecto de la Presión y la Temperatura en el Equilibrio",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "efecto-de-la-presion-y-la-temperatura-en-el-equilibrio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 94
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "equilibrios-heterogeneos-y-solubilidad-kps",
+    "title": "Equilibrios Heterogéneos y Solubilidad (Kps)",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "equilibrios-heterogeneos-y-solubilidad-kps"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 95
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "velocidad-de-reaccion",
+    "title": "Velocidad de Reacción",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "velocidad-de-reaccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 96
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "factores-que-afectan-a-la-velocidad-de-reaccion",
+    "title": "Factores que Afectan a la Velocidad de Reacción",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "factores-que-afectan-a-la-velocidad-de-reaccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 97
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "teoria-de-colisiones-y-energia-de-activacion",
+    "title": "Teoría de Colisiones y Energía de Activación",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "teoria-de-colisiones-y-energia-de-activacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 98
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "equilibrio-cinetica",
+    "blockTitle": "Equilibrio Químico y Cinética",
+    "topicSlug": "mecanismos-de-reaccion-y-catalizadores",
+    "title": "Mecanismos de Reacción y Catalizadores",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "equilibrio-cinetica",
+      "topic": "mecanismos-de-reaccion-y-catalizadores"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 99
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "teorias-acido-base-arrhenius-y-br-nsted-lowry",
+    "title": "Teorías Ácido-Base: Arrhenius y Brønsted-Lowry",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "teorias-acido-base-arrhenius-y-br-nsted-lowry"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 100
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "fuerza-de-acidos-y-bases-ka-y-kb",
+    "title": "Fuerza de Ácidos y Bases: Ka y Kb",
+    "orderIndex": 44,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "fuerza-de-acidos-y-bases-ka-y-kb"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 101
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "el-ph-y-el-producto-ionico-del-agua",
+    "title": "El pH y el Producto Iónico del Agua",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "el-ph-y-el-producto-ionico-del-agua"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 102
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "ph-de-acidos-y-bases-fuertes",
+    "title": "pH de Ácidos y Bases Fuertes",
+    "orderIndex": 46,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "ph-de-acidos-y-bases-fuertes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 103
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "ph-de-acidos-y-bases-debiles",
+    "title": "pH de Ácidos y Bases Débiles",
+    "orderIndex": 47,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "ph-de-acidos-y-bases-debiles"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 104
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "hidrolisis-de-sales",
+    "title": "Hidrólisis de Sales",
+    "orderIndex": 48,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "hidrolisis-de-sales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 105
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "disoluciones-reguladoras-tampon",
+    "title": "Disoluciones Reguladoras (Tampón)",
+    "orderIndex": 49,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "disoluciones-reguladoras-tampon"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 106
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "acido-base",
+    "blockTitle": "Ácido-Base",
+    "topicSlug": "valoraciones-acido-base-e-indicadores",
+    "title": "Valoraciones Ácido-Base e Indicadores",
+    "orderIndex": 50,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "acido-base",
+      "topic": "valoraciones-acido-base-e-indicadores"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 107
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "reacciones-de-oxidacion-reduccion",
+    "title": "Reacciones de Oxidación-Reducción",
+    "orderIndex": 51,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "reacciones-de-oxidacion-reduccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 108
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "ajuste-de-reacciones-redox-por-el-metodo-del-ion-electron",
+    "title": "Ajuste de Reacciones Redox por el Método del Ion-Electrón",
+    "orderIndex": 52,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "ajuste-de-reacciones-redox-por-el-metodo-del-ion-electron"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 109
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "pilas-galvanicas",
+    "title": "Pilas Galvánicas",
+    "orderIndex": 53,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "pilas-galvanicas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 110
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "potenciales-estandar-de-reduccion",
+    "title": "Potenciales Estándar de Reducción",
+    "orderIndex": 54,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "potenciales-estandar-de-reduccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 111
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "espontaneidad-de-las-reacciones-redox",
+    "title": "Espontaneidad de las Reacciones Redox",
+    "orderIndex": 55,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "espontaneidad-de-las-reacciones-redox"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 112
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "la-electrolisis",
+    "title": "La Electrólisis",
+    "orderIndex": 56,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "la-electrolisis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 113
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "leyes-de-faraday-de-la-electrolisis",
+    "title": "Leyes de Faraday de la Electrólisis",
+    "orderIndex": 57,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "leyes-de-faraday-de-la-electrolisis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 114
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "electroquimica",
+    "blockTitle": "Electroquímica",
+    "topicSlug": "corrosion-y-baterias-comerciales",
+    "title": "Corrosión y Baterías Comerciales",
+    "orderIndex": 58,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "electroquimica",
+      "topic": "corrosion-y-baterias-comerciales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 115
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "el-atomo-de-carbono-y-sus-enlaces",
+    "title": "El Átomo de Carbono y sus Enlaces",
+    "orderIndex": 59,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "el-atomo-de-carbono-y-sus-enlaces"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 116
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "grupos-funcionales-y-nomenclatura-basica",
+    "title": "Grupos Funcionales y Nomenclatura Básica",
+    "orderIndex": 60,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "grupos-funcionales-y-nomenclatura-basica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 117
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "formulacion-de-hidrocarburos",
+    "title": "Formulación de Hidrocarburos",
+    "orderIndex": 61,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "formulacion-de-hidrocarburos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 118
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "formulacion-de-compuestos-oxigenados-y-nitrogenados",
+    "title": "Formulación de Compuestos Oxigenados y Nitrogenados",
+    "orderIndex": 62,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "formulacion-de-compuestos-oxigenados-y-nitrogenados"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 119
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "isomeria-estructural-y-estereoisomeria",
+    "title": "Isomería Estructural y Estereoisomería",
+    "orderIndex": 63,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "isomeria-estructural-y-estereoisomeria"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 120
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "reacciones-de-sustitucion",
+    "title": "Reacciones de Sustitución",
+    "orderIndex": 64,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "reacciones-de-sustitucion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 121
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "reacciones-de-adicion",
+    "title": "Reacciones de Adición",
+    "orderIndex": 65,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "reacciones-de-adicion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 122
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "reacciones-de-eliminacion",
+    "title": "Reacciones de Eliminación",
+    "orderIndex": 66,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "reacciones-de-eliminacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 123
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "oxidacion-reduccion-en-quimica-organica",
+    "title": "Oxidación-Reducción en Química Orgánica",
+    "orderIndex": 67,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "oxidacion-reduccion-en-quimica-organica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 124
+  },
+  {
+    "subject": "quimica",
+    "blockSlug": "quimica-organica",
+    "blockTitle": "Química Orgánica",
+    "topicSlug": "macromoleculas-y-polimeros",
+    "title": "Macromoléculas y Polímeros",
+    "orderIndex": 68,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "quimica",
+      "block": "quimica-organica",
+      "topic": "macromoleculas-y-polimeros"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "quimica"
+    ],
+    "v2SortOrder": 125
   }
 ]

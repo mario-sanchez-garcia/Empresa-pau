@@ -137,7 +137,7 @@ const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; betaStatus
   { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
   { id: 'Inglés', label: 'Inglés', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
   { id: 'Física', label: 'Física', color: '#0f766e', betaStatus: 'enabled' },
-  { id: 'Química', label: 'Química', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
+  { id: 'Química', label: 'Química', color: '#65a30d', betaStatus: 'enabled' },
   { id: 'Biología', label: 'Biología', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
 ]
 const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'enabled')

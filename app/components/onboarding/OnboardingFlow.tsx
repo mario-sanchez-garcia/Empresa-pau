@@ -908,13 +908,7 @@ export default function OnboardingFlow() {
           </div>
 
           {/* Body */}
-          {/* flex-start (en vez de center) + un margen superior moderado:
-              con justify-content:center las opciones quedaban centradas en
-              todo el espacio libre entre título y footer, lo que en steps
-              con pocas opciones las anclaba visualmente muy abajo con un
-              hueco enorme debajo del título. Este margen las sube a la
-              zona media/tercio superior conservando aire editorial. */}
-          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', position: 'relative' }}>
+          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${step}-content`}
@@ -922,7 +916,7 @@ export default function OnboardingFlow() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                style={{ width: '100%', marginTop: 'clamp(16px, 5vh, 64px)' }}
+                style={{ width: '100%' }}
               >
                 {renderStep()}
               </motion.div>

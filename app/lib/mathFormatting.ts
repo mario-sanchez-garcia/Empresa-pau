@@ -637,9 +637,14 @@ function formatPhysicsNotation(text: string) {
     .replace(new RegExp(`\\b(\\d+(?:[,.]\\d+)?)\\s+(${UNITS})(?:\\s*\\^\\s*\\{?([+\\-]?\\d+)\\}?)?\\b`, 'g'),
       (_, value, unit, exponent) => `$${value}\\,\\text{${unit}}${exponent ? `^{${exponent}}` : ''}$`)
 
-  output = output.replace(/\b(E_mec|Gm_1m_2|v\^2|mu_0|omega)\b/g, value =>
-    `$${value.replace('E_mec', 'E_{mec}').replace('Gm_1m_2', 'Gm_{1}m_{2}').replace('v^2', 'v^{2}').replace('mu_0', '\\mu_0').replace('omega', '\\omega')}$`
-  )
+  output = output
+    .replace(/\b(E_mec|Gm_1m_2|v\^2|mu_0)\b/g, value =>
+      `$${value.replace('E_mec', 'E_{mec}').replace('Gm_1m_2', 'Gm_{1}m_{2}').replace('v^2', 'v^{2}').replace('mu_0', '\\mu_0')}$`
+    )
+    // "omega" suelto solo es la letra griega si le sigue un operador. Como palabra
+    // corriente aparece en textos de Lengua ("como alfa y omega") y en Biología
+    // ("ácidos grasos omega-3"), donde convertirla en ω rompía la frase.
+    .replace(/\bomega(?=\s*[_^=])/g, '$\\omega$')
   return output
 }
 

@@ -229,6 +229,8 @@ const BASE_CSS = `
   .onb-scroll-form{padding:20px 24px!important}
   .onb-steps-tabs{display:none!important}
   .onb-steps-compact{display:flex!important}
+  .onb-login-desktop{display:none!important}
+  .onb-login-mobile{display:inline-flex!important}
 }
 `
 
@@ -871,32 +873,35 @@ export default function OnboardingFlow() {
           <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
-              {step === 'pain' && (
-                <Link href="/login" style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.06em', color: '#94a3b8', textDecoration: 'underline', textUnderlineOffset: 3, whiteSpace: 'nowrap' }}>
-                  ¿Ya tienes cuenta? Inicia sesión
-                </Link>
-              )}
+              <LoginAccessMobile />
             </div>
-            <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0 }}>
-              {SIDEBAR_STEPS.map((label, i) => {
-                const done = currentStep > i + 1
-                const active = currentStep === i + 1
-                return (
-                  <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent' }}>
-                    {label}
-                  </div>
-                )
-              })}
-            </div>
-            {/* Mobile: sustituye la tira completa de pestañas (se corta fuera
-                de pantalla con 11 pasos) por un indicador compacto */}
-            <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
-                {currentStep} de {STEPS.length}
-              </span>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                {SIDEBAR_STEPS[stepIndex] ?? ''}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0, flex: '1 1 auto', justifyContent: 'flex-end' }}>
+              {/* Con el botón de login, las 11 pestañas ya no tienen sitio
+                  garantizado a este ancho — overflow-x scroll en vez de
+                  encoger cada pestaña (ilegible) o tapar el botón de login
+                  (el punto de este cambio es que nunca deje de verse). */}
+              <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0, overflowX: 'auto', minWidth: 0 }}>
+                {SIDEBAR_STEPS.map((label, i) => {
+                  const done = currentStep > i + 1
+                  const active = currentStep === i + 1
+                  return (
+                    <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent', flexShrink: 0 }}>
+                      {label}
+                    </div>
+                  )
+                })}
+              </div>
+              {/* Mobile: sustituye la tira completa de pestañas (se corta fuera
+                  de pantalla con 11 pasos) por un indicador compacto */}
+              <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
+                  {currentStep} de {STEPS.length}
+                </span>
+                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                  {SIDEBAR_STEPS[stepIndex] ?? ''}
+                </span>
+              </div>
+              <div style={{ flexShrink: 0 }}><LoginAccessDesktop /></div>
             </div>
           </div>
 
@@ -1334,25 +1339,31 @@ export default function OnboardingFlow() {
           </div>
 
           <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
-            <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0 }}>
-              {SIDEBAR_STEPS.map((label, i) => {
-                const done = painCurrentStep > i + 1
-                const active = painCurrentStep === i + 1
-                return (
-                  <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent' }}>
-                    {label}
-                  </div>
-                )
-              })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
+              <LoginAccessMobile />
             </div>
-            <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
-                {painCurrentStep} de {STEPS.length}
-              </span>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                {SIDEBAR_STEPS[painIndex] ?? ''}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0, flex: '1 1 auto', justifyContent: 'flex-end' }}>
+              <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0, overflowX: 'auto', minWidth: 0 }}>
+                {SIDEBAR_STEPS.map((label, i) => {
+                  const done = painCurrentStep > i + 1
+                  const active = painCurrentStep === i + 1
+                  return (
+                    <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent', flexShrink: 0 }}>
+                      {label}
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
+                  {painCurrentStep} de {STEPS.length}
+                </span>
+                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                  {SIDEBAR_STEPS[painIndex] ?? ''}
+                </span>
+              </div>
+              <div style={{ flexShrink: 0 }}><LoginAccessDesktop /></div>
             </div>
           </div>
 
@@ -1903,6 +1914,37 @@ function sanitizeOnboardingExams(exams: OnboardingStudentExam[], selectedSubject
       priority: exam.priority,
     }))
     .slice(0, 8)
+}
+
+// Acceso a login del onboarding — visible en la cabecera de todos los pasos
+// (ver AGENTS.md / feedback de producto: el enlace anterior, gris diminuto y
+// subrayado, era casi invisible). Dos variantes por CSS (no JS) para no
+// duplicar el toggle de layout: la de escritorio se oculta por completo en
+// mobile y viceversa, igual que .onb-steps-tabs/.onb-steps-compact.
+function LoginAccessDesktop() {
+  return (
+    <div className="onb-login-desktop" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#64748b', whiteSpace: 'nowrap' }}>¿Ya tienes cuenta?</span>
+      <Link
+        href="/login"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', border: '1.5px solid #1c1c1c', color: '#1c1c1c', fontFamily: "'Inter', system-ui, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+      >
+        Iniciar sesión →
+      </Link>
+    </div>
+  )
+}
+
+function LoginAccessMobile() {
+  return (
+    <Link
+      href="/login"
+      className="onb-login-mobile"
+      style={{ display: 'none', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', border: '1.5px solid #1c1c1c', color: '#1c1c1c', fontFamily: "'Inter', system-ui, sans-serif", fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
+    >
+      Iniciar sesión →
+    </Link>
+  )
 }
 
 function EditorialGrid({ children, cols }: { children: ReactNode; cols: number }) {

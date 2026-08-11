@@ -900,19 +900,16 @@ export default function OnboardingFlow() {
             </div>
           </div>
 
-          {/* Step title */}
-          <div style={{ padding: '24px 40px 0', flexShrink: 0 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Paso {currentStep} · {SIDEBAR_STEPS[stepIndex] ?? ''}</div>
-            <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.03em', color: '#1c1c1c', marginBottom: 4, lineHeight: 1.15 }}>{STEP_LABELS[step].title}</div>
-            <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 0 }}>{STEP_LABELS[step].help}</p>
-          </div>
-
-          {/* Body */}
-          {/* Término medio: flex-start (no centrado en todo el hueco libre,
-              que en steps con pocas opciones dejaba un vacío enorme) con un
-              margen moderado (no pegado al título, que quedaba demasiado
-              compacto). */}
-          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', position: 'relative' }}>
+          {/* Título + opciones viven en el mismo bloque centrado, no en dos
+              bloques separados (título fijo arriba del todo + opciones con
+              su propio margen) — así ambos bajan/suben juntos como una sola
+              unidad en vez de quedar descoordinados entre sí. */}
+          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Paso {currentStep} · {SIDEBAR_STEPS[stepIndex] ?? ''}</div>
+              <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.03em', color: '#1c1c1c', marginBottom: 4, lineHeight: 1.15 }}>{STEP_LABELS[step].title}</div>
+              <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 0 }}>{STEP_LABELS[step].help}</p>
+            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${step}-content`}
@@ -920,7 +917,7 @@ export default function OnboardingFlow() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                style={{ width: '100%', marginTop: 'clamp(48px, 9vh, 110px)' }}
+                style={{ width: '100%', marginTop: 28 }}
               >
                 {renderStep()}
               </motion.div>

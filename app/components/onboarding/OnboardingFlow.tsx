@@ -1294,99 +1294,71 @@ export default function OnboardingFlow() {
   // panel blanco derecho) en vez de una pantalla negra centrada aparte: así
   // el momento emocional post-pain se lee como parte del mismo onboarding
   // ("paso 1.5"), no como un corte de experiencia hacia otra pantalla.
+  // Pantalla "manifiesto", no una pregunta más: sin foto, fondo blanco
+  // completo, un único foco visual (el titular). El split foto/formulario
+  // que usa renderShell() funciona para preguntas con opciones, pero aquí
+  // dejaba media pantalla vacía y el mensaje "perdido" arriba — feedback de
+  // producto tras verla en real (ver AGENTS.md). La cabecera (Kairo,
+  // pestañas, login) se mantiene igual que en el resto del onboarding para
+  // no romper la sensación de continuidad.
   function renderPainResult() {
     const copy = data.painType ? PAIN_RESULT_COPY[data.painType] : null
     const painIndex = STEPS.indexOf('pain')
     const painCurrentStep = painIndex + 1
     const painProgressPct = Math.round((painCurrentStep / STEPS.length) * 100)
-    const photo = STEP_PHOTO.pain ?? HF_FLATLAY
-    const headlines = STEP_HEADLINE.pain ?? []
 
     return (
-      <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#111' }}>
-        {/* Left — misma foto/headline que el paso "pain", sin cambios */}
-        <div className="onb-photo-panel" style={{ width: '44%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.45) saturate(.55)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.1) 0%, rgba(17,17,17,.75) 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(17,17,17,.7) 0%, transparent 55%)' }} />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '32px 36px', zIndex: 1 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)' }}>
-              Paso {painCurrentStep} de {STEPS.length} · {SIDEBAR_STEPS[painIndex] ?? ''}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', background: '#fff' }}>
+        <div style={{ height: 2, background: '#e0e0e0', flexShrink: 0, position: 'relative' }}>
+          <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${painProgressPct}%`, background: '#1c1c1c' }} />
+        </div>
+
+        <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
+            <LoginAccessMobile />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0, flex: '1 1 auto', justifyContent: 'flex-end' }}>
+            <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0, overflowX: 'auto', minWidth: 0 }}>
+              {SIDEBAR_STEPS.map((label, i) => {
+                const done = painCurrentStep > i + 1
+                const active = painCurrentStep === i + 1
+                return (
+                  <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent', flexShrink: 0 }}>
+                    {label}
+                  </div>
+                )
+              })}
             </div>
-            <div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(44px, 5.5vw, 72px)', lineHeight: .92, color: '#fff', letterSpacing: '.01em' }}>
-                {headlines.map((line, i) => <div key={i}>{line}</div>)}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: 'rgba(255,255,255,.06)', marginTop: 28 }}>
-                <div style={{ background: 'rgba(17,17,17,.7)', padding: '10px 14px' }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#fff', lineHeight: 1 }}>{painCurrentStep}/{STEPS.length}</div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: 2 }}>Pasos</div>
-                </div>
-                <div style={{ background: 'rgba(17,17,17,.7)', padding: '10px 14px' }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#fff', lineHeight: 1 }}>{painProgressPct}%</div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginTop: 2 }}>Completado</div>
-                </div>
-              </div>
+            <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
+                {painCurrentStep} de {STEPS.length}
+              </span>
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                {SIDEBAR_STEPS[painIndex] ?? ''}
+              </span>
             </div>
+            <div style={{ flexShrink: 0 }}><LoginAccessDesktop /></div>
           </div>
         </div>
 
-        {/* Right — mismo panel blanco/cabecera/pestañas que renderShell() */}
-        <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f9f9f9', overflow: 'hidden' }}>
-          <div style={{ height: 2, background: '#e0e0e0', flexShrink: 0, position: 'relative' }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${painProgressPct}%`, background: '#1c1c1c' }} />
+        {/* Statement — un único foco visual, centrado */}
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 24px' }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 22 }}>
+            Paso {painCurrentStep} · Tu objetivo
           </div>
-
-          <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
-              <LoginAccessMobile />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0, flex: '1 1 auto', justifyContent: 'flex-end' }}>
-              <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0, overflowX: 'auto', minWidth: 0 }}>
-                {SIDEBAR_STEPS.map((label, i) => {
-                  const done = painCurrentStep > i + 1
-                  const active = painCurrentStep === i + 1
-                  return (
-                    <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent', flexShrink: 0 }}>
-                      {label}
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="onb-steps-compact" style={{ display: 'none', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#1c1c1c', whiteSpace: 'nowrap' }}>
-                  {painCurrentStep} de {STEPS.length}
-                </span>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                  {SIDEBAR_STEPS[painIndex] ?? ''}
-                </span>
-              </div>
-              <div style={{ flexShrink: 0 }}><LoginAccessDesktop /></div>
-            </div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(38px, 6.5vw, 84px)', lineHeight: .98, letterSpacing: '.01em', textTransform: 'uppercase', color: '#1c1c1c', maxWidth: 820 }}>
+            {copy?.title ?? 'Kairo se adapta a lo que más te cuesta.'}
           </div>
-
-          <div style={{ padding: '24px 40px 0', flexShrink: 0 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Paso {painCurrentStep} · Tu objetivo</div>
-            <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-.03em', color: '#1c1c1c', marginBottom: 4, lineHeight: 1.15 }}>
-              {copy?.title ?? 'Kairo se adapta a lo que más te cuesta.'}
-            </div>
-            <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 0 }}>
-              {copy?.body ?? 'Organizará tus asignaturas, tu tiempo y tus próximos exámenes.'}
-            </p>
-          </div>
-
-          <div className="onb-scroll-form" style={{ flex: 1, overflowY: 'auto', padding: '20px 40px', position: 'relative' }} />
-
-          <div style={{ borderTop: '1px solid #e0e0e0', padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: '#f9f9f9' }}>
-            <button onClick={goBack} style={{ padding: '9px 18px', background: 'none', border: '1px solid #e0e0e0', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: '#94a3b8', cursor: 'pointer' }}>
-              ← Cambiar respuesta
-            </button>
-            <button onClick={goNext} style={{ padding: '11px 28px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: 'pointer' }}>
-              Continuar →
-            </button>
-          </div>
+          <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.7, maxWidth: 480, marginTop: 22, marginBottom: 0 }}>
+            {copy?.body ?? 'Organizará tus asignaturas, tu tiempo y tus próximos exámenes.'}
+          </p>
+          <button onClick={goNext} style={{ marginTop: 36, padding: '15px 44px', background: '#1c1c1c', border: 'none', color: '#fff', fontSize: 14, fontWeight: 800, letterSpacing: '-.01em', cursor: 'pointer' }}>
+            Continuar →
+          </button>
+          <button onClick={goBack} style={{ marginTop: 16, background: 'none', border: 'none', color: '#94a3b8', fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer' }}>
+            ← Cambiar respuesta
+          </button>
         </div>
       </div>
     )

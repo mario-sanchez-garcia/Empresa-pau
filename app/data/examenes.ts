@@ -24,14 +24,16 @@ const preguntaModelo = (
   bloque: string,
   opcion: "A" | "B",
   enunciado: string,
-  puntuacion = 2.5
+  puntuacion = 2.5,
+  imagenes?: string[]
 ): Pregunta => ({
   id,
   bloque,
   opcion,
   enunciado,
   puntuacion,
-  criterios: criteriosModeloMates
+  criterios: criteriosModeloMates,
+  ...(imagenes ? { imagenes } : {})
 })
 
 const examenesModeloMates: Examen[] = [
@@ -543,14 +545,14 @@ se pide:
 a) (2 puntos) Discutir el sistema en función de los valores del parámetro $m$.
 
 b) (0.5 puntos) Resolver el sistema en el caso $m=6$.`),
-      preguntaModelo("M2019-2B", "Analisis", "B", `a) (1 punto) A partir de la gráfica de la función $f$ incluida en el PDF oficial, determine los valores de $f'(-1)$, $\\displaystyle\\lim_{x\\to -2^+}f(x)$, $\\displaystyle\\lim_{x\\to -2^-}f(x)$ y $\\displaystyle\\lim_{x\\to 0}f(x)$.
+      preguntaModelo("M2019-2B", "Analisis", "B", `a) (1 punto) A partir de la gráfica adjunta de la función $f$, determine los valores de $f'(-1)$, $\\displaystyle\\lim_{x\\to -2^+}f(x)$, $\\displaystyle\\lim_{x\\to -2^-}f(x)$ y $\\displaystyle\\lim_{x\\to 0}f(x)$.
 
 b) (1.5 puntos) Calcule $\\displaystyle\\int_{-3}^{\\pi} g(x)\\,dx$, donde
 
 $$g(x)=\\begin{cases}
 x^2+2x+1, & -3\\leq x\\leq 0\\\\
 1+\\sin x, & 0<x\\leq 4
-\\end{cases}.$$`),
+\\end{cases}.$$`, 2.5, ["/mates-imgs/madrid/2019/modelo/2019-modelo-2b-grafica.png"]),
       preguntaModelo("M2019-3B", "Geometria", "B", `Dadas las rectas
 
 $$r\\equiv\\begin{cases}x=2+\\lambda\\\\y=3+\\lambda\\\\z=1-\\lambda\\end{cases},\\qquad s\\equiv\\begin{cases}x-y=2\\\\y+z=1\\end{cases},$$
@@ -617,7 +619,7 @@ se pide:
 a) (2 puntos) Discutir el sistema lineal $AX=B$ en función de los valores del parámetro $m$.
 
 b) (0.5 puntos) Resolver el sistema lineal $AX=B$ cuando $m=-1$.`),
-      preguntaModelo("M2018-2B", "Analisis", "B", `El dibujo adjunto del PDF oficial muestra la gráfica de la función
+      preguntaModelo("M2018-2B", "Analisis", "B", `El dibujo adjunto muestra la gráfica de la función
 
 $$f(x)=(6-x)e^{\\frac{x-4}{3}}-1.$$
 
@@ -627,7 +629,7 @@ a) (1 punto) Calcular el área de la región sombreada.
 
 b) (1 punto) Determinar la abscisa del punto de la gráfica donde la recta tangente tiene pendiente máxima.
 
-c) (0.5 puntos) Efectuando los cálculos necesarios, obtener la ecuación de la asíntota que se muestra en el dibujo.`),
+c) (0.5 puntos) Efectuando los cálculos necesarios, obtener la ecuación de la asíntota que se muestra en el dibujo.`, 2.5, ["/mates-imgs/madrid/2018/modelo/2018-modelo-2b-grafica.png"]),
       preguntaModelo("M2018-3B", "Geometria", "B", `Dados los planos $\\pi_1\\equiv x+y=0$, $\\pi_2\\equiv x=0$ y el punto $B(-1,1,1)$, se pide:
 
 a) (1 punto) Determinar el punto $B'$, simétrico de $B$ respecto del plano $\\pi_2$.

@@ -224,10 +224,6 @@ const BASE_CSS = `
 @media(max-width:767px){
   .onb-photo-panel{display:none!important}
   .onb-form-panel{width:100%!important;padding:0 20px!important}
-  .onb-welcome-left{width:100%!important;padding:28px 24px!important}
-  .onb-welcome-right{display:none!important}
-  .onb-main-pad{padding:0 24px!important}
-  .onb-header-pad{padding:18px 24px!important}
   .onb-footer-pad{padding:14px 24px!important}
   .onb-steps-header{padding:14px 20px!important}
   .onb-scroll-form{padding:20px 24px!important}
@@ -240,7 +236,7 @@ export default function OnboardingFlow() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isPreview = searchParams.get('preview') === '1'
-  const [step, setStep] = useState<Step>('welcome')
+  const [step, setStep] = useState<Step>('pain')
   const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
   // Fase 2 (signup al final): error de la pantalla de preview/signup —
   // draft server-side, Google OAuth o signup por email. Ya no existe un
@@ -265,6 +261,11 @@ export default function OnboardingFlow() {
   // Fase 0 de observabilidad del onboarding (medición pura, ver AGENTS.md).
   const traceIdRef = useRef<string | null>(null)
   const onboardingStartedRef = useRef(false)
+  // El paso inicial ya es 'pain' desde el primer render (ya no hay 'welcome'
+  // de por medio), pero el trace_id se resuelve de forma async en restore().
+  // Sin esto, el efecto de onboarding_step_viewed de abajo correría antes de
+  // que exista trace_id y jamás se repetiría (step no vuelve a cambiar).
+  const [traceReady, setTraceReady] = useState(false)
   const stepTimerRef = useRef<ReturnType<typeof createActiveDurationTracker> | null>(null)
   const stepVisitCountsRef = useRef<Record<string, number>>({})
   const stepValidationAttemptsRef = useRef<Record<string, number>>({})
@@ -376,9 +377,13 @@ export default function OnboardingFlow() {
       // progreso de 11 pasos, igual que 'pain-result'), pero SÍ son destinos
       // válidos para reanudar — si no, volver de /onboarding/revisa-tu-email
       // o recargar en 'signup' rebotaría siempre a 'welcome'.
-      if (savedStep && (STEPS.includes(savedStep) || savedStep === 'welcome' || savedStep === 'preview' || savedStep === 'signup')) {
+      // 'welcome' ya no es un destino del flujo normal (se salta directo a
+      // 'pain'); una copia local antigua que apunte ahí se reanuda en 'pain'.
+      if (savedStep === 'welcome') {
+        setStep('pain')
+      } else if (savedStep && (STEPS.includes(savedStep) || savedStep === 'preview' || savedStep === 'signup')) {
         setStep(savedStep)
-        if (savedStep !== 'welcome' && saved.schoolName) setSchoolQuery(saved.schoolName)
+        if (saved.schoolName) setSchoolQuery(saved.schoolName)
         // Username NUNCA se deriva del email (ver AGENTS.md / plan de
         // onboarding). Si el draft restaurado ya trae uno guardado, se
         // revalida su disponibilidad aquí mismo (tras los awaits de arriba,
@@ -387,6 +392,19 @@ export default function OnboardingFlow() {
           void checkUsername(saved.username)
         }
       }
+      // Ya no hay pantalla 'welcome' que dispare onboarding_started al hacer
+      // click — el usuario nuevo aterriza directo en 'pain', así que el
+      // evento nace aquí, una sola vez por trace_id (idempotente vía
+      // ensureOnboardingTraceId + onboardingStartedRef).
+      if (!traceIdRef.current) {
+        const traceId = ensureOnboardingTraceId()
+        traceIdRef.current = traceId
+        if (!onboardingStartedRef.current) {
+          onboardingStartedRef.current = true
+          void sendOnboardingEvent(traceId, 'onboarding_started', { step_id: 'pain', step_index: 0 })
+        }
+      }
+      if (!cancelled) setTraceReady(true)
     }
     restore()
     return () => { cancelled = true }
@@ -399,13 +417,14 @@ export default function OnboardingFlow() {
 
   // Fase 0 de observabilidad: registra onboarding_step_viewed cuando el paso
   // está efectivamente renderizado, y arranca/reinicia el medidor de tiempo
-  // activo del paso. No se dispara para 'welcome' (cubierto por
-  // onboarding_started).
+  // activo del paso. También depende de traceReady porque el paso inicial
+  // ('pain') ya está montado antes de que restore() resuelva el trace_id, y
+  // como 'step' no cambia solo por eso, sin traceReady este efecto nunca se
+  // volvería a ejecutar y el evento del primer paso no se dispararía.
   useEffect(() => {
     stepTimerRef.current?.destroy()
     stepTimerRef.current = createActiveDurationTracker()
 
-    if (step === 'welcome') return
     if (!traceIdRef.current) return
 
     const visitCount = (stepVisitCountsRef.current[step] ?? 0) + 1
@@ -419,7 +438,7 @@ export default function OnboardingFlow() {
     })
 
     return () => { stepTimerRef.current?.destroy() }
-  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, traceReady])
 
   function onUsernameChange(raw: string) {
     const val = raw.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 20)
@@ -465,7 +484,7 @@ export default function OnboardingFlow() {
 
   const stepIndex = STEPS.indexOf(step)
   const currentStep = stepIndex >= 0 ? stepIndex + 1 : 0
-  const progressPct = (step === 'preview' || step === 'signup') ? 100 : step === 'welcome' ? 0 : Math.round((currentStep / STEPS.length) * 100)
+  const progressPct = (step === 'preview' || step === 'signup') ? 100 : Math.round((currentStep / STEPS.length) * 100)
 
   const canContinue = (() => {
     if (step === 'pain') return Boolean(data.painType)
@@ -488,16 +507,6 @@ export default function OnboardingFlow() {
   }
 
   function goNext() {
-    if (step === 'welcome') {
-      const traceId = ensureOnboardingTraceId()
-      traceIdRef.current = traceId
-      if (!onboardingStartedRef.current) {
-        onboardingStartedRef.current = true
-        void sendOnboardingEvent(traceId, 'onboarding_started', { step_id: 'pain', step_index: 0 })
-      }
-      setStep('pain')
-      return
-    }
     if (step === 'pain') {
       // No avanza al siguiente STEPS[] — primero pasa por la pantalla de
       // resultado personalizado (sin formulario, fuera del contador de pasos).
@@ -549,9 +558,6 @@ export default function OnboardingFlow() {
         const currentUsername = data.username
         if (currentUsername && currentUsername.length >= 3) void checkUsername(currentUsername)
       }
-    } else if (step === 'pain') {
-      void sendOnboardingEvent(traceIdRef.current, 'onboarding_back_clicked', { step_id: STEP_ID_MAP[step], step_index: 0 })
-      setStep('welcome')
     }
   }
 
@@ -770,94 +776,23 @@ export default function OnboardingFlow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step])
 
-  const showBack = step === 'pain' || stepIndex > 0
+  const showBack = stepIndex > 0
   const showContinue = stepIndex >= 0 && step !== 'confirm'
   const showConfirm = step === 'confirm'
 
   return (
     <div style={{ minHeight: '100dvh', fontFamily: "'Inter', system-ui, sans-serif" }}>
       <style>{FONTS + BASE_CSS}</style>
-      {step === 'welcome'
-        ? renderWelcome()
-        : step === 'pain-result'
-          ? renderPainResult()
-          : step === 'preview'
-            ? renderPreview()
-            : step === 'signup'
-              ? renderSignup()
-              : renderShell()}
+      {step === 'pain-result'
+        ? renderPainResult()
+        : step === 'preview'
+          ? renderPreview()
+          : step === 'signup'
+            ? renderSignup()
+            : renderShell()}
     </div>
   )
 
-  // ─── V4: Welcome screen ──────────────────────────────────────────────────────
-  function renderWelcome() {
-    return (
-      <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#111' }}>
-        {/* Left — dark editorial */}
-        <div className="onb-welcome-left" style={{ width: '50%', display: 'flex', flexDirection: 'column', background: '#111', position: 'relative', overflow: 'hidden' }}>
-          {/* Decorative large K */}
-          <div style={{ position: 'absolute', top: '50%', left: '-20px', transform: 'translateY(-56%)', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(200px, 22vw, 300px)', color: 'rgba(255,255,255,.025)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none', letterSpacing: '-0.03em' }}>K</div>
-
-          {/* Header */}
-          <div className="onb-header-pad" style={{ padding: '22px 44px', borderBottom: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'relative', zIndex: 1 }}>
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: '.05em', color: '#fff' }}>Kairo</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ padding: '4px 10px', border: '1px solid rgba(37,99,235,.3)', background: 'rgba(37,99,235,.1)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.15em', textTransform: 'uppercase', color: '#3b82f6' }}>Beta privada</span>
-              <Link href="/login" style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(255,255,255,.35)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                ¿Ya tienes cuenta? Inicia sesión
-              </Link>
-            </div>
-          </div>
-
-          {/* Main */}
-          <div className="onb-main-pad" style={{ flex: 1, padding: '0 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: '#3b82f6', marginBottom: 20 }}>La PAU empieza hoy</div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(52px, 6.5vw, 88px)', lineHeight: .91, color: '#fff', letterSpacing: '.01em', marginBottom: 22 }}>
-              La PAU<br />empieza<br /><span style={{ color: 'rgba(255,255,255,.2)' }}>hoy.</span>
-            </div>
-            <p style={{ fontSize: 13, lineHeight: 1.75, color: 'rgba(255,255,255,.4)', maxWidth: 380, marginBottom: 40 }}>
-              En unos minutos tendrás una preparación adaptada a tus asignaturas, tu tiempo y tus próximos exámenes.
-            </p>
-
-            {/* Circle CTA */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              <button
-                onClick={goNext}
-                style={{ width: 100, height: 100, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,.2)', background: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'transform .2s, border-color .2s', flexShrink: 0 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.07)'; (e.currentTarget as HTMLElement).style.borderColor = '#fff' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,.2)' }}
-              >
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 12, letterSpacing: '.04em', color: '#fff', lineHeight: 1.2, textAlign: 'center', padding: '0 8px' }}>Preparar<br />mi Camino</span>
-                <span style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', marginTop: 4 }}>↗</span>
-              </button>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.2)', lineHeight: 1.7 }}>
-                Adaptado a tus asignaturas<br />tu tiempo y tus exámenes<br />Gratis en beta privada
-              </div>
-            </div>
-          </div>
-
-          {/* Progress */}
-          <div style={{ flexShrink: 0, borderTop: '1px solid rgba(255,255,255,.07)', padding: '14px 44px', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', gap: 4 }}>
-              {STEPS.map((_, i) => (
-                <div key={i} style={{ flex: 1, height: 2, background: 'rgba(255,255,255,.08)', borderRadius: 2 }} />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right — cinematic photo */}
-        <div className="onb-welcome-right" style={{ width: '50%', position: 'relative', overflow: 'hidden' }}>
-          <img src={HF_LIBRARY} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(.55) saturate(.6)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(17,17,17,.9) 0%, rgba(17,17,17,.15) 45%, transparent 70%)' }} />
-          <div style={{ position: 'absolute', bottom: 32, right: 32, textAlign: 'right' }}>
-            <div style={{ display: 'inline-block', padding: '4px 10px', border: '1px solid rgba(255,255,255,.15)', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: 8 }}>Editorial · Higgsfield</div>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,.25)', maxWidth: 160, lineHeight: 1.6 }}>Cada Camino se adapta a tu comunidad, tus asignaturas y tu ritmo real</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // ─── V1: Step shell ───────────────────────────────────────────────────────────
   function renderShell() {
@@ -933,7 +868,14 @@ export default function OnboardingFlow() {
 
           {/* Header */}
           <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
+              {step === 'pain' && (
+                <Link href="/login" style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.06em', color: '#94a3b8', textDecoration: 'underline', textUnderlineOffset: 3, whiteSpace: 'nowrap' }}>
+                  ¿Ya tienes cuenta? Inicia sesión
+                </Link>
+              )}
+            </div>
             <div className="onb-steps-tabs" style={{ display: 'flex', gap: 0 }}>
               {SIDEBAR_STEPS.map((label, i) => {
                 const done = currentStep > i + 1

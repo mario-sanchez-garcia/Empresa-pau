@@ -50,7 +50,7 @@
     "blockSlug": "algebra-lineal",
     "blockTitle": "Álgebra",
     "topicSlug": "producto-por-un-escalar-numero-matriz",
-    "title": "Producto por un Escalar (Número · Matriz)",
+    "title": "Producto por un Escalar (Número $\\cdot$ Matriz)",
     "orderIndex": 3,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -73,7 +73,7 @@
     "blockSlug": "algebra-lineal",
     "blockTitle": "Álgebra",
     "topicSlug": "multiplicacion-de-matrices-a-b",
-    "title": "Multiplicación de Matrices (A · B)",
+    "title": "Multiplicación de Matrices ($A \\cdot B$)",
     "orderIndex": 4,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -96,7 +96,7 @@
     "blockSlug": "algebra-lineal",
     "blockTitle": "Álgebra",
     "topicSlug": "propiedades-de-la-matriz-traspuesta-a-t",
-    "title": "Propiedades de la Matriz Traspuesta (A^t)",
+    "title": "Propiedades de la Matriz Traspuesta ($A^t$)",
     "orderIndex": 5,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -119,7 +119,7 @@
     "blockSlug": "algebra-lineal",
     "blockTitle": "Álgebra",
     "topicSlug": "potencias-de-matrices-a-n",
-    "title": "Potencias de Matrices (A^n)",
+    "title": "Potencias de Matrices ($A^n$)",
     "orderIndex": 6,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -441,7 +441,7 @@
     "blockSlug": "geometria-3d",
     "blockTitle": "Geometría",
     "topicSlug": "repaso-puntos-y-vectores-en-el-plano-r2",
-    "title": "Repaso: Puntos y Vectores en el Plano (R2)",
+    "title": "Repaso: Puntos y Vectores en el Plano ($\\mathbb{R}^2$)",
     "orderIndex": 20,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -464,7 +464,7 @@
     "blockSlug": "geometria-3d",
     "blockTitle": "Geometría",
     "topicSlug": "vectores-en-el-espacio-r3",
-    "title": "Vectores en el Espacio (R3)",
+    "title": "Vectores en el Espacio ($\\mathbb{R}^3$)",
     "orderIndex": 21,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -556,7 +556,7 @@
     "blockSlug": "geometria-3d",
     "blockTitle": "Geometría",
     "topicSlug": "producto-escalar-de-dos-vectores-u-v",
-    "title": "Producto Escalar de dos Vectores (u · v)",
+    "title": "Producto Escalar de dos Vectores ($\\vec{u} \\cdot \\vec{v}$)",
     "orderIndex": 25,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -579,7 +579,7 @@
     "blockSlug": "geometria-3d",
     "blockTitle": "Geometría",
     "topicSlug": "producto-vectorial-u-v",
-    "title": "Producto Vectorial (u × v)",
+    "title": "Producto Vectorial ($\\vec{u} \\times \\vec{v}$)",
     "orderIndex": 26,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -877,8 +877,8 @@
     "subject": "matematicas_ii",
     "blockSlug": "analisis",
     "blockTitle": "Análisis",
-    "topicSlug": "calculo-de-limites-e-indeterminaciones",
-    "title": "Cálculo de Límites e Indeterminaciones",
+    "topicSlug": "indeterminacion-0-0",
+    "title": "Indeterminación 0/0",
     "orderIndex": 39,
     "contentStatus": "flashcard_v2",
     "explanation": "",
@@ -888,7 +888,7 @@
     "evauPracticeQuery": {
       "subject": "mates",
       "block": "analisis",
-      "topic": "calculo-de-limites-e-indeterminaciones"
+      "topic": "indeterminacion-0-0"
     },
     "source": "curriculum_content_v2",
     "compatibleSubjects": [
@@ -900,9 +900,78 @@
     "subject": "matematicas_ii",
     "blockSlug": "analisis",
     "blockTitle": "Análisis",
+    "topicSlug": "indeterminacion-inf-inf",
+    "title": "Indeterminación ∞/∞",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "indeterminacion-inf-inf"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "indeterminacion-inf-menos-inf",
+    "title": "Indeterminación ∞ − ∞",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "indeterminacion-inf-menos-inf"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "indeterminacion-1-inf",
+    "title": "Indeterminación 1^∞",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "mates",
+      "block": "analisis",
+      "topic": "indeterminacion-1-inf"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ii"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "matematicas_ii",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
     "topicSlug": "continuidad-y-tipos-de-discontinuidad",
     "title": "Continuidad y Tipos de Discontinuidad",
-    "orderIndex": 40,
+    "orderIndex": 43,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -917,7 +986,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 40
+    "v2SortOrder": 43
   },
   {
     "subject": "matematicas_ii",
@@ -925,7 +994,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "concepto-de-derivada-e-interpretacion-geometrica",
     "title": "Concepto de Derivada e Interpretación Geométrica",
-    "orderIndex": 41,
+    "orderIndex": 44,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -940,7 +1009,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 41
+    "v2SortOrder": 44
   },
   {
     "subject": "matematicas_ii",
@@ -948,7 +1017,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "calculo-de-derivadas-y-regla-de-la-cadena",
     "title": "Cálculo de Derivadas y Regla de la Cadena",
-    "orderIndex": 42,
+    "orderIndex": 45,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -963,7 +1032,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 42
+    "v2SortOrder": 45
   },
   {
     "subject": "matematicas_ii",
@@ -971,7 +1040,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "teoremas-de-rolle-y-del-valor-medio-lagrange",
     "title": "Teoremas de Rolle y del Valor Medio (Lagrange)",
-    "orderIndex": 43,
+    "orderIndex": 46,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -986,7 +1055,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 43
+    "v2SortOrder": 46
   },
   {
     "subject": "matematicas_ii",
@@ -994,7 +1063,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "informacion-extraida-de-la-propia-funcion",
     "title": "Información Extraída de la Propia Función",
-    "orderIndex": 44,
+    "orderIndex": 47,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1009,7 +1078,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 44
+    "v2SortOrder": 47
   },
   {
     "subject": "matematicas_ii",
@@ -1017,7 +1086,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "informacion-extraida-de-la-1-y-2-derivada",
     "title": "Información Extraída de la 1ª y 2ª Derivada",
-    "orderIndex": 45,
+    "orderIndex": 48,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1032,7 +1101,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 45
+    "v2SortOrder": 48
   },
   {
     "subject": "matematicas_ii",
@@ -1040,7 +1109,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "primitiva-de-una-funcion-y-la-integral-indefinida",
     "title": "Primitiva de una Función y la Integral Indefinida",
-    "orderIndex": 46,
+    "orderIndex": 49,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1055,7 +1124,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 46
+    "v2SortOrder": 49
   },
   {
     "subject": "matematicas_ii",
@@ -1063,7 +1132,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "integrales-de-funciones-elementales-inmediatas",
     "title": "Integrales de Funciones Elementales (Inmediatas)",
-    "orderIndex": 47,
+    "orderIndex": 50,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1078,7 +1147,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 47
+    "v2SortOrder": 50
   },
   {
     "subject": "matematicas_ii",
@@ -1086,7 +1155,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "metodos-de-integracion",
     "title": "Métodos de Integración",
-    "orderIndex": 48,
+    "orderIndex": 51,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1101,7 +1170,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 48
+    "v2SortOrder": 51
   },
   {
     "subject": "matematicas_ii",
@@ -1109,7 +1178,7 @@
     "blockTitle": "Análisis",
     "topicSlug": "la-integral-definida-regla-de-barrow-y-areas",
     "title": "La Integral Definida (Regla de Barrow y Áreas)",
-    "orderIndex": 49,
+    "orderIndex": 52,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1124,7 +1193,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 49
+    "v2SortOrder": 52
   },
   {
     "subject": "matematicas_ii",
@@ -1132,7 +1201,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "algebra-de-sucesos-y-tipos-de-experimentos",
     "title": "Álgebra de Sucesos y Tipos de Experimentos",
-    "orderIndex": 50,
+    "orderIndex": 53,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1147,7 +1216,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 50
+    "v2SortOrder": 53
   },
   {
     "subject": "matematicas_ii",
@@ -1155,7 +1224,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "asignacion-de-probabilidades-regla-de-laplace",
     "title": "Asignación de Probabilidades (Regla de Laplace)",
-    "orderIndex": 51,
+    "orderIndex": 54,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1170,7 +1239,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 51
+    "v2SortOrder": 54
   },
   {
     "subject": "matematicas_ii",
@@ -1178,7 +1247,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "definicion-axiomatica-de-probabilidad-kolmogorov",
     "title": "Definición Axiomática de Probabilidad (Kolmogorov)",
-    "orderIndex": 52,
+    "orderIndex": 55,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1193,7 +1262,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 52
+    "v2SortOrder": 55
   },
   {
     "subject": "matematicas_ii",
@@ -1201,7 +1270,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "diagramas-de-arbol-y-tablas-de-contingencia",
     "title": "Diagramas de Árbol y Tablas de Contingencia",
-    "orderIndex": 53,
+    "orderIndex": 56,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1216,7 +1285,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 53
+    "v2SortOrder": 56
   },
   {
     "subject": "matematicas_ii",
@@ -1224,7 +1293,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "teoremas-de-la-probabilidad-total-y-de-bayes",
     "title": "Teoremas de la Probabilidad Total y de Bayes",
-    "orderIndex": 54,
+    "orderIndex": 57,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1239,7 +1308,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 54
+    "v2SortOrder": 57
   },
   {
     "subject": "matematicas_ii",
@@ -1247,7 +1316,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "parametros-de-una-distribucion-media-varianza-y-desviacion-tipica",
     "title": "Parámetros de una Distribución: Media, Varianza y Desviación Típica",
-    "orderIndex": 55,
+    "orderIndex": 58,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1262,7 +1331,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 55
+    "v2SortOrder": 58
   },
   {
     "subject": "matematicas_ii",
@@ -1270,7 +1339,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "distribucion-binomial-variable-discreta",
     "title": "Distribución Binomial (Variable Discreta)",
-    "orderIndex": 56,
+    "orderIndex": 59,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1285,7 +1354,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 56
+    "v2SortOrder": 59
   },
   {
     "subject": "matematicas_ii",
@@ -1293,7 +1362,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "desigualdad-de-chebycheff",
     "title": "Desigualdad de Chebycheff",
-    "orderIndex": 57,
+    "orderIndex": 60,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1308,7 +1377,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 57
+    "v2SortOrder": 60
   },
   {
     "subject": "matematicas_ii",
@@ -1316,7 +1385,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "distribuciones-de-probabilidad-continuas",
     "title": "Distribuciones de Probabilidad Continuas",
-    "orderIndex": 58,
+    "orderIndex": 61,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1331,7 +1400,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 58
+    "v2SortOrder": 61
   },
   {
     "subject": "matematicas_ii",
@@ -1339,7 +1408,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "distribucion-normal-y-tipificacion",
     "title": "Distribución Normal y Tipificación",
-    "orderIndex": 59,
+    "orderIndex": 62,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1354,7 +1423,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 59
+    "v2SortOrder": 62
   },
   {
     "subject": "matematicas_ii",
@@ -1362,7 +1431,7 @@
     "blockTitle": "Probabilidad",
     "topicSlug": "aproximacion-de-la-binomial-a-la-normal-moivre-gauss",
     "title": "Aproximación de la Binomial a la Normal (Moivre-Gauss)",
-    "orderIndex": 60,
+    "orderIndex": 63,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -1377,7 +1446,7 @@
     "compatibleSubjects": [
       "matematicas_ii"
     ],
-    "v2SortOrder": 60
+    "v2SortOrder": 63
   },
   {
     "subject": "matematicas_ccss",

@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { supabase } from '../lib/supabase'
 import { Eye, EyeOff } from 'lucide-react'
@@ -13,8 +12,22 @@ const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 
 export default function Login() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const returnTo = searchParams.get('returnTo') ?? '/camino'
+  const [startingFresh, setStartingFresh] = useState(false)
+
+  // Dispositivo compartido: si ya hay una sesión activa (ej. un hermano que
+  // no cerró sesión), "Empieza aquí" no puede limitarse a navegar a
+  // /onboarding — esa pantalla ve la sesión existente y te manda directo a
+  // /camino de esa cuenta. Se cierra sesión y se limpia cualquier borrador
+  // local antes de entrar, para garantizar un onboarding realmente nuevo.
+  const handleStartFresh = async () => {
+    setStartingFresh(true)
+    await supabase.auth.signOut()
+    clearOnboarding()
+    router.push('/onboarding')
+  }
 
   // ── Auth state (preservado exactamente) ──────────────────────────────────────
   const [email, setEmail]       = useState('')
@@ -436,9 +449,15 @@ export default function Login() {
             fontSize: 13, color: 'rgba(255,255,255,.3)',
           }}>
             ¿Es tu primera vez?{' '}
-            <Link href="/onboarding" className="lg-link">
-              Empieza aquí
-            </Link>
+            <button
+              type="button"
+              onClick={handleStartFresh}
+              disabled={startingFresh}
+              className="lg-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: startingFresh ? 'default' : 'pointer' }}
+            >
+              {startingFresh ? 'Un momento…' : 'Empieza aquí'}
+            </button>
           </div>
 
           {/* Legal footer */}

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Check, X } from 'lucide-react'
 import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
+import ParentLinkSection from '@/app/pricing/ParentLinkSection'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -274,6 +275,9 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── ¿Pagan tus padres? ───────────────────────────────────────────────── */}
+      <ParentLinkSection />
 
       {/* ── Note strip (dark) ─────────────────────────────────────────────────── */}
       <section className="pr-note" style={{ background: '#111', padding: '40px 72px', borderTop: '1px solid rgba(255,255,255,.06)' }}>

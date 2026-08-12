@@ -109,8 +109,8 @@ export default function ParentLinkModule({ billing, daysSinceReg }: Props) {
           <Send size={18} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-base font-black leading-snug text-slate-950">Desbloquea tu plan completo hasta la PAU</h3>
-          <p className="mt-0.5 text-xs font-semibold text-slate-500">Envía un informe a tus padres para activar el acceso.</p>
+          <h3 className="text-base font-black leading-snug text-slate-950">¿Pagan tus padres?</h3>
+          <p className="mt-0.5 text-xs font-semibold text-slate-500">Envíales un enlace y desbloquea tu plan completo hasta la PAU.</p>
         </div>
       </div>
 

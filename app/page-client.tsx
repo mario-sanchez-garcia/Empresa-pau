@@ -5992,7 +5992,7 @@ function cambiarTipo(t: Tipo) {
                             Reportar error
                           </button>
                           <a
-                            href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo"
+                            href="/contacto"
                             style={{ fontSize: 12.5, fontWeight: 700, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '5px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                           >
                             Escribir a soporte
@@ -6363,7 +6363,7 @@ function cambiarTipo(t: Tipo) {
                       Kairo no puede cambiar notas ni corregir manualmente desde el chat — si crees que hay un error, escríbenos directamente.
                     </p>
                     <a
-                      href="mailto:hola@kairo.es?subject=Problema%20t%C3%A9cnico%20%E2%80%94%20Kairo"
+                      href="/contacto"
                       className="tutor-shortcut"
                       style={{ textDecoration: 'none' }}
                     >

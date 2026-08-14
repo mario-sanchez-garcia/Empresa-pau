@@ -647,9 +647,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           body: JSON.stringify({ subject: currentTopic.subject, v2SortOrder: currentTopic.v2SortOrder }),
         })
         if (postponeRes.ok) {
-          const postponeData = await postponeRes.json() as { success?: boolean; warning?: boolean }
+          const postponeData = await postponeRes.json() as { success?: boolean; warning?: boolean; blockSkipped?: boolean; retryScheduled?: boolean }
           if (postponeData.warning) {
             setToast('Avisamos: tendrás que ver este bloque antes de la PAU')
+          } else if (postponeData.blockSkipped) {
+            setToast('Entendido, pasamos directamente al siguiente tema.')
+          } else if (postponeData.retryScheduled) {
+            setToast('Entendido, te lo volveremos a proponer en unos días.')
           }
         }
       }

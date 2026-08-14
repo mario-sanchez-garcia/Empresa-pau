@@ -57,6 +57,8 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'Sin ella, Ajustes no puede guardar instrucciones personalizadas ni el generador de parciales leerlas' },
   { table: 'perfiles', column: 'student_exams',
     porque: 'GET /api/profile la selecciona junto a username; si falta, TODO el endpoint devuelve 500 y el username desaparece del perfil aunque esté guardado' },
+  { table: 'user_learning_queue', column: 'retry_not_before',
+    porque: '"No lo he dado" a mitad de bloque reintenta la misma tarjeta tras unos días en vez de saltarla; sin esta columna, postpone-mission falla al escribirla y ensureCaminoCalendar no puede respetar la espera' },
 ]
 
 /** Funciones que alguna política RLS o ruta invoca. */

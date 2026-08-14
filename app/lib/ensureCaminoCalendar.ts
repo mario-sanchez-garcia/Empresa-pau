@@ -50,6 +50,7 @@ type QueueItem = {
   block_key: string | null
   block_slug: string | null
   metadata: Record<string, unknown> | null
+  retry_not_before: string | null
 }
 
 function queueTopicMeta(item: QueueItem) {
@@ -320,7 +321,7 @@ export async function ensureCaminoCalendar(
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
   const { data: queueItems } = await supabase
     .from('user_learning_queue')
-    .select('id, subject, v2_sort_order, title, block_key, block_slug, metadata')
+    .select('id, subject, v2_sort_order, title, block_key, block_slug, metadata, retry_not_before')
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
     .in('subject', subjects)
@@ -393,6 +394,11 @@ export async function ensureCaminoCalendar(
     for (let slot = 0; slot < itemsPerDay; slot++) {
       if (cursor >= queue.length) break
       const item = queue[cursor]
+      // "No lo he dado" a mitad de bloque deja la tarjeta en 'pending' pero
+      // con retry_not_before en el futuro (ver postpone-mission/route.ts) —
+      // mientras dure la espera, esta asignatura no aporta nada ese día
+      // (rota a las demás) en vez de forzar la misma tarjeta o saltarla.
+      if (item.retry_not_before && item.retry_not_before > dateStr) break
       const itemMeta = item.metadata ?? {}
       const topicMeta = queueTopicMeta(item)
       const missionType = (itemMeta.mission_type as string) ?? 'concept'

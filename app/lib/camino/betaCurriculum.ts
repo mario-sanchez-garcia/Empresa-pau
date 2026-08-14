@@ -11,6 +11,15 @@ export const PRIVATE_BETA_SUBJECTS = [
 
 export type PrivateBetaSubject = typeof PRIVATE_BETA_SUBJECTS[number]
 
+export const PRIVATE_BETA_SUBJECT_LABELS: Record<PrivateBetaSubject, string> = {
+  matematicas_ii: 'Matemáticas II',
+  matematicas_ccss: 'Matemáticas CCSS',
+  lengua: 'Lengua Castellana y Literatura',
+  historia_espana: 'Historia de España',
+  fisica: 'Física',
+  quimica: 'Química',
+}
+
 export function isPrivateBetaSubject(subject: string): subject is PrivateBetaSubject {
   return (PRIVATE_BETA_SUBJECTS as readonly string[]).includes(subject)
 }

@@ -277,7 +277,6 @@ export default function Login() {
           {[
             { v: PLATFORM_STRUCTURED_EXERCISES_LABEL, l: PLATFORM_STRUCTURED_EXERCISES_TEXT },
             { v: '38',   l: 'Semanas PAU' },
-            { v: '<30s', l: 'Corrección' },
           ].map(s => (
             <div key={s.l}>
               <div style={{ fontFamily: B, fontSize: 26, color: '#fff', letterSpacing: '.01em', lineHeight: 1 }}>{s.v}</div>

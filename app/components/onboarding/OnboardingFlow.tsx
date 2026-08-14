@@ -14,6 +14,7 @@ import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { DAILY_MINUTES_LABELS } from '@/app/lib/camino/dailyTimeCapacity'
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
+import { PRIVATE_BETA_SUBJECTS, PRIVATE_BETA_SUBJECT_LABELS } from '@/app/lib/camino/betaCurriculum'
 import { DEFAULT_GRADE_THRESHOLD } from '@/app/lib/camino/gradeThreshold'
 import {
   clearOnboarding,
@@ -143,6 +144,14 @@ const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; betaStatus
 const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'enabled')
 const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'locked')
 const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(s => s.id))
+
+// Nombres tomados de PRIVATE_BETA_SUBJECT_LABELS (betaCurriculum.ts) — misma
+// fuente que define qué asignaturas están activas en la beta, para que este
+// banner nunca quede desincronizado cuando se active una nueva.
+const PRIVATE_BETA_SUBJECT_NAMES = PRIVATE_BETA_SUBJECTS.map(slug => PRIVATE_BETA_SUBJECT_LABELS[slug])
+const PRIVATE_BETA_SUBJECTS_SENTENCE = PRIVATE_BETA_SUBJECT_NAMES.length > 1
+  ? `${PRIVATE_BETA_SUBJECT_NAMES.slice(0, -1).join(', ')} y ${PRIVATE_BETA_SUBJECT_NAMES[PRIVATE_BETA_SUBJECT_NAMES.length - 1]}`
+  : PRIVATE_BETA_SUBJECT_NAMES.join(', ')
 
 const FEELING_OPTS = [
   'Voy bastante bien',
@@ -1114,7 +1123,6 @@ export default function OnboardingFlow() {
             {[
               { v: PLATFORM_STRUCTURED_EXERCISES_LABEL, l: PLATFORM_STRUCTURED_EXERCISES_TEXT },
               { v: '38', l: 'Semanas PAU' },
-              { v: '<30s', l: 'Corrección' },
             ].map(s => (
               <div key={s.l}>
                 <div style={{ fontFamily: SIGNUP_FONT_DISPLAY, fontSize: 26, color: '#fff', letterSpacing: '.01em', lineHeight: 1 }}>{s.v}</div>
@@ -1534,7 +1542,7 @@ export default function OnboardingFlow() {
         <div>
           <div style={{ border: '1px solid #bfdbfe', background: '#eff6ff', padding: '10px 14px', marginBottom: 16 }}>
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Beta privada</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>De momento puedes probar con Matemáticas II, Matemáticas CCSS, Lengua Castellana y Literatura, Historia de España, Física y Química. El resto se irá abriendo próximamente.</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>De momento puedes probar con {PRIVATE_BETA_SUBJECTS_SENTENCE}. El resto se irá abriendo próximamente.</div>
           </div>
           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.2em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Disponibles en beta privada</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0', marginBottom: 14 }}>
@@ -1714,19 +1722,11 @@ export default function OnboardingFlow() {
 
     if (step === 'weekly-days') {
       return (
-        <div>
-          <EditorialGrid cols={2}>
-            {WEEKLY_DAY_OPTS.map(opt => (
-              <EditorialChoice key={opt.label} title={opt.label} selected={data.weeklyStudyDays === opt.label} onClick={() => update({ weeklyStudyDays: opt.label, weeklyStudyDaysValue: opt.value })} />
-            ))}
-          </EditorialGrid>
-          <div style={{ marginTop: 14, border: '1px solid rgba(37,99,235,.18)', background: 'linear-gradient(135deg, rgba(239,246,255,.92), rgba(255,255,255,.96))', padding: '12px 14px', boxShadow: '0 12px 30px rgba(37,99,235,.08)' }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 6 }}>Cuenta gratis</div>
-            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, fontWeight: 700, color: '#334155' }}>
-              Recuerda: con la cuenta gratis tendrás 2 días de Camino activos. Con Premium desbloqueas la planificación completa según los días que elijas.
-            </p>
-          </div>
-        </div>
+        <EditorialGrid cols={2}>
+          {WEEKLY_DAY_OPTS.map(opt => (
+            <EditorialChoice key={opt.label} title={opt.label} selected={data.weeklyStudyDays === opt.label} onClick={() => update({ weeklyStudyDays: opt.label, weeklyStudyDaysValue: opt.value })} />
+          ))}
+        </EditorialGrid>
       )
     }
 

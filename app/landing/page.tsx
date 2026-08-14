@@ -17,7 +17,6 @@ const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 const STATS = [
   { value: PLATFORM_STRUCTURED_EXERCISES_LABEL,  label: PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT },
   { value: '38',    label: 'Semanas de currículum PAU' },
-  { value: '<30s',  label: 'Para recibir tu corrección' },
   { value: '10+',   label: 'Años de exámenes oficiales' },
 ]
 
@@ -153,6 +152,7 @@ export default function LandingPage() {
         .v4c-stat  { padding: 24px; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; }
         .v4c-stat:nth-child(2n) { border-right: none; }
         .v4c-stat:nth-child(3), .v4c-stat:nth-child(4) { border-bottom: none; }
+        .v4c-stat:last-child { border-right: none; }
         .v4c-dark .v4c-stat { border-color: rgba(255,255,255,.08); }
 
         /* ── Steps list ── */

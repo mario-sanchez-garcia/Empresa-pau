@@ -1,14 +1,14 @@
-// AVISO DE COOKIES: Kairo solo usa cookies estrictamente necesarias (sesión Supabase).
-// No se requiere banner de consentimiento previo para esas cookies (RGPD art. 5.3 LSSI).
-// Si en el futuro se añade cualquier analítica de terceros (Google Analytics, Meta Pixel,
-// PostHog, Hotjar...) PASA A SER OBLIGATORIO un banner de consentimiento previo y granular
-// que BLOQUEE esos scripts hasta la aceptación explícita del usuario. No omitir este paso.
+// AVISO DE COOKIES: Kairo usa cookies técnicas necesarias (sesión Supabase) y, con
+// consentimiento previo del usuario, PostHog para analítica de producto. PostHog solo
+// se inicializa tras aceptar el banner — ver CookieConsentProvider, que bloquea el SDK
+// hasta la aceptación explícita (RGPD art. 5.3 LSSI). No inicializar PostHog fuera de ese flujo.
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import NextTopLoader from 'nextjs-toploader'
 import { HintsProvider } from '@/app/lib/onboarding/HintsContext';
+import { CookieConsentProvider } from '@/app/lib/analytics/CookieConsentContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,9 +79,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextTopLoader color="#2563eb" height={3} showSpinner={false} shadow={false} />
-        <HintsProvider>
-          {children}
-        </HintsProvider>
+        <CookieConsentProvider>
+          <HintsProvider>
+            {children}
+          </HintsProvider>
+        </CookieConsentProvider>
       </body>
     </html>
   );

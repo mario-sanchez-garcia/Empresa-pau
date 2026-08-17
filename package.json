@@ -30,6 +30,7 @@
     "nextjs-toploader": "^3.9.17",
     "ogl": "^1.0.11",
     "perfect-freehand": "^1.2.3",
+    "posthog-js": "^1.417.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",

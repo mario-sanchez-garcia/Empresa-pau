@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
+import CookiePreferencesButton from './CookiePreferencesButton'
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad · Kairo',
@@ -71,6 +72,7 @@ export default function PrivacidadPage() {
             <li style={li}><strong style={{ color: 'rgba(255,255,255,.85)' }}>Anthropic</strong> — API de IA, procesamiento puntual sin almacenamiento.</li>
             <li style={li}><strong style={{ color: 'rgba(255,255,255,.85)' }}>Stripe</strong> — pagos.</li>
             <li style={li}><strong style={{ color: 'rgba(255,255,255,.85)' }}>Vercel</strong> — hosting.</li>
+            <li style={li}><strong style={{ color: 'rgba(255,255,255,.85)' }}>PostHog</strong> — analítica de producto, UE, solo con su consentimiento (ver sección 10).</li>
           </ul>
           <P>Todos cumplen el RGPD.</P>
         </S>
@@ -88,7 +90,12 @@ export default function PrivacidadPage() {
         </S>
 
         <S n="10" title="Cookies" M={M}>
-          <P>Solo cookies técnicas necesarias para la sesión. Sin cookies de seguimiento ni publicidad.</P>
+          <ul style={ul}>
+            <li style={li}><strong style={{ color: 'rgba(255,255,255,.85)' }}>Cookies técnicas:</strong> necesarias para mantener su sesión iniciada. No requieren consentimiento (Art. 5.3 LSSI).</li>
+            <li style={li}><strong style={{ color: 'rgba(255,255,255,.85)' }}>Cookies analíticas (PostHog):</strong> nos ayudan a entender cómo se usa Kairo para mejorarlo. Solo se activan si acepta el banner de cookies al entrar; puede rechazarlas o retirar su consentimiento cuando quiera.</li>
+          </ul>
+          <P>No usamos cookies de publicidad ni las compartimos con terceros con fines comerciales.</P>
+          <P><CookiePreferencesButton /></P>
         </S>
 
         <S n="11" title="Contacto" M={M} last>

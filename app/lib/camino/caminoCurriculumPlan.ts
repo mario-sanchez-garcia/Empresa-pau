@@ -128,10 +128,15 @@ export function normalizeCaminoSlug(value?: string | null) {
 
 export function sanitizeLessonTitle(value?: string | null) {
   return (value ?? '')
+    .replace(/\\vec\{([^{}]*)\}/g, (_match, inner) => `${inner}⃗`)
     .replace(/\$\\cdot\$/g, '·')
     .replace(/\$([^$]*?)\\cdot([^$]*?)\$/g, (_match, left, right) => `${left.trim()} · ${right.trim()}`.trim())
     .replace(/\\cdot|cdot/g, '·')
     .replace(/\\times|times/g, '×')
+    // Red de seguridad: desenvuelve cualquier macro LaTeX restante (p.ej. \mathbb{R} → R)
+    // ya que este título se muestra como texto plano, no vía KaTeX.
+    .replace(/\\[a-zA-Z]+\{([^{}]*)\}/g, '$1')
+    .replace(/\$/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 }

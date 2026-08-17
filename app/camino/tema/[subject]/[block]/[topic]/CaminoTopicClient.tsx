@@ -985,8 +985,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 10 }}>
               {subjectLabelFromSlug(currentTopic.subject)} &middot; {currentTopic.blockTitle}
             </p>
-            <h1 className="topic-h1" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
-              {currentTopic.title}
+            <h1 className="topic-h1 [&_p]:m-0 [&_p]:inline" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
+              <LessonMarkdown text={currentTopic.title} format="raw" />
             </h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12, alignItems: 'center' }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, padding: '3px 10px' }}>

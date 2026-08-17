@@ -1559,28 +1559,6 @@
     ]
   },
   {
-    "subject": "lengua",
-    "blockSlug": "comunicacion",
-    "blockTitle": "Comunicación",
-    "topicSlug": "comentario-critico-pau",
-    "title": "Comentario crítico PAU",
-    "orderIndex": 1,
-    "contentStatus": "itinerary_only",
-    "explanation": "",
-    "guidedExample": "",
-    "practicePrompt": "",
-    "rawLatex": "",
-    "evauPracticeQuery": {
-      "subject": "lengua",
-      "block": "comunicacion",
-      "topic": "comentario-critico"
-    },
-    "source": "contenidos_2_bach",
-    "compatibleSubjects": [
-      "lengua"
-    ]
-  },
-  {
     "subject": "historia",
     "blockSlug": "segunda-republica-guerra-civil",
     "blockTitle": "Segunda República y Guerra Civil",
@@ -7486,5 +7464,1385 @@
       "quimica"
     ],
     "v2SortOrder": 125
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "el-examen-de-lengua-en-la-pau-estructura-y-reparto-de-puntos",
+    "title": "El Examen de Lengua en la PAU: Estructura y Reparto de Puntos",
+    "orderIndex": 1,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "el-examen-de-lengua-en-la-pau-estructura-y-reparto-de-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 1
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "el-tema-del-texto-como-enunciarlo-0-5-puntos",
+    "title": "El Tema del Texto: Cómo Enunciarlo (0,5 puntos)",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "el-tema-del-texto-como-enunciarlo-0-5-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 2
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "el-resumen-40-50-palabras-exactas-0-6-puntos",
+    "title": "El Resumen: 40-50 Palabras Exactas (0,6 puntos)",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "el-resumen-40-50-palabras-exactas-0-6-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 3
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "las-tipologias-textuales-identificar-el-tipo-de-texto-0-2-puntos",
+    "title": "Las Tipologías Textuales: Identificar el Tipo de Texto (0,2 puntos)",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "las-tipologias-textuales-identificar-el-tipo-de-texto-0-2-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 4
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "los-generos-periodisticos-de-opinion",
+    "title": "Los Géneros Periodísticos de Opinión",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "los-generos-periodisticos-de-opinion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "las-funciones-del-lenguaje",
+    "title": "Las Funciones del Lenguaje",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "las-funciones-del-lenguaje"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 6
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "la-modalizacion-detectar-las-marcas-de-subjetividad",
+    "title": "La Modalización: Detectar las Marcas de Subjetividad",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "la-modalizacion-detectar-las-marcas-de-subjetividad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "la-coherencia-la-estructura-interna-del-texto",
+    "title": "La Coherencia: La Estructura Interna del Texto",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "la-coherencia-la-estructura-interna-del-texto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "la-cohesion-los-mecanismos-que-enlazan-el-texto",
+    "title": "La Cohesión: Los Mecanismos que Enlazan el Texto",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "la-cohesion-los-mecanismos-que-enlazan-el-texto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "los-marcadores-discursivos-clasificacion-y-uso",
+    "title": "Los Marcadores Discursivos: Clasificación y Uso",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "los-marcadores-discursivos-clasificacion-y-uso"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "la-adecuacion-y-el-registro",
+    "title": "La Adecuación y el Registro",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "la-adecuacion-y-el-registro"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "las-figuras-retoricas-rentables-en-el-comentario",
+    "title": "Las Figuras Retóricas Rentables en el Comentario",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "las-figuras-retoricas-rentables-en-el-comentario"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 12
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "caracteristicas-linguisticas-y-estilisticas-el-metodo-completo-1-3-puntos",
+    "title": "Características Lingüísticas y Estilísticas: El Método Completo (1,3 puntos)",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "caracteristicas-linguisticas-y-estilisticas-el-metodo-completo-1-3-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 13
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "el-texto-argumentativo-estructura-de-la-respuesta-1-4-puntos",
+    "title": "El Texto Argumentativo: Estructura de la Respuesta (1,4 puntos)",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "el-texto-argumentativo-estructura-de-la-respuesta-1-4-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 14
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "comunicacion",
+    "blockTitle": "Comunicación",
+    "topicSlug": "los-tipos-de-argumentos",
+    "title": "Los Tipos de Argumentos",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "comunicacion",
+      "topic": "los-tipos-de-argumentos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 15
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "el-sintagma-tipos-y-estructura",
+    "title": "El Sintagma: Tipos y Estructura",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "el-sintagma-tipos-y-estructura"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 16
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "el-sujeto-como-identificarlo-sin-fallar",
+    "title": "El Sujeto: Cómo Identificarlo sin Fallar",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "el-sujeto-como-identificarlo-sin-fallar"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 17
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "predicado-nominal-y-atributo-las-copulativas",
+    "title": "Predicado Nominal y Atributo: Las Copulativas",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "predicado-nominal-y-atributo-las-copulativas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 18
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "complemento-directo-y-complemento-indirecto",
+    "title": "Complemento Directo y Complemento Indirecto",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "complemento-directo-y-complemento-indirecto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 19
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "el-complemento-de-regimen-suplemento",
+    "title": "El Complemento de Régimen (Suplemento)",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "el-complemento-de-regimen-suplemento"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 20
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "circunstancial-predicativo-y-agente",
+    "title": "Circunstancial, Predicativo y Agente",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "circunstancial-predicativo-y-agente"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 21
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "clasificacion-de-la-oracion-simple",
+    "title": "Clasificación de la Oración Simple",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "clasificacion-de-la-oracion-simple"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 22
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "la-oracion-compuesta-coordinacion-y-yuxtaposicion",
+    "title": "La Oración Compuesta: Coordinación y Yuxtaposición",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "la-oracion-compuesta-coordinacion-y-yuxtaposicion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 23
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "subordinadas-sustantivas-funciones",
+    "title": "Subordinadas Sustantivas: Funciones",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "subordinadas-sustantivas-funciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 24
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "subordinadas-adjetivas-o-de-relativo",
+    "title": "Subordinadas Adjetivas o de Relativo",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "subordinadas-adjetivas-o-de-relativo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 25
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "subordinadas-adverbiales-propias-tiempo-lugar-y-modo",
+    "title": "Subordinadas Adverbiales Propias: Tiempo, Lugar y Modo",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "subordinadas-adverbiales-propias-tiempo-lugar-y-modo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 26
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "subordinadas-adverbiales-impropias",
+    "title": "Subordinadas Adverbiales Impropias",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "subordinadas-adverbiales-impropias"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 27
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "los-valores-de-se",
+    "title": "Los Valores de SE",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "los-valores-de-se"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 28
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "las-perifrasis-verbales",
+    "title": "Las Perífrasis Verbales",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "las-perifrasis-verbales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 29
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "metodo-completo-de-analisis-sintactico",
+    "title": "Método Completo de Análisis Sintáctico",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "metodo-completo-de-analisis-sintactico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 30
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "las-categorias-gramaticales-clases-de-palabras",
+    "title": "Las Categorías Gramaticales (Clases de Palabras)",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "las-categorias-gramaticales-clases-de-palabras"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 31
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "estructura-morfologica-lexema-y-morfemas",
+    "title": "Estructura Morfológica: Lexema y Morfemas",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "estructura-morfologica-lexema-y-morfemas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 32
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "la-derivacion",
+    "title": "La Derivación",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "la-derivacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 33
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "composicion-parasintesis-y-otros-procesos",
+    "title": "Composición, Parasíntesis y Otros Procesos",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "composicion-parasintesis-y-otros-procesos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 34
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "analisis-morfologico-completo-metodo",
+    "title": "Análisis Morfológico Completo: Método",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "analisis-morfologico-completo-metodo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 35
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "sinonimia-y-antonimia",
+    "title": "Sinonimia y Antonimia",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "sinonimia-y-antonimia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 36
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "polisemia-y-homonimia",
+    "title": "Polisemia y Homonimia",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "polisemia-y-homonimia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 37
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "hiperonimia-hiponimia-y-campo-semantico",
+    "title": "Hiperonimia, Hiponimia y Campo Semántico",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "hiperonimia-hiponimia-y-campo-semantico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 38
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "denotacion-connotacion-y-cambios-de-significado",
+    "title": "Denotación, Connotación y Cambios de Significado",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "denotacion-connotacion-y-cambios-de-significado"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 39
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "reflexion-lengua",
+    "blockTitle": "Reflexión sobre la lengua",
+    "topicSlug": "las-lenguas-de-espana-y-las-variedades-del-espanol",
+    "title": "Las Lenguas de España y las Variedades del Español",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "reflexion-lengua",
+      "topic": "las-lenguas-de-espana-y-las-variedades-del-espanol"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "como-se-responde-un-tema-de-literatura-2-puntos",
+    "title": "Cómo se Responde un Tema de Literatura (2 puntos)",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "como-se-responde-un-tema-de-literatura-2-puntos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-realismo-y-el-naturalismo",
+    "title": "El Realismo y el Naturalismo",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-realismo-y-el-naturalismo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-modernismo",
+    "title": "El Modernismo",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-modernismo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 43
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-generacion-del-98",
+    "title": "La Generación del 98",
+    "orderIndex": 44,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-generacion-del-98"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 44
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "antonio-machado",
+    "title": "Antonio Machado",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "antonio-machado"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 45
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-novela-anterior-a-1936-unamuno-baroja-y-azorin",
+    "title": "La Novela Anterior a 1936: Unamuno, Baroja y Azorín",
+    "orderIndex": 46,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-novela-anterior-a-1936-unamuno-baroja-y-azorin"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 46
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-teatro-anterior-a-1939-valle-inclan-y-el-esperpento",
+    "title": "El Teatro Anterior a 1939: Valle-Inclán y el Esperpento",
+    "orderIndex": 47,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-teatro-anterior-a-1939-valle-inclan-y-el-esperpento"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 47
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-novecentismo-y-la-generacion-del-14",
+    "title": "El Novecentismo y la Generación del 14",
+    "orderIndex": 48,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-novecentismo-y-la-generacion-del-14"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 48
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "las-vanguardias",
+    "title": "Las Vanguardias",
+    "orderIndex": 49,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "las-vanguardias"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 49
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-generacion-del-27-caracteristicas",
+    "title": "La Generación del 27: Características",
+    "orderIndex": 50,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-generacion-del-27-caracteristicas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 50
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "los-poetas-del-27-trayectorias-individuales",
+    "title": "Los Poetas del 27: Trayectorias Individuales",
+    "orderIndex": 51,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "los-poetas-del-27-trayectorias-individuales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 51
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "federico-garcia-lorca-la-poesia",
+    "title": "Federico García Lorca: La Poesía",
+    "orderIndex": 52,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "federico-garcia-lorca-la-poesia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 52
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-teatro-de-lorca",
+    "title": "El Teatro de Lorca",
+    "orderIndex": 53,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-teatro-de-lorca"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 53
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-poesia-de-1939-a-la-actualidad",
+    "title": "La Poesía de 1939 a la Actualidad",
+    "orderIndex": 54,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-poesia-de-1939-a-la-actualidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 54
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-novela-espanola-de-1939-a-1974",
+    "title": "La Novela Española de 1939 a 1974",
+    "orderIndex": 55,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-novela-espanola-de-1939-a-1974"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 55
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-novela-espanola-de-1975-a-la-actualidad",
+    "title": "La Novela Española de 1975 a la Actualidad",
+    "orderIndex": 56,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-novela-espanola-de-1975-a-la-actualidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 56
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-teatro-de-1939-a-la-actualidad",
+    "title": "El Teatro de 1939 a la Actualidad",
+    "orderIndex": 57,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-teatro-de-1939-a-la-actualidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 57
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "la-literatura-hispanoamericana-del-siglo-xx",
+    "title": "La Literatura Hispanoamericana del Siglo XX",
+    "orderIndex": 58,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "la-literatura-hispanoamericana-del-siglo-xx"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 58
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "el-comentario-de-un-fragmento-literario-pregunta-3-1",
+    "title": "El Comentario de un Fragmento Literario (Pregunta 3.1)",
+    "orderIndex": 59,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "el-comentario-de-un-fragmento-literario-pregunta-3-1"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 59
+  },
+  {
+    "subject": "lengua",
+    "blockSlug": "educacion-literaria",
+    "blockTitle": "Educación literaria",
+    "topicSlug": "como-comentar-la-obra-leida-preguntas-3-3-y-3-4",
+    "title": "Cómo Comentar la Obra Leída (Preguntas 3.3 y 3.4)",
+    "orderIndex": 60,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "lengua",
+      "block": "educacion-literaria",
+      "topic": "como-comentar-la-obra-leida-preguntas-3-3-y-3-4"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "lengua"
+    ],
+    "v2SortOrder": 60
   }
 ]

@@ -317,6 +317,16 @@ const mdComponents: Partial<Components> = {
   blockquote: ({children}) => <blockquote style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #93c5fd', borderRadius: '16px', padding: '1rem', margin: '1rem 0', color: '#475569', background: '#ffffff', boxShadow: '0 10px 24px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
 }
 
+const sidebarCorrectionMdComponents: Partial<Components> = {
+  p: ({ children }) => <span style={{ margin: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{children}</span>,
+  strong: ({ children }) => <strong style={{ fontWeight: 850, color: '#0f172a' }}>{children}</strong>,
+  em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+  ul: ({ children }) => <span style={{ display: 'grid', gap: 4 }}>{children}</span>,
+  ol: ({ children }) => <span style={{ display: 'grid', gap: 4 }}>{children}</span>,
+  li: ({ children }) => <span style={{ display: 'block', fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{children}</span>,
+  code: ({ children }) => <code style={{ borderRadius: 6, background: '#f1f5f9', padding: '1px 4px', fontFamily: 'inherit', color: '#334155' }}>{children}</code>,
+}
+
 const darkMdComponents: Partial<Components> = {
   h1: ({children}) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #dbe7fb', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
   h2: ({children}) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#1e3a8a', letterSpacing: '-0.01em' }}>{children}</h2>,
@@ -1753,22 +1763,29 @@ function extractCorrectionBullets(text: string, section: string): string[] {
     .map(sanitizeCorrectionListItem)
     .filter(Boolean)
 }
+
+function normalizeCorrectionListItems(items: unknown[]): string[] {
+  return items
+    .map(item => sanitizeCorrectionListItem(String(item ?? '')))
+    .filter(Boolean)
+}
+
 // El esquema completo de Simulacros (varios bloques) trae fortalezas/errores_principales
 // a nivel superior; el prompt ligero de un solo bloque (buildBlockPrompt, usado por
 // /api/exam/correct) no los genera — en ese caso se derivan del propio bloque.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
 const correccionFuertesJson = Array.isArray((correccionParsedJson as any)?.fortalezas)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
-  ? ((correccionParsedJson as any).fortalezas as unknown[]).filter(Boolean).map(String)
+  ? normalizeCorrectionListItems((correccionParsedJson as any).fortalezas as unknown[])
   : typeof correccionBloqueJson?.que_hizo_bien === 'string' && correccionBloqueJson.que_hizo_bien.trim()
-  ? [correccionBloqueJson.que_hizo_bien.trim()]
+  ? normalizeCorrectionListItems([correccionBloqueJson.que_hizo_bien])
   : null
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
 const correccionErroresJson = Array.isArray((correccionParsedJson as any)?.errores_principales)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
-  ? ((correccionParsedJson as any).errores_principales as unknown[]).filter(Boolean).map(String)
+  ? normalizeCorrectionListItems((correccionParsedJson as any).errores_principales as unknown[])
   : Array.isArray(correccionBloqueJson?.errores_detectados)
-  ? (correccionBloqueJson.errores_detectados as unknown[]).filter(Boolean).map(String)
+  ? normalizeCorrectionListItems(correccionBloqueJson.errores_detectados as unknown[])
   : null
 const correctionFuertes = correccionFuertesJson?.length
   ? correccionFuertesJson
@@ -6072,7 +6089,9 @@ function cambiarTipo(t: Tipo) {
                     {correctionFuertes.length > 0 ? correctionFuertes.map((point, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
                         <div style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>✓</div>
-                        <span style={{ fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{point}</span>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>
+                          <MathMarkdown text={point} format={false} components={sidebarCorrectionMdComponents} />
+                        </div>
                       </div>
                     )) : (
                       <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
@@ -6087,7 +6106,9 @@ function cambiarTipo(t: Tipo) {
                     {correctionErrores.length > 0 ? correctionErrores.map((err, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
                         <div style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#fee2e2', color: '#dc2626', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>!</div>
-                        <span style={{ fontSize: 12, color: '#334155', lineHeight: 1.55 }}>{err}</span>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>
+                          <MathMarkdown text={err} format={false} components={sidebarCorrectionMdComponents} />
+                        </div>
                       </div>
                     )) : (
                       <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>

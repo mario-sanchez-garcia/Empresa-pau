@@ -776,7 +776,7 @@ function PracticaPageInner() {
                       )}
                       {answers[block.id]?.image && (
                         <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: '#dbe7fb' }}>
-                          <img src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`} alt="Respuesta" className="max-h-96 w-full object-contain" style={{ background: '#f8fbff' }} />
+                          <img src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`} alt="Respuesta" loading="lazy" decoding="async" className="max-h-96 w-full object-contain" style={{ background: '#f8fbff' }} />
                           <button
                             onClick={() => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? { text: '' }), image: null, imageType: null } }))}
                             className="absolute right-3 top-3 rounded-full bg-white p-2 shadow-md transition hover:bg-red-50"

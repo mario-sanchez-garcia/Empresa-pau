@@ -1098,6 +1098,7 @@ export default function OnboardingFlow() {
             src="/brand/login-bg.png"
             alt=""
             aria-hidden
+            loading="eager"
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.4) brightness(1.05) contrast(1.08)' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(13,13,13,.78) 0%, rgba(13,13,13,.35) 45%, rgba(13,13,13,.82) 100%)' }} />
@@ -1105,7 +1106,7 @@ export default function OnboardingFlow() {
           {/* Logo */}
           <div style={{ position: 'absolute', top: 32, left: 36, zIndex: 2 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 30, width: 'auto', mixBlendMode: 'lighten', display: 'block' }} />
+            <img src="/brand/kairo-logo-new.png" alt="Kairo" loading="eager" style={{ height: 30, width: 'auto', mixBlendMode: 'lighten', display: 'block' }} />
           </div>
 
           {/* Tagline */}

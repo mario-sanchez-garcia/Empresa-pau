@@ -29,6 +29,8 @@ const defaultComponents: Partial<Components> = {
         <img
           src={safeSrc}
           alt={alt ?? 'Imagen oficial'}
+          loading="lazy"
+          decoding="async"
           className="max-h-[240px] w-auto max-w-[min(100%,600px)] rounded-xl border border-slate-200 bg-white object-contain shadow-sm"
         />
       </span>

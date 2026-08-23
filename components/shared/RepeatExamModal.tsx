@@ -210,7 +210,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
                 <input type="file" accept="image/*" capture="environment" onChange={handleImagen} style={{ display: 'none' }} id="repeat-exam-image-input" />
                 {imagenPreview ? (
                   <div style={{ position: 'relative' }}>
-                    <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
+                    <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
                     <button onClick={clearImagen} type="button" style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
                   </div>
                 ) : (

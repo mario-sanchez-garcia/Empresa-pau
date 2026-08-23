@@ -165,6 +165,12 @@ export default function AyudaPage() {
             >
               💬 Pregunta a Kairo
             </a>
+            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 14 }}>
+              ¿Nada de esto lo resuelve?{' '}
+              <a href="/contacto" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 2 }}>
+                Escríbenos directamente
+              </a>
+            </p>
           </div>
         </div>
       </div>

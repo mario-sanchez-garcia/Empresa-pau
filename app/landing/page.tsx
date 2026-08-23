@@ -7,7 +7,9 @@ import {
 } from '@/app/lib/platformStats'
 import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
 import LandingAuthProvider from './LandingAuthState'
-import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta } from './LandingCta'
+import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
+import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
+import BackToTop from '@/app/components/ui/BackToTop'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -213,6 +215,9 @@ export default function LandingPage() {
         /* ── Footer links ── */
         .v4c-footer-link:hover { color: #fff !important; }
 
+        /* ── Mid-page CTA ── */
+        .v4c-mid-cta:hover { background: #1c1c1c !important; color: #fff !important; }
+
         /* ── Nav scroll-aware (dark ↔ light) ── */
         #v4c-nav {
           transition: background 300ms cubic-bezier(0.23,1,0.32,1),
@@ -268,6 +273,36 @@ export default function LandingPage() {
         @media (prefers-reduced-motion: reduce) {
           .v4c-cta-circle, .v4c-cta-circle-inv { transition: none !important; }
         }
+
+        /* ── Hero entrance ── */
+        @keyframes v4c-hero-in {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .v4c-hero-in { animation: v4c-hero-in 0.9s cubic-bezier(0.22,1,0.36,1) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .v4c-hero-in { animation: none !important; }
+        }
+
+        /* ── Sticky mobile CTA ── */
+        .v4c-sticky-cta {
+          display: none;
+        }
+        @media (max-width: 640px) {
+          .v4c-sticky-cta {
+            display: block;
+            position: fixed;
+            left: 12px; right: 12px;
+            bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            z-index: 90;
+            padding: 6px;
+            background: rgba(17,17,17,.9);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 999px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+          }
+        }
       `}</style>
 
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
@@ -281,7 +316,7 @@ export default function LandingPage() {
       }}>
         <Link href="/" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img id="v4c-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 32, width: 'auto', display: 'block' }} />
+          <img id="v4c-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 32, width: 'auto', display: 'block' }} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Link href="/pricing" className="v4c-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
@@ -321,7 +356,7 @@ export default function LandingPage() {
         </div>
 
         {/* Hero text */}
-        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 32px' }}>
+        <div className="v4c-hero-in" style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 32px' }}>
           <p style={{ fontFamily: M, fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.35)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 18 }}>
             Selectividad · Madrid · 2026
           </p>
@@ -356,6 +391,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Block 1: El problema (light) ─────────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <div data-theme="light" className="v4c-block v4c-light" style={{ background: '#f9f9f9' }}>
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>El problema</span>
@@ -377,8 +413,10 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      </RevealOnScroll>
 
       {/* ── Block 2: Cómo funciona (dark) ────────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <div id="como-funciona" className="v4c-block v4c-dark" style={{ background: '#111' }}>
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>Cómo funciona</span>
@@ -403,8 +441,10 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      </RevealOnScroll>
 
       {/* ── Block 3: La corrección (light) ───────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <div data-theme="light" className="v4c-block v4c-light" style={{ background: '#f9f9f9' }}>
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>La corrección</span>
@@ -456,8 +496,10 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      </RevealOnScroll>
 
       {/* ── Block 4: Prueba social (dark) ────────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <div className="v4c-block v4c-dark" style={{ background: '#111' }}>
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>Resultados</span>
@@ -484,8 +526,26 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+      </RevealOnScroll>
+
+      {/* ── Mid-page CTA strip ────────────────────────────────────────────────── */}
+      <RevealOnScroll as="div">
+      <div style={{ background: '#f9f9f9', padding: '48px 72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20, borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
+        <p style={{ fontFamily: bebas.style.fontFamily, fontSize: 'clamp(22px, 3vw, 32px)', letterSpacing: '.01em', color: '#1c1c1c', margin: 0 }}>
+          ¿Listo para subir nota este trimestre?
+        </p>
+        <Link
+          href="#como-funciona"
+          className="v4c-mid-cta"
+          style={{ padding: '12px 28px', border: '1px solid #1c1c1c', borderRadius: 999, fontFamily: dmMono.style.fontFamily, fontSize: 11, color: '#1c1c1c', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase', transition: 'background 140ms, color 140ms' }}
+        >
+          Empieza gratis →
+        </Link>
+      </div>
+      </RevealOnScroll>
 
       {/* ── Comparison table (light, full-width) ─────────────────────────────── */}
+      <RevealOnScroll as="div">
       <section data-theme="light" className="v4c-full" style={{ background: '#f9f9f9' }}>
         <div className="v4c-full-inner">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 16, display: 'block' }}>Por qué Kairo</span>
@@ -524,8 +584,10 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </RevealOnScroll>
 
       {/* ── Subjects (dark, full-width) ──────────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <section className="v4c-full" style={{ background: '#111' }}>
         <div className="v4c-full-inner">
           <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 16, display: 'block' }}>Asignaturas</span>
@@ -544,8 +606,10 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </RevealOnScroll>
 
       {/* ── Pricing (dark full-width) ─────────────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <div style={{ background: '#111', padding: '80px 72px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <h2 style={{ fontFamily: B, fontSize: 'clamp(32px, 4vw, 52px)', letterSpacing: '.01em', color: '#fff', lineHeight: .95, marginBottom: 56 }}>Planes.</h2>
@@ -586,8 +650,10 @@ export default function LandingPage() {
           </p>
         </div>
       </div>
+      </RevealOnScroll>
 
       {/* ── CTA split block ───────────────────────────────────────────────────── */}
+      <RevealOnScroll as="div">
       <div className="v4c-cta-split">
         <div data-theme="light" className="v4c-cta-left">
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4.5vw, 60px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 16 }}>
@@ -601,12 +667,13 @@ export default function LandingPage() {
           <BottomCta />
         </div>
       </div>
+      </RevealOnScroll>
 
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
       <footer style={{ background: '#111', padding: '32px 72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, borderTop: '1px solid rgba(255,255,255,.07)' }}>
         <Link href="/" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
+          <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="lazy" decoding="async" style={{ height: 28, width: 'auto', display: 'block' }} />
         </Link>
         <ul style={{ display: 'flex', gap: 20, listStyle: 'none', flexWrap: 'wrap', padding: 0, margin: 0 }}>
           {[
@@ -614,6 +681,8 @@ export default function LandingPage() {
             { label: 'Camino PAU', href: '/camino'            },
             { label: 'Simulacros', href: '/simulacros'        },
             { label: 'Precios',    href: '/pricing'           },
+            { label: 'Ayuda',      href: '/ayuda'             },
+            { label: 'Contacto',   href: '/contacto'          },
             { label: 'Privacidad',  href: '/legal/privacidad'   },
             { label: 'Términos',    href: '/legal/terminos'     },
             { label: 'Aviso legal', href: '/legal/aviso-legal'  },
@@ -647,6 +716,9 @@ export default function LandingPage() {
   check();
 })();
       `}} />
+
+      <BackToTop />
+      <StickyMobileCta />
 
     </div>
     </LandingAuthProvider>

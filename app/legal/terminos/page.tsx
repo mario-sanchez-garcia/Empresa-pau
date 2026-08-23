@@ -127,7 +127,7 @@ function LegalNav({ B, M, active }: { B: string; M: string; active: string }) {
     <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(17,17,17,.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '0 24px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
       <Link href="/" aria-label="Inicio">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
+        <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 28, width: 'auto', display: 'block' }} />
       </Link>
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const }}>
         {links.map(l => (

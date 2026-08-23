@@ -69,6 +69,36 @@ export function BottomCta() {
   )
 }
 
+// Fixed CTA bar pinned to the bottom of the viewport on mobile only (hidden on
+// desktop via the .v4c-sticky-cta media query in app/landing/page.tsx), so the
+// primary action stays reachable without scrolling back to the hero.
+export function StickyMobileCta() {
+  const { status, href, label } = useLandingAuth()
+  const isAuthed = status === 'authed'
+  const isLoading = status === 'loading'
+  return (
+    <div className="v4c-sticky-cta">
+      <Link
+        href={isLoading ? '#' : href}
+        aria-disabled={isLoading}
+        onClick={e => { if (isLoading) e.preventDefault() }}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          width: '100%', height: 48, borderRadius: 999, background: '#fff', textDecoration: 'none',
+          opacity: isLoading ? 0.6 : 1, cursor: isLoading ? 'default' : 'pointer',
+        }}
+      >
+        <span style={{ fontFamily: B, fontSize: 15, letterSpacing: '.04em', color: '#111', fontWeight: isAuthed ? 700 : undefined }}>
+          {isAuthed ? label : 'Empieza gratis'}
+        </span>
+        {!isAuthed && (
+          <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(0,0,0,.45)', letterSpacing: '.08em', textTransform: 'uppercase' }}>sin tarjeta</span>
+        )}
+      </Link>
+    </div>
+  )
+}
+
 export function PricingPlanCta({ isFree, cta }: { isFree: boolean; cta: string }) {
   const { status, href } = useLandingAuth()
   const isLoading = status === 'loading'

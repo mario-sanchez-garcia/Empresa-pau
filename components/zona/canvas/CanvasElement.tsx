@@ -63,7 +63,7 @@ export function ConnectorElement({ connector, elements, selected, onSelect, upda
 function renderElementContent(element: CanvasItem, updateElement: CanvasElementViewProps['updateElement']) {
   if (element.type === 'path') return <svg className="h-full w-full overflow-visible" viewBox={`0 0 ${element.width} ${element.height}`}><path d={pathData(element)} fill={element.color ?? '#111827'} /></svg>
   if (element.type === 'shape') return renderShape(element)
-  if (element.type === 'image') return <img src={element.src} alt="Imagen del canvas" draggable={false} className="h-full w-full rounded-xl object-cover" />
+  if (element.type === 'image') return <img src={element.src} alt="Imagen del canvas" loading="lazy" decoding="async" draggable={false} className="h-full w-full rounded-xl object-cover" />
   if (element.type === 'sticky') {
     return (
       <div className="h-full w-full rounded-lg p-4 text-lg font-black leading-snug text-[#172033] shadow-xl outline-none" style={{ background: element.fill }}>

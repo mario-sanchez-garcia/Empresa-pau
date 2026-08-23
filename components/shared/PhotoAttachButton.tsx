@@ -57,7 +57,7 @@ export default function PhotoAttachButton({
       <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleFile} style={{ display: 'none' }} disabled={disabled} />
       {value ? (
         <div style={{ position: 'relative', display: 'inline-block' }}>
-          <img src={value.preview} alt="Foto adjunta" style={{ height: size + 34, width: size + 34, objectFit: 'cover', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
+          <img src={value.preview} alt="Foto adjunta" loading="lazy" decoding="async" style={{ height: size + 34, width: size + 34, objectFit: 'cover', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
           <button
             type="button"
             onClick={clear}

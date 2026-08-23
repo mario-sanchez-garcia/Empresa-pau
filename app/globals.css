@@ -215,6 +215,16 @@ button:active:not(:disabled),
 .pau-reveal-delay-3 { animation-delay: 180ms; }
 .pau-reveal-delay-4 { animation-delay: 240ms; }
 
+/* ─── Cross-page transitions ──────────────────────────────────────
+   Full navigations (SidebarNav, footers, etc. use plain <a href> on
+   purpose — see SidebarNav.tsx) currently hard-cut between pages.
+   @view-transition smooths that with a cross-fade in browsers that
+   support it (Chromium); it's a no-op elsewhere, so this is purely
+   additive and never blocks or delays navigation. ─────────────────── */
+@view-transition {
+  navigation: auto;
+}
+
 /* ─── Reduced motion ─────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -224,6 +234,11 @@ button:active:not(:disabled),
     scroll-behavior: auto !important;
   }
   .pau-stagger > * { animation: none; }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 /* ─── Skeleton shimmer ───────────────────────────────────────────── */

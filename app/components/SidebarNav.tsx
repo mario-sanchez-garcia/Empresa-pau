@@ -137,6 +137,9 @@ export default function SidebarNav() {
         @media (min-width: 768px) {
           .kairo-mobile-nav { display: none !important; }
         }
+        .kairo-nav-item:hover > div:first-child { background: rgba(37,99,235,.28) !important; }
+        .kairo-account-item:hover { background: #f1f5f9 !important; }
+        .kairo-logout-item:hover { background: #fef2f2 !important; }
       `}</style>
 
       {/* ── Desktop sidebar (unchanged behaviour) ────────────────────────── */}
@@ -181,6 +184,7 @@ export default function SidebarNav() {
               <a
                 key={label}
                 href={href}
+                className="kairo-nav-item"
                 style={{
                   display: 'flex', alignItems: 'center',
                   padding: '0 10px', height: 44, flexShrink: 0,
@@ -329,10 +333,12 @@ export default function SidebarNav() {
                     key={label}
                     href={href}
                     onClick={() => setAccountMenuOpen(false)}
+                    className="kairo-account-item"
                     style={{
                       display: 'flex', alignItems: 'center', gap: 10,
                       padding: '9px 10px', borderRadius: 8, textDecoration: 'none',
                       fontSize: 13, fontWeight: 700, color: '#334155',
+                      transition: 'background 120ms',
                     }}
                   >
                     <Icon size={15} color="#64748b" /> {label}
@@ -341,10 +347,12 @@ export default function SidebarNav() {
                 <div style={{ height: 1, background: '#f1f5f9', margin: '4px 6px' }} />
                 <button
                   onClick={() => { setAccountMenuOpen(false); handleLogout() }}
+                  className="kairo-logout-item"
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                     padding: '9px 10px', borderRadius: 8, border: 'none', background: 'none', cursor: 'pointer',
                     fontSize: 13, fontWeight: 700, color: '#dc2626',
+                    transition: 'background 120ms',
                   }}
                 >
                   <LogOut size={15} /> Cerrar sesión

@@ -60,9 +60,26 @@ export default function Login() {
     }
   }
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   // ── Email/password handler (login únicamente — /login ya no crea cuentas) ────
   async function handleSubmit() {
-    if (!email || !password) return
+    if (!email && !password) {
+      setMensaje('Escribe tu email y tu contraseña.')
+      return
+    }
+    if (!email) {
+      setMensaje('Escribe tu email.')
+      return
+    }
+    if (!EMAIL_RE.test(email)) {
+      setMensaje('Ese email no parece válido. Revísalo y vuelve a intentarlo.')
+      return
+    }
+    if (!password) {
+      setMensaje('Escribe tu contraseña.')
+      return
+    }
     setCargando(true)
     setMensaje('')
     const { error, data } = await supabase.auth.signInWithPassword({ email, password })
@@ -109,7 +126,16 @@ export default function Login() {
     if (text.includes('invalid login credentials')) {
       return 'Email o contraseña incorrectos.'
     }
-    return error ?? 'No se pudo completar la operación. Inténtalo de nuevo.'
+    if (text.includes('email not confirmed')) {
+      return 'Todavía no has confirmado tu email. Revisa tu bandeja de entrada.'
+    }
+    if (text.includes('too many requests') || text.includes('rate limit')) {
+      return 'Demasiados intentos seguidos. Espera un momento antes de volver a intentarlo.'
+    }
+    if (text.includes('fetch') || text.includes('network')) {
+      return 'Parece que no tienes conexión. Comprueba tu red e inténtalo de nuevo.'
+    }
+    return 'No se pudo iniciar sesión. Inténtalo de nuevo en un momento.'
   }
 
   return (
@@ -226,6 +252,7 @@ export default function Login() {
           src="/brand/login-bg.png"
           alt=""
           aria-hidden
+          loading="eager"
           style={{
             position: 'absolute', inset: 0,
             width: '100%', height: '100%', objectFit: 'cover',
@@ -244,6 +271,7 @@ export default function Login() {
           <img
             src="/brand/kairo-logo-new.png"
             alt="Kairo"
+            loading="eager"
             style={{ height: 30, width: 'auto', mixBlendMode: 'lighten', display: 'block' }}
           />
         </div>
@@ -301,7 +329,7 @@ export default function Login() {
           {/* Mobile logo */}
           <div className="lg-up" style={{ marginBottom: 36, display: 'none' }} id="mobile-logo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/kairo-logo-new.png" alt="Kairo" style={{ height: 28, width: 'auto', mixBlendMode: 'lighten' }} />
+            <img src="/brand/kairo-logo-new.png" alt="Kairo" loading="eager" style={{ height: 28, width: 'auto', mixBlendMode: 'lighten' }} />
           </div>
 
           {/* Heading */}

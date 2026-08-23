@@ -329,7 +329,7 @@ export default function CatEjercicioCard({
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {imagenes.map((imagen, index) => (
                     <div key={`${imagen.name}-${index}`} className="relative rounded-2xl border p-3" style={{ borderColor: UI.border }}>
-                      <img src={imagen.preview} alt={imagen.name} className="h-40 w-full object-contain" />
+                      <img src={imagen.preview} alt={imagen.name} loading="lazy" decoding="async" className="h-40 w-full object-contain" />
                       <div className="mt-2 truncate text-xs font-semibold text-slate-600">{imagen.name}</div>
                       <button type="button" onClick={() => eliminarImagen(index)} className="absolute right-2 top-2 rounded-full p-2 text-white" style={{ backgroundColor: UI.color }}><X size={14} /></button>
                     </div>

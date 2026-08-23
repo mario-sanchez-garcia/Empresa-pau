@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Bug, CreditCard, FlaskConical, Mail, Shield, type LucideIcon } from 'lucide-react'
+import ContactForm from './ContactForm'
+import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 export const metadata: Metadata = {
   title: 'Contacto · Kairo',
@@ -17,6 +19,11 @@ export default function ContactoPage() {
 
   return (
     <div style={{ background: '#111', color: '#fff', minHeight: '100dvh', fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>
+      <style>{`
+        .contact-card:hover { background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.14) !important; }
+        .legal-nav-link:hover { color: #fff !important; }
+        .legal-footer-link:hover { color: rgba(255,255,255,.6) !important; }
+      `}</style>
       <LegalNav B={B} M={M} />
 
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px 100px' }}>
@@ -30,8 +37,16 @@ export default function ContactoPage() {
         </div>
 
         <div style={{ padding: '40px 0', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
-          <p style={{ fontSize: 17, color: 'rgba(255,255,255,.55)', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 560 }}>
-            Estamos en beta privada y atendemos todas las consultas de forma personal.
+          <p style={{ fontSize: 17, color: 'rgba(255,255,255,.55)', lineHeight: 1.7, margin: '0 0 32px', maxWidth: 560 }}>
+            Estamos en beta privada y atendemos todas las consultas de forma personal. Escríbenos directamente desde este formulario.
+          </p>
+
+          <ContactForm M={M} />
+        </div>
+
+        <div style={{ padding: '40px 0', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+          <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20 }}>
+            O escribe directamente por motivo
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -39,7 +54,7 @@ export default function ContactoPage() {
               icon={Mail}
               title="Soporte general"
               description="Preguntas sobre el producto, bugs, sugerencias o dudas de uso."
-              email="hola@kairo.es"
+              email={SUPPORT_EMAIL}
               subject="Soporte"
               M={M}
             />
@@ -47,7 +62,7 @@ export default function ContactoPage() {
               icon={Shield}
               title="Privacidad y datos"
               description="Solicitudes de acceso, rectificación o eliminación de tus datos."
-              email="hola@kairo.es"
+              email={SUPPORT_EMAIL}
               subject="Privacidad"
               M={M}
             />
@@ -55,7 +70,7 @@ export default function ContactoPage() {
               icon={CreditCard}
               title="Reembolsos y pagos"
               description="Solicitudes de reembolso o problemas con el pago del Pack Curso PAU."
-              email="hola@kairo.es"
+              email={SUPPORT_EMAIL}
               subject="Reembolso"
               M={M}
             />
@@ -63,7 +78,7 @@ export default function ContactoPage() {
               icon={Bug}
               title="Problema técnico"
               description="Si algo no funciona correctamente o encuentras un error."
-              email="hola@kairo.es"
+              email={SUPPORT_EMAIL}
               subject="Problema técnico"
               M={M}
             />
@@ -71,7 +86,7 @@ export default function ContactoPage() {
               icon={FlaskConical}
               title="Beta privada"
               description="Feedback sobre tu experiencia, ideas o preguntas sobre la fase beta."
-              email="hola@kairo.es"
+              email={SUPPORT_EMAIL}
               subject="Beta privada"
               M={M}
             />
@@ -104,6 +119,7 @@ function ContactCard({
   return (
     <a
       href={`mailto:${email}?subject=${encodeURIComponent(subject + ' — Kairo')}`}
+      className="contact-card"
       style={{
         display: 'flex', alignItems: 'flex-start', gap: 20,
         padding: '22px 24px',
@@ -143,11 +159,11 @@ function LegalNav({ B, M }: { B: string; M: string }) {
     <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(17,17,17,.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '0 24px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
       <Link href="/" aria-label="Inicio">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
+        <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 28, width: 'auto', display: 'block' }} />
       </Link>
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const }}>
         {links.map(l => (
-          <Link key={l.key} href={l.href} style={{ fontFamily: M, fontSize: 9, fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', padding: '5px 10px', borderRadius: 6, textDecoration: 'none', color: l.key === 'contacto' ? '#fff' : 'rgba(255,255,255,.35)', background: l.key === 'contacto' ? 'rgba(37,99,235,.25)' : 'transparent', transition: 'all 140ms' }}>
+          <Link key={l.key} href={l.href} className="legal-nav-link" style={{ fontFamily: M, fontSize: 9, fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', padding: '5px 10px', borderRadius: 6, textDecoration: 'none', color: l.key === 'contacto' ? '#fff' : 'rgba(255,255,255,.35)', background: l.key === 'contacto' ? 'rgba(37,99,235,.25)' : 'transparent', transition: 'all 140ms' }}>
             {l.label}
           </Link>
         ))}
@@ -170,7 +186,7 @@ function LegalFooter({ M }: { M: string }) {
       {links.map((l, i) => (
         <span key={l.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {i > 0 && <span style={{ color: 'rgba(255,255,255,.12)', fontFamily: M, fontSize: 10 }}>·</span>}
-          <Link href={l.href} style={{ fontFamily: M, fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', color: l.key === 'contacto' ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.25)', transition: 'color 140ms' }}>
+          <Link href={l.href} className="legal-footer-link" style={{ fontFamily: M, fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', color: l.key === 'contacto' ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.25)', transition: 'color 140ms' }}>
             {l.label}
           </Link>
         </span>

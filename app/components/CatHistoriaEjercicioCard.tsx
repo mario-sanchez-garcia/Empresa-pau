@@ -42,7 +42,7 @@ export function RenderFuente({ fuente, storageKeyPrefix = 'cat-historia:fuente' 
       {fuente.titulo && <h4 className="mb-4 text-base font-black text-slate-900">{fuente.titulo}</h4>}
       {(fuente.tipo === 'imagen' || fuente.tipo === 'imagen_doble' || fuente.tipo === 'documento') && imagenes.length > 0 && (
         <div className={`grid gap-3 ${imagenes.length > 1 ? 'md:grid-cols-2' : ''}`}>
-          {imagenes.map((src, index) => <img key={`${src}-${index}`} src={src} alt={`${fuente.titulo ?? 'Fuente histórica'} ${index + 1}`} className="max-h-[520px] w-full rounded-2xl border border-slate-200 object-contain" />)}
+          {imagenes.map((src, index) => <img key={`${src}-${index}`} src={src} alt={`${fuente.titulo ?? 'Fuente histórica'} ${index + 1}`} loading="lazy" decoding="async" className="max-h-[520px] w-full rounded-2xl border border-slate-200 object-contain" />)}
         </div>
       )}
       {fuente.texto && (
@@ -311,7 +311,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto }: { ejer
               <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} className="hidden" />
               {imagenPreview ? (
                 <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: UI.border }}>
-                  <img src={imagenPreview} alt="Respuesta" className="max-h-[360px] w-full object-contain" />
+                  <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" className="max-h-[360px] w-full object-contain" />
                   <button onClick={eliminarImagen} type="button" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg" style={{ backgroundColor: UI.color }}>
                     <X size={16} />
                   </button>

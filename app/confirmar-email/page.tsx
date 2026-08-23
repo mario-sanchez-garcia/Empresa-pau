@@ -166,6 +166,7 @@ function ConfirmarEmailContent() {
         <img
           src="/brand/kairo-logo-new.png"
           alt="Kairo"
+          loading="eager"
           style={{ height: 26, width: 'auto', mixBlendMode: 'lighten', display: 'block', opacity: 0.85 }}
         />
       </header>

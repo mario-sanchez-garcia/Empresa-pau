@@ -50,6 +50,8 @@ export default function KairoBrand({
       <img
         src="/brand/kairo-logo-new.png"
         alt=""
+        loading="lazy"
+        decoding="async"
         width={s.mark}
         height={s.mark}
         style={{ width: '90%', height: '90%', objectFit: 'contain', display: 'block' }}
@@ -88,6 +90,7 @@ export default function KairoBrand({
         <img
           src={stacked ? '/brand/kairo-lockup.png' : '/brand/kairo-logo-new.png'}
           alt="Kairo"
+          loading="eager"
           width={stacked ? s.stackW : s.logoW}
           height={stacked ? s.stackH : s.logoH}
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}

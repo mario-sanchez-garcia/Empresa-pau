@@ -6,6 +6,7 @@ import { CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import KairoLoader from '@/app/components/ui/KairoLoader'
 import CheckoutShell from '@/components/shared/CheckoutShell'
+import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -97,7 +98,7 @@ export default function CheckoutSuccessClient() {
           <div style={styles.infoBox}>
             <p style={{ ...styles.infoText, fontFamily: M }}>
               Si sigue sin aparecer en unos minutos, escríbenos a{' '}
-              <a href="mailto:hola@kairo.es" style={styles.link}>hola@kairo.es</a>{' '}
+              <a href={`mailto:${SUPPORT_EMAIL}`} style={styles.link}>{SUPPORT_EMAIL}</a>{' '}
               con el número de pedido que Stripe te ha enviado por email.
             </p>
           </div>
@@ -134,7 +135,7 @@ function Logo() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
+      <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 26, width: 'auto', display: 'block' }} />
     </div>
   )
 }

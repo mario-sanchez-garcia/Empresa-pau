@@ -532,7 +532,7 @@ export default function SettingsPage() {
 
         {/* V4 CREDENTIAL HEADER */}
         <div className="settings-header" style={{ position: 'relative', height: 240, flexShrink: 0, overflow: 'hidden', background: '#0f172a' }}>
-          <img src={NOTEBOOK_IMG} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.2) saturate(.4)' }} />
+          <img src={NOTEBOOK_IMG} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(.2) saturate(.4)' }} />
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0, padding: '20px 0' }}>
             <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#374151', marginBottom: 10 }}>Kairo · Mi perfil</div>
             {/* Avatar */}
@@ -541,7 +541,7 @@ export default function SettingsPage() {
               style={{ width: 80, height: 80, borderRadius: '50%', background: preferences.photo ? 'transparent' : 'rgba(37,99,235,.25)', border: '3px solid rgba(37,99,235,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 900, color: 'white', cursor: 'pointer', position: 'relative', marginBottom: 12, overflow: 'hidden', flexShrink: 0 }}
             >
               {preferences.photo
-                ? <img src={preferences.photo} alt="Foto" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={preferences.photo} alt="Foto" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : initial}
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 150ms', borderRadius: '50%' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '1')}

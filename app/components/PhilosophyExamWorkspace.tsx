@@ -411,7 +411,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
               <div>
                 <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={chooseImage} className="hidden" />
                 {imagePreview
-                  ? <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: UI.border }}><img src={imagePreview} alt="Respuesta manuscrita" className="max-h-80 w-full object-contain" /><button type="button" onClick={clearImage} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-white"><X size={16} /></button></div>
+                  ? <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: UI.border }}><img src={imagePreview} alt="Respuesta manuscrita" loading="lazy" decoding="async" className="max-h-80 w-full object-contain" /><button type="button" onClick={clearImage} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-white"><X size={16} /></button></div>
                   : <button type="button" onClick={() => fileRef.current?.click()} className="flex h-48 w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed text-sm font-black" style={{ borderColor: UI.accent, background: UI.light, color: UI.color }}><UploadCloud size={32} /><span className="mt-2">Sube una foto de tu respuesta</span></button>
                 }
               </div>

@@ -817,6 +817,8 @@ export default function SimulacroActivoPage() {
                       <img
                         src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`}
                         alt="Respuesta"
+                        loading="lazy"
+                        decoding="async"
                         className="max-h-96 w-full object-contain"
                         style={{ background: '#f8fbff' }}
                       />

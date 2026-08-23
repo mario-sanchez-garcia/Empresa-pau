@@ -61,8 +61,27 @@ function WaitlistContent() {
   )
   const waUrl = `https://wa.me/?text=${waText}`
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    if (!EMAIL_RE.test(email.trim())) {
+      setErrorMsg('Ese email no parece válido. Revísalo y vuelve a intentarlo.')
+      setFormState('error')
+      return
+    }
+    if (!comunidad) {
+      setErrorMsg('Elige tu comunidad autónoma.')
+      setFormState('error')
+      return
+    }
+    if (!curso) {
+      setErrorMsg('Elige tu curso.')
+      setFormState('error')
+      return
+    }
+
     setFormState('submitting')
     setErrorMsg('')
 
@@ -251,7 +270,7 @@ function WaitlistContent() {
         <header className="wl-header">
           <Link href="/landing" aria-label="Inicio">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
+            <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 26, width: 'auto', display: 'block' }} />
           </Link>
           <Link href="/login" className="wl-enter">Entrar</Link>
         </header>

@@ -183,7 +183,7 @@ function Logo() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 26, width: 'auto', display: 'block' }} />
+      <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 26, width: 'auto', display: 'block' }} />
     </div>
   )
 }

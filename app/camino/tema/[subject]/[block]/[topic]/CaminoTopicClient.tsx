@@ -1212,7 +1212,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} style={{ display: 'none' }} />
                     {image ? (
                       <div style={{ display: 'grid', gap: 10 }}>
-                        <img src={image.preview} alt="Respuesta subida" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
+                        <img src={image.preview} alt="Respuesta subida" loading="lazy" decoding="async" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
                         <button type="button" onClick={clearImage} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '6px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
                           <X size={13} /> Quitar foto
                         </button>

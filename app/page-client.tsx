@@ -5401,9 +5401,22 @@ function cambiarTipo(t: Tipo) {
 
         {seccion === 'examenes' && (
           <>
+            {/* Breadcrumb: Exámenes › Asignatura › Bloque — puramente informativo/navegable,
+                no toca el estado de asignatura/bloque (ver navegarAAsignatura para ese flujo). */}
+            <nav aria-label="Migas de pan" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px 0', fontSize: 12, color: '#64748b', flexWrap: 'wrap' }}>
+              <a href="/examenes" style={{ color: '#64748b', textDecoration: 'none', fontWeight: 600 }}>Exámenes</a>
+              <span style={{ color: '#cbd5e1' }}>›</span>
+              <span style={{ color: '#334155', fontWeight: 700 }}>{cfg.label}</span>
+              {bloqueActivoLabel && (
+                <>
+                  <span style={{ color: '#cbd5e1' }}>›</span>
+                  <span style={{ color: '#334155', fontWeight: 700 }}>{bloqueActivoLabel}</span>
+                </>
+              )}
+            </nav>
             {/* V4 Mesa de Trabajo — photo hero */}
             <div className="exams-subject-hero" style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
-              <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
+              <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Exámenes PAU · {examSystemLabel(ccaa)}</div>
@@ -5429,7 +5442,7 @@ function cambiarTipo(t: Tipo) {
                 })()}
               </div>
             </div>
-            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
+            <main className="exams-screen pau-reveal" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
             <SectionIntroCard
               hintKey="hint_examenes"
@@ -5859,6 +5872,8 @@ function cambiarTipo(t: Tipo) {
                       <img
                         src={(preguntaActiva as any).imagen_url} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                         alt="Fuente histórica"
+                        loading="lazy"
+                        decoding="async"
                         className="max-w-full rounded-2xl border border-slate-200 shadow-sm"
                       />
                     </div>
@@ -5866,13 +5881,13 @@ function cambiarTipo(t: Tipo) {
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagenFuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Fuente histórica oficial</div>
-                      <img src={(preguntaActiva as { imagenFuente?: string }).imagenFuente} alt="Fuente histórica oficial" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
+                      <img src={(preguntaActiva as { imagenFuente?: string }).imagenFuente} alt="Fuente histórica oficial" loading="lazy" decoding="async" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
                     </div>
                   )}
                   {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ margin: '2px auto 20px', display: 'grid', justifyItems: 'center', gap: '12px' }}>
                       {(preguntaActiva as any).imagenes.map((src: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} style={{ width: 'min(100%, 640px)', maxHeight: '260px', objectFit: 'contain', borderRadius: '12px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.055)' }} />
+                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} loading="lazy" decoding="async" style={{ width: 'min(100%, 640px)', maxHeight: '260px', objectFit: 'contain', borderRadius: '12px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.055)' }} />
                       ))}
                     </div>
                   )}
@@ -5951,7 +5966,7 @@ function cambiarTipo(t: Tipo) {
                     <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} style={{ display: 'none' }} />
                     {imagenPreview ? (
                       <div style={{ position: 'relative' }}>
-                        <img src={imagenPreview} alt="Respuesta" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
+                        <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
                         <button onClick={() => { setImagen(null); setImagenPreview(null); setImagenError('') }} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
                       </div>
                     ) : (
@@ -6164,10 +6179,10 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'chat' && (
-          <main className="tutor-screen">
+          <main className="tutor-screen pau-reveal">
             <div className="tutor-shell">
               <div className="tutor-hero">
-                <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" />
+                <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" loading="eager" />
                 <div className="tutor-hero-overlay">
                   <div>
                     <div className="tutor-hero-eyebrow">Tutor IA</div>
@@ -6282,7 +6297,7 @@ function cambiarTipo(t: Tipo) {
                                 <div>
                                   <div className="tutor-msg-user-bubble">
                                     {msg.imagenPreview && (
-                                      <img src={msg.imagenPreview} alt="Foto enviada" style={{ display: 'block', maxWidth: 200, maxHeight: 200, borderRadius: 10, marginBottom: msg.texto ? 8 : 0, objectFit: 'contain' }} />
+                                      <img src={msg.imagenPreview} alt="Foto enviada" loading="lazy" decoding="async" style={{ display: 'block', maxWidth: 200, maxHeight: 200, borderRadius: 10, marginBottom: msg.texto ? 8 : 0, objectFit: 'contain' }} />
                                     )}
                                     {msg.texto}
                                   </div>
@@ -6399,12 +6414,13 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'historial' && (
-          <main className="history-screen">
+          <main className="history-screen pau-reveal">
             <div className="history-shell">
               <div className="history-hero">
                 <img
                   src={historialSubjectFilter === 'todas' ? STUDY_DESK_IMG : (SUBJECT_HERO_IMGS[historialSubjectFilter] ?? STUDY_DESK_IMG)}
                   alt=""
+                  loading="eager"
                 />
                 <div className="history-hero-overlay">
                   <div>
@@ -6750,7 +6766,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'planning' && (
-          <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+          <main className="pau-reveal" style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>

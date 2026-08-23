@@ -1831,7 +1831,7 @@ export default function CaminoCalendarClient() {
   if (caminoReadyStatus === 'no_queue') return (
     <Shell>
       <main style={{ position: 'relative', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <img src={HF_LIBRARY} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
+        <img src={HF_LIBRARY} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(5,12,26,0.92) 0%, rgba(5,12,26,0.68) 50%, rgba(5,12,26,0.88) 100%)' }} />
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 20 }}>Camino PAU · Kairo</p>
@@ -1854,7 +1854,7 @@ export default function CaminoCalendarClient() {
   if (caminoReadyStatus === 'no_future') return (
     <Shell>
       <main style={{ position: 'relative', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <img src={HF_LIBRARY} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
+        <img src={HF_LIBRARY} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(5,12,26,0.92) 0%, rgba(5,12,26,0.68) 50%, rgba(5,12,26,0.88) 100%)' }} />
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 20 }}>Camino PAU · Kairo</p>
@@ -1956,7 +1956,7 @@ export default function CaminoCalendarClient() {
 
           {/* ── HERO ── */}
           <div className="camino-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
-            <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
+            <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
             <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
               <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>

@@ -10,7 +10,7 @@ export default function CheckoutShell({ children, maxWidth = 440 }: { children: 
   return (
     <div style={styles.page}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/checkout-bg.webp" alt="" aria-hidden style={styles.bg} />
+      <img src="/brand/checkout-bg.webp" alt="" aria-hidden loading="eager" style={styles.bg} />
       <div style={styles.vignette} />
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth }}>
         {children}

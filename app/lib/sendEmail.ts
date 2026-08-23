@@ -25,11 +25,13 @@ export async function sendEmail({
   subject,
   html,
   userId,
+  replyTo,
 }: {
   to: string
   subject: string
   html: string
   userId?: string
+  replyTo?: string
 }) {
   const unsubscribeFooter = userId
     ? `<p style="font-size:12px;color:#999;margin-top:24px;text-align:center">¿No quieres recibir estos recordatorios? <a href="${APP_URL}/api/email/unsubscribe?token=${generateUnsubscribeToken(userId)}" style="color:#999">Darse de baja</a></p>`
@@ -46,6 +48,7 @@ export async function sendEmail({
     to,
     subject,
     html: finalHtml,
+    ...(replyTo ? { replyTo } : {}),
   })
 
   if (response.error) {

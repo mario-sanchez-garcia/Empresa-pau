@@ -1,8 +1,15 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Check, X } from 'lucide-react'
 import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
 import ParentLinkSection from '@/app/pricing/ParentLinkSection'
+
+export const metadata: Metadata = {
+  title: 'Precios',
+  description: 'Planes de Kairo para preparar la PAU: gratis, Premium y el Curso PAU completo. Corrección por IA, exámenes reales y plan de estudio diario.',
+  alternates: { canonical: '/pricing' },
+}
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -113,6 +120,7 @@ export default function PricingPage() {
           transition: opacity 140ms, transform 140ms cubic-bezier(0.23,1,0.32,1);
         }
         .pr-btn-dark:hover { opacity: .88; transform: translateY(-1px); }
+        .pr-footer-link:hover { color: #fff !important; }
 
         /* ── Features list ── */
         .pr-feature { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
@@ -149,7 +157,7 @@ export default function PricingPage() {
       }}>
         <Link href="/" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img id="pr-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 32, width: 'auto', display: 'block' }} />
+          <img id="pr-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 32, width: 'auto', display: 'block' }} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Link href="/" className="pr-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
@@ -307,18 +315,20 @@ export default function PricingPage() {
       <footer style={{ background: '#111', padding: '32px 72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, borderTop: '1px solid rgba(255,255,255,.07)' }}>
         <Link href="/" aria-label="Inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/kairo-logo-white.png" alt="Kairo" style={{ height: 28, width: 'auto', display: 'block' }} />
+          <img src="/brand/kairo-logo-white.png" alt="Kairo" loading="lazy" decoding="async" style={{ height: 28, width: 'auto', display: 'block' }} />
         </Link>
         <ul style={{ display: 'flex', gap: 20, listStyle: 'none', flexWrap: 'wrap', padding: 0, margin: 0 }}>
           {[
             { label: 'Exámenes',   href: '/examenes'         },
             { label: 'Camino PAU', href: '/camino'           },
             { label: 'Simulacros', href: '/simulacros'       },
+            { label: 'Ayuda',      href: '/ayuda'            },
+            { label: 'Contacto',   href: '/contacto'         },
             { label: 'Privacidad', href: '/legal/privacidad' },
             { label: 'Términos',   href: '/legal/terminos'   },
           ].map(({ label, href }) => (
             <li key={label}>
-              <Link href={href} style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase', transition: 'color 140ms' }}>
+              <Link href={href} className="pr-footer-link" style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', textDecoration: 'none', letterSpacing: '.06em', textTransform: 'uppercase', transition: 'color 140ms' }}>
                 {label}
               </Link>
             </li>

@@ -67,6 +67,33 @@ export const metadata: Metadata = {
   },
 };
 
+// schema.org — Organization + SoftwareApplication, apropiado para un producto
+// de software educativo online (no LocalBusiness: Kairo no tiene local físico).
+const STRUCTURED_DATA = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Kairo',
+    url: APP_URL,
+    logo: `${APP_URL}/brand/kairo-logo.png`,
+    description: DESCRIPTION,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Kairo',
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Web',
+    url: APP_URL,
+    description: DESCRIPTION,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'EUR',
+    },
+  },
+]
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -78,6 +105,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+        />
         <NextTopLoader color="#2563eb" height={3} showSpinner={false} shadow={false} />
         <CookieConsentProvider>
           <HintsProvider>

@@ -211,7 +211,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
             <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} className="hidden" />
             {imagenPreview ? (
               <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: CAT_UI.border }}>
-                <img src={imagenPreview} alt="Respuesta" className="max-h-[300px] w-full object-contain" />
+                <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" className="max-h-[300px] w-full object-contain" />
                 <button onClick={eliminarImagen} type="button" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg" style={{ backgroundColor: CAT_UI.color }}><X size={16} /></button>
               </div>
             ) : (

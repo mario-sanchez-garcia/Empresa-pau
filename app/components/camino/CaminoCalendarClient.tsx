@@ -2061,7 +2061,18 @@ export default function CaminoCalendarClient() {
           })()}
 
           {upcomingPartial && (() => {
-            const todayPartialMission = today.missions.find(m => m.missionType === 'partial_practice')
+            // Debe ser la misión de HOY del MISMO examen que el banner
+            // muestra (upcomingPartial), no cualquier partial_practice de
+            // hoy: con dos parciales activos (p.ej. Mates y Historia) cuyas
+            // prácticas caen el mismo día, filtrar solo por missionType
+            // podía coger la de Mates aunque el banner mostrara Historia —
+            // ese missionId viajaba a /api/practica-parcial, que lo usa
+            // para reutilizar/devolver una sesión existente sin mirar
+            // subject/block, así que "Empezar" en el parcial de Historia
+            // podía abrir (o reanudar) la sesión de Mates.
+            const todayPartialMission = today.missions.find(
+              m => m.missionType === 'partial_practice' && m.metadata?.partial_exam_id === upcomingPartial.id
+            )
             return (
               <div style={{ padding: '8px 20px', borderBottom: '1px solid #f1f5f9' }}>
                 <PartialExamBanner

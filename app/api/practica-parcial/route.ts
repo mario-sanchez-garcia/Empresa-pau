@@ -57,11 +57,21 @@ export async function POST(request: NextRequest) {
   // comprueba antes que nada, incluso antes de los límites de plan: no es
   // una sesión nueva, así que no debe consumir cupo ni bloquearse por él.
   if (missionId) {
+    // `.eq('asignatura', subject)` es una red de seguridad, no solo una
+    // optimización: si missionId llegara apuntando a la misión de OTRO
+    // examen/asignatura (p. ej. un bug de cliente mezclando la misión de
+    // "hoy" de un parcial de Mates con el banner de un parcial de
+    // Historia), sin este filtro se devolvía esa sesión ajena tal cual —
+    // "pulso Empezar en Historia y carga Mates". Con el filtro, una
+    // coincidencia de mission_id en la asignatura equivocada simplemente no
+    // cuenta como reutilizable y se sigue con el flujo normal de abajo, que
+    // sí crea/reutiliza correctamente en la asignatura pedida.
     const { data: existing } = await db
       .from('historial_simulacros')
       .select('id')
       .eq('user_id', user.id)
       .eq('estado', 'completado')
+      .eq('asignatura', subject)
       .eq('resultado_json->>mission_id', missionId)
       .limit(1)
       .maybeSingle()
@@ -83,6 +93,7 @@ export async function POST(request: NextRequest) {
       .select('id')
       .eq('user_id', user.id)
       .eq('estado', 'en_progreso')
+      .eq('asignatura', subject)
       .eq('resultado_json->>mission_id', missionId)
       .order('created_at', { ascending: false })
       .limit(1)

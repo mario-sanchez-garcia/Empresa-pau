@@ -54,6 +54,7 @@ const qaCorrectionsScript = read('scripts/qa-corrections-p0.mjs')
 const qaCorrectionsChecklist = read('docs/qa/p0-corrections-checklist.md')
 const stripeQaChecklist = read('docs/qa/stripe-test-mode-checklist.md')
 const stripeSmoke = read('scripts/smoke-stripe-p0.mjs')
+const practicaParcialRoute = read('app/api/practica-parcial/route.ts')
 
 assert(
   'streaming correction uses safe progressive stream before final renderer',
@@ -445,6 +446,24 @@ assert(
     caminoCalendar.includes('Bloque completado: pasamos a ejercicio PAU mixto') &&
     caminoCalendar.includes('Tema completado: evitamos repetir teoría básica') &&
     caminoCalendar.includes('Refuerza ${curriculumItem?.topic')
+)
+
+// Regression for: "Empezar" on a Historia parcial banner opened a Mates
+// simulacro. Root cause was PartialExamBanner's missionId being taken from
+// the first partial_practice mission of the day regardless of which exam
+// it belonged to — with two active parciales prepping the same day, the
+// wrong exam's mission id rode along and /api/practica-parcial matched an
+// existing session by that id alone, ignoring subject/block entirely.
+assert(
+  'Camino PAU "Empezar" on an exam banner only reuses a session for the same exam and subject',
+  caminoCalendar.includes("m.missionType === 'partial_practice' && m.metadata?.partial_exam_id === upcomingPartial.id") &&
+    // 3 occurrences expected: the pre-existing "same block+subject in
+    // progress" reuse check, plus the completed-by-missionId and
+    // in-progress-by-missionId lookups this fix added the filter to (see
+    // route comment) — without it, a missionId match alone could return a
+    // session from a different exam's subject.
+    (practicaParcialRoute.match(/\.eq\('asignatura', subject\)/g) ?? []).length >= 3 &&
+    practicaParcialRoute.includes("red de seguridad")
 )
 
 assert(

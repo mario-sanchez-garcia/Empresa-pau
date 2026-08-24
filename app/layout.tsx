@@ -9,6 +9,7 @@ import "katex/dist/katex.min.css";
 import NextTopLoader from 'nextjs-toploader'
 import { HintsProvider } from '@/app/lib/onboarding/HintsContext';
 import { CookieConsentProvider } from '@/app/lib/analytics/CookieConsentContext';
+import BackToTop from '@/app/components/ui/BackToTop';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -115,6 +116,7 @@ export default function RootLayout({
             {children}
           </HintsProvider>
         </CookieConsentProvider>
+        <BackToTop />
       </body>
     </html>
   );

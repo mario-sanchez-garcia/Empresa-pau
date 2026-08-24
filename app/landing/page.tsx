@@ -9,7 +9,6 @@ import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_P
 import LandingAuthProvider from './LandingAuthState'
 import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
-import BackToTop from '@/app/components/ui/BackToTop'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -717,7 +716,6 @@ export default function LandingPage() {
 })();
       `}} />
 
-      <BackToTop />
       <StickyMobileCta />
 
     </div>

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 
-// Fixed "back to top" button — appears once the user has scrolled past one
-// viewport height, so it never crowds short pages.
+// Fixed "back to top" button — appears once the user has scrolled past a
+// short distance, so it's reachable even on pages that aren't extremely long.
 export default function BackToTop() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.8)
+    const onScroll = () => setVisible(window.scrollY > 350)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)

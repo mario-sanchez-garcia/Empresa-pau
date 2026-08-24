@@ -111,7 +111,7 @@ function LimiteForm({ onInsert, onCancel, accentColor, borderColor }: FormProps)
   const [expr, setExpr] = useState("")
   const latex = `\\lim_{x \\to ${target || "a"}} ${expr || "f(x)"}`
   return (
-    <FormShell title="Límite" preview={`$${latex}$`} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(target || expr)} accentColor={accentColor} borderColor={borderColor}>
+    <FormShell title="Límite" preview={latex} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(target || expr)} accentColor={accentColor} borderColor={borderColor}>
       <div className="flex flex-col items-start leading-tight">
         <span className="text-sm italic text-slate-700">lim</span>
         <span className="flex items-center gap-1 text-[11px] text-slate-500">
@@ -128,7 +128,7 @@ function FraccionForm({ onInsert, onCancel, accentColor, borderColor }: FormProp
   const [den, setDen] = useState("")
   const latex = `\\frac{${num || "\\,"}}{${den || "\\,"}}`
   return (
-    <FormShell title="Fracción" preview={`$${latex}$`} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(num || den)} accentColor={accentColor} borderColor={borderColor}>
+    <FormShell title="Fracción" preview={latex} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(num || den)} accentColor={accentColor} borderColor={borderColor}>
       <div className="flex flex-col items-stretch gap-1">
         <FillBox value={num} onChange={setNum} placeholder="numerador" accentColor={accentColor} />
         <div style={{ borderTop: "2px solid #0f172a" }} />
@@ -143,7 +143,7 @@ function PotenciaForm({ onInsert, onCancel, accentColor, borderColor }: FormProp
   const [exp, setExp] = useState("")
   const latex = `${base || "x"}^{${exp || "2"}}`
   return (
-    <FormShell title="Potencia" preview={`$${latex}$`} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(base || exp)} accentColor={accentColor} borderColor={borderColor}>
+    <FormShell title="Potencia" preview={latex} onInsert={() => onInsert(`$${latex}$`)} onCancel={onCancel} canInsert={Boolean(base || exp)} accentColor={accentColor} borderColor={borderColor}>
       <div className="flex items-start gap-0.5">
         <FillBox value={base} onChange={setBase} placeholder="base" accentColor={accentColor} />
         <FillBox value={exp} onChange={setExp} placeholder="exp" small accentColor={accentColor} />
@@ -160,7 +160,7 @@ function RaizForm({ onInsert, onCancel, accentColor, borderColor }: FormProps) {
     <FormShell
       title="Raíz"
       hint="deja el índice vacío para raíz cuadrada"
-      preview={`$${latex}$`}
+      preview={latex}
       onInsert={() => onInsert(`$${latex}$`)}
       onCancel={onCancel}
       canInsert={Boolean(radicand || index)}
@@ -190,7 +190,7 @@ function IntegralForm({ onInsert, onCancel, accentColor, borderColor }: FormProp
     <FormShell
       title="Integral"
       hint="deja los límites vacíos para integral indefinida"
-      preview={`$${latex}$`}
+      preview={latex}
       onInsert={() => onInsert(`$${latex}$`)}
       onCancel={onCancel}
       canInsert={Boolean(expr || lower || upper)}
@@ -220,7 +220,7 @@ function SistemaForm({ onInsert, onCancel, accentColor, borderColor }: FormProps
   return (
     <FormShell
       title="Sistema de ecuaciones"
-      preview={filled.length ? `$$${latex}$$` : ""}
+      preview={filled.length ? latex : ""}
       onInsert={() => onInsert(`$$${latex}$$`)}
       onCancel={onCancel}
       canInsert={filled.length > 0}

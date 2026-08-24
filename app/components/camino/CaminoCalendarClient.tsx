@@ -17,7 +17,8 @@ import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type 
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { MAX_LIGAS_PER_USER } from '@/app/lib/camino/leagueRounds'
-import { deletePartialExamMissions, injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
+import { deletePartialExamMissions, injectAllPartialExamMissions, weekdaysBefore } from '@/app/lib/camino/injectPartialExamMissions'
+import { computeExamTimeNeed, getBlockPerformance } from '@/app/lib/camino/examTimeNeed'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
@@ -903,6 +904,8 @@ export default function CaminoCalendarClient() {
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', name: '', priority: 'normal' as ExamPriority, confidence: 'medio' as ExamConfidence, content: '' })
   const [savingExam, setSavingExam] = useState(false)
+  const [recalcExamId, setRecalcExamId] = useState<string | null>(null)
+  const [recalcResult, setRecalcResult] = useState<{ examId: string; message: string } | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
@@ -1753,6 +1756,54 @@ export default function CaminoCalendarClient() {
       deletePartialExamMissions(userId, supabase, id).then(() => injectAllPartialExamMissions(userId, supabase, remaining))
     }, () => undefined)
   }
+  // Recálculo explícito del Camino para UN examen: a diferencia del sizing
+  // automático de saveExam() (que solo pide a la IA cuántas sesiones caben
+  // dentro del tope normal para no invadir el resto de asignaturas), este
+  // calcula el tiempo REALMENTE necesario según días restantes, nivel
+  // autoevaluado, dificultad implícita en la prioridad e historial de notas
+  // en ese bloque — y si hace falta más de lo que el ritmo diario de
+  // onboarding daría, apila más de una sesión por día en vez de quedarse
+  // corto. `force` en injectAllPartialExamMissions hace que se reescriba
+  // aunque nada del examen haya cambiado (el alumno lo pidió explícitamente).
+  async function recalculateExamCamino(exam: StudentExam) {
+    if (recalcExamId) return
+    setRecalcExamId(exam.id)
+    setRecalcResult(null)
+    try {
+      const { data } = await supabase.auth.getSession()
+      const userId = data.session?.user.id
+      if (!userId) { setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.'); return }
+
+      const daysUntilExam = weekdaysBefore(exam.date, todayMadrid()).length
+      if (daysUntilExam <= 0) { setToast('Este examen ya no puede recalcularse.'); return }
+
+      const performance = await getBlockPerformance(supabase, userId, exam.subject, exam.block ?? '')
+      const need = computeExamTimeNeed({
+        daysUntilExam,
+        priority: exam.priority,
+        confidence: exam.confidence,
+        historicalAvgScore: performance?.avgScore ?? null,
+        historicalAttempts: performance?.attempts,
+        dailyMinutesOnboarding: onboarding?.dailyMinutes ?? null,
+      })
+
+      const nextExams = exams.map(e => e.id === exam.id
+        ? { ...e, sessionOverride: need.recommendedSessions, maxSessionsPerDay: need.maxSessionsPerDay }
+        : e)
+      await injectAllPartialExamMissions(userId, supabase, nextExams, { forceExamId: exam.id })
+
+      // Refresca el calendario visible con las misiones recién escritas —
+      // mismo patrón que addSubject() usa tras inyectar contenido nuevo.
+      const calDays = await fetchCaminoCalendar(userId)
+      if (calDays) { setCalendar(calDays); saveCalendarWeeksToCache(calDays) }
+
+      setRecalcResult({ examId: exam.id, message: need.summary })
+    } catch {
+      setToast('No se pudo recalcular tu Camino. Inténtalo de nuevo.')
+    } finally {
+      setRecalcExamId(null)
+    }
+  }
 
   async function addSubject(subjectLabel: string) {
     const SUBJECT_TO_SLUG: Record<string, string> = {
@@ -2264,11 +2315,27 @@ export default function CaminoCalendarClient() {
               <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155' }}>+ Añadir</button>
             </div>
             {activeExams.length ? activeExams.map(exam => (
-              <div key={exam.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
-                <button onClick={() => openEditExam(exam)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Pencil size={13} /></button>
-                <button onClick={() => deleteExam(exam.id)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
+              <div key={exam.id} style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
+                  <button
+                    onClick={() => recalculateExamCamino(exam)}
+                    disabled={recalcExamId === exam.id}
+                    title="Recalcular mi Camino para este examen"
+                    style={{ fontSize: 11, color: recalcExamId === exam.id ? '#93c5fd' : '#cbd5e1', background: 'none', border: 'none', cursor: recalcExamId === exam.id ? 'default' : 'pointer', padding: 3 }}
+                  >
+                    <TimerReset size={13} className={recalcExamId === exam.id ? 'animate-spin' : undefined} />
+                  </button>
+                  <button onClick={() => openEditExam(exam)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Pencil size={13} /></button>
+                  <button onClick={() => deleteExam(exam.id)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
+                </div>
+                {recalcResult?.examId === exam.id && (
+                  <div style={{ marginTop: 8, marginLeft: 66, display: 'flex', alignItems: 'start', gap: 8, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '8px 10px' }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', flex: 1, lineHeight: 1.4 }}>{recalcResult.message}</p>
+                    <button onClick={() => setRecalcResult(null)} style={{ fontSize: 10, color: '#93c5fd', background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 }}>✕</button>
+                  </div>
+                )}
               </div>
             )) : null}
             {pastExams.length > 0 && (

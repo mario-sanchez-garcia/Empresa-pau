@@ -22,13 +22,15 @@ export type PartialExamInput = {
   priority?: ExamPriority
   confidence?: ExamConfidence
   content?: string
-  /** Overrides the computed session count (e.g. from an AI plan-intensity call). */
+  /** Overrides the computed session count (e.g. from an AI plan-intensity call, or from the "Recalcular mi Camino" flow). */
   sessionOverride?: number
+  /** How many of this exam's sessions may land on the same day (>1 = stacking, used when sessionOverride needs more depth than one slot/day gives — see examTimeNeed.ts). Defaults to 1. */
+  maxSessionsPerDay?: number
   /** Free-text custom instructions from the student, passed through to mission metadata. */
   customInstructions?: string
 }
 
-function madridToday(): string {
+export function madridToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
 }
 
@@ -43,7 +45,7 @@ function isWeekday(dateStr: string): boolean {
   return dow !== 0 && dow !== 6
 }
 
-function weekdaysBefore(examDate: string, fromDate: string): string[] {
+export function weekdaysBefore(examDate: string, fromDate: string): string[] {
   const days: string[] = []
   let cur = fromDate
   while (cur < examDate) {
@@ -76,13 +78,42 @@ function baseSessionCount(daysAvailable: number): number {
 // Priority/confidence modulate how many prep sessions an exam earns, but the
 // count is always capped well below the available days so other active
 // subjects keep their rotation slots instead of being crowded out entirely.
-function sessionCountFor(daysAvailable: number, priority?: ExamPriority, confidence?: ExamConfidence, sessionOverride?: number): number {
+// maxSessionsPerDay > 1 (set by the explicit "Recalcular mi Camino" flow,
+// see examTimeNeed.ts) raises that cap proportionally, since a stacked day
+// can legitimately carry more than one prep session.
+function sessionCountFor(daysAvailable: number, priority?: ExamPriority, confidence?: ExamConfidence, sessionOverride?: number, maxSessionsPerDay = 1): number {
   if (daysAvailable <= 0) return 0
   const weight = priorityWeight(priority)
   const priorityBonus = weight >= 4 ? 2 : weight === 3 ? 1 : weight === 1 ? -1 : 0
   const computed = baseSessionCount(daysAvailable) + priorityBonus + confidenceBonus(confidence)
   const requested = sessionOverride && sessionOverride > 0 ? sessionOverride : computed
-  return Math.max(1, Math.min(requested, daysAvailable, 6))
+  const absoluteCap = maxSessionsPerDay > 1 ? 12 : 6
+  return Math.max(1, Math.min(requested, daysAvailable * Math.max(1, maxSessionsPerDay), absoluteCap))
+}
+
+// Distributes `count` sessions over `availableSlotsAscending` (chronological
+// dates), packing sessions onto the days closest to the exam first — up to
+// `maxPerDay` each — before spilling onto earlier days. This means a tight
+// timeline concentrates the extra depth where it matters (right before the
+// exam) instead of spreading thin across every day. When count exceeds
+// availableSlotsAscending.length * maxPerDay, the earliest (lowest-priority,
+// per missionSequence's ordering) sessions are the ones left unassigned
+// (null) — mirrors the previous slice(-usableCount) behaviour for the
+// maxPerDay=1 case exactly, so normal (non-recalculated) exams are
+// unaffected.
+function assignDatesForCount(count: number, availableSlotsAscending: string[], maxPerDay: number): (string | null)[] {
+  const result: (string | null)[] = new Array(Math.max(0, count)).fill(null)
+  const n = availableSlotsAscending.length
+  if (count <= 0 || n === 0) return result
+  const load = new Array(n).fill(0)
+  let dayIdx = n - 1
+  for (let i = count - 1; i >= 0; i--) {
+    while (dayIdx >= 0 && load[dayIdx] >= maxPerDay) dayIdx--
+    if (dayIdx < 0) break
+    result[i] = availableSlotsAscending[dayIdx]
+    load[dayIdx]++
+  }
+  return result
 }
 
 function missionSequence(count: number): PartialMissionType[] {
@@ -176,7 +207,7 @@ export async function injectPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
   partialExam: PartialExamInput,
-  options: { reservedDates?: Set<string> } = {},
+  options: { reservedDates?: Set<string>; force?: boolean } = {},
 ): Promise<{ claimedDates: string[] }> {
   const today = madridToday()
   if (partialExam.date <= today) return { claimedDates: [] }
@@ -199,7 +230,12 @@ export async function injectPartialExamMissions(
     .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
     .order('scheduled_date', { ascending: true })
 
-  if (existingRows && existingRows.length > 0) {
+  // `force` (set by the explicit "Recalcular mi Camino para este examen"
+  // action) skips this stability check on purpose: the student asked for a
+  // fresh calculation right now, even if nothing in the exam's own fields
+  // changed — e.g. new grades came in, or more days have passed and the
+  // margin needs revisiting.
+  if (!options.force && existingRows && existingRows.length > 0) {
     const existingSignature = signatureFromMetadata(existingRows[0].metadata)
     if (existingSignature && signaturesEqual(examSignature(partialExam), existingSignature)) {
       return {
@@ -229,7 +265,8 @@ export async function injectPartialExamMissions(
   const reserved = options.reservedDates
   const availableSlots = reserved ? allSlots.filter(d => !reserved.has(d)) : allSlots
 
-  const count = sessionCountFor(daysUntilExam, partialExam.priority, partialExam.confidence, partialExam.sessionOverride)
+  const maxSessionsPerDay = Math.max(1, Math.min(partialExam.maxSessionsPerDay ?? 1, 3))
+  const count = sessionCountFor(daysUntilExam, partialExam.priority, partialExam.confidence, partialExam.sessionOverride, maxSessionsPerDay)
   const sequence = missionSequence(count)
   if (sequence.length === 0 || availableSlots.length === 0) return { claimedDates: [] }
 
@@ -240,19 +277,18 @@ export async function injectPartialExamMissions(
   const topic = partialExam.topic || undefined
   const now = new Date().toISOString()
 
-  // Use the last N available slots (closest to the exam). When a nearer
-  // exam has already reserved part of this window, availableSlots can be
-  // shorter than the full sequence — slice(-sequence.length) on a shorter
-  // array returns it unchanged from the start, silently pairing sequence[0..]
-  // (the lowest-priority, earliest session types) with the few available
-  // slots while dropping block_mock/final_mini_mock (the highest-priority
-  // ones, meant to land right before the exam) entirely. Trim the sequence
-  // from the front instead, so it's always the earliest/lowest-priority
-  // session types that get dropped when slots are scarce, never the ones
-  // closest to the exam.
-  const usableCount = Math.min(sequence.length, availableSlots.length)
-  const targetSequence = sequence.slice(-usableCount)
-  const targetSlots = availableSlots.slice(-usableCount)
+  // Assign each session in `sequence` a date, packed onto the days closest
+  // to the exam first (up to maxSessionsPerDay each). With maxSessionsPerDay
+  // = 1 (the default, normal creation/edit flow) this behaves exactly like
+  // the previous slice(-usableCount) approach: when a nearer exam has
+  // already reserved part of this window and availableSlots is shorter than
+  // the full sequence, it's always the earliest/lowest-priority session
+  // types (missionSequence's front) that get dropped, never the ones
+  // closest to the exam. With maxSessionsPerDay > 1 (set by "Recalcular mi
+  // Camino para este examen", see examTimeNeed.ts) it stacks extra sessions
+  // on the days nearest the exam instead of dropping them.
+  const targetSequence = sequence
+  const targetSlots = assignDatesForCount(sequence.length, availableSlots, maxSessionsPerDay)
   const claimedDates: string[] = []
 
   for (let i = 0; i < targetSequence.length; i++) {
@@ -349,7 +385,8 @@ export async function deletePartialExamMissions(
 export async function injectAllPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
-  exams: (StudentExam & { sessionOverride?: number })[],
+  exams: (StudentExam & { sessionOverride?: number; maxSessionsPerDay?: number })[],
+  options: { forceExamId?: string } = {},
 ): Promise<void> {
   const today = madridToday()
   const upcoming = exams
@@ -373,7 +410,8 @@ export async function injectAllPartialExamMissions(
 
   const reservedDates = new Set<string>()
   for (const exam of upcoming) {
-    const { claimedDates } = await injectPartialExamMissions(userId, supabase, { ...exam, customInstructions }, { reservedDates })
+    const force = options.forceExamId != null && exam.id === options.forceExamId
+    const { claimedDates } = await injectPartialExamMissions(userId, supabase, { ...exam, customInstructions }, { reservedDates, force })
     for (const d of claimedDates) reservedDates.add(d)
     // Reserve the exam's own date too: a later exam's prep window shouldn't
     // claim what is actually a different subject's exam day.

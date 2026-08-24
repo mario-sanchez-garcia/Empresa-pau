@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import RevisaTuEmailClient from './RevisaTuEmailClient'
 
 export const metadata: Metadata = {
-  title: 'Revisa tu correo · Kairo',
+  title: 'Revisa tu correo',
   description: 'Confirma tu email para terminar de crear tu Camino PAU.',
 }
 

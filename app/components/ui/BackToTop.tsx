@@ -19,9 +19,10 @@ export default function BackToTop() {
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Volver arriba"
+      className="kairo-back-to-top"
       style={{
         position: 'fixed',
-        right: 20,
+        left: '50%',
         bottom: 20,
         zIndex: 40,
         width: 44,
@@ -36,7 +37,7 @@ export default function BackToTop() {
         boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
         cursor: 'pointer',
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.9)',
+        transform: visible ? 'translateX(-50%) translateY(0) scale(1)' : 'translateX(-50%) translateY(12px) scale(0.9)',
         pointerEvents: visible ? 'auto' : 'none',
         transition: 'opacity 0.25s ease, transform 0.25s ease, background 0.15s ease',
       }}

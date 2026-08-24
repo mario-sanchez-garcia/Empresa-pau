@@ -215,6 +215,18 @@ button:active:not(:disabled),
 .pau-reveal-delay-3 { animation-delay: 180ms; }
 .pau-reveal-delay-4 { animation-delay: 240ms; }
 
+/* ─── Back to top ──────────────────────────────────────────────────
+   Bottom offset bumped on narrow screens so it clears two different
+   fixed bottom bars that would otherwise sit on top of it (z-index
+   200/90 > this button's 40):
+   - SidebarNav's mobile bottom nav (Camino/Exámenes/Simulacros/Zona/
+     Settings), 60px tall, shown up to max-width:767px.
+   - The landing page's sticky CTA (.v4c-sticky-cta), ~60px tall,
+     shown up to max-width:640px (a subset of the range above). ────── */
+@media (max-width: 767px) {
+  .kairo-back-to-top { bottom: 84px !important; }
+}
+
 /* ─── Cross-page transitions ──────────────────────────────────────
    Full navigations (SidebarNav, footers, etc. use plain <a href> on
    purpose — see SidebarNav.tsx) currently hard-cut between pages.

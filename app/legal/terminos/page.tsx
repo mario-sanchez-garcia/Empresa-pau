@@ -4,7 +4,7 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 export const metadata: Metadata = {
-  title: 'Términos y Condiciones · Kairo',
+  title: 'Términos y Condiciones',
   description: 'Términos y Condiciones de Uso de Kairo.',
 }
 

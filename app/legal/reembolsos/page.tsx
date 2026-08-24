@@ -4,7 +4,7 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 export const metadata: Metadata = {
-  title: 'Política de Reembolsos · Kairo',
+  title: 'Política de Reembolsos',
   description: 'Condiciones de reembolso del Pack Curso PAU.',
 }
 

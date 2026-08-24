@@ -5,7 +5,7 @@ import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 import CookiePreferencesButton from './CookiePreferencesButton'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidad · Kairo',
+  title: 'Política de Privacidad',
   description: 'Política de Privacidad de Kairo.',
 }
 

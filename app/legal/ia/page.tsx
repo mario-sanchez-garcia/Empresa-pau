@@ -4,7 +4,7 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 export const metadata: Metadata = {
-  title: 'Uso de Inteligencia Artificial · Kairo',
+  title: 'Uso de Inteligencia Artificial',
   description: 'Cómo usa Kairo la inteligencia artificial en correcciones y simulacros.',
 }
 

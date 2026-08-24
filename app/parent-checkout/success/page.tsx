@@ -10,7 +10,7 @@ const B = bebas.style.fontFamily
 const M = dmMono.style.fontFamily
 
 export const metadata: Metadata = {
-  title: 'Pago recibido · Kairo',
+  title: 'Pago recibido',
   description: 'Tu pago ha sido recibido. Estamos activando el Pack Curso PAU.',
 }
 

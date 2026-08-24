@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const metadata: Metadata = {
-  title: 'Informe semanal · Kairo',
+  title: 'Informe semanal',
   robots: { index: false, follow: false },
 }
 

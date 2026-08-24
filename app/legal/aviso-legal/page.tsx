@@ -4,7 +4,7 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 
 export const metadata: Metadata = {
-  title: 'Aviso Legal · Kairo',
+  title: 'Aviso Legal',
   description: 'Aviso legal e información del titular del servicio Kairo, conforme a la LSSI-CE.',
 }
 

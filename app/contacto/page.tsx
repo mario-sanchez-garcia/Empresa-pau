@@ -6,7 +6,7 @@ import ContactForm from './ContactForm'
 import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 export const metadata: Metadata = {
-  title: 'Contacto · Kairo',
+  title: 'Contacto',
   description: 'Contacta con el equipo de Kairo para soporte, privacidad, reembolsos o preguntas sobre la beta.',
 }
 

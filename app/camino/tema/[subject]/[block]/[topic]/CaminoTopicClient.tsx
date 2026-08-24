@@ -1680,7 +1680,7 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
               onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = 'rgba(255,255,255,0.7)'; b.style.borderColor = 'rgba(255,255,255,0.18)' }}
               onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = 'rgba(255,255,255,0.4)'; b.style.borderColor = 'rgba(255,255,255,0.08)' }}
             >
-              Hacer bonus
+              Ver corrección
             </button>
           </div>
         </div>

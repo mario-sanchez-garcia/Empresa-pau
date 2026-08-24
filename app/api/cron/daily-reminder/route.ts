@@ -48,15 +48,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const dow = new Date().getUTCDay()
+  const db = createServiceClient()
+  const today = getMadridToday()
+  // Derived from the Madrid calendar date (not the current instant's UTC
+  // day) — same pattern as streak-warning/reengagement, so this can't drift
+  // a day off near midnight regardless of what time Vercel actually invokes
+  // the cron at.
+  const dow = new Date(today + 'T12:00:00Z').getUTCDay()
   if (dow === 6) {
     console.log('[daily-reminder] cron finished', { sent: 0, skipped: 0, reason: 'saturday' })
     return NextResponse.json({ sent: 0, skipped: 0, reason: 'saturday' })
   }
   const isSunday = dow === 0
-
-  const db = createServiceClient()
-  const today = getMadridToday()
 
   // Users registered >= 2 hours ago with at least 1 pending mission (today or overdue).
   // 10_000 matches the cap used elsewhere for this kind of full-table candidate
@@ -86,20 +89,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: 0, skipped: 0 })
   }
 
-  // Users who already completed a mission today
-  const { data: completedToday } = await db
-    .from('camino_calendar')
-    .select('user_id')
-    .eq('status', 'completed')
-    .eq('scheduled_date', today)
-    .in('user_id', candidateIds)
-
-  const completedTodaySet = new Set((completedToday ?? []).map(r => r.user_id as string))
-
-  // Filter out users who already studied today
-  const toNotify = candidateIds.filter(id => !completedTodaySet.has(id))
-  console.log('[daily-reminder] users after completed-today filter', {
-    completedToday: completedTodaySet.size,
+  // candidateIds is already the exact "still has something pending" signal
+  // — every id in it comes from a live status='pending' row. There used to
+  // be a second pass here that additionally excluded anyone with ANY
+  // status='completed' row on scheduled_date=today, on the assumption that
+  // completing something meant "done for today". That's what silently
+  // dropped most weekdays: a student who logged a bonus/free-initiative
+  // activity (or any other same-day completed row) before 16:00 UTC got
+  // excluded even though her actual assigned mission was still pending —
+  // in a Tue–Fri week that meant only the days she hadn't touched anything
+  // yet by cron time (Tue, Fri) got an email, and Wed/Thu silently didn't.
+  // Trusting the row's own live status is both simpler and correct: if she
+  // has completed every pending item, she has no 'pending' row left and
+  // never entered candidateIds in the first place.
+  const toNotify = candidateIds
+  console.log('[daily-reminder] users to notify (still have a pending item)', {
     toNotify: toNotify.length,
   })
   if (toNotify.length === 0) {
@@ -150,21 +154,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: 0, skipped: candidateIds.length })
   }
 
+  // Tono: un mensaje de alguien de confianza, no una alarma. Nada de
+  // urgencia ni de contadores en peligro — si acaso, la racha se menciona
+  // en positivo desde streak-warning, nunca aquí como amenaza.
   const emailSubject = isSunday
-    ? 'Tu simulacro semanal te espera — 20 minutos que mueven tu nota'
-    : 'Tu misión de hoy en Kairo te espera'
+    ? 'Tu simulacro del domingo, cuando tengas un ratito 👋'
+    : 'Tu misión de hoy te está esperando 👋'
 
   const html = isSunday
     ? buildEmailHtml({
         number: '01',
         label: 'Camino PAU · Simulacro del domingo',
-        headline: 'EL MOMENTO<br>QUE MÁS MUEVE<br>TU NOTA',
+        headline: 'TU RATITO<br>DEL DOMINGO<br>TE ESPERA',
         bodyHtml: `
           <p style="margin:0 0 12px;font-size:15px;line-height:1.75;color:#4b5563;">
             Son solo <strong style="color:#0f172a;">3 ejercicios</strong> del bloque donde más puedes crecer — unos 20 minutos.
           </p>
           <p style="margin:0;font-size:15px;line-height:1.75;color:#4b5563;">
-            El domingo es tu mejor oportunidad de la semana para mover la Nota Proyectada.
+            Si hoy te viene bien es un buen momento para hacerlo, pero sin prisa — tú decides cuándo.
           </p>
         `,
         ctaText: 'Empezar simulacro →',
@@ -179,13 +186,13 @@ export async function GET(request: NextRequest) {
     : buildEmailHtml({
         number: '01',
         label: 'Camino PAU · Misión del día',
-        headline: 'HOY TIENES<br>UNA MISIÓN<br>PENDIENTE',
+        headline: 'SIN PRISA,<br>TU MISIÓN<br>TE ESPERA',
         bodyHtml: `
           <p style="margin:0 0 12px;font-size:15px;line-height:1.75;color:#4b5563;">
-            Dedica <strong style="color:#0f172a;">25 minutos</strong> a tu misión de hoy en Camino PAU y sigue avanzando hacia la selectividad.
+            Oye — cuando tengas un rato hoy, tienes una misión en Camino PAU esperándote. Son unos <strong style="color:#0f172a;">25 minutos</strong>.
           </p>
           <p style="margin:0;font-size:15px;line-height:1.75;color:#4b5563;">
-            Tu progreso está guardado. Empieza cuando quieras.
+            No hay prisa ni nota por hacerlo ya mismo. Tu progreso está guardado tal cual lo dejaste.
           </p>
         `,
         ctaText: 'Ver mi misión →',

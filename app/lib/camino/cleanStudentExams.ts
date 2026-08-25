@@ -11,6 +11,15 @@ export type ExamPriority = typeof VALID_EXAM_PRIORITIES[number]
 export const VALID_EXAM_CONFIDENCE = ['bajo', 'medio', 'alto'] as const
 export type ExamConfidence = typeof VALID_EXAM_CONFIDENCE[number]
 
+// 'parcial' (default): el Simulacro/Prep. parcial de este examen se filtra
+// por los topic_id concretos elegidos con los chips (exam_topics). 'global':
+// no hay chips fijos — se cubre todo lo que el alumno ya tiene completado en
+// camino_calendar para esta asignatura en el momento de generar, así que el
+// conjunto de temas puede crecer entre una generación y otra (a diferencia
+// de 'parcial', que siempre es el mismo set fijo elegido al crear el examen).
+export const VALID_EXAM_SCOPES = ['parcial', 'global'] as const
+export type ExamScope = typeof VALID_EXAM_SCOPES[number]
+
 export type StudentExam = {
   id: string
   subject: string
@@ -30,6 +39,7 @@ export type StudentExam = {
   priority: ExamPriority
   confidence?: ExamConfidence
   content?: string
+  examScope?: ExamScope
 }
 
 function cleanString(value: unknown, fallback = '') {
@@ -53,6 +63,9 @@ export function cleanStudentExams(value: unknown): StudentExam[] {
         : undefined
       const blockSlug = cleanString(exam.blockSlug, '').slice(0, 80) || undefined
       const content = cleanString(exam.content, '').slice(0, 500) || undefined
+      const examScope: ExamScope | undefined = (VALID_EXAM_SCOPES as readonly string[]).includes(exam.examScope as string)
+        ? (exam.examScope as ExamScope)
+        : undefined
       return [{
         id: cleanString(exam.id, `onboarding-exam-${index + 1}`).slice(0, 80),
         subject,
@@ -64,6 +77,7 @@ export function cleanStudentExams(value: unknown): StudentExam[] {
         priority,
         confidence,
         content,
+        examScope,
       }]
     })
     .slice(0, 8)

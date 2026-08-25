@@ -61,7 +61,12 @@ type Mission = {
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 type ExamConfidence = 'bajo' | 'medio' | 'alto'
-type StudentExam = { id: string; subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence?: ExamConfidence; content?: string; sessionOverride?: number }
+// 'parcial' (por defecto): el Simulacro de este examen se filtra por los
+// topic_id fijos elegidos con los chips (exam_topics). 'global': sin chips
+// fijos — cubre todo lo que el alumno ya tenga completado en camino_calendar
+// para esta asignatura en el momento de generar.
+type ExamScope = 'parcial' | 'global'
+type StudentExam = { id: string; subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence?: ExamConfidence; content?: string; sessionOverride?: number; examScope?: ExamScope }
 type CurriculumItem = { subject: string; subjectSlug: string; block: string; blockSlug: string; topic: string; topicSlug: string; title: string; sortOrder: number; contentStatus: string; source: 'supabase' | 'fallback' | 'seed'; planTopic?: CaminoCurriculumTopic }
 type RankingEntry = { id: string; name: string; community: string; xp: number; rank: number; isCurrentUser: boolean }
 type LeaderboardPayload = {
@@ -909,7 +914,7 @@ export default function CaminoCalendarClient() {
   const [fullRankingToken, setFullRankingToken] = useState<string | null>(null)
   const [showExamForm, setShowExamForm] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
-  const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', topicIds: [] as string[], name: '', priority: 'normal' as ExamPriority, confidence: 'medio' as ExamConfidence, content: '' })
+  const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', topicIds: [] as string[], examScope: 'parcial' as ExamScope, name: '', priority: 'normal' as ExamPriority, confidence: 'medio' as ExamConfidence, content: '' })
   const [savingExam, setSavingExam] = useState(false)
   const [recalcExamId, setRecalcExamId] = useState<string | null>(null)
   const [recalcResult, setRecalcResult] = useState<{ examId: string; message: string } | null>(null)
@@ -1707,12 +1712,12 @@ export default function CaminoCalendarClient() {
   function resetExamDraft() {
     setEditingExamId(null)
     setShowExamForm(false)
-    setExamDraft(current => ({ ...current, block: '', topic: '', topicIds: [], name: '', date: toISO(addDays(new Date(), 3)), priority: 'normal', confidence: 'medio', content: '' }))
+    setExamDraft(current => ({ ...current, block: '', topic: '', topicIds: [], examScope: 'parcial', name: '', date: toISO(addDays(new Date(), 3)), priority: 'normal', confidence: 'medio', content: '' }))
   }
   function openNewExam() { setEditingExamId(null); setShowExamForm(true) }
   function openEditExam(exam: StudentExam) {
     setEditingExamId(exam.id)
-    setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, topicIds: [], name: exam.name, priority: exam.priority, confidence: exam.confidence ?? 'medio', content: exam.content ?? '' })
+    setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, topicIds: [], examScope: exam.examScope ?? 'parcial', name: exam.name, priority: exam.priority, confidence: exam.confidence ?? 'medio', content: exam.content ?? '' })
     setShowExamForm(true)
     // Chip selection lives in exam_topics, not in the student_exams jsonb
     // itself — fetch it separately so re-opening a Historia Parcial for
@@ -1734,7 +1739,10 @@ export default function CaminoCalendarClient() {
   async function saveExam() {
     if (!examDraft.subject || !examDraft.date || savingExam) return
     const isHistoria = normalizeSubjectSlug(examDraft.subject) === 'historia_espana'
-    if (isHistoria && examDraft.topicIds.length === 0) return
+    const isGlobalScope = isHistoria && examDraft.examScope === 'global'
+    // 'global' has no fixed chip set to require — it's resolved dynamically
+    // at generation time from whatever the student has completed by then.
+    if (isHistoria && !isGlobalScope && examDraft.topicIds.length === 0) return
     setSavingExam(true)
     try {
       const normalizedBlock = normalizeBlockKey(examDraft.block ?? '')
@@ -1746,7 +1754,9 @@ export default function CaminoCalendarClient() {
       // as before, unchanged, while exam_topics (below) carries the real
       // topic_id relations for later phases to query structurally.
       let topicText = examDraft.topic
-      if (isHistoria) {
+      if (isGlobalScope) {
+        topicText = 'Todo lo visto hasta la fecha'
+      } else if (isHistoria) {
         const { data: topicRows } = await supabase.from('curriculum_topics').select('title').in('id', examDraft.topicIds)
         topicText = (topicRows ?? []).map(t => t.title).join(', ')
       }
@@ -1791,6 +1801,11 @@ export default function CaminoCalendarClient() {
       // id there in the first place — the route would 403 a brand-new exam
       // if its chips were saved before student_exams caught up.
       await regenerate(nextExams)
+      // 'global' skips exam_topics entirely — there's no fixed chip set to
+      // persist, and leaving stale rows from a PREVIOUS 'parcial' save (if
+      // the student switches scope while editing) would make the Simulacro
+      // wrongly still filter by those old topics, so any existing rows are
+      // cleared too.
       if (isHistoria) {
         supabase.auth.getSession().then(({ data }) => {
           const token = data.session?.access_token
@@ -1798,7 +1813,7 @@ export default function CaminoCalendarClient() {
           fetch('/api/parciales/exam-topics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ examId, topicIds }),
+            body: JSON.stringify({ examId, topicIds: isGlobalScope ? [] : topicIds }),
           }).catch(() => undefined)
         }, () => undefined)
       }
@@ -2390,10 +2405,13 @@ export default function CaminoCalendarClient() {
               <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155' }}>+ Añadir</button>
             </div>
             {activeExams.length ? activeExams.map(exam => (
-              <div key={exam.id} style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+              <div key={exam.id} style={{ padding: '8px 0 8px 8px', borderBottom: '1px solid #f1f5f9', borderLeft: `2px solid ${exam.examScope === 'global' ? '#7c3aed' : '#2563eb'}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
                   <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
+                  {exam.examScope === 'global' && (
+                    <span style={{ fontSize: 8, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.06em', color: '#7c3aed', background: '#f5f3ff', border: '1px solid #7c3aed33', borderRadius: 999, padding: '2px 6px', flexShrink: 0 }}>Global</span>
+                  )}
                   <button
                     onClick={() => recalculateExamCamino(exam)}
                     disabled={recalcExamId === exam.id}
@@ -2419,7 +2437,7 @@ export default function CaminoCalendarClient() {
                   <ChevronDown size={11} style={{ transform: showPastExams ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />Pasados ({pastExams.length})
                 </button>
                 {showPastExams && pastExams.map(exam => (
-                  <div key={exam.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', opacity: 0.5 }}>
+                  <div key={exam.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0 6px 8px', opacity: 0.5, borderLeft: `2px solid ${exam.examScope === 'global' ? '#7c3aed' : '#2563eb'}` }}>
                     <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
                     <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
                     <button onClick={() => deleteExam(exam.id)} style={{ color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
@@ -3524,6 +3542,24 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
   const href = exam.block
     ? `/simulacros/practica/nueva?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial${missionParam}${examParam}`
     : `/simulacros/practica/nueva?subject=${simSubject}&source=camino_partial${missionParam}${examParam}`
+  // Simulacro completo (90 min, generateSimulacro) para este mismo examen —
+  // antes no existía ningún enlace real con exam_id hacia /simulacros; este
+  // es ese punto de entrada. examScope decide si se filtra solo por los
+  // temas elegidos con chips ('parcial') o por todo lo completado hasta la
+  // fecha en Camino PAU ('global') — ver resolveExamHistoriaTopics.
+  const simulacroHref = `/simulacros?subject=${simSubject}&examId=${encodeURIComponent(exam.id)}&examScope=${exam.examScope ?? 'parcial'}&source=camino_partial_simulacro`
+  // Distinción visual de alcance: azul (#2563eb, ya el acento por defecto de
+  // Camino) para 'parcial', morado (#7c3aed, el mismo tono que ya usa el
+  // resto de la app para XP/bonus) para 'global' — se recalcula en cada
+  // render a partir de exam.examScope, así que cambiarlo al editar el
+  // examen se refleja al instante sin ningún estado aparte.
+  const isGlobalScope = exam.examScope === 'global'
+  const scopeColor = isGlobalScope ? '#7c3aed' : '#2563eb'
+  const scopeBadge = (
+    <span style={{ display: 'inline-flex', alignItems: 'center', borderRadius: 999, padding: '2px 8px', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.06em', color: scopeColor, background: isGlobalScope ? '#f5f3ff' : '#eff6ff', border: `1px solid ${scopeColor}33` }}>
+      {isGlobalScope ? 'Global' : 'Parcial'}
+    </span>
+  )
 
   if (daysDiff === 0) {
     return (
@@ -3540,32 +3576,52 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
   if (completedToday) {
     return (
       <div style={{ borderRadius: 14, border: '1px solid #bbf7d0', borderLeft: '3px solid #059669', background: '#ecfdf5', padding: '16px 20px' }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#059669', margin: 0 }}>Próximo parcial</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#059669', margin: 0 }}>Próximo parcial</p>
+          {scopeBadge}
+        </div>
         <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
           {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
           {exam.subject ? ` · ${exam.subject}` : ''}
           {blockDisplay ? ` · ${blockDisplay}` : ''}
         </p>
-        <p style={{ fontSize: 12, color: '#059669', margin: 0, fontWeight: 700 }}>✓ Ya has practicado hoy para este parcial.</p>
+        <p style={{ fontSize: 12, color: '#059669', margin: '0 0 12px', fontWeight: 700 }}>✓ Ya has practicado hoy para este parcial.</p>
+        <a
+          href={simulacroHref}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: '1.5px solid #059669', background: 'white', color: '#059669', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}
+        >
+          Simulacro completo <ArrowRight size={13} />
+        </a>
       </div>
     )
   }
 
   return (
-    <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #2563eb', background: 'white', padding: '16px 20px' }}>
-      <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Próximo parcial</p>
+    <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: `3px solid ${scopeColor}`, background: 'white', padding: '16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: scopeColor, margin: 0 }}>Próximo parcial</p>
+        {scopeBadge}
+      </div>
       <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
         {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
         {exam.subject ? ` · ${exam.subject}` : ''}
         {blockDisplay ? ` · ${blockDisplay}` : ''}
       </p>
       <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 12px', fontWeight: 600 }}>Kairo ha ajustado esta semana para que llegues preparado.</p>
-      <a
-        href={href}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}
-      >
-        Empezar práctica <ArrowRight size={13} />
-      </a>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <a
+          href={href}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}
+        >
+          Empezar práctica <ArrowRight size={13} />
+        </a>
+        <a
+          href={simulacroHref}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, border: '1.5px solid #2563eb', background: 'white', color: '#2563eb', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}
+        >
+          Simulacro completo <ArrowRight size={13} />
+        </a>
+      </div>
     </div>
   )
 }
@@ -3871,7 +3927,7 @@ function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}{!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
-type ExamDraft = { subject: string; date: string; block: string; topic: string; topicIds: string[]; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }
+type ExamDraft = { subject: string; date: string; block: string; topic: string; topicIds: string[]; examScope: ExamScope; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curriculum, saving }: { subjects: string[]; draft: ExamDraft; setDraft: (draft: ExamDraft) => void; onClose: () => void; onSave: () => void; editing: boolean; curriculum: CurriculumItem[]; saving: boolean }) {
   const PRIORITIES: { value: ExamPriority; label: string; active: { bg: string; text: string; border: string } }[] = [
@@ -3953,6 +4009,37 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
               )}
             </div>
             {isHistoria && (
+              <Field label="Alcance del examen">
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {([
+                    { value: 'parcial' as ExamScope, label: 'Parcial', hint: 'Solo los temas que elijas' },
+                    { value: 'global' as ExamScope, label: 'Global', hint: 'Todo lo que ya llevas visto' },
+                  ]).map(opt => {
+                    const active = draft.examScope === opt.value
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setDraft({ ...draft, examScope: opt.value })}
+                        style={{
+                          flex: 1,
+                          textAlign: 'left',
+                          borderRadius: 10,
+                          border: `1.5px solid ${active ? '#2563eb' : '#e2e8f0'}`,
+                          background: active ? '#eff6ff' : '#fafbfc',
+                          padding: '8px 12px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: active ? '#2563eb' : '#334155' }}>{opt.label}</div>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 1 }}>{opt.hint}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </Field>
+            )}
+            {isHistoria && draft.examScope === 'parcial' && (
               <Field label={`Temas${draft.topicIds.length > 0 ? ` (${draft.topicIds.length} seleccionados)` : ''}`}>
                 <HistoriaTopicChips
                   selectedIds={draft.topicIds}
@@ -3962,6 +4049,11 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
                   <p style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>Elige al menos un tema.</p>
                 )}
               </Field>
+            )}
+            {isHistoria && draft.examScope === 'global' && (
+              <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: '#64748b', lineHeight: 1.4 }}>
+                El Simulacro y las prácticas de este examen cubrirán todos los temas que ya tengas completados en Camino PAU hasta ese momento — no hace falta elegir chips.
+              </p>
             )}
             {blockOptions.length > 0 && isCustomBlock && (
               <Field label="Bloque (especifica)">
@@ -4038,7 +4130,7 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
             <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">
               Cancelar
             </button>
-            <button onClick={onSave} disabled={saving || (isHistoria && draft.topicIds.length === 0)} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-60">
+            <button onClick={onSave} disabled={saving || (isHistoria && draft.examScope === 'parcial' && draft.topicIds.length === 0)} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-60">
               {saving ? 'Calculando plan…' : editing ? 'Guardar cambios' : 'Guardar parcial'}
             </button>
           </div>

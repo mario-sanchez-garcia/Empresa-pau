@@ -52,12 +52,16 @@ function SimulacrosPage() {
   // Ties this simulacro to a real Parcial (student_exams id) instead of a
   // one-off random generation — when present, exam_simulacro is checked
   // before generating and the result is cached there so the same exam_id
-  // always reopens the same simulacro, whether entered from Camino or
-  // directly from this page. No current link sets this yet (see task
-  // history), but the plumbing is real and ready for whichever entry point
-  // wires it in next.
+  // always reopens the same simulacro, whether entered from Camino (the
+  // "Simulacro completo" action on PartialExamBanner) or directly from this
+  // page with the same URL.
   const examIdParam = searchParams.get('examId')
+  // 'global': no fixed exam_topics set — resolved fresh each generation from
+  // everything completed in camino_calendar. 'parcial' (or absent): the
+  // fixed chip selection in exam_topics, same as generatePracticeSession.
+  const examScopeParam = searchParams.get('examScope')
   const autoTriggeredRef = useRef(false)
+  const examSimulacroAutoTriggeredRef = useRef(false)
 
   const [userId, setUserId] = useState('')
   const caminoSubjectParam = searchParams.get('subject') as SimulacroSubject | null
@@ -142,6 +146,18 @@ function SimulacrosPage() {
     router.replace(`/simulacros/practica/nueva?${params.toString()}`)
   }, [isCaminoPartial, caminoBlock, subject, searchParams, router])
 
+  // "Simulacro completo" desde PartialExamBanner (examId + examScope reales,
+  // distinto de camino_partial de arriba, que es para la Prep. parcial de
+  // 45 min) — genera en cuanto se aterriza aquí en vez de exigir configurar
+  // año/dificultad a mano: con examId, esas opciones ni se usan (el filtro
+  // por tema las ignora, ver generateSimulacro).
+  useEffect(() => {
+    if (!examIdParam || examSimulacroAutoTriggeredRef.current) return
+    examSimulacroAutoTriggeredRef.current = true
+    void createSimulacro()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [examIdParam])
+
   async function loadHistory(uid = userId) {
     if (!uid) return
     const [simulacrosResult, examenesResult] = await Promise.all([
@@ -215,17 +231,29 @@ function SimulacrosPage() {
         finalBlocks = cachedBlocks
       } else {
         // Historia only, and only once this exam has real exam_topics rows
-        // (chip selection) — same topic-based filtering generatePracticeSession
-        // already applies to "Prep. parcial", now for the full simulacro too.
+        // (examScope='parcial', chip selection) or completed camino_calendar
+        // topics (examScope='global') — same topic-based filtering
+        // generatePracticeSession already applies to "Prep. parcial", now
+        // for the full simulacro too.
         let historiaTopicSlugs: string[] | undefined
         if (examIdParam && subject === 'historia') {
           try {
-            const topicsRes = await fetch(`/api/parciales/exam-topics?examId=${encodeURIComponent(examIdParam)}`, { headers: authHeaders })
-            const topicsJson = topicsRes?.ok ? await topicsRes.json() as { topicIds?: string[] } : null
-            if (topicsJson?.topicIds?.length) {
-              const { data: topicRows } = await supabase.from('curriculum_topics').select('topic_slug').in('id', topicsJson.topicIds)
-              const slugs = (topicRows ?? []).map(t => t.topic_slug).filter((s): s is string => typeof s === 'string')
-              if (slugs.length > 0) historiaTopicSlugs = slugs
+            if (examScopeParam === 'global') {
+              const { data: completedRows } = await supabase.from('camino_calendar').select('title').eq('user_id', currentUserId).eq('subject', 'historia_espana').eq('status', 'completed')
+              const titles = [...new Set((completedRows ?? []).map(r => r.title).filter((t): t is string => typeof t === 'string' && t.length > 0))]
+              if (titles.length > 0) {
+                const { data: topicRows } = await supabase.from('curriculum_topics').select('topic_slug').eq('subject', 'historia_espana').in('title', titles)
+                const slugs = (topicRows ?? []).map(t => t.topic_slug).filter((s): s is string => typeof s === 'string')
+                if (slugs.length > 0) historiaTopicSlugs = slugs
+              }
+            } else {
+              const topicsRes = await fetch(`/api/parciales/exam-topics?examId=${encodeURIComponent(examIdParam)}`, { headers: authHeaders })
+              const topicsJson = topicsRes?.ok ? await topicsRes.json() as { topicIds?: string[] } : null
+              if (topicsJson?.topicIds?.length) {
+                const { data: topicRows } = await supabase.from('curriculum_topics').select('topic_slug').in('id', topicsJson.topicIds)
+                const slugs = (topicRows ?? []).map(t => t.topic_slug).filter((s): s is string => typeof s === 'string')
+                if (slugs.length > 0) historiaTopicSlugs = slugs
+              }
             }
           } catch { /* falls back to the normal año/dificultad generation below */ }
         }
@@ -424,6 +452,16 @@ function SimulacrosPage() {
       <SimulacroShell>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: '#64748b', fontSize: 13, fontWeight: 700 }}>
           <KairoLoadingDot /> Abriendo tu práctica…
+        </div>
+      </SimulacroShell>
+    )
+  }
+
+  if (examIdParam) {
+    return (
+      <SimulacroShell>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: '#64748b', fontSize: 13, fontWeight: 700 }}>
+          <KairoLoadingDot /> {errorMessage || 'Preparando tu simulacro…'}
         </div>
       </SimulacroShell>
     )

@@ -8,6 +8,7 @@ import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { isInternalUser } from '@/app/lib/internalUsers'
+import { resolveExamHistoriaTopics } from '@/app/lib/camino/resolveExamHistoriaTopics'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,10 +52,13 @@ export async function POST(request: NextRequest) {
   // simulacro, since exam_id is free text (student_exams is a jsonb array,
   // not a table), not a real FK.
   let examOwned = false
+  let examScope: 'parcial' | 'global' | undefined
   if (examId) {
     const { data: profile } = await db.from('perfiles').select('student_exams').eq('id', user.id).maybeSingle()
-    const exams = Array.isArray(profile?.student_exams) ? profile.student_exams as Array<{ id?: unknown }> : []
-    examOwned = exams.some(e => e?.id === examId)
+    const exams = Array.isArray(profile?.student_exams) ? profile.student_exams as Array<{ id?: unknown; examScope?: unknown }> : []
+    const matched = exams.find(e => e?.id === examId)
+    examOwned = Boolean(matched)
+    examScope = matched?.examScope === 'global' ? 'global' : 'parcial'
   }
 
   // El alumno puede volver a pulsar la misión de "Prep. parcial" del
@@ -235,20 +239,15 @@ export async function POST(request: NextRequest) {
   }
 
   // Historia only, and only once this exam has real exam_topics rows (chip
-  // selection) — filters by the topics the student picked instead of the
-  // free-text block match inside generatePracticeSession. Parciales without
-  // exam_topics (created before it existed, or other subjects, which don't
-  // have topicSlugs populated in their exercise data yet) fall straight
-  // through unaffected.
+  // selection, examScope='parcial') or completed camino_calendar topics
+  // (examScope='global') — filters by those topics instead of the free-text
+  // block match inside generatePracticeSession. Parciales without either
+  // (created before exam_topics/examScope existed, or other subjects, which
+  // don't have topicSlugs populated in their exercise data yet) fall
+  // straight through unaffected.
   let historiaTopicSlugs: string[] | undefined
   if (subject === 'historia' && examId && examOwned) {
-    const { data: topicRows } = await db.from('exam_topics').select('topic_id').eq('exam_id', examId)
-    const topicIds = (topicRows ?? []).map(r => r.topic_id).filter((id): id is string => typeof id === 'string')
-    if (topicIds.length > 0) {
-      const { data: slugRows } = await db.from('curriculum_topics').select('topic_slug').in('id', topicIds)
-      const slugs = (slugRows ?? []).map(r => r.topic_slug).filter((s): s is string => typeof s === 'string')
-      if (slugs.length > 0) historiaTopicSlugs = slugs
-    }
+    historiaTopicSlugs = await resolveExamHistoriaTopics(db, user.id, examId, examScope)
   }
 
   const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs)

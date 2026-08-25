@@ -11,7 +11,8 @@
     "smoke:stripe:p0": "node scripts/smoke-stripe-p0.mjs",
     "qa:corrections:p0": "node scripts/qa-corrections-p0.mjs",
     "seed:math-curriculum": "node scripts/seed-math-curriculum.mjs",
-    "seed:camino-curriculum": "node scripts/seed-camino-curriculum.mjs"
+    "seed:camino-curriculum": "node scripts/seed-camino-curriculum.mjs",
+    "seed:curriculum-topics": "node scripts/seed-curriculum-topics.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",

@@ -150,6 +150,15 @@ export async function POST(request: NextRequest) {
     const missionId = isPracticeSession && typeof simulacroRecord.resultado_json?.mission_id === 'string'
       ? simulacroRecord.resultado_json.mission_id
       : null
+    // Simulacro completo (90 min) entrado desde la misión de calendario
+    // final_mini_mock (ver injectPartialExamMissions.ts) — mismo campo
+    // resultado_json.mission_id que arriba, pero sin el gate de
+    // isPracticeSession: un Simulacro completo nunca marca
+    // __practice_session, así que necesita su propia rama en vez de
+    // reutilizar `missionId` (que sigue siendo solo para prácticas de 45 min).
+    const fullSimulacroMissionId = !isPracticeSession && typeof simulacroRecord.resultado_json?.mission_id === 'string'
+      ? simulacroRecord.resultado_json.mission_id
+      : null
     // "Pausar y continuar": si esta sesión tiene tramos de tiempo
     // registrados (pausas/reanudaciones vía /api/simulacro/timer), el
     // tiempo real trabajado es la suma de esos tramos — no lo que el
@@ -577,6 +586,11 @@ export async function POST(request: NextRequest) {
     // apuntar a esta misma corrección.
     if (missionId) {
       await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, missionId, simulacro_id, xpResult?.xpAwarded)
+    }
+    // Misma idea, rama aparte: Simulacro completo (90 min) entrado desde la
+    // misión final_mini_mock en vez de una práctica de 45 min.
+    if (fullSimulacroMissionId) {
+      await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, fullSimulacroMissionId, simulacro_id, xpResult?.xpAwarded)
     }
 
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })

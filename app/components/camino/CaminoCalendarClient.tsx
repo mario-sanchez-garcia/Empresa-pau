@@ -363,6 +363,20 @@ function hrefForMission(mission: Mission): MissionHrefResult {
         fallback: '',
       }
     }
+    // final_mini_mock (ver injectPartialExamMissions.ts) — el mismo
+    // mission_type='pau_practice' de arriba, pero para el Simulacro real de
+    // 90 min en vez de una práctica de bloque. Mismo patrón de URL que
+    // PartialExamBanner (examId+examScope), más missionId para que
+    // /simulacros/page.tsx pueda guardarlo y la corrección marque esta
+    // misión como completada (ver markCalendarMissionCompleted).
+    const linksToSimulacroExamId = typeof mission.metadata?.links_to_simulacro_exam_id === 'string' ? mission.metadata.links_to_simulacro_exam_id : ''
+    if (linksToSimulacroExamId && simSubject) {
+      const examScope = typeof mission.metadata?.links_to_simulacro_exam_scope === 'string' ? mission.metadata.links_to_simulacro_exam_scope : 'parcial'
+      return {
+        href: `/simulacros?subject=${encodeURIComponent(simSubject)}&examId=${encodeURIComponent(linksToSimulacroExamId)}&examScope=${encodeURIComponent(examScope)}&source=camino_partial_final_mock&missionId=${encodeURIComponent(mission.id)}`,
+        fallback: '',
+      }
+    }
   }
   const target = mission.href ? { href: mission.href, fallback: '' } : getMissionTarget(mission.kind, mission.subject, mission.topic, mission.block)
   if (!target.href) return target

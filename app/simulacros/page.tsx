@@ -60,6 +60,11 @@ function SimulacrosPage() {
   // everything completed in camino_calendar. 'parcial' (or absent): the
   // fixed chip selection in exam_topics, same as generatePracticeSession.
   const examScopeParam = searchParams.get('examScope')
+  // Presente cuando se entra desde la misión de calendario final_mini_mock
+  // (ver injectPartialExamMissions.ts/CaminoCalendarClient.tsx) — se guarda
+  // en resultado_json.mission_id para que /api/simulacro pueda marcar esa
+  // misión como completada al corregir (ver markCalendarMissionCompleted).
+  const missionIdParam = searchParams.get('missionId')
   const autoTriggeredRef = useRef(false)
   const examSimulacroAutoTriggeredRef = useRef(false)
 
@@ -319,7 +324,8 @@ function SimulacrosPage() {
         respuestas_parciales: {},
         estado: 'en_progreso',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        ...(missionIdParam ? { resultado_json: { mission_id: missionIdParam } } : {}),
       }
       const { error } = await supabase.from('historial_simulacros').insert(row)
       if (error) {

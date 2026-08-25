@@ -2,7 +2,8 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
-import type { ExamConfidence, ExamPriority, StudentExam } from './cleanStudentExams'
+import { SIMULACRO_MINUTES } from './xpMap'
+import type { ExamConfidence, ExamPriority, ExamScope, StudentExam } from './cleanStudentExams'
 
 type PartialMissionType = 'conceptual_review' | 'evau_practice' | 'block_mock' | 'final_mini_mock'
 
@@ -28,6 +29,8 @@ export type PartialExamInput = {
   maxSessionsPerDay?: number
   /** Free-text custom instructions from the student, passed through to mission metadata. */
   customInstructions?: string
+  /** 'parcial' (default) or 'global' — needed so the final_mini_mock mission's Simulacro link carries the same examScope PartialExamBanner already sends. */
+  examScope?: ExamScope
 }
 
 export function madridToday(): string {
@@ -128,20 +131,21 @@ function missionSequence(count: number): PartialMissionType[] {
   return seq
 }
 
-// Las 4 usan mission_type: 'partial_practice' al insertarse más abajo (nunca
-// 'mock_exam'), así que SIEMPRE abren el flujo de 45 min de
-// /simulacros/practica/[id] (PARCIAL_MINUTES), no el simulacro completo de
-// 90 min. "block_mock"/"final_mini_mock" llevaban la palabra "simulacro" en
-// el título aunque su duración real fuera siempre 45 min — el alumno leía
-// "Simulacro final..." esperando 90 min y el cronómetro le daba 45,
-// exactamente la confusión Simulacro/Práctica parcial que se quería evitar.
+// conceptual_review/evau_practice/block_mock usan mission_type:
+// 'partial_practice' al insertarse más abajo, así que abren el flujo de 45
+// min de /simulacros/practica/[id] (PARCIAL_MINUTES) — nunca dicen
+// "simulacro" en el título para no repetir la confusión que esto tuvo antes
+// (el alumno leía "Simulacro" esperando 90 min y el cronómetro le daba 45).
+// final_mini_mock es la excepción a propósito: desde que enlaza al Simulacro
+// real de 90 min (mission_type: 'pau_practice', ver el bucle de inserción
+// más abajo), su título SÍ debe decir "Simulacro" — ahora es verdad.
 function missionTitle(type: PartialMissionType, blockDisplay: string, topic?: string): string {
   const ctx = topic ? `${blockDisplay} — ${topic}` : blockDisplay
   switch (type) {
     case 'conceptual_review': return `Repaso de conceptos: ${ctx}`
     case 'evau_practice':     return `Práctica PAU: ${ctx}`
     case 'block_mock':        return `Práctica corta: ${ctx}`
-    case 'final_mini_mock':   return `Práctica final antes del parcial: ${ctx}`
+    case 'final_mini_mock':   return `Simulacro completo antes del examen: ${ctx}`
   }
 }
 
@@ -322,8 +326,12 @@ export async function injectPartialExamMissions(
         .eq('id', existing[0].id as string)
     }
 
+    // final_mini_mock enlaza al Simulacro real de 90 min (ver más abajo), no
+    // al flujo de práctica de 45 — su hueco en el día debe reservar la
+    // duración real, no la de partial_practice.
+    const isFinalSimulacroLink = mType === 'final_mini_mock'
     const scheduler = await createDayScheduler(userId, supabase, slot)
-    const timeSlot = scheduler.place(estimatedMinutesForMissionType('partial_practice'))
+    const timeSlot = scheduler.place(isFinalSimulacroLink ? SIMULACRO_MINUTES : estimatedMinutesForMissionType('partial_practice'))
 
     await supabase.from('camino_calendar').insert({
       user_id: userId,
@@ -332,7 +340,12 @@ export async function injectPartialExamMissions(
       title: missionTitle(mType, blockDisplay, topic),
       block_key: partialExam.block || null,
       block_slug: blockSlug || null,
-      mission_type: 'partial_practice',
+      // pau_practice (ya permitido por el constraint de BD, ya con XP
+      // definido) en vez de partial_practice para que esta misión concreta
+      // abra el Simulacro real de 90 min en vez del flujo de práctica de 45
+      // — ver hrefForMission en CaminoCalendarClient.tsx, que decide la URL
+      // mirando mission_type + metadata.links_to_simulacro_exam_id.
+      mission_type: isFinalSimulacroLink ? 'pau_practice' : 'partial_practice',
       is_main: true,
       is_bonus: false,
       status: 'pending',
@@ -353,6 +366,10 @@ export async function injectPartialExamMissions(
         confidence: partialExam.confidence ?? null,
         custom_instructions: partialExam.customInstructions ?? null,
         simulacro_block_filter: partialExam.block || null,
+        ...(isFinalSimulacroLink ? {
+          links_to_simulacro_exam_id: partialExam.id,
+          links_to_simulacro_exam_scope: partialExam.examScope ?? 'parcial',
+        } : {}),
         simulacro_subject: simSubject,
       },
     })

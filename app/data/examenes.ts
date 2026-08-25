@@ -1573,6 +1573,7 @@ export interface PreguntaHistoria {
   paginaFuente?: number
   conceptos?: string[]
   criterios: string
+  topicSlugs: string[]
 }
 
 export interface ExamenHistoria {
@@ -1593,6 +1594,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2025-ordinaria-A-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "origenes-reino-visigodo", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "la-industrializacion-y-el-comercio-en-el-siglo-xviii"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "Responda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-La Hispania romana.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3.-Responda a una de estas dos preguntas:\n-Los Reyes Católicos: unión dinástica e instituciones de gobierno. La guerra de Granada.\n-Sociedad, economía y cultura del siglo XVIII.",
@@ -1601,6 +1603,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2025-ordinaria-A-fuente1",
+        topicSlugs: ["la-autarquia-economica-1939-1959-princip"],
         imagen_url: "/historia-imgs/24-25 ordinaria HE fuente 1.PNG",
         tipo: "fuente1",
         label: "Fuente 1",
@@ -1612,6 +1615,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2025-ordinaria-A-fuente2",
+        topicSlugs: ["las-fases-militares-de-la-guerra-civil-e", "las-consecuencias-de-la-guerra-civil-esp"],
         imagen_url: "/historia-imgs/24-25 ordinaria HE fuente 2.PNG",
         tipo: "fuente2",
         label: "Fuente 2",
@@ -1623,6 +1627,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2025-ordinaria-A-texto",
+        topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El Sexenio Revolucionario: La Constitución de 1869. (Puntuación máxima: 2,5 puntos).",
@@ -1632,6 +1637,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2025-ordinaria-A-tema",
+        topicSlugs: ["la-regencia-de-maria-cristina-y-la-desam", "el-bienio-progresista-y-la-desamortizaci", "la-industrializacion-y-el-ferrocarril-xix"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: Las desamortizaciones. La España rural del siglo XIX. Industrialización, comercio y comunicaciones.",
@@ -1646,6 +1652,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2024-Lunes-A-cuestiones",
+        topicSlugs: ["los-iberos-economia-sociedad-y-arte", "los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "la-dictadura-de-almanzor-y-la-fitna-976", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "las-reformas-institucionales-borbonicas", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2. Al-Ándalus: evolución política.\n3. Los Reyes Católicos: unión dinástica e instituciones de gobierno. La guerra de Granada.\n4. Las reformas borbónicas en los virreinatos americanos.",
@@ -1654,6 +1661,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Lunes-A-fuente",
+        topicSlugs: ["la-evolucion-demografica-en-el-siglo-xix"],
         imagen_url: "/historia-imgs/23-24 ordinaria HE A lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -1665,6 +1673,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Lunes-A-tema",
+        topicSlugs: ["las-bases-ideologicas-del-franquismo-y-l"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: El franquismo. Fundamentos ideológicos del régimen franquista en el contexto histórico europeo.",
@@ -1679,6 +1688,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2024-Lunes-B-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-conquista-y-organizacion-del-imperio", "la-revolucion-de-los-precios-el-impacto", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. La monarquía visigoda.\n2. La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3. Sociedad, economía y cultura de los siglos XVI y XVII.\n4. La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
@@ -1687,6 +1697,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Lunes-B-fuente",
+        topicSlugs: ["el-desastre-de-annual-1921-y-el-expedien"],
         imagen_url: "/historia-imgs/23-24 ordinaria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -1698,6 +1709,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Lunes-B-texto",
+        topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: Las Cortes de Cádiz. (Puntuación máxima: 3 puntos).",
@@ -1713,6 +1725,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2024-Martes-A-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El Paleolítico y el Neolítico.\n2. Los reinos cristianos: evolución de la conquista de la Península y organización política.\n3. Exploración, conquista y colonización de América (desde 1492 y durante el siglo XVI).\n4. La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -1721,6 +1734,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Martes-A-fuente",
+        topicSlugs: ["el-aislamiento-internacional-1945-1953-y"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con las relaciones internacionales de la dictadura franquista (1939-1975).\n(Puntuación máxima: 2 puntos).\nFranco recibe en Madrid al presidente de Estados Unidos Dwight D. Eisenhower, en visita a España, diciembre de 1959.",
@@ -1731,6 +1745,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Martes-A-tema",
+        topicSlugs: ["la-emancipacion-de-la-america-espanola-1"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: El proceso de independencia de las colonias americanas. El legado español en\nAmérica.",
@@ -1745,6 +1760,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2024-Martes-B-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "los-austrias-menores-el-sistema-de-valid", "el-conde-duque-de-olivares-y-la-union-de", "la-crisis-de-1640-la-rebelion-de-catalun", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-industrializacion-y-el-comercio-en-el-siglo-xviii"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. La Hispania romana.\n2. Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n3. Los Austrias del siglo XVII. Política interior y exterior.\n4. Sociedad, economía y cultura del siglo XVIII.",
@@ -1753,6 +1769,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Martes-B-fuente",
+        topicSlugs: ["la-industrializacion-y-el-ferrocarril-xix"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente documento. (Puntuación máxima: 0,5 puntos).\n2. Relacione los datos con las transformaciones económicas del siglo XIX: Industrialización, comercio y comunicaciones. (Puntuación máxima: 2 puntos).\nProducción de algunos minerales, 1860-1894 (medias anuales en toneladas)\nPiritas de cobre\nPlomo Mercurio Hierro\n1860-1864 232 66 880 199\n1870-1874 459 77 1.267 596\n1880-1884 1.876 Sin datos 1.627 4.045\n1890-1894 2.549 164 1.707 5.415\nFuente: Comín, F., Martín Aceña, P., Muñoz Rubio, M. y Vidal Olivares, J. (1998): 150 años de historia de los ferrocarriles españoles.",
@@ -1763,6 +1780,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2024-Martes-B-texto",
+        topicSlugs: ["la-proclamacion-de-la-segunda-republica", "la-constitucion-de-1931-caracteristicas", "el-bienio-reformista-reforma-militar-y-r"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La Segunda República: El Gobierno provisional y la Constitución de\n1931. (Puntuación máxima: 3 puntos).",
@@ -1778,6 +1796,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2023-Lunes-A-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n3. Al Ándalus: economía, sociedad y cultura.\n4. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -1786,6 +1805,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Lunes-A-fuente",
+        topicSlugs: ["el-declive-de-los-gobiernos-gonzalez-cor"],
         imagen_url: "/historia-imgs/22-23 ordinaria HE A lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -1797,6 +1817,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Lunes-A-tema",
+        topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: Las Cortes de Cádiz. La Constitución de 1812.\nD",
@@ -1811,6 +1832,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2023-Lunes-B-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -1819,6 +1841,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Lunes-B-fuente",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         imagen_url: "/historia-imgs/22-23 ordinaria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -1830,6 +1853,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Lunes-B-texto",
+        topicSlugs: ["las-fases-militares-de-la-guerra-civil-e", "las-fases-militares-la-batalla-del-ebro"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: Fases militares de la Guerra Civil. La evolución política y económica en las dos zonas (Puntuación máxima: 3 puntos).",
@@ -1845,6 +1869,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2023-Martes-A-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Los Austrias del siglo XVII: el gobierno de los validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -1853,6 +1878,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Martes-A-fuente",
+        topicSlugs: ["restauracion", "el-anarquismo-en-espana-la-ftre-y-la-pro", "el-socialismo-en-espana-el-psoe-y-la-ugt"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Relacione esta imagen con el desarrollo del movimiento obrero español durante la Restauración\nBorbónica (1874-1902) (Puntuación máxima: 1 punto).\n“La Tejedora”, por Joan Planella y Rodríguez (1882). Barcelona, colección particular.",
@@ -1863,6 +1889,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Martes-A-tema",
+        topicSlugs: ["el-auge-de-la-oposicion-democratica-cc-o"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: La oposición a la dictadura: principales grupos y evolución en el tiempo. La crisis del franquismo desde 1973 a la muerte de Franco.",
@@ -1877,6 +1904,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2023-Martes-B-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -1885,6 +1913,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Martes-B-fuente",
+        topicSlugs: ["alfonso-xiii-y-el-reformismo-maura-y-can", "el-golpe-de-estado-de-primo-de-rivera-13", "la-caida-de-primo-de-rivera-y-la-dictabl"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo al siguiente cuadro (Puntuación máxima: 0,5 puntos).\n2. Relacione estos datos con el final del reinado de Alfonso XIII (Puntuación máxima: 1 punto).\nResultados, en las capitales de provincia, de las elecciones municipales celebradas el 12 de abril de 1931\nConcejales Alcaldes\nRepublicanos y socialistas 1.062 39\nMonárquicos 467 10\nComunistas 3 0\nOtros 192 3\nFuente: Instituto Nacional de Estadística",
@@ -1895,6 +1924,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2023-Martes-B-texto",
+        topicSlugs: ["el-problema-sucesorio-y-la-primera-guerr"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Isabel II (1833-1868): la primera guerra carlista (Puntuación máxima 3 puntos).",
@@ -1910,6 +1940,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2022-Lunes-A-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y\nAmérica.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -1918,6 +1949,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Lunes-A-fuente",
+        topicSlugs: ["la-legalizacion-del-pce-y-las-primeras-e"],
         imagen_url: "/historia-imgs/21-22 ordinaria HE A Lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -1929,6 +1961,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Lunes-A-tema",
+        topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "la-emancipacion-de-la-america-espanola-1"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: El reinado de Fernando VII: liberalismo frente a absolutismo. El proceso de independencia de las colonias americanas.\nPartido \tUnión de\nCentro\nDemocrático\nPartido\nSocialista\nObrero\nEspañol\nPartido\nComunista de España\nAlianza\nPopular\nPartido\nSocialista\nPopular\nPacte\nDemocratic\nPer\nCatalunya\nPartido\nNacionalista\nVasco\nEscaños \t165 \t118 \t20 \t16 \t6 \t11 \t8\n% votos \t34,4 \t29,3 \t9,3 \t8,2 \t4,4 \t2,8 \t1,6\nVotos \t6.310.391 \t5.371.866 \t1.709.890 \t1.504.771 \t816.582 \t514.647 \t296.193",
@@ -1943,6 +1976,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2022-Lunes-B-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "la-crisis-demografica-y-economica-del-siglo-xvii", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -1951,6 +1985,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Lunes-B-fuente",
+        topicSlugs: ["las-fases-militares-de-la-guerra-de-la-i", "la-guerra-de-guerrillas-tactica-lideres"],
         imagen_url: "/historia-imgs/21-22 ordinaria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -1962,6 +1997,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Lunes-B-texto",
+        topicSlugs: ["la-integracion-europea-y-la-alternancia-pp-psoe"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La integración de España en Europa. Consecuencias económicas y sociales (Puntuación máxima: 3 puntos).",
@@ -1977,6 +2013,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2022-Martes-A-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "el-fin-de-la-hegemonia-westfalia-1648-lo", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -1985,6 +2022,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Martes-A-fuente",
+        topicSlugs: ["la-industrializacion-y-el-ferrocarril-xix"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente tabla (Puntuación máxima: 0,5 puntos).\n2. \tRelacione este cuadro con el sistema de comunicaciones en el siglo XIX: el ferrocarril\n(Puntuación máxima: 1 punto).\nQuinquenios \tKm. nuevos ampliados \tTotal km. explotados final quinquenio\n1846-1850 \t28 \t28\n1851-1855 \t449 \t477\n1856-1860 \t1.441 \t1.918\n1861-1865 \t2.913 \t4.831\n1866-1870 \t641 \t5.472\n1871-1875 \t646 \t6.118\n1876-1880 \t1.360 \t7.478\n1881-1885 \t1.453 \t8.931\n1886-1890 \t1.069 \t10.000\n1891-1895 \t1.529 \t11.529\nFuente: El problema de los ferrocarriles españoles. Antecedentes, datos, soluciones, Madrid, 1933",
@@ -1995,6 +2033,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Martes-A-tema",
+        topicSlugs: ["el-estado-de-las-autonomias-el-terrorism"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: Las etapas políticas de la democracia. Los gobiernos de la UCD. El golpe de\nEstado de 23 de febrero de 1981. La alternancia política: gobiernos socialistas y gobiernos del Partido\nPopular.",
@@ -2009,6 +2048,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2022-Martes-B-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con América. Causas del despegue económico de Cataluña.",
@@ -2017,6 +2057,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Martes-B-fuente",
+        topicSlugs: ["la-autarquia-economica-1939-1959-princip"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. \tExplique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. \tRelacione esta imagen con la política económica del franquismo: la autarquía (Puntuación máxima: 1 punto).\nCartilla individual de racionamiento, 1944",
@@ -2027,6 +2068,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2022-Martes-B-texto",
+        topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "la-emancipacion-de-la-america-espanola-1"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII: liberalismo frente a absolutismo\n(Puntuación máxima: 3 puntos).",
@@ -2042,6 +2084,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2021-Lunes-A-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -2050,6 +2093,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Lunes-A-fuente",
+        topicSlugs: ["las-bases-ideologicas-del-franquismo-y-l"],
         imagen_url: "/historia-imgs/20-21 ordianria HE A lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2061,6 +2105,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Lunes-A-tema",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: La Restauración Borbónica (1874-1902): Cánovas del Castillo y el turno de partidos.\nLa Constitución de 1876.\nFranco llega a las Cortes para presidir la sesió n de apertura (17-",
@@ -2075,6 +2120,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2021-Lunes-B-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -2083,6 +2129,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Lunes-B-fuente",
+        topicSlugs: ["la-guerra-de-cuba-y-filipinas-1895-1898", "el-desastre-de-1898-santiago-de-cuba-y-e"],
         imagen_url: "/historia-imgs/20-21 ordianria HE B lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2094,6 +2141,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Lunes-B-texto",
+        topicSlugs: ["la-integracion-europea-y-la-alternancia-pp-psoe"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La integración de España en Europa.\nConsecuencias económicas y sociales.",
@@ -2109,6 +2157,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2021-Martes-A-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -2117,6 +2166,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Martes-A-fuente",
+        topicSlugs: ["el-golpe-de-estado-de-primo-de-rivera-13"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de los orígenes de la Dictadura de Primo de Rivera. (Puntuación máxima: 1 punto).\nFotografía de Alfonso XIII con los miembros del Directorio Militar (Fuente ABC)",
@@ -2127,6 +2177,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Martes-A-tema",
+        topicSlugs: ["las-fases-militares-de-la-guerra-de-la-i", "la-guerra-de-guerrillas-tactica-lideres"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: La Guerra de la Independencia: antecedentes y causas. Bandos en conflicto y fases de la guerra.",
@@ -2141,6 +2192,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2021-Martes-B-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -2149,6 +2201,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Martes-B-fuente",
+        topicSlugs: ["la-evolucion-demografica-en-el-siglo-xix"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la evolución demográfica entre 1797 y 1833 (Puntuación máxima: 1 punto).\nFuente: Pérez Moreda, Vicente, en Sánchez Albornoz, N. (comp.), La modernización económica de España\n1830-1930, Madrid, Alianza, 1985, p. 26.",
@@ -2159,6 +2212,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2021-Martes-B-texto",
+        topicSlugs: ["juan-carlos-i-arias-navarro-y-el-inicio", "adolfo-suarez-y-la-ley-para-la-reforma-p"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La Transición: alternativas políticas tras la muerte de Franco. El papel del rey y el gobierno de Adolfo Suárez.",
@@ -2174,6 +2228,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2020-Lunes-A-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "carlos-ii-y-el-problema-sucesorio", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -2182,6 +2237,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Lunes-A-fuente",
+        topicSlugs: ["la-industrializacion-y-el-ferrocarril-xix"],
         imagen_url: "/historia-imgs/19-20 ordinaria HE A Lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2193,6 +2249,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Lunes-A-tema",
+        topicSlugs: ["la-crisis-de-1917-las-juntas-de-defensa"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: La intervención en Marruecos. Repercusiones de la Primera Guerra Mundial en España. La crisis de 1917 y el Trienio Bolchevique.",
@@ -2207,6 +2264,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2020-Lunes-B-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "la-crisis-demografica-y-economica-del-siglo-xvii", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -2215,6 +2273,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Lunes-B-fuente",
+        topicSlugs: ["el-estado-de-las-autonomias-el-terrorism"],
         imagen_url: "/historia-imgs/19-20 ordinaria HE B Lunes.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2226,6 +2285,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Lunes-B-texto",
+        topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El Sexenio Democrático (1868-1874). Evolución política: el gobierno provisional. (Puntuación máxima: 3 puntos).",
@@ -2241,6 +2301,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2020-Martes-A-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos.\nGuerras y sublevación en Europa.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La Guerra de la Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -2249,6 +2310,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Martes-A-fuente",
+        topicSlugs: ["las-fases-militares-de-la-guerra-de-la-i"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la Guerra de la Independencia (Puntuación máxima: 1 punto).\nCuadro. La rendición de Bailén. Autor: Casado del Alisal. Fuente: Museo del Prado.",
@@ -2259,6 +2321,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Martes-A-tema",
+        topicSlugs: ["las-bases-ideologicas-del-franquismo-y-l"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: La creación del Estado franquista. Grupos ideológicos y apoyos sociales. Etapas de la dictadura y principales características de cada una de ellas. El contexto internacional: del aislamiento al reconocimiento exterior.",
@@ -2273,6 +2336,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2020-Martes-B-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con América. Causas del despegue económico de Cataluña.",
@@ -2281,6 +2345,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Martes-B-fuente",
+        topicSlugs: ["adolfo-suarez-y-la-ley-para-la-reforma-p"],
         tipo: "fuente",
         label: "Fuente",
         enunciado: "1. Explique brevemente el tipo de fuente, la localización cronológica y el contenido atendiendo a la siguiente imagen. (Puntuación máxima: 0,5 puntos).\n2. Explique el contexto histórico de la Transición (Puntuación máxima: 1 punto).\nCuadro El Abrazo, Juan Genovés. Fuente: Museo Reina Sofía.",
@@ -2291,6 +2356,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2020-Martes-B-texto",
+        topicSlugs: ["la-decada-moderada-constitucion-de-1845"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado efectivo de Isabel II (1843-1868). Evolución política. La\nConstitución de 1845. (Puntuación máxima: 3 puntos).",
@@ -2306,6 +2372,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2019-ordinaria-A-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -2314,6 +2381,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2019-ordinaria-A-fuente",
+        topicSlugs: ["la-integracion-europea-y-la-alternancia-pp-psoe"],
         imagen_url: "/historia-imgs/18-19 ordinaria HE A.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2325,6 +2393,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2019-ordinaria-A-tema",
+        topicSlugs: ["la-guerra-de-cuba-y-filipinas-1895-1898", "el-desastre-de-1898-santiago-de-cuba-y-e"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: El problema de Cuba y la guerra entre España y Estados Unidos. La crisis de 1898 y sus consecuencias económicas, políticas e ideológicas.",
@@ -2339,6 +2408,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2019-ordinaria-B-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-crisis-demografica-y-economica-del-siglo-xvii", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -2347,6 +2417,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2019-ordinaria-B-fuente",
+        topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
         imagen_url: "/historia-imgs/18-19 ordinaria HE B.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2358,6 +2429,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2019-ordinaria-B-texto",
+        topicSlugs: ["las-bases-ideologicas-del-franquismo-y-l"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): La creación del estado franquista.\nGrupos ideológicos y apoyo social.",
@@ -2373,6 +2445,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2018-ordinaria-A-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "carlos-ii-y-el-problema-sucesorio", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y sublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -2381,6 +2454,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2018-ordinaria-A-fuente",
+        topicSlugs: ["la-crisis-de-1917-las-juntas-de-defensa"],
         imagen_url: "/historia-imgs/17-18 ordinaria HE.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2392,6 +2466,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2018-ordinaria-A-tema",
+        topicSlugs: ["el-problema-sucesorio-y-la-primera-guerr"],
         tipo: "tema",
         label: "Tema",
         enunciado: "Desarrolle el tema: El reinado de Isabel II (1833-1868): la primera guerra carlista. Evolución política, partidos y conflictos. El Estatuto Real de 1834 y las Constituciones de 1837 y 1845.",
@@ -2406,6 +2481,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
 {
         id: "h-2018-ordinaria-B-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con América. Causas del despegue económico de Cataluña.",
@@ -2414,6 +2490,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2018-ordinaria-B-fuente",
+        topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
         imagen_url: "/historia-imgs/17-18 ordinaria HE B.PNG",
         tipo: "fuente",
         label: "Fuente",
@@ -2425,6 +2502,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
 {
         id: "h-2018-ordinaria-B-texto",
+        topicSlugs: ["el-bienio-radical-cedista-elecciones-de", "la-revolucion-de-octubre-de-1934-asturia"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo (puntuación máxima: 1,5 puntos).\n2. Responda a la siguiente cuestión (puntuación máxima: 3 puntos): El gobierno radical cedista (1933-\n1935). La Revolución de Asturias.",
@@ -2444,6 +2522,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2018-extra-a-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "el-fin-de-la-hegemonia-westfalia-1648-lo", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas\nen los ámbitos social, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de\nCórdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y\nsociedad estamental.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y\nalcance de las reformas.",
@@ -2452,6 +2531,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2018-extra-a-fuente",
+        topicSlugs: ["el-problema-sucesorio-y-la-primera-guerr"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2018-extra-a-fuente.png",
@@ -2461,6 +2541,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2018-extra-a-tema",
+        topicSlugs: ["alfonso-xiii-y-el-reformismo-maura-y-can", "el-golpe-de-estado-de-primo-de-rivera-13", "la-caida-de-primo-de-rivera-y-la-dictabl"],
         tipo: "tema",
         label: "Tema",
         enunciado: "La dictadura de Primo de Rivera. El final del reinado de Alfonso XIII.",
@@ -2479,6 +2560,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2018-extra-b-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-guerra-de-sucesion-espanola-y-el-trat", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas\ninternos. Guerras y     sublevación en Europa.\n4. Principales factores de la crisis demográfica y económica del siglo XVII y sus\nconsecuencias.\n5. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura,\nindustria y comercio con América. Causas del despegue económico de Cataluña.",
@@ -2487,6 +2569,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2018-extra-b-fuente",
+        topicSlugs: ["el-bienio-reformista-reforma-militar-y-r", "el-bienio-reformista-reforma-educativa-r"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2018-extra-b-fuente.png",
@@ -2496,6 +2579,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2018-extra-b-texto",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo.\n2. Responda a la cuestión histórica planteada en el texto.",
@@ -2515,6 +2599,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2019-extra-a-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos\nsocial, económico y cultural.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio\ncon América. Causas del despegue económico de Cataluña.",
@@ -2523,6 +2608,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2019-extra-a-fuente",
+        topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2019-extra-a-fuente.png",
@@ -2532,6 +2618,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2019-extra-a-tema",
+        topicSlugs: ["la-proclamacion-de-la-segunda-republica"],
         tipo: "tema",
         label: "Tema",
         enunciado: "La proclamación de la Segunda República. La Constitución de 1931. El bienio reformista (1931-1933).",
@@ -2550,6 +2637,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2019-extra-b-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "carlos-ii-y-el-problema-sucesorio", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -2558,6 +2646,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2019-extra-b-fuente",
+        topicSlugs: ["la-legalizacion-del-pce-y-las-primeras-e"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2019-extra-b-fuente.png",
@@ -2567,6 +2656,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2019-extra-b-texto",
+        topicSlugs: ["carlos-iv-godoy-y-el-impacto-de-la-revol", "el-motin-de-aranjuez-y-las-abdicaciones"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Explique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo.\n2. Responda a la cuestión histórica planteada en el texto.",
@@ -2586,6 +2676,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2020-extra-a-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "carlos-ii-y-el-problema-sucesorio", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de\nla Edad Media.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio\ncon América. Causas del despegue económico de Cataluña.",
@@ -2594,6 +2685,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-a-fuente",
+        topicSlugs: ["restauracion", "el-anarquismo-en-espana-la-ftre-y-la-pro", "el-socialismo-en-espana-el-psoe-y-la-ugt"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-a-fuente.png",
@@ -2603,6 +2695,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-a-tema",
+        topicSlugs: ["el-alzamiento-de-julio-de-1936-y-el-puen", "la-dimension-internacional-el-comite-de"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA:\nLa Guerra Civil: la sublevación militar y el estallido de la guerra. La dimensión internacional del\nconflicto.",
@@ -2621,6 +2714,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2020-extra-b-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la península Ibérica. Principales aportaciones romanas en los ámbitos\nsocial, económico y cultural.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -2629,6 +2723,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-b-fuente",
+        topicSlugs: ["el-desarrollismo-los-planes-de-desarroll"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-b-fuente.png",
@@ -2638,6 +2733,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-b-texto",
+        topicSlugs: ["la-constitucion-de-1812-la-pepa-principi"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -2658,6 +2754,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2020-extra-coincidencias-a-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -2666,6 +2763,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-coincidencias-a-fuente",
+        topicSlugs: ["el-golpe-de-estado-de-primo-de-rivera-13", "el-directorio-civil-de-primo-de-rivera-p"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-coincidencias-a-fuente.png",
@@ -2675,6 +2773,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-coincidencias-a-tema",
+        topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "la-emancipacion-de-la-america-espanola-1"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA:\nEl reinado de Fernando VII: liberalismo frente a absolutismo. El proceso de independencia de las\ncolonias americanas.",
@@ -2694,6 +2793,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2020-extra-coincidencias-b-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de\nrepoblación.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y\ncomercio con América. Causas del despegue económico de Cataluña.",
@@ -2702,6 +2802,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-coincidencias-b-fuente",
+        topicSlugs: ["la-guerra-de-cuba-y-filipinas-1895-1898", "el-desastre-de-1898-santiago-de-cuba-y-e"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2020-extra-coincidencias-b-fuente.png",
@@ -2711,6 +2812,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2020-extra-coincidencias-b-texto",
+        topicSlugs: ["el-aislamiento-internacional-1945-1953-y"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -2730,6 +2832,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2021-extra-a-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -2738,6 +2841,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-a-fuente",
+        topicSlugs: ["el-2-de-mayo-de-1808-y-la-organizacion-d"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-a-fuente.png",
@@ -2747,6 +2851,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-a-tema",
+        topicSlugs: ["la-autarquia-economica-1939-1959-princip", "el-desarrollismo-los-planes-de-desarroll", "las-transformaciones-sociales-del-desarr"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: Política económica del franquismo: de la autarquía al desarrollismo. Transformaciones\nsociales: causas y evolución.",
@@ -2765,6 +2870,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2021-extra-b-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -2773,6 +2879,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-b-fuente",
+        topicSlugs: ["la-crisis-de-la-ucd-y-el-cambio-la-victo"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-b-fuente.png",
@@ -2782,6 +2889,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-b-texto",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -2802,6 +2910,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2021-extra-coincidencias-a-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "el-fin-de-la-hegemonia-westfalia-1648-lo", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -2810,6 +2919,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-coincidencias-a-fuente",
+        topicSlugs: ["el-desarrollismo-los-planes-de-desarroll"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-coincidencias-a-fuente.png",
@@ -2819,6 +2929,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-coincidencias-a-tema",
+        topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: Las Cortes de Cádiz. La Constitución de 1812.\nE i\nli\nd d l\nió d F\ni\nB\nl\n1962 (f",
@@ -2838,6 +2949,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2021-extra-coincidencias-b-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "carlos-ii-y-el-problema-sucesorio", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -2846,6 +2958,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-coincidencias-b-fuente",
+        topicSlugs: ["la-decada-moderada-constitucion-de-1845"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2021-extra-coincidencias-b-fuente.png",
@@ -2855,6 +2968,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2021-extra-coincidencias-b-texto",
+        topicSlugs: ["la-constitucion-de-1837", "el-problema-sucesorio-y-la-primera-guerr"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -2874,6 +2988,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2022-extra-a-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "carlos-ii-y-el-problema-sucesorio", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -2882,6 +2997,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-a-fuente",
+        topicSlugs: ["el-aislamiento-internacional-1945-1953-y"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-a-fuente.png",
@@ -2891,6 +3007,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-a-tema",
+        topicSlugs: ["el-problema-sucesorio-y-la-primera-guerr"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: El reinado de Isabel II (1833-1868): la primera guerra carlista. Evolución política, partidos\ny conflictos. El Estatuto Real de 1834 y las Constituciones de 1837 y 1845.",
@@ -2909,6 +3026,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2022-extra-b-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Al Ándalus: economía, sociedad y cultura.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -2917,6 +3035,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-b-fuente",
+        topicSlugs: ["la-evolucion-demografica-en-el-siglo-xix"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-b-fuente.png",
@@ -2926,6 +3045,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-b-texto",
+        topicSlugs: ["el-asesinato-de-carrero-blanco-1973-y-la", "la-agonia-del-franquismo-el-sahara-los-f"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -2946,6 +3066,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2022-extra-coincidencias-a-cuestiones",
+        topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -2954,6 +3075,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-coincidencias-a-fuente",
+        topicSlugs: ["la-regencia-de-maria-cristina-y-la-desam", "el-bienio-progresista-y-la-desamortizaci"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-coincidencias-a-fuente.png",
@@ -2963,6 +3085,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-coincidencias-a-tema",
+        topicSlugs: ["alfonso-xiii-y-el-reformismo-maura-y-can", "el-golpe-de-estado-de-primo-de-rivera-13", "la-caida-de-primo-de-rivera-y-la-dictabl"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: La dictadura de Primo de Rivera. El final del reinado de Alfonso XIII.",
@@ -2982,6 +3105,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2022-extra-coincidencias-b-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -2990,6 +3114,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-coincidencias-b-fuente",
+        topicSlugs: ["las-consecuencias-de-la-guerra-civil-esp"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2022-extra-coincidencias-b-fuente.png",
@@ -2999,6 +3124,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2022-extra-coincidencias-b-texto",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -3018,6 +3144,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2023-extra-a-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-guerra-de-sucesion-espanola-y-el-trat", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n4. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n5. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -3026,6 +3153,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-a-fuente",
+        topicSlugs: ["la-guerra-de-cuba-y-filipinas-1895-1898", "el-desastre-de-1898-santiago-de-cuba-y-e"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-a-fuente.png",
@@ -3035,6 +3163,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-a-tema",
+        topicSlugs: ["la-proclamacion-de-la-segunda-republica"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: La proclamación de la Segunda República. La Constitución de 1931. El bienio\nreformista (1931-1933).",
@@ -3053,6 +3182,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2023-extra-b-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "carlos-ii-y-el-problema-sucesorio", "carlos-iii-y-el-reformismo-ilustrado"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III",
@@ -3061,6 +3191,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-b-fuente",
+        topicSlugs: ["el-auge-de-la-oposicion-democratica-cc-o"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-b-fuente.png",
@@ -3070,6 +3201,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-b-texto",
+        topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "el-trienio-liberal-1820-1823"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -3090,6 +3222,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2023-extra-coincidencias-a-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "la-crisis-demografica-y-economica-del-siglo-xvii", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -3098,6 +3231,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-coincidencias-a-fuente",
+        topicSlugs: ["la-autarquia-economica-1939-1959-princip", "el-desarrollismo-los-planes-de-desarroll"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-coincidencias-a-fuente.png",
@@ -3107,6 +3241,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-coincidencias-a-tema",
+        topicSlugs: ["la-industrializacion-y-el-ferrocarril-xix"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: La revolución industrial en la España del siglo XIX. El sistema de comunicaciones: el\nferrocarril. Proteccionismo y librecambismo. La aparición de la banca moderna.\nB",
@@ -3126,6 +3261,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2023-extra-coincidencias-b-cuestiones",
+        topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. Los Austrias del Siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -3134,6 +3270,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-coincidencias-b-fuente",
+        topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2023-extra-coincidencias-b-fuente.png",
@@ -3143,6 +3280,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2023-extra-coincidencias-b-texto",
+        topicSlugs: ["la-legalizacion-del-pce-y-las-primeras-e", "la-constitucion-de-1978-los-padres-de-la", "el-estado-de-las-autonomias-el-terrorism"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -3162,6 +3300,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2024-extra-a-cuestiones",
+        topicSlugs: ["los-iberos-economia-sociedad-y-arte", "los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (3 puntos) CUESTIONES:\n1. Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2. Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n3. Los Reyes Católicos: unión dinástica e instituciones de gobierno. La guerra de Granada.\n4. La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
@@ -3170,6 +3309,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-a-fuente",
+        topicSlugs: ["las-fases-militares-de-la-guerra-de-la-i"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-a-fuente.png",
@@ -3179,6 +3319,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-a-tema",
+        topicSlugs: ["alfonso-xiii-y-el-reformismo-maura-y-can", "el-golpe-de-estado-de-primo-de-rivera-13", "la-caida-de-primo-de-rivera-y-la-dictabl"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: La Dictadura de Primo de Rivera y el final del reinado de Alfonso XIII.",
@@ -3197,6 +3338,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2024-extra-b-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "los-modelos-de-repoblacion-siglos-viii-x", "la-conquista-y-organizacion-del-imperio", "la-revolucion-de-los-precios-el-impacto", "las-reformas-institucionales-borbonicas", "la-politica-americana-de-los-borbones-vi"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (3 puntos) CUESTIONES:\n1. La monarquía visigoda.\n2. Modelos de repoblación. Organización estamental en los reinos cristianos medievales.\n3. Sociedad, economía y cultura de los siglos XVI y XVII.\n4. Las reformas borbónicas en los virreinatos americanos.",
@@ -3205,6 +3347,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-b-fuente",
+        topicSlugs: ["la-crisis-de-la-ucd-y-el-cambio-la-victo", "los-gobiernos-del-psoe-1982-1996-cee-ota", "el-declive-de-los-gobiernos-gonzalez-cor", "la-integracion-europea-y-la-alternancia-pp-psoe"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-b-fuente.png",
@@ -3214,6 +3357,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-b-texto",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -3234,6 +3378,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2024-extra-coincidencias-a-cuestiones",
+        topicSlugs: ["origenes-reino-visigodo", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "los-austrias-menores-el-sistema-de-valid", "el-conde-duque-de-olivares-y-la-union-de", "la-crisis-de-1640-la-rebelion-de-catalun", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-industrializacion-y-el-comercio-en-el-siglo-xviii"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A.1 (3 puntos) CUESTIONES:\n1. La monarquía visigoda.\n2. La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3. Los Austrias del siglo XVII. Política interior y exterior.\n4. Sociedad, economía y cultura del siglo XVIII.",
@@ -3242,6 +3387,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-coincidencias-a-fuente",
+        topicSlugs: ["la-autarquia-economica-1939-1959-princip", "el-desarrollismo-los-planes-de-desarroll"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-coincidencias-a-fuente.png",
@@ -3251,6 +3397,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-coincidencias-a-tema",
+        topicSlugs: ["carlos-iv-godoy-y-el-impacto-de-la-revol", "las-fases-militares-de-la-guerra-de-la-i"],
         tipo: "tema",
         label: "Tema",
         enunciado: "A.3 (4,5 puntos) TEMA: El reinado de Carlos IV. La Guerra de la Independencia.",
@@ -3270,6 +3417,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2024-extra-coincidencias-b-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "la-guerra-de-sucesion-espanola-y-el-trat"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "B.1 (3 puntos) CUESTIONES:\n1. El Paleolítico y el Neolítico.\n2. Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n3. Exploración, conquista y colonización de América (desde 1492 y durante el siglo XVI).\n4. La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
@@ -3278,6 +3426,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-coincidencias-b-fuente",
+        topicSlugs: ["la-oposicion-al-sistema-republicanos-car"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2024-extra-coincidencias-b-fuente.png",
@@ -3287,6 +3436,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2024-extra-coincidencias-b-texto",
+        topicSlugs: ["el-golpe-de-estado-de-primo-de-rivera-13", "el-directorio-civil-de-primo-de-rivera-p"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto.\n2. Señale y explique las ideas fundamentales del texto.\n3. Responda a la cuestión histórica planteada.",
@@ -3306,6 +3456,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2025-extra-a-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "origenes-reino-visigodo", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "la-reconquista-los-grandes-hitos-de-la-e", "el-nucleo-astur-leones-de-covadonga-al-r", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "el-modelo-politico-de-felipe-ii-centrali", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Los Austrias del siglo XVI. Política interior y exterior.\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3314,6 +3465,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-a-fuente",
+        topicSlugs: ["las-fases-militares-de-la-guerra-de-la-i"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-fuente-1.png",
@@ -3323,6 +3475,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-a-texto",
+        topicSlugs: ["la-caida-de-primo-de-rivera-y-la-dictabl"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
@@ -3342,6 +3495,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2025-extra-b-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "origenes-reino-visigodo", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "la-reconquista-los-grandes-hitos-de-la-e", "el-nucleo-astur-leones-de-covadonga-al-r", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "el-modelo-politico-de-felipe-ii-centrali", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Los Austrias del siglo XVI. Política interior y exterior.\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3350,6 +3504,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-b-fuente",
+        topicSlugs: ["la-evolucion-demografica-en-el-siglo-xix"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-fuente-2.png",
@@ -3359,6 +3514,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-b-texto",
+        topicSlugs: [],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
@@ -3379,6 +3535,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2025-extra-coincidencias-a-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-iberos-economia-sociedad-y-arte", "los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "la-dictadura-de-almanzor-y-la-fitna-976", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "la-reconquista-los-grandes-hitos-de-la-e", "el-nucleo-astur-leones-de-covadonga-al-r", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: evolución política.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Exploración y conquista de América. Incorporación del Nuevo Mundo a la Monarquía hispánica (desde\n1492 y durante el siglo XVI).\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3387,6 +3544,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-coincidencias-a-fuente",
+        topicSlugs: ["la-regencia-de-maria-cristina-y-la-desam", "el-bienio-progresista-y-la-desamortizaci"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-coincidencias-fuente-1.png",
@@ -3396,6 +3554,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-coincidencias-a-texto",
+        topicSlugs: ["el-sistema-canovista-constitucion-de-187"],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
@@ -3416,6 +3575,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
       {
         id: "h-2025-extra-coincidencias-b-cuestiones",
+        topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-iberos-economia-sociedad-y-arte", "los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "la-dictadura-de-almanzor-y-la-fitna-976", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "la-reconquista-los-grandes-hitos-de-la-e", "el-nucleo-astur-leones-de-covadonga-al-r", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
         tipo: "cuestiones",
         label: "Cuestiones",
         enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-El Paleolítico y el Neolítico.\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: evolución política.\n-Los reinos cristianos: evolución de la Reconquista y organización política.\n3.-Responda a una de estas dos preguntas:\n-Exploración y conquista de América. Incorporación del Nuevo Mundo a la Monarquía hispánica (desde\n1492 y durante el siglo XVI).\n-La nueva Monarquía borbónica. Los decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3424,6 +3584,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-coincidencias-b-fuente",
+        topicSlugs: ["la-regencia-de-maria-cristina-y-la-desam", "la-regencia-del-general-espartero-1840-1", "la-constitucion-de-1837"],
         tipo: "fuente",
         label: "Fuente",
         imagen_url: "/historia-imgs/extraordinarias/historia-2025-extra-coincidencias-fuente-2.png",
@@ -3433,6 +3594,7 @@ export const examenesHistoria: ExamenHistoria[] = [
       },
       {
         id: "h-2025-extra-coincidencias-b-texto",
+        topicSlugs: [],
         tipo: "texto",
         label: "Texto",
         enunciado: "ANÁLISIS DE TEXTO O TEMA:\nElija entre el análisis de texto o el tema, y responda a las preguntas planteadas.",
@@ -3448,6 +3610,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2018-modelo-A-cuestiones",
+          topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-guerra-de-sucesion-espanola-y-el-trat", "carlos-iii-y-el-reformismo-ilustrado"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "1) Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2) Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3) Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de\nrepoblación.\n4) La Monarquía Hispánica de Felipe II. Gobierno y administración.  Los problemas internos. Guerras y\nsublevación en Europa.\n5) La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.\n6) Ideas fundamentales de la Ilustración. El despotismo ilustrado: Carlos III.",
@@ -3456,6 +3619,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2018-modelo-A-fuente",
+          topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2018-modelo-a-fuente.png",
@@ -3465,6 +3629,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2018-modelo-A-tema",
+          topicSlugs: ["juan-carlos-i-arias-navarro-y-el-inicio", "adolfo-suarez-y-la-ley-para-la-reforma-p"],
           tipo: "tema",
           label: "Tema",
           enunciado: "TEMA: La Transición: alternativas políticas tras la muerte de Franco. El papel del Rey y el gobierno de\nAdolfo Suárez. El restablecimiento de la democracia: las elecciones de junio de 1977. La Constitución\nde 1978. El estado de las autonomías. El terrorismo durante la transición.",
@@ -3479,6 +3644,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2018-modelo-B-cuestiones",
+          topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "1) Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2) Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n3) Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n4) El Imperio de los Austrias: España bajo Carlos I.  Política interior y conflictos europeos.\n5) Exploración   y   colonización   de   América.   Consecuencias   de   los descubrimientos en España,\nEuropa y América.\n6) La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3487,6 +3653,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2018-modelo-B-fuente",
+          topicSlugs: ["el-auge-de-la-oposicion-democratica-cc-o"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2018-modelo-b-fuente.png",
@@ -3496,6 +3663,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2018-modelo-B-texto",
+          topicSlugs: ["la-regencia-de-maria-cristina-y-la-desam", "el-bienio-progresista-y-la-desamortizaci"],
           tipo: "texto",
           label: "Texto",
           enunciado: "TEXTO:   Real Decreto declarando la Venta de bienes del Clero\nAtendiendo a la necesidad y conveniencia de disminuir la deuda pública consolidada, y de entregar al interés\nindividual la masa de bienes raíces, que han venido a ser propiedad de la Nación, a fin de que la agricultura y el\ncomercio saquen de ellos las ventajas que no podrían conseguirse por entero en su actual estado (...)\nconformándome con lo propuesto por el Consejo de Ministros, en nombre de mi excelsa hija la reina doña Isabel II,\nhe venido en decretar lo siguiente:\nArtículo 1º. Quedan declarados en venta desde ahora todos los bienes raíces de cualquier clase que hubiesen\npertenecido a las comunidades y corporaciones religiosas extinguidas y los demás que hayan sido adjudicados a la\nNación por cualquier título o motivo...\nArtículo 2º. Se exceptúan de esta medida general los edificios que el gobierno destine para el servicio público o para\nconservar monumentos de las artes, o para honrar la memoria de hazañas nacionales. El mismo gobierno publicará\nla lista de los edificios que con este objeto deben quedar excluidos de la venta pública.\nArtículo 4º. Que todos los medios rústicos susceptibles de división, sin menoscabo de su valor, o sin graves\ndificultades para su propia venta, se distribuyan en el mayor número de partes o suertes que se pudiere.\nArtículo 5º. Que estas suertes se pongan en venta con total separación, como si cada una hubiese compuesto una\npropiedad aislada.\nEn el Pardo a 19 de febrero de 1836. D. Juan Álvarez Mendizábal Gaceta de Madrid, 21 de febrero de 1836.\nANÁLISIS DEL TEXTO Y CUESTIÓN:\n1.\nExplique razonadamente el tipo de texto y resuma las ideas fundamentales del mismo (puntuación máxima:\n1,5 puntos).\n2.\nResponda a la siguiente cuestión (puntuación máxima: 3 puntos): El reinado de Isabel II (1833-1868): las\ndesamortizaciones de Mendizábal y Madoz.",
@@ -3510,6 +3678,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2019-modelo-A-cuestiones",
+          topicSlugs: ["origenes-reino-visigodo", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "el-fin-de-la-hegemonia-westfalia-1648-lo", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "1. El reino visigodo: origen y organización política. Los concilios.\n2. Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad\nestamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y\ncomercio con América. Causas del despegue económico de Cataluña.",
@@ -3518,6 +3687,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2019-modelo-A-fuente",
+          topicSlugs: ["las-fases-militares-de-la-guerra-de-la-i", "la-guerra-de-guerrillas-tactica-lideres"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2019-modelo-a-fuente.png",
@@ -3527,6 +3697,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2019-modelo-A-tema",
+          topicSlugs: ["la-autarquia-economica-1939-1959-princip", "el-desarrollismo-los-planes-de-desarroll", "las-transformaciones-sociales-del-desarr"],
           tipo: "tema",
           label: "Tema",
           enunciado: "TEMA: Política económica del franquismo: de la autarquía al desarrollismo. Transformaciones\nsociales: causas y evolución.",
@@ -3541,6 +3712,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2019-modelo-B-cuestiones",
+          topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-crisis-demografica-y-economica-del-siglo-xvii", "carlos-ii-y-el-problema-sucesorio", "los-decretos-de-nueva-planta-y-la-centra"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los\námbitos social, económico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de\nNavarra al final de la Edad Media.\n4. Principales factores de la crisis demográfica y económica del siglo XVII y sus\nconsecuencias.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema\nsucesorio.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y\nalcance de las reformas.",
@@ -3549,6 +3721,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2019-modelo-B-fuente",
+          topicSlugs: ["la-proclamacion-de-la-segunda-republica"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2019-modelo-b-fuente.png",
@@ -3558,6 +3731,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2019-modelo-B-texto",
+          topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad y concisión el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): El reinado de Amadeo\nde Saboya.",
@@ -3573,6 +3747,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2020-modelo-A-cuestiones",
+          topicSlugs: ["origenes-reino-visigodo", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-crisis-demografica-y-economica-del-siglo-xvii", "los-decretos-de-nueva-planta-y-la-centra"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de\nrepoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3581,6 +3756,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2020-modelo-A-fuente",
+          topicSlugs: ["la-constitucion-de-1978-los-padres-de-la"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2020-modelo-a-fuente.png",
@@ -3590,6 +3766,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2020-modelo-A-tema",
+          topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
           tipo: "tema",
           label: "Tema",
           enunciado: "A.3 (4,5 puntos) TEMA:\nEl Sexenio Democrático (1868-1874): la constitución de 1869. Evolución política: gobierno provisional,\nreinado de Amadeo de Saboya y Primera República.",
@@ -3604,6 +3781,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2020-modelo-B-cuestiones",
+          topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-guerra-de-sucesion-espanola-y-el-trat"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartesos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad\nestamental.\n4. El significado de1492. La guerra de Granada y el descubrimiento de América.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -3612,6 +3790,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2020-modelo-B-fuente",
+          topicSlugs: ["la-constitucion-de-1837"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2020-modelo-b-fuente.png",
@@ -3621,6 +3800,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2020-modelo-B-texto",
+          topicSlugs: ["las-bases-ideologicas-del-franquismo-y-l"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0’5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión. (Puntuación máxima: 3 puntos): La creación del Estado franquista.\nEtapas de la Dictadura y principales características de cada una de ellas.",
@@ -3636,6 +3816,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2021-modelo-A-cuestiones",
+          topicSlugs: ["los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "tartessos-el-primer-gran-reino-peninsula", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-union-dinastica-y-la-construccion-del", "la-expansion-territorial-guerra-de-grana", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Los pueblos prerromanos. Las colonizaciones históricas: fenicios y griegos. Tartessos.\n2. Al Ándalus: economía, sociedad y cultura.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. Los Reyes Católicos: unión dinástica e instituciones de gobierno.\n5. Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio\ncon América. Causas del despegue económico de Cataluña.",
@@ -3644,6 +3825,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2021-modelo-A-fuente",
+          topicSlugs: ["el-problema-sucesorio-y-la-primera-guerr"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2021-modelo-a-fuente.png",
@@ -3653,6 +3835,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2021-modelo-A-tema",
+          topicSlugs: ["el-alzamiento-de-julio-de-1936-y-el-puen", "la-dimension-internacional-el-comite-de"],
           tipo: "tema",
           label: "Tema",
           enunciado: "A.3 (4,5 puntos) TEMA:\nLa Guerra Civil: la sublevación militar y el estallido de la guerra. La dimensión internacional del\nconflicto.",
@@ -3667,6 +3850,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2021-modelo-B-cuestiones",
+          topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "carlos-ii-y-el-problema-sucesorio", "los-decretos-de-nueva-planta-y-la-centra"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "B.1 (4 puntos) CUESTIONES:\n1. Sociedad y economía en el Paleolítico y Neolítico. La pintura rupestre.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final\nde la Edad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Crisis y decadencia de la Monarquía Hispánica: el reinado de Carlos II y el problema sucesorio.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3675,6 +3859,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2021-modelo-B-fuente",
+          topicSlugs: ["el-frente-popular-elecciones-de-febrero"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2021-modelo-b-fuente.png",
@@ -3684,6 +3869,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2021-modelo-B-texto",
+          topicSlugs: ["el-sexenio-democratico-1868-1874-la-glor"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El Sexenio Democrático (1868-1874): la Constitución de 1869.\nEvolución política: gobierno provisional. (Puntuación máxima: 3 puntos).",
@@ -3699,6 +3885,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2022-modelo-A-cuestiones",
+          topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "la-expansion-territorial-guerra-de-grana", "el-descubrimiento-de-america-1492-y-el-t", "el-fin-de-la-hegemonia-westfalia-1648-lo", "los-decretos-de-nueva-planta-y-la-centra"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A.1 (4 puntos) CUESTIONES:\n1. Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2. Al Ándalus: reinos de taifas. Reino nazarí.\n3. Los reinos cristianos en la Edad Media: organización política, régimen señorial y sociedad estamental.\n4. El significado de 1492. La guerra de Granada y el descubrimiento de América.\n5. La guerra de los Treinta Años y la pérdida de la hegemonía española en Europa.\n6. La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las\nreformas.",
@@ -3707,6 +3894,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2022-modelo-A-fuente",
+          topicSlugs: ["la-dimension-internacional-el-comite-de", "el-apoyo-sovietico-las-brigadas-internac"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2022-modelo-a-fuente.png",
@@ -3716,6 +3904,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2022-modelo-A-tema",
+          topicSlugs: ["la-regencia-de-maria-cristina-y-la-desam", "el-bienio-progresista-y-la-desamortizaci"],
           tipo: "tema",
           label: "Tema",
           enunciado: "A.3 (4,5 puntos) TEMA: El reinado de Isabel II (1833-1868): las desamortizaciones de Mendizábal y Madoz.\nDe la sociedad estamental a la sociedad de clases.",
@@ -3730,6 +3919,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2022-modelo-B-cuestiones",
+          topicSlugs: ["origenes-reino-visigodo", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "los-modelos-de-repoblacion-siglos-viii-x", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "la-crisis-demografica-y-economica-del-siglo-xvii", "la-industrializacion-y-el-comercio-en-el-siglo-xviii", "la-politica-americana-de-los-borbones-vi"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "B.1 (4 puntos) CUESTIONES:\n1. El reino visigodo: origen y organización política. Los concilios.\n2. Los primeros núcleos de resistencia cristiana. Principales etapas de la Reconquista. Modelos de repoblación.\n3. Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4. La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5. Principales factores de la crisis demográfica y económica del siglo XVII y sus consecuencias.\n6. La España del siglo XVIII. Expansión y transformaciones económicas: agricultura, industria y comercio con\nAmérica. Causas del despegue económico de Cataluña.",
@@ -3738,6 +3928,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2022-modelo-B-fuente",
+          topicSlugs: ["restauracion", "el-anarquismo-en-espana-la-ftre-y-la-pro", "el-socialismo-en-espana-el-psoe-y-la-ugt"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2022-modelo-b-fuente.png",
@@ -3747,6 +3938,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2022-modelo-B-texto",
+          topicSlugs: ["la-legalizacion-del-pce-y-las-primeras-e", "la-constitucion-de-1978-los-padres-de-la", "el-estado-de-las-autonomias-el-terrorism"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): Las elecciones de junio de 1977. La\nConstitución de 1978. El Estado de las Autonomías.\n\nC\nd\nl\nl\ni\nó l\nió",
@@ -3762,6 +3954,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2023-modelo-A-cuestiones",
+          topicSlugs: ["origenes-reino-visigodo", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "las-comunidades-de-castilla-1520-1521", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "los-decretos-de-nueva-planta-y-la-centra"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A.1. (4 puntos) CUESTIONES\n1.-El reino visigodo: origen y organización política. Los concilios.\n2.-Al Ándalus: reinos de taifas. Reino nazarí.\n3.-Organización política de la Corona de Castilla, de la Corona de Aragón y del Reino de Navarra al final de la\nEdad Media.\n4.-El Imperio de los Austrias: España bajo Carlos I. Política interior y conflictos europeos.\n5.-Exploración y colonización de América. Consecuencias de los descubrimientos en España, Europa y América.\n6.-La nueva Monarquía Borbónica. Los Decretos de Nueva Planta. Modelo de Estado y alcance de las reformas.",
@@ -3770,6 +3963,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2023-modelo-A-fuente",
+          topicSlugs: ["la-crisis-de-1917-las-juntas-de-defensa"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2023-modelo-a-fuente.png",
@@ -3779,6 +3973,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2023-modelo-A-tema",
+          topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "la-emancipacion-de-la-america-espanola-1"],
           tipo: "tema",
           label: "Tema",
           enunciado: "A.3. (4.5 puntos) TEMA: El reinado de Fernando VII: liberalismo frente a absolutismo. El proceso de\nindependencia de las colonias americanas.",
@@ -3793,6 +3988,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2023-modelo-B-cuestiones",
+          topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "el-nucleo-astur-leones-de-covadonga-al-r", "los-nucleos-pirenaicos-navarra-aragon-y", "corona-de-castilla-vs-corona-de-aragon-d", "el-modelo-politico-de-felipe-ii-centrali", "los-conflictos-internos-de-felipe-ii-las", "la-batalla-de-lepanto-1571-y-la-rebelion", "la-armada-invencible-1588-y-la-union-ibe", "los-austrias-menores-el-sistema-de-valid", "la-crisis-de-1640-la-rebelion-de-catalun", "la-guerra-de-sucesion-espanola-y-el-trat"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "B.1. (4 puntos) CUESTIONES\n1.-Conquista y romanización de la Península Ibérica. Principales aportaciones romanas en los ámbitos social,\neconómico y cultural.\n2.-Al Ándalus: la conquista musulmana de la Península Ibérica. Emirato y califato de Córdoba.\n3.-Los reinos cristianos de la Edad Media: organización política, régimen señorial y sociedad estamental.\n4.-La Monarquía Hispánica de Felipe II. Gobierno y administración. Los problemas internos. Guerras y\nsublevación en Europa.\n5.-Los Austrias del siglo XVII: el gobierno de validos. La crisis de 1640.\n6.-La Guerra de Sucesión Española y el sistema de Utrecht. Los Pactos de Familia.",
@@ -3801,6 +3997,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2023-modelo-B-fuente",
+          topicSlugs: ["la-evolucion-demografica-en-el-siglo-xix"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2023-modelo-b-fuente.png",
@@ -3810,6 +4007,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2023-modelo-B-texto",
+          topicSlugs: ["juan-carlos-i-arias-navarro-y-el-inicio", "adolfo-suarez-y-la-ley-para-la-reforma-p"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1.-Resuma con brevedad el contenido del texto (Puntuación máxima: 0.5 puntos).\n2.-Señale y explique las ideas fundamentales del texto (Puntuación máxima: 1 punto).\n3.-Responda a la siguiente cuestión (Puntuación máxima: 3 puntos): La Transición: alternativas políticas tras la\nmuerte de Franco. El papel del rey y el gobierno de Adolfo Suárez.",
@@ -3825,6 +4023,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2024-modelo-A-cuestiones",
+          topicSlugs: ["la-conquista-romana-de-hispania-las-tres", "la-romanizacion-mecanismos-economia-y-le", "la-conquista-musulmana-711-y-el-emirato", "el-emirato-independiente-de-abderraman-i", "el-califato-de-cordoba-esplendor-y-poder", "la-dictadura-de-almanzor-y-la-fitna-976", "los-reinos-de-taifas-y-las-invasiones-no", "el-reino-nazari-de-granada-1238-1492", "la-herencia-territorial-de-carlos-i-y-el", "la-politica-exterior-de-carlos-v-francia", "el-modelo-politico-de-felipe-ii-centrali", "la-industrializacion-y-el-comercio-en-el-siglo-xviii"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A.1 (3 puntos) CUESTIONES:\n1. La Hispania romana.\n2. Al-Ándalus: evolución política.\n3. Los Austrias del siglo XVI. Política interior y exterior.\n4. Sociedad, economía y cultura del siglo XVIII.",
@@ -3833,6 +4032,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2024-modelo-A-fuente",
+          topicSlugs: ["la-autarquia-economica-1939-1959-princip", "el-desarrollismo-los-planes-de-desarroll"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2024-modelo-a-fuente.png",
@@ -3842,6 +4042,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2024-modelo-A-tema",
+          topicSlugs: ["la-guerra-de-cuba-y-filipinas-1895-1898", "el-desastre-de-1898-santiago-de-cuba-y-e"],
           tipo: "tema",
           label: "Tema",
           enunciado: "A.3 (4,5 puntos) TEMA: Las guerras de Cuba, el conflicto bélico contra Estados Unidos y la crisis de 1898.",
@@ -3856,6 +4057,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2024-modelo-B-cuestiones",
+          topicSlugs: ["el-paleolitico-en-la-peninsula-iberica", "el-neolitico-la-revolucion-agricola-y-el", "el-nucleo-astur-leones-de-covadonga-al-r", "la-reconquista-los-grandes-hitos-de-la-e", "el-descubrimiento-de-america-1492-y-el-t", "la-conquista-y-organizacion-del-imperio", "la-guerra-de-sucesion-espanola-y-el-trat"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "B.1 (3 puntos) CUESTIONES:\n1. El Paleolítico y el Neolítico.\n2. Los reinos cristianos: evolución de la conquista de la Península y organización política.\n3. Exploración, conquista y colonización de América (desde 1492 y durante el siglo XVI).\n4. La Guerra de Sucesión. La Paz de Utrecht. Los Pactos de Familia.",
@@ -3864,6 +4066,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2024-modelo-B-fuente",
+          topicSlugs: ["las-cortes-de-cadiz-composicion-corrient", "la-constitucion-de-1812-la-pepa-principi"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2024-modelo-b-fuente.png",
@@ -3873,6 +4076,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2024-modelo-B-texto",
+          topicSlugs: ["la-oposicion-al-sistema-republicanos-car"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: La crisis de la Restauración: La oposición al régimen. (Puntuación\nmáxima: 3 puntos).",
@@ -3888,6 +4092,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2026-modelo-A-cuestiones",
+          topicSlugs: ["los-iberos-economia-sociedad-y-arte", "los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "origenes-reino-visigodo", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-conquista-y-organizacion-del-imperio", "la-revolucion-de-los-precios-el-impacto", "la-guerra-de-sucesion-espanola-y-el-trat"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3.-Responda a una de estas dos preguntas:\n-Sociedad, economía y cultura de los siglos XVI y XVII.\n-La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
@@ -3896,6 +4101,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2026-modelo-A-fuente",
+          topicSlugs: ["el-bienio-reformista-reforma-militar-y-r", "el-bienio-reformista-reforma-educativa-r"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2026-modelo-a-fuente.png",
@@ -3905,6 +4111,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2026-modelo-A-texto",
+          topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "la-emancipacion-de-la-america-espanola-1"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII. (Puntuación máxima: 2,5 puntos).\n\n2.Tema: El sistema canovista: la Constitución de 1876 y el turno de partidos. La oposición al sistema.",
@@ -3920,6 +4127,7 @@ export const examenesHistoria: ExamenHistoria[] = [
     preguntas: [
         {
           id: "h-2026-modelo-B-cuestiones",
+          topicSlugs: ["los-iberos-economia-sociedad-y-arte", "los-celtas-y-celtiberos-organizacion-y-c", "las-colonizaciones-historicas-fenicios-g", "origenes-reino-visigodo", "la-economia-de-al-andalus-agricultura-in", "la-sociedad-andalusi-jerarquia-etnico-re", "el-legado-cultural-y-cientifico-de-al-an", "corona-de-castilla-vs-corona-de-aragon-d", "los-nucleos-pirenaicos-navarra-aragon-y", "la-conquista-y-organizacion-del-imperio", "la-revolucion-de-los-precios-el-impacto", "la-guerra-de-sucesion-espanola-y-el-trat"],
           tipo: "cuestiones",
           label: "Cuestiones",
           enunciado: "A. (3 puntos) CUESTIONES:\nResponda a tres cuestiones, una por cada bloque de preguntas.\n1.-Responda a una de estas dos preguntas:\n-Los pueblos prerromanos y las colonizaciones de los pueblos del Mediterráneo.\n-La monarquía visigoda.\n2.-Responda a una de estas dos preguntas:\n-Al-Ándalus: economía, sociedad y cultura. El legado judío en la Península ibérica.\n-La Baja Edad Media en las Coronas de Castilla y de Aragón y en el Reino de Navarra.\n3.-Responda a una de estas dos preguntas:\n-Sociedad, economía y cultura de los siglos XVI y XVII.\n-La Guerra de Sucesión. La Paz de Utrecht. Los pactos de familia.",
@@ -3928,6 +4136,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2026-modelo-B-fuente",
+          topicSlugs: ["la-integracion-europea-y-la-alternancia-pp-psoe"],
           tipo: "fuente",
           label: "Fuente",
           imagen_url: "/historia-imgs/modelos/historia-2026-modelo-b-fuente.png",
@@ -3937,6 +4146,7 @@ export const examenesHistoria: ExamenHistoria[] = [
         },
         {
           id: "h-2026-modelo-B-texto",
+          topicSlugs: ["fernando-vii-el-sexenio-absolutista-1814", "la-emancipacion-de-la-america-espanola-1"],
           tipo: "texto",
           label: "Texto",
           enunciado: "ANÁLISIS DEL TEXTO Y CUESTIONES:\n1. Resuma con brevedad el contenido del texto. (Puntuación máxima: 0,5 puntos).\n2. Señale y explique las ideas fundamentales del texto. (Puntuación máxima: 1 punto).\n3. Responda a la siguiente cuestión: El reinado de Fernando VII. (Puntuación máxima: 2,5 puntos).\n\n2.Tema: El sistema canovista: la Constitución de 1876 y el turno de partidos. La oposición al sistema.",

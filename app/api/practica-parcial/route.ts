@@ -246,19 +246,38 @@ export async function POST(request: NextRequest) {
   // don't have topicSlugs populated in their exercise data yet) fall
   // straight through unaffected.
   let historiaTopicSlugs: string[] | undefined
+  let strictHistoriaMatch = false
   if (subject === 'historia' && examId && examOwned) {
     historiaTopicSlugs = await resolveExamHistoriaTopics(db, user.id, examId, examScope)
+    // Only a Historia Parcial's own practice request (real, owned examId,
+    // 'parcial' scope) should be blocked outright when there's nothing to
+    // filter by — 'global' scope has no chip set to require, and non-exam
+    // Historia practice (e.g. sunday_mock) never had topic filtering to
+    // begin with, so neither should suddenly start failing here.
+    strictHistoriaMatch = examScope !== 'global'
+  } else if (subject === 'historia' && missionId) {
+    // Misión automática "ejercicios de bloque" (ver
+    // app/lib/camino/generateBlockPracticeMission.ts, disparada al
+    // completar el último tema de Curso de un bloque de Historia) — no está
+    // ligada a ningún examen/exam_topics, así que no hay ownership que
+    // comprobar: sus topicSlugs (todos los temas finos del bloque recién
+    // terminado) ya viajan directos en la propia fila de camino_calendar.
+    const { data: missionRow } = await db
+      .from('camino_calendar')
+      .select('mission_type, metadata')
+      .eq('id', missionId)
+      .eq('user_id', user.id)
+      .eq('subject', 'historia_espana')
+      .maybeSingle()
+    const meta = (missionRow?.metadata ?? {}) as Record<string, unknown>
+    if (missionRow?.mission_type === 'pau_practice' && typeof meta.block_practice_for === 'string' && Array.isArray(meta.topicSlugs)) {
+      historiaTopicSlugs = meta.topicSlugs.filter((s): s is string => typeof s === 'string')
+      strictHistoriaMatch = true
+    }
   }
-
-  // Only a Historia Parcial's own practice request (real, owned examId,
-  // 'parcial' scope) should be blocked outright when there's nothing to
-  // filter by — 'global' scope has no chip set to require, and non-exam
-  // Historia practice (e.g. sunday_mock) never had topic filtering to begin
-  // with, so neither should suddenly start failing here.
-  const strictHistoriaMatch = subject === 'historia' && Boolean(examId && examOwned) && examScope !== 'global'
   const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs, strictHistoriaMatch)
   if (!session) {
-    if (strictHistoriaMatch && !historiaTopicSlugs?.length) {
+    if (strictHistoriaMatch && examId && !historiaTopicSlugs?.length) {
       return NextResponse.json({ error: 'needs_topics', message: 'Este examen necesita que elijas los temas.', examId }, { status: 422 })
     }
     return NextResponse.json({ error: 'No hay preguntas disponibles para este bloque' }, { status: 422 })

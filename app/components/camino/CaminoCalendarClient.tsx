@@ -343,6 +343,27 @@ function hrefForMission(mission: Mission): MissionHrefResult {
       }
     }
   }
+  if (mission.missionType === 'pau_practice') {
+    // Misión automática de "ejercicios de bloque" (ver
+    // generateBlockPracticeMission.ts) — igual que partial_practice arriba,
+    // pero sin examId: no está ligada a ningún examen, así que
+    // /api/practica-parcial resuelve sus topicSlugs directo de esta misma
+    // fila (metadata.topicSlugs) en vez de exam_topics.
+    if (mission.status === 'done') {
+      const resultId = typeof mission.metadata?.practica_simulacro_id === 'string' ? mission.metadata.practica_simulacro_id : ''
+      return resultId
+        ? { href: `/simulacros/${resultId}/results`, fallback: '' }
+        : { href: '', fallback: 'Práctica completada.' }
+    }
+    const blockPracticeFor = typeof mission.metadata?.block_practice_for === 'string' ? mission.metadata.block_practice_for : ''
+    const simSubject = String(mission.metadata?.simulacro_subject ?? '')
+    if (blockPracticeFor && simSubject) {
+      return {
+        href: `/simulacros/practica/nueva?subject=${encodeURIComponent(simSubject)}&block=${encodeURIComponent(blockPracticeFor)}&source=camino_block_practice&missionId=${encodeURIComponent(mission.id)}`,
+        fallback: '',
+      }
+    }
+  }
   const target = mission.href ? { href: mission.href, fallback: '' } : getMissionTarget(mission.kind, mission.subject, mission.topic, mission.block)
   if (!target.href) return target
   const separator = target.href.includes('?') ? '&' : '?'

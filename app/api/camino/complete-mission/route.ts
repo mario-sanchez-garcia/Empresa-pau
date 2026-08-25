@@ -6,6 +6,7 @@ import { awardXp } from '@/app/lib/camino/awardXp'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { getTopicByV2SortOrder, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { resolveTopicIdentity } from '@/app/lib/camino/resolveTopicIdentity'
+import { maybeGenerateBlockPracticeMission } from '@/app/lib/camino/generateBlockPracticeMission'
 
 export const dynamic = 'force-dynamic'
 
@@ -145,6 +146,12 @@ export async function POST(request: NextRequest) {
         metadata: topicId ? { free_initiative: true, topic_id: topicId } : { free_initiative: true },
       }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order' })
 
+      if (missionType === 'concept' || missionType === 'review') {
+        await maybeGenerateBlockPracticeMission(db, user.id, subject, v2SortOrder).catch(err => {
+          console.error('[camino/complete-mission] block_practice_check_failed', err)
+        })
+      }
+
       return NextResponse.json({ success: false, reason: 'free_initiative_recorded' })
     }
 
@@ -172,6 +179,20 @@ export async function POST(request: NextRequest) {
     // PASO 4 — Idempotencia: 0 filas afectadas = ya completada entre medias
     if (!updated || updated.length === 0) {
       return NextResponse.json({ success: false, reason: 'already_completed' })
+    }
+
+    // PASO 2a — Historia: si esta finalización completa TODO un bloque de
+    // Curso (todos sus temas finos en 'completed'), genera automáticamente
+    // una misión de "ejercicios de bloque" — ver
+    // app/lib/camino/generateBlockPracticeMission.ts. Solo para las
+    // misiones que representan un tema real de Curso (concept/review);
+    // evau_practice/comment_text/partial_practice nunca lo disparan.
+    // Best-effort: un fallo aquí no debe impedir que la misión ya
+    // completada (arriba) ni el XP (abajo) se guarden.
+    if (missionType === 'concept' || missionType === 'review') {
+      await maybeGenerateBlockPracticeMission(db, user.id, subject, v2SortOrder).catch(err => {
+        console.error('[camino/complete-mission] block_practice_check_failed', err)
+      })
     }
 
     // PASO 2b — Marcar cola como completada (best-effort)

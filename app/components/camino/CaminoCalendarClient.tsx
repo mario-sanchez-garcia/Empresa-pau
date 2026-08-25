@@ -897,6 +897,12 @@ export default function CaminoCalendarClient() {
   const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
   const [exams, setExams] = useState<StudentExam[]>([])
+  // ?editExam=<id> (used by the "elige tus temas" message on a Historia
+  // Parcial with no exam_topics, see app/simulacros/page.tsx) deep-links
+  // straight into that exam's edit modal instead of leaving the student to
+  // hunt for it in the list.
+  const editExamParam = searchParams.get('editExam')
+  const editExamParamHandledRef = useRef<string | null>(null)
   const [xpTotal, setXpTotal] = useState(0)
   const [weeklyXP, setWeeklyXP] = useState(0)
   const [weeklySimsCompleted, setWeeklySimsCompleted] = useState(0)
@@ -1736,6 +1742,13 @@ export default function CaminoCalendarClient() {
       }, () => undefined)
     }
   }
+  useEffect(() => {
+    if (!editExamParam || editExamParamHandledRef.current === editExamParam) return
+    const exam = exams.find(e => e.id === editExamParam)
+    if (!exam) return
+    editExamParamHandledRef.current = editExamParam
+    openEditExam(exam)
+  }, [editExamParam, exams])
   async function saveExam() {
     if (!examDraft.subject || !examDraft.date || savingExam) return
     const isHistoria = normalizeSubjectSlug(examDraft.subject) === 'historia_espana'
@@ -4044,6 +4057,7 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
                 <HistoriaTopicChips
                   selectedIds={draft.topicIds}
                   onChange={ids => setDraft({ ...draft, topicIds: ids })}
+                  blockFilter={draft.block}
                 />
                 {draft.topicIds.length === 0 && (
                   <p style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>Elige al menos un tema.</p>

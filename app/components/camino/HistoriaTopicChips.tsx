@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
 
 type CurriculumTopicRow = {
@@ -43,6 +43,20 @@ function groupByBlock(rows: CurriculumTopicRow[]): Block[] {
   return blocks
 }
 
+// Same normalization family used elsewhere for free-text block matching
+// (blockNormalization.ts, injectPartialExamMissions.ts's toSlug) — here also
+// strips a leading article, since curriculum_topics.block_title and the exam
+// modal's BLOQUE dropdown both use titles like "La Guerra Civil" while a
+// student's free-typed/legacy exam.block often reads just "Guerra Civil".
+function normalizeBlockText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/^(la|el|los|las)\s+/, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
 // Controlled multi-select: the alumno puede elegir varios temas de varios
 // bloques a la vez para un mismo Parcial de Historia. `selectedIds` son
 // curriculum_topics.id (uuid) — el padre es quien decide qué hacer con ellos
@@ -50,36 +64,71 @@ function groupByBlock(rows: CurriculumTopicRow[]): Block[] {
 export default function HistoriaTopicChips({
   selectedIds,
   onChange,
+  blockFilter,
 }: {
   selectedIds: string[]
   onChange: (ids: string[]) => void
+  /** Display block title (e.g. draft.block from the exam modal's BLOQUE field) to restrict the chips to. Empty/undefined shows every block. */
+  blockFilter?: string
 }) {
-  const [blocks, setBlocks] = useState<Block[] | null>(null)
+  const [allBlocks, setAllBlocks] = useState<Block[] | null>(null)
+  const [topicsWithExercises, setTopicsWithExercises] = useState<Set<string> | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let cancelled = false
-    supabase
-      .from('curriculum_topics')
-      .select('id, block_key, block_title, topic_slug, title, order')
-      .eq('subject', 'historia_espana')
-      .then(({ data, error: fetchError }) => {
-        if (cancelled) return
-        if (fetchError || !data) {
-          setError('No hemos podido cargar los temas de Historia. Inténtalo de nuevo.')
-          return
-        }
-        setBlocks(groupByBlock(data as CurriculumTopicRow[]))
-      })
+    Promise.all([
+      supabase
+        .from('curriculum_topics')
+        .select('id, block_key, block_title, topic_slug, title, order')
+        .eq('subject', 'historia_espana'),
+      fetch('/api/parciales/historia-topics-with-exercises').then(res => res.json()).catch(() => null),
+    ]).then(([topicsResult, exercisesResult]) => {
+      if (cancelled) return
+      if (topicsResult.error || !topicsResult.data) {
+        setError('No hemos podido cargar los temas de Historia. Inténtalo de nuevo.')
+        return
+      }
+      setAllBlocks(groupByBlock(topicsResult.data as CurriculumTopicRow[]))
+      const slugs = Array.isArray(exercisesResult?.topicSlugs) ? exercisesResult.topicSlugs as string[] : null
+      setTopicsWithExercises(slugs ? new Set(slugs) : new Set())
+    })
     return () => { cancelled = true }
   }, [])
+
+  // Changing the bloque above after already picking chips would otherwise
+  // leave selectedIds pointing at topic_ids from a block the student no
+  // longer has selected — reset so exam_topics only ever reflects the
+  // currently visible (and currently chosen) block's topics.
+  const prevBlockFilter = useRef(blockFilter)
+  useEffect(() => {
+    if (prevBlockFilter.current !== blockFilter) {
+      prevBlockFilter.current = blockFilter
+      if (selectedIds.length > 0) onChange([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blockFilter])
 
   function toggle(id: string) {
     onChange(selectedIds.includes(id) ? selectedIds.filter(x => x !== id) : [...selectedIds, id])
   }
 
   if (error) return <p style={{ fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{error}</p>
-  if (!blocks) return <p style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Cargando temas…</p>
+  if (!allBlocks || !topicsWithExercises) return <p style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Cargando temas…</p>
+
+  const normalizedFilter = blockFilter ? normalizeBlockText(blockFilter) : ''
+  const blocks = allBlocks
+    .map(block => ({ ...block, topics: block.topics.filter(t => topicsWithExercises.has(t.topic_slug)) }))
+    .filter(block => block.topics.length > 0)
+    .filter(block => !normalizedFilter || normalizeBlockText(block.blockTitle) === normalizedFilter)
+
+  if (blocks.length === 0) {
+    return (
+      <p style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>
+        No hay temas con ejercicios disponibles para este bloque todavía. Elige otro bloque.
+      </p>
+    )
+  }
 
   return (
     <div style={{ display: 'grid', gap: 12, maxHeight: 260, overflowY: 'auto', paddingRight: 2 }}>

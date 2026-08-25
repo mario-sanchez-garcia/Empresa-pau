@@ -76,6 +76,11 @@ function SimulacrosPage() {
   const [examHistory, setExamHistory] = useState<ExamHistoryRow[]>([])
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  // Historia Parcial (scope 'parcial') created before the chip selector
+  // existed — no exam_topics rows to filter by, so generateSimulacro would
+  // otherwise silently produce a simulacro unrelated to the exam's real
+  // topics instead of the topic-scoped one the student expects.
+  const [needsTopicsExamId, setNeedsTopicsExamId] = useState('')
   const [gradeThresholdConfig, setGradeThresholdConfig] = useState<GradeThresholdConfig>(DEFAULT_GRADE_THRESHOLD_CONFIG)
   const [repeatingId, setRepeatingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -256,6 +261,19 @@ function SimulacrosPage() {
               }
             }
           } catch { /* falls back to the normal año/dificultad generation below */ }
+
+          // 'parcial' scope has a fixed chip set it MUST filter by — without
+          // it there's nothing distinguishing this exam's simulacro from any
+          // other Historia simulacro, so instead of silently generating an
+          // unrelated one (the exact bug this replaces), send the student to
+          // pick real topics first. 'global' has no chip set to require (an
+          // empty result there just means nothing completed yet), so it's
+          // left untouched.
+          if (examScopeParam !== 'global' && !historiaTopicSlugs?.length) {
+            setNeedsTopicsExamId(examIdParam)
+            setLoading(false)
+            return
+          }
         }
 
         generated = generateSimulacro(subject, technicalDifficulty, generatorOption, ccaa, {
@@ -458,6 +476,18 @@ function SimulacrosPage() {
   }
 
   if (examIdParam) {
+    if (needsTopicsExamId) {
+      return (
+        <SimulacroShell>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, padding: '80px 24px', textAlign: 'center' }}>
+            <p style={{ color: '#334155', fontSize: 13, fontWeight: 700, margin: 0 }}>Este examen necesita que elijas los temas — edítalo para seleccionarlos.</p>
+            <a href={`/camino?editExam=${encodeURIComponent(needsTopicsExamId)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#0f172a', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', textDecoration: 'none' }}>
+              Editar Parcial
+            </a>
+          </div>
+        </SimulacroShell>
+      )
+    }
     return (
       <SimulacroShell>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: '#64748b', fontSize: 13, fontWeight: 700 }}>

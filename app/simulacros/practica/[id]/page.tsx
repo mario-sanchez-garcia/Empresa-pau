@@ -58,6 +58,12 @@ function PracticaPageInner() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'dirty'>('saved')
   const [creatingSession, setCreatingSession] = useState(false)
   const [createError, setCreateError] = useState('')
+  // Historia Parcial created before the chip selector existed (no
+  // exam_topics rows) — /api/practica-parcial refuses to generate arbitrary
+  // content for it instead of silently returning an unrelated topic, so this
+  // points the student straight at the fix (edit the Parcial, pick temas)
+  // rather than showing a dead-end error.
+  const [needsTopicsExamId, setNeedsTopicsExamId] = useState('')
   const [pausing, setPausing] = useState(false)
   const [resuming, setResuming] = useState(false)
   const [resumeError, setResumeError] = useState('')
@@ -99,6 +105,11 @@ function PracticaPageInner() {
             router.replace(json.alreadyCompleted ? `/simulacros/${json.id}/results` : `/simulacros/practica/${json.id}`)
           } else {
             const json = await res.json().catch(() => ({})) as Record<string, unknown>
+            if (json.error === 'needs_topics' && examId) {
+              setNeedsTopicsExamId(examId)
+              setCreatingSession(false)
+              return
+            }
             // json.error puede ser un código crudo tipo "parcial_limit_reached"
             // (el mensaje humano real vive en json.message) — mostrarlo tal
             // cual dejaba ese texto sin traducir en pantalla.
@@ -465,7 +476,14 @@ function PracticaPageInner() {
     return (
       <SimulacroShell title="Práctica parcial" subtitle="Preparando sesión...">
         <div className="mx-auto max-w-xl py-20 text-center">
-          {createError ? (
+          {needsTopicsExamId ? (
+            <>
+              <p className="mb-4 text-sm font-semibold text-slate-700">Este examen necesita que elijas los temas — edítalo para seleccionarlos.</p>
+              <a href={`/camino?editExam=${encodeURIComponent(needsTopicsExamId)}`} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white">
+                Editar Parcial
+              </a>
+            </>
+          ) : createError ? (
             <>
               <p className="mb-4 text-sm font-semibold text-red-600">{createError}</p>
               <a href="/camino" className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700">

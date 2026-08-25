@@ -250,8 +250,17 @@ export async function POST(request: NextRequest) {
     historiaTopicSlugs = await resolveExamHistoriaTopics(db, user.id, examId, examScope)
   }
 
-  const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs)
+  // Only a Historia Parcial's own practice request (real, owned examId,
+  // 'parcial' scope) should be blocked outright when there's nothing to
+  // filter by — 'global' scope has no chip set to require, and non-exam
+  // Historia practice (e.g. sunday_mock) never had topic filtering to begin
+  // with, so neither should suddenly start failing here.
+  const strictHistoriaMatch = subject === 'historia' && Boolean(examId && examOwned) && examScope !== 'global'
+  const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs, strictHistoriaMatch)
   if (!session) {
+    if (strictHistoriaMatch && !historiaTopicSlugs?.length) {
+      return NextResponse.json({ error: 'needs_topics', message: 'Este examen necesita que elijas los temas.', examId }, { status: 422 })
+    }
     return NextResponse.json({ error: 'No hay preguntas disponibles para este bloque' }, { status: 422 })
   }
 

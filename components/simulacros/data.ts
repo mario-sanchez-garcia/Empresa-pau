@@ -538,6 +538,20 @@ export function generatePracticeSession(
   // populated yet) have no rows here and fall straight through to the
   // existing blockNormalization-based filter, unchanged.
   historiaTopicSlugs?: string[],
+  // True only for a Historia Parcial's own practice/mission request
+  // (subject==='historia' with a real, owned examId — see
+  // /api/practica-parcial). Historia has no real "blockFilter" of its own
+  // (blockNormalization.ts only recognizes structural keys like "cuestiones"/
+  // "fuente1", never period names like "Guerra Civil"), so without
+  // historiaTopicSlugs the two filters above never match anything for
+  // Historia — the "any available block" fallback below used to silently
+  // paper over that with unrelated content (e.g. Romans for a Guerra Civil
+  // exam). When this flag is set, that fallback is skipped and the function
+  // returns null instead, so the caller can tell the student to pick real
+  // topics rather than handing them a random session. Other callers
+  // (sunday_mock's free block practice, any other subject) keep the old
+  // fallback untouched.
+  strictHistoriaMatch = false,
 ): PracticeSession | null {
   const normalizedFilter = normalizeBlockKey(blockFilter)
   const allQuestions = normalizeQuestions(subject, comunidad)
@@ -556,6 +570,7 @@ export function generatePracticeSession(
       item => normalizeTheme(subject, item.rawTheme) === normalizedFilter && !isIncompleteOfficialExercise(item.block),
     )
   }
+  if (pool.length === 0 && subject === 'historia' && strictHistoriaMatch) return null
   // Subject-level fallback: if no questions for the requested block, use any available block
   if (pool.length === 0) {
     const themes = [...new Set(allQuestions.map(item => normalizeTheme(subject, item.rawTheme)))]

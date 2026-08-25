@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import MonthCalendarOverlay, { MonthCalendarButton } from '@/app/components/camino/MonthCalendarOverlay'
 import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
+import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
@@ -902,7 +903,7 @@ export default function CaminoCalendarClient() {
   const [fullRankingToken, setFullRankingToken] = useState<string | null>(null)
   const [showExamForm, setShowExamForm] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
-  const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', name: '', priority: 'normal' as ExamPriority, confidence: 'medio' as ExamConfidence, content: '' })
+  const [examDraft, setExamDraft] = useState({ subject: '', date: toISO(addDays(new Date(), 3)), block: '', topic: '', topicIds: [] as string[], name: '', priority: 'normal' as ExamPriority, confidence: 'medio' as ExamConfidence, content: '' })
   const [savingExam, setSavingExam] = useState(false)
   const [recalcExamId, setRecalcExamId] = useState<string | null>(null)
   const [recalcResult, setRecalcResult] = useState<{ examId: string; message: string } | null>(null)
@@ -1625,10 +1626,14 @@ export default function CaminoCalendarClient() {
     setCalendar(current => nextCalendar.length <= 7 ? mergeWeekIntoCalendar(current, weekStart, nextCalendar) : nextCalendar)
     setExams(nextExams)
     saveJson(EXAMS_KEY, nextExams)
-    supabase.auth.getSession().then(({ data: sessionData }) => {
+    // Returns the PATCH promise (existing callers ignore it, fire-and-forget
+    // as before) so saveExam() can await it before writing exam_topics —
+    // exam_topics ownership checks look up the exam inside student_exams, so
+    // writing it out of order would make a fresh exam's chips fail with 403.
+    return supabase.auth.getSession().then(({ data: sessionData }) => {
       const token = sessionData.session?.access_token
       if (!token) return
-      fetch('/api/profile', {
+      return fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ student_exams: nextExams }),
@@ -1673,8 +1678,9 @@ export default function CaminoCalendarClient() {
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
     const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {})
     recordCalendarSource('client', 'exam_change', { weekStart: selectedWeekStart, missionCount: missionCount(regenerated) })
-    persist(regenerated, nextExams)
+    const saved = persist(regenerated, nextExams)
     setToast('Camino PAU actualizado')
+    return saved
   }
   function toggleCalendarExpanded() {
     setCalendarExpanded(current => {
@@ -1695,15 +1701,50 @@ export default function CaminoCalendarClient() {
   function resetExamDraft() {
     setEditingExamId(null)
     setShowExamForm(false)
-    setExamDraft(current => ({ ...current, block: '', topic: '', name: '', date: toISO(addDays(new Date(), 3)), priority: 'normal', confidence: 'medio', content: '' }))
+    setExamDraft(current => ({ ...current, block: '', topic: '', topicIds: [], name: '', date: toISO(addDays(new Date(), 3)), priority: 'normal', confidence: 'medio', content: '' }))
   }
   function openNewExam() { setEditingExamId(null); setShowExamForm(true) }
-  function openEditExam(exam: StudentExam) { setEditingExamId(exam.id); setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, name: exam.name, priority: exam.priority, confidence: exam.confidence ?? 'medio', content: exam.content ?? '' }); setShowExamForm(true) }
+  function openEditExam(exam: StudentExam) {
+    setEditingExamId(exam.id)
+    setExamDraft({ subject: exam.subject, date: exam.date, block: exam.block ?? '', topic: exam.topic, topicIds: [], name: exam.name, priority: exam.priority, confidence: exam.confidence ?? 'medio', content: exam.content ?? '' })
+    setShowExamForm(true)
+    // Chip selection lives in exam_topics, not in the student_exams jsonb
+    // itself — fetch it separately so re-opening a Historia Parcial for
+    // editing shows the chips that were picked last time instead of none.
+    if (normalizeSubjectSlug(exam.subject) === 'historia_espana') {
+      supabase.auth.getSession().then(({ data }) => {
+        const token = data.session?.access_token
+        if (!token) return
+        fetch(`/api/parciales/exam-topics?examId=${encodeURIComponent(exam.id)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then(res => res.ok ? res.json() : null).then(json => {
+          if (Array.isArray(json?.topicIds)) {
+            setExamDraft(current => current.subject === exam.subject ? { ...current, topicIds: json.topicIds } : current)
+          }
+        }).catch(() => undefined)
+      }, () => undefined)
+    }
+  }
   async function saveExam() {
     if (!examDraft.subject || !examDraft.date || savingExam) return
+    const isHistoria = normalizeSubjectSlug(examDraft.subject) === 'historia_espana'
+    if (isHistoria && examDraft.topicIds.length === 0) return
     setSavingExam(true)
     try {
       const normalizedBlock = normalizeBlockKey(examDraft.block ?? '')
+
+      // Historia now picks real curriculum_topics rows via chips instead of
+      // typing free text — build the legacy `topic` string from their
+      // titles so every place that still reads exam.topic (list/calendar
+      // labels, injectPartialExamMissions matching) keeps working exactly
+      // as before, unchanged, while exam_topics (below) carries the real
+      // topic_id relations for later phases to query structurally.
+      let topicText = examDraft.topic
+      if (isHistoria) {
+        const { data: topicRows } = await supabase.from('curriculum_topics').select('title').in('id', examDraft.topicIds)
+        topicText = (topicRows ?? []).map(t => t.title).join(', ')
+      }
+
       // Ask the AI to size the plan to how the student says they're doing in
       // this subject/block, and to whatever custom instructions they have
       // active — before the plan gets generated, not after.
@@ -1718,7 +1759,7 @@ export default function CaminoCalendarClient() {
             body: JSON.stringify({
               subject: examDraft.subject,
               block: normalizedBlock,
-              topic: examDraft.topic,
+              topic: topicText,
               content: examDraft.content,
               confidence: examDraft.confidence,
               priority: examDraft.priority,
@@ -1731,13 +1772,30 @@ export default function CaminoCalendarClient() {
         }
       } catch { /* AI sizing is best-effort; deterministic fallback in injectPartialExamMissions still applies */ }
 
-      const draft = { ...examDraft, block: normalizedBlock, sessionOverride }
+      const { topicIds, ...examDraftFields } = examDraft
+      const draft = { ...examDraftFields, topic: topicText, block: normalizedBlock, sessionOverride }
       const currentEditingId = editingExamId
+      const examId = currentEditingId ?? generateExamId()
       const nextExams = currentEditingId
         ? exams.map(exam => exam.id === currentEditingId ? { ...exam, ...draft } : exam)
-        : [...exams, { id: generateExamId(), ...draft }]
+        : [...exams, { id: examId, ...draft }]
       resetExamDraft()
-      regenerate(nextExams)
+      // Await so the exam_topics write below (ownership-checked against
+      // perfiles.student_exams) never races the PATCH that puts this exam
+      // id there in the first place — the route would 403 a brand-new exam
+      // if its chips were saved before student_exams caught up.
+      await regenerate(nextExams)
+      if (isHistoria) {
+        supabase.auth.getSession().then(({ data }) => {
+          const token = data.session?.access_token
+          if (!token) return
+          fetch('/api/parciales/exam-topics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ examId, topicIds }),
+          }).catch(() => undefined)
+        }, () => undefined)
+      }
       supabase.auth.getSession().then(({ data }) => {
         const userId = data.session?.user.id
         if (!userId) return
@@ -3803,7 +3861,7 @@ function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}{!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
-type ExamDraft = { subject: string; date: string; block: string; topic: string; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }
+type ExamDraft = { subject: string; date: string; block: string; topic: string; topicIds: string[]; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }
 
 function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curriculum, saving }: { subjects: string[]; draft: ExamDraft; setDraft: (draft: ExamDraft) => void; onClose: () => void; onSave: () => void; editing: boolean; curriculum: CurriculumItem[]; saving: boolean }) {
   const PRIORITIES: { value: ExamPriority; label: string; active: { bg: string; text: string; border: string } }[] = [
@@ -3819,6 +3877,11 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
   ]
   const blockOptions = examBlockOptionsForSubject(draft.subject, curriculum)
   const isCustomBlock = draft.block !== '' && !blockOptions.includes(draft.block)
+  // Only Historia has topicSlugs populated in its exercise data so far
+  // (examenesHistoria) and a real curriculum_topics catalogue behind it —
+  // Mates/Lengua/Física keep the free-text "Tema" field for now, one
+  // subject at a time.
+  const isHistoria = normalizeSubjectSlug(draft.subject) === 'historia_espana'
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -3857,7 +3920,7 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
             <Field label="Fecha del examen">
               <input type="date" value={draft.date} onChange={e => setDraft({ ...draft, date: e.target.value })} className="em-input" />
             </Field>
-            <div className="grid grid-cols-2 gap-3">
+            <div className={isHistoria ? '' : 'grid grid-cols-2 gap-3'}>
               <Field label="Bloque">
                 {blockOptions.length > 0 ? (
                   <select
@@ -3873,10 +3936,23 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
                   <input value={draft.block} onChange={e => setDraft({ ...draft, block: e.target.value })} placeholder="Álgebra, Análisis..." className="em-input" />
                 )}
               </Field>
-              <Field label="Tema (opcional)">
-                <input value={draft.topic} onChange={e => setDraft({ ...draft, topic: e.target.value })} placeholder="Matrices, Gauss..." className="em-input" />
-              </Field>
+              {!isHistoria && (
+                <Field label="Tema (opcional)">
+                  <input value={draft.topic} onChange={e => setDraft({ ...draft, topic: e.target.value })} placeholder="Matrices, Gauss..." className="em-input" />
+                </Field>
+              )}
             </div>
+            {isHistoria && (
+              <Field label={`Temas${draft.topicIds.length > 0 ? ` (${draft.topicIds.length} seleccionados)` : ''}`}>
+                <HistoriaTopicChips
+                  selectedIds={draft.topicIds}
+                  onChange={ids => setDraft({ ...draft, topicIds: ids })}
+                />
+                {draft.topicIds.length === 0 && (
+                  <p style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>Elige al menos un tema.</p>
+                )}
+              </Field>
+            )}
             {blockOptions.length > 0 && isCustomBlock && (
               <Field label="Bloque (especifica)">
                 <input value={draft.block} onChange={e => setDraft({ ...draft, block: e.target.value })} placeholder="Álgebra, Análisis..." className="em-input" autoFocus />
@@ -3952,7 +4028,7 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
             <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">
               Cancelar
             </button>
-            <button onClick={onSave} disabled={saving} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-60">
+            <button onClick={onSave} disabled={saving || (isHistoria && draft.topicIds.length === 0)} className="rounded-lg bg-[#0f172a] px-4 py-2 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-60">
               {saving ? 'Calculando plan…' : editing ? 'Guardar cambios' : 'Guardar parcial'}
             </button>
           </div>

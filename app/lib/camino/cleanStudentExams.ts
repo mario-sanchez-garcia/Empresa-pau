@@ -17,6 +17,14 @@ export type StudentExam = {
   date: string
   block: string
   blockSlug?: string
+  // Free-text label — for Historia (subject historia_espana) it's now a
+  // display string auto-built from the titles the student picked as chips
+  // (see HistoriaTopicChips/CaminoCalendarClient), not typed by hand. The
+  // real per-topic relations for those exams live in exam_topics
+  // (exam_id = this StudentExam's id, topic_id -> curriculum_topics), not in
+  // this jsonb column — exam_topics is additive, so older Parciales saved
+  // before it existed just have no rows there and keep working off `topic`
+  // exactly as before.
   topic: string
   name: string
   priority: ExamPriority

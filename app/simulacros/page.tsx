@@ -49,6 +49,14 @@ function SimulacrosPage() {
   const caminoBlock = searchParams.get('block')
   const caminoSource = searchParams.get('source')
   const isCaminoPartial = caminoSource === 'camino_partial' && !!caminoBlock
+  // Ties this simulacro to a real Parcial (student_exams id) instead of a
+  // one-off random generation — when present, exam_simulacro is checked
+  // before generating and the result is cached there so the same exam_id
+  // always reopens the same simulacro, whether entered from Camino or
+  // directly from this page. No current link sets this yet (see task
+  // history), but the plumbing is real and ready for whichever entry point
+  // wires it in next.
+  const examIdParam = searchParams.get('examId')
   const autoTriggeredRef = useRef(false)
 
   const [userId, setUserId] = useState('')
@@ -175,32 +183,75 @@ function SimulacrosPage() {
         return
       }
       setUserId(currentUserId)
+      const accessToken = sessionData.session?.access_token
+      const authHeaders = { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) }
 
       const effectiveYearChoice = mode === 'personalizado' ? yearChoice : 'all'
       const yearSelection = yearChoiceToSelection(effectiveYearChoice)
       const optionSelection = effectiveOptionChoice(mode, subject, optionChoice)
       const technicalDifficulty = technicalDifficultyForYearChoice(effectiveYearChoice)
       const generatorOption: SimulacroOption = optionSelection === 'B' ? 'B' : 'A'
-      const generated = generateSimulacro(subject, technicalDifficulty, generatorOption, ccaa, {
-        yearSelection,
-        optionSelection,
-        ...(isCaminoPartial && caminoBlock ? { blockFilter: caminoBlock } : {}),
-      })
 
-      const weakBlocks = mode === 'errores'
-        ? buildWeakBlocks(history, examHistory, subject, ccaa)
-        : []
-      if (mode === 'errores' && weakBlocks.length === 0) {
-        setErrorMessage('Para crear un simulacro con tus peores notas necesito al menos una corrección previa de esta asignatura.')
-        setLoading(false)
-        return
+      // exam_simulacro is exam_id UNIQUE — a hit here means this Parcial
+      // already has its simulacro decided, from this session or a previous
+      // one (any entry point), so generation is skipped entirely and the
+      // exact same blocks are reused.
+      let cachedBlocks: SimulacroBlock[] | null = null
+      if (examIdParam) {
+        try {
+          const cacheRes = await fetch(`/api/parciales/exam-simulacro?examId=${encodeURIComponent(examIdParam)}`, { headers: authHeaders })
+          if (cacheRes?.ok) {
+            const json = await cacheRes.json() as { simulacroData?: { blocks?: SimulacroBlock[] } | null }
+            if (Array.isArray(json.simulacroData?.blocks) && json.simulacroData.blocks.length > 0) {
+              cachedBlocks = json.simulacroData.blocks
+            }
+          }
+        } catch { /* cache lookup is best-effort — falls through to a fresh generation */ }
       }
 
-      const finalBlocks = mode === 'errores'
-        ? mergeBlocksForExam(weakBlocks, generated?.blocks ?? [], ccaa)
-        : generated?.blocks ?? []
+      let generated: ReturnType<typeof generateSimulacro> = null
+      let finalBlocks: SimulacroBlock[] = []
+      if (cachedBlocks) {
+        finalBlocks = cachedBlocks
+      } else {
+        // Historia only, and only once this exam has real exam_topics rows
+        // (chip selection) — same topic-based filtering generatePracticeSession
+        // already applies to "Prep. parcial", now for the full simulacro too.
+        let historiaTopicSlugs: string[] | undefined
+        if (examIdParam && subject === 'historia') {
+          try {
+            const topicsRes = await fetch(`/api/parciales/exam-topics?examId=${encodeURIComponent(examIdParam)}`, { headers: authHeaders })
+            const topicsJson = topicsRes?.ok ? await topicsRes.json() as { topicIds?: string[] } : null
+            if (topicsJson?.topicIds?.length) {
+              const { data: topicRows } = await supabase.from('curriculum_topics').select('topic_slug').in('id', topicsJson.topicIds)
+              const slugs = (topicRows ?? []).map(t => t.topic_slug).filter((s): s is string => typeof s === 'string')
+              if (slugs.length > 0) historiaTopicSlugs = slugs
+            }
+          } catch { /* falls back to the normal año/dificultad generation below */ }
+        }
 
-      if (!generated && finalBlocks.length === 0) {
+        generated = generateSimulacro(subject, technicalDifficulty, generatorOption, ccaa, {
+          yearSelection,
+          optionSelection,
+          ...(isCaminoPartial && caminoBlock ? { blockFilter: caminoBlock } : {}),
+          ...(historiaTopicSlugs ? { historiaTopicSlugs } : {}),
+        })
+
+        const weakBlocks = mode === 'errores'
+          ? buildWeakBlocks(history, examHistory, subject, ccaa)
+          : []
+        if (mode === 'errores' && weakBlocks.length === 0) {
+          setErrorMessage('Para crear un simulacro con tus peores notas necesito al menos una corrección previa de esta asignatura.')
+          setLoading(false)
+          return
+        }
+
+        finalBlocks = mode === 'errores'
+          ? mergeBlocksForExam(weakBlocks, generated?.blocks ?? [], ccaa)
+          : generated?.blocks ?? []
+      }
+
+      if (finalBlocks.length === 0) {
         setErrorMessage('No hay suficientes ejercicios disponibles para crear este simulacro.')
         setLoading(false)
         return
@@ -230,6 +281,17 @@ function SimulacrosPage() {
         setErrorMessage('No se pudo crear el simulacro. Revisa la conexión o la tabla historial_simulacros en Supabase.')
         setLoading(false)
         return
+      }
+      // Cache miss only — a hit already came from exam_simulacro, re-saving
+      // it would just be a no-op upsert of the same data. Fire-and-forget:
+      // this Parcial's simulacro is already usable via the row just
+      // inserted above regardless of whether the cache write succeeds.
+      if (examIdParam && !cachedBlocks) {
+        fetch('/api/parciales/exam-simulacro', {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({ examId: examIdParam, simulacroData: { blocks: finalBlocks } }),
+        }).catch(() => undefined)
       }
       router.push(`/simulacros/${generatedId}`)
     } catch (error) {

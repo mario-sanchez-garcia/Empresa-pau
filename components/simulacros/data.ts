@@ -21,6 +21,13 @@ interface GenerateSimulacroSettings {
   yearSelection?: SimulacroYearSelection
   optionSelection?: SimulacroOptionSelection
   blockFilter?: string
+  // Historia only, and only once a Parcial's exam_topics rows are known —
+  // when set, replaces the año/dificultad selection entirely (topic-based
+  // selection, not "instead of AND also"): pulls straight from the topics
+  // the student picked with the chip selector rather than a random exam by
+  // year. The theme/format diversity loop below (cuestiones/fuente/tema/
+  // texto) still runs unchanged, just over this narrower pool.
+  historiaTopicSlugs?: string[]
 }
 
 export const SUBJECTS = {
@@ -58,9 +65,14 @@ export function generateSimulacro(
   comunidad: string,
   settings: GenerateSimulacroSettings = {}
 ) {
+  const hasHistoriaTopicFilter = subject === 'historia' && (settings.historiaTopicSlugs?.length ?? 0) > 0
   const yearSelection = settings.yearSelection ?? difficulty
   const optionSelection = settings.optionSelection ?? option
-  const years = yearSelection === 'all' ? null : yearsForSubject(subject, yearSelection)
+  // Topic-based selection stands on its own — ignore the año/dificultad
+  // tier entirely rather than intersecting with it, so a Parcial covering
+  // e.g. Prehistoria isn't starved down to whatever few exercises from that
+  // topic also happen to fall in one arbitrary year range.
+  const years = hasHistoriaTopicFilter ? null : yearSelection === 'all' ? null : yearsForSubject(subject, yearSelection)
 
   if (subject === 'lengua') {
     const lenguaYears = yearSelection === 'all'
@@ -99,7 +111,8 @@ export function generateSimulacro(
   const questions = normalizeQuestions(subject, comunidad).filter(item => (
     (!years || years.includes(item.year)) &&
     (optionSelection === 'mixed' || item.option === optionSelection) &&
-    !isIncompleteOfficialExercise(item.block)
+    !isIncompleteOfficialExercise(item.block) &&
+    (!hasHistoriaTopicFilter || (item.block.topicSlugs ?? []).some(slug => settings.historiaTopicSlugs!.includes(slug)))
   ))
   const distinctYears = new Set(questions.map(q => q.year)).size
   const usedYears = new Set<number>()
@@ -453,7 +466,8 @@ function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) 
     textoFuente: p.texto_fuente,
     conceptos: p.conceptos,
     imagenes: p.imagenes,
-    requiereImagen: p.requiereImagen
+    requiereImagen: p.requiereImagen,
+    topicSlugs: Array.isArray(p.topicSlugs) ? p.topicSlugs : undefined
   }
   return { rawTheme, year: block.year, option, block }
 }
@@ -517,13 +531,31 @@ export function generatePracticeSession(
   blockFilter: string,
   comunidad: string,
   numQuestions: number = 3,
+  // Historia only, and only when the Parcial has real exam_topics rows
+  // (chip selection) — filters by the topics the student actually picked
+  // instead of the free-text block match below. Parciales created before
+  // exam_topics existed (or other subjects, which don't have topicSlugs
+  // populated yet) have no rows here and fall straight through to the
+  // existing blockNormalization-based filter, unchanged.
+  historiaTopicSlugs?: string[],
 ): PracticeSession | null {
   const normalizedFilter = normalizeBlockKey(blockFilter)
   const allQuestions = normalizeQuestions(subject, comunidad)
-  let pool = allQuestions.filter(
-    item => normalizeTheme(subject, item.rawTheme) === normalizedFilter && !isIncompleteOfficialExercise(item.block),
-  )
   let usedBlock = normalizedFilter
+  let pool: typeof allQuestions = []
+  if (subject === 'historia' && historiaTopicSlugs?.length) {
+    pool = allQuestions.filter(
+      item => (item.block.topicSlugs ?? []).some(slug => historiaTopicSlugs.includes(slug)) && !isIncompleteOfficialExercise(item.block),
+    )
+  }
+  // Either not a topic-filtered Historia request, or the topic filter
+  // matched nothing (still very rare — 207/209 exercises have topicSlugs —
+  // but never worse than before): fall back to the original block match.
+  if (pool.length === 0) {
+    pool = allQuestions.filter(
+      item => normalizeTheme(subject, item.rawTheme) === normalizedFilter && !isIncompleteOfficialExercise(item.block),
+    )
+  }
   // Subject-level fallback: if no questions for the requested block, use any available block
   if (pool.length === 0) {
     const themes = [...new Set(allQuestions.map(item => normalizeTheme(subject, item.rawTheme)))]

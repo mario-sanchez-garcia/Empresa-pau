@@ -78,6 +78,7 @@ function PracticaPageInner() {
       const subject = searchParams.get('subject') ?? 'mates'
       const block = searchParams.get('block') ?? ''
       const missionId = searchParams.get('missionId') ?? undefined
+      const examId = searchParams.get('examId') ?? undefined
 
       supabase.auth.getSession().then(async ({ data }) => {
         const token = data.session?.access_token
@@ -87,7 +88,7 @@ function PracticaPageInner() {
           const res = await fetch('/api/practica-parcial', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ subject, block, missionId }),
+            body: JSON.stringify({ subject, block, missionId, examId }),
           })
           if (res.ok) {
             const json = await res.json() as { id: string; alreadyCompleted?: boolean }

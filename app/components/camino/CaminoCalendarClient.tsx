@@ -326,8 +326,14 @@ function hrefForMission(mission: Mission): MissionHrefResult {
     const simSubject = String(mission.metadata?.simulacro_subject ?? '')
     const simBlock = String(mission.metadata?.simulacro_block_filter ?? mission.block ?? '')
     if (simSubject && simBlock) {
+      // partial_exam_id: escrito por injectPartialExamMissions.ts al crear
+      // esta misión — deja que /api/practica-parcial reutilice la práctica
+      // de hoy para este Parcial (y filtre por sus exam_topics si es
+      // Historia) sin depender de que el missionId coincida exacto.
+      const examId = typeof mission.metadata?.partial_exam_id === 'string' ? mission.metadata.partial_exam_id : ''
+      const examIdParam = examId ? `&examId=${encodeURIComponent(examId)}` : ''
       return {
-        href: `/simulacros/practica/nueva?subject=${encodeURIComponent(simSubject)}&block=${encodeURIComponent(simBlock)}&source=camino_partial&missionId=${encodeURIComponent(mission.id)}`,
+        href: `/simulacros/practica/nueva?subject=${encodeURIComponent(simSubject)}&block=${encodeURIComponent(simBlock)}&source=camino_partial&missionId=${encodeURIComponent(mission.id)}${examIdParam}`,
         fallback: '',
       }
     }
@@ -3511,9 +3517,13 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
   // que si se hubiera empezado desde la tarjeta del calendario en vez de
   // desde este banner.
   const missionParam = missionId ? `&missionId=${encodeURIComponent(missionId)}` : ''
+  // examId: deja que /api/practica-parcial reutilice la práctica de hoy
+  // para este Parcial (aunque este banner no comparta missionId con la
+  // tarjeta de calendario) y filtre por sus exam_topics si es Historia.
+  const examParam = `&examId=${encodeURIComponent(exam.id)}`
   const href = exam.block
-    ? `/simulacros/practica/nueva?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial${missionParam}`
-    : `/simulacros/practica/nueva?subject=${simSubject}&source=camino_partial${missionParam}`
+    ? `/simulacros/practica/nueva?subject=${simSubject}&block=${encodeURIComponent(exam.block)}&source=camino_partial${missionParam}${examParam}`
+    : `/simulacros/practica/nueva?subject=${simSubject}&source=camino_partial${missionParam}${examParam}`
 
   if (daysDiff === 0) {
     return (

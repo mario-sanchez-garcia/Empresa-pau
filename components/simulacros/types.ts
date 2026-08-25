@@ -18,6 +18,10 @@ export interface SimulacroBlock {
   conceptos?: string[]
   imagenes?: string[]
   requiereImagen?: boolean
+  // Historia only for now (examenesHistoria) — real curriculum_topics slugs
+  // for this exercise, used to filter by the chips a student picked when
+  // creating a Parcial instead of the free-text block/theme match.
+  topicSlugs?: string[]
 }
 
 export interface SimulacroAnswer {

@@ -44,6 +44,18 @@ export async function POST(request: NextRequest) {
   const block = String(body.block ?? '')
   const source = typeof body.source === 'string' ? body.source.slice(0, 64) : null
   const weekStart = typeof body.weekStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.weekStart) ? body.weekStart : null
+  const examId = typeof body.examId === 'string' && body.examId.trim() ? body.examId.trim() : null
+
+  // examId ties this request to a real Parcial (student_exams.id) — same
+  // ownership check as /api/parciales/exam-topics and /api/parciales/exam-
+  // simulacro, since exam_id is free text (student_exams is a jsonb array,
+  // not a table), not a real FK.
+  let examOwned = false
+  if (examId) {
+    const { data: profile } = await db.from('perfiles').select('student_exams').eq('id', user.id).maybeSingle()
+    const exams = Array.isArray(profile?.student_exams) ? profile.student_exams as Array<{ id?: unknown }> : []
+    examOwned = exams.some(e => e?.id === examId)
+  }
 
   // El alumno puede volver a pulsar la misión de "Prep. parcial" del
   // calendario después de ya haberla entregado (el enlace del calendario a
@@ -100,6 +112,35 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
     if (inProgress) {
       return NextResponse.json({ id: inProgress.id as string })
+    }
+  }
+
+  // Bug reportado: el mismo Parcial da dos "prácticas" distintas el mismo
+  // día cuando se entra por dos sitios que no comparten missionId (p. ej.
+  // la misión de calendario de hoy con un id, y el banner "Empezar
+  // práctica ahora" del propio Parcial sin — o con otro — missionId). La
+  // comprobación de arriba solo encuentra una completada si el missionId
+  // coincide EXACTO; aquí se reutiliza cualquier práctica de hoy para este
+  // mismo examen (completada o en curso), missionId aparte. Solo hoy, no
+  // "siempre" — los días siguientes de preparación de este mismo Parcial sí
+  // deben traer ejercicios nuevos (ver injectPartialExamMissions.ts).
+  if (examId && examOwned) {
+    const todayStart = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).toISOString()
+    const { data: sameExamToday } = await db
+      .from('historial_simulacros')
+      .select('id, estado')
+      .eq('user_id', user.id)
+      .eq('asignatura', subject)
+      .eq('resultado_json->>exam_id', examId)
+      .gte('created_at', todayStart)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (sameExamToday) {
+      return NextResponse.json({
+        id: sameExamToday.id as string,
+        alreadyCompleted: sameExamToday.estado === 'completado',
+      })
     }
   }
 
@@ -193,7 +234,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Bloque requerido' }, { status: 400 })
   }
 
-  const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions)
+  // Historia only, and only once this exam has real exam_topics rows (chip
+  // selection) — filters by the topics the student picked instead of the
+  // free-text block match inside generatePracticeSession. Parciales without
+  // exam_topics (created before it existed, or other subjects, which don't
+  // have topicSlugs populated in their exercise data yet) fall straight
+  // through unaffected.
+  let historiaTopicSlugs: string[] | undefined
+  if (subject === 'historia' && examId && examOwned) {
+    const { data: topicRows } = await db.from('exam_topics').select('topic_id').eq('exam_id', examId)
+    const topicIds = (topicRows ?? []).map(r => r.topic_id).filter((id): id is string => typeof id === 'string')
+    if (topicIds.length > 0) {
+      const { data: slugRows } = await db.from('curriculum_topics').select('topic_slug').in('id', topicIds)
+      const slugs = (slugRows ?? []).map(r => r.topic_slug).filter((s): s is string => typeof s === 'string')
+      if (slugs.length > 0) historiaTopicSlugs = slugs
+    }
+  }
+
+  const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs)
   if (!session) {
     return NextResponse.json({ error: 'No hay preguntas disponibles para este bloque' }, { status: 422 })
   }
@@ -216,7 +274,10 @@ export async function POST(request: NextRequest) {
       // originó (si vino del calendario) — /api/simulacro lo lee al
       // completarla para marcar esa misión como hecha, y esta misma ruta lo
       // usa arriba para detectar reintentos de una misión ya completada.
-      resultado_json: { __practice_session: true, block, subject, comunidad, ...(source ? { source } : {}), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}) },
+      // exam_id: enlaza con el Parcial real (student_exams.id) — esta misma
+      // ruta lo usa arriba para el reuso "misma práctica hoy para este
+      // examen" sin depender de que el missionId coincida exacto.
+      resultado_json: { __practice_session: true, block, subject, comunidad, ...(source ? { source } : {}), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}), ...(examId && examOwned ? { exam_id: examId } : {}) },
       created_at: session.created_at,
       updated_at: session.created_at,
     })
